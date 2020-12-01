@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 25.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="2048px"
+	 height="2048px" viewBox="0 0 2048 2048" enable-background="new 0 0 2048 2048" xml:space="preserve">
+<g id="Base_Design">
+	<path id="Base_x5F_Color_1_" fill="#CCCCCC" d="M907.959,1951.891H178.08v-942.002h729.879V1951.891z M1822.421,1009.889h-729.879
+		v942.002h729.879V1009.889z"/>
+	<path id="Collar_1_" fill="#867966" d="M1247.179,493.074H895.959V195.513h351.219V493.074z"/>
+</g>
+<g id="Sleeves">
+	<path id="Sleeves_1_" fill="#CCCCCC" d="M809.889,491.074c17.108,40.012,40.063,73.398,78.815,88.889
+		c53.404,41.07,96.133,86.266,95.687,148.148C980.579,786.467,948.977,829.12,897,860.259
+		c-45.06,16.693-72.671,53.377-88.889,103.111l-668.444-92.444V652.259L809.889,491.074z M1317.093,493.074
+		c-17.108,40.012-40.063,73.398-78.815,88.889c-53.403,41.07-96.133,86.266-95.687,148.148
+		c3.811,58.356,35.413,101.009,87.391,132.148c45.06,16.693,72.671,53.377,88.889,103.111l668.444-92.444V654.259L1317.093,493.074z
+		"/>
+</g>
+<g id="Sleeve_Stripes">
+	<path id="Stripe_x5F_4" fill="#101820" d="M562.432,1051.091l-405.439,125.092l-7.278-23.59l405.439-125.092L562.432,1051.091z
+		 M1055.222,748.649H75.667v-31.205h979.555V748.649z M2072.111,717.444h-979.556v31.205h979.556V717.444z M513.365,1019.084
+		l405.439,125.092l-7.06,22.883l-405.439-125.092L513.365,1019.084z M1418.457,1050.603l-313.962,96.868l-7.041-22.821
+		l313.962-96.868L1418.457,1050.603z M1455.177,1008.953l405.439,125.092l-7.15,23.174l-405.439-125.092L1455.177,1008.953z"/>
+	<path id="Stripe_x5F_3" fill="#A88654" d="M1018.317,717.444H100.095v-11.017h918.222V717.444z M2035.206,706.427h-918.222v11.017
+		h918.222V706.427z M1018.317,759.667H100.095v-11.017h918.222V759.667z M550.405,1066.331l-380.053,117.259l-3.248-10.528
+		l380.053-117.259L550.405,1066.331z M521.58,1046.68l380.053,117.259l-3.248,10.528l-380.053-117.259L521.58,1046.68z
+		 M1409.877,1064.781l-294.304,90.803l-3.248-10.528l294.304-90.803L1409.877,1064.781z M1463.302,1036.84l380.053,117.259
+		l-3.248,10.528l-380.053-117.259L1463.302,1036.84z M2035.206,748.649h-918.222v11.017h918.222V748.649z"/>
+</g>
+<g id="Sleeve_x5F_End">
+	<path id="Sleeve_x5F_end_x5F_Long_1_" fill="#9E8A6E" d="M215.414,893h-74.667V626.333h74.667V893z M1987.315,626.333h-68.981V893
+		h68.981V626.333z"/>
+	<path id="Sleeve_x5F_End_x5F_Short_1_" fill="#9A8464" d="M675.667,965.37h-29.333V508.771h29.333V965.37z M1487.926,508.771
+		h-29.333V965.37h29.333V508.771z"/>
+</g>
+<g id="Stripes">
+	<path id="Stripe_3" fill="#FFFFFF" d="M867.348,1349.149L552.612,1460.83l-313.538-108.815l17.639-103.629l295.847,105.008
+		l292.676-104.853L867.348,1349.149z M1759.507,1238.541l-292.676,104.853l-295.847-105.008l-17.639,103.629l313.538,108.815
+		l314.736-111.681L1759.507,1238.541z"/>
+	<path id="Stripe_2" fill="#BC955C" d="M1463.296,1077h-13.481v62.667h13.481V1077z M855.687,1342.677l-303.111,107.556
+		l-302.222-104.889l14.222-83.556l288,102.222l285.333-102.222L855.687,1342.677z M1769.957,1332.677l-303.111,107.556
+		l-302.222-104.889l14.222-83.556l288,102.222l285.333-102.222L1769.957,1332.677z"/>
+	<path id="Stripe_1" fill="#1A1A1A" d="M1449.815,1077h-13.481v62.667h13.481V1077z M1475.333,1077h-13.482v62.667h13.482V1077z
+		 M633.909,1104.004v220.006l-73.778,26.667v-201.556L633.909,1104.004z M469.02,1104.004v220.006l73.778,26.667v-201.556
+		L469.02,1104.004z M469.02,1947.324l73.778,4.567v-493.279l-73.778-26.491V1947.324z M633.909,1432.121l-73.778,26.491v493.279
+		l73.778-4.567V1432.121z"/>
+</g>
+<g id="Mesh">
+	<path id="Mesh_1_" fill="#BC955B" d="M1148.716,1327.072c38,270.667,22.785,425.12,24.562,594.602h-57.229v-600.342
+		L1148.716,1327.072z M1775.21,1327.072c-38,270.667-22.785,425.12-24.562,594.602h57.229v-600.342L1775.21,1327.072z
+		 M224.124,1362.035l13.333,571.12l31.753,0.963l-15.852-582.853L224.124,1362.035z M846.907,1346.479l-15.852,587.639l31.753-0.963
+		l13.333-571.12L846.907,1346.479z"/>
+</g>
+<g id="Pattern_Fill_1_">
+</g>
+<g id="UV_Updated_1_">
+	<image overflow="visible" width="2048" height="2048" id="UV_Updated" xlink:href="../../WIP/UV/t-shirts_UV_2020.png" >
+	</image>
+</g>
+<g id="Text">
+	<text transform="matrix(1 0 0 1 1540.3711 332.3594)"><tspan x="0" y="0" font-family="'MyriadPro-Regular'" font-size="40px">C</tspan><tspan x="22.76" y="0" font-family="'MyriadPro-Regular'" font-size="40px">ollar</tspan></text>
+	<text transform="matrix(1 0 0 1 53.293 1557.4515)"><tspan x="0" y="0" font-family="'MyriadPro-Regular'" font-size="40px" letter-spacing="-1">F</tspan><tspan x="18.44" y="0" font-family="'MyriadPro-Regular'" font-size="40px">r</tspan><tspan x="31.121" y="0" font-family="'MyriadPro-Regular'" font-size="40px">o</tspan><tspan x="53.08" y="0" font-family="'MyriadPro-Regular'" font-size="40px">n</tspan><tspan x="75.12" y="0" font-family="'MyriadPro-Regular'" font-size="40px">t</tspan></text>
+	<text transform="matrix(1 0 0 1 1889.5789 1577.6719)" font-family="'MyriadPro-Regular'" font-size="40px">Back</text>
+	<text transform="matrix(1 0 0 1 370.6667 383.2225)"><tspan x="0" y="0" font-family="'MyriadPro-Regular'" font-size="40px">R</tspan><tspan x="21.92" y="0" font-family="'MyriadPro-Regular'" font-size="40px">ig</tspan><tspan x="53.639" y="0" font-family="'MyriadPro-Regular'" font-size="40px">h</tspan><tspan x="75.679" y="0" font-family="'MyriadPro-Regular'" font-size="40px">t </tspan><tspan x="97.398" y="0" font-family="'MyriadPro-Regular'" font-size="40px">A</tspan><tspan x="121.759" y="0" font-family="'MyriadPro-Regular'" font-size="40px">r</tspan><tspan x="134.998" y="0" font-family="'MyriadPro-Regular'" font-size="40px">m</tspan></text>
+	<text transform="matrix(1 0 0 1 1804.5122 945.9162)"><tspan x="0" y="0" font-family="'MyriadPro-Regular'" font-size="40px">L</tspan><tspan x="18.319" y="0" font-family="'MyriadPro-Regular'" font-size="40px">e</tspan><tspan x="38.359" y="0" font-family="'MyriadPro-Regular'" font-size="40px">f</tspan><tspan x="50.479" y="0" font-family="'MyriadPro-Regular'" font-size="40px">t </tspan><tspan x="72.198" y="0" font-family="'MyriadPro-Regular'" font-size="40px">A</tspan><tspan x="96.559" y="0" font-family="'MyriadPro-Regular'" font-size="40px">r</tspan><tspan x="109.798" y="0" font-family="'MyriadPro-Regular'" font-size="40px">m</tspan></text>
+	<line fill="none" stroke="#FF00FF" stroke-width="3" stroke-miterlimit="10" x1="1486.333" y1="477" x2="1486.333" y2="995.732"/>
+	<line fill="none" stroke="#FF00FF" stroke-width="3" stroke-miterlimit="10" x1="646.333" y1="477" x2="646.333" y2="995.732"/>
+	<line fill="none" stroke="#FF00FF" stroke-width="3" stroke-miterlimit="10" x1="1777" y1="477" x2="1777" y2="995.732"/>
+	<line fill="none" stroke="#FF00FF" stroke-width="3" stroke-miterlimit="10" x1="1984.407" y1="477" x2="1984.407" y2="995.732"/>
+	<text transform="matrix(1 0 0 1 1351.5049 488.0306)"><tspan x="0" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px" letter-spacing="-1">T</tspan><tspan x="11.641" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">-Shi</tspan><tspan x="53.112" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">r</tspan><tspan x="62.272" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">t End</tspan></text>
+	<text transform="matrix(1 0 0 1 661.5049 468.0306)"><tspan x="0" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px" letter-spacing="-1">T</tspan><tspan x="11.641" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">-Shi</tspan><tspan x="53.112" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">r</tspan><tspan x="62.272" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">t End</tspan></text>
+	<text transform="matrix(1 0 0 1 1640.6901 488.0306)" font-family="'MyriadPro-Regular'" font-size="26.0997px">3/4 End</text>
+	<line fill="none" stroke="#FF00FF" stroke-width="3" stroke-miterlimit="10" x1="339.667" y1="477" x2="339.667" y2="995.732"/>
+	<text transform="matrix(1 0 0 1 358.0234 488.0306)" font-family="'MyriadPro-Regular'" font-size="26.0997px">3/4 End</text>
+	<text transform="matrix(1 0 0 1 1889.5789 471.438)"><tspan x="0" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">L</tspan><tspan x="11.953" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">ong Slee</tspan><tspan x="106.067" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">v</tspan><tspan x="118.36" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">e</tspan><tspan x="0" y="31.32" font-family="'MyriadPro-Regular'" font-size="26.0997px">End</tspan></text>
+	<line fill="none" stroke="#FF00FF" stroke-width="3" stroke-miterlimit="10" x1="139.667" y1="477" x2="139.667" y2="995.732"/>
+	<text transform="matrix(1 0 0 1 159.5048 508.7714)"><tspan x="0" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">L</tspan><tspan x="11.953" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">ong Slee</tspan><tspan x="106.067" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">v</tspan><tspan x="118.36" y="0" font-family="'MyriadPro-Regular'" font-size="26.0997px">e</tspan><tspan x="0" y="31.32" font-family="'MyriadPro-Regular'" font-size="26.0997px">End</tspan></text>
+</g>
+</svg>
