@@ -84,8 +84,8 @@
 
             this.createElementFromHTML();
 
-            // this.gltfLoader.load('./assets/models/testJersey.gltf', (gltf) => {
-            this.gltfLoader.load('./assets/models/soccer_jersey_2k.gltf', (gltf) => {
+            this.gltfLoader.load('./assets/models/testJersey.gltf', (gltf) => {
+            // this.gltfLoader.load('./assets/models/soccer_jersey_2k.gltf', (gltf) => {
 
                     gltf.scene.traverse((child: any) => {
                          if (child.isMesh) {
@@ -95,16 +95,25 @@
 
                              child.material.side = THREE.DoubleSide;
 
+                             child.material.metalness = 0.99
+
                              self.baseModel = child;
                          }
                     })
 
-                    this.textureMapImage = './assets/models/testJersey_N.jpg';
-
                     this.gltfScene = gltf.scene
 
-                    this.addTextureMapImage();
-                    // self.scene.add(this.gltfScene);
+                    this.addTexture()
+
+                    this.normalMapImage = './assets/models/testJersey_N.jpg';
+                    this.addNormalMapImage();
+
+                    this.aoMapImage = './assets/models/testJersey_AO.png';
+                    this.addAoMapImage();
+
+                    setTimeout(() => {
+                        self.scene.add(this.gltfScene);
+                    }, 200)
 
                     this.fitCameraToSelection()
 
@@ -130,7 +139,7 @@
 
     export default class SceneObjLoader extends Vue {
         private el!: Element;
-        private ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        private ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
         private keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
         private fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
         private backLight = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -157,7 +166,9 @@
 
         private textureImage!: string
 
-        private textureMapImage!: string
+        private normalMapImage!: string
+
+        private aoMapImage!: string
 
         private groups = []
 
@@ -258,29 +269,24 @@
             }
         }
 
-        private addTextureMapImage() {
-            const self = this;
-            self.addTexture()
-            const img = document.createElement('img');
-            img.setAttribute('src', this.textureMapImage)
+        private addNormalMapImage() {
+            const textureLoader = new THREE.TextureLoader();
+            const normalMap = textureLoader.load( this.normalMapImage );
 
-            const ctx = this.canvas.getContext("2d");
+            normalMap.encoding = THREE.sRGBEncoding;
+            normalMap.flipY = false
+            this.baseModel.material.normalMap = normalMap;
+            this.baseModel.material.normalMap.needsUpdate = true
+        }
 
-            img.onload = () => {
-                ctx.drawImage(img, 0, 0);
+        private addAoMapImage() {
+            const textureLoader = new THREE.TextureLoader();
+            const aoMap = textureLoader.load( this.aoMapImage );
 
-                const texture = new THREE.Texture(this.canvas);
-                texture.flipY = false
-                this.baseModel.material.normalMap = texture;
-                this.baseModel.material.normalMap.needsUpdate = true
-
-
-                setTimeout(() => {
-                    self.addTexture()
-                    self.scene.add(this.gltfScene);
-                }, 100)
-
-            }
+            aoMap.encoding = THREE.sRGBEncoding;
+            aoMap.flipY = false
+            this.baseModel.material.aoMap = aoMap;
+            this.baseModel.material.aoMap.needsUpdate = true
         }
     }
 </script>
