@@ -1,43 +1,64 @@
 <template>
     <div class="kit-container">
+        <v-card>
+            <v-navigation-drawer v-model="drawer" :mini-variant.sync="mini" permanent>
+                <v-list-item class="px-2">
+                    <v-app-bar-nav-icon v-if="mini" @click.stop="mini = !mini"></v-app-bar-nav-icon>
+
+                    <v-list-item-title>Customize</v-list-item-title>
+
+                    <v-btn icon @click.stop="mini = !mini">
+                        <v-icon>mdi-chevron-left</v-icon>
+                    </v-btn>
+                </v-list-item>
+
+                <v-divider></v-divider>
+
+                <v-list dense>
+                    <div v-for="(link, i) in items" :key="i">
+
+                        <v-list-item v-if="!link.subLinks"  :active-class="'color'" avatar class="v-list-item">
+                            <v-list-item-icon>
+                                <v-icon>{{ link.icon }}</v-icon>
+                            </v-list-item-icon>
+
+                            <v-list-item-content>
+                                <v-list-item-title>{{ link.title }}</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+
+                        <v-list-group v-else :key="link.title" no-action :prepend-icon="link.icon" :value="false">
+                            <template v-slot:activator>
+                                <v-list-item-title>{{ link.title }}</v-list-item-title>
+                            </template>
+
+                            <v-list-item v-for="(sublink, sub_key) in link.subLinks" :key="sub_key">
+                                <v-list-item-title>
+                                    {{sublink.title}}
+                                    <input @change="changeColor(sub_key)" type="color" id="favcolor" name="favcolor" v-model="sublink.color">
+                                </v-list-item-title>
+                            </v-list-item>
+
+                        </v-list-group>
+
+                    </div>
+                </v-list>
+            </v-navigation-drawer>
+        </v-card>
         <div class="kit-scene" ref="scene">
 
-        </div>
-        <div class="kit-controls">
-            <div class="edit-panel">
-                <div class="tab">
-                    <ul class="tabs">
-                        <li class="tablinks active">
-                            <button>Color</button>
-                        </li>
-                        <li class="tablinks">
-                            <button>Collar</button>
-                        </li>
-                        <li class="tablinks">
-                            <button>Name & Numbers</button>
-                        </li>
-                        <li class="tablinks">
-                            <button>Logos</button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="groups">
-                    <p v-for="(group, key) in groups" :key="key">
-                        {{group.name}}
-                        <input @change="changeColor(key)" type="color" id="favcolor" name="favcolor" v-model="group.color">
-                    </p>
-                </div>
-            </div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
+    /* eslint-disable */
     import $ from "jquery";
     import * as THREE from 'three'
     import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
     import {Component, Vue} from "vue-property-decorator";
     import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
+    import store from '../store/index'
 
     @Component<SceneObjLoader>({
         mounted() {
@@ -101,7 +122,6 @@
                          }
                     })
 
-                    this.gltfScene = gltf.scene
 
                     this.addTexture()
 
@@ -112,7 +132,7 @@
                     this.addAoMapImage();
 
                     setTimeout(() => {
-                        self.scene.add(this.gltfScene);
+                        self.scene.add(gltf.scene);
                     }, 200)
 
                     this.fitCameraToSelection()
@@ -138,6 +158,18 @@
     })
 
     export default class SceneObjLoader extends Vue {
+        private drawer = null;
+        private groups: any[] = [];
+        private items = [
+            { title: 'Color', icon: 'mdi-palette', subLinks: this.groups},
+            { title: 'Colour & Style', icon: 'mdi-pencil-ruler' },
+            { title: 'Name & Numbers', icon: 'mdi-signature-text' },
+            { title: 'Logos', icon: 'mdi-signature-image' },
+        ];
+        private mini = true;
+
+        store = store;
+
         private el!: Element;
         private ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
         private keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -146,31 +178,27 @@
 
         private camera!: THREE.PerspectiveCamera;
 
-        private scene: THREE.Scene = new THREE.Scene()
+        private scene = new THREE.Scene()
 
         private renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true}); //{ antialias: true, alpha: true }
 
         private controls!: OrbitControls;
 
-        private gltfScene: THREE.Scenen;
-
         private gltfLoader: GLTFLoader = new GLTFLoader();
 
-        private baseModel!: THREE.Mesh;
+        private baseModel!: any;
 
         private canvas!: HTMLCanvasElement
 
         private textureImageTag!: HTMLOrSVGImageElement
 
-        private textureHtmlImageTag!: HTMLOrSVGImageElement
+        private textureHtmlImageTag!: any
 
         private textureImage!: string
 
         private normalMapImage!: string
 
         private aoMapImage!: string
-
-        private groups = []
 
         private fitCameraToSelection(fitOffset = 1.2 ) {
 
@@ -223,7 +251,7 @@
             this.getSubGroups(this.textureHtmlImageTag, '');
         }
 
-        private getSubGroups(imageTag, lastTag) {
+        private getSubGroups(imageTag: any, lastTag: any) {
             const self = this;
             if(lastTag){
                 lastTag = lastTag + ' > '
@@ -235,7 +263,7 @@
                     if($(group).attr('fill') && $(group).attr('fill') != 'none'){
                         self.groups.push({
                             xPath : lastTag + '#'+group.id,
-                            name: (lastTag + group.id).replace(/_/g, ' ').replace(/#/g, ' ').replace(' > ', ' ').trim(),
+                            title: (lastTag + group.id).replace(/_/g, ' ').replace(/#/g, ' ').replace(' > ', ' ').trim(),
                             color: $(group).attr('fill'),
                         });
                     }
@@ -245,7 +273,7 @@
             return true;
         }
 
-        private changeColor(key){
+        private changeColor(key: number){
             const children = $(this.textureHtmlImageTag).find(this.groups[key]['xPath']);
             children.attr('fill', this.groups[key]['color']);
             this.textureImage = this.textureHtmlImageTag.outerHTML;
@@ -258,14 +286,15 @@
             const ctx = this.canvas.getContext("2d");
 
             this.textureImageTag.onload = () => {
-                ctx.drawImage(this.textureImageTag, 0, 0);
+                if(ctx !== null) {
+                    ctx.drawImage(this.textureImageTag, 0, 0);
 
-                const texture = new THREE.Texture(this.canvas);
-                texture.flipY = false
-                this.baseModel.material.map = texture;
-                this.baseModel.material.map.needsUpdate = true
+                    const texture = new THREE.Texture(this.canvas);
+                    texture.flipY = false
+                    this.baseModel.material.map = texture;
+                    this.baseModel.material.map.needsUpdate = true
 
-
+                }
             }
         }
 
@@ -299,7 +328,7 @@
         max-height: 720px;
     }
     .kit-scene {
-        width: 70%;
+        width: 100%;
         height: 100%;
         background: url('/img/bg.jpg') no-repeat center center;
         background-size: 100%;

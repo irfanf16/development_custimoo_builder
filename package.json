@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@types/animejs": "^3.1.2",
+    "@types/jquery": "^3.5.4",
     "animejs": "^3.2.0",
     "core-js": "^3.6.5",
     "dat.gui": "^0.7.7",
