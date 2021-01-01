@@ -29,7 +29,7 @@
 
                         <v-list-group v-else :key="link.title" no-action :prepend-icon="link.icon" :value="false">
                             <template v-slot:activator>
-                                <v-list-item-title>{{ link.title }}</v-list-item-title>
+                                <v-list-item-title>{{ link.title }} {{link.colors.length}}</v-list-item-title>
                             </template>
 
                             <v-list-item v-for="(sublink, sub_key) in link.colors" :key="sub_key">
@@ -161,7 +161,7 @@
         private drawer = null;
         private groups: any[] = [];
         private items = [
-            { title: 'Color', icon: 'mdi-palette', colors: this.groups},
+            { title: 'Color', icon: 'mdi-palette', colors: []},
             { title: 'Colour & Style', icon: 'mdi-pencil-ruler' },
             { title: 'Name & Numbers', icon: 'mdi-signature-text' },
             { title: 'Logos', icon: 'mdi-signature-image' },
@@ -249,9 +249,11 @@
             div.innerHTML = this.textureImage;
             this.textureHtmlImageTag = div.firstChild;
             this.groups = this.getSubGroups(this.textureHtmlImageTag, '');
+            this.$set(this.items[0], 'colors', this.groups);
+            console.log(this.groups)
         }
 
-        private getSubGroups(imageTag: any, lastTag: any) {
+        private getSubGroups(imageTag: any, lastTag: any) { // will be remove when i got group from backend
             const self = this;
             const groups: any[] = [];
             if(lastTag){
