@@ -17,7 +17,7 @@
                 <v-list dense>
                     <div v-for="(link, i) in items" :key="i">
 
-                        <v-list-item v-if="!link.subLinks"  :active-class="'color'" avatar class="v-list-item">
+                        <v-list-item v-if="!link.colors" :active-class="'color'" class="v-list-item">
                             <v-list-item-icon>
                                 <v-icon>{{ link.icon }}</v-icon>
                             </v-list-item-icon>
@@ -32,7 +32,7 @@
                                 <v-list-item-title>{{ link.title }}</v-list-item-title>
                             </template>
 
-                            <v-list-item v-for="(sublink, sub_key) in link.subLinks" :key="sub_key">
+                            <v-list-item v-for="(sublink, sub_key) in link.colors" :key="sub_key">
                                 <v-list-item-title>
                                     {{sublink.title}}
                                     <input @change="changeColor(sub_key)" type="color" id="favcolor" name="favcolor" v-model="sublink.color">
@@ -93,7 +93,7 @@
             this.renderer.setClearColor( 0x000000, 0 ); // the default
 
 
-            this.textureImage = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="2048px" height="2048px" viewBox="0 0 2048 2048" enable-background="new 0 0 2048 2048" xml:space="preserve"> <g id="Artwork"> <polygon id="left_arm" points="1549.837,1976.558 847.512,1976.558 838.333,1128.111 1198.004,1033.889 1557.676,1126.965 "/> <polygon id="Right_arm" points="1443.171,1022.889 740.845,1022.889 731.667,174.442 1091.338,80.22 1451.009,173.296 "/> <polygon id="Collar_1_" fill="#E6332A" points="2039.667,1073 1299.667,1067.667 1294.333,999.667 1441,859.667 2020.788,868.326 "/> <polygon id="Front" fill="#312783" points="818.778,2048 17.778,2048 17.778,1053.444 382.333,936.111 818.778,1053.444 "/> <path id="Back_1_" fill="#006633" d="M731.667,936.111H0V13.444h731.667V936.111z M2048,1385.889h-450.556v369.778H2048V1385.889z"/> </g> <g id="Layer_1"> <image overflow="visible" width="2048" height="2048" xlink:href="uvs.png"> </image> </g> </svg>';
+            this.textureImage = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="2048px" height="2048px" viewBox="0 0 2048 2048" enable-background="new 0 0 2048 2048" xml:space="preserve"> <g id="Artwork"> <polygon id="left_arm" points="1549.837,1976.558 847.512,1976.558 838.333,1128.111 1198.004,1033.889 1557.676,1126.965 "/> <polygon id="Right_arm" points="1443.171,1022.889 740.845,1022.889 731.667,174.442 1091.338,80.22 1451.009,173.296 "/> <polygon id="Collar_1_" fill="#E6332A" points="2039.667,1073 1299.667,1067.667 1294.333,999.667 1441,859.667 2020.788,868.326 "/> <polygon id="Front" fill="#312783" points="818.778,2048 17.778,2048 17.778,1053.444 382.333,936.111 818.778,1053.444 "/> <path id="Back_1_" fill="#006633" d="M731.667,936.111H0V13.444h731.667V936.111z M2048,1385.889h-450.556v369.778H2048V1385.889z"/> <g id="Artwork_inner"><path id="Back_1_" fill="#006633" d="M731.667,936.111H0V13.444h731.667V936.111z M2048,1385.889h-450.556v369.778H2048V1385.889z"/></g> </g> <g id="Layer_1"> <image overflow="visible" width="2048" height="2048" xlink:href="uvs.png"> </image> </g> </svg>';
 
             this.textureImageTag = document.createElement("img"); //initialization of image tag
             this.canvas = document.createElement("canvas"); //initialization of canvas tag
@@ -161,7 +161,7 @@
         private drawer = null;
         private groups: any[] = [];
         private items = [
-            { title: 'Color', icon: 'mdi-palette', subLinks: this.groups},
+            { title: 'Color', icon: 'mdi-palette', colors: this.groups},
             { title: 'Colour & Style', icon: 'mdi-pencil-ruler' },
             { title: 'Name & Numbers', icon: 'mdi-signature-text' },
             { title: 'Logos', icon: 'mdi-signature-image' },
@@ -248,29 +248,38 @@
             const div = document.createElement('div');
             div.innerHTML = this.textureImage;
             this.textureHtmlImageTag = div.firstChild;
-            this.getSubGroups(this.textureHtmlImageTag, '');
+            this.groups = this.getSubGroups(this.textureHtmlImageTag, '');
         }
 
         private getSubGroups(imageTag: any, lastTag: any) {
             const self = this;
+            const groups: any[] = [];
             if(lastTag){
                 lastTag = lastTag + ' > '
             }
             $(imageTag).children().each((index, group) =>{
                 if($(group).children().length > 0){
-                    self.getSubGroups(group, lastTag +  '#'+group.id)
+                    let subLinks = self.getSubGroups(group, lastTag +  '#'+group.id)
+                    if(group.nodeName != 'g' || (group.nodeName == 'g' && subLinks.length)) {
+                        groups.push({
+                            xPath: lastTag + '#' + group.id,
+                            title: (group.id).replace(/_/g, ' ').trim(),
+                            color: $(group).attr('fill'),
+                            'subLinks': subLinks
+                        });
+                    }
                 }else{
-                    if($(group).attr('fill') && $(group).attr('fill') != 'none'){
-                        self.groups.push({
+                    if($(group).attr('fill') != 'none' && !$(group).is('image')){
+                        groups.push({
                             xPath : lastTag + '#'+group.id,
-                            title: (lastTag + group.id).replace(/_/g, ' ').replace(/#/g, ' ').replace(' > ', ' ').trim(),
+                            title: (group.id).replace(/_/g, ' ').trim(),
                             color: $(group).attr('fill'),
                         });
                     }
                 }
             })
 
-            return true;
+            return groups;
         }
 
         private changeColor(key: number){
