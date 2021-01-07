@@ -103,10 +103,10 @@
 
                     this.addTexture()
 
-                    this.normalMapImage = './assets/models/testJersey_N.jpg';
+                    this.normalMapImage = './assets/models/testJersey_N-compressed.jpg';
                     this.addNormalMapImage();
 
-                    this.aoMapImage = './assets/models/testJersey_AO.png';
+                    this.aoMapImage = './assets/models/testJersey_AO-compressed.jpg';
                     this.addAoMapImage();
 
                     setTimeout(() => {
@@ -263,10 +263,23 @@
         }
 
         private changeColor(key: number, group: []){
-            const children = $(this.textureHtmlImageTag).find(group[key]['xPath']);
-            children.attr('fill', group[key]['color']);
+            const element = $(this.textureHtmlImageTag).find(group[key]['xPath']);
+            element.attr('fill', group[key]['color']);
+            if(element.children()){
+                this.changeColorRecursive(group[key]['color'], element);
+            }
             this.textureImage = this.textureHtmlImageTag.outerHTML;
             this.addTexture()
+        }
+
+        private changeColorRecursive(color: string, element: any){
+            const self = this;
+            element.children().each((index: number, child: any) => {
+                $(child).attr('fill', color);
+                if($(child).children().length){
+                    self.changeColorRecursive(color, $(child));
+                }
+            })
         }
 
         private addTexture() {
@@ -319,8 +332,11 @@
     .kit-scene {
         width: 100%;
         height: 100%;
-        background: url('/img/bg.jpg') no-repeat center center;
-        background-size: 100%;
+        background: url('/img/bg.jpg') no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
     }
     .kit-controls{
         width: 30%;
