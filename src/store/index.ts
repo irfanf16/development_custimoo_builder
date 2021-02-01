@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    "color": {
+    "colors": {
       "c10": {
         "name": "Jet Black",
         "hexa": "#000000",
@@ -426,12 +426,18 @@ export default new Vuex.Store({
         "render": "#50c9ea",
         "pantone": "Blue 0821 C"
       }
-    }
+    },
+    activeMenu: []
   },
   mutations: {
+    SET_MENU: (state, activeMenu) => {
+      state.activeMenu = activeMenu
+    }
   },
   actions: {
-  },
-  modules: {
+    SetMenu: ({commit, state}, activeMenu) => {
+      commit('SET_MENU', activeMenu)
+      return state.activeMenu
+    }
   }
 })

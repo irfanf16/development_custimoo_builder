@@ -16,10 +16,15 @@
 
                 <v-list dense>
 
-                    <ColorList :items="items" :main-self="this"></ColorList>
+                    <ColorList :items="items" :main-self="this" :depth="depth"></ColorList>
 
                 </v-list>
             </v-navigation-drawer>
+        </v-card>
+        <v-card v-if="changeColorControl" ma-1 pa-0 :style="colorDivStyle">
+            <ul class="list-inline">
+                <li @click="changeColor(color.hexa)" v-for="(color, key) in store.state.colors" :key="key" class="color-li" :class="{'pre-selected': color.preSelected? true: false, 'color-selected': (changeColorGroup[changeColorKey] && changeColorGroup[changeColorKey].color == color.hexa)? true: false}" :style="{'background-color': color.hexa}"><span>{{color.name}}</span></li>
+            </ul>
         </v-card>
         <div class="kit-scene" ref="scene">
 
@@ -125,6 +130,7 @@
             });
 
             window.onresize = function() {
+                self.fitCameraToSelection()
                 self.onWindowResize()
             };
 
@@ -132,6 +138,17 @@
 
             this.animate();
 
+        },
+        computed: {
+            colorDivStyle() {
+              if(this.$vuetify.breakpoint.name == 'xs' || this.$vuetify.breakpoint.name == 'sm' || this.$vuetify.breakpoint.name == 'md'){
+                  this.fitCameraToSelection()
+                  return {'position': 'absolute', 'height': '180px', 'width' : '100%', 'overflow-x' : 'scroll', 'overflow-y' : 'hidden', 'left': this.mini? '56px' : '256px'}
+              }else{
+                this.fitCameraToSelection()
+                return {'position': 'absolute', 'width': '180px', 'left': this.mini? '56px' : '256px'}
+              }
+            }
         }
     })
 
@@ -177,6 +194,12 @@
         private normalMapImage!: string
 
         private aoMapImage!: string
+
+        private changeColorControl = false
+        private changeColorKey!: number
+        private changeColorGroup: any[] = [];
+
+        private depth = 0;
 
         private fitCameraToSelection(fitOffset = 1.2 ) {
 
@@ -262,11 +285,26 @@
             return groups;
         }
 
-        private changeColor(key: number, group: []){
-            const element = $(this.textureHtmlImageTag).find(group[key]['xPath']);
-            element.attr('fill', group[key]['color']);
+        private showChangeColorControl(key: number, group: []){
+            this.mini = true;
+            this.changeColorControl = false
+            this.changeColorControl = true
+            this.changeColorKey = key
+            this.changeColorGroup = group
+        }
+
+        private hideChangeColorControl(){
+            this.changeColorControl = false
+        }
+        private changeColor(color: string){
+            this.changeColorGroup[this.changeColorKey].color = color
+            if(this.changeColorGroup[this.changeColorKey].subLinks){
+                this.changeGroupItemsColor(this.changeColorGroup[this.changeColorKey].subLinks, color);
+            }
+            const element = $(this.textureHtmlImageTag).find(this.changeColorGroup[this.changeColorKey]['xPath']);
+            element.attr('fill', color);
             if(element.children()){
-                this.changeColorRecursive(group[key]['color'], element);
+                this.changeColorRecursive(color, element);
             }
             this.textureImage = this.textureHtmlImageTag.outerHTML;
             this.addTexture()
@@ -278,6 +316,16 @@
                 $(child).attr('fill', color);
                 if($(child).children().length){
                     self.changeColorRecursive(color, $(child));
+                }
+            })
+        }
+
+        private changeGroupItemsColor(items: [], color: string){
+            const self = this;
+            items.forEach((item: any) => {
+                item.color = color;
+                if(item.subLinks && item.subLinks.length){
+                    self.changeGroupItemsColor(item.subLinks, color);
                 }
             })
         }
@@ -323,11 +371,70 @@
 </script>
 
 <style scoped>
+    .list-inline{
+        margin: 0;
+        display: block;
+        width: 100%;
+        padding-left: 0;
+        list-style: none;
+    }
+    ul.list-inline li {
+        display: block;
+        margin: 0;
+        width: 36px;
+        height: 36px;
+        float: left;
+        position: relative;
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+    ul.list-inline span {
+        position: absolute;
+        left: 0;
+        top: 100%;
+        background-color: #39434c;
+        color: #fff;
+        text-transform: uppercase;
+        padding: 0 5px;
+        height: 36px;
+        line-height: 36px;
+        z-index: 6;
+        opacity: 0;
+        pointer-events: none;
+        white-space: nowrap;
+        font-size: 62.5%;
+        text-rendering: geometricPrecision;
+    }
+    .color-li:hover span {
+        opacity: 1;
+    }
+    li.color-li:hover:after {
+        border: 1px solid #fff;
+    }
+    li.pre-selected:after {
+        border: 1px solid #fff;
+    }
+    li.color-selected:after {
+        border: 1px solid #fff;
+        background: url('/img/color-check.svg') no-repeat center center;
+        background-size: 12px 12px;
+    }
+    li.color-li{
+      display: inline-block;
+    }
+    li.color-li:after {
+        content: "";
+        position: absolute;
+        width: 90%;
+        height: 90%;
+        left: 5%;
+        top: 5%;
+    }
     .kit-container{
         display: inline-flex;
         width: 100%;
         height: 100%;
-        max-height: 720px;
+        max-height: 1440px;
     }
     .kit-scene {
         width: 100%;
@@ -337,54 +444,5 @@
         -moz-background-size: cover;
         -o-background-size: cover;
         background-size: cover;
-    }
-    .kit-controls{
-        width: 30%;
-        height: 100%;
-    }
-    .edit-panel{
-        width: 96%;
-        height: 96%;
-        margin: 2% 2% 2% 2%;
-        background: #999999;
-        color: #fff;
-        border-radius: 4px;
-    }
-    .groups{
-        margin: 10px 2px 2px 15px;
-    }
-    /* Style the tab */
-    .tab {
-        overflow: hidden;
-        border: 1px solid #999999;
-    }
-
-    /* Style the buttons inside the tab */
-    .tab button {
-        background-color: inherit;
-        float: left;
-        border: none;
-        outline: none;
-        cursor: pointer;
-        padding: 14px 16px;
-        transition: 0.3s;
-        font-size: 17px;
-    }
-
-    /* Change background color of buttons on hover */
-    .tab button:hover {
-        background-color: #ddd;
-    }
-
-    /* Create an active/current tablink class */
-    .tab .active {
-        border: 1px solid #006666;
-        background: #006666;
-    }
-    ul.tabs {
-        display: flex;
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
     }
 </style>
