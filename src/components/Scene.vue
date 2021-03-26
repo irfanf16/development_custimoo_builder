@@ -18,8 +18,8 @@ import { Image } from 'fabric/fabric-impl'
 })
 
 export default class Scene extends Vue {
-  private frontCanvas !: fabric.Canvas;
-  private backCanvas !: fabric.Canvas;
+  private frontCanvas !: fabric.Canvas
+  private backCanvas !: fabric.Canvas
   private front = {textureUrl: './img/images/HoodieDesign_2.svg', modelUrl: './img/images/HoodieTemplateFront.png'}
   private back = {textureUrl: './img/images/HoodieDesign_2.svg', modelUrl: './img/images/HoodieTemplateFront.png'}
 
