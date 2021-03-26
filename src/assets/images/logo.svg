@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="245" height="38.995" viewBox="0 0 245 38.995">
+  <g id="Group_7" data-name="Group 7" transform="translate(-23 -23)">
+    <g id="Group_6" data-name="Group 6" transform="translate(-2684.366 188.796)">
+      <path id="Path_201" data-name="Path 201" d="M2784.664-156.671v17.548l-5.381-3.414v-7.582l-11.309,7.955-3.042-1.638V-147.9l11.309-7.214-7.331-4.134.078-6.551Z" transform="translate(-43.173)" fill="#219f84"/>
+      <path id="Path_202" data-name="Path 202" d="M2743.883-58.027l-5.3-3.276-10.685,6.317L2717.521-61.3l-5.615,3.51,15.6,9.359Z" transform="translate(-3.405 -78.366)" fill="#03142e"/>
+      <path id="Path_203" data-name="Path 203" d="M2722.893-165.8v6.62l-10.113,5.654V-141.9l-5.415,3.344v-18.075Z" fill="#03142e"/>
+    </g>
+    <text id="name" transform="translate(69 52)" fill="#03142e" font-size="25" font-family="Ubuntu-Bold, Ubuntu" font-weight="700"><tspan x="0" y="0">Shirt Customizer</tspan></text>
+  </g>
+</svg>
