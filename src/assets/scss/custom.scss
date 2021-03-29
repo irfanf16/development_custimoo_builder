@@ -80,6 +80,7 @@ a:hover{color: #219f84;}
     //     }
     // }
 }
+.h-100vh{height: 100vh;}
 .btn-secondary{
     background: #219F84;
     border-color: #219f84;
@@ -92,3 +93,36 @@ a:hover{color: #219f84;}
 
 .fw-bold{font-weight: 700;}
 .fz-18{font-size: 18px;}
+.select-item-slider{
+    .owl-carousel{
+        .owl-item{
+            border-radius: 5px;
+            overflow: hidden;
+            &.center{transform: scale(1.2);}
+        }
+        .owl-stage-outer{padding: 10px 0;}
+        .owl-nav{
+            position: static;
+            .owl-next,
+            .owl-prev{
+                position: absolute;
+                content: '';
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(0,0,0,0.5) url('~@/assets/images/arrow-left.svg') no-repeat 50% 50% / 13px;
+                width: 26px;
+                height: 26px;
+                z-index: 1;
+                font-size: 0;
+                margin: 0;
+                &:hover{background-color: #000;}
+            }
+            .owl-prev{
+                left: 0;
+                right: auto;
+                transform: translateY(-50%) rotate(180deg);
+            }
+        }
+    }
+}

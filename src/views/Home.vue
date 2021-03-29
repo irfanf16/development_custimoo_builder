@@ -5,7 +5,7 @@
         <b-col cols="3" class="text-left border-right py-5">
             <ChooseColor />
         </b-col>
-        <b-col cols="6" class="border-right">
+        <b-col cols="6" class="border-right d-flex flex-wrap align-items-center h-100vh">
           <div class="customization-area p-5">
             <CustomizationPreview />
             <b-button class="mt-5" variant="secondary">Continue</b-button>
