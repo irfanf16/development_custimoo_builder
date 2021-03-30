@@ -37,7 +37,7 @@ export default class Scene extends Vue {
     canvas = new fabric.Canvas(element)
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
-    let model !: any
+    let model: any
     fabric.Image.fromURL(ImageData.modelUrl,  (img: any) => {
       img.scaleToWidth(canvas.getWidth() - 10).scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
@@ -49,7 +49,7 @@ export default class Scene extends Vue {
       model = img
     })
 
-    let texture !: any
+    let texture: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
       const objFront = fabric.util.groupSVGElements(objects, options)
       objFront.scaleToWidth(canvas.getWidth() - 10).scaleToHeight(canvas.getHeight() - 10).set({
@@ -68,12 +68,11 @@ export default class Scene extends Vue {
       texture = objFront
     })
 
-    let logoObject !: any
+    let logoObjects: any[] =[]
     const self = this
 
     if(this.logos) {
       this.logos.forEach((logo: Record<any, any>) => {
-        console.log(logo)
         fabric.Image.fromURL(logo.url, (img: any) => {
           img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
             .scaleToHeight(canvas.getHeight() / self.mainCanvasHeight * logo.height)
@@ -87,16 +86,17 @@ export default class Scene extends Vue {
               globalCompositeOperation: 'source-atop'
             })
 
-          logoObject = img;
+          logoObjects.push(img)
         })
       })
     }
 
     setTimeout(() => {
       canvas.add(texture)
-      if(logoObject) {
+      logoObjects.forEach((logoObject)=> {
         canvas.add(logoObject)
-      }
+      })
+
       canvas.add(model)
 
       canvas.viewportCenterObject(texture);
