@@ -8,7 +8,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
-import { Image } from 'fabric/fabric-impl'
 
 @Component<Scene>({
   mounted () {
@@ -31,53 +30,65 @@ export default class Scene extends Vue {
     canvas = new fabric.Canvas(element)
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
-    fabric.Image.fromURL(ImageData.modelUrl, function (img: any) {
+    let model !: any
+    fabric.Image.fromURL(ImageData.modelUrl,  (img: any) => {
       img.scale(0.3).set({
-        opacity: 0.41,
-        left: 192,
-        top: 255,
-        'hasControls': false,
-        'selectable': false,
-        'evented': false,
+        hasControls: false,
+        selectable: false,
+        evented: false,
+        globalCompositeOperation: 'overlay'
       });
-
-      canvas.add(img)
-      canvas.renderAll()
+      img.center().setCoords()
+      model = img
     })
 
+    let texture !: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
       const objFront = fabric.util.groupSVGElements(objects, options)
       objFront.scale(0.3).set({
-        left: 190,
-        top: 250,
         hasControls: false,
         selectable: false,
         evented: false,
         lockMovementX: true,
-        lockMovementY: true
+        lockMovementY: true,
       })
-
-      canvas.setBackgroundImage(objFront as Image, function () {
-        console.log('function done')
+      objFront._objects.forEach((element: any) => {
+        if(element.id === 'Laces') {
+          element.globalCompositeOperation = 'destination-out'
+        }
       })
+      objFront.center().setCoords();
+      texture = objFront
     })
 
-    fabric.Image.fromURL('./img/images/ladybug.png', function (img: any) {
+    let logo !: any
+    fabric.Image.fromURL('./img/images/logo.png', (img: any) => {
 
-      img.scale(0.5).set({
+      img.scaleToWidth(100).scaleToHeight(100).set({
         left: 170,
         top: 170,
-        opacity: 1,
-        'selectable': true,
-        'hasControls': true,
-        'evented': true,
-        globalCompositeOperation: 'source-atop',
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
+        evented: true,
+        globalCompositeOperation: 'source-atop'
       })
 
-      img.hasControls = img.hasBorders = true;
-      canvas.add(img);
-      canvas.bringToFront(img);
-    });
+      logo = img;
+    })
+
+    setTimeout(() => {
+      canvas.add(texture)
+      canvas.add(logo)
+      canvas.add(model)
+
+      canvas.viewportCenterObject(texture);
+      canvas.viewportCenterObject(model);
+      canvas.renderAll();
+
+      canvas.renderAll()
+    }, 1000)
+
   }
 }
 </script>
