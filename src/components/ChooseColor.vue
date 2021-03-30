@@ -59,12 +59,6 @@
             <button class="btn btn-secondary">Shuffle</button>
             <button class="redo-btn"><font-awesome-icon :icon="['fas', 'redo-alt']" /></button>
         </div>
-        <!-- <div>
-            <input type="file" @change="onFileChange" />
-            <div id="preview">
-                <img v-if="url" :src="url" />
-            </div>
-        </div> -->
     </div>
 </template>
 
@@ -72,13 +66,8 @@
     import { Component, Vue } from 'vue-property-decorator'
     @Component<ChooseColor>({})
     export default class ChooseColor extends Vue {
-        private url!: string
+
         private colorOneActive = false
-        
-        public onFileChange(e:any) {
-            const file = e.target.files[0];
-            this.url = URL.createObjectURL(file);
-        }
 
         public showColor() {
             this.colorOneActive = !this.colorOneActive
@@ -206,7 +195,7 @@
                 margin: 0 2px;
                 background: #000;
                 border-radius: 50%;
-                border: 1px solid #EFF2F4;
+                border: 1px solid #EFF2F4; 
                 position: relative;
                 margin-bottom: 10px;
                 @media only screen and (min-width: 1024px){
