@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Scene/>
+    <Scene :canvas-height="400" :canvas-width="400" :front="{textureUrl: './img/images/HoodieDesign_2.svg', modelUrl: './img/images/HoodieTemplateFront.png'}"/>
   </div>
 </template>
 

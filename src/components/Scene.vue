@@ -1,26 +1,33 @@
 <template>
-  <div>
-    <canvas ref="front" id="front" className="canvas" width="400" height="500"></canvas>
-    <canvas ref="back" id="back" className="canvas" width="400" height="500"></canvas>
+  <div style="display: flex">
+    <canvas ref="front" id="front" className="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    <canvas ref="back" id="back" className="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 
 @Component<Scene>({
   mounted () {
     this.loadScene(this.front, this.frontCanvas, 'front')
-    this.loadScene(this.back, this.backCanvas, 'back')
+    if(this.back) {
+      this.loadScene(this.back, this.backCanvas, 'back')
+    }
   }
 })
 
 export default class Scene extends Vue {
+  @Prop({required: true}) readonly front!: Record<string, unknown>;
+  @Prop({required: false}) readonly back!: Record<string, unknown>;
+  @Prop({required: false, default: () => { return [{url: './img/images/logo.png', width: 100, height: 100, x: 170, y: 117}]}}) readonly logos !: [Record<string, any>];
+  @Prop({required: false, default: 400}) readonly mainCanvasWidth!: number;
+  @Prop({required: false, default: 400}) readonly mainCanvasHeight!: number;
+  @Prop({required: false, default: 400}) readonly canvasWidth!: number;
+  @Prop({required: false, default: 400}) readonly canvasHeight!: number;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
-  private front = {textureUrl: './img/images/HoodieDesign_2.svg', modelUrl: './img/images/HoodieTemplateFront.png'}
-  private back = {textureUrl: './img/images/HoodieDesign_2.svg', modelUrl: './img/images/HoodieTemplateFront.png'}
 
   public loadScene (ImageData: any, canvas: fabric.Canvas, side: string) {
     let element = this.$refs.front as HTMLCanvasElement
@@ -32,7 +39,7 @@ export default class Scene extends Vue {
 
     let model !: any
     fabric.Image.fromURL(ImageData.modelUrl,  (img: any) => {
-      img.scale(0.3).set({
+      img.scaleToWidth(canvas.getWidth() - 10).scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
         selectable: false,
         evented: false,
@@ -45,7 +52,7 @@ export default class Scene extends Vue {
     let texture !: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
       const objFront = fabric.util.groupSVGElements(objects, options)
-      objFront.scale(0.3).set({
+      objFront.scaleToWidth(canvas.getWidth() - 10).scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
         selectable: false,
         evented: false,
@@ -61,25 +68,35 @@ export default class Scene extends Vue {
       texture = objFront
     })
 
-    let logo !: any
-    fabric.Image.fromURL('./img/images/logo.png', (img: any) => {
+    let logoObject !: any
+    const self = this
 
-      img.scaleToWidth(100).scaleToHeight(100).set({
-        left: 170,
-        top: 170,
-        selectable: true,
-        hasControls: true,
-        hasBorders: true,
-        evented: true,
-        globalCompositeOperation: 'source-atop'
+    if(this.logos) {
+      this.logos.forEach((logo: Record<any, any>) => {
+        console.log(logo)
+        fabric.Image.fromURL(logo.url, (img: any) => {
+          img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
+            .scaleToHeight(canvas.getHeight() / self.mainCanvasHeight * logo.height)
+            .set({
+              left: canvas.getWidth() / self.mainCanvasWidth * logo.x,
+              top: canvas.getHeight() / self.mainCanvasHeight * logo.y,
+              selectable: true,
+              hasControls: true,
+              hasBorders: true,
+              evented: true,
+              globalCompositeOperation: 'source-atop'
+            })
+
+          logoObject = img;
+        })
       })
-
-      logo = img;
-    })
+    }
 
     setTimeout(() => {
       canvas.add(texture)
-      canvas.add(logo)
+      if(logoObject) {
+        canvas.add(logoObject)
+      }
       canvas.add(model)
 
       canvas.viewportCenterObject(texture);
