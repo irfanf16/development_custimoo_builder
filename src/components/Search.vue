@@ -39,7 +39,10 @@
     .nav-customize-area{
         margin: 0 0 15px;
         .nav-item{
-            font-size: 12px;
+            font-size: 10px;
+            @media only screen and (min-width: 1170px){
+                font-size: 12px;
+            }
             &.search-opener{
                 .nav-link{
                     border-bottom: none;

@@ -98,8 +98,12 @@
         }
         .shuffle-colors{
             .btn{
-                flex: 0 0 86%;
-                max-width: 86%;
+                flex: 0 0 82%;
+                max-width: 82%;
+                @media only screen and (min-width: 1170px){
+                    flex: 0 0 86%;
+                    max-width: 86%;
+                }
             }
             .redo-btn{
                 background: none;
@@ -111,8 +115,8 @@
     .choose-color{
         a{
             display: block;
-            width: 140px;
-            height: 140px;
+            width: 100px;
+            height: 100px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -121,17 +125,31 @@
             margin: 0 0 20px;
             border-radius: 6px;
             font-weight: 700;
+            font-size: 12px;
+            @media only screen and (min-width: 1170px){
+                width: 120px;
+                height: 120px;
+                font-size: 14px;
+            }
+            @media only screen and (min-width: 1299px){
+                width: 140px;
+                height: 140px;
+            }
             &:hover{text-decoration: none;}
             
         }
         .color-circle{
             border-radius: 50%;
-            width: 72px;
-            height: 72px;
+            width: 52px;
+            height: 52px;
             background: #FFC658;
             border: 1px solid #EFF2F4;
             position: relative;
-            margin: 0 0 12px;
+            margin: 0 auto 12px;
+            @media only screen and (min-width: 1170px){
+                width: 72px;
+                height: 72px;
+            }
             &:before{
                 position: absolute;
                 content: '';
@@ -155,6 +173,8 @@
         z-index: 2;
         box-shadow: 0 0 5px rgba(0,0,0,0.1);
         border-radius: 15px;
+        max-height: 300px;
+        overflow-y: auto;
         a.close{
             width: auto;
             height: auto;
@@ -176,15 +196,28 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
+            &:after{
+                flex: auto;
+                content: '';
+            }
             .color-box{
-                width: 45px;
-                height: 45px;
+                width: 40px;
+                height: 40px;
                 margin: 0 2px;
                 background: #000;
                 border-radius: 50%;
                 border: 1px solid #EFF2F4;
                 position: relative;
                 margin-bottom: 10px;
+                @media only screen and (min-width: 1024px){
+                    width: 32px;
+                    height: 32px;
+                }
+                @media only screen and (min-width: 1274px){
+                    width: 45px;
+                    height: 45px;
+                }
+                &:last-child{margin: 0 7px;}
                 &:before{
                     position: absolute;
                     content: '';
@@ -194,6 +227,12 @@
                     bottom: 0;
                     border-radius: 50%;
                     border: 5px solid #fff;
+                    @media only screen and (min-width: 1024px){
+                        border: 3px solid #fff;
+                    }
+                    @media only screen and (min-width: 1274px){
+                        border: 5px solid #fff;
+                    }
                 }
             }
         }

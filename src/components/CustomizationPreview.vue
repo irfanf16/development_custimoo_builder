@@ -16,7 +16,9 @@
   .preview-section{
     overflow: hidden;
     .image-holder{
-      margin: 0 10px;
+      margin: 0 1%;
+      flex: 0 0 48%;
+      max-width: 48%;
       img{
         display: block;
         max-width: 100%;

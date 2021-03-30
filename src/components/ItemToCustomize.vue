@@ -26,3 +26,4 @@
 })
     export default class ItemToCustomize extends Vue {}
 </script>
+
