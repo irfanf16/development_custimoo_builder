@@ -8,6 +8,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
+import { Group } from 'fabric/fabric-impl'
 
 @Component<Scene>({
   mounted () {
@@ -51,7 +52,7 @@ export default class Scene extends Vue {
 
     let texture: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
-      const objFront = fabric.util.groupSVGElements(objects, options)
+      const objFront = fabric.util.groupSVGElements(objects, options) as Group
       objFront.scaleToWidth(canvas.getWidth() - 10).scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
         selectable: false,
