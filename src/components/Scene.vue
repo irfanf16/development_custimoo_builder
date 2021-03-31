@@ -50,7 +50,7 @@ export default class Scene extends Vue {
       });
       img.center().setCoords()
       model = img
-    }, null, { crossOrigin: 'anonymous'})
+    },{ crossOrigin: 'anonymous'})
 
     let texture: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
@@ -74,7 +74,7 @@ export default class Scene extends Vue {
       }else{
         self.backTexture = texture
       }
-    }, null, { crossOrigin: 'anonymous'})
+    })
 
     let logoObjects: any[] =[]
     const self = this
@@ -95,7 +95,7 @@ export default class Scene extends Vue {
             })
 
           logoObjects.push(img)
-        }, null, { crossOrigin: 'anonymous'})
+        },{ crossOrigin: 'anonymous'})
       })
     }
 
