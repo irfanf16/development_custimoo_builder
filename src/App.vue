@@ -7,6 +7,10 @@
 
 <script>
 import Header from '@/components/Header.vue';
+import Vue from 'vue'
+import AxiosPlugin from 'vue-axios-cors';
+
+Vue.use(AxiosPlugin)
 
 export default{
   name: 'App',

@@ -28,7 +28,7 @@
           </div>
         </b-col>
         <b-col cols="3">
-          <ItemToCustomize :productListing="this.products" />
+          <ItemToCustomize :productListing="products" />
         </b-col>
       </b-row>
     </b-container>
@@ -58,17 +58,19 @@ export default class Home extends Vue {
   private company_id !: string
   private product_id !: string
 
-  retrieveProducts() {
+  retrieveProducts(): void {
     this.product_id = '1'
     this.company_id = '1'
     let param = '?product_id='+this.product_id+'&company_id='+this.company_id
     ApiDataService.getAll(param)
-      .then((response) => {
-        this.products = response.data;
-        console.log(response.data);
+      .then((response: any) => {
+        setTimeout(function(){
+          console.log(response.data);
+        }, 2000)
+        this.products = response.data.products.data;
       })
-      .catch((e) => {
-        console.log(e);
+      .catch((e: any) => {
+        console.log(e)
       });
   }
 }
@@ -133,5 +135,5 @@ export default class Home extends Vue {
       }
     }
   }
-  
+
 </style>
