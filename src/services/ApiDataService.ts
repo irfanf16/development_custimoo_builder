@@ -1,5 +1,4 @@
-<script lang="ts">
-import http from "../httpCommon.vue"
+import http from "../httpCommon"
 
 class ApiDataService {
   getAll(payload: string) {
@@ -8,10 +7,6 @@ class ApiDataService {
   getSingle(payload: string) {
     return http.get(`/product/colors${payload}`)
   }
-  // get(id: string) {
-  //   return http.get(`/tutorials/${id}`);
-  // }
 }
 
 export default new ApiDataService()
-</script>
