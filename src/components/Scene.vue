@@ -29,6 +29,8 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 400}) readonly canvasHeight!: number;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
+  private frontTexture !: any
+  private backTexture !: any
 
   public loadScene (ImageData: any, canvas: fabric.Canvas, side: string) {
     let element = this.$refs.front as HTMLCanvasElement
@@ -48,26 +50,31 @@ export default class Scene extends Vue {
       });
       img.center().setCoords()
       model = img
-    })
+    }, null, { crossOrigin: 'anonymous'})
 
     let texture: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
-      const objFront = fabric.util.groupSVGElements(objects, options) as Group
-      objFront.scaleToWidth(canvas.getWidth() - 10).scaleToHeight(canvas.getHeight() - 10).set({
+      const img = fabric.util.groupSVGElements(objects, options) as Group
+      img.scaleToWidth(canvas.getWidth() - 10).scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
         selectable: false,
         evented: false,
         lockMovementX: true,
         lockMovementY: true,
       })
-      objFront._objects.forEach((element: any) => {
+      img._objects.forEach((element: any) => {
         if(element.id === 'Laces') {
           element.globalCompositeOperation = 'destination-out'
         }
       })
-      objFront.center().setCoords();
-      texture = objFront
-    })
+      img.center().setCoords();
+      texture = img
+      if(side === 'back'){
+        self.frontTexture = texture
+      }else{
+        self.backTexture = texture
+      }
+    }, null, { crossOrigin: 'anonymous'})
 
     let logoObjects: any[] =[]
     const self = this
@@ -88,7 +95,7 @@ export default class Scene extends Vue {
             })
 
           logoObjects.push(img)
-        })
+        }, null, { crossOrigin: 'anonymous'})
       })
     }
 
@@ -100,14 +107,29 @@ export default class Scene extends Vue {
 
       canvas.add(model)
 
-      canvas.viewportCenterObject(texture);
-      canvas.viewportCenterObject(model);
-      canvas.renderAll();
-
+      canvas.viewportCenterObject(texture)
+      canvas.viewportCenterObject(model)
       canvas.renderAll()
     }, 1000)
 
   }
+
+  // public changeColor() {
+  //   this.objFront.getObjects().forEach(function(e) {
+  //
+  //     if(i >= myObj.colors.length){
+  //       i = 0;
+  //     }
+  //     //console.log(e);
+  //     //console.log(i);
+  //     //console.log(myObj.colors);
+  //     color = myObj.colors[i].color;
+  //
+  //     e.set('fill', color);
+  //
+  //     i++;
+  //   });
+  // }
 }
 </script>
 
