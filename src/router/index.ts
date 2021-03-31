@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
 import ViewScene from '../views/ViewScene.vue'
+import CustomizationProcess from '../views/CustomizationProcess.vue'
 
 Vue.use(VueRouter)
 
@@ -15,6 +16,11 @@ const routes: Array<RouteConfig> = [
     path: '/view-scene',
     name: 'viewScene',
     component: ViewScene
+  },
+  {
+    path: '/customization-process',
+    name: 'CustomizationProcess',
+    component: CustomizationProcess
   },
   {
     path: '/about',
