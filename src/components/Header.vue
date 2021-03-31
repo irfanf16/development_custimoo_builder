@@ -4,7 +4,7 @@
             <b-row>
                 <b-col cols="2">
                     <div class="logo">
-                        <a href="#."><img src="@/assets/images/logo.svg" alt="Shirt Customizer" /></a>
+                        <a href="/"><img src="@/assets/images/logo.svg" alt="Shirt Customizer" /></a>
                     </div>
                 </b-col>
                 <b-col cols="10">
