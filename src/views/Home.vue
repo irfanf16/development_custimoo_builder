@@ -12,7 +12,7 @@
           </div>
         </b-col>
         <b-col cols="3">
-          <ItemToCustomize />
+          <ItemToCustomize :productListing="this.products" />
         </b-col>
       </b-row>
     </b-container>
@@ -24,16 +24,37 @@ import { Component, Vue } from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
-
+import ApiDataService from "@/services/ApiDataService";
 
 @Component<Home>({
   components: {
     ChooseColor,
     CustomizationPreview,
     ItemToCustomize
+  },
+  mounted() {
+    this.retrieveProducts()
   }
 })
 
-export default class Home extends Vue {}
+export default class Home extends Vue {
+  private products : any[] = []
+  private company_id !: string
+  private product_id !: string
+
+  retrieveProducts() {
+    this.product_id = '1'
+    this.company_id = '1'
+    let param = '?product_id='+this.product_id+'&company_id='+this.company_id
+    ApiDataService.getAll(param)
+      .then((response) => {
+        this.products = response.data;
+        console.log(response.data);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+}
 </script>
 
