@@ -4,17 +4,18 @@
         <div class="customization-nav-area">
             <Search />
         </div>
-        <SelectItemCarousel />
+        <SelectItemCarousel :productListingCarousel="productListing" />
         <h2 class="fw-bold mt-5 mb-2 fz-18">Designs Available</h2>
         <DesignAvailable />
     </div>
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from 'vue-property-decorator'
+import {Component, Prop, Vue} from 'vue-property-decorator'
     import Search from '@/components/Search.vue'
     import SelectItemCarousel from '../components/SelectItemCarousel.vue'
     import DesignAvailable from '../components/DesignAvailable.vue'
+import ApiDataService from "@/services/ApiDataService";
 
 
 @Component<ItemToCustomize>({
@@ -24,6 +25,26 @@
         DesignAvailable
     }
 })
-    export default class ItemToCustomize extends Vue {}
+export default class ItemToCustomize extends Vue {
+  @Prop() productListing!: any
+
+  // retrieveDesigns(): void {
+  //
+  //   // console.log(productListing)
+  //   this.product_id = '1'
+  //   this.company_id = '1'
+  //   let param = '?product_id='+this.product_id+'&company_id='+this.company_id
+  //   ApiDataService.getAll(param)
+  //     .then((response: any) => {
+  //       setTimeout(function(){
+  //         console.log(response.data);
+  //       }, 2000)
+  //       this.products = response.data.products.data;
+  //     })
+  //     .catch((e: any) => {
+  //       console.log(e)
+  //     });
+  // }
+}
 </script>
 
