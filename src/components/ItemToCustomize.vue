@@ -17,11 +17,11 @@
   import DesignAvailable from '../components/DesignAvailable.vue'
 
 @Component<ItemToCustomize>({
-    components: {
-        Search,
-        SelectItemCarousel,
-        DesignAvailable
-    }
+  components: {
+    Search,
+    SelectItemCarousel,
+    DesignAvailable
+  }
 })
 export default class ItemToCustomize extends Vue {
   public designIndex = 0
@@ -30,6 +30,7 @@ export default class ItemToCustomize extends Vue {
 
   public setDesigns(designIndex :number){
     this.designIndex = designIndex
+    this.$emit('designsData', designIndex)
   }
 }
 </script>

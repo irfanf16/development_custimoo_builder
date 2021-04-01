@@ -22,9 +22,9 @@ import { Group } from 'fabric/fabric-impl'
 export default class Scene extends Vue {
   @Prop({required: true}) readonly front!: Record<string, unknown>;
   @Prop({required: false}) readonly back!: Record<string, unknown>;
-  @Prop({required: false, default: () => { return [{url: './img/images/logo.png', width: 100, height: 100, x: 170, y: 117}]}}) readonly logos !: [Record<string, any>];
-  @Prop({required: false, default: 400}) readonly mainCanvasWidth!: number;
-  @Prop({required: false, default: 400}) readonly mainCanvasHeight!: number;
+  @Prop({required: false, default: () => { return [{url: './img/images/logo.png', width: 100, height: 100, x: 100, y: 117}]}}) readonly logos !: [Record<string, any>];
+  @Prop({required: false, default: 235}) readonly mainCanvasWidth!: number;
+  @Prop({required: false, default: 290}) readonly mainCanvasHeight!: number;
   @Prop({required: false, default: 400}) readonly canvasWidth!: number;
   @Prop({required: false, default: 400}) readonly canvasHeight!: number;
   private frontCanvas !: fabric.Canvas

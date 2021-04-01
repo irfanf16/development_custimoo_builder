@@ -1,7 +1,7 @@
 <template>
   <div class="available-designs-section" v-if="productDesignsData">
-    <div class="design-col" v-for="design in productDesignsData.productstyles[0].productdesigns" :key="design.id">
-      <a href="#.">
+    <div class="design-col" v-for="(design, index) in productDesignsData.productstyles[0].productdesigns" :key="design.id">
+      <a @click="changeDesign(index)">
         <Scene :canvas-height="73" :canvas-width="59" :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ productDesignsData.productstyles[0].front.file_url}"/>
       </a>
     </div>
@@ -21,6 +21,16 @@
   export default class DesignAvailable extends Vue {
     @Prop({required: true}) productDesignsData !: any
     private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
+
+    public changeDesign(index: number){
+      this.productDesignsData.productstyles[0].productdesigns.forEach((design: any, key: number) => {
+        if(index == key){
+          design.is_default = 1
+        }else{
+          design.is_default = 0
+        }
+      })
+    }
   }
 </script>
 

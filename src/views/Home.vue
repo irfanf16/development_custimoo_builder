@@ -23,12 +23,12 @@
         </b-col>
         <b-col cols="6" class="border-right d-flex flex-wrap align-items-center h-100vh justify-content-center">
           <div class="customization-area p-5">
-            <CustomizationPreview />
+            <CustomizationPreview :designs="products[designsIndex]" />
             <b-button class="mt-5" variant="secondary">Continue</b-button>
           </div>
         </b-col>
         <b-col cols="3">
-          <ItemToCustomize :productListing="products" />
+          <ItemToCustomize :productListing="products" @designsData="changeProduct"/>
         </b-col>
       </b-row>
     </b-container>
@@ -58,6 +58,8 @@ export default class Home extends Vue {
   private company_id !: string
   private product_id !: string
 
+  public designsIndex = 0
+
   retrieveProducts(): void {
     this.product_id = '1'
     this.company_id = '1'
@@ -69,6 +71,10 @@ export default class Home extends Vue {
       .catch((e: any) => {
         console.log(e)
       });
+  }
+
+  public changeProduct(designsIndex :number){
+    this.designsIndex = designsIndex
   }
 }
 </script>
