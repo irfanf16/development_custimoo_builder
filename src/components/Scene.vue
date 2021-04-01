@@ -1,7 +1,7 @@
 <template>
   <div style="display: flex">
     <canvas ref="front" id="front" className="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
-    <canvas ref="back" id="back" className="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    <canvas v-if="back" ref="back" id="back" className="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
   </div>
 </template>
 
@@ -50,7 +50,7 @@ export default class Scene extends Vue {
       });
       img.center().setCoords()
       model = img
-    },{ crossOrigin: 'anonymous'})
+    })
 
     let texture: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
@@ -95,7 +95,7 @@ export default class Scene extends Vue {
             })
 
           logoObjects.push(img)
-        },{ crossOrigin: 'anonymous'})
+        })
       })
     }
 
@@ -104,7 +104,6 @@ export default class Scene extends Vue {
       logoObjects.forEach((logoObject)=> {
         canvas.add(logoObject)
       })
-
       canvas.add(model)
 
       canvas.viewportCenterObject(texture)

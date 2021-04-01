@@ -64,9 +64,6 @@ export default class Home extends Vue {
     let param = '?product_id='+this.product_id+'&company_id='+this.company_id
     ApiDataService.getAll(param)
       .then((response: any) => {
-        setTimeout(function(){
-          console.log(response.data);
-        }, 2000)
         this.products = response.data.products.data;
       })
       .catch((e: any) => {
