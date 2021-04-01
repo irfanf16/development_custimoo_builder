@@ -7,7 +7,7 @@
                     Logo
                 </template>
                 <div class="logo-placement-tabs">
-                    <logo-placement-tabs />
+                    <LogoPlacementTabs />
                 </div>
             </b-tab>
             <b-tab>
@@ -17,7 +17,7 @@
                 </template>
                 <div>
                     <h2 class="fw-bold fz-16 p-3">Choose Color</h2>
-                    <color-accordion />
+                    <ColorAccordion />
                 </div>
             </b-tab>
             <b-tab>
@@ -25,21 +25,27 @@
                     <div class="icon-holder"><font-awesome-icon :icon="['fas', 'text-height']" /></div>
                     Text
                 </template>
-                <p class="p-3">Tab contents 2</p>
+                <CustomizationText />
             </b-tab>
             <b-tab>
                 <template #title>
                     <div class="icon-holder"><font-awesome-icon :icon="['fas', 'swatchbook']" /></div>
                     Style
                 </template>
-                <p class="p-3">Tab contents 2</p>
+                <div class="collar-section p-4">
+                    <h2 class="fw-bold mb-2 fz-18">Choose Product</h2>
+                    <CollarStyle />
+                </div>
             </b-tab>
             <b-tab>
                 <template #title>
                     <div class="icon-holder"><font-awesome-icon :icon="['fas', 'user-friends']" /></div>
                     Team
                 </template>
-                <p class="p-3">Tab contents 2</p>
+                <div class="team-roaster-area p-4">
+                    <h2 class="fw-bold mb-2 fz-18">Roster</h2>
+                    <EditRosterArea />
+                </div>
             </b-tab>
         </b-tabs>
     </div>
@@ -48,11 +54,17 @@
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator'
     import ColorAccordion from '@/components/ColorAccordion.vue'
-import LogoPlacementTabs from './LogoPlacementTabs.vue'
+    import LogoPlacementTabs from './LogoPlacementTabs.vue'
+    import CustomizationText from '@/components/CustomizationText.vue'
+    import CollarStyle from '@/components/CollarStyle.vue'
+    import EditRosterArea from '@/components/EditRosterArea.vue'
     @Component<CustomizationProcess>({
         components: {
             ColorAccordion,
-            LogoPlacementTabs
+            LogoPlacementTabs,
+            CustomizationText,
+            CollarStyle,
+            EditRosterArea
         }
     })
     export default class CustomizationProcess extends Vue {
