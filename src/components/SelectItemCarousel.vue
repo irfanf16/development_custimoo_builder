@@ -1,5 +1,5 @@
 <template>
-  <carousel class="select-item-slider" :items="4" :margin="20" :loop="true" :center="true" :touchDrag="true" :dots="false">
+  <carousel v-if="renderComponent" class="select-item-slider" :items="renderComponent.length > 3? 4: renderComponent.length" :margin="20" :loop="true" :center="true" :touchDrag="true" :dots="false">
     <template v-for="(product, index) in productListingCarousel">
       <a href="#." ref="products" v-on:click="productDesigns(index)"  :key="product.product_id">
         <Scene :canvas-height="73" :canvas-width="59" :front="{textureUrl: apiBaseUrl+'/'+product.productstyles[0].productdesigns[0].front_design.file_url, modelUrl: apiBaseUrl+'/'+product.productstyles[0].front.file_url}"/>
@@ -18,8 +18,20 @@ export default {
   props:['productListingCarousel'],
   data: function () {
     return {
-      apiBaseUrl: process.env.VUE_APP_API_BASE_URL
+      apiBaseUrl: process.env.VUE_APP_API_BASE_URL,
+      renderComponent : true
     }
+  },
+  created () {
+    const self = this
+    setTimeout(() => {
+      self.renderComponent = false;
+
+      self.$nextTick(() => {
+        // Add the component back in
+        self.renderComponent = true;
+      });
+    }, 1000)
   },
   methods: {
     productDesigns: function (index) {
