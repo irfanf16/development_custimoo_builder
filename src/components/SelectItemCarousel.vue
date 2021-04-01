@@ -1,5 +1,5 @@
 <template>
-  <carousel v-if="renderComponent" class="select-item-slider" :items="renderComponent.length > 3? 4: renderComponent.length" :margin="20" :loop="false" :center="true" :touchDrag="true" :dots="false">
+  <carousel @changed="loadMoreProduct" v-if="renderComponent" class="select-item-slider" :items="renderComponent.length > 3? 4: renderComponent.length" :margin="20" :loop="false" :center="true" :touchDrag="true" :dots="false">
     <template v-for="(product, index) in productListingCarousel">
       <a href="#." ref="products" v-on:click="productDesigns(index)"  :key="product.product_id">
         <Scene :canvas-height="73" :canvas-width="59" :front="{textureUrl: apiBaseUrl+'/'+product.productstyles[0].productdesigns[0].front_design.file_url, modelUrl: apiBaseUrl+'/'+product.productstyles[0].front.file_url}"/>
@@ -36,6 +36,9 @@ export default {
   methods: {
     productDesigns: function (index) {
       this.$emit('designsData', index)
+    },
+    loadMoreProduct:(e) => {
+      console.log(e.item)
     }
   }
 }
