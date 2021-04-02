@@ -1,11 +1,9 @@
 <template>
     <div class="preview-section p-3 d-flex flex-wrap justify-content-center align-items-center" v-if="designs">
       <template v-for="design in designs.productstyles[0].productdesigns">
-        <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
-          <Scene :canvas-width="235" :canvas-height="290" :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ designs.productstyles[0].front.file_url}"/>
-        </div>
-        <div class="image-holder" :key="'back'+design.id">
-
+        <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
+          <Scene v-if="designs.productstyles[0].back" :canvas-width="235" :canvas-height="290" :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ designs.productstyles[0].front.file_url}" :back="{textureUrl: apiBaseUrl+'/'+ design.back_design.file_url, modelUrl: apiBaseUrl+'/'+ designs.productstyles[0].back.file_url}" />
+          <Scene v-else :canvas-width="235" :canvas-height="290" :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ designs.productstyles[0].front.file_url}" />
         </div>
       </template>
     </div>
@@ -31,8 +29,6 @@
     overflow: hidden;
     .image-holder{
       margin: 0 1%;
-      flex: 0 0 48%;
-      max-width: 48%;
       img{
         display: block;
         max-width: 100%;

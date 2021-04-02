@@ -3,7 +3,7 @@ import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faFillDrip, faImage, faRedoAlt, faSearch, faShareAlt, faSwatchbook, faTextHeight, faTimes, faTrashAlt, faUserFriends, faUserSecret } from '@fortawesome/free-solid-svg-icons'
+import { faEyeSlash, faFillDrip, faImage, faRedoAlt, faSearch, faShareAlt, faSwatchbook, faTextHeight, faTimes, faTrashAlt, faUserFriends, faUserSecret } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
@@ -22,6 +22,7 @@ library.add(faSwatchbook)
 library.add(faUserFriends)
 library.add(faShareAlt)
 library.add(faTrashAlt)
+library.add(faEyeSlash)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 

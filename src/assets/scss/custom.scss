@@ -546,17 +546,14 @@ a:hover{color: #219f84;}
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
-        &:after{
-            flex: auto;
-            content: '';
-        }
+        
         .color-box{
             width: 40px;
             height: 40px;
             margin: 0 2px;
             background: #000;
             border-radius: 50%;
-            border: 1px solid #EFF2F4; 
+            border: 1px solid #EFF2F4;
             position: relative;
             margin-bottom: 10px;
             @media only screen and (min-width: 1024px){
@@ -567,7 +564,6 @@ a:hover{color: #219f84;}
                 width: 45px;
                 height: 45px;
             }
-            &:last-child{margin: 0 7px;}
             &:before{
                 position: absolute;
                 content: '';
@@ -598,7 +594,7 @@ a:hover{color: #219f84;}
         }
     }
     .canvas-container{
-        canvas{
+        canvas.lower-canvas{
           position: static !important;
           width: 100% !important;
           height: auto !important;
@@ -639,4 +635,91 @@ a:hover{color: #219f84;}
             border-color: #219F84;
         }
     }
+}
+.roster-section{
+    flex: 0 0 50%;
+    max-width: 50%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 1rem;
+    border-right: 1px solid #EDF2F6;
+    .roster-qty{
+        flex: 0 0 13%;
+        max-width: 13%;
+    }
+    .roster-row{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        flex: 0 0 100%;
+        max-width: 100%;
+        .align-left{
+            flex: 0 0 80%;
+            max-width: 80%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .align-right{
+            flex: 0 0 12%;
+            max-width: 12%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .hide-show{
+            flex: 0 0 20px;
+            max-width: 20px;
+        }
+        .roster-name{
+            flex: 0 0 55%;
+            max-width: 55%;
+        }
+        .shirt-no{
+            flex: 0 0 12%;
+            max-width: 12%;
+        }
+        .shirt-size{
+            flex: 0 0 20%;
+            max-width: 20%;
+        }
+        .qty{
+            flex: 0 0 55%;
+            max-width: 55%;
+        }
+        .remove{
+            a{
+                color: #D53943;
+                font-size: 9px;
+                width: 22px;
+                height: 22px;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: center;
+                background: #F8E1E2;
+                border-radius: 50%;
+            }
+        }
+        input,
+        select{
+            font-size: 14px;
+        }
+        &.button-holder{
+            margin: 20px 0 0;
+            justify-content: center;
+        }
+    }
+}
+.roster-modal{
+    .modal-body{padding: 0;}
+    .modal-title{
+        font-weight: 700;
+        font-size: 30px;
+    }
+    .close{font-size: 2.5rem;}
 }
