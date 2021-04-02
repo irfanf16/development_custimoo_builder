@@ -12,7 +12,7 @@
                   </div>
                   <div class="upload-logo-content">
                     <h3>Upload Logo Image</h3>
-                    <h4>Image Requirments</h4>
+                    <h4>Image Requirements</h4>
                     <p>Need High Res Image</p>
                   </div>
                 </b-button>

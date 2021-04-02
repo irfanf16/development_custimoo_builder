@@ -25,9 +25,9 @@
     public changeDesign(index: number){
       this.productDesignsData.productstyles[0].productdesigns.forEach((design: any, key: number) => {
         if(index == key){
-          design.is_default = 1
+          design.design_show = 1
         }else{
-          design.is_default = 0
+          design.design_show = 0
         }
       })
     }
