@@ -593,15 +593,15 @@ a:hover{color: #219f84;}
             border-color: #E7F4F1;
         }
     }
-    // .canvas-container{
-    //     canvas.lower-canvas{
-    //       position: static !important;
-    //       width: 100% !important;
-    //       height: auto !important;
-    //       margin: 0 !important;
-    //       display: block !important;
-    //     }
-    //   }
+    .canvas-container{
+        canvas.lower-canvas{
+          position: static !important;
+          width: 100% !important;
+          height: auto !important;
+          margin: 0 !important;
+          display: block !important;
+        }
+      }
 }
 .upload-logo-disclaimer{
     .modal-header{
