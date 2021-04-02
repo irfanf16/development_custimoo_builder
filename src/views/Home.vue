@@ -28,7 +28,7 @@
           </div>
         </b-col>
         <b-col cols="3">
-          <ItemToCustomize :productListing="products" @designsData="changeProduct"/>
+          <ItemToCustomize :productListing="products" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts"/>
         </b-col>
       </b-row>
     </b-container>
@@ -56,21 +56,32 @@ import ApiDataService from "@/services/ApiDataService";
 export default class Home extends Vue {
   private products : any[] = []
   private company_id !: string
-  private product_id !: string
-
+  private nextPageUrl !: string
+  public page = '1'
   public designsIndex = 0
 
-  retrieveProducts(): void {
-    this.product_id = '1'
+  public retrieveProducts(): void {
     this.company_id = '1'
-    let param = '?product_id='+this.product_id+'&company_id='+this.company_id
-    ApiDataService.getAll(param)
-      .then((response: any) => {
-        this.products = response.data.products.data;
-      })
-      .catch((e: any) => {
-        console.log(e)
-      });
+
+    if (this.nextPageUrl) {
+      let nextPage = this.nextPageUrl.split('&page=')
+      console.log(nextPage[1])
+      this.page = nextPage[1]
+    }
+
+    let param = '?company_id=' + this.company_id + '&page=' + this.page
+    console.log(param)
+      ApiDataService.getAll(param)
+        .then((response: any) => {
+          this.products = this.products.concat(response.data.products.data)
+          this.nextPageUrl = response.data.products.next_page_url
+          this.$refs.updateCarousel.reRenderCarousel()
+          console.log(response.data.products.current_page)
+        })
+        .catch((e: any) => {
+          console.log(e)
+        });
+    // }
   }
 
   public changeProduct(designsIndex :number){

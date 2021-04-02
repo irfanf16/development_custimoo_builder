@@ -4,7 +4,7 @@
         <div class="customization-nav-area">
             <Search />
         </div>
-        <SelectItemCarousel :productListingCarousel="productListing" @designsData="setDesigns" />
+        <SelectItemCarousel :productListingCarousel="productListing" ref="updateCarousel"  @designsData="setDesigns" @retrieveProductsC="retrieveProductsC" />
         <h2 class="fw-bold mt-5 mb-2 fz-18">Designs Available</h2>
         <DesignAvailable :canvas-width="235" :canvas-height="290" :productDesignsData="productListing[designIndex]" />
     </div>
@@ -31,6 +31,13 @@ export default class ItemToCustomize extends Vue {
   public setDesigns(designIndex :number){
     this.designIndex = designIndex
     this.$emit('designsData', designIndex)
+  }
+  public retrieveProductsC(index :number){
+    this.$emit('retrieveProducts', index)
+  }
+  public reRenderCarousel(): void{
+    console.log('rendered!!')
+    this.$refs.updateCarousel.reRender()
   }
 }
 </script>

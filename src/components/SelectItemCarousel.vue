@@ -23,22 +23,29 @@ export default {
     }
   },
   created () {
-    const self = this
-    setTimeout(() => {
-      self.renderComponent = false;
-
-      self.$nextTick(() => {
-        // Add the component back in
-        self.renderComponent = true;
-      });
-    }, 1000)
+    this.reRender()
   },
   methods: {
     productDesigns: function (index) {
       this.$emit('designsData', index)
     },
-    loadMoreProduct:(e) => {
+    loadMoreProduct: function (e) {
       console.log(e.item)
+      if(e.item.index+1 == e.item.count){
+        console.log(e.item.index)
+        this.$emit('retrieveProductsC', 1)
+      }
+    },
+    reRender: function () {
+        const self = this
+        setTimeout(() => {
+          self.renderComponent = false;
+
+          self.$nextTick(() => {
+            // Add the component back in
+            self.renderComponent = true;
+          });
+        }, 1000)
     }
   }
 }
