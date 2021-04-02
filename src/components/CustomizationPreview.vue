@@ -19,13 +19,6 @@
     components: {
       Scene
     },
-    created() {
-      console.log(this.designs)
-      const self = this
-      setTimeout(function (){
-        console.log(self.designs)
-      }, 1000)
-    }
   })
   export default class CustomizationPreview extends Vue {
     @Prop({required: true}) designs!: any

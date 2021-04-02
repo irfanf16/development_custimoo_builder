@@ -25,8 +25,8 @@ export default class Scene extends Vue {
   @Prop({required: false, default: () => { return [{url: './img/images/logo.png', width: 100, height: 100, x: 100, y: 117}]}}) readonly logos !: [Record<string, any>];
   @Prop({required: false, default: 235}) readonly mainCanvasWidth!: number;
   @Prop({required: false, default: 290}) readonly mainCanvasHeight!: number;
-  @Prop({required: false, default: 400}) readonly canvasWidth!: number;
-  @Prop({required: false, default: 400}) readonly canvasHeight!: number;
+  @Prop({required: false, default: 235}) readonly canvasWidth!: number;
+  @Prop({required: false, default: 290}) readonly canvasHeight!: number;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -42,7 +42,7 @@ export default class Scene extends Vue {
 
     let model: any
     fabric.Image.fromURL(ImageData.modelUrl,  (img: any) => {
-      img.scaleToWidth(canvas.getWidth() - 10).scaleToHeight(canvas.getHeight() - 10).set({
+      img.scaleToWidth(canvas.getWidth() - 10).set({
         hasControls: false,
         selectable: false,
         evented: false,
@@ -55,7 +55,7 @@ export default class Scene extends Vue {
     let texture: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
       const img = fabric.util.groupSVGElements(objects, options) as Group
-      img.scaleToWidth(canvas.getWidth() - 10).scaleToHeight(canvas.getHeight() - 10).set({
+      img.scaleToWidth(canvas.getWidth() - 10).set({
         hasControls: false,
         selectable: false,
         evented: false,
@@ -70,9 +70,9 @@ export default class Scene extends Vue {
       img.center().setCoords();
       texture = img
       if(side === 'back'){
-        self.frontTexture = texture
-      }else{
         self.backTexture = texture
+      }else{
+        self.frontTexture = texture
       }
     })
 

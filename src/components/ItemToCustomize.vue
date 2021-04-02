@@ -6,7 +6,7 @@
         </div>
         <SelectItemCarousel :productListingCarousel="productListing" @designsData="setDesigns" />
         <h2 class="fw-bold mt-5 mb-2 fz-18">Designs Available</h2>
-        <DesignAvailable :productDesignsData="productListing[designIndex]" />
+        <DesignAvailable :canvas-width="235" :canvas-height="290" :productDesignsData="productListing[designIndex]" />
     </div>
 </template>
 
