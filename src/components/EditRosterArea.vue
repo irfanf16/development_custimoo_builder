@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-button v-b-modal.modal-scrollable>Launch scrolling modal</b-button>
+        <b-button v-b-modal.modal-scrollable>Edit Roster</b-button>
 
         <b-modal id="modal-scrollable" scrollable title="Roster" content-class="roster-modal">
             <p class="my-4" v-for="i in 20" :key="i">

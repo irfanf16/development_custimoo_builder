@@ -509,6 +509,12 @@ a:hover{color: #219f84;}
             }
         }
     }
+    .team-roaster-area{
+        .btn{
+            display: block;
+            width: 100%;
+        }
+    }
 }
 .color-holder{
     margin: 20px 0 0;
@@ -582,6 +588,7 @@ a:hover{color: #219f84;}
     }
 }
 .customization-area{
+    width: 100%;
     .continue-btn-holder{
         .btn{font-weight: 600;}
         .back-btn{
@@ -590,6 +597,15 @@ a:hover{color: #219f84;}
             border-color: #E7F4F1;
         }
     }
+    .canvas-container{
+        canvas{
+          position: static !important;
+          width: 100% !important;
+          height: auto !important;
+          margin: 0 !important;
+          display: block !important;
+        }
+      }
 }
 .upload-logo-disclaimer{
     .modal-header{
