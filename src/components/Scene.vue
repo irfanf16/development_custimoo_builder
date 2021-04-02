@@ -1,7 +1,7 @@
 <template>
   <div style="display: flex">
-    <canvas ref="front" id="front" className="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
-    <canvas v-if="back" ref="back" id="back" className="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
   </div>
 </template>
 
