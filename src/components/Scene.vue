@@ -27,6 +27,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 290}) readonly mainCanvasHeight!: number;
   @Prop({required: false, default: 235}) readonly canvasWidth!: number;
   @Prop({required: false, default: 290}) readonly canvasHeight!: number;
+  @Prop({required: false, default: false}) readonly haveControls!: boolean;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -79,36 +80,44 @@ export default class Scene extends Vue {
     let logoObjects: any[] =[]
     const self = this
 
+    let logosLoaded = true
     if(this.logos) {
-      this.logos.forEach((logo: Record<any, any>) => {
+      logosLoaded = false
+      this.logos.forEach((logo: Record<any, any>, index: number) => {
         fabric.Image.fromURL(logo.url, (img: any) => {
           img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
             .scaleToHeight(canvas.getHeight() / self.mainCanvasHeight * logo.height)
             .set({
               left: canvas.getWidth() / self.mainCanvasWidth * logo.x,
               top: canvas.getHeight() / self.mainCanvasHeight * logo.y,
-              selectable: true,
-              hasControls: true,
-              hasBorders: true,
+              selectable: self.haveControls,
+              hasControls: self.haveControls,
+              hasBorders: self.haveControls,
               evented: true,
               globalCompositeOperation: 'source-atop'
             })
 
           logoObjects.push(img)
+          if(index + 1 == self.logos.length){
+            logosLoaded = true
+          }
         })
       })
     }
 
-    setTimeout(() => {
-      canvas.add(texture)
-      logoObjects.forEach((logoObject)=> {
-        canvas.add(logoObject)
-      })
-      canvas.add(model)
+    const timer = setInterval(() => {
+      if(model && texture && logosLoaded) {
+        canvas.add(texture)
+        logoObjects.forEach((logoObject) => {
+          canvas.add(logoObject)
+        })
+        canvas.add(model)
 
-      canvas.viewportCenterObject(texture)
-      canvas.viewportCenterObject(model)
-      canvas.renderAll()
+        canvas.viewportCenterObject(texture)
+        canvas.viewportCenterObject(model)
+        canvas.renderAll()
+        clearInterval(timer)
+      }
     }, 1000)
 
   }
