@@ -128,7 +128,7 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
 
   public searchProducts(){
     this.hasProducts = true
-    let url = '/list/products?company_id=1';
+    let url = '/list/products?';
     if(this.search){
       url += '&search=' + this.search
     }
