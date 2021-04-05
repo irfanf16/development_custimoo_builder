@@ -4,11 +4,9 @@
             <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
                 <b-nav-item class="search-opener"><b-button v-b-toggle.collapse-1 variant="primary"><font-awesome-icon :icon="['fas', 'search']" /></b-button></b-nav-item>
                 <b-nav-item>All</b-nav-item>
-                <b-nav-item>Hockey</b-nav-item>
-                <b-nav-item>Baseball</b-nav-item>
-                <b-nav-item>Soccer</b-nav-item>
+                <b-nav-item v-for="category in categoryListing" :key="category.id">{{ category.category_name.toUpperCase() }}</b-nav-item>
             </b-nav>
-            
+
             <b-collapse id="collapse-1" class="mt-2">
                 <b-card>
                     <b-nav-form>
@@ -22,9 +20,10 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from 'vue-property-decorator'
+import {Component, Prop, Vue} from 'vue-property-decorator'
     @Component<Search>({})
     export default class Search extends Vue {
+      @Prop({required: true}) categoryListing!: any
         data() {
             return {
                 types: [

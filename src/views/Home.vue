@@ -28,7 +28,7 @@
           </div>
         </b-col>
         <b-col cols="3">
-          <ItemToCustomize :productListing="products" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts"/>
+          <ItemToCustomize :productListing="products" :categoryListing="categories" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts"/>
         </b-col>
       </b-row>
     </b-container>
@@ -55,6 +55,7 @@ import ApiDataService from "@/services/ApiDataService";
 
 export default class Home extends Vue {
   private products : any[] = []
+  private categories : any[] = []
   private company_id !: string
   private nextPageUrl !: string
   public page = '1'
@@ -74,8 +75,10 @@ export default class Home extends Vue {
       ApiDataService.getAll(param)
         .then((response: any) => {
           this.products = this.products.concat(response.data.products.data)
+          this.categories = this.categories.concat(response.data.categories)
           this.nextPageUrl = response.data.products.next_page_url
-          this.$refs.updateCarousel.reRenderCarousel()
+          const updateCarousel = this.$refs.updateCarousel as ItemToCustomize
+          updateCarousel.reRenderCarousel()
           console.log(response.data.products.current_page)
         })
         .catch((e: any) => {
