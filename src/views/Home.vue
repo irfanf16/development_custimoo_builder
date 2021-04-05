@@ -3,7 +3,7 @@
     <b-container fluid>
       <b-row>
         <b-col cols="3" class="text-left border-right py-5 overflow-hidden">
-            <ChooseColor />
+            <ChooseColor :colors="colors"/>
             <div class="upload-logo-opener">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
@@ -41,6 +41,7 @@ import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
 import http from "../httpCommon"
+import axios from "axios";
 
 @Component<Home>({
   components: {
@@ -49,20 +50,43 @@ import http from "../httpCommon"
     ItemToCustomize
   },
   mounted() {
+    this.instance = axios.create({
+      baseURL: "http://api.custimoo.com/api",
+      headers: {
+        "Content-type": "application/json"
+      }
+    });
+    this.login()
     this.retrieveProducts()
+    this.getCategoriesColors()
   }
 })
 
 export default class Home extends Vue {
   private products : any[] = []
   private categories : any[] = []
+  private colors : any[] = []
   private nextPageUrl !: string
   public designsIndex = 0
   public hasProducts = true
-  public category_id !: number
+  public category_id !: string
   public search = ''
+  public default_color = true
+  public product_id !: number
+  public provider_id = 'oVXYIzKY'
+  private instance !: any
 
-public retrieveProducts(url = '/list/products?company_id=1', searchCall = false): void {
+  async login(url = '/company/login'): void {
+    await this.instance.post(url, {
+      provider_id: this.provider_id
+    }).then((response: any) => {
+      localStorage.setItem('access_token', response.data.accessToken)
+    }).catch((e: any) => {
+      console.log(e)
+    });
+  }
+
+public retrieveProducts(url = '/list/products', searchCall = false): void {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -73,7 +97,7 @@ public retrieveProducts(url = '/list/products?company_id=1', searchCall = false)
     if(this.hasProducts) {
       http.get(url).then((response: any) => {
         this.products = this.products.concat(response.data.products.data)
-        this.categories = response.data.categories
+        // this.categories = response.data.categories
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
@@ -82,6 +106,24 @@ public retrieveProducts(url = '/list/products?company_id=1', searchCall = false)
         console.log(e)
       });
     }
+  }
+
+  public getCategoriesColors(url = '/product/colors?', defaultColor = true): void {
+    if(defaultColor){
+      url += 'default_color=' + this.default_color
+    }
+    else if (this.product_id){
+      url += 'product_id=' + this.product_id
+    }
+
+      http.get(url).then((response: any) => {
+        console.log(response.data.data.color)
+        this.categories = response.data.data.categories
+        this.colors = response.data.data.color.colors
+      }).catch((e: any) => {
+        console.log(e)
+      });
+    // }
   }
 
   public searchProducts(){
@@ -95,7 +137,7 @@ public retrieveProducts(url = '/list/products?company_id=1', searchCall = false)
     }
     this.retrieveProducts(url, true)
   }
-  public getSearchQuery(param, type){
+  public getSearchQuery(param: string, type: string){
     if(type == 'search'){
       this.search = param
     }

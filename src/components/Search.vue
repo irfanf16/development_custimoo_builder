@@ -34,7 +34,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
       public search = ''
       @Prop({required: true}) categoryListing!: any
 
-      public searchProducts(param, type){
+      public searchProducts(param: string, type: string){
         this.$emit('search', param, type)
       }
     }
