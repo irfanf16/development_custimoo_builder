@@ -40,7 +40,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
-import ApiDataService from "@/services/ApiDataService";
+import http from "../httpCommon"
 
 @Component<Home>({
   components: {
@@ -55,32 +55,26 @@ import ApiDataService from "@/services/ApiDataService";
 
 export default class Home extends Vue {
   private products : any[] = []
-  private company_id !: string
   private nextPageUrl !: string
-  public page = '1'
   public designsIndex = 0
+  public hasProducts = true
 
-  public retrieveProducts(): void {
-    this.company_id = '1'
-
+  public retrieveProducts(url = '/list/products?company_id=1'): void {
     if (this.nextPageUrl) {
-      let nextPage = this.nextPageUrl.split('&page=')
-      console.log(nextPage[1])
-      this.page = nextPage[1]
+      url = this.nextPageUrl
     }
 
-    let param = '?company_id=' + this.company_id + '&page=' + this.page
-    console.log(param)
-      ApiDataService.getAll(param)
-        .then((response: any) => {
-          this.products = this.products.concat(response.data.products.data)
-          this.nextPageUrl = response.data.products.next_page_url
-          console.log(response.data.products.current_page)
-        })
-        .catch((e: any) => {
-          console.log(e)
-        });
-    // }
+    if(this.hasProducts) {
+      http.get(url).then((response: any) => {
+        this.products = this.products.concat(response.data.products.data)
+        this.nextPageUrl = response.data.products.next_page_url
+        if (!response.data.products.next_page_url) {
+          this.hasProducts = false
+        }
+      }).catch((e: any) => {
+        console.log(e)
+      });
+    }
   }
 
   public changeProduct(designsIndex :number){
