@@ -36,6 +36,10 @@ export default class ItemToCustomize extends Vue {
   public retrieveProductsC(index :number){
     this.$emit('retrieveProducts', index)
   }
+  public reRenderCarousel(): void{
+    console.log('rendered!!')
+    // this.$refs.updateCarousel.reRender()
+  }
 }
 </script>
 
