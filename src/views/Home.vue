@@ -75,7 +75,6 @@ export default class Home extends Vue {
         .then((response: any) => {
           this.products = this.products.concat(response.data.products.data)
           this.nextPageUrl = response.data.products.next_page_url
-          this.$refs.updateCarousel.reRenderCarousel()
           console.log(response.data.products.current_page)
         })
         .catch((e: any) => {

@@ -1,5 +1,5 @@
 <template>
-  <carousel @changed="loadMoreProduct" v-if="renderComponent" class="select-item-slider" :items="renderComponent.length > 3? 4: renderComponent.length" :margin="20" :loop="false" :center="true" :touchDrag="true" :dots="false">
+  <slither-slider @changed="loadMoreProduct" v-if="productListingCarousel.length" :options="{numberOfSlides: productListingCarousel.length > 3? 4: 1, loop: false, dots: false}" class="select-item-slider">
     <template v-for="(product, index) in productListingCarousel">
       <a href="#." ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">
@@ -9,16 +9,18 @@
         </template>
       </a>
     </template>
-  </carousel>
+  </slither-slider>
 </template>
 
 <script>
 
-import carousel from 'vue-owl-carousel'
+import SlitherSlider from 'slither-slider';
 import Scene from '@/components/Scene.vue'
+import Vue from 'vue'
+Vue.use(SlitherSlider)
 
 export default {
-  components: { carousel, Scene },
+  components: { Scene },
   props:['productListingCarousel'],
   data: function () {
     return {
@@ -26,30 +28,14 @@ export default {
       renderComponent : true
     }
   },
-  created () {
-    this.reRender()
-  },
   methods: {
     productDesigns: function (index) {
       this.$emit('designsData', index)
     },
-    loadMoreProduct: function (e) {
-      console.log(e.item)
-      if(e.item.index+1 == e.item.count){
-        console.log(e.item.index)
+    loadMoreProduct: function (currentIndex) {
+      if(this.productListingCarousel.length == currentIndex + 1){
         this.$emit('retrieveProductsC', 1)
       }
-    },
-    reRender: function () {
-        const self = this
-        setTimeout(() => {
-          self.renderComponent = false;
-
-          self.$nextTick(() => {
-            // Add the component back in
-            self.renderComponent = true;
-          });
-        }, 1000)
     }
   }
 }
