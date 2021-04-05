@@ -2,7 +2,7 @@
     <div>
         <b-button v-b-modal.modal-scrollable>Edit Roster</b-button>
 
-        <b-modal id="modal-scrollable" scrollable title="Roster" content-class="roster-modal" size="xl">
+        <b-modal id="modal-scrollable" scrollable title="Roster" content-class="roster-modal" size="xl" footer-class="hide-modal-footer">
             <div class="d-flex flex-wrap justify-content-between">
                 <div class="roster-section">
                     <div class="roster-row mb-2">
@@ -478,13 +478,17 @@
                 </div>
                 <div class="roster-preview-area">
                     <div class="roster-template-area">
-                        <button class="btn btn-secondary fw-bold pl-5 pr-5">Download Roster Template</button>
-                        <button class="btn btn-secondary fw-bold pl-5 pr-5">Upload Roster Template</button>
+                        <button class="btn btn-secondary fw-bold">Download Roster Template <a href="#." v-b-tooltip.hover title="Enter roster in excel file"><font-awesome-icon :icon="['fas', 'info-circle']" /></a></button>
+                        <button class="btn btn-secondary fw-bold">Upload Roster Template <a href="#." v-b-tooltip.hover title="Upload the template here to populate the roster"><font-awesome-icon :icon="['fas', 'info-circle']" /></a></button>
                     </div>
                     <CustomizationPreview :designs="products[designsIndex]" />
+                    <OrderDetails />
                 </div>
             </div>
         </b-modal>
+        <div class="team-order-details">
+            <OrderDetails />
+        </div>
     </div>
 </template>
 
@@ -492,11 +496,13 @@
     
     import { Component, Vue } from 'vue-property-decorator'
     import CustomizationPreview from '@/components/CustomizationPreview.vue'
+    import OrderDetails from '@/components/OrderDetails.vue'
     import ApiDataService from "@/services/ApiDataService";
 
     @Component<EditRosterArea>({
         components: {
-            CustomizationPreview
+            CustomizationPreview,
+            OrderDetails
         },
         mounted() {
             this.retrieveProducts()

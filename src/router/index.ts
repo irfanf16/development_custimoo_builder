@@ -3,6 +3,7 @@ import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
 import ViewScene from '../views/ViewScene.vue'
 import CustomizationProcess from '../views/CustomizationProcess.vue'
+import ConfirmOrder from '../views/ConfirmOrder.vue'
 
 Vue.use(VueRouter)
 
@@ -21,6 +22,11 @@ const routes: Array<RouteConfig> = [
     path: '/customization-process',
     name: 'CustomizationProcess',
     component: CustomizationProcess
+  },
+  {
+    path: '/confirm-order',
+    name: 'ConfirmOrder',
+    component: ConfirmOrder
   },
   {
     path: '/about',

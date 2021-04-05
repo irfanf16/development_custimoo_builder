@@ -185,10 +185,10 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            &:after{
-                flex: auto;
-                content: '';
-            }
+            // &:after{
+            //     flex: auto;
+            //     content: '';
+            // }
             .color-box{
                 width: 40px;
                 height: 40px;
@@ -206,7 +206,7 @@
                     width: 45px;
                     height: 45px;
                 }
-                &:last-child{margin: 0 7px;}
+                // &:last-child{margin: 0 7px;}
                 &:before{
                     position: absolute;
                     content: '';
