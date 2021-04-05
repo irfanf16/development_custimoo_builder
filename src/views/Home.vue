@@ -79,6 +79,7 @@ export default class Home extends Vue {
           this.nextPageUrl = response.data.products.next_page_url
           const updateCarousel = this.$refs.updateCarousel as ItemToCustomize
           updateCarousel.reRenderCarousel()
+
           console.log(response.data.products.current_page)
         })
         .catch((e: any) => {
