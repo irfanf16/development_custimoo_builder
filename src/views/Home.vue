@@ -28,7 +28,7 @@
           </div>
         </b-col>
         <b-col cols="3">
-          <ItemToCustomize :productListing="products" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts"/>
+          <ItemToCustomize :productListing="products" :categories="categories" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts"/>
         </b-col>
       </b-row>
     </b-container>
@@ -55,9 +55,12 @@ import http from "../httpCommon"
 
 export default class Home extends Vue {
   private products : any[] = []
+  private categories : any[] = []
   private nextPageUrl !: string
   public designsIndex = 0
   public hasProducts = true
+  public category_id !: number
+  public search !: string
 
   public retrieveProducts(url = '/list/products?company_id=1'): void {
     if (this.nextPageUrl) {
@@ -67,6 +70,7 @@ export default class Home extends Vue {
     if(this.hasProducts) {
       http.get(url).then((response: any) => {
         this.products = this.products.concat(response.data.products.data)
+        this.categories = response.data.categories
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
@@ -75,6 +79,17 @@ export default class Home extends Vue {
         console.log(e)
       });
     }
+  }
+
+  public searchProducts(){
+    let url = '/list/products?company_id=1';
+    if(this.search){
+      url += '&search=' + this.search
+    }
+    if(this.category_id){
+      url += '&category_id=' + this.category_id
+    }
+    this.retrieveProducts(url)
   }
 
   public changeProduct(designsIndex :number){

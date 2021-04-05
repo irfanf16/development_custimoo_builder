@@ -2,7 +2,7 @@
     <div class="item-to-customize text-left py-5">
         <h2 class="fw-bold mb-2 fz-18">Select Item to Customize</h2>
         <div class="customization-nav-area">
-            <Search />
+            <Search :categoryListing="categories"/>
         </div>
         <SelectItemCarousel :productListingCarousel="productListing" ref="updateCarousel"  @designsData="setDesigns" @retrieveProductsC="retrieveProductsC" />
         <h2 class="fw-bold mt-5 mb-2 fz-18">Designs Available</h2>
@@ -27,6 +27,7 @@ export default class ItemToCustomize extends Vue {
   public designIndex = 0
 
   @Prop({required: true}) productListing!: any
+  @Prop({required: true}) categories!: any
 
   public setDesigns(designIndex :number){
     this.designIndex = designIndex
@@ -34,6 +35,10 @@ export default class ItemToCustomize extends Vue {
   }
   public retrieveProductsC(index :number){
     this.$emit('retrieveProducts', index)
+  }
+  public reRenderCarousel(): void{
+    console.log('rendered!!')
+    // this.$refs.updateCarousel.reRender()
   }
 }
 </script>
