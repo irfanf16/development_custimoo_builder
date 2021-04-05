@@ -1,13 +1,14 @@
 <template>
-    <div class="item-to-customize text-left py-5">
-        <h2 class="fw-bold mb-2 fz-18">Select Item to Customize</h2>
-        <div class="customization-nav-area">
-            <Search :categoryListing="categories"/>
-        </div>
-        <SelectItemCarousel :productListingCarousel="productListing" ref="updateCarousel"  @designsData="setDesigns" @retrieveProductsC="retrieveProductsC" />
-        <h2 class="fw-bold mt-5 mb-2 fz-18">Designs Available</h2>
-        <DesignAvailable :productDesignsData="productListing[designIndex]" />
+  <div class="item-to-customize text-left py-5">
+    <h2 class="fw-bold mb-2 fz-18">Select Item to Customize</h2>
+    <div class="customization-nav-area">
+      <Search :categoryListing="categories" @search="searchProduct"/>
     </div>
+    <SelectItemCarousel :productListingCarousel="productListing" ref="updateCarousel" @designsData="setDesigns"
+                        @retrieveProductsC="retrieveProductsC"/>
+    <h2 class="fw-bold mt-5 mb-2 fz-18">Designs Available</h2>
+    <DesignAvailable :productDesignsData="productListing[designIndex]"/>
+  </div>
 </template>
 
 <script lang="ts">
@@ -35,6 +36,9 @@ export default class ItemToCustomize extends Vue {
   }
   public retrieveProductsC(index :number){
     this.$emit('retrieveProducts', index)
+  }
+  public searchProduct(param, type){
+    this.$emit('search', param, type)
   }
   public reRenderCarousel(): void{
     console.log('rendered!!')

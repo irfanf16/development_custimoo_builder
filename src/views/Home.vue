@@ -28,7 +28,7 @@
           </div>
         </b-col>
         <b-col cols="3">
-          <ItemToCustomize :productListing="products" :categories="categories" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts"/>
+          <ItemToCustomize :productListing="products" :categories="categories" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
         </b-col>
       </b-row>
     </b-container>
@@ -60,10 +60,10 @@ export default class Home extends Vue {
   public designsIndex = 0
   public hasProducts = true
   public category_id !: number
-  public search !: string
+  public search = ''
 
-  public retrieveProducts(url = '/list/products?company_id=1'): void {
-    if (this.nextPageUrl) {
+public retrieveProducts(url = '/list/products?company_id=1', searchCall = false): void {
+    if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
 
@@ -82,6 +82,8 @@ export default class Home extends Vue {
   }
 
   public searchProducts(){
+    this.hasProducts = true
+    console.log(this.search)
     let url = '/list/products?company_id=1';
     if(this.search){
       url += '&search=' + this.search
@@ -89,9 +91,18 @@ export default class Home extends Vue {
     if(this.category_id){
       url += '&category_id=' + this.category_id
     }
-    this.retrieveProducts(url)
+    console.log(url)
+    this.retrieveProducts(url, true)
   }
-
+  public getSearchQuery(param, type){
+    if(type == 'search'){
+      this.search = param
+    }
+    else{
+      this.category_id = param
+    }
+    this.searchProducts()
+  }
   public changeProduct(designsIndex :number){
     this.designsIndex = designsIndex
   }
