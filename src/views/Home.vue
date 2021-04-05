@@ -66,6 +66,9 @@ public retrieveProducts(url = '/list/products?company_id=1', searchCall = false)
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
+    if(searchCall){
+      this.products = []
+    }
 
     if(this.hasProducts) {
       http.get(url).then((response: any) => {
@@ -83,7 +86,6 @@ public retrieveProducts(url = '/list/products?company_id=1', searchCall = false)
 
   public searchProducts(){
     this.hasProducts = true
-    console.log(this.search)
     let url = '/list/products?company_id=1';
     if(this.search){
       url += '&search=' + this.search
@@ -91,7 +93,6 @@ public retrieveProducts(url = '/list/products?company_id=1', searchCall = false)
     if(this.category_id){
       url += '&category_id=' + this.category_id
     }
-    console.log(url)
     this.retrieveProducts(url, true)
   }
   public getSearchQuery(param, type){
