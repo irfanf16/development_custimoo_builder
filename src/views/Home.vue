@@ -3,7 +3,7 @@
     <b-container fluid>
       <b-row>
         <b-col cols="3" class="text-left border-right py-5 overflow-hidden">
-            <ChooseColor :colors="colors"/>
+          <ChooseColor :colors="colors"/>
             <div class="upload-logo-opener">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
@@ -120,14 +120,12 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
       url += 'product_id=' + this.product_id
     }
 
-      http.get(url).then((response: any) => {
-        console.log(response.data.data.color)
-        this.categories = response.data.data.categories
-        this.colors = response.data.data.color.colors
-      }).catch((e: any) => {
-        console.log(e)
-      });
-    // }
+    http.get(url).then((response: any) => {
+      this.categories = response.data.data.categories
+      this.colors = JSON.parse(response.data.data.color.color_text)
+    }).catch((e: any) => {
+      console.log(e)
+    });
   }
 
   public searchProducts(){

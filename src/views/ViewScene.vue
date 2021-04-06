@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Scene :canvas-height="400" :canvas-width="400" :front="{textureUrl: './img/images/HoodieDesign_2.svg', modelUrl: './img/images/HoodieTemplateFront.png'}"/>
+    <Scene fill-color="#001234" :front="{textureUrl: 'http://api.custimoo.com/files/1/product/texture/ChelseaAway2.svg', modelUrl: 'http://api.custimoo.com/files/1/product/base_model/LongSleeve%20details%20layer.png'}"/>
   </div>
 </template>
 
