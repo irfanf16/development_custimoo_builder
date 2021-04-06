@@ -3,23 +3,27 @@
     <b-container fluid>
       <b-row>
         <b-col cols="3" class="text-left border-right py-5 overflow-hidden">
-            <ChooseColor :colors="colors"/>
-            <div class="upload-logo-opener">
-                <b-button v-b-modal.modal-center>
-                  <div class="upload-box">
-                    <div class="icon-holder"><font-awesome-icon :icon="['fas', 'image']" /></div>
-                    Upload Logo
-                  </div>
-                  <div class="upload-logo-content">
-                    <h3>Upload Logo Image</h3>
-                    <h4>Image Requirements</h4>
-                    <p>Need High Res Image</p>
-                  </div>
-                </b-button>
-                <b-modal ok-title="Confirm and Upload logo" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
-                    <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
-                </b-modal>
-            </div>
+          <ChooseColor :colors="colors"/>
+          <div class="upload-logo-opener">
+            <b-button v-b-modal.modal-center>
+              <div class="upload-box">
+                <div class="icon-holder">
+                  <font-awesome-icon :icon="['fas', 'image']"/>
+                </div>
+                Upload Logo
+              </div>
+              <div class="upload-logo-content">
+                <h3>Upload Logo Image</h3>
+                <h4>Image Requirements</h4>
+                <p>Need High Res Image</p>
+              </div>
+            </b-button>
+            <b-modal ok-title="Confirm and Upload logo" content-class="upload-logo-disclaimer" id="modal-center"
+                     centered title="Upload Logo">
+              <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws.
+                You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
+            </b-modal>
+          </div>
         </b-col>
         <b-col cols="6" class="border-right d-flex flex-wrap align-items-center h-100vh justify-content-center">
           <div class="customization-area p-5">
