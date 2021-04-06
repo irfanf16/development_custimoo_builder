@@ -28,6 +28,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 235}) readonly canvasWidth!: number;
   @Prop({required: false, default: 290}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly haveControls!: boolean;
+  @Prop({required: false}) readonly fillColor!: string;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -93,7 +94,7 @@ export default class Scene extends Vue {
               selectable: self.haveControls,
               hasControls: self.haveControls,
               hasBorders: self.haveControls,
-              evented: true,
+              evented: self.haveControls,
               globalCompositeOperation: 'source-atop'
             })
 
@@ -122,22 +123,13 @@ export default class Scene extends Vue {
 
   }
 
-  // public changeColor() {
-  //   this.objFront.getObjects().forEach(function(e) {
-  //
-  //     if(i >= myObj.colors.length){
-  //       i = 0;
-  //     }
-  //     //console.log(e);
-  //     //console.log(i);
-  //     //console.log(myObj.colors);
-  //     color = myObj.colors[i].color;
-  //
-  //     e.set('fill', color);
-  //
-  //     i++;
-  //   });
-  // }
+  public changeColor() {
+    const self = this
+    console.log(this.frontTexture)
+    this.frontTexture.getObjects().forEach(function(e: Record<any, any>) {
+      e.set('fill', self.fillColor);
+    });
+  }
 }
 </script>
 
