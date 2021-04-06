@@ -2,7 +2,8 @@
     <div class="customization-preview-process">
       <header class="preview-area-header py-4">
         <div class="buttons-preview text-left">
-          <b-button variant="outline-secondary">Locker room</b-button>
+          <b-button variant="outline-secondary" v-b-modal.modal-center>Locker room</b-button>
+          <LockerRoomModal />
           <b-button variant="outline-secondary">Save to locker room</b-button>
           <b-button variant="outline-secondary">Buy Now</b-button>
         </div>
@@ -26,7 +27,11 @@
 
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator'
+    import LockerRoomModal from '@/components/LockerRoomModal.vue'
 @Component<CustomizationPreviewProcess>({
+  components: {
+    LockerRoomModal
+  }
 })
     export default class CustomizationPreviewProcess extends Vue {}
 </script>
