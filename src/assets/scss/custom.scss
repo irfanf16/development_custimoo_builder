@@ -151,6 +151,7 @@ a:hover{color: #219f84;}
 
     }
 }
+.confirm-order-area,
 .customization-tabs{
     margin: 0 -15px;
     .nav-tabs{
@@ -607,6 +608,7 @@ a:hover{color: #219f84;}
         }
     }
 }
+
 .customization-area{
     width: 100%;
     padding-bottom: 20px;
@@ -838,6 +840,25 @@ a:hover{color: #219f84;}
                 justify-content: space-between;
                 margin: 0 0 10px;
             }
+        }
+    }
+}
+.order-details-holder{
+    .order-details{
+        .order-row{
+            .btn{display: none;}
+        }
+    }
+}
+
+.lockerroom-modal{
+    .modal-title{
+        font-size: 30px;
+        font-weight: 700;
+    }
+    .modal-header{
+        .close{
+            font-size: 30px;
         }
     }
 }
