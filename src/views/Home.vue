@@ -116,14 +116,12 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
       url += 'product_id=' + this.product_id
     }
 
-      http.get(url).then((response: any) => {
-        console.log(response.data.data.color)
-        this.categories = response.data.data.categories
-        this.colors = response.data.data.color.colors
-      }).catch((e: any) => {
-        console.log(e)
-      });
-    // }
+    http.get(url).then((response: any) => {
+      this.categories = response.data.data.categories
+      this.colors = JSON.parse(response.data.data.color.color_text)
+    }).catch((e: any) => {
+      console.log(e)
+    });
   }
 
   public searchProducts(){
