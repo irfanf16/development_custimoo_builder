@@ -4,7 +4,7 @@
         <div class="choose-color d-flex flex-wrap justify-content-between">
             <a href="#" v-on:click="showColor()">
                 <div>
-                    <div class="color-circle"></div>
+                    <div class="color-circle" :style="{ background: '#f00 url(' + colorImage + ') no-repeat 50% 50% / cover' }"></div>
                     <strong>Color One</strong>
                 </div>
             </a>
@@ -72,6 +72,8 @@
         public showColor() {
             this.colorOneActive = !this.colorOneActive
         }
+
+        public colorImage = '/img/images/color-placeholder.png'
         
     }
 </script>
@@ -131,7 +133,6 @@
             border-radius: 50%;
             width: 52px;
             height: 52px;
-            background: #FFC658;
             border: 1px solid #EFF2F4;
             position: relative;
             margin: 0 auto 12px;
