@@ -10,19 +10,19 @@
             </a>
             <a href="#" v-on:click="showColor()">
                 <div>
-                    <div class="color-circle"></div>
+                    <div class="color-circle" :style="{ background: '#f00' }"></div>
                     <strong>Color One</strong>
                 </div>
             </a>
             <a href="#" v-on:click="showColor()">
                 <div>
-                    <div class="color-circle"></div>
+                    <div class="color-circle" :style="{ background: '#f00 url(' + colorImage + ') no-repeat 50% 50% / cover' }"></div>
                     <strong>Color One</strong>
                 </div>
             </a>
             <a href="#" v-on:click="showColor()">
                 <div>
-                    <div class="color-circle"></div>
+                    <div class="color-circle" :style="{ background: '#f00 url(' + colorImage + ') no-repeat 50% 50% / cover' }"></div>
                     <strong>Color One</strong>
                 </div>
             </a>
