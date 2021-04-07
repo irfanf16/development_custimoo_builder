@@ -646,9 +646,19 @@ a:hover{color: #219f84;}
         line-height: 26px;
         p{margin: 0;}
         a{color: #219F84;}
+        .upload-logo-buttons{
+            padding: 1rem 2rem;
+            .btn-cancel{
+                background: #E7F4F1;
+                color: #219F84;
+                margin-right: 10px;
+                border-color: #E7F4F1;
+            }
+        }
     }
     .modal-footer{
         justify-content: center;
+        display: none;
     }
     .modal-footer{
         .btn-secondary{
@@ -859,6 +869,71 @@ a:hover{color: #219f84;}
     .modal-header{
         .close{
             font-size: 30px;
+        }
+    }
+    .modal-body{
+        padding: 2rem 1rem;
+    }
+    .lockerroom-tabs{
+        .card-header{
+            border: none;
+            background: none;
+        }
+        .card{border: none;}
+        .nav-tabs{
+            .nav-item{margin: 0 15px 0 0;}
+            .nav-link{
+                border-bottom: 1px solid #EFF2F4;
+                &.active{
+                    border: none;
+                    border-bottom: 1px solid #219F84;
+                }
+            }
+        }
+    }
+    .modal-footer{display: none;}
+}
+.bs-tooltip-top{
+    .arrow{
+        &:before{border-top-color: #fff;}
+    }
+}
+.tooltip.b-tooltip.share-tooltip{
+    .arrow{
+        &:before{border-bottom-color: #fff;}
+    }
+    opacity: 1;
+    .tooltip-inner{
+        background-color: #fff;
+        max-width: 360px;
+        padding: 1rem;
+        box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    }
+    .share-holder{
+        h3{
+            color: #000; 
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 0 10px;
+            text-align: left;
+        }
+        .form-inline{
+            .form-control{
+                margin: 0;
+                background: #F0F0F0;
+                color: #808895;
+                font-size: 12px;
+                padding-right: 1.5rem;
+                position: relative;
+                z-index: 1;
+            }
+            .btn{
+                background: #219f84;
+                font-size: 12px;
+                border-color: #219f84;
+                margin-left: -0.75rem;
+                padding-left: 1.5rem;
+            }
         }
     }
 }

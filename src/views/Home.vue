@@ -3,7 +3,7 @@
     <b-container fluid>
       <b-row>
         <b-col cols="3" class="text-left border-right py-5 overflow-hidden">
-            <ChooseColor :colors="colors"/>
+          <ChooseColor :colors="colors"/>
             <div class="upload-logo-opener">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
@@ -16,8 +16,12 @@
                     <p>Need High Res Image</p>
                   </div>
                 </b-button>
-                <b-modal ok-title="Confirm and Upload logo" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
+                <b-modal content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
                     <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
+                    <div class="upload-logo-buttons">
+                      <b-button class="btn-cancel">Cancel</b-button>
+                      <b-button class="btn-upload">Confirm and Upload logo</b-button>
+                    </div>
                 </b-modal>
             </div>
         </b-col>
