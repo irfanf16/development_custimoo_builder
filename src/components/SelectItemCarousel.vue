@@ -1,5 +1,5 @@
 <template>
-  <slither-slider @changed="loadMoreProduct" v-if="productListingCarousel.length" :options="{numberOfSlides: productListingCarousel.length > 3? 4: 1, loop: false, dots: false}" class="select-item-slider">
+  <slither-slider @changed="loadMoreProduct" v-if="productListingCarousel.length" :options="{numberOfSlides: productListingCarousel.length > 3? 4: productListingCarousel.length, loop: false, dots: false}" class="select-item-slider">
     <template v-for="(product, index) in productListingCarousel">
       <a href="#." ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">

@@ -9,6 +9,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { Group } from 'fabric/fabric-impl'
+import store from '@/store'
 
 @Component<Scene>({
   mounted () {
@@ -16,6 +17,14 @@ import { Group } from 'fabric/fabric-impl'
     if(this.back) {
       this.loadScene(this.back, this.backCanvas, 'back')
     }
+
+    const self = this
+    store.commit('defaultFillColors')
+    setTimeout(() => {
+      if(self.fillColors){
+        self.changeColor()
+      }
+    }, 3000)
   }
 })
 
@@ -28,7 +37,6 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 235}) readonly canvasWidth!: number;
   @Prop({required: false, default: 290}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly haveControls!: boolean;
-  @Prop({required: false}) readonly fillColor!: string;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -56,6 +64,9 @@ export default class Scene extends Vue {
 
     let texture: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
+      // console.log(objects)
+      // objects = objects.filter((object: Record<any, any>) => object.id == 'Base' || object.id == 'Accent')
+      // console.log(options);
       const img = fabric.util.groupSVGElements(objects, options) as Group
       img.scaleToWidth(canvas.getWidth() - 10).set({
         hasControls: false,
@@ -73,8 +84,10 @@ export default class Scene extends Vue {
       texture = img
       if(side === 'back'){
         self.backTexture = texture
+        self.backCanvas = canvas
       }else{
         self.frontTexture = texture
+        self.frontCanvas = canvas
       }
     })
 
@@ -120,15 +133,27 @@ export default class Scene extends Vue {
         clearInterval(timer)
       }
     }, 1000)
-
   }
 
   public changeColor() {
     const self = this
-    console.log(this.frontTexture)
-    this.frontTexture.getObjects().forEach(function(e: Record<any, any>) {
-      e.set('fill', self.fillColor);
+
+    const svgGroupIds = this.frontTexture.getObjects().map(item => item.id)
+      .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
+
+    let colorsByGroup = []
+    let useColorIndex = 0
+    svgGroupIds.forEach((groupId: string) => {
+      colorsByGroup.push({id: groupId, color: self.fillColors[useColorIndex].color})
+    })
+    console.log(svgGroupIds)
+
+    this.frontTexture.getObjects().forEach(function(item: Record<any, any>) {
+      if(item.id == 'Base') {
+        item.set('fill', self.fillColors[0].color);
+      }
     });
+    this.frontCanvas.renderAll()
   }
 }
 </script>

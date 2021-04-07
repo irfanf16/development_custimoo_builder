@@ -497,7 +497,7 @@
     import { Component, Vue } from 'vue-property-decorator'
     import CustomizationPreview from '@/components/CustomizationPreview.vue'
     import OrderDetails from '@/components/OrderDetails.vue'
-    import ApiDataService from "@/services/ApiDataService";
+    import {http} from "@/httpCommon";
 
     @Component<EditRosterArea>({
         components: {
@@ -530,7 +530,7 @@
             this.product_id = '1'
             this.company_id = '1'
             let param = '?product_id='+this.product_id+'&company_id='+this.company_id
-            ApiDataService.getAll(param)
+            http.get(param)
             .then((response: any) => {
                 this.products = response.data.products.data;
             })

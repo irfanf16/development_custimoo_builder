@@ -35,7 +35,7 @@
     import CustomizationPreview from '@/components/CustomizationPreview.vue'
     import OrderDetails from '@/components/OrderDetails.vue'
     import SaveDesignModal from '@/components/SaveDesignModal.vue'
-    import ApiDataService from "@/services/ApiDataService";
+    import {http} from "@/httpCommon";
 
 
     @Component<ConfirmOrder>({
@@ -49,7 +49,7 @@
             this.retrieveProducts()
         }
     })
-    
+
     export default class ConfirmOrder extends Vue {
         public selected= null
         public options= [
@@ -71,7 +71,7 @@
             this.product_id = '1'
             this.company_id = '1'
             let param = '?product_id='+this.product_id+'&company_id='+this.company_id
-            ApiDataService.getAll(param)
+            http.get(param)
             .then((response: any) => {
                 this.products = response.data.products.data;
             })
@@ -107,6 +107,6 @@
             flex: 0 0 100%;
             max-width: 100%;
         }
-        
+
     }
 </style>

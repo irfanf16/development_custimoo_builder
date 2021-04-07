@@ -33,9 +33,6 @@ library.add(faBaseballBall)
 library.add(faTshirt)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
-
-
-
 Vue.config.productionTip = false
 
 new Vue({
@@ -43,3 +40,19 @@ new Vue({
   store,
   render: h => h(App)
 }).$mount('#app')
+
+if (store.getters.isAuthenticated) {
+  app_instance();
+} else{
+  store.dispatch('AUTH_LOGIN').then(() => {
+    app_instance();
+  })
+}
+
+function app_instance(){
+  return new Vue({
+    router,
+    store,
+    render: h => h(App)
+  }).$mount('#app')
+}
