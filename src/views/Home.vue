@@ -7,8 +7,15 @@
             <div class="upload-logo-opener">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
-                    <div class="icon-holder"><font-awesome-icon :icon="['fas', 'image']" /></div>
-                    Upload Logo
+                    <div v-if="imagePath">
+                      <img src="imagePath"/>
+                    </div>
+                    <div v-else>
+                      <div class="icon-holder">
+                        <font-awesome-icon :icon="['fas', 'image']"/>
+                      </div>
+                      Upload Logo
+                    </div>
                   </div>
                   <div class="upload-logo-content">
                     <h3>Upload Logo Image</h3>
@@ -16,11 +23,12 @@
                     <p>Need High Res Image</p>
                   </div>
                 </b-button>
-                <b-modal content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
+                <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
                     <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
                     <div class="upload-logo-buttons">
-                      <b-button class="btn-cancel">Cancel</b-button>
-                      <b-button class="btn-upload">Confirm and Upload logo</b-button>
+                      <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
+                      <input type="file" name="logos" ref="fileInput" @change="uploadImage" class="fileLoader">
+                      <b-button class="btn-upload" @click="uploadLogo">Confirm and Upload logo</b-button>
                     </div>
                 </b-modal>
             </div>
@@ -44,8 +52,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
-import http from "../httpCommon"
-import axios from "axios";
+import { http } from "@/httpCommon"
 
 @Component<Home>({
   components: {
@@ -54,22 +61,16 @@ import axios from "axios";
     ItemToCustomize
   },
   mounted() {
-    this.instance = axios.create({
-      baseURL: "http://api.custimoo.com/api",
-      headers: {
-        "Content-type": "application/json"
-      }
-    });
-    this.login()
-    this.retrieveProducts()
-    this.getCategoriesColors()
+    if (this.isAuthenticated) {
+      this.retrieveProducts()
+    }
+    this.$store.commit('defaultFillColors')
+    console.log(this.categories)
   }
 })
 
 export default class Home extends Vue {
   private products : any[] = []
-  private categories : any[] = []
-  private colors : any[] = []
   private nextPageUrl !: string
   public designsIndex = 0
   public hasProducts = true
@@ -78,19 +79,20 @@ export default class Home extends Vue {
   public default_color = true
   public product_id !: number
   public provider_id = 'oVXYIzKY'
-  private instance !: any
+  public imagePath = ''
+  public ref = this.$refs as Record<any, any>
 
-  async login(url = '/company/login'): void {
-    await this.instance.post(url, {
-      provider_id: this.provider_id
-    }).then((response: any) => {
-      localStorage.setItem('access_token', response.data.accessToken)
-    }).catch((e: any) => {
-      console.log(e)
-    });
+  get isAuthenticated (): boolean {
+    return this.$store.getters.isAuthenticated
+  }
+  get colors(): [] {
+    return this.$store.getters.getDefaultColors
+  }
+  get categories(): [] {
+    return this.$store.getters.getCategories
   }
 
-public retrieveProducts(url = '/list/products', searchCall = false): void {
+  public retrieveProducts(url = '/list/products', searchCall = false): void {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -101,7 +103,6 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
     if(this.hasProducts) {
       http.get(url).then((response: any) => {
         this.products = this.products.concat(response.data.products.data)
-        // this.categories = response.data.categories
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
@@ -110,23 +111,6 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
         console.log(e)
       });
     }
-  }
-
-  public getCategoriesColors(defaultColor = true): void {
-    let url = '/product/colors?'
-    if(defaultColor){
-      url += 'default_color=' + this.default_color
-    }
-    else if (this.product_id){
-      url += 'product_id=' + this.product_id
-    }
-
-    http.get(url).then((response: any) => {
-      this.categories = response.data.data.categories
-      this.colors = JSON.parse(response.data.data.color.color_text)
-    }).catch((e: any) => {
-      console.log(e)
-    });
   }
 
   public searchProducts(){
@@ -151,6 +135,30 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
   }
   public changeProduct(designsIndex :number){
     this.designsIndex = designsIndex
+  }
+  public uploadLogo() {
+    this.ref.fileInput.click()
+  }
+
+  public hideModal() {
+    this.ref.myModal.hide()
+  }
+
+  public uploadImage(e: any) {
+    let img = e.target.files[0]
+    console.log(img)
+    let fd = new FormData()
+    let header = {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+    fd.append('image', img)
+    http.post('/upload-image', fd, header)
+    // http.post('/upload-image', fd)
+      .then(resp => {
+        this.imagePath = resp.data.path
+      })
   }
 }
 </script>
@@ -213,6 +221,10 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
         font-weight: 400;
       }
     }
+  }
+  .fileLoader
+  {
+    display:none;
   }
 
 </style>
