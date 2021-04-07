@@ -7,8 +7,15 @@
             <div class="upload-logo-opener">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
-                    <div class="icon-holder"><font-awesome-icon :icon="['fas', 'image']" /></div>
-                    Upload Logo
+                    <div v-if="imagePath">
+                      <img src="imagePath"/>
+                    </div>
+                    <div v-else>
+                      <div class="icon-holder">
+                        <font-awesome-icon :icon="['fas', 'image']"/>
+                      </div>
+                      Upload Logo
+                    </div>
                   </div>
                   <div class="upload-logo-content">
                     <h3>Upload Logo Image</h3>
@@ -16,11 +23,12 @@
                     <p>Need High Res Image</p>
                   </div>
                 </b-button>
-                <b-modal content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
+                <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
                     <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
                     <div class="upload-logo-buttons">
-                      <b-button class="btn-cancel">Cancel</b-button>
-                      <b-button class="btn-upload">Confirm and Upload logo</b-button>
+                      <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
+                      <input type="file" name="logos" ref="fileInput" @change="uploadImage" class="fileLoader">
+                      <b-button class="btn-upload" @click="uploadLogo">Confirm and Upload logo</b-button>
                     </div>
                 </b-modal>
             </div>
@@ -44,7 +52,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
-import http from "../httpCommon"
+import { http } from "@/httpCommon"
 import axios from "axios";
 
 @Component<Home>({
@@ -60,9 +68,10 @@ import axios from "axios";
         "Content-type": "application/json"
       }
     });
-    this.login()
-    this.retrieveProducts()
-    this.getCategoriesColors()
+    if (this.isAuthenticated) {
+      this.retrieveProducts()
+      this.getCategoriesColors()
+    }
   }
 })
 
@@ -79,18 +88,24 @@ export default class Home extends Vue {
   public product_id !: number
   public provider_id = 'oVXYIzKY'
   private instance !: any
+  public imagePath = ''
+  public ref = this.$refs as Record<any, any>
 
-  async login(url = '/company/login'): void {
-    await this.instance.post(url, {
-      provider_id: this.provider_id
-    }).then((response: any) => {
-      localStorage.setItem('access_token', response.data.accessToken)
-    }).catch((e: any) => {
-      console.log(e)
-    });
+  get isAuthenticated (): boolean {
+    return this.$store.getters.isAuthenticated
   }
 
-public retrieveProducts(url = '/list/products', searchCall = false): void {
+  // async login(url = '/company/login') {
+  //   await this.instance.post(url, {
+  //     provider_id: this.provider_id
+  //   }).then((response: any) => {
+  //     localStorage.setItem('access_token', response.data.accessToken)
+  //   }).catch((e: any) => {
+  //     console.log(e)
+  //   });
+  // }
+
+  public retrieveProducts(url = '/list/products', searchCall = false): void {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -99,6 +114,7 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
     }
 
     if(this.hasProducts) {
+
       http.get(url).then((response: any) => {
         this.products = this.products.concat(response.data.products.data)
         // this.categories = response.data.categories
@@ -150,6 +166,30 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
   }
   public changeProduct(designsIndex :number){
     this.designsIndex = designsIndex
+  }
+  public uploadLogo() {
+    this.ref.fileInput.click()
+  }
+
+  public hideModal() {
+    this.ref.myModal.hide()
+  }
+
+  public uploadImage(e: any) {
+    let img = e.target.files[0]
+    console.log(img)
+    let fd = new FormData()
+    let header = {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+    fd.append('image', img)
+    http.post('/upload-image', fd, header)
+    // http.post('/upload-image', fd)
+      .then(resp => {
+        this.imagePath = resp.data.path
+      })
   }
 }
 </script>
@@ -212,6 +252,10 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
         font-weight: 400;
       }
     }
+  }
+  .fileLoader
+  {
+    display:none;
   }
 
 </style>
