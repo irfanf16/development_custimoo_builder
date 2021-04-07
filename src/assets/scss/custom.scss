@@ -867,12 +867,13 @@ a:hover{color: #219f84;}
         font-weight: 700;
     }
     .modal-header{
+        padding: 1rem 2rem;
         .close{
             font-size: 30px;
         }
     }
     .modal-body{
-        padding: 2rem 1rem;
+        padding: 2rem;
     }
     .lockerroom-tabs{
         .card-header{
@@ -910,7 +911,7 @@ a:hover{color: #219f84;}
         box-shadow: 0 0 8px rgba(0,0,0,0.2);
     }
     .share-holder{
-        h3{
+        h3{ 
             color: #000; 
             font-size: 14px;
             font-weight: 600;
