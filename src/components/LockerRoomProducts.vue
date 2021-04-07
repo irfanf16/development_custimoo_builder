@@ -16,8 +16,7 @@
                                     <b-form inline>
                                         <b-form-input
                                         id="inline-form-input-name"
-                                        class="mb-2 mr-sm-2 mb-sm-0"
-                                        placeholder="Jane Doe"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
                                         ></b-form-input>
                                         <b-button variant="primary">Copy Link</b-button>
                                     </b-form>
@@ -43,8 +42,19 @@
                     </li>
                     <li>
                         <a id="share-button-3" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-3" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-3" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -65,8 +75,19 @@
                     </li>
                     <li>
                         <a id="share-button-4" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-4" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-4" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -87,8 +108,19 @@
                     </li>
                     <li>
                         <a id="share-button-5" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-5" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-5" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -109,8 +141,19 @@
                     </li>
                     <li>
                         <a id="share-button-6" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-6" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-6" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -131,8 +174,19 @@
                     </li>
                     <li>
                         <a id="share-button-7" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-7" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-7" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -153,8 +207,19 @@
                     </li>
                     <li>
                         <a id="share-button-8" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-8" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-8" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -175,8 +240,19 @@
                     </li>
                     <li>
                         <a id="share-button-9" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-9" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-9" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -197,8 +273,19 @@
                     </li>
                     <li>
                         <a id="share-button-10" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-10" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-10" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -219,8 +306,19 @@
                     </li>
                     <li>
                         <a id="share-button-11" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-11" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-11" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -241,8 +339,19 @@
                     </li>
                     <li>
                         <a id="share-button-12" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-12" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-12" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -263,8 +372,19 @@
                     </li>
                     <li>
                         <a id="share-button-13" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-13" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-13" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -285,8 +405,19 @@
                     </li>
                     <li>
                         <a id="share-button-14" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-14" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-14" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>
@@ -307,8 +438,19 @@
                     </li>
                     <li>
                         <a id="share-button-15" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                        <b-tooltip target="share-button-15" placement="bottom">
-                            Hello <strong>World!</strong>
+                        <b-tooltip custom-class="share-tooltip" target="share-button-15" placement="bottom">
+                            <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                    <b-form inline>
+                                        <b-form-input
+                                        id="inline-form-input-name"
+                                        placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                        ></b-form-input>
+                                        <b-button variant="primary">Copy Link</b-button>
+                                    </b-form>
+                                </div>
+                            </div>
                         </b-tooltip>
                     </li>
                     <li>

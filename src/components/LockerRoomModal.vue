@@ -3,7 +3,7 @@
         <div class="lockerroom-header">
             <div class="locker-opener">
                 <a href="#." class="arrow arrow-left"><font-awesome-icon :icon="['fas', 'arrow-left']" /></a>
-                <b-button variant="secondary">Locker 1</b-button>
+                <b-button variant="secondary" class="active">Locker 1</b-button>
                 <b-button variant="secondary">Locker 2<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
                 <b-button variant="secondary">Locker 3<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
                 <a href="#." class="arrow arrow-right"><font-awesome-icon :icon="['fas', 'arrow-right']" /></a>
@@ -60,6 +60,15 @@
                 padding: 10px 30px;
                 margin: 0 10px 10px;
                 position: relative;
+                background: none;
+                border-color: rgba(3,20,46,0.13);
+                color: #03142E;
+                &.active,
+                &:hover{
+                    background: #219f84;
+                    color: #fff;
+                    border-color: #219f84;
+                }
                 .remove{
                     position: absolute;
                     right: -10px;
