@@ -2,13 +2,15 @@
   <div class="page-wrapper m-4 bg-white border">
     <b-container fluid>
       <b-row>
-        <b-col cols="3" class="text-left border-right py-5 overflow-hidden">
+        <b-col cols="12" lg="3" class="text-left border-right py-5 overflow-hidden home-color-area">
           <ChooseColor :colors="colors"/>
-            <div class="upload-logo-opener">
+            <div class="upload-logo-opener d-none d-lg-block">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
-                    <div class="icon-holder"><font-awesome-icon :icon="['fas', 'image']" /></div>
-                    Upload Logo
+                    <div>
+                      <div class="icon-holder"><font-awesome-icon :icon="['fas', 'image']" /></div>
+                      Upload Logo
+                    </div>
                   </div>
                   <div class="upload-logo-content">
                     <h3>Upload Logo Image</h3>
@@ -25,13 +27,16 @@
                 </b-modal>
             </div>
         </b-col>
-        <b-col cols="6" class="border-right d-flex flex-wrap align-items-center h-100vh justify-content-center">
+        <b-col cols="12" class="d-lg-none">
+          <ChooseInterest />
+        </b-col>
+        <b-col cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
           <div class="customization-area p-5">
             <CustomizationPreview :designs="products[designsIndex]" />
             <b-button class="mt-5" variant="secondary">Continue</b-button>
           </div>
         </b-col>
-        <b-col cols="3">
+        <b-col cols="3" class="d-none d-lg-block">
           <ItemToCustomize :productListing="products" :categories="categories" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
         </b-col>
       </b-row>
@@ -44,6 +49,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
+import ChooseInterest from '@/components/ChooseInterest.vue'
 import http from "../httpCommon"
 import axios from "axios";
 
@@ -51,7 +57,8 @@ import axios from "axios";
   components: {
     ChooseColor,
     CustomizationPreview,
-    ItemToCustomize
+    ItemToCustomize,
+    ChooseInterest
   },
   mounted() {
     this.instance = axios.create({
@@ -155,15 +162,21 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
 </script>
 
 <style lang="scss" scoped>
+.home-color-area{
+  @media only screen and (min-width: 992px){padding-bottom: 10rem !important;}
+}
   .upload-logo-opener{
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 30px;
+    padding: 20px;
     text-align: center;
     border-top: 1px solid #dee2e6;
     color: #808895;
+    @media only screen and (min-width: 1200px){
+      padding: 30px;
+    }
     .btn{
       background: none;
       color: #808895;
@@ -173,8 +186,11 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
       align-items: center;
       padding: 0;
       font-size: 10px;
-      max-width: 300px;
+      max-width: 100%;
       margin: 0 auto;
+      @media only screen and (min-width: 1200px){
+        max-width: 300px;
+      }
       &.btn-secondary{
         &:active{
           background-color: transparent;
@@ -186,30 +202,57 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
     }
     .upload-box{
       text-align: center;
-      width: 84px;
-      height: 84px;
+      width: 68px;
+      height: 68px;
       border: 1px dashed #dee2e6;
       border-radius: 5px;
       padding: 10px 5px;
-      font-size: 12px;
+      font-size: 9px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-      .icon-holder{font-size: 32px;}
+      @media only screen and (min-width: 1200px){
+        width: 74px;
+        height: 74px;
+        font-size: 10px;
+      }
+      @media only screen and (min-width: 1366px){
+        width: 84px;
+        height: 84px;
+        font-size: 12px;
+      }
+      .icon-holder{
+        font-size: 24px;
+        @media only screen and (min-width: 1366px){
+          font-size: 32px;
+        }
+      }
     }
     .upload-logo-content{
-      padding: 10px;
+      padding: 5px 0 5px 8px;
       text-align: left;
+      @media only screen and (min-width: 1200px){
+        padding: 10px;
+      }
       h3{
-        font-size: 16px;
+        font-size: 13px;
         color: #03142E;
         font-weight: 600;
+        @media only screen and (min-width: 1200px){
+          font-size: 14px;
+        }
+        @media only screen and (min-width: 1366px){
+          font-size: 16px;
+        }
       }
       h4{
-        font-size: 14px;
+        font-size: 12px;
         color: #03142E;
         font-weight: 400;
+        @media only screen and (min-width: 1200px){
+          font-size: 14px;
+        }
       }
     }
   }

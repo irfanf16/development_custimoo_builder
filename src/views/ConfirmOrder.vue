@@ -7,7 +7,8 @@
                 </b-col>
                 <b-col class="text-right">
                     <div class="header-buttons">
-                        <b-button variant="outline-secondary">Edit Your Design</b-button>
+                        <b-button variant="outline-secondary" v-b-modal.modal-center-design>Edit Your Design</b-button>
+                        <SaveDesignModal />
                         <b-button variant="outline-secondary">Save to locker room</b-button>
                         <a href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                     </div>
@@ -33,6 +34,7 @@
     import OrderAccordion from '@/components/OrderAccordion.vue'
     import CustomizationPreview from '@/components/CustomizationPreview.vue'
     import OrderDetails from '@/components/OrderDetails.vue'
+    import SaveDesignModal from '@/components/SaveDesignModal.vue'
     import ApiDataService from "@/services/ApiDataService";
 
 
@@ -40,7 +42,8 @@
         components: {
             OrderAccordion,
             CustomizationPreview,
-            OrderDetails
+            OrderDetails,
+            SaveDesignModal
         },
         mounted() {
             this.retrieveProducts()
