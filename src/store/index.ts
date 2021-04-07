@@ -1,16 +1,24 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import http from '@/httpCommon'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    categories: [],
     defaultFillColors: []
   },
   mutations: {
-    defaultFillColors(state: Record<any, any>, colors: []) {
-      localStorage.setItem('defaultFillColors', JSON.stringify(colors));
-      state.defaultFillColors = colors;
+    defaultFillColors(state: Record<any, any>) {
+      const url = '/product/colors?default_color=1'
+      http.get(url).then((response: any) => {
+        localStorage.setItem('defaultFillColors', response.data.data.color.color_text);
+        state.defaultFillColors = JSON.parse(response.data.data.color.color_text);
+        state.categories = response.data.data.categories;
+      }).catch((e: any) => {
+        console.log(e)
+      });
     },
     initialiseStore(state: Record<any, any>) {
       if (localStorage.getItem('defaultFillColors')) {
@@ -19,6 +27,9 @@ export default new Vuex.Store({
     }
   },
   getters: {
+    getCategories: state => {
+      return state.categories
+    },
     getDefaultFilledColors: state => {
       return state.defaultFillColors.filter((fillColor: Record<any, any>) => fillColor.color != null)
     }

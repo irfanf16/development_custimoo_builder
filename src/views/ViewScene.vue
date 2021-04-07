@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Scene fill-color="#001234" :front="{textureUrl: 'http://api.custimoo.com/files/1/product/texture/ChelseaAway2.svg', modelUrl: 'http://api.custimoo.com/files/1/product/base_model/LongSleeve%20details%20layer.png'}"/>
+    <Scene fill-colors="[{color: '#001234'}, {color: '#aa0034'}, {color: null}]" :front="{textureUrl: '/img/images/ChelseaAway2.svg', modelUrl: 'http://api.custimoo.com/files/1/product/base_model/LongSleeve%20details%20layer.png'}"/>
   </div>
 </template>
 

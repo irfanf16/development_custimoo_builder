@@ -112,7 +112,8 @@ public retrieveProducts(url = '/list/products', searchCall = false): void {
     }
   }
 
-  public getCategoriesColors(url = '/product/colors?', defaultColor = true): void {
+  public getCategoriesColors(defaultColor = true): void {
+    let url = '/product/colors?'
     if(defaultColor){
       url += 'default_color=' + this.default_color
     }
