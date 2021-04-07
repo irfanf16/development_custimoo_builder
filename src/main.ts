@@ -3,7 +3,7 @@ import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faArrowLeft, faArrowRight, faEdit, faEyeSlash, faFillDrip, faImage, faInfoCircle, faRedoAlt, faSearch, faShareAlt, faSwatchbook, faTextHeight, faTimes, faTrashAlt, faUserFriends, faUserSecret } from '@fortawesome/free-solid-svg-icons'
+import { faArrowLeft, faArrowRight, faBaseballBall, faEdit, faEyeSlash, faFillDrip, faFutbol, faHockeyPuck, faImage, faInfoCircle, faRedoAlt, faSearch, faShareAlt, faSwatchbook, faTextHeight, faTimes, faTrashAlt, faTshirt, faUserFriends, faUserSecret } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
@@ -27,6 +27,10 @@ library.add(faInfoCircle)
 library.add(faArrowRight)
 library.add(faArrowLeft)
 library.add(faEdit)
+library.add(faFutbol)
+library.add(faHockeyPuck)
+library.add(faBaseballBall)
+library.add(faTshirt)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 
