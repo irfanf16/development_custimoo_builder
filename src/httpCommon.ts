@@ -20,6 +20,15 @@ http.interceptors.request.use((request: AxiosRequestConfig ) => {
   if (token) {
     request.headers.Authorization = `Bearer ${token}`
   }
+  const jwtToken = localStorage.getItem('jwtToken')
+  if (jwtToken) {
+    request.headers.CustomerToken = `Bearer ${jwtToken}`
+  }
+  else{
+    // request.headers.CustomerToken = `Bearer ${process.env.VUE_APP_JWT_TOKEN}`
+    request.headers.BrowserToken = localStorage.getItem('browserToken')
+  }
+
   return request
 })
 

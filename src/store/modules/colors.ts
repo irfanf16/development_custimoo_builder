@@ -1,20 +1,15 @@
-import {http} from "@/httpCommon";
+import {http, noTokenRequest} from "@/httpCommon";
 import { Module } from "vuex";
 const Colors:Module<any, any> = {
   state: {
     categories: [],
-    defaultFillColors: [],
-    jwtToken: ''
+    defaultFillColors: []
   },
   mutations: {
     defaultFillColors(state: Record<any, any>, payload: Record<any, any>) {
       console.log('here')
       state.categories = payload.categories
       state.defaultFillColors = payload.color
-    },
-    jwtToken(state: Record<any, any>, jwtToken) {
-      localStorage.setItem('jwtToken', JSON.stringify(jwtToken));
-      state.jwtToken = jwtToken;
     },
     initialiseStore(state: Record<any, any>) {
       if (localStorage.getItem('defaultFillColors')) {
@@ -31,9 +26,6 @@ const Colors:Module<any, any> = {
     },
     getDefaultFilledColors: state => {
       return state.defaultFillColors.filter((fillColor: Record<any, any>) => fillColor.color != null)
-    },
-    getJwtToken: state => {
-      return state.jwtToken
     }
   },
   actions: {
@@ -45,7 +37,7 @@ const Colors:Module<any, any> = {
         console.log(e)
       });
     }
-  },
+  }
 }
 export default Colors;
 
