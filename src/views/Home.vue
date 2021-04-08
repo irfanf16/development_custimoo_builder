@@ -7,7 +7,6 @@
             <div class="upload-logo-opener d-none d-lg-block">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
-                    <div>
                       <div class="icon-holder"><font-awesome-icon :icon="['fas', 'image']" /></div>
                     <div v-if="imagePath">
                       <img src="imagePath"/>
