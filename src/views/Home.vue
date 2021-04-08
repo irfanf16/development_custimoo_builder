@@ -1,13 +1,12 @@
 <template>
-  <div class="page-wrapper m-4 bg-white border">
+  <div class="page-wrapper m-4">
     <b-container fluid>
       <b-row>
-        <b-col cols="12" lg="3" class="text-left border-right py-5 overflow-hidden home-color-area">
+        <b-col v-if="manageComponents.ChooseColor" cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
           <ChooseColor :colors="colors"/>
-            <div class="upload-logo-opener d-none d-lg-block">
+            <div v-if="!mobileScreen" class="upload-logo-opener d-none d-lg-block">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
-                      <div class="icon-holder"><font-awesome-icon :icon="['fas', 'image']" /></div>
                     <div v-if="imagePath">
                       <img src="imagePath"/>
                     </div>
@@ -34,16 +33,16 @@
                 </b-modal>
             </div>
         </b-col>
-        <b-col cols="12" class="d-lg-none">
+        <b-col v-if="manageComponents.ChooseInterest" cols="12" class="pb-5">
           <ChooseInterest />
         </b-col>
-        <b-col cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
+        <b-col v-if="manageComponents.CustomizationPreview" cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
           <div class="customization-area p-5">
             <CustomizationPreview :designs="products[designsIndex]" />
             <b-button class="mt-5" variant="secondary">Continue</b-button>
           </div>
         </b-col>
-        <b-col cols="3" class="d-none d-lg-block">
+        <b-col v-if="manageComponents.ItemToCustomize" cols="3" class="d-none d-lg-block">
           <ItemToCustomize :productListing="products" :categories="categories" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
         </b-col>
       </b-row>
@@ -70,9 +69,11 @@ import { http } from "@/httpCommon"
     if (this.isAuthenticated) {
       this.retrieveProducts()
     }
+    this.mobileScreen = this.$store.state.is_mobile
     this.$store.dispatch('setDefaultFillColors')
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
+    console.log(this.manageComponents)
   }
 })
 
@@ -88,6 +89,14 @@ export default class Home extends Vue {
   public provider_id = 'oVXYIzKY'
   public imagePath = ''
   public ref = this.$refs as Record<any, any>
+  public mobileScreen = this.$store.state.mobileScreen
+  public manageComponents = {
+    ChooseColor: true,
+    UploadLogo: !this.mobileScreen,
+    ChooseInterest: this.mobileScreen,
+    CustomizationPreview: !this.mobileScreen,
+    ItemToCustomize: !this.mobileScreen,
+  }
 
   get isAuthenticated (): boolean {
     return this.$store.getters.isAuthenticated
@@ -174,9 +183,18 @@ export default class Home extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.home-color-area{
-  @media only screen and (min-width: 992px){padding-bottom: 10rem !important;}
-}
+  .page-wrapper{
+    @media only screen and (min-width: 992px){
+      border: 1px solid #dee2e6;
+      background: #fff;
+    }
+  }
+  .home-color-area{
+    @media only screen and (min-width: 992px){
+      padding-bottom: 10rem !important;
+      border-right: 1px solid #dee2e6;
+    }
+  }
   .upload-logo-opener{
     position: absolute;
     left: 0;

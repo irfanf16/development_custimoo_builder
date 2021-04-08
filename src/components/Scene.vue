@@ -18,19 +18,20 @@ import { Group } from 'fabric/fabric-impl'
     }
 
     const self = this
-    this.$store.commit('defaultFillColors')
-    setTimeout(() => {
-      if(self.fillColors){
-        self.changeColor()
-      }
-    }, 3000)
+    this.$store.dispatch('setDefaultFillColors')
+    // setTimeout(() => {
+    //   console.log(self.fillColors)
+    //   if(self.fillColors){
+    //     self.changeColor()
+    //   }
+    // }, 3000)
   }
 })
 
 export default class Scene extends Vue {
   @Prop({required: true}) readonly front!: Record<string, unknown>;
   @Prop({required: false}) readonly back!: Record<string, unknown>;
-  @Prop({required: false, default: () => { return [{url: './img/images/logo.png', width: 100, height: 100, x: 100, y: 117}]}}) readonly logos !: [Record<string, any>];
+  @Prop({required: false}) readonly logos !: [Record<string, any>];
   @Prop({required: false, default: 235}) readonly mainCanvasWidth!: number;
   @Prop({required: false, default: 290}) readonly mainCanvasHeight!: number;
   @Prop({required: false, default: 235}) readonly canvasWidth!: number;
@@ -40,6 +41,10 @@ export default class Scene extends Vue {
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
   private backTexture !: any
+
+  get fillColors(): [Record<any, any>] {
+    return this.$store.getters.getDefaultFilledColors
+  }
 
   public loadScene (ImageData: any, canvas: fabric.Canvas, side: string) {
     let element = this.$refs.front as HTMLCanvasElement
@@ -64,7 +69,11 @@ export default class Scene extends Vue {
     let texture: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
       // console.log(objects)
-      // objects = objects.filter((object: Record<any, any>) => object.id == 'Base' || object.id == 'Accent')
+      if(side == 'back'){
+        objects = objects.filter((object: Record<any, any>) => object.id.includes('back'))
+      }else {
+        objects = objects.filter((object: Record<any, any>) => !object.id.includes('back'))
+      }
       // console.log(options);
       const img = fabric.util.groupSVGElements(objects, options) as Group
       img.scaleToWidth(canvas.getWidth() - 10).set({
@@ -72,8 +81,9 @@ export default class Scene extends Vue {
         selectable: false,
         evented: false,
         lockMovementX: true,
-        lockMovementY: true,
+        lockMovementY: true
       })
+
       img._objects.forEach((element: any) => {
         if(element.id === 'Laces') {
           element.globalCompositeOperation = 'destination-out'
@@ -94,7 +104,7 @@ export default class Scene extends Vue {
     const self = this
 
     let logosLoaded = true
-    if(this.logos) {
+    if(this.logos && side == 'front') {
       logosLoaded = false
       this.logos.forEach((logo: Record<any, any>, index: number) => {
         fabric.Image.fromURL(logo.url, (img: any) => {
@@ -137,7 +147,7 @@ export default class Scene extends Vue {
   public changeColor() {
     const self = this
 
-    const svgGroupIds = this.frontTexture.getObjects().map(item => item.id)
+    const svgGroupIds = this.frontTexture.getObjects().map((item : Record<any, any>) => item.id)
       .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
 
     let colorsByGroup = []

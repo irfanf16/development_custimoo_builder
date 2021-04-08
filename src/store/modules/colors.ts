@@ -7,9 +7,10 @@ const Colors:Module<any, any> = {
   },
   mutations: {
     defaultFillColors(state: Record<any, any>, payload: Record<any, any>) {
-      console.log('here')
-      state.categories = payload.categories
-      state.defaultFillColors = payload.color
+      if(payload){
+        state.categories = payload.categories
+        state.defaultFillColors = JSON.parse(payload.color.color_text)
+      }
     },
     initialiseStore(state: Record<any, any>) {
       if (localStorage.getItem('defaultFillColors')) {
@@ -26,7 +27,7 @@ const Colors:Module<any, any> = {
     },
     getDefaultFilledColors: state => {
       return state.defaultFillColors.filter((fillColor: Record<any, any>) => fillColor.color != null)
-    }
+    },
   },
   actions: {
     setDefaultFillColors({commit}){

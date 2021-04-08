@@ -9,22 +9,23 @@
           <strong>{{ chooseColor.name }}</strong>
         </div>
       </a>
-      <div v-if="colorPickerActive">
-        <transition name="list">
-          <div class="color-holder">
-            <div class="color-header">
-              <h3>{{ chooseColors[selectColorIndex].name }}</h3>
-              <a href="#" @click="colorPickerActive = false" class="close">
-                <font-awesome-icon :icon="['fas', 'times']"/>
-              </a>
-            </div>
-            <div class="color-container">
-              <div v-for="color in colors" @click="setColor(color.value)" class="color-box" :title="color.name" :style="{background: color.value}"
-                   :key="color.position"></div>
-            </div>
+      
+    </div>
+    <div v-if="colorPickerActive">
+      <transition name="list">
+        <div class="color-holder">
+          <div class="color-header">
+            <h3>{{ chooseColors[selectColorIndex].name }}</h3>
+            <a href="#" @click="colorPickerActive = false" class="close">
+              <font-awesome-icon :icon="['fas', 'times']"/>
+            </a>
           </div>
-        </transition>
-      </div>
+          <div class="color-container">
+            <div v-for="color in colors" @click="setColor(color.value)" class="color-box" :title="color.name" :style="{background: color.value}"
+                  :key="color.position"></div>
+          </div>
+        </div>
+      </transition>
     </div>
     <div class="shuffle-colors d-flex flex-wrap justify-content-between align-items-center">
       <button class="btn btn-secondary">Shuffle</button>
@@ -99,8 +100,8 @@ export default class ChooseColor extends Vue {
 .choose-color {
   a {
     display: block;
-    width: 140px;
-    height: 140px;
+    width: 130px;
+    height: 130px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -110,7 +111,10 @@ export default class ChooseColor extends Vue {
     border-radius: 6px;
     font-weight: 700;
     font-size: 12px;
-    
+    @media only screen and (min-width: 375px){
+      width: 140px;
+      height: 140px;
+    }
     @media only screen and (min-width: 992px){
       width: 100px;
       height: 100px;
@@ -161,7 +165,7 @@ export default class ChooseColor extends Vue {
 }
 
 .color-holder {
-  position: absolute;
+  position: fixed;
   left: 0;
   right: 0;
   bottom: -999px;
@@ -169,9 +173,12 @@ export default class ChooseColor extends Vue {
   transition: all 1s ease;
   z-index: 2;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  border-radius: 15px;
+  border-radius: 15px 15px 0 0;
   max-height: 300px;
   overflow-y: auto;
+  @media only screen and (min-width: 768px){
+    position: absolute;
+  }
 
   a.close {
     width: auto;
