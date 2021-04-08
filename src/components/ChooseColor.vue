@@ -9,9 +9,9 @@
           <strong>{{ chooseColor.name }}</strong>
         </div>
       </a>
-      <div>
+      <div v-if="colorPickerActive">
         <transition name="list">
-          <div class="color-holder" v-if="colorPickerActive" >
+          <div class="color-holder">
             <div class="color-header">
               <h3>{{ chooseColors[selectColorIndex].name }}</h3>
               <a href="#" @click="colorPickerActive = false" class="close">
@@ -99,8 +99,8 @@ export default class ChooseColor extends Vue {
 .choose-color {
   a {
     display: block;
-    width: 100px;
-    height: 100px;
+    width: 140px;
+    height: 140px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -110,6 +110,11 @@ export default class ChooseColor extends Vue {
     border-radius: 6px;
     font-weight: 700;
     font-size: 12px;
+    
+    @media only screen and (min-width: 992px){
+      width: 100px;
+      height: 100px;
+    }
     @media only screen and (min-width: 1170px) {
       width: 120px;
       height: 120px;
@@ -133,7 +138,7 @@ export default class ChooseColor extends Vue {
     border: 1px solid #EFF2F4;
     position: relative;
     margin: 0 auto 12px;
-    @media only screen and (min-width: 1170px) {
+    @media only screen and (min-width: 1366px) {
       width: 72px;
       height: 72px;
     }
@@ -146,8 +151,11 @@ export default class ChooseColor extends Vue {
       bottom: 0;
       top: 0;
       z-index: 1;
-      border: 6px solid #fff;
+      border: 4px solid #fff;
       border-radius: 50%;
+      @media only screen and (min-width: 1024px){
+        border: 6px solid #fff;
+      }
     }
   }
 }
@@ -201,7 +209,7 @@ export default class ChooseColor extends Vue {
       border: 1px solid #EFF2F4;
       position: relative;
       margin-bottom: 10px;
-      @media only screen and (min-width: 1024px) {
+      @media only screen and (min-width: 768px) {
         width: 32px;
         height: 32px;
       }
