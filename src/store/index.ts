@@ -6,6 +6,9 @@ import Colors from "@/store/modules/colors";
 Vue.use(Vuex)
 
 export default new Vuex.Store({
+  state: {
+    mobileScreen: false
+  },
   modules: {
     Auth,
     Colors

@@ -2,9 +2,9 @@
   <div class="page-wrapper m-4">
     <b-container fluid>
       <b-row>
-        <b-col cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
+        <b-col v-if="manageComponents.ChooseColor" cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
           <ChooseColor :colors="colors"/>
-            <div class="upload-logo-opener d-none d-lg-block">
+            <div v-if="!mobileScreen" class="upload-logo-opener d-none d-lg-block">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
                     <div v-if="imagePath">
@@ -33,16 +33,16 @@
                 </b-modal>
             </div>
         </b-col>
-        <b-col cols="12" class="d-lg-none pb-5">
+        <b-col v-if="manageComponents.ChooseInterest" cols="12" class="pb-5">
           <ChooseInterest />
         </b-col>
-        <b-col cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
+        <b-col v-if="manageComponents.CustomizationPreview" cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
           <div class="customization-area p-5">
             <CustomizationPreview :designs="products[designsIndex]" />
             <b-button class="mt-5" variant="secondary">Continue</b-button>
           </div>
         </b-col>
-        <b-col cols="3" class="d-none d-lg-block">
+        <b-col v-if="manageComponents.ItemToCustomize" cols="3" class="d-none d-lg-block">
           <ItemToCustomize :productListing="products" :categories="categories" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
         </b-col>
       </b-row>
@@ -69,8 +69,10 @@ import { http } from "@/httpCommon"
     if (this.isAuthenticated) {
       this.retrieveProducts()
     }
+    this.mobileScreen = this.$store.state.is_mobile
+
     this.$store.dispatch('setDefaultFillColors')
-    console.log(this.categories)
+    console.log(this.manageComponents)
   }
 })
 
@@ -86,6 +88,14 @@ export default class Home extends Vue {
   public provider_id = 'oVXYIzKY'
   public imagePath = ''
   public ref = this.$refs as Record<any, any>
+  public mobileScreen = this.$store.state.mobileScreen
+  public manageComponents = {
+    ChooseColor: true,
+    UploadLogo: !this.mobileScreen,
+    ChooseInterest: this.mobileScreen,
+    CustomizationPreview: !this.mobileScreen,
+    ItemToCustomize: !this.mobileScreen,
+  }
 
   get isAuthenticated (): boolean {
     return this.$store.getters.isAuthenticated
