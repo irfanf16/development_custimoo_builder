@@ -1,13 +1,12 @@
 <template>
-  <div class="page-wrapper m-4 bg-white border">
+  <div class="page-wrapper m-4">
     <b-container fluid>
       <b-row>
-        <b-col cols="12" lg="3" class="text-left border-right py-5 overflow-hidden home-color-area">
+        <b-col cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
           <ChooseColor :colors="colors"/>
             <div class="upload-logo-opener d-none d-lg-block">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
-                      <div class="icon-holder"><font-awesome-icon :icon="['fas', 'image']" /></div>
                     <div v-if="imagePath">
                       <img src="imagePath"/>
                     </div>
@@ -34,7 +33,7 @@
                 </b-modal>
             </div>
         </b-col>
-        <b-col cols="12" class="d-lg-none">
+        <b-col cols="12" class="d-lg-none pb-5">
           <ChooseInterest />
         </b-col>
         <b-col cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
@@ -170,9 +169,18 @@ export default class Home extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.home-color-area{
-  @media only screen and (min-width: 992px){padding-bottom: 10rem !important;}
-}
+  .page-wrapper{
+    @media only screen and (min-width: 992px){
+      border: 1px solid #dee2e6;
+      background: #fff;
+    }
+  }
+  .home-color-area{
+    @media only screen and (min-width: 992px){
+      padding-bottom: 10rem !important;
+      border-right: 1px solid #dee2e6;
+    }
+  }
   .upload-logo-opener{
     position: absolute;
     left: 0;
