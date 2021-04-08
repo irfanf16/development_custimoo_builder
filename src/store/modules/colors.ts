@@ -7,16 +7,11 @@ const Colors:Module<any, any> = {
     jwtToken: ''
   },
   mutations: {
-    defaultFillColors(state: Record<any, any>) {
-      console.log('here')
-      const url = '/product/colors?default_color=1'
-      http.get(url).then((response: any) => {
-        localStorage.setItem('defaultFillColors', response.data.data.color.color_text);
-        state.defaultFillColors = JSON.parse(response.data.data.color.color_text);
-        state.categories = response.data.data.categories;
-      }).catch((e: any) => {
-        console.log(e)
-      });
+    defaultFillColors(state: Record<any, any>, payload: Record<any, any>) {
+      if(payload){
+        state.categories = payload.categories
+        state.defaultFillColors = JSON.parse(payload.color.color_text)
+      }
     },
     jwtToken(state: Record<any, any>, jwtToken) {
       localStorage.setItem('jwtToken', JSON.stringify(jwtToken));
@@ -36,13 +31,21 @@ const Colors:Module<any, any> = {
       return state.defaultFillColors
     },
     getDefaultFilledColors: state => {
-      return state.defaultFillColors.filter((fillColor: Record<any, any>) => fillColor.color != null)
+        return state.defaultFillColors.filter((fillColor: Record<any, any>) => fillColor.color != null)
     },
     getJwtToken: state => {
-      return state.jwtToken.filter((jwtToken: Record<any, any>) => jwtToken != null)
+      return state.jwtToken
     }
   },
   actions: {
+    setDefaultFillColors({commit}){
+      const url = '/product/colors?default_color=1'
+      http.get(url).then((response: any) => {
+        commit('defaultFillColors', response.data.data)
+      }).catch((e: any) => {
+        console.log(e)
+      });
+    }
   },
 }
 export default Colors;
