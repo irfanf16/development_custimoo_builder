@@ -9,7 +9,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { Group } from 'fabric/fabric-impl'
-import store from '@/store'
 
 @Component<Scene>({
   mounted () {
@@ -19,7 +18,7 @@ import store from '@/store'
     }
 
     const self = this
-    store.commit('defaultFillColors')
+    this.$store.commit('defaultFillColors')
     setTimeout(() => {
       if(self.fillColors){
         self.changeColor()
