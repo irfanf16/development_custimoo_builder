@@ -70,7 +70,7 @@ import { http } from "@/httpCommon"
     if (this.isAuthenticated) {
       this.retrieveProducts()
     }
-    this.$store.commit('defaultFillColors')
+    this.$store.dispatch('setDefaultFillColors')
     console.log(this.categories)
   }
 })
