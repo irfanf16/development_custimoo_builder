@@ -8,9 +8,10 @@ const Colors:Module<any, any> = {
   },
   mutations: {
     defaultFillColors(state: Record<any, any>, payload: Record<any, any>) {
-      console.log('here')
-      state.categories = payload.categories
-      state.defaultFillColors = payload.color
+      if(payload){
+        state.categories = payload.categories
+        state.defaultFillColors = JSON.parse(payload.color.color_text)
+      }
     },
     jwtToken(state: Record<any, any>, jwtToken) {
       localStorage.setItem('jwtToken', JSON.stringify(jwtToken));
@@ -30,7 +31,7 @@ const Colors:Module<any, any> = {
       return state.defaultFillColors
     },
     getDefaultFilledColors: state => {
-      return state.defaultFillColors.filter((fillColor: Record<any, any>) => fillColor.color != null)
+        return state.defaultFillColors.filter((fillColor: Record<any, any>) => fillColor.color != null)
     },
     getJwtToken: state => {
       return state.jwtToken

@@ -18,8 +18,9 @@ import { Group } from 'fabric/fabric-impl'
     }
 
     const self = this
-    this.$store.commit('defaultFillColors')
+    this.$store.dispatch('setDefaultFillColors')
     setTimeout(() => {
+      console.log(self.fillColors)
       if(self.fillColors){
         self.changeColor()
       }
@@ -40,6 +41,10 @@ export default class Scene extends Vue {
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
   private backTexture !: any
+
+  get fillColors(): [Record<any, any>] {
+    return this.$store.getters.getDefaultFilledColors
+  }
 
   public loadScene (ImageData: any, canvas: fabric.Canvas, side: string) {
     let element = this.$refs.front as HTMLCanvasElement
@@ -137,7 +142,7 @@ export default class Scene extends Vue {
   public changeColor() {
     const self = this
 
-    const svgGroupIds = this.frontTexture.getObjects().map(item => item.id)
+    const svgGroupIds = this.frontTexture.getObjects().map((item : Record<any, any>) => item.id)
       .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
 
     let colorsByGroup = []
