@@ -9,7 +9,6 @@
           <strong>{{ chooseColor.name }}</strong>
         </div>
       </a>
-      
     </div>
     <div v-if="colorPickerActive">
       <transition name="list">
