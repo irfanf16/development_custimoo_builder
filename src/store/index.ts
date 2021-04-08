@@ -23,9 +23,14 @@ export default new Vuex.Store({
         console.log(e)
       });
     },
-    jwtToken(state: Record<any, any>, jwtToken) {
-      localStorage.setItem('jwtToken', JSON.stringify(jwtToken));
-      state.jwtToken = jwtToken;
+    jwtToken(state: Record<any, any>) {
+      const url = 'https://dev.customize.ninja/index.php?route=account/kbauthtoken'
+      http.get(url).then((response: any) => {
+        localStorage.setItem('jwtToken', response.data.access_token);
+        state.jwtToken = response.data.access_token;
+      }).catch((e: any) => {
+        console.log(e)
+      });
     },
     initialiseStore(state: Record<any, any>) {
       if (localStorage.getItem('defaultFillColors')) {
