@@ -72,7 +72,6 @@ import { http } from "@/httpCommon"
     this.mobileScreen = this.$store.state.is_mobile
 
     this.$store.dispatch('setDefaultFillColors')
-    console.log(this.manageComponents)
   }
 })
 

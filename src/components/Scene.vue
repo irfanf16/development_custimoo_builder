@@ -36,7 +36,6 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 290}) readonly mainCanvasHeight!: number;
   @Prop({required: false, default: 235}) readonly canvasWidth!: number;
   @Prop({required: false, default: 290}) readonly canvasHeight!: number;
-  @Prop({required: false, default: false}) readonly haveControls!: boolean;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -74,7 +73,7 @@ export default class Scene extends Vue {
       }else {
         objects = objects.filter((object: Record<any, any>) => !object.id.includes('back'))
       }
-      // console.log(options);
+
       const img = fabric.util.groupSVGElements(objects, options) as Group
       img.scaleToWidth(canvas.getWidth() - 10).set({
         hasControls: false,
@@ -104,24 +103,25 @@ export default class Scene extends Vue {
     const self = this
 
     let logosLoaded = true
-    if(this.logos && side == 'front') {
+    const logos = this.logos.filter((logo: Record<any, any>) => logo.side == side)
+    if(logos.length) {
       logosLoaded = false
-      this.logos.forEach((logo: Record<any, any>, index: number) => {
+      logos.forEach((logo: Record<any, any>, index: number) => {
         fabric.Image.fromURL(logo.url, (img: any) => {
           img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
             .scaleToHeight(canvas.getHeight() / self.mainCanvasHeight * logo.height)
             .set({
               left: canvas.getWidth() / self.mainCanvasWidth * logo.x,
               top: canvas.getHeight() / self.mainCanvasHeight * logo.y,
-              selectable: self.haveControls,
-              hasControls: self.haveControls,
-              hasBorders: self.haveControls,
-              evented: self.haveControls,
+              selectable: logo.haveControls,
+              hasControls: logo.haveControls,
+              hasBorders: logo.haveControls,
+              evented: logo.haveControls,
               globalCompositeOperation: 'source-atop'
             })
-
+          console.log(logo.haveControls)
           logoObjects.push(img)
-          if(index + 1 == self.logos.length){
+          if(index + 1 == logos.length){
             logosLoaded = true
           }
         })
