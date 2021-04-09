@@ -2,9 +2,9 @@
   <div class="page-wrapper m-4">
     <b-container fluid>
       <b-row>
-        <b-col cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
+        <b-col v-if="manageComponents.ChooseColor" cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
           <ChooseColor :colors="colors"/>
-            <div class="upload-logo-opener d-none d-lg-block">
+            <div v-if="!mobileScreen" class="upload-logo-opener d-none d-lg-block">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
                     <div v-if="imagePath">
@@ -27,22 +27,22 @@
                     <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
                     <div class="upload-logo-buttons">
                       <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
-                      <input type="file" name="logos" ref="fileInput" @change="uploadImage" class="fileLoader">
+                      <input type="file" name="logos" ref="fileInput" @change="uploadImage" class="fileLoader" accept="image/x-png,image/jpeg">
                       <b-button class="btn-upload" @click="uploadLogo">Confirm and Upload logo</b-button>
                     </div>
                 </b-modal>
             </div>
         </b-col>
-        <b-col cols="12" class="d-lg-none pb-5">
+        <b-col v-if="manageComponents.ChooseInterest" cols="12" class="pb-5">
           <ChooseInterest />
         </b-col>
-        <b-col cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
+        <b-col v-if="manageComponents.CustomizationPreview" cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
           <div class="customization-area p-5">
             <CustomizationPreview :designs="products[designsIndex]" />
             <b-button class="mt-5" variant="secondary">Continue</b-button>
           </div>
         </b-col>
-        <b-col cols="3" class="d-none d-lg-block">
+        <b-col v-if="manageComponents.ItemToCustomize" cols="3" class="d-none d-lg-block">
           <ItemToCustomize :productListing="products" :categories="categories" ref="updateCarousel" @designsData="changeProduct" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
         </b-col>
       </b-row>
@@ -69,8 +69,11 @@ import { http } from "@/httpCommon"
     if (this.isAuthenticated) {
       this.retrieveProducts()
     }
+    this.mobileScreen = this.$store.state.is_mobile
     this.$store.dispatch('setDefaultFillColors')
-    console.log(this.categories)
+    this.$store.dispatch('setJwtToken')
+    this.$store.dispatch('setBrowserToken')
+    console.log(this.manageComponents)
   }
 })
 
@@ -86,6 +89,14 @@ export default class Home extends Vue {
   public provider_id = 'oVXYIzKY'
   public imagePath = ''
   public ref = this.$refs as Record<any, any>
+  public mobileScreen = this.$store.state.mobileScreen
+  public manageComponents = {
+    ChooseColor: true,
+    UploadLogo: !this.mobileScreen,
+    ChooseInterest: this.mobileScreen,
+    CustomizationPreview: !this.mobileScreen,
+    ItemToCustomize: !this.mobileScreen,
+  }
 
   get isAuthenticated (): boolean {
     return this.$store.getters.isAuthenticated
@@ -160,9 +171,12 @@ export default class Home extends Vue {
     }
     fd.append('image', img)
     http.post('/upload-image', fd, header)
-    // http.post('/upload-image', fd)
       .then(resp => {
         this.imagePath = resp.data.path
+        this.hideModal()
+      })
+      .catch((e: any) => {
+        console.log(e)
       })
   }
 }
