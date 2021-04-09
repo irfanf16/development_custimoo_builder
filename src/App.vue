@@ -7,19 +7,12 @@
 
 <script>
 import Header from '@/components/Header.vue';
-import {noTokenRequest} from "@/httpCommon";
-import store from "@/store/index";
 
 export default{
   name: 'App',
   components: {
     Header
-  },
-  store: store,
-  data: function () {
-    return {
-    }
-  },
+  }
 }
 </script>
 

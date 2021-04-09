@@ -18,7 +18,6 @@ import { Group } from 'fabric/fabric-impl'
     }
 
     const self = this
-    this.$store.dispatch('setDefaultFillColors')
     // setTimeout(() => {
     //   console.log(self.fillColors)
     //   if(self.fillColors){

@@ -18,6 +18,9 @@ import Scene from '@/components/Scene.vue' // @ is an alias to /src
 @Component({
   components: {
     Scene
+  },
+  mounted () {
+    this.$store.dispatch('setDefaultFillColors')
   }
 })
 export default class ViewScene extends Vue {}
