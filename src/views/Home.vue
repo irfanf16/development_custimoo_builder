@@ -27,7 +27,7 @@
                     <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
                     <div class="upload-logo-buttons">
                       <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
-                      <input type="file" name="logos" ref="fileInput" @change="uploadImage" class="fileLoader">
+                      <input type="file" name="logos" ref="fileInput" @change="uploadImage" class="fileLoader" accept="image/x-png,image/jpeg">
                       <b-button class="btn-upload" @click="uploadLogo">Confirm and Upload logo</b-button>
                     </div>
                 </b-modal>
@@ -70,8 +70,10 @@ import { http } from "@/httpCommon"
       this.retrieveProducts()
     }
     this.mobileScreen = this.$store.state.is_mobile
-
     this.$store.dispatch('setDefaultFillColors')
+    this.$store.dispatch('setJwtToken')
+    this.$store.dispatch('setBrowserToken')
+    console.log(this.manageComponents)
   }
 })
 
@@ -169,9 +171,12 @@ export default class Home extends Vue {
     }
     fd.append('image', img)
     http.post('/upload-image', fd, header)
-    // http.post('/upload-image', fd)
       .then(resp => {
         this.imagePath = resp.data.path
+        this.hideModal()
+      })
+      .catch((e: any) => {
+        console.log(e)
       })
   }
 }
