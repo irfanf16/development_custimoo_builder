@@ -103,29 +103,30 @@ export default class Scene extends Vue {
     const self = this
 
     let logosLoaded = true
-    const logos = this.logos.filter((logo: Record<any, any>) => logo.side == side)
-    if(logos.length) {
-      logosLoaded = false
-      logos.forEach((logo: Record<any, any>, index: number) => {
-        fabric.Image.fromURL(logo.url, (img: any) => {
-          img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
-            .scaleToHeight(canvas.getHeight() / self.mainCanvasHeight * logo.height)
-            .set({
-              left: canvas.getWidth() / self.mainCanvasWidth * logo.x,
-              top: canvas.getHeight() / self.mainCanvasHeight * logo.y,
-              selectable: logo.haveControls,
-              hasControls: logo.haveControls,
-              hasBorders: logo.haveControls,
-              evented: logo.haveControls,
-              globalCompositeOperation: 'source-atop'
-            })
-          console.log(logo.haveControls)
-          logoObjects.push(img)
-          if(index + 1 == logos.length){
-            logosLoaded = true
-          }
+    if(this.logos) {
+      const logos = this.logos.filter((logo: Record<any, any>) => logo.side == side)
+      if (logos.length) {
+        logosLoaded = false
+        logos.forEach((logo: Record<any, any>, index: number) => {
+          fabric.Image.fromURL(logo.url, (img: any) => {
+            img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
+              .scaleToHeight(canvas.getHeight() / self.mainCanvasHeight * logo.height)
+              .set({
+                left: canvas.getWidth() / self.mainCanvasWidth * logo.x,
+                top: canvas.getHeight() / self.mainCanvasHeight * logo.y,
+                selectable: logo.haveControls,
+                hasControls: logo.haveControls,
+                hasBorders: logo.haveControls,
+                evented: logo.haveControls,
+                globalCompositeOperation: 'source-atop'
+              })
+            logoObjects.push(img)
+            if (index + 1 == logos.length) {
+              logosLoaded = true
+            }
+          })
         })
-      })
+      }
     }
 
     const timer = setInterval(() => {
