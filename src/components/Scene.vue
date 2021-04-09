@@ -54,7 +54,7 @@ export default class Scene extends Vue {
 
     let model: any
     fabric.Image.fromURL(ImageData.modelUrl,  (img: any) => {
-      img.scaleToWidth(canvas.getWidth() - 10).set({
+      img.scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
         selectable: false,
         evented: false,
@@ -72,9 +72,12 @@ export default class Scene extends Vue {
       }else {
         objects = objects.filter((object: Record<any, any>) => !object.id.includes('back'))
       }
-
-      const img = fabric.util.groupSVGElements(objects, options) as Group
-      img.scaleToWidth(canvas.getWidth() - 10).set({
+      if(side == 'front'){
+        // options.height = 1350
+      }
+      console.log(options)
+      const img = fabric.util.groupSVGElements(objects) as Group
+      img.scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
         selectable: false,
         evented: false,
