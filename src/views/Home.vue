@@ -69,7 +69,6 @@ import { http } from "@/httpCommon"
     if (this.isAuthenticated) {
       this.retrieveProducts()
       this.getFillColors()
-      // this.mergeLogos()
     }
     this.mobileScreen = this.$store.state.is_mobile
     this.$store.dispatch('setCategories')
@@ -188,7 +187,7 @@ export default class Home extends Vue {
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
         this.logoUrl = this.apiBaseUrl+'/'+resp.data.file.logo_url
-        let logo = {url: resp.data.file.logo_url, width: 100, height: 100, x: 150, y: 190, haveControls: true, side: 'front'}
+        let logo = {url: resp.data.file.logo_url, width: 100, height: 100, x_axis: 150, y_axis: 190, haveControls: true, side: 'front'}
         this.logos.push(logo)
         localStorage.setItem('customer_logos', JSON.stringify(this.logos))
         this.hideModal()
