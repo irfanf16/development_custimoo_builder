@@ -5,7 +5,7 @@
       <a href="#" v-for="(chooseColor, index) in chooseColors" :key="index" v-on:click="showColor(index)">
         <div>
           <div class="color-circle"
-               :style="{ background : chooseColor.color? chooseColor.color : ' url(' + colorImage + ') no-repeat 50% 50% / cover' }"></div>
+               :style="{ background : chooseColor.color? chooseColor.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></div>
           <strong>{{ chooseColor.name }}</strong>
         </div>
       </a>

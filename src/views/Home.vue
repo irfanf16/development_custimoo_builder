@@ -3,7 +3,7 @@
     <b-container fluid>
       <b-row>
         <b-col v-if="manageComponents.ChooseColor" cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
-          <ChooseColor :colors="colors"/>
+          <ChooseColor :colors="colors" />
             <div v-if="!mobileScreen" class="upload-logo-opener d-none d-lg-block">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
@@ -68,9 +68,10 @@ import { http } from "@/httpCommon"
   mounted() {
     if (this.isAuthenticated) {
       this.retrieveProducts()
+      this.getFillColors()
     }
     this.mobileScreen = this.$store.state.is_mobile
-    this.$store.dispatch('setDefaultFillColors')
+    this.$store.dispatch('setCategories')
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
     console.log(this.manageComponents)
@@ -84,7 +85,7 @@ export default class Home extends Vue {
   public hasProducts = true
   public category_id !: string
   public search = ''
-  public default_color = true
+  public colors = []
   public product_id !: number
   public provider_id = 'oVXYIzKY'
   public logoUrl = ''
@@ -103,11 +104,17 @@ export default class Home extends Vue {
   get isAuthenticated (): boolean {
     return this.$store.getters.isAuthenticated
   }
-  get colors(): [] {
-    return this.$store.getters.getDefaultColors
-  }
   get categories(): [] {
     return this.$store.getters.getCategories
+  }
+
+  getFillColors(){
+    const url = '/product/colors?default_color=1'
+    http.get(url).then((response: any) => {
+      this.colors = JSON.parse(response.data.color_text)
+    }).catch((e: any) => {
+      console.log(e)
+    });
   }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {

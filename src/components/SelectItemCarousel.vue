@@ -33,7 +33,7 @@ export default {
       this.$emit('designsData', index)
     },
     loadMoreProduct: function (currentIndex) {
-      if(this.productListingCarousel.length == currentIndex + 1){
+      if(this.productListingCarousel.length - 5 <= currentIndex){
         this.$emit('retrieveProductsC', 1)
       }
     }

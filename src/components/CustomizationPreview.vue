@@ -6,14 +6,14 @@
           <Scene v-else :canvas-width="235" :canvas-height="290" :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ designs.productstyles[0].front.file_url}" :logos="designs.productstyles[0].logo" />
         </div>
       </template>
-    </div>
+    </div> 
 </template>
 
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator'
   import Scene from "@/components/Scene.vue"
 
-  @Component<CustomizationPreview>({
+  @Component<CustomizationPreview>({ 
     components: {
       Scene
     },
