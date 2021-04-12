@@ -76,7 +76,6 @@ export default class Scene extends Vue {
       if(side == 'front'){
         // options.height = 1350
       }
-      console.log(options)
       const img = fabric.util.groupSVGElements(objects) as Group
       img.scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
@@ -138,6 +137,7 @@ export default class Scene extends Vue {
       if(model && texture && logosLoaded) {
         canvas.add(texture)
         logoObjects.forEach((logoObject) => {
+          console.log(logoObject)
           canvas.add(logoObject)
         })
         canvas.add(model)

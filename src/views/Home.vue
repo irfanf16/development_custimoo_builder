@@ -69,6 +69,7 @@ import { http } from "@/httpCommon"
     if (this.isAuthenticated) {
       this.retrieveProducts()
       this.getFillColors()
+      // this.mergeLogos()
     }
     this.mobileScreen = this.$store.state.is_mobile
     this.$store.dispatch('setCategories')
@@ -126,12 +127,21 @@ export default class Home extends Vue {
     }
 
     if(this.hasProducts) {
+      const self = this
       http.get(url).then((response: any) => {
         this.products = this.products.concat(response.data.products.data)
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
         }
+
+        if(localStorage.getItem('customer_logos')){
+          let customer_logos = JSON.parse(localStorage.getItem('customer_logos') as string)
+          this.logos = this.logos.concat(customer_logos)
+        }
+        this.logos.forEach((logo, index)=> {
+          self.mergeLogos(index)
+        })
       }).catch((e: any) => {
         console.log(e)
       });
@@ -181,16 +191,23 @@ export default class Home extends Vue {
     fd.append('file', img)
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
-        console.log(resp)
         this.logoUrl = this.apiBaseUrl+'/'+resp.data.file.logo_url
-        let logo = {url: this.logoUrl, width: 100, height: 100, x: 100, y: 117, haveControls: true, side: 'front'}
-        this.logos = this.logos.concat(logo)
-        console.log(this.logos)
+        let logo = {url: resp.data.file.logo_url, width: 100, height: 100, x: 150, y: 190, haveControls: true, side: 'front'}
+        this.logos.push(logo)
+        localStorage.setItem('customer_logos', JSON.stringify(this.logos))
         this.hideModal()
+        this.mergeLogos(this.logos.length-1)
       })
       .catch((e: any) => {
         console.log(e)
       })
+  }
+
+  public mergeLogos(index: number){
+    const self = this
+    this.products.forEach((product: any, key: number) => {
+      self.$set(this.products[key].productstyles[0].logo, product.productstyles[0].logo.length, this.logos[index])
+    })
   }
 }
 </script>
