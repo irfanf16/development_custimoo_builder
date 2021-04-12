@@ -7,9 +7,6 @@ import Main from "@/store/modules/main";
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  state: {
-    mobileScreen: false
-  },
   modules: {
     Auth,
     ProductAttributes,

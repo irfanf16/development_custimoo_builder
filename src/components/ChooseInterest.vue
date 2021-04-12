@@ -7,14 +7,20 @@
             <b-button><div class="icon-holder"><font-awesome-icon :icon="['fas', 'baseball-ball']"/></div> <strong>Baseball</strong></b-button>
             <b-button><div class="icon-holder"><font-awesome-icon :icon="['fas', 'tshirt']"/></div> <strong>Accessories</strong></b-button>
         </div>
-        <button class="btn btn-secondary w-100 fw-bold">Show Me Design</button>
+        <button @click="showDesign()" class="btn btn-secondary w-100 fw-bold">Show Me Design</button>
     </div>
 </template>
 
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator'
     @Component<ChooseInterest>({})
-    export default class ChooseInterest extends Vue{}
+    export default class ChooseInterest extends Vue{
+      public showDesign() {
+        this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
+        this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: false})
+        this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
+      }
+    }
 </script>
 
 <style lang="scss" scoped>

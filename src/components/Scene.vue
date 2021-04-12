@@ -86,11 +86,11 @@ export default class Scene extends Vue {
         lockMovementY: true
       })
 
-      img._objects.forEach((element: any) => {
-        if(element.id === 'Laces') {
-          element.globalCompositeOperation = 'destination-out'
-        }
-      })
+      // img._objects.forEach((element: any) => {
+      //   if(element.id === 'Laces') {
+      //     element.globalCompositeOperation = 'destination-out'
+      //   }
+      // })
       img.center().setCoords();
       texture = img
       if(side === 'back'){

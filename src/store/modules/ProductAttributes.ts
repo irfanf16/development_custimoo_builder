@@ -2,7 +2,8 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 const ProductAttributes:Module<any, any> = {
   state: {
-    categories: []
+    categories: [],
+    DefaultFilledColors: []
   },
   mutations: {
     categories(state: Record<any, any>, categories: Record<any, any>) {

@@ -4,7 +4,7 @@
       <b-row>
         <b-col v-if="manageComponents.ChooseColor" cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
           <ChooseColor :colors="colors" />
-            <div v-if="!mobileScreen" class="upload-logo-opener d-none d-lg-block">
+            <div v-if="!manageComponents.mobileScreen" class="upload-logo-opener d-none d-lg-block">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
                     <div v-if="logoUrl">
@@ -74,7 +74,6 @@ import { http } from "@/httpCommon"
     this.$store.dispatch('setCategories')
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
-    console.log(this.manageComponents)
   }
 })
 
@@ -92,13 +91,7 @@ export default class Home extends Vue {
   public ref = this.$refs as Record<any, any>
   public mobileScreen = this.$store.state.mobileScreen
   private logos : any[] = []
-  public manageComponents = {
-    ChooseColor: true,
-    UploadLogo: !this.mobileScreen,
-    ChooseInterest: this.mobileScreen,
-    CustomizationPreview: !this.mobileScreen,
-    ItemToCustomize: !this.mobileScreen,
-  }
+
   private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
 
   get isAuthenticated (): boolean {
@@ -106,6 +99,9 @@ export default class Home extends Vue {
   }
   get categories(): [] {
     return this.$store.getters.getCategories
+  }
+  get manageComponents(): [] {
+    return this.$store.getters.getManageComponents
   }
 
   getFillColors(){
