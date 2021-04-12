@@ -1,7 +1,32 @@
 import {http, noTokenRequest} from "@/httpCommon";
 import { Module } from "vuex";
+const mobileScreen = false
 const Main:Module<any, any> = {
+  state: {
+    mobileScreen: mobileScreen,
+    manageComponents: {
+      mobileScreen: mobileScreen,
+      ChooseColor: true,
+      UploadLogo: !mobileScreen,
+      ChooseInterest: mobileScreen,
+      CustomizationPreview: !mobileScreen,
+      ItemToCustomize: !mobileScreen,
+    }
+  },
+  mutations: {
+    manageComponents(state: Record<any, any>, payload: Record<any, any>) {
+      state.manageComponents[payload.index] = payload.value
+    }
+  },
+  getters: {
+    getManageComponents: state => {
+      return state.manageComponents
+    }
+  },
   actions: {
+    setManageComponents({ commit }, payload) {
+      commit('manageComponents', payload)
+    },
     setJwtToken() {
       if(!localStorage.getItem('jwtToken')) {
         /***************** THIS LINE ADDED TEMPORARILY  IT WILL REMOVE WHEN JWT TOKEN WILL GET FROM URL *****************/

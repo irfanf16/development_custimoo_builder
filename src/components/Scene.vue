@@ -85,11 +85,11 @@ export default class Scene extends Vue {
         lockMovementY: true
       })
 
-      img._objects.forEach((element: any) => {
-        if(element.id === 'Laces') {
-          element.globalCompositeOperation = 'destination-out'
-        }
-      })
+      // img._objects.forEach((element: any) => {
+      //   if(element.id === 'Laces') {
+      //     element.globalCompositeOperation = 'destination-out'
+      //   }
+      // })
       img.center().setCoords();
       texture = img
       if(side === 'back'){
@@ -137,7 +137,6 @@ export default class Scene extends Vue {
       if(model && texture && logosLoaded) {
         canvas.add(texture)
         logoObjects.forEach((logoObject) => {
-          console.log(logoObject)
           canvas.add(logoObject)
         })
         canvas.add(model)
