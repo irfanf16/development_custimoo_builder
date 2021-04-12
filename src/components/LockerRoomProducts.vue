@@ -478,7 +478,7 @@
         .products-block{
             flex: 0 0 18%;
             max-width: 18%;
-            margin: 0 0.65rem 25px;
+            margin: 0 0.6rem 25px;
             .image-holder{
                 position: relative;
                 overflow: hidden;

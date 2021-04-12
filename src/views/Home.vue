@@ -3,7 +3,7 @@
     <b-container fluid>
       <b-row>
         <b-col v-if="manageComponents.ChooseColor" cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
-          <ChooseColor :colors="colors"/>
+          <ChooseColor :colors="colors" />
             <div v-if="!mobileScreen" class="upload-logo-opener d-none d-lg-block">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
