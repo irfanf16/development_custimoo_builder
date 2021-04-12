@@ -39,6 +39,7 @@ export default class Scene extends Vue {
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
   private backTexture !: any
+  private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -110,12 +111,14 @@ export default class Scene extends Vue {
       if (logos.length) {
         logosLoaded = false
         logos.forEach((logo: Record<any, any>, index: number) => {
-          fabric.Image.fromURL(logo.url, (img: any) => {
+          let planeUrl = this.apiBaseUrl+'/'+logo.url
+          let url = planeUrl.trim().split(' ').join('%20')
+          fabric.Image.fromURL(url, (img: any) => {
             img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
               .scaleToHeight(canvas.getHeight() / self.mainCanvasHeight * logo.height)
               .set({
-                left: canvas.getWidth() / self.mainCanvasWidth * logo.x,
-                top: canvas.getHeight() / self.mainCanvasHeight * logo.y,
+                left: canvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
+                top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
                 selectable: logo.haveControls,
                 hasControls: logo.haveControls,
                 hasBorders: logo.haveControls,

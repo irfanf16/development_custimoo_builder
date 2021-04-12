@@ -3,12 +3,12 @@
     <b-container fluid>
       <b-row>
         <b-col v-if="manageComponents.ChooseColor" cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
-          <ChooseColor :colors="colors"/>
+          <ChooseColor :colors="colors" />
             <div v-if="!mobileScreen" class="upload-logo-opener d-none d-lg-block">
                 <b-button v-b-modal.modal-center>
                   <div class="upload-box">
-                    <div v-if="imagePath">
-                      <img src="imagePath"/>
+                    <div v-if="logoUrl">
+                      <img :src="logoUrl" width="100%"/>
                     </div>
                     <div v-else>
                       <div class="icon-holder">
@@ -38,7 +38,7 @@
         </b-col>
         <b-col v-if="manageComponents.CustomizationPreview" cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
           <div class="customization-area p-5">
-            <CustomizationPreview :designs="products[designsIndex]" />
+            <CustomizationPreview :designs="products[designsIndex]" :logos="logos"/>
             <b-button class="mt-5" variant="secondary">Continue</b-button>
           </div>
         </b-col>
@@ -88,9 +88,10 @@ export default class Home extends Vue {
   public colors = []
   public product_id !: number
   public provider_id = 'oVXYIzKY'
-  public imagePath = ''
+  public logoUrl = ''
   public ref = this.$refs as Record<any, any>
   public mobileScreen = this.$store.state.mobileScreen
+  private logos : any[] = []
   public manageComponents = {
     ChooseColor: true,
     UploadLogo: !this.mobileScreen,
@@ -98,6 +99,7 @@ export default class Home extends Vue {
     CustomizationPreview: !this.mobileScreen,
     ItemToCustomize: !this.mobileScreen,
   }
+  private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
 
   get isAuthenticated (): boolean {
     return this.$store.getters.isAuthenticated
@@ -176,10 +178,14 @@ export default class Home extends Vue {
         'Content-Type': 'multipart/form-data'
       }
     }
-    fd.append('image', img)
-    http.post('/upload-image', fd, header)
+    fd.append('file', img)
+    http.post('/customer/upload/logo', fd, header)
       .then(resp => {
-        this.imagePath = resp.data.path
+        console.log(resp)
+        this.logoUrl = this.apiBaseUrl+'/'+resp.data.file.logo_url
+        let logo = {url: this.logoUrl, width: 100, height: 100, x: 100, y: 117, haveControls: true, side: 'front'}
+        this.logos = this.logos.concat(logo)
+        console.log(this.logos)
         this.hideModal()
       })
       .catch((e: any) => {
