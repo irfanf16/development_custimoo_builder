@@ -27,7 +27,7 @@
                     <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
                     <div class="upload-logo-buttons">
                       <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
-                      <input type="file" name="logos" ref="fileInput" @change="uploadImage" class="fileLoader" accept="image/x-png,image/jpeg">
+                      <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader" accept="image/x-png,image/jpeg">
                       <b-button class="btn-upload" @click="uploadLogo">Confirm and Upload logo</b-button>
                     </div>
                 </b-modal>
@@ -162,7 +162,7 @@ export default class Home extends Vue {
     this.ref.myModal.hide()
   }
 
-  public uploadImage(e: any) {
+  public uploadLogoImage(e: any) {
     let img = e.target.files[0]
     console.log(img)
     let fd = new FormData()
