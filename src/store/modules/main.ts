@@ -4,6 +4,9 @@ const Main:Module<any, any> = {
   actions: {
     setJwtToken() {
       if(!localStorage.getItem('jwtToken')) {
+        /***************** THIS LINE ADDED TEMPORARILY  IT WILL REMOVE WHEN JWT TOKEN WILL GET FROM URL *****************/
+        localStorage.setItem('jwtToken', process.env.VUE_APP_JWT_TOKEN)
+        /*****************************-------------------*******************************/
         const url = "https://dev.customize.ninja/index.php?route=account/kbauthtoken"
         const config = {
           crossDomain: true,
