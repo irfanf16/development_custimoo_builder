@@ -79,7 +79,11 @@ import { http } from "@/httpCommon"
       this.retrieveProducts()
       this.getFillColors()
     }
-    this.getLogoAssociation()
+    this.isAssociation = localStorage.getItem('isAssociation')
+    this.jwtToken = localStorage.getItem('jwtToken')
+    if(this.isAssociation == 'true' && this.jwtToken){
+      this.getLogoAssociation()
+    }
     this.mobileScreen = this.$store.state.is_mobile
     this.$store.dispatch('setCategories')
     this.$store.dispatch('setJwtToken')
@@ -101,6 +105,8 @@ export default class Home extends Vue {
   public ref = this.$refs as Record<any, any>
   public mobileScreen = this.$store.state.mobileScreen
   private logos : any[] = []
+  private isAssociation = false
+  private jwtToken !: string
 
   private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
 
@@ -205,6 +211,9 @@ export default class Home extends Vue {
         let logo = {url: resp.data.file.logo_url, width: 100, height: 100, x_axis: 150, y_axis: 190, haveControls: true, side: 'front'}
         this.logos.push(logo)
         localStorage.setItem('customer_logos', JSON.stringify(this.logos))
+        if(!this.jwtToken) {
+          localStorage.setItem('isAssociation', 'true')
+        }
         this.hideModal()
         this.mergeLogos(this.logos.length-1)
       })
@@ -224,6 +233,7 @@ export default class Home extends Vue {
     const url = '/customer/associateresource'
     http.get(url).then((response: any) => {
       console.log(response)
+      localStorage.setItem('isAssociation', 'false')
     }).catch((e: any) => {
       console.log(e)
     });
