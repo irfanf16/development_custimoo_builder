@@ -3,6 +3,7 @@ import { Module } from "vuex";
 const ProductAttributes:Module<any, any> = {
   state: {
     categories: [],
+    customLogos: [],
     DefaultFilledColors: []
   },
   mutations: {
@@ -10,11 +11,19 @@ const ProductAttributes:Module<any, any> = {
       if(categories){
         state.categories = categories
       }
+    },
+    customLogos(state: Record<any, any>, customLogos: Record<any, any>) {
+      if(customLogos){
+        state.customLogos = customLogos
+      }
     }
   },
   getters: {
     getCategories: state => {
       return state.categories
+    },
+    getCustomLogos: state => {
+      return state.customLogos
     }
   },
   actions: {
@@ -25,6 +34,9 @@ const ProductAttributes:Module<any, any> = {
       }).catch((e: any) => {
         console.log(e)
       });
+    },
+    setCustomLogos({commit}, payload){
+        commit('categories', payload)
     }
   }
 }

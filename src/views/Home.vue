@@ -45,8 +45,36 @@
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
           <div class="customization-area p-5">
-            <CustomizationPreview :designs="products[designsIndex]" :logos="logos"/>
-            <b-button @click="showAdvanceCustomization()" class="mt-5" variant="secondary">Continue</b-button>
+            <template v-if="manageComponents.AdvanceCustomization">
+              <div class="customization-preview-process">
+                <header class="preview-area-header py-4">
+                  <div class="buttons-preview text-left">
+                    <b-button variant="outline-secondary" v-b-modal.modal-center>Locker room</b-button>
+                    <LockerRoomModal />
+                    <b-button variant="outline-secondary">Save to locker room</b-button>
+                    <b-button variant="outline-secondary">Buy Now</b-button>
+                  </div>
+                  <ul class="preview-header-icons">
+                    <li><a href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a></li>
+                    <li><a href="#."><font-awesome-icon :icon="['fas', 'redo-alt']" /></a></li>
+                  </ul>
+                </header>
+                <div class="undo-btn-area text-left pt-3">
+                  <b-button variant="outline-secondary mr-2">Undo</b-button>
+                  <b-button variant="outline-secondary">Redo</b-button>
+                </div>
+              </div>
+            </template>
+            <CustomizationPreview :designs="products[designsIndex]"/>
+            <template v-if="manageComponents.BasicCustomization">
+              <b-button @click="showAdvanceCustomization()" class="mt-5" variant="secondary">Continue</b-button>
+            </template>
+            <template v-if="manageComponents.AdvanceCustomization">
+              <div class="continue-btn-holder pt-5">
+                <b-button @click="showBasicCustomization()" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
+                <b-button class="mx-2 px-5" variant="secondary">Next</b-button>
+              </div>
+            </template>
           </div>
         </b-col>
         <b-col v-if="manageComponents.ItemToCustomize" cols="3" class="d-none d-lg-block">
@@ -104,7 +132,6 @@ export default class Home extends Vue {
   public logoUrl = ''
   public ref = this.$refs as Record<any, any>
   public mobileScreen = this.$store.state.mobileScreen
-  private logos : any[] = []
   private isAssociation = false
   private jwtToken !: string
 
@@ -133,6 +160,10 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
   }
+  public showBasicCustomization(){
+    this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
+    this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
+  }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {
     if (this.nextPageUrl && !searchCall) {
@@ -150,14 +181,6 @@ export default class Home extends Vue {
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
         }
-
-        if(localStorage.getItem('customer_logos')){
-          let customer_logos = JSON.parse(localStorage.getItem('customer_logos') as string)
-          this.logos = this.logos.concat(customer_logos)
-        }
-        this.logos.forEach((logo, index)=> {
-          self.mergeLogos(index)
-        })
       }).catch((e: any) => {
         console.log(e)
       });
@@ -209,24 +232,15 @@ export default class Home extends Vue {
       .then(resp => {
         this.logoUrl = this.apiBaseUrl+'/'+resp.data.file.logo_url
         let logo = {url: resp.data.file.logo_url, width: 100, height: 100, x_axis: 150, y_axis: 190, haveControls: true, side: 'front'}
-        this.logos.push(logo)
-        localStorage.setItem('customer_logos', JSON.stringify(this.logos))
+        this.$store.dispatch('setCustomLogos', logo)
         if(!this.jwtToken) {
           localStorage.setItem('isAssociation', 'true')
         }
         this.hideModal()
-        this.mergeLogos(this.logos.length-1)
       })
       .catch((e: any) => {
         console.log(e)
       })
-  }
-
-  public mergeLogos(index: number){
-    const self = this
-    this.products.forEach((product: any, key: number) => {
-      self.$set(this.products[key].productstyles[0].logo, product.productstyles[0].logo.length, this.logos[index])
-    })
   }
 
   public getLogoAssociation(){
@@ -349,5 +363,70 @@ export default class Home extends Vue {
   {
     display:none;
   }
+  //.customization-preview-process{
+    .undo-btn-area{
+      .btn{
+        color: #000;
+        border-color: #DDDFE3;
+        font-size: 12px;
+        font-weight: 600;
+        &:hover{
+          color: #fff;
+        }
+      }
+    }
+    .preview-area-header{
+      margin: 0 -15px;
+      padding: 26px 15px;
+      border-bottom: 1px solid #EDF2F6;
+      min-height: 91px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      .btn{
+        margin: 0 15px 0 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #000;
+        border-color: #DDDFE3;
+        border-radius: 5px;
+        &:hover{color: #fff;}
+      }
+      .preview-header-icons{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        align-items: center;
+        font-size: 18px;
+        list-style: none;
+        li{margin: 0 0 0 12px;}
+      }
+    }
+  //}
+  .preview-section{
+    overflow: hidden;
+    max-width: 610px;
+    margin: 0 auto;
+    .image-holder{
+      margin: 0 1%;
+      flex: 0 0 48%;
+      max-width: 48%;
+      img{
+        display: block;
+        max-width: 100%;
+        margin: 0 auto;
+        height: auto;
+      }
+    }
+  }
+  .preview-area-customize{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+  }
+
 
 </style>

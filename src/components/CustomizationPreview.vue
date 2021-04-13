@@ -16,19 +16,11 @@
   @Component<CustomizationPreview>({
     components: {
       Scene
-    },
-    mounted() {
-      this.test()
     }
   })
   export default class CustomizationPreview extends Vue {
     @Prop({required: true}) designs!: any
-    @Prop({required: true}) logos!: any
     private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
-
-    public test(){
-      console.log(this.logos)
-    }
   }
 </script>
 
