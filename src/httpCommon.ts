@@ -22,8 +22,8 @@ http.interceptors.request.use((request: AxiosRequestConfig ) => {
   }
   const jwtToken = localStorage.getItem('jwtToken')
   if (jwtToken) {
-    request.headers.CustomerToken = `Bearer ${jwtToken}`
-    request.headers.BrowserToken = ''
+    request.headers.CustomerToken = `${jwtToken}`
+    request.headers.BrowserToken = localStorage.getItem('browserToken')
   }
   else{
     request.headers.CustomerToken = ''

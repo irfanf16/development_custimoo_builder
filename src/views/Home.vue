@@ -79,6 +79,7 @@ import { http } from "@/httpCommon"
       this.retrieveProducts()
       this.getFillColors()
     }
+    this.getLogoAssociation()
     this.mobileScreen = this.$store.state.is_mobile
     this.$store.dispatch('setCategories')
     this.$store.dispatch('setJwtToken')
@@ -217,6 +218,15 @@ export default class Home extends Vue {
     this.products.forEach((product: any, key: number) => {
       self.$set(this.products[key].productstyles[0].logo, product.productstyles[0].logo.length, this.logos[index])
     })
+  }
+
+  public getLogoAssociation(){
+    const url = '/customer/associateresource'
+    http.get(url).then((response: any) => {
+      console.log(response)
+    }).catch((e: any) => {
+      console.log(e)
+    });
   }
 }
 </script>
