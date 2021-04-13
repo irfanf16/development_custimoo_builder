@@ -3,7 +3,6 @@ import { Module } from "vuex";
 const mobileScreen = false
 const Main:Module<any, any> = {
   state: {
-    mobileScreen: mobileScreen,
     manageComponents: {
       mobileScreen: mobileScreen,
       ChooseColor: true,
@@ -11,6 +10,8 @@ const Main:Module<any, any> = {
       ChooseInterest: mobileScreen,
       CustomizationPreview: !mobileScreen,
       ItemToCustomize: !mobileScreen,
+      BasicCustomization: true,
+      AdvanceCustomization: false,
     }
   },
   mutations: {

@@ -2,44 +2,51 @@
   <div class="page-wrapper m-4">
     <b-container fluid>
       <b-row>
-        <b-col v-if="manageComponents.ChooseColor" cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
-          <ChooseColor :colors="colors" />
-            <div v-if="!manageComponents.mobileScreen" class="upload-logo-opener d-none d-lg-block">
-                <b-button v-b-modal.modal-center>
-                  <div class="upload-box">
-                    <div v-if="logoUrl">
-                      <img :src="logoUrl" width="100%"/>
-                    </div>
-                    <div v-else>
-                      <div class="icon-holder">
-                        <font-awesome-icon :icon="['fas', 'image']"/>
+        <template v-if="manageComponents.BasicCustomization">
+          <b-col v-if="manageComponents.ChooseColor" cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
+            <ChooseColor :colors="colors" />
+              <div v-if="!manageComponents.mobileScreen" class="upload-logo-opener d-none d-lg-block">
+                  <b-button v-b-modal.modal-center>
+                    <div class="upload-box">
+                      <div v-if="logoUrl">
+                        <img :src="logoUrl" width="100%"/>
                       </div>
-                      Upload Logo
+                      <div v-else>
+                        <div class="icon-holder">
+                          <font-awesome-icon :icon="['fas', 'image']"/>
+                        </div>
+                        Upload Logo
+                      </div>
                     </div>
-                  </div>
-                  <div class="upload-logo-content">
-                    <h3>Upload Logo Image</h3>
-                    <h4>Image Requirements</h4>
-                    <p>Need High Res Image</p>
-                  </div>
-                </b-button>
-                <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
-                    <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
-                    <div class="upload-logo-buttons">
-                      <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
-                      <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader" accept="image/x-png,image/jpeg">
-                      <b-button class="btn-upload" @click="uploadLogo">Confirm and Upload logo</b-button>
+                    <div class="upload-logo-content">
+                      <h3>Upload Logo Image</h3>
+                      <h4>Image Requirements</h4>
+                      <p>Need High Res Image</p>
                     </div>
-                </b-modal>
-            </div>
-        </b-col>
-        <b-col v-if="manageComponents.ChooseInterest" cols="12" class="pb-5">
-          <ChooseInterest />
-        </b-col>
+                  </b-button>
+                  <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
+                      <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
+                      <div class="upload-logo-buttons">
+                        <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
+                        <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader" accept="image/x-png,image/jpeg">
+                        <b-button class="btn-upload" @click="uploadLogo">Confirm and Upload logo</b-button>
+                      </div>
+                  </b-modal>
+              </div>
+          </b-col>
+          <b-col v-if="manageComponents.ChooseInterest" cols="12" class="pb-5">
+            <ChooseInterest />
+          </b-col>
+        </template>
+        <template v-if="manageComponents.AdvanceCustomization">
+          <b-col cols="3" class="text-left border-right py-3">
+            <CustomizationTabs />
+          </b-col>
+        </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
           <div class="customization-area p-5">
             <CustomizationPreview :designs="products[designsIndex]" :logos="logos"/>
-            <b-button class="mt-5" variant="secondary">Continue</b-button>
+            <b-button @click="showAdvanceCustomization()" class="mt-5" variant="secondary">Continue</b-button>
           </div>
         </b-col>
         <b-col v-if="manageComponents.ItemToCustomize" cols="3" class="d-none d-lg-block">
@@ -56,6 +63,7 @@ import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
 import ChooseInterest from '@/components/ChooseInterest.vue'
+import CustomizationTabs from '@/components/CustomizationTabs.vue'
 import { http } from "@/httpCommon"
 
 @Component<Home>({
@@ -63,7 +71,8 @@ import { http } from "@/httpCommon"
     ChooseColor,
     CustomizationPreview,
     ItemToCustomize,
-    ChooseInterest
+    ChooseInterest,
+    CustomizationTabs
   },
   mounted() {
     if (this.isAuthenticated) {
@@ -111,6 +120,11 @@ export default class Home extends Vue {
     }).catch((e: any) => {
       console.log(e)
     });
+  }
+
+  public showAdvanceCustomization(){
+    this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
+    this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
   }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {
