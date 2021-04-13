@@ -4,6 +4,7 @@ const ProductAttributes:Module<any, any> = {
   state: {
     categories: [],
     customLogos: [],
+    isAssociation: false,
     DefaultFilledColors: []
   },
   mutations: {
@@ -16,6 +17,10 @@ const ProductAttributes:Module<any, any> = {
       if(customLogos){
         state.customLogos = customLogos
       }
+    },
+    isAssociation(state: Record<any, any>, isAssociation: Record<any, any>) {
+        state.isAssociation = isAssociation.associate
+      localStorage.setItem('isAssociation', isAssociation.associate)
     }
   },
   getters: {
@@ -24,6 +29,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getCustomLogos: state => {
       return state.customLogos
+    },
+    getIsAssociation: state => {
+      return state.isAssociation
     }
   },
   actions: {
@@ -37,6 +45,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setCustomLogos({commit}, payload){
         commit('categories', payload)
+    },
+    setIsAssociation({commit}, payload){
+        commit('isAssociation', payload)
     }
   }
 }

@@ -92,6 +92,7 @@ import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
 import ChooseInterest from '@/components/ChooseInterest.vue'
 import CustomizationTabs from '@/components/CustomizationTabs.vue'
+import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import { http } from "@/httpCommon"
 
 @Component<Home>({
@@ -100,6 +101,7 @@ import { http } from "@/httpCommon"
     CustomizationPreview,
     ItemToCustomize,
     ChooseInterest,
+    LockerRoomModal,
     CustomizationTabs
   },
   mounted() {
@@ -107,9 +109,8 @@ import { http } from "@/httpCommon"
       this.retrieveProducts()
       this.getFillColors()
     }
-    this.isAssociation = localStorage.getItem('isAssociation')
     this.jwtToken = localStorage.getItem('jwtToken')
-    if(this.isAssociation == 'true' && this.jwtToken){
+    if(this.isAssociation && this.jwtToken){
       this.getLogoAssociation()
     }
     this.mobileScreen = this.$store.state.is_mobile
@@ -132,7 +133,6 @@ export default class Home extends Vue {
   public logoUrl = ''
   public ref = this.$refs as Record<any, any>
   public mobileScreen = this.$store.state.mobileScreen
-  private isAssociation = false
   private jwtToken !: string
 
   private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
@@ -142,6 +142,9 @@ export default class Home extends Vue {
   }
   get categories(): [] {
     return this.$store.getters.getCategories
+  }
+  get isAssociation(): [] {
+    return this.$store.getters.getIsAssociation
   }
   get manageComponents(): [] {
     return this.$store.getters.getManageComponents
@@ -234,7 +237,7 @@ export default class Home extends Vue {
         let logo = {url: resp.data.file.logo_url, width: 100, height: 100, x_axis: 150, y_axis: 190, haveControls: true, side: 'front'}
         this.$store.dispatch('setCustomLogos', logo)
         if(!this.jwtToken) {
-          localStorage.setItem('isAssociation', 'true')
+          this.$store.dispatch('setIsAssociation', {associate: true})
         }
         this.hideModal()
       })
@@ -247,7 +250,7 @@ export default class Home extends Vue {
     const url = '/customer/associateresource'
     http.get(url).then((response: any) => {
       console.log(response)
-      localStorage.setItem('isAssociation', 'false')
+      this.$store.dispatch('setIsAssociation', {associate: false})
     }).catch((e: any) => {
       console.log(e)
     });
