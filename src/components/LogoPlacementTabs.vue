@@ -107,12 +107,19 @@
 
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator'
-    @Component<LogoPlacementTabs>({})
+    @Component<LogoPlacementTabs>({
+      mounted(){
+        this.$store.dispatch('setCustomLogos')
+      }
+    })
     export default class LogoPlacementTabs extends Vue {
         public selected= null
         public options= [
           { value: null, text: 'Front' },
           { value: 'a', text: 'Back' }
         ]
+      get customLogos(): [] {
+        return this.$store.getters.getCustomLogos
+      }
     }
 </script>
