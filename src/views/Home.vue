@@ -7,8 +7,10 @@
             <div v-if="manageComponents.ChooseColor" class="py-3 pb-5 py-lg-5 overflow-hidden my-4 my-lg-0">
               <ChooseColor :colors="colors"/>
             </div>
-            <template v-if="manageComponents.LogoArea">
-              <UploadLogo/>
+            <template v-if="products.length && products[designsIndex].is_logo_allowed == 1">
+              <template v-if="manageComponents.LogoArea">
+                <UploadLogo :logos_setting="products[designsIndex].logos_setting" />
+              </template>
             </template>
           </b-col>
           <b-col v-if="manageComponents.ChooseInterest" cols="12" class="pb-5">
@@ -106,6 +108,7 @@ import {http} from "@/httpCommon"
     this.$store.dispatch('setCategories')
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
+    this.$store.dispatch('setIsAssociation', {associate: false})
   }
 })
 

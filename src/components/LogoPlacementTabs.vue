@@ -8,14 +8,23 @@
         <div class="logo-placement-area mb-4">
           <div class="logo-placement-holder mb-3">
             <div class="logo-holder">
-              <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
-              <a href="#" class="remove-img">
-                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-              </a>
+              <template v-if="customLogos.length >= n">
+                <img :src="apiBaseUrl+'/'+customLogos[index].url" alt="logo Shirt"/>
+                <a href="#" class="remove-img">
+                  <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                </a>
+              </template>
+              <template v-else>
+                <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
+              </template>
+
             </div>
             <div class="logo-placemet-content">
               <h4>Logo Placement</h4>
-              <b-form-select v-model="selected" :options="options"></b-form-select>
+              <template v-if="customLogos.length >= n">
+              <b-form-select v-model="customLogos[index].side" :options="options"></b-form-select>
+              </template>
+<!--              <b-form-select v-model="selected" :options="options"></b-form-select>-->
             </div>
           </div>
           <button class="btn btn-secondary w-100 fw-bold">Save Logo to Locker Room</button>
@@ -47,14 +56,17 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 @Component<LogoPlacementTabs>({
   mounted() {
     this.$store.dispatch('setCustomLogos')
+    console.log(this.customLogos)
   }
 })
 export default class LogoPlacementTabs extends Vue {
   @Prop({required: true}) numberOfLogos!: any
-  public selected = null
+
+  private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  public selected = 'front'
   public options = [
-    {value: null, text: 'Front'},
-    {value: 'a', text: 'Back'}
+    {value: 'front', text: 'Front'},
+    {value: 'back', text: 'Back'}
   ]
 
   get customLogos(): [] {
