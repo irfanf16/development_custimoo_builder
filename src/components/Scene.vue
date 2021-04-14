@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { Group } from 'fabric/fabric-impl'
 
@@ -40,12 +40,34 @@ export default class Scene extends Vue {
   private frontTexture !: any
   private backTexture !: any
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  private logoObjects: any[] =[]
+  private logosLoaded = true
+  private mounted = false
+  private frontModel: any
+  private backModel: any
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
   }
+  get customLogos(): [Record<any, any>] {
+    return this.$store.getters.getCustomLogos
+  }
 
-  public loadScene (ImageData: any, canvas: fabric.Canvas, side: string) {
+  @Watch('customLogos', {
+    immediate: true, deep: true
+  })
+  customLogosChanged(newVal: [Record<any, any>], oldVal: [Record<any, any>]) {
+    if(this.mounted) {
+      const removeLogos = oldVal.filter(x => !newVal.includes(x));
+      const addLogos = newVal.filter(x => !oldVal.includes(x)) as [Record<any, any>];
+      if(addLogos){
+        this.logosLoaded = false
+        this.addLogos(addLogos, this.frontCanvas);
+      }
+    }
+  }
+
+  public async loadScene (ImageData: any, canvas: fabric.Canvas, side: string) {
     let element = this.$refs.front as HTMLCanvasElement
     if(side === 'back'){
       element = this.$refs.back as HTMLCanvasElement;
@@ -63,6 +85,11 @@ export default class Scene extends Vue {
       });
       img.center().setCoords()
       model = img
+      if(side == 'back'){
+        self.backModel = img
+      }else{
+        self.frontModel = img
+      }
     })
 
     let texture: any
@@ -101,42 +128,25 @@ export default class Scene extends Vue {
       }
     })
 
-    let logoObjects: any[] =[]
     const self = this
 
-    let logosLoaded = true
-    if(this.logos) {
-      const logos = this.logos.filter((logo: Record<any, any>) => logo.side == side)
+    let logos = this.logos
+    if(this.customLogos){
+      logos = logos.concat(this.customLogos) as [Record<any, any>]
+    }
+
+    if(logos.length) {
+      logos = logos.filter((logo: Record<any, any>) => logo.side == side) as [Record<any, any>]
       if (logos.length) {
-        logosLoaded = false
-        logos.forEach((logo: Record<any, any>, index: number) => {
-          let planeUrl = this.apiBaseUrl+'/'+logo.url
-          let url = planeUrl.trim().split(' ').join('%20')
-          fabric.Image.fromURL(url, (img: any) => {
-            img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
-              .scaleToHeight(canvas.getHeight() / self.mainCanvasHeight * logo.height)
-              .set({
-                left: canvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
-                top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
-                selectable: logo.haveControls,
-                hasControls: logo.haveControls,
-                hasBorders: logo.haveControls,
-                evented: logo.haveControls,
-                globalCompositeOperation: 'source-atop'
-              })
-            logoObjects.push(img)
-            if (index + 1 == logos.length) {
-              logosLoaded = true
-            }
-          })
-        })
+        this.logosLoaded = false
+        await this.addLogos(logos, canvas)
       }
     }
 
     const timer = setInterval(() => {
-      if(model && texture && logosLoaded) {
+      if(model && texture && self.logosLoaded) {
         canvas.add(texture)
-        logoObjects.forEach((logoObject) => {
+        self.logoObjects.forEach((logoObject) => {
           canvas.add(logoObject)
         })
         canvas.add(model)
@@ -144,9 +154,44 @@ export default class Scene extends Vue {
         canvas.viewportCenterObject(texture)
         canvas.viewportCenterObject(model)
         canvas.renderAll()
+        self.mounted = true
         clearInterval(timer)
       }
     }, 1000)
+  }
+
+  public async addLogos(logos: [Record<any, any>], canvas: fabric.Canvas) {
+    const self = this
+    logos.forEach((logo: Record<any, any>, index: number) => {
+      let planeUrl = this.apiBaseUrl+'/'+logo.url
+      let url = planeUrl.trim().split(' ').join('%20')
+      fabric.Image.fromURL(url, (img: any) => {
+        img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
+          .set({
+            left: canvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
+            top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
+            selectable: logo.haveControls,
+            hasControls: logo.haveControls,
+            hasBorders: logo.haveControls,
+            evented: logo.haveControls,
+            globalCompositeOperation: 'source-atop'
+          })
+        self.logoObjects.push(img)
+        if (index + 1 == logos.length) {
+          self.logosLoaded = true
+        }
+        if(self.mounted){
+          let model = self.frontModel
+          if(logo.side == 'back') {
+            canvas = self.backCanvas
+            model = self.backModel
+          }
+          canvas.add(img)
+          model.bringToFront()
+          canvas.renderAll()
+        }
+      })
+    })
   }
 
   public changeColor() {
@@ -162,7 +207,7 @@ export default class Scene extends Vue {
     })
     console.log(svgGroupIds)
 
-    this.frontTexture.getObjects().forEach(function(item: Record<any, any>) {
+    this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       if(item.id == 'Base') {
         item.set('fill', self.fillColors[0].color);
       }
