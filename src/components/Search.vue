@@ -42,10 +42,13 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 
 <style scoped lang="scss">
 .nav-customize-area {
-  margin: 0 0 15px;
-
+  @media only screen and (min-width: 992px){margin: 0 0 15px;}
   .nav-item {
-    font-size: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    @media only screen and (min-width: 992px){
+      font-size: 10px;
+    }
     @media only screen and (min-width: 1170px) {
       font-size: 12px;
     }

@@ -1,5 +1,5 @@
 <template>
-  <div class="available-designs-section" v-if="productDesignsData">
+  <div class="available-designs-section px-3 px-lg-0" v-if="productDesignsData">
     <div class="design-col" v-for="(design, index) in productDesignsData.productstyles[0].productdesigns"
          :key="design.id">
       <a @click="changeDesign(index)">
