@@ -13,13 +13,13 @@ const ProductAttributes:Module<any, any> = {
         state.categories = categories
       }
     },
-    customLogos(state: Record<any, any>, customLogos: Record<any, any>) {
-      if(customLogos){
-        state.customLogos = customLogos
+    customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
+      if(customLogo){
+        state.customLogos = state.customLogos.concat([customLogo])
       }
     },
     isAssociation(state: Record<any, any>, isAssociation: Record<any, any>) {
-        state.isAssociation = isAssociation.associate
+      state.isAssociation = isAssociation.associate
       localStorage.setItem('isAssociation', isAssociation.associate)
     }
   },
@@ -44,7 +44,7 @@ const ProductAttributes:Module<any, any> = {
       });
     },
     setCustomLogos({commit}, payload){
-        commit('categories', payload)
+      commit('customLogos', payload)
     },
     setIsAssociation({commit}, payload){
         commit('isAssociation', payload)
