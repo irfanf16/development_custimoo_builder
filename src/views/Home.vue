@@ -107,12 +107,11 @@ import { http } from "@/httpCommon"
       this.retrieveProducts()
       this.getFillColors()
     }
-    this.isAssociation = localStorage.getItem('isAssociation')
-    this.jwtToken = localStorage.getItem('jwtToken')
-    if(this.isAssociation == 'true' && this.jwtToken){
+    this.isAssociation = JSON.parse(localStorage.getItem('isAssociation') as string) as boolean
+    this.jwtToken = localStorage.getItem('jwtToken') as string
+    if(this.isAssociation && this.jwtToken){
       this.getLogoAssociation()
     }
-    this.mobileScreen = this.$store.state.is_mobile
     this.$store.dispatch('setCategories')
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
@@ -131,7 +130,6 @@ export default class Home extends Vue {
   public provider_id = 'oVXYIzKY'
   public logoUrl = ''
   public ref = this.$refs as Record<any, any>
-  public mobileScreen = this.$store.state.mobileScreen
   private isAssociation = false
   private jwtToken !: string
 
