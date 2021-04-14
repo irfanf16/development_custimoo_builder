@@ -109,11 +109,11 @@ import { http } from "@/httpCommon"
       this.retrieveProducts()
       this.getFillColors()
     }
-    this.jwtToken = localStorage.getItem('jwtToken')
+    
+    this.jwtToken = localStorage.getItem('jwtToken') as string
     if(this.isAssociation && this.jwtToken){
       this.getLogoAssociation()
     }
-    this.mobileScreen = this.$store.state.is_mobile
     this.$store.dispatch('setCategories')
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
@@ -134,7 +134,6 @@ export default class Home extends Vue {
   public ref = this.$refs as Record<any, any>
   public mobileScreen = this.$store.state.mobileScreen
   private jwtToken !: string
-
   private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
 
   get isAuthenticated (): boolean {
