@@ -5,6 +5,7 @@
         <template v-if="manageComponents.BasicCustomization">
           <b-col v-if="manageComponents.ChooseColor" cols="12" lg="3" class="text-left py-3 pb-5 py-lg-5 overflow-hidden home-color-area">
             <ChooseColor :colors="colors" />
+            <template v-if="products.length && products[designsIndex].is_logo_allowed == 1" >
               <div v-if="!manageComponents.mobileScreen" class="upload-logo-opener d-none d-lg-block">
                   <b-button v-b-modal.modal-center>
                     <div class="upload-box">
@@ -33,6 +34,7 @@
                       </div>
                   </b-modal>
               </div>
+            </template>
           </b-col>
           <b-col v-if="manageComponents.ChooseInterest" cols="12" class="pb-5">
             <ChooseInterest />
@@ -40,7 +42,7 @@
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="3" class="text-left border-right py-3">
-            <CustomizationTabs />
+            <CustomizationTabs :productDetails="products[designsIndex]"/>
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="6" class="d-none border-right d-lg-flex flex-wrap align-items-center h-100vh justify-content-center">
@@ -109,9 +111,9 @@ import { http } from "@/httpCommon"
       this.retrieveProducts()
       this.getFillColors()
     }
-    
+    let isAssociation = JSON.parse(localStorage.getItem('isAssociation') as string) as boolean
     this.jwtToken = localStorage.getItem('jwtToken') as string
-    if(this.isAssociation && this.jwtToken){
+    if(isAssociation && this.jwtToken){
       this.getLogoAssociation()
     }
     this.$store.dispatch('setCategories')
@@ -142,9 +144,9 @@ export default class Home extends Vue {
   get categories(): [] {
     return this.$store.getters.getCategories
   }
-  get isAssociation(): [] {
-    return this.$store.getters.getIsAssociation
-  }
+  // get isAssociation(): [] {
+  //   return this.$store.getters.getIsAssociation
+  // }
   get manageComponents(): [] {
     return this.$store.getters.getManageComponents
   }
