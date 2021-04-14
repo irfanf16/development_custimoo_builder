@@ -18,7 +18,8 @@
       public showDesign() {
         this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
         this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: false})
-        this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
+        this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
+        this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
       }
     }
 </script>
@@ -42,6 +43,7 @@
             justify-content: center;
             align-items: center;
             border-color: #DCDEE2;
+            background: #fff;
             .icon-holder{
                 width: 38px;
                 height: 38px;

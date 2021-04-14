@@ -1,74 +1,86 @@
 <template>
-    <div class="customization-tabs">
-        <b-tabs>
-            <b-tab active>
-                <template #title>
-                    <div class="icon-holder"><font-awesome-icon :icon="['fas', 'image']" /></div>
-                    Logo
-                </template>
-                <div class="logo-placement-tabs">
-                    <LogoPlacementTabs />
-                </div>
-            </b-tab>
-            <b-tab>
-                <template #title>
-                    <div class="icon-holder"><font-awesome-icon :icon="['fas', 'fill-drip']" /></div>
-                    Color
-                </template>
-                <div>
-                    <h2 class="fw-bold fz-16 p-3">Choose Color</h2>
-                    <ColorAccordion />
-                </div>
-            </b-tab>
-            <b-tab>
-                <template #title>
-                    <div class="icon-holder"><font-awesome-icon :icon="['fas', 'text-height']" /></div>
-                    Text
-                </template>
-                <CustomizationText />
-            </b-tab>
-            <b-tab>
-                <template #title>
-                    <div class="icon-holder"><font-awesome-icon :icon="['fas', 'swatchbook']" /></div>
-                    Style
-                </template>
-                <div class="collar-section p-4">
-                    <h2 class="fw-bold mb-2 fz-18">Choose Product</h2>
-                    <CollarStyle />
-                </div>
-            </b-tab>
-            <b-tab>
-                <template #title>
-                    <div class="icon-holder"><font-awesome-icon :icon="['fas', 'user-friends']" /></div>
-                    Team
-                </template>
-                <div class="team-roaster-area p-4">
-                    <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-                    <EditRosterArea />
-                </div>
-            </b-tab>
-        </b-tabs>
-    </div>
+  <div class="customization-tabs">
+    <b-tabs>
+      <b-tab active v-if="productDetails.is_logo_allowed == 1">
+        <template #title>
+          <div class="icon-holder">
+            <font-awesome-icon :icon="['fas', 'image']"/>
+          </div>
+          Logo
+        </template>
+        <div class="logo-placement-tabs">
+          <LogoPlacementTabs :numberOfLogos="productDetails.allowed_logos_count"/>
+        </div>
+      </b-tab>
+      <b-tab>
+        <template #title>
+          <div class="icon-holder">
+            <font-awesome-icon :icon="['fas', 'fill-drip']"/>
+          </div>
+          Color
+        </template>
+        <div>
+          <h2 class="fw-bold fz-16 p-3">Choose Color</h2>
+          <ColorAccordion/>
+        </div>
+      </b-tab>
+      <b-tab>
+        <template #title>
+          <div class="icon-holder">
+            <font-awesome-icon :icon="['fas', 'text-height']"/>
+          </div>
+          Text
+        </template>
+        <CustomizationText/>
+      </b-tab>
+      <b-tab>
+        <template #title>
+          <div class="icon-holder">
+            <font-awesome-icon :icon="['fas', 'swatchbook']"/>
+          </div>
+          Style
+        </template>
+        <div class="collar-section p-4">
+          <h2 class="fw-bold mb-2 fz-18">Choose Product</h2>
+          <CollarStyle/>
+        </div>
+      </b-tab>
+      <b-tab>
+        <template #title>
+          <div class="icon-holder">
+            <font-awesome-icon :icon="['fas', 'user-friends']"/>
+          </div>
+          Team
+        </template>
+        <div class="team-roaster-area p-4">
+          <h2 class="fw-bold mb-2 fz-18">Roster</h2>
+          <EditRosterArea/>
+        </div>
+      </b-tab>
+    </b-tabs>
+  </div>
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from 'vue-property-decorator'
-    import ColorAccordion from '@/components/ColorAccordion.vue'
-    import LogoPlacementTabs from './LogoPlacementTabs.vue'
-    import CustomizationText from '@/components/CustomizationText.vue'
-    import CollarStyle from '@/components/CollarStyle.vue'
-    import EditRosterArea from '@/components/EditRosterArea.vue'
-    @Component<CustomizationProcess>({
-        components: {
-            ColorAccordion,
-            LogoPlacementTabs,
-            CustomizationText,
-            CollarStyle,
-            EditRosterArea
-        }
-    })
-    export default class CustomizationProcess extends Vue {
-        
-    }
+import {Component, Prop, Vue} from 'vue-property-decorator'
+import ColorAccordion from '@/components/ColorAccordion.vue'
+import LogoPlacementTabs from './LogoPlacementTabs.vue'
+import CustomizationText from '@/components/CustomizationText.vue'
+import CollarStyle from '@/components/CollarStyle.vue'
+import EditRosterArea from '@/components/EditRosterArea.vue'
+
+@Component<CustomizationProcess>({
+  components: {
+    ColorAccordion,
+    LogoPlacementTabs,
+    CustomizationText,
+    CollarStyle,
+    EditRosterArea
+  }
+})
+export default class CustomizationProcess extends Vue {
+  @Prop({required: true}) productDetails!: any
+
+}
 
 </script>

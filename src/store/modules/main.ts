@@ -6,7 +6,7 @@ const Main:Module<any, any> = {
     manageComponents: {
       mobileScreen: mobileScreen,
       ChooseColor: true,
-      UploadLogo: !mobileScreen,
+      LogoArea: !mobileScreen,
       ChooseInterest: mobileScreen,
       CustomizationPreview: !mobileScreen,
       ItemToCustomize: !mobileScreen,

@@ -110,6 +110,7 @@ export default class ChooseColor extends Vue {
     border-radius: 6px;
     font-weight: 700;
     font-size: 12px;
+    background: #fff;
     @media only screen and (min-width: 375px){
       width: 140px;
       height: 140px;
