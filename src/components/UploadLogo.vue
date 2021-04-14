@@ -94,13 +94,16 @@
         left: 0;
         right: 0;
         bottom: 0;
-        padding: 20px;
+        padding: 15px;
         text-align: center;
         color: #808895;
         border-radius: 20px 20px 0 0;
         background: #fff;
         box-shadow: 0 0 10px rgba(0,0,0,0.2);
         z-index: 9;
+        @media only screen and (min-width: 992px){
+            padding: 20px;
+        }
         @media only screen and (min-width: 1200px){
             position: absolute;
             border-radius: 0;
@@ -121,7 +124,9 @@
             padding: 0;
             font-size: 10px;
             max-width: 100%;
-            margin: 0 auto;
+            @media only screen and (min-width: 992px){
+                margin: 0 auto;
+            }
             @media only screen and (min-width: 1200px){
                 max-width: 300px;
             }
