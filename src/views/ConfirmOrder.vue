@@ -46,7 +46,7 @@
             SaveDesignModal
         },
         mounted() {
-            this.retrieveProducts()
+            // this.retrieveProducts()
         }
     })
 

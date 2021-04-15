@@ -493,7 +493,6 @@
 </template>
 
 <script lang="ts">
-    
     import { Component, Vue } from 'vue-property-decorator'
     import CustomizationPreview from '@/components/CustomizationPreview.vue'
     import OrderDetails from '@/components/OrderDetails.vue'
@@ -505,7 +504,7 @@
             OrderDetails
         },
         mounted() {
-            this.retrieveProducts()
+            // this.retrieveProducts()
         }
     })
 
