@@ -81,7 +81,7 @@ export default class Scene extends Vue {
             addLogo = false
           }
         })
-        if(addLogo) {
+        if(addLogo && logo.url) {
           self.addLogos([logo], self.frontCanvas)
         }
       })
@@ -149,7 +149,7 @@ export default class Scene extends Vue {
     }
 
     if(logos.length) {
-      logos = logos.filter((logo: Record<any, any>) => logo.side == side) as [Record<any, any>]
+      logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
       if (logos.length) {
         this.logosLoaded = false
         await this.addLogos(logos, canvas)
@@ -183,37 +183,35 @@ export default class Scene extends Vue {
   public async addLogos(logos: [Record<any, any>], canvas: fabric.Canvas) {
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
-      // if(logo.url) {
-        let planeUrl = this.apiBaseUrl + '/' + logo.url
-        let url = planeUrl.trim().split(' ').join('%20')
-        fabric.Image.fromURL(url, (img: any) => {
-          img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
-            .set({
-              left: canvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
-              top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
-              selectable: logo.haveControls,
-              hasControls: logo.haveControls,
-              hasBorders: logo.haveControls,
-              evented: logo.haveControls,
-              globalCompositeOperation: 'source-atop'
-            })
-          self.logoObjects.push(img)
-          if (index + 1 == logos.length) {
-            self.logosLoaded = true
+      let planeUrl = this.apiBaseUrl + '/' + logo.url
+      let url = planeUrl.trim().split(' ').join('%20')
+      fabric.Image.fromURL(url, (img: any) => {
+        img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
+          .set({
+            left: canvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
+            top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
+            selectable: logo.haveControls,
+            hasControls: logo.haveControls,
+            hasBorders: logo.haveControls,
+            evented: logo.haveControls,
+            globalCompositeOperation: 'source-atop'
+          })
+        self.logoObjects.push(img)
+        if (index + 1 == logos.length) {
+          self.logosLoaded = true
+        }
+        if (self.mounted) {
+          let model = self.frontModel
+          if (logo.side == 'back') {
+            canvas = self.backCanvas
+            model = self.backModel
           }
-          if (self.mounted) {
-            let model = self.frontModel
-            if (logo.side == 'back') {
-              canvas = self.backCanvas
-              model = self.backModel
-            }
 
-            canvas.add(img)
-            model.bringToFront()
-            canvas.renderAll()
-          }
-        })
-      // }
+          canvas.add(img)
+          model.bringToFront()
+          canvas.renderAll()
+        }
+      })
     })
   }
 

@@ -5,8 +5,7 @@ const ProductAttributes:Module<any, any> = {
   state: {
     categories: [],
     customLogos: [],
-    isAssociation: false,
-    DefaultFilledColors: []
+    isAssociation: false
   },
   mutations: {
     categories(state: Record<any, any>, categories: Record<any, any>) {
