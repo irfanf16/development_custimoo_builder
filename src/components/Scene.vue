@@ -183,7 +183,7 @@ export default class Scene extends Vue {
   public async addLogos(logos: [Record<any, any>], canvas: fabric.Canvas) {
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
-      if(logo.url) {
+      // if(logo.url) {
         let planeUrl = this.apiBaseUrl + '/' + logo.url
         let url = planeUrl.trim().split(' ').join('%20')
         fabric.Image.fromURL(url, (img: any) => {
@@ -213,7 +213,7 @@ export default class Scene extends Vue {
             canvas.renderAll()
           }
         })
-      }
+      // }
     })
   }
 
