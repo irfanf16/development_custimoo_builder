@@ -142,56 +142,112 @@ export default class UploadLogo extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.upload-logo-opener {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 20px;
-  text-align: center;
-  color: #808895;
-  border-radius: 20px 20px 0 0;
-  background: #fff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  z-index: 9;
-  @media only screen and (min-width: 1200px) {
-    position: absolute;
-    border-radius: 0;
-    background: none;
-    border-top: 1px solid #dee2e6;
-    box-shadow: none;
-  }
-  @media only screen and (min-width: 1200px) {
-    padding: 30px;
-  }
-
-  .btn {
-    background: none;
-    color: #808895;
-    border: none;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    padding: 0;
-    font-size: 10px;
-    max-width: 100%;
-    margin: 0 auto;
-    @media only screen and (min-width: 1200px) {
-      max-width: 300px;
-    }
-
-    &.btn-secondary {
-      &:active {
-        background-color: transparent;
-        border-color: transparent;
+    .upload-logo-opener{
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 15px;
+        text-align: center;
         color: #808895;
-      }
-
-      &:focus {
-        box-shadow: none;
-      }
+        border-radius: 20px 20px 0 0;
+        background: #fff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        z-index: 9;
+        @media only screen and (min-width: 992px){
+            padding: 20px;
+        }
+        @media only screen and (min-width: 1200px){
+            position: absolute;
+            border-radius: 0;
+            background: none;
+            border-top: 1px solid #dee2e6;
+            box-shadow: none;
+        }
+        @media only screen and (min-width: 1200px){
+            padding: 30px;
+        }
+        .btn{
+            background: none;
+            color: #808895;
+            border: none;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 0;
+            font-size: 10px;
+            max-width: 100%;
+            @media only screen and (min-width: 992px){
+                margin: 0 auto;
+            }
+            @media only screen and (min-width: 1200px){
+                max-width: 300px;
+            }
+            &.btn-secondary{
+                &:active{
+                background-color: transparent;
+                border-color: transparent;
+                color: #808895;
+                }
+                &:focus{box-shadow: none;}
+            }
+        }
+        .upload-box{
+            text-align: center;
+            width: 68px;
+            height: 68px;
+            border: 1px dashed #dee2e6;
+            border-radius: 5px;
+            padding: 10px 5px;
+            font-size: 9px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            @media only screen and (min-width: 1200px){
+                width: 74px;
+                height: 74px;
+                font-size: 10px;
+            }
+            @media only screen and (min-width: 1366px){
+                width: 84px;
+                height: 84px;
+                font-size: 12px;
+            }
+            .icon-holder{
+                font-size: 24px;
+                @media only screen and (min-width: 1366px){
+                font-size: 32px;
+                }
+            }
+        }
+        .upload-logo-content{
+            padding: 5px 0 5px 8px;
+            text-align: left;
+            @media only screen and (min-width: 1200px){
+                padding: 10px;
+            }
+            h3{
+                font-size: 13px;
+                color: #03142E;
+                font-weight: 600;
+                @media only screen and (min-width: 1200px){
+                font-size: 14px;
+                }
+                @media only screen and (min-width: 1366px){
+                font-size: 16px;
+                }
+            }
+            h4{
+                font-size: 12px;
+                color: #03142E;
+                font-weight: 400;
+                @media only screen and (min-width: 1200px){
+                font-size: 14px;
+                }
+            }
+        }
     }
-  }
 
   .upload-box {
     text-align: center;
@@ -268,7 +324,6 @@ export default class UploadLogo extends Vue {
       }
     }
   }
-}
 
 .fileLoader {
   display: none;

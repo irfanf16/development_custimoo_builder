@@ -58,7 +58,22 @@ export default class Scene extends Vue {
   })
   customLogosChanged(newVal: [Record<any, any>], oldVal: [Record<any, any>]) {
     if(this.mounted) {
-      const removeLogos = oldVal.filter(x => !newVal.includes(x));
+      const self = this
+      this.logoObjects.forEach((logoObject) => {
+        let deleteLogo = true
+        newVal.forEach((logo) => {
+          if(self.apiBaseUrl+'/'+logo.src == logoObject._element.src){
+            deleteLogo = false
+          }
+        })
+        if(deleteLogo) {
+          self.frontCanvas.remove(logoObject)
+          if(self.backCanvas) {
+            self.backCanvas.remove(logoObject)
+          }
+        }
+      })
+
       const addLogos = newVal.filter(x => !oldVal.includes(x)) as [Record<any, any>];
       if(addLogos){
         this.logosLoaded = false
@@ -158,6 +173,13 @@ export default class Scene extends Vue {
         clearInterval(timer)
       }
     }, 1000)
+    canvas.on('object:modified', (e) => {
+      self.objectMove(e)
+    })
+  }
+
+  public objectMove(e: any) {
+    console.log(e)
   }
 
   public async addLogos(logos: [Record<any, any>], canvas: fabric.Canvas) {
