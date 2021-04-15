@@ -1,5 +1,6 @@
 import {http} from "@/httpCommon";
 import { Module } from "vuex";
+import {Vue} from "vue-property-decorator";
 const ProductAttributes:Module<any, any> = {
   state: {
     categories: [],
@@ -16,6 +17,11 @@ const ProductAttributes:Module<any, any> = {
     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
       if(customLogo){
         state.customLogos = state.customLogos.concat([customLogo])
+      }
+    },
+    customLogoAttribute(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
+      if(customLogoAttribute){
+        Vue.set(state.customLogos[customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value);
       }
     },
     isAssociation(state: Record<any, any>, isAssociation: Record<any, any>) {
@@ -45,6 +51,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setCustomLogos({commit}, payload){
       commit('customLogos', payload)
+    },
+    updateCustomLogoAttribute({commit}, payload){
+      commit('customLogoAttribute', payload)
     },
     setIsAssociation({commit}, payload){
         commit('isAssociation', payload)

@@ -9,7 +9,7 @@
           Logo
         </template>
         <div class="logo-placement-tabs">
-          <LogoPlacementTabs :numberOfLogos="productDetails.allowed_logos_count"/>
+          <LogoPlacementTabs :numberOfLogosAllowed="productDetails.allowed_logos_count" :logos_setting="productDetails.logos_setting" />
         </div>
       </b-tab>
       <b-tab>
