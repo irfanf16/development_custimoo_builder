@@ -164,7 +164,7 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
   }
 
-  public async retrieveProducts(url = '/list/products', searchCall = false): void {
+  public retrieveProducts(url = '/list/products', searchCall = false): void {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -174,7 +174,7 @@ export default class Home extends Vue {
 
     if (this.hasProducts) {
       const self = this
-      await http.get(url).then((response: any) => {
+      http.get(url).then((response: any) => {
         this.products = this.products.concat(response.data.products.data)
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
@@ -200,7 +200,6 @@ export default class Home extends Vue {
         x_axis: logoSetting.x_axis,
         y_axis: logoSetting.y_axis,
         haveControls: Boolean(logoSetting.is_locked),
-        isRender: false,
         side: logoSetting.side
       }
       this.$store.dispatch('setCustomLogos', logo)
