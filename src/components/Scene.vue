@@ -74,11 +74,17 @@ export default class Scene extends Vue {
         }
       })
 
-      const addLogos = newVal.filter(x => !oldVal.includes(x)) as [Record<any, any>];
-      if(addLogos){
-        this.logosLoaded = false
-        this.addLogos(addLogos, this.frontCanvas);
-      }
+      newVal.forEach((logo) => {
+        let addLogo = true
+        this.logoObjects.forEach((logoObject) => {
+          if(self.apiBaseUrl+'/'+logo.src == logoObject._element.src){
+            addLogo = false
+          }
+        })
+        if(addLogo) {
+          self.addLogos([logo], self.frontCanvas)
+        }
+      })
     }
   }
 
@@ -110,14 +116,6 @@ export default class Scene extends Vue {
     let texture: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
       // console.log(objects)
-      if(side == 'back'){
-        objects = objects.filter((object: Record<any, any>) => object.id.includes('back'))
-      }else {
-        objects = objects.filter((object: Record<any, any>) => !object.id.includes('back'))
-      }
-      if(side == 'front'){
-        // options.height = 1350
-      }
       const img = fabric.util.groupSVGElements(objects) as Group
       img.scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
@@ -185,34 +183,37 @@ export default class Scene extends Vue {
   public async addLogos(logos: [Record<any, any>], canvas: fabric.Canvas) {
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
-      let planeUrl = this.apiBaseUrl+'/'+logo.url
-      let url = planeUrl.trim().split(' ').join('%20')
-      fabric.Image.fromURL(url, (img: any) => {
-        img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
-          .set({
-            left: canvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
-            top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
-            selectable: logo.haveControls,
-            hasControls: logo.haveControls,
-            hasBorders: logo.haveControls,
-            evented: logo.haveControls,
-            globalCompositeOperation: 'source-atop'
-          })
-        self.logoObjects.push(img)
-        if (index + 1 == logos.length) {
-          self.logosLoaded = true
-        }
-        if(self.mounted){
-          let model = self.frontModel
-          if(logo.side == 'back') {
-            canvas = self.backCanvas
-            model = self.backModel
+      if(logo.url) {
+        let planeUrl = this.apiBaseUrl + '/' + logo.url
+        let url = planeUrl.trim().split(' ').join('%20')
+        fabric.Image.fromURL(url, (img: any) => {
+          img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
+            .set({
+              left: canvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
+              top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
+              selectable: logo.haveControls,
+              hasControls: logo.haveControls,
+              hasBorders: logo.haveControls,
+              evented: logo.haveControls,
+              globalCompositeOperation: 'source-atop'
+            })
+          self.logoObjects.push(img)
+          if (index + 1 == logos.length) {
+            self.logosLoaded = true
           }
-          canvas.add(img)
-          model.bringToFront()
-          canvas.renderAll()
-        }
-      })
+          if (self.mounted) {
+            let model = self.frontModel
+            if (logo.side == 'back') {
+              canvas = self.backCanvas
+              model = self.backModel
+            }
+
+            canvas.add(img)
+            model.bringToFront()
+            canvas.renderAll()
+          }
+        })
+      }
     })
   }
 
