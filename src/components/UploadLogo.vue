@@ -43,8 +43,6 @@ import {http} from "@/httpCommon"
 
 @Component<UploadLogo>({
   mounted() {
-    this.mobileScreen = this.$store.state.is_mobile
-    this.$store.dispatch('setCategories')
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
     if(!this.logos_setting.length){
@@ -57,7 +55,6 @@ import {http} from "@/httpCommon"
         side: 'front'
       })
     }
-    console.log(this.customLogos.length)
 
   }
 })
@@ -75,7 +72,6 @@ export default class UploadLogo extends Vue {
     }
   }
 
-  public mobileScreen = this.$store.state.mobileScreen
   private jwtToken !: string
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
   public logoUrl = ''
@@ -98,7 +94,6 @@ export default class UploadLogo extends Vue {
   }
 
   public modalHandler(){
-    console.log('hereee')
     if(!this.customLogos.length){
       this.showModal()
     }
@@ -106,7 +101,6 @@ export default class UploadLogo extends Vue {
 
   public uploadLogoImage(e: any) {
     let img = e.target.files[0]
-    console.log(img)
     let fd = new FormData()
     let header = {
       headers: {
@@ -118,7 +112,6 @@ export default class UploadLogo extends Vue {
       .then(resp => {
         this.logoUrl = this.apiBaseUrl + '/' + resp.data.file.logo_url
         let logoSetting = this.logos_setting[0]
-        console.log(logoSetting)
         let logo = {
           url: resp.data.file.logo_url,
           width: logoSetting.width,
@@ -128,7 +121,6 @@ export default class UploadLogo extends Vue {
           haveControls: Boolean(logoSetting.is_locked),
           side: logoSetting.side
         }
-        console.log(logo)
         this.$store.dispatch('setCustomLogos', logo)
         if (!this.jwtToken) {
           localStorage.setItem('isAssociation', 'true')
@@ -141,13 +133,10 @@ export default class UploadLogo extends Vue {
   }
 
   public deleteLogo(e: any){
-    console.log('delete logo')
     this.hideModal()
     this.customLogos.splice(0, 1);
     this.logoUrl = ''
   }
-
-
 }
 
 </script>
