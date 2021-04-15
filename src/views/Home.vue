@@ -9,7 +9,7 @@
             </div>
             <template v-if="products.length && products[designsIndex].is_logo_allowed == 1">
               <template v-if="manageComponents.LogoArea">
-                <UploadLogo :logos_setting="products[designsIndex].logos_setting" />
+                <UploadLogo :logosSetting="products[designsIndex].logos_setting" />
               </template>
             </template>
           </b-col>
@@ -20,6 +20,11 @@
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-3">
             <CustomizationTabs :productDetails="products[designsIndex]"/>
+            <template v-if="products.length && products[designsIndex].is_logo_allowed == 1">
+              <template v-if="manageComponents.LogoArea">
+                <UploadLogo :logosSetting="products[designsIndex].logos_setting" />
+              </template>
+            </template>
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="border-right">

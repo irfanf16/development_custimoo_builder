@@ -45,8 +45,8 @@ import {http} from "@/httpCommon"
   mounted() {
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
-    if(!this.logos_setting.length){
-      this.logos_setting = this.logos_setting.apend({
+    if(!this.logosSetting){
+      this.logosSetting = this.logosSetting.apend({
         width: 100,
         height: 100,
         x_axis: 150,
@@ -59,7 +59,7 @@ import {http} from "@/httpCommon"
   }
 })
 export default class UploadLogo extends Vue {
-  @Prop({required: true}) logos_setting!: any
+  @Prop({required: false}) logosSetting!: any
 
   @Watch('logoUrl', {
     immediate: true, deep: true
@@ -76,7 +76,6 @@ export default class UploadLogo extends Vue {
       }
     }
   }
-
 
   private jwtToken !: string
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
@@ -126,19 +125,6 @@ export default class UploadLogo extends Vue {
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
         this.logoUrl = this.apiBaseUrl + '/' + resp.data.file.logo_url
-        /*
-        let logoSetting = this.logos_setting[0]
-        let logo = {
-          url: resp.data.file.logo_url,
-          width: logoSetting.width,
-          height: logoSetting.height,
-          x_axis: logoSetting.x_axis,
-          y_axis: logoSetting.y_axis,
-          haveControls: Boolean(logoSetting.is_locked),
-          side: logoSetting.side
-        }
-        this.$store.dispatch('setCustomLogos', logo)
-*/
         console.log(resp.data.file.logo_url)
         let payload = {
           index: 0,
@@ -155,18 +141,7 @@ export default class UploadLogo extends Vue {
       .catch((e: any) => {
         console.log(e)
       })
-    console.log(this.customLogos)
   }
-
-  // public deleteLogo(e: any){
-  //   this.hideModal()
-  //   // this.customLogos.splice(0, 1);
-  //   let payload = {
-  //     index: 0
-  //   }
-  //   this.$store.dispatch('deleteCustomLogo', payload)
-  //   this.logoUrl = ''
-  // }
 
   public deleteFirstLogo() {
     let payload = {
@@ -175,6 +150,7 @@ export default class UploadLogo extends Vue {
       value: ''
     }
     this.$store.dispatch('updateCustomLogoAttribute', payload)
+    this.logoUrl = ''
   }
 }
 

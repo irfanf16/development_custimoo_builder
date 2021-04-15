@@ -1,4 +1,5 @@
 <template>
+  <div>
   <div class="customization-tabs">
     <b-tabs>
       <b-tab active v-if="productDetails.is_logo_allowed == 1">
@@ -9,7 +10,7 @@
           Logo
         </template>
         <div class="logo-placement-tabs">
-          <LogoPlacementTabs :numberOfLogosAllowed="productDetails.allowed_logos_count" :logos_setting="productDetails.logos_setting" />
+          <LogoPlacementTabs :numberOfLogosAllowed="productDetails.allowed_logos_count" :logosSetting="productDetails.logos_setting" />
         </div>
       </b-tab>
       <b-tab>
@@ -58,9 +59,10 @@
         </div>
       </b-tab>
     </b-tabs>
-    <template v-if="manageComponents.LogoArea">
-      <UploadLogo :logos_setting="logos_setting" />
-    </template>
+  </div>
+<!--    <template v-if="manageComponents.LogoArea">-->
+<!--      <UploadLogo :logosSetting="productDetails.logos_setting"  />-->
+<!--    </template>-->
   </div>
 </template>
 
@@ -84,21 +86,10 @@ import UploadLogo from '@/components/UploadLogo.vue'
   },
   mounted() {
     this.$store.dispatch('setCustomLogos')
-    if(!this.logos_setting.length){
-      this.logos_setting = this.logos_setting.apend({
-        width: 100,
-        height: 100,
-        x_axis: 150,
-        y_axis: 190,
-        haveControls: true,
-        side: 'front'
-      })
-    }
   }
 })
 export default class CustomizationProcess extends Vue {
   @Prop({required: true}) productDetails!: any
-  @Prop({required: false}) logos_setting!: any
 
   get manageComponents(): [] {
     return this.$store.getters.getManageComponents

@@ -46,6 +46,10 @@
           </div>
           <button class="btn btn-secondary w-100 fw-bold">Save Color to Locker Room</button>
         </div>
+<!--        <template v-if="manageComponents.LogoArea">-->
+<!--        <template >-->
+<!--          <UploadLogo />-->
+<!--        </template>-->
       </div>
     </b-tab>
     <b-tab v-if="customLogos.length < numberOfLogosAllowed" @click="addTab">
@@ -58,12 +62,16 @@
 
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
+import UploadLogo from "@/components/UploadLogo.vue"
 
 @Component<LogoPlacementTabs>({
+  components: {
+    UploadLogo
+  },
   mounted() {
     this.$store.dispatch('setCustomLogos')
-    if(!this.logos_setting.length){
-      this.logos_setting = this.logos_setting.apend({
+    if(!this.logosSetting){
+      this.logosSetting = this.logosSetting.apend({
         width: 100,
         height: 100,
         x_axis: 150,
@@ -76,7 +84,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 })
 export default class LogoPlacementTabs extends Vue {
   @Prop({required: true}) numberOfLogosAllowed!: number
-  @Prop({required: true}) logos_setting!: any
+  @Prop({required: true}) logosSetting!: any
 
   public numberOfLogos = 1
 
@@ -91,9 +99,13 @@ export default class LogoPlacementTabs extends Vue {
     return this.$store.getters.getCustomLogos
   }
 
+  get manageComponents(): [] {
+    return this.$store.getters.getManageComponents
+  }
+
   public addTab(){
     if(this.numberOfLogos < this.numberOfLogosAllowed) {
-      let logoSetting = this.logos_setting[0]
+      let logoSetting = this.logosSetting[0]
       let logo = {
         url: '',
         width: logoSetting.width,
