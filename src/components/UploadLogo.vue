@@ -1,7 +1,7 @@
 <template>
   <div class="upload-logo-opener">
 <!--    <b-button v-b-modal.modal-center>-->
-    <div class="btn btn-secondary modal-handler" @click="modalHandler">
+    <div class="btn btn-secondary modal-handler">
       <div class="upload-box">
         <div v-if="logoUrl">
           <img :src="logoUrl" width="100%"/>
@@ -9,7 +9,7 @@
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <div v-else>
+        <div v-else @click="modalHandler">
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
           </div>
