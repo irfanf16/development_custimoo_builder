@@ -22,7 +22,7 @@
             <CustomizationTabs :productDetails="products[designsIndex]"/>
           </b-col>
         </template>
-        <b-col v-if="manageComponents.CustomizationPreview" cols="6" class="d-none border-right d-lg-block">
+        <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="border-right">
           <template v-if="manageComponents.AdvanceCustomization">
             <div class="customization-preview-process w-100">
               <header class="preview-area-header py-4">

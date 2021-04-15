@@ -2,7 +2,7 @@
   <div class="available-designs-section px-3 px-lg-0" v-if="productDesignsData">
     <div class="design-col" v-for="(design, index) in productDesignsData.productstyles[0].productdesigns"
          :key="design.id">
-      <a @click="changeDesign(index)">
+      <a @click="changeDesign(index); showDesign()">
         <Scene :canvas-height="73" :canvas-width="59"
                :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ productDesignsData.productstyles[0].front.file_url}"
                :logos="productDesignsData.productstyles[0].logo"/>
@@ -34,6 +34,13 @@ export default class DesignAvailable extends Vue {
       }
     })
   }
+
+  public showDesign() {
+      this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
+      this.$store.dispatch('setManageComponents', {index: 'showAdvanceCustomization', value: true})
+    }
 }
 </script>
 
