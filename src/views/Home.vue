@@ -127,6 +127,7 @@ export default class Home extends Vue {
   public mobileScreen = this.$store.state.mobileScreen
   private jwtToken !: string
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  public mounted = false
 
   get isAuthenticated(): boolean {
     return this.$store.getters.isAuthenticated
@@ -138,6 +139,10 @@ export default class Home extends Vue {
 
   get manageComponents(): [] {
     return this.$store.getters.getManageComponents
+  }
+
+  get customLogos(): [] {
+    return this.$store.getters.getCustomLogos
   }
 
   getFillColors() {
@@ -159,7 +164,7 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
   }
 
-  public retrieveProducts(url = '/list/products', searchCall = false): void {
+  public async retrieveProducts(url = '/list/products', searchCall = false): void {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -169,15 +174,36 @@ export default class Home extends Vue {
 
     if (this.hasProducts) {
       const self = this
-      http.get(url).then((response: any) => {
+      await http.get(url).then((response: any) => {
         this.products = this.products.concat(response.data.products.data)
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
         }
+        if(!this.mounted){
+          this.mounted = true
+          this.customLogoInit()
+        }
       }).catch((e: any) => {
         console.log(e)
       });
+    }
+  }
+
+  public customLogoInit(){
+    if(this.products.length && this.products[this.designsIndex].is_logo_allowed == 1){
+      let logoSetting = this.products[this.designsIndex].logos_setting[0]
+      let logo = {
+        url: '',
+        width: logoSetting.width,
+        height: logoSetting.height,
+        x_axis: logoSetting.x_axis,
+        y_axis: logoSetting.y_axis,
+        haveControls: Boolean(logoSetting.is_locked),
+        isRender: false,
+        side: logoSetting.side
+      }
+      this.$store.dispatch('setCustomLogos', logo)
     }
   }
 
