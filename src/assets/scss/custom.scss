@@ -156,6 +156,16 @@ a:hover{color: #219f84;}
 .confirm-order-area,
 .customization-tabs{
     margin: 0 -15px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    z-index: 999;
+    @media only screen and (min-width: 992px){
+        position: static;
+        background: none;
+    }
     .nav-tabs{
         border-bottom: none;
         justify-content: space-between;
