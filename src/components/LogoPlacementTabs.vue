@@ -107,7 +107,10 @@ export default class LogoPlacementTabs extends Vue {
     }
   }
   public removeLogoTab(index: number){
-    this.customLogos.splice(index, 1);
+    let payload = {
+      index: index
+    }
+    this.$store.dispatch('deleteCustomLogo', payload)
   }
 
   public deleteLogo(index: number) {

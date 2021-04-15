@@ -58,6 +58,9 @@
         </div>
       </b-tab>
     </b-tabs>
+    <template v-if="manageComponents.LogoArea">
+      <UploadLogo :logos_setting="logos_setting" />
+    </template>
   </div>
 </template>
 
@@ -68,6 +71,7 @@ import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterArea from '@/components/EditRosterArea.vue'
+import UploadLogo from '@/components/UploadLogo.vue'
 
 @Component<CustomizationProcess>({
   components: {
@@ -75,12 +79,30 @@ import EditRosterArea from '@/components/EditRosterArea.vue'
     LogoPlacementTabs,
     CustomizationText,
     CollarStyle,
-    EditRosterArea
+    EditRosterArea,
+    UploadLogo
+  },
+  mounted() {
+    this.$store.dispatch('setCustomLogos')
+    if(!this.logos_setting.length){
+      this.logos_setting = this.logos_setting.apend({
+        width: 100,
+        height: 100,
+        x_axis: 150,
+        y_axis: 190,
+        haveControls: true,
+        side: 'front'
+      })
+    }
   }
 })
 export default class CustomizationProcess extends Vue {
   @Prop({required: true}) productDetails!: any
+  @Prop({required: false}) logos_setting!: any
 
+  get manageComponents(): [] {
+    return this.$store.getters.getManageComponents
+  }
 }
 
 </script>

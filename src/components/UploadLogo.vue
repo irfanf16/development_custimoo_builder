@@ -3,9 +3,9 @@
 <!--    <b-button v-b-modal.modal-center>-->
     <div class="btn btn-secondary modal-handler">
       <div class="upload-box">
-        <div v-if="logoUrl">
+        <div v-if="logoUrl && manageComponents.BasicCustomization">
           <img :src="logoUrl" width="100%"/>
-          <a href="#" class="remove-img" @click="deleteLogo">
+          <a href="#" class="remove-img" @click="deleteFirstLogo">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
@@ -60,6 +60,7 @@ import {http} from "@/httpCommon"
 })
 export default class UploadLogo extends Vue {
   @Prop({required: true}) logos_setting!: any
+
   @Watch('logoUrl', {
     immediate: true, deep: true
   })
@@ -68,9 +69,14 @@ export default class UploadLogo extends Vue {
     if(Object.keys(this.customLogos).length) {
       const firstImage = Object.values(this.customLogos)[0] as Record<any, any>
       let customLogoUrl = firstImage.url
-      this.logoUrl = this.apiBaseUrl + '/' + customLogoUrl
+      if(customLogoUrl != '') {
+        this.logoUrl = this.apiBaseUrl + '/' + customLogoUrl
+      } else {
+        this.logoUrl = ''
+      }
     }
   }
+
 
   private jwtToken !: string
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
@@ -93,9 +99,18 @@ export default class UploadLogo extends Vue {
     return this.$store.getters.getCustomLogos
   }
 
+  get manageComponents(): [] {
+    return this.$store.getters.getManageComponents
+  }
+
   public modalHandler(){
-    if(!this.customLogos.length){
-      this.showModal()
+    if(Object.keys(this.customLogos).length) {
+      const firstImage = Object.values(this.customLogos)[0] as Record<any, any>
+      let customLogoUrl = firstImage.url
+      this.logoUrl = this.apiBaseUrl + '/' + customLogoUrl
+      if(!customLogoUrl){
+        this.showModal()
+      }
     }
   }
 
@@ -111,6 +126,7 @@ export default class UploadLogo extends Vue {
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
         this.logoUrl = this.apiBaseUrl + '/' + resp.data.file.logo_url
+        /*
         let logoSetting = this.logos_setting[0]
         let logo = {
           url: resp.data.file.logo_url,
@@ -122,6 +138,15 @@ export default class UploadLogo extends Vue {
           side: logoSetting.side
         }
         this.$store.dispatch('setCustomLogos', logo)
+*/
+        console.log(resp.data.file.logo_url)
+        let payload = {
+          index: 0,
+          attribute: 'url',
+          value: resp.data.file.logo_url
+        }
+        this.$store.dispatch('updateCustomLogoAttribute', payload)
+
         if (!this.jwtToken) {
           localStorage.setItem('isAssociation', 'true')
         }
@@ -130,12 +155,26 @@ export default class UploadLogo extends Vue {
       .catch((e: any) => {
         console.log(e)
       })
+    console.log(this.customLogos)
   }
 
-  public deleteLogo(e: any){
-    this.hideModal()
-    this.customLogos.splice(0, 1);
-    this.logoUrl = ''
+  // public deleteLogo(e: any){
+  //   this.hideModal()
+  //   // this.customLogos.splice(0, 1);
+  //   let payload = {
+  //     index: 0
+  //   }
+  //   this.$store.dispatch('deleteCustomLogo', payload)
+  //   this.logoUrl = ''
+  // }
+
+  public deleteFirstLogo() {
+    let payload = {
+      index: 0,
+      attribute: 'url',
+      value: ''
+    }
+    this.$store.dispatch('updateCustomLogoAttribute', payload)
   }
 }
 

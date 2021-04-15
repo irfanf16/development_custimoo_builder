@@ -21,7 +21,12 @@ const ProductAttributes:Module<any, any> = {
     },
     customLogoAttribute(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
-        Vue.set(state.customLogos[customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value);
+        Vue.set(state.customLogos[customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
+      }
+    },
+    customLogoDelete(state: Record<any, any>, delCustomLogo: Record<any, any>) {
+      if(delCustomLogo){
+        state.customLogos.splice(delCustomLogo.index, 1)
       }
     },
     isAssociation(state: Record<any, any>, isAssociation: Record<any, any>) {
@@ -54,6 +59,9 @@ const ProductAttributes:Module<any, any> = {
     },
     updateCustomLogoAttribute({commit}, payload){
       commit('customLogoAttribute', payload)
+    },
+    deleteCustomLogo({commit}, payload){
+      commit('customLogoDelete', payload)
     },
     setIsAssociation({commit}, payload){
         commit('isAssociation', payload)
