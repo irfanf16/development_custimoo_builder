@@ -4,7 +4,7 @@
       <b-row>
         <template v-if="manageComponents.BasicCustomization">
           <b-col cols="12" lg="3" class="text-left home-color-area">
-            <div v-if="manageComponents.ChooseColor" class="py-3 pb-5 py-lg-5 overflow-hidden my-4 my-lg-0">
+            <div v-if="manageComponents.ChooseColor" class="py-3 pb-5 py-lg-5 overflow-hidden mt-4 mt-lg-0">
               <ChooseColor :colors="colors"/>
             </div>
             <template v-if="products.length && products[designsIndex].is_logo_allowed == 1">
@@ -22,7 +22,7 @@
             <CustomizationTabs :productDetails="products[designsIndex]"/>
           </b-col>
         </template>
-        <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="border-right">
+        <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
           <template v-if="manageComponents.AdvanceCustomization">
             <div class="customization-preview-process w-100">
               <header class="preview-area-header py-2 py-lg-4">
@@ -272,7 +272,9 @@ export default class Home extends Vue {
     }
   }
 }
-
+.preview-column{
+  @media only screen and (min-width: 992px){border-right: 1px solid #dee2e6;}
+}
 .preview-area-header {
   margin: 0 -15px;
   padding: 26px 15px;

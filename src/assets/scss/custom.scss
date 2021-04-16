@@ -259,12 +259,16 @@ a:hover{color: #219f84;}
     max-height: 50vh;
     overflow-y: auto;
     padding-bottom: 110px;
+    border-radius: 25px 25px 0 0;
+    border-top: 2px solid #EDF2F6;
     @media only screen and (min-width: 992px){
         position: static;
         background: none;
         margin: 0 -15px;
         max-height: inherit;
         padding-bottom: 0;
+        border-radius: 0;
+        border-top: none;
     }
     .nav-tabs{
         justify-content: space-between;
@@ -399,13 +403,27 @@ a:hover{color: #219f84;}
         }
     }
     .logo-placement-tabs{
-        max-width: 300px;
+        max-width: 320px;
         margin: 0 auto;
         .nav-tabs{
-            padding: 20px 0;
+            padding: 15px 0;
             border: none;
             justify-content: flex-start;
             position: static;
+            position: relative;
+            @media only screen and (min-width: 992px){
+                padding: 20px 0;
+            }
+            &:before{
+                position: absolute;
+                left: -9999px;
+                right: -9999px;
+                bottom: 0;
+                content: '';
+                height: 1px;
+                background: #EDF2F6;
+                @media only screen and (min-width: 992px){display: none;}
+            }
             .nav-link{
                 border: 1px solid #EDF2F6;
                 margin: 0 10px 0 0;
@@ -469,6 +487,16 @@ a:hover{color: #219f84;}
                 }
             }
         }
+        .tab-content{
+            padding-top: 30px;
+            @media only screen and (min-width: 992px){padding-top: 0;}
+        }
+        // .upload-logo-opener{
+        //     @media only screen and (max-width: 991px){
+        //         bottom: 92px;
+        //         box-shadow: none;
+        //     }
+        // }
     }
     .logo-placement-area{
         h4{

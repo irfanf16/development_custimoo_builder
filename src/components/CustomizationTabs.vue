@@ -2,7 +2,7 @@
   <div>
   <div class="customization-tabs">
     <b-tabs>
-      <b-tab active v-if="productDetails.is_logo_allowed == 1">
+      <b-tab v-if="productDetails.is_logo_allowed == 1">
         <template #title>
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
@@ -83,6 +83,17 @@ import UploadLogo from '@/components/UploadLogo.vue'
   },
   mounted() {
     this.$store.dispatch('setCustomLogos')
+  },
+  created() {
+    console.log("mango")
+    var obkects = document.getElementsByClassName("tab-pane");
+    console.log(obkects)
+    for(var i=0;i<obkects.length;i++){
+      console.log(obkects[i].classList)//.classList.remove('active');
+      obkects[i].classList.remove('active')//.classList.remove('active');
+      console.log(obkects[i].classList)//.classList.remove('active');
+    }
+    
   }
 })
 export default class CustomizationProcess extends Vue {
