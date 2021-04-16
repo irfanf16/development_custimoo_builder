@@ -60,9 +60,6 @@
       </b-tab>
     </b-tabs>
   </div>
-<!--    <template v-if="manageComponents.LogoArea">-->
-<!--      <UploadLogo :logosSetting="productDetails.logos_setting"  />-->
-<!--    </template>-->
   </div>
 </template>
 

@@ -46,20 +46,20 @@ import {http} from "@/httpCommon"
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
     if(!this.logosSetting){
-      this.logosSetting = this.logosSetting.apend({
+      this.logosSetting = this.logosSetting.concat([{
         width: 100,
         height: 100,
         x_axis: 150,
         y_axis: 190,
         haveControls: true,
         side: 'front'
-      })
+      }])
     }
-
   }
 })
 export default class UploadLogo extends Vue {
   @Prop({required: false}) logosSetting!: any
+  @Prop({required: true}) customLogoIndex!: any
 
   @Watch('logoUrl', {
     immediate: true, deep: true
@@ -103,7 +103,12 @@ export default class UploadLogo extends Vue {
   }
 
   public modalHandler(){
-    if(Object.keys(this.customLogos).length) {
+    let manageComponent = this.manageComponents as Record<any, any>
+    console.log(manageComponent.AdvanceCustomization)
+    if(manageComponent.AdvanceCustomization) {
+      this.showModal()
+    }
+    if(Object.keys(this.customLogos).length && manageComponent.BasicCustomization) {
       const firstImage = Object.values(this.customLogos)[0] as Record<any, any>
       let customLogoUrl = firstImage.url
       this.logoUrl = this.apiBaseUrl + '/' + customLogoUrl
@@ -127,7 +132,7 @@ export default class UploadLogo extends Vue {
         this.logoUrl = this.apiBaseUrl + '/' + resp.data.file.logo_url
         console.log(resp.data.file.logo_url)
         let payload = {
-          index: 0,
+          index: this.customLogoIndex,
           attribute: 'url',
           value: resp.data.file.logo_url
         }

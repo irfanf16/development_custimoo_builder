@@ -46,10 +46,9 @@
           </div>
           <button class="btn btn-secondary w-100 fw-bold">Save Color to Locker Room</button>
         </div>
-<!--        <template v-if="manageComponents.LogoArea">-->
-<!--        <template >-->
-<!--          <UploadLogo />-->
-<!--        </template>-->
+        <template v-if="manageComponents.LogoArea">
+          <UploadLogo :customLogoIndex="index"/>
+        </template>
       </div>
     </b-tab>
     <b-tab v-if="customLogos.length < numberOfLogosAllowed" @click="addTab">
