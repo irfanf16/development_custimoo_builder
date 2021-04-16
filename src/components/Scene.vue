@@ -31,6 +31,10 @@ export default class Scene extends Vue {
   @Prop({required: true}) readonly front!: Record<string, unknown>;
   @Prop({required: false}) readonly back!: Record<string, unknown>;
   @Prop({required: false}) readonly logos !: [Record<string, any>];
+  @Prop({required: false}) readonly logosSettings !: Record<any, any>
+  @Prop({required: false}) readonly logoAllowed !: boolean
+  @Prop({required: false}) readonly logosLimit !: number
+  @Prop({required: false}) readonly productColors !: [Record<string, any>];
   @Prop({required: false, default: 260}) readonly mainCanvasWidth!: number;
   @Prop({required: false, default: 290}) readonly mainCanvasHeight!: number;
   @Prop({required: false, default: 260}) readonly canvasWidth!: number;
