@@ -18,7 +18,7 @@
           </b-col>
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
-          <b-col cols="12" lg="3" class="text-left border-right py-3">
+          <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs :productDetails="products[designsIndex]"/>
             <template v-if="products.length && products[designsIndex].is_logo_allowed == 1">
               <template v-if="manageComponents.LogoArea">
@@ -30,7 +30,7 @@
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="border-right">
           <template v-if="manageComponents.AdvanceCustomization">
             <div class="customization-preview-process w-100">
-              <header class="preview-area-header py-4">
+              <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
                   <b-button variant="outline-secondary" v-b-modal.modal-center>Locker room</b-button>
                   <LockerRoomModal/>
@@ -282,20 +282,26 @@ export default class Home extends Vue {
   margin: 0 -15px;
   padding: 26px 15px;
   border-bottom: 1px solid #EDF2F6;
-  min-height: 91px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-
+  @media only screen and (min-width: 992px){
+    min-height: 91px;
+  }
   .btn {
-    margin: 0 15px 0 0;
-    font-size: 14px;
-    font-weight: 600;
+    margin: 0 0.3rem 0 0;
+    font-size: 12px;
     color: #000;
     border-color: #DDDFE3;
     border-radius: 5px;
-
+    padding: 5px 8px;
+    @media only screen and (min-width: 992px){
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 15px 0 0;
+      padding: 0.375rem 0.75rem;
+    }
     &:hover {
       color: #fff;
     }
@@ -306,11 +312,14 @@ export default class Home extends Vue {
     flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
-    font-size: 18px;
+    font-size: 14px;
     list-style: none;
-
+    @media only screen and (min-width: 992px){
+      font-size: 18px;
+    }
     li {
-      margin: 0 0 0 12px;
+      margin: 0 0 0 6px;
+      @media only screen and (min-width: 992px){margin: 0 0 0 12px;}
     }
   }
 }

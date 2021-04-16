@@ -153,24 +153,136 @@ a:hover{color: #219f84;}
 
     }
 }
-.confirm-order-area,
+.confirm-order-area{
+    .accordion{
+        .card-header{
+            background: none;
+            border: none;
+        }
+        .card{border-radius: 0;}
+        .btn{
+            background: none;
+            border: none;
+            color: #03142E;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 600;
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            &:focus{box-shadow: none;}
+            &:active{
+                background: none;
+                border: none;
+                color: #03142E;
+            }
+            .accordion-icon{
+                background: #808895;
+                width: 18px;
+                height: 18px;
+                border-radius: 2px;
+                display: block;
+                position: relative;
+                &:before{
+                    position: absolute;
+                    content: '';
+                    left: 50%;
+                    top: 50%;
+                    border: 6px solid transparent;
+                    border-top: 6px solid #fff;
+                    margin: -2px 0 0 -6px;
+                }
+            }
+            &.not-collapsed{
+                .accordion-icon{
+                    transform: rotate(180deg);
+                    background: #219F84;
+                    &:before{margin-top: -3px;}
+                }
+            }
+            .color{
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 12px;
+                font-weight: 400;
+                max-width: 90px;
+                .color-box{
+                    width: 23px;
+                    height: 23px;
+                    background: #000;
+                    border-radius: 50%;
+                    display: block;
+                    position: relative;
+                    border: 1px solid #000;
+                    margin: 0 8px 0 0;
+                    &:before{
+                        position: absolute;
+                        content: '';
+                        left: 0;
+                        right: 0;
+                        top: 0;
+                        bottom: 0;
+                        border-radius: 50%;
+                        border: 3px solid #fff;
+                    }
+                }
+            }
+            .text{
+                max-width: 80px;
+                width: 100%;
+            }
+        }
+        .nav-link{
+            font-size: 12px;
+            padding: 0.5rem; 
+            color: #03142E;
+            font-weight: 600;
+            border-bottom: 1px solid #EFF2F4;
+            transition: all 0.3s ease;
+            &:hover{
+                border-bottom: 1px solid #219F84;
+            }
+        }
+    }
+}
 .customization-tabs{
-    margin: 0 -15px;
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     background: #fff;
     z-index: 999;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-bottom: 110px;
     @media only screen and (min-width: 992px){
         position: static;
         background: none;
+        margin: 0 -15px;
+        max-height: inherit;
+        padding-bottom: 0;
     }
     .nav-tabs{
-        border-bottom: none;
         justify-content: space-between;
-        border-bottom: 1px solid #EDF2F6;
-        padding: 0 1rem 1rem;
+        border: 1px solid #EDF2F6;
+        padding: 1rem;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9;
+        background: #fff;
+        @media only screen and (min-width: 992px){
+            position: static;
+            background: none;
+            border: none;
+            border-bottom: 1px solid #EDF2F6;
+            padding: 0 1rem 1rem;
+        }
         .nav-link{
             border: none;
             text-align: center;
@@ -293,6 +405,7 @@ a:hover{color: #219f84;}
             padding: 20px 0;
             border: none;
             justify-content: flex-start;
+            position: static;
             .nav-link{
                 border: 1px solid #EDF2F6;
                 margin: 0 10px 0 0;
@@ -471,7 +584,8 @@ a:hover{color: #219f84;}
             padding: 0;
             border: none;
             margin: 0 0 15px;
-            .nav-link{
+            position: static; 
+             .nav-link{
                 padding: 0;
                 border: 1px solid #707070;
                 border-radius: 5px;
