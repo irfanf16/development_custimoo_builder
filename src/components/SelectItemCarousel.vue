@@ -4,7 +4,7 @@
       <a href="#." ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">
           <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
-            <Scene :canvas-width="59" :canvas-height="73" :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.productstyles[0].front.file_url}" :logos="product.productstyles[0].logo" />
+            <Scene :canvas-width="59" :canvas-height="73" :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.productstyles[0].front.file_url}" :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)" :logosLimit="product.allowed_logos_count" :productColors="product.colors"/>
           </div>
         </template>
       </a>
