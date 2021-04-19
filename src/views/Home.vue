@@ -27,7 +27,7 @@
             <div class="customization-preview-process w-100">
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
-                  <b-button variant="outline-secondary" v-b-modal.modal-center>Locker room</b-button>
+                  <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
                   <LockerRoomModal/>
                   <b-button variant="outline-secondary">Save to locker room</b-button>
                   <b-button variant="outline-secondary">Buy Now</b-button>

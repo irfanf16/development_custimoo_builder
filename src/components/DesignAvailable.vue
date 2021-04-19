@@ -15,6 +15,7 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import Scene from '@/components/Scene.vue'
+import manageComponents from '@/store/modules/main'
 
 @Component<DesignAvailable>({
   components: {
@@ -37,10 +38,12 @@ export default class DesignAvailable extends Vue {
   }
 
   public showDesign() {
-      this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
-      this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
-      this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
-      this.$store.dispatch('setManageComponents', {index: 'showAdvanceCustomization', value: true})
+      if(manageComponents.mobileScreen){
+        this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
+        this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
+        this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
+        this.$store.dispatch('setManageComponents', {index: 'showAdvanceCustomization', value: true})
+      }
     }
 }
 </script>

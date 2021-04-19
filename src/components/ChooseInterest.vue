@@ -13,13 +13,16 @@
 
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator'
+    import manageComponents from '@/store/modules/main'
     @Component<ChooseInterest>({})
     export default class ChooseInterest extends Vue{
       public showDesign() {
-        this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
-        this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: false})
-        this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
-        this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
+          if(!manageComponents.mobileScreen){
+                this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
+                this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: false})
+                this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
+                this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
+          }
       }
     }
 </script>
