@@ -175,14 +175,12 @@ export default class UploadLogo extends Vue {
         box-shadow: 0 0 10px rgba(0,0,0,0.2);
         z-index: 9;
         @media only screen and (min-width: 992px){
-            padding: 20px;
-        }
-        @media only screen and (min-width: 1200px){
             position: absolute;
             border-radius: 0;
             background: none;
             border-top: 1px solid #dee2e6;
             box-shadow: none;
+            padding: 20px;
         }
         @media only screen and (min-width: 1200px){
             padding: 30px;
@@ -224,6 +222,10 @@ export default class UploadLogo extends Vue {
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
+            @media only screen and (min-width: 992px){
+              width: 64px;
+              height: 64px;
+            }
             @media only screen and (min-width: 1200px){
                 width: 74px;
                 height: 74px;
@@ -236,6 +238,9 @@ export default class UploadLogo extends Vue {
             }
             .icon-holder{
                 font-size: 24px;
+                @media only screen and (min-width: 992px){
+                    font-size: 20px;
+                }
                 @media only screen and (min-width: 1366px){
                 font-size: 32px;
                 }

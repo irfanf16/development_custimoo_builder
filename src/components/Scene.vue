@@ -1,5 +1,5 @@
 <template>
-  <div style="display: flex">
+  <div style="display: flex; justify-content: center;">
     <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
     <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
   </div>

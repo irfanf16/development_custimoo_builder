@@ -1,5 +1,5 @@
 <template>
-    <b-modal id="modal-center" centered scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
+    <b-modal id="modal-center-lockerroom" centered scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener">
                 <a href="#." class="arrow arrow-left"><font-awesome-icon :icon="['fas', 'arrow-left']" /></a>

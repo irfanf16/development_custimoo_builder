@@ -9,7 +9,7 @@
           </a>
         </div>
       </template>
-      <div>
+      <div class="tabs-logo-container">
         <div class="logo-placement-area mb-4">
           <div class="logo-placement-holder mb-3">
             <div class="logo-holder">
@@ -136,6 +136,7 @@ export default class LogoPlacementTabs extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.tabs-logo-container{padding: 0 0 150px;}
 .nav-tabs {
   .nav-item {
     .nav-link {

@@ -403,8 +403,9 @@ a:hover{color: #219f84;}
         }
     }
     .logo-placement-tabs{
-        max-width: 320px;
+        max-width: 340px;
         margin: 0 auto;
+        padding: 0 10px;
         .nav-tabs{
             padding: 15px 0;
             border: none;
@@ -429,10 +430,15 @@ a:hover{color: #219f84;}
                 margin: 0 10px 0 0;
                 font-size: 14px;
                 font-weight: 600;
+                position: relative;
                 &.active{
                     color: #fff;
                     background: #219F84;
                     border-color: #219F84;
+                }
+                .remove-logo{
+                    top: -5px;
+                    right: -10px;
                 }
             }
         }
