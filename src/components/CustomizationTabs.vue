@@ -22,7 +22,7 @@
         </template>
         <div>
           <h2 class="fw-bold fz-16 p-3">Choose Color</h2>
-          <ColorAccordion/>
+          <ColorAccordion :productColors="productColors" />
         </div>
       </b-tab>
       <b-tab>
@@ -83,17 +83,16 @@ import UploadLogo from '@/components/UploadLogo.vue'
   },
   mounted() {
     this.$store.dispatch('setCustomLogos')
+    this.productColorsManipulation()
   },
   created() {
     console.log("mango")
     var obkects = document.getElementsByClassName("tab-pane");
     console.log(obkects)
     for(var i=0;i<obkects.length;i++){
-      console.log(obkects[i].classList)//.classList.remove('active');
       obkects[i].classList.remove('active')//.classList.remove('active');
-      console.log(obkects[i].classList)//.classList.remove('active');
     }
-    
+
   }
 })
 export default class CustomizationProcess extends Vue {
@@ -101,6 +100,15 @@ export default class CustomizationProcess extends Vue {
 
   get manageComponents(): [] {
     return this.$store.getters.getManageComponents
+  }
+  public productColors: any[] = []
+
+  public productColorsManipulation(){
+    this.productDetails.colors.forEach((colors: any, key: number) => {
+      colors.color_text = JSON.parse(colors.color_text)
+      colors.selectedColor = ""
+      this.productColors = this.productColors.concat(colors)
+    })
   }
 }
 
