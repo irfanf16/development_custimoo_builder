@@ -10,8 +10,8 @@
         </div>
       </template>
       <div class="tabs-logo-container">
-        <div class="logo-placement-area mb-4">
-          <div class="logo-placement-holder mb-3">
+        <div class="logo-placement-area mb-3 mb-lg-4">
+          <div class="logo-placement-holder mb-lg-3">
             <div class="logo-holder">
               <template v-if="customLogos[index].url != ''">
                 <img :src="apiBaseUrl+'/'+customLogos[index].url" alt="logo Shirt"/>
@@ -28,10 +28,10 @@
               <b-form-select v-model="customLogos[index].side" :options="options"></b-form-select>
             </div>
           </div>
-          <button class="btn btn-secondary w-100 fw-bold">Save Logo to Locker Room</button>
+          <button class="btn btn-secondary w-100 fw-bold">Save Logo</button>
         </div>
         <div class="logo-placement-area">
-          <h4 class="mb-4">Color Extracted from Logo</h4>
+          <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
           <div class="logo-placement-holder">
             <div class="logo-holder">
               <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
@@ -44,7 +44,7 @@
               <b-form-select v-model="selected" :options="options"></b-form-select>
             </div>
           </div>
-          <button class="btn btn-secondary w-100 fw-bold">Save Color to Locker Room</button>
+          <button class="btn btn-secondary w-100 fw-bold">Save Color</button>
         </div>
         <template v-if="manageComponents.LogoArea">
           <UploadLogo :customLogoIndex="index"/>
@@ -136,7 +136,46 @@ export default class LogoPlacementTabs extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.tabs-logo-container{padding: 0 0 150px;}
+.tabs-logo-container{
+  @media only screen and (min-width: 992px){
+    padding: 0 0 150px;
+  }
+  .upload-logo-opener{
+    box-shadow: none;
+    border-radius: 0;
+    position: static;
+    padding: 0;
+    border-top: 1px solid #EFF2F4;
+    margin: 20px -20px 0;
+    padding: 15px 20px 0;
+  }
+  .logo-placement-area{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    .logo-placement-holder{
+      flex: 0 0 67%;
+      max-width: 67%;
+      @media only screen and (min-width: 992px){
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+    }
+    .btn{ 
+      flex: 0 0 30%;
+      max-width: 30%;
+      font-size: 12px;
+      padding: 0.50rem;
+      @media only screen and (min-width: 992px){
+        flex: 0 0 100%;
+        max-width: 100%;
+        font-size: 14px;
+        padding: 0.50rem 0.75rem;
+      }
+    }
+  }
+}
 .nav-tabs {
   .nav-item {
     .nav-link {

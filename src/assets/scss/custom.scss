@@ -293,9 +293,15 @@ a:hover{color: #219f84;}
             border-radius: 5px;
             color: #808895;
             font-size: 12px;
-            @media only screen and (min-width: 1550px){
-                padding: 0.5rem 1.3rem;
+            @media only screen and (min-width: 992px){
+                font-size: 10px;
+                padding: 0.5rem;
             }
+            @media only screen and (min-width: 1360px){
+                font-size: 12px;
+                padding: 0.5rem 1rem;
+            }
+            @media only screen and (min-width: 1550px){padding: 0.5rem 1.3rem;}
             &:hover{color: #189076;}
             &.active{
                 border: none;
@@ -305,6 +311,12 @@ a:hover{color: #219f84;}
             .icon-holder{
                 font-size: 20px;
                 margin: 0 0 3px;
+                @media only screen and (min-width:992px){
+                    font-size: 16px;
+                }
+                @media only screen and (min-width:1360px){
+                    font-size: 20px;
+                }
             }
         }
     }
@@ -431,6 +443,12 @@ a:hover{color: #219f84;}
                 font-size: 14px;
                 font-weight: 600;
                 position: relative;
+                @media only screen and (min-width: 992px){
+                    font-size: 12px;
+                }
+                @media only screen and (min-width: 1360px){
+                    font-size: 14px;
+                }
                 &.active{
                     color: #fff;
                     background: #219F84;
@@ -448,8 +466,8 @@ a:hover{color: #219f84;}
             justify-content: space-between;
             align-items: center;
             .logo-holder{
-                width: 75px;
-                height: 75px;
+                width: 60px;
+                height: 60px;
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: center;
@@ -457,6 +475,10 @@ a:hover{color: #219f84;}
                 border: 1px solid #EFF2F4;
                 border-radius: 5px;
                 position: relative;
+                @media only screen and (min-width: 992px){
+                    width: 75px;
+                    height: 75px;
+                }
                 img{
                     display: block;
                     max-width: 100%;
@@ -480,11 +502,18 @@ a:hover{color: #219f84;}
                 }
             }
             .logo-placemet-content{
-                width: 200px;
+                width: 144px;
+                @media only screen and (min-width: 992px){
+                    width: 200px;
+                }
+                @media only screen and (min-width: 1200px){
+                    width: 226px;
+                }
                 h4{
                     color: #03142E;
                     font-size: 14px;
-                    margin: 0 0 8px;
+                    margin: 0 0 5px;
+                    @media only screen and (min-width: 992px){margin: 0 0 8px;}
                 }
                 .custom-select{
                     border: 1px solid #EFF2F4;
@@ -494,7 +523,8 @@ a:hover{color: #219f84;}
             }
         }
         .tab-content{
-            padding-top: 30px;
+            padding-top: 20px;
+            @media only screen and (min-width: 720px){padding-top: 30px;}
             @media only screen and (min-width: 992px){padding-top: 0;}
         }
         // .upload-logo-opener{
@@ -507,7 +537,10 @@ a:hover{color: #219f84;}
     .logo-placement-area{
         h4{
             font-weight: 700;
-            font-size: 18px;
+            font-size: 12px;
+            @media only screen and (min-width: 992px){
+                font-size: 18px;
+            }
         }
     }
     .customization-text-area{
