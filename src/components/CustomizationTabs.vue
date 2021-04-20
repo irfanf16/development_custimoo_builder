@@ -22,7 +22,12 @@
         </template>
         <div>
           <h2 class="fw-bold fz-16 p-3">Choose Color</h2>
-          <ColorAccordion/>
+          <div class="d-none d-lg-block">
+            <ColorAccordion/>
+          </div>
+          <div class="d-lg-none">
+            <ColorTabs />
+          </div>
         </div>
       </b-tab>
       <b-tab>
