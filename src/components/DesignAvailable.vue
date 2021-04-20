@@ -41,6 +41,7 @@ export default class DesignAvailable extends Vue {
   }
 
   public showDesign() {
+
     if(this.manageComponents.mobileScreen){
       this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
       this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
