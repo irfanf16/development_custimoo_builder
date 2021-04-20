@@ -83,21 +83,16 @@ export default class Scene extends Vue {
         this.logoObjects.forEach((logoObject) => {
           if(self.apiBaseUrl+'/'+logo.url == logoObject._element.src){
             addLogo = false
-            if(logoObject.left != logo.x_axis) {
-              logoObject.left = logo.x_axis
-              if(logo.side == 'back') {
-                self.backCanvas.renderAll()
-              } else {
-                self.frontCanvas.renderAll()
-              }
-            }else if(logoObject.top != logo.y_axis) {
-              logoObject.top = logo.y_axis
-              if(logo.side == 'back') {
-                self.backCanvas.renderAll()
-              } else {
-                self.frontCanvas.renderAll()
-              }
+            if(logoObject.left != logo.x_axis || logoObject.top != logo.y_axis) {
+              logoObject.center()
+              logoObject.set({
+                left: self.frontCanvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
+                top: self.frontCanvas.getHeight() / self.mainCanvasHeight * logo.y_axis
+              })
             }
+            // logoObject.rotate(10)
+
+            logoObject.setCoords()
           }
         })
         if(addLogo && logo.url) {
@@ -198,7 +193,6 @@ export default class Scene extends Vue {
   public objectMove(e: any) {
     const self = this;
     this.customLogos.forEach((logo, index) => {
-      console.log(self.apiBaseUrl+'/'+logo.url)
       if(self.apiBaseUrl+'/'+logo.url == e.target._element.src){
         if(e.action == 'drag') {
           self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'x_axis', value: e.target.left})
