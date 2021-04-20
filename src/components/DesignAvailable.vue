@@ -26,6 +26,9 @@ import manageComponents from '@/store/modules/main'
 export default class DesignAvailable extends Vue {
   @Prop({required: true}) productDesignsData !: any
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  get manageComponents(): Record<any, any> {
+    return this.$store.getters.getManageComponents
+  }
 
   public changeDesign(index: number) {
     this.productDesignsData.productstyles[0].productdesigns.forEach((design: any, key: number) => {
@@ -38,13 +41,14 @@ export default class DesignAvailable extends Vue {
   }
 
   public showDesign() {
-      if(!manageComponents.mobileScreen){
-        this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
-        this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
-        this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
-        this.$store.dispatch('setManageComponents', {index: 'showAdvanceCustomization', value: true})
-      }
+
+    if(this.manageComponents.mobileScreen){
+      this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
+      this.$store.dispatch('setManageComponents', {index: 'showAdvanceCustomization', value: true})
     }
+  }
 }
 </script>
 

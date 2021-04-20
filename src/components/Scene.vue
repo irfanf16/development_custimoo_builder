@@ -66,7 +66,7 @@ export default class Scene extends Vue {
       this.logoObjects.forEach((logoObject) => {
         let deleteLogo = true
         newVal.forEach((logo) => {
-          if(self.apiBaseUrl+'/'+logo.src == logoObject._element.src){
+          if(self.apiBaseUrl+'/'+logo.url == logoObject._element.src){
             deleteLogo = false
           }
         })
@@ -81,8 +81,23 @@ export default class Scene extends Vue {
       newVal.forEach((logo) => {
         let addLogo = true
         this.logoObjects.forEach((logoObject) => {
-          if(self.apiBaseUrl+'/'+logo.src == logoObject._element.src){
+          if(self.apiBaseUrl+'/'+logo.url == logoObject._element.src){
             addLogo = false
+            if(logoObject.left != logo.x_axis) {
+              logoObject.left = logo.x_axis
+              if(logo.side == 'back') {
+                self.backCanvas.renderAll()
+              } else {
+                self.frontCanvas.renderAll()
+              }
+            }else if(logoObject.top != logo.y_axis) {
+              logoObject.top = logo.y_axis
+              if(logo.side == 'back') {
+                self.backCanvas.renderAll()
+              } else {
+                self.frontCanvas.renderAll()
+              }
+            }
           }
         })
         if(addLogo && logo.url) {
@@ -181,12 +196,22 @@ export default class Scene extends Vue {
   }
 
   public objectMove(e: any) {
-    console.log(e)
+    const self = this;
+    this.customLogos.forEach((logo, index) => {
+      console.log(self.apiBaseUrl+'/'+logo.url)
+      if(self.apiBaseUrl+'/'+logo.url == e.target._element.src){
+        if(e.action == 'drag') {
+          self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'x_axis', value: e.target.left})
+          self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'y_axis', value: e.target.top})
+        }
+      }
+    })
   }
 
   public async addLogos(logos: [Record<any, any>], canvas: fabric.Canvas) {
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
+      logo.haveControls = logo.haveControls == 0? false : true
       let planeUrl = this.apiBaseUrl + '/' + logo.url
       let url = planeUrl.trim().split(' ').join('%20')
       fabric.Image.fromURL(url, (img: any) => {

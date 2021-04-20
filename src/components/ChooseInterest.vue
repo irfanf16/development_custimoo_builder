@@ -16,8 +16,12 @@
     import manageComponents from '@/store/modules/main'
     @Component<ChooseInterest>({})
     export default class ChooseInterest extends Vue{
+      get manageComponents(): Record<any, any> {
+        return this.$store.getters.getManageComponents
+      }
+
       public showDesign() {
-          if(!manageComponents.mobileScreen){
+          if(!this.manageComponents.mobileScreen){
                 this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
                 this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: false})
                 this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})

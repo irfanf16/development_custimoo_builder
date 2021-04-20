@@ -137,7 +137,7 @@ export default class Home extends Vue {
     return this.$store.getters.getCategories
   }
 
-  get manageComponents(): [] {
+  get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
   }
 
