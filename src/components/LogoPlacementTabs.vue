@@ -28,7 +28,7 @@
               <b-form-select v-model="customLogos[index].side" :options="options"></b-form-select>
             </div>
           </div>
-          <button class="btn btn-secondary w-100 fw-bold">Save Logo<span class="d-none d-lg-inline"> to Locker Room</span></button>
+          <button class="btn btn-secondary w-100 fw-bold">Save Logo</button>
         </div>
         <div class="logo-placement-area">
           <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
@@ -44,7 +44,7 @@
               <b-form-select v-model="selected" :options="options"></b-form-select>
             </div>
           </div>
-          <button class="btn btn-secondary w-100 fw-bold">Save Color<span class="d-none d-lg-inline"> to Locker Room</span></button>
+          <button class="btn btn-secondary w-100 fw-bold">Save Color</button>
         </div>
         <template v-if="manageComponents.LogoArea">
           <UploadLogo :customLogoIndex="index"/>
@@ -157,12 +157,22 @@ export default class LogoPlacementTabs extends Vue {
     .logo-placement-holder{
       flex: 0 0 67%;
       max-width: 67%;
+      @media only screen and (min-width: 992px){
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
     }
     .btn{ 
       flex: 0 0 30%;
       max-width: 30%;
       font-size: 12px;
       padding: 0.50rem;
+      @media only screen and (min-width: 992px){
+        flex: 0 0 100%;
+        max-width: 100%;
+        font-size: 14px;
+        padding: 0.50rem 0.75rem;
+      }
     }
   }
 }
