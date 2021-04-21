@@ -197,8 +197,11 @@ export default class Home extends Vue {
         url: '',
         width: logoSetting.width,
         height: logoSetting.height,
+        scaleX: 1,
+        scaleY: 1,
         x_axis: logoSetting.x_axis,
         y_axis: logoSetting.y_axis,
+        rotate: logoSetting.rotation,
         haveControls: Boolean(logoSetting.is_locked),
         side: logoSetting.side,
         customLogo: true

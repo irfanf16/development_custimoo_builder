@@ -86,16 +86,19 @@ export default class Scene extends Vue {
           let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
           if(logoUrl == logoObject._element.src){
             addLogo = false
+            logoObject.center() //add center because all events only trigger if use it in fabric js.
             if(logoObject.left != logo.x_axis || logoObject.top != logo.y_axis) {
-              logoObject.center()
               logoObject.set({
                 left: self.frontCanvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
                 top: self.frontCanvas.getHeight() / self.mainCanvasHeight * logo.y_axis
               })
             }
-            // logoObject.rotate(10)
+            if(logoObject.angle != logo.rotate) {
+              logoObject.rotate(logo.rotate as number)
+            }
 
-            logoObject.setCoords()
+            logoObject.scaleX = self.frontCanvas.getWidth() / self.mainCanvasWidth * logo.scaleX
+            logoObject.scaleY = self.frontCanvas.getHeight() / self.mainCanvasHeight * logo.scaleY
           }
         })
         if(addLogo && logo.url) {
@@ -202,8 +205,13 @@ export default class Scene extends Vue {
       let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
       if(logoUrl == e.target._element.src){
         if(e.action == 'drag') {
-          self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'x_axis', value: e.target.left})
-          self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'y_axis', value: e.target.top})
+          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'x_axis', value: e.target.left })
+          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'y_axis', value: e.target.top })
+        }else if(e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
+          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'scaleX', value: e.target.scaleX })
+          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'scaleY', value: e.target.scaleY })
+        }else if(e.action == 'rotate') {
+          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'rotate', value: e.target.angle })
         }
       }
     })
@@ -212,13 +220,15 @@ export default class Scene extends Vue {
   public async addLogos(logos: [Record<any, any>], canvas: fabric.Canvas) {
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
-      logo.haveControls = logo.haveControls == 0? false : true
+      logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
       fabric.Image.fromURL(logoUrl, (img: any) => {
-        img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
-          .set({
+        img.set({
             left: canvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
             top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
+            scaleX: canvas.getWidth() / self.mainCanvasWidth * logo.width / img.width,
+            scaleY: canvas.getHeight() / self.mainCanvasHeight * logo.height / img.height,
+            angle: logo.rotate as number,
             selectable: logo.haveControls,
             hasControls: logo.haveControls,
             hasBorders: logo.haveControls,
