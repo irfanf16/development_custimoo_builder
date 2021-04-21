@@ -45,6 +45,7 @@ export default class Scene extends Vue {
   private backTexture !: any
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
   private logoObjects: any[] =[]
+  private customLogoObjects: any[] =[]
   private logosLoaded = true
   private mounted = false
   private frontModel: any
@@ -63,10 +64,11 @@ export default class Scene extends Vue {
   customLogosChanged(newVal: [Record<any, any>], oldVal: [Record<any, any>]) {
     if(this.mounted) {
       const self = this
-      this.logoObjects.forEach((logoObject) => {
+      this.customLogoObjects.forEach((logoObject) => {
         let deleteLogo = true
-        newVal.forEach((logo) => {
-          if(self.apiBaseUrl+'/'+logo.url == logoObject._element.src){
+        newVal.forEach((logo: Record<any, any>) => {
+          let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
+          if(logoUrl == logoObject._element.src){
             deleteLogo = false
           }
         })
@@ -80,24 +82,20 @@ export default class Scene extends Vue {
 
       newVal.forEach((logo) => {
         let addLogo = true
-        this.logoObjects.forEach((logoObject) => {
-          if(self.apiBaseUrl+'/'+logo.url == logoObject._element.src){
+        this.customLogoObjects.forEach((logoObject) => {
+          let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
+          if(logoUrl == logoObject._element.src){
             addLogo = false
-            if(logoObject.left != logo.x_axis) {
-              logoObject.left = logo.x_axis
-              if(logo.side == 'back') {
-                self.backCanvas.renderAll()
-              } else {
-                self.frontCanvas.renderAll()
-              }
-            }else if(logoObject.top != logo.y_axis) {
-              logoObject.top = logo.y_axis
-              if(logo.side == 'back') {
-                self.backCanvas.renderAll()
-              } else {
-                self.frontCanvas.renderAll()
-              }
+            if(logoObject.left != logo.x_axis || logoObject.top != logo.y_axis) {
+              logoObject.center()
+              logoObject.set({
+                left: self.frontCanvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
+                top: self.frontCanvas.getHeight() / self.mainCanvasHeight * logo.y_axis
+              })
             }
+            // logoObject.rotate(10)
+
+            logoObject.setCoords()
           }
         })
         if(addLogo && logo.url) {
@@ -181,6 +179,9 @@ export default class Scene extends Vue {
         self.logoObjects.forEach((logoObject) => {
           canvas.add(logoObject)
         })
+        self.customLogoObjects.forEach((logoObject) => {
+          canvas.add(logoObject)
+        })
         canvas.add(model)
 
         canvas.viewportCenterObject(texture)
@@ -198,8 +199,8 @@ export default class Scene extends Vue {
   public objectMove(e: any) {
     const self = this;
     this.customLogos.forEach((logo, index) => {
-      console.log(self.apiBaseUrl+'/'+logo.url)
-      if(self.apiBaseUrl+'/'+logo.url == e.target._element.src){
+      let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
+      if(logoUrl == e.target._element.src){
         if(e.action == 'drag') {
           self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'x_axis', value: e.target.left})
           self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'y_axis', value: e.target.top})
@@ -212,9 +213,8 @@ export default class Scene extends Vue {
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
       logo.haveControls = logo.haveControls == 0? false : true
-      let planeUrl = this.apiBaseUrl + '/' + logo.url
-      let url = planeUrl.trim().split(' ').join('%20')
-      fabric.Image.fromURL(url, (img: any) => {
+      let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
+      fabric.Image.fromURL(logoUrl, (img: any) => {
         img.scaleToWidth(canvas.getWidth() / self.mainCanvasWidth * logo.width)
           .set({
             left: canvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
@@ -225,7 +225,11 @@ export default class Scene extends Vue {
             evented: logo.haveControls,
             globalCompositeOperation: 'source-atop'
           })
-        self.logoObjects.push(img)
+        if(logo.customLogo){
+          self.customLogoObjects.push(img)
+        }else {
+          self.logoObjects.push(img)
+        }
         if (index + 1 == logos.length) {
           self.logosLoaded = true
         }

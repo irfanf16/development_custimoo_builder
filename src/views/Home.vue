@@ -200,7 +200,8 @@ export default class Home extends Vue {
         x_axis: logoSetting.x_axis,
         y_axis: logoSetting.y_axis,
         haveControls: Boolean(logoSetting.is_locked),
-        side: logoSetting.side
+        side: logoSetting.side,
+        customLogo: true
       }
       this.$store.dispatch('setCustomLogos', logo)
     }
