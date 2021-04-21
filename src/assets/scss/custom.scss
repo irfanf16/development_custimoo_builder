@@ -256,11 +256,11 @@ a:hover{color: #219f84;}
     bottom: 0;
     background: #fff;
     z-index: 999;
-    max-height: 50vh;
+    max-height: 60vh;
     overflow-y: auto;
-    padding-bottom: 110px;
+    padding-bottom: 100px;
     border-radius: 25px 25px 0 0;
-    border-top: 2px solid #EDF2F6;
+    border-top: 2px solid #EDF2F6; 
     @media only screen and (min-width: 992px){
         position: static;
         background: none;
@@ -418,6 +418,7 @@ a:hover{color: #219f84;}
         max-width: 340px;
         margin: 0 auto;
         padding: 0 10px;
+        overflow: hidden;
         .nav-tabs{
             padding: 15px 0;
             border: none;
@@ -544,6 +545,10 @@ a:hover{color: #219f84;}
         }
     }
     .customization-text-area{
+        h2{
+            border-bottom: 2px solid #219F84;
+            padding: 0 0 10px;
+        }
         position: relative;
         border-bottom: 1px solid #EDF2F6;
         .font-type-area{
@@ -552,8 +557,8 @@ a:hover{color: #219f84;}
             justify-content: space-between;
             align-items: center;
             .type-block{
-                flex: 0 0 45%;
-                max-width: 45%;
+                flex: 0 0 60%;
+                max-width: 60%;
             }
             .arc-block{
                 flex: 0 0 28%;
@@ -561,7 +566,10 @@ a:hover{color: #219f84;}
                 text-align: center;
                 .custom-control-label{
                     color: #000;
-                    font-size: 16px;
+                    font-size: 12px;
+                    @media only screen and (min-width: 390px){
+                        font-size: 16px;
+                    }
                     &:before{
                         top: 0;
                         width: 18px;
@@ -589,13 +597,17 @@ a:hover{color: #219f84;}
             border-color: #EFF2F4;
         }
         .text-color-holder{
-            padding: 20px 0 0;
+            padding: 0;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
             a{
                 color: #808895;
+                border: 1px solid #E7F4F1;
+                padding: 0.5rem 1rem;
+                border-radius: 5px;
+                @media only screen and (max-width: 719px){font-size: 12px;}
                 &:hover{text-decoration: none;}
                 .text-color-box{
                     display: flex;
@@ -645,8 +657,26 @@ a:hover{color: #219f84;}
                 .color-holder{max-height: 100%;}
             }
         }
+        h4{
+            @media only screen and (max-width: 719px){
+                font-size: 12px;
+            }
+        }
+        .custom-select,
+        .form-control{
+            @media only screen and (max-width: 719px){
+                font-size: 12px;
+            }
+        }
     }
     .collar-section{
+        @media only screen and (min-width: 720px){
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        @media only screen and (min-width: 992px){
+            max-width: inherit;
+        }
         .nav-tabs{
             padding: 0;
             border: none;
@@ -659,13 +689,16 @@ a:hover{color: #219f84;}
                 font-size: 14px;
                 font-weight: 700;
                 padding: 10px;
-                width: 75px;
-                height: 70px;
                 display: flex;
                 flex-wrap: wrap;
                 align-items: center;
                 justify-content: center;
                 color: #000;
+                margin-bottom: 10px;
+                @media only screen and (min-width: 992px){
+                    width: 75px;
+                    height: 70px;
+                }
                 &:hover{
                     background: none;
                     border-color: #219f84;
@@ -729,8 +762,99 @@ a:hover{color: #219f84;}
     }
     .team-roaster-area{
         .btn{
-            display: block;
-            width: 100%;
+            font-size: 0.8rem;
+            @media only screen and (min-width: 992px){
+                display: block;
+                width: 100%;
+                font-size: 1rem;
+            }
+        }
+    }
+    .color-tabs{
+        @media only screen and (min-width: 720px){
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        @media only screen and (min-width: 992px){
+            max-width: inherit;
+        }
+        .nav-tabs{
+            position: static;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            .nav-item{
+                margin-right: 10px;
+            }
+            .nav-link{
+                border: 1px solid #DCDEE2;
+                color: #03142E;
+                font-size: 12px;
+                font-weight: 600;
+                padding: 0.5rem 1rem;
+                &.active{
+                    background: #219F84;
+                    border-color: #219F84;
+                    color: #fff;
+                }
+            }
+        }
+        .tab-pane{
+            .nav{
+                .nav-link{
+                    border-bottom: 1px solid #E7F4F1;
+                    font-size: 12px;
+                    line-height: 16px;
+                    padding: 0.5rem;
+                }
+            }
+        }
+    }
+    .color-holder{
+        background: none;
+        box-shadow: none;
+        border-radius: 0;
+        .color-container{
+            justify-content: flex-start;
+            padding: 0;
+            .color-box{
+                width: 33px;
+                height: 33px;
+                margin: 0 3px 10px;
+                @media only screen and (min-width: 992px){
+                    width: 40px;
+                    height: 40px;
+                    margin: 0 5px 10px;
+                }
+            }
+        }
+    }
+    .mobile-text-tabs{
+        @media only screen and (min-width: 720px){
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        @media only screen and (min-width: 992px){
+            max-width: inherit;
+        }
+        h2{display: none;}
+        .nav-tabs{
+          position: static;
+          padding-bottom: 0;
+          .nav-link{
+              font-size: 12px;
+              font-weight: 400;
+              color: #03142E;
+              padding: 0 0 0.5rem;
+              border-radius: 0;
+              @media only screen and (min-width: 375px){
+                font-size: 13px;
+              }
+              @media only screen and (min-width: 390px){font-size: 14px;}
+              &.active{
+                  background: none;
+                  border-bottom: 2px solid #219F84;
+              }
+          }
         }
     }
 }
@@ -743,6 +867,7 @@ a:hover{color: #219f84;}
     border-radius: 15px;
     max-height: 300px;
     overflow-y: auto;
+    
     a.close{
         width: auto;
         height: auto;
@@ -917,13 +1042,16 @@ a:hover{color: #219f84;}
     .preview-section{border-bottom: 1px solid #EDF2F6;}
 }
 .roster-section{
-    flex: 0 0 50%;
-    max-width: 50%;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 1rem;
-    border-right: 1px solid #EDF2F6;
+    padding: 1rem 0 0;
+    @media only screen and (min-width: 992px){
+        flex: 0 0 50%;
+        max-width: 50%;
+        padding: 1rem;
+        border-right: 1px solid #EDF2F6;
+    }
     .roster-qty{
         flex: 0 0 13%;
         max-width: 13%;
@@ -944,24 +1072,41 @@ a:hover{color: #219f84;}
             justify-content: space-between;
         }
         .align-right{
-            flex: 0 0 12%;
-            max-width: 12%;
+            flex: 0 0 20%;
+            max-width: 20%;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
+            @media only screen and (min-width: 992px){
+                flex: 0 0 12%;
+                max-width: 12%;
+            }
         }
         .hide-show{
             flex: 0 0 20px;
             max-width: 20px;
         }
         .roster-name{
-            flex: 0 0 55%;
-            max-width: 55%;
+            flex: 0 0 52%;
+            max-width: 52%;
+            @media only screen and (min-width: 992px){
+                flex: 0 0 55%;
+                max-width: 55%;
+            }
+            input{
+                @media only screen and (max-width: 991px){
+                    border-radius: 5px 0 0 5px;
+                }
+            }
         }
         .shirt-no{
-            flex: 0 0 12%;
-            max-width: 12%;
+            flex: 0 0 20%;
+            max-width: 20%;
+            @media only screen and (min-width: 992px){
+                flex: 0 0 12%;
+                max-width: 12%;
+            }
         }
         .shirt-size{
             flex: 0 0 20%;
@@ -970,6 +1115,12 @@ a:hover{color: #219f84;}
         .qty{
             flex: 0 0 55%;
             max-width: 55%;
+            input{
+                @media only screen and (max-width: 992px){
+                    border-right: 1px solid #ced4da;
+                    border-radius: 0 5px 5px 0;
+                }
+            }
         }
         .remove{
             a{
@@ -988,10 +1139,17 @@ a:hover{color: #219f84;}
         input,
         select{
             font-size: 14px;
+            border-radius: 0;
+            border-right: 0;
         }
         &.button-holder{
-            margin: 20px 0 0;
-            justify-content: center;
+            margin: 10px 0 0;
+            padding: 0 20px;
+            @media only screen and (min-width: 992px){
+                margin: 20px 0 0;
+                justify-content: center;
+                padding: 0;
+            }
         }
     }
 }
@@ -1009,7 +1167,8 @@ a:hover{color: #219f84;}
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 1rem;
+    padding: 1rem 0 0;
+    @media only screen and (min-width: 992px){padding: 1rem;}
     h2{
         border-bottom: 1px solid #EFF2F4;
         padding-bottom: 10px;
@@ -1045,6 +1204,9 @@ a:hover{color: #219f84;}
         .qty-area{
             flex: 0 0 100%;
             max-width: 100%;
+        }
+        .qty-area{
+            @media only screen and (max-width: 991px){display: none;}
         }
         .choose-stuff{
             display: block;

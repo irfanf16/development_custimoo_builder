@@ -21,11 +21,11 @@
           Color
         </template>
         <div>
-          <h2 class="fw-bold fz-16 p-3">Choose Color</h2>
+          <h2 class="fw-bold fz-16 p-3 d-none d-lg-block">Choose Color</h2>
           <div class="d-none d-lg-block">
             <ColorAccordion :productColors="productColors" />
           </div>
-          <div class="d-lg-none">
+          <div class="color-tabs d-lg-none">
             <ColorTabs />
           </div>
         </div>
@@ -37,7 +37,39 @@
           </div>
           Text
         </template>
-        <CustomizationText/>
+        <div class="d-none d-lg-block">
+          <CustomizationText />
+          <CustomizationText />
+          <CustomizationText />
+        </div>
+        <div class="mobile-text-tabs d-lg-none">
+          <b-tabs>
+            <b-tab>
+              <template #title>
+                Player Name
+              </template>
+              <div>
+                <CustomizationText />
+              </div>
+            </b-tab>
+            <b-tab>
+              <template #title>
+                Player Number
+              </template>
+              <div>
+                <CustomizationText />
+              </div>
+            </b-tab>
+            <b-tab>
+              <template #title>
+                Player Name Or Number
+              </template>
+              <div>
+                <CustomizationText />
+              </div>
+            </b-tab>
+          </b-tabs>
+        </div>
       </b-tab>
       <b-tab>
         <template #title>
@@ -76,6 +108,7 @@ import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterArea from '@/components/EditRosterArea.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
+import ColorTabs from '@/components/ColorTabs.vue'
 
 @Component<CustomizationProcess>({
   components: {
@@ -84,6 +117,7 @@ import UploadLogo from '@/components/UploadLogo.vue'
     CustomizationText,
     CollarStyle,
     EditRosterArea,
+    ColorTabs,
     UploadLogo
   },
   mounted() {
