@@ -1,8 +1,9 @@
 <template>
     <div class="customization-text-area">
-        <div class="p-4">
+        <div class="p-3 p-lg-4">
             <h2 class="fw-bold mb-2 fz-18">Player Name</h2>
             <b-form>
+                <h4 class="mt-3 mb-2 fz-16">Player Name</h4>
                 <b-form-input
                 id="inline-form-input-name"
                 class="mb-2 mr-sm-2 mb-sm- 0"
@@ -16,15 +17,9 @@
                     <div class="arc-block">
                         <b-form-checkbox>Arc Text</b-form-checkbox>
                     </div>
-                    <div class="arc-field">
-                        <b-form-input
-                        id="inline-form-input-name"
-                        class="mb-2 mr-sm-2 mb-sm-0"
-                        placeholder="50 %"
-                        ></b-form-input>
-                    </div>
                 </div>
             </b-form>
+            <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
             <div class="text-color-holder" :class="{ active: colorTextActive }">
                 <a href="#." v-on:click="showColor()">
                     <div class="text-color-box">
@@ -39,10 +34,10 @@
                     </div>
                 </a>
                 <div class="color-holder">
-                    <div class="color-header">
+                    <!-- <div class="color-header">
                         <h3>Color Two</h3>
                         <a href="#" @click="showColor()" class="close"><font-awesome-icon :icon="['fas', 'times']" /></a>
-                    </div>
+                    </div> -->
                     <div class="color-container">
                         <div class="color-box"></div>
                         <div class="color-box"></div>
