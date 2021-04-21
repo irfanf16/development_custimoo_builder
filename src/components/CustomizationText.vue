@@ -1,9 +1,9 @@
 <template>
     <div class="customization-text-area">
-        <div class="p-3 p-lg-4">
+        <div class="px-3 pt-3 p-lg-4">
             <h2 class="fw-bold mb-2 fz-18">Player Name</h2>
             <b-form>
-                <h4 class="mt-3 mb-2 fz-16">Player Name</h4>
+                <h4 class="mt-1 mt-lg-3 mb-2 fz-16">Player Name</h4>
                 <b-form-input
                 id="inline-form-input-name"
                 class="mb-2 mr-sm-2 mb-sm- 0"
