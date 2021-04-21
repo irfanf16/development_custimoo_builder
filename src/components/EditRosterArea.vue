@@ -1,8 +1,8 @@
 <template>
     <div>
-        <b-button v-b-modal.modal-scrollable>Edit Roster</b-button>
+        <b-button class="d-none d-lg-block" v-b-modal.modal-scrollable>Edit Roster</b-button>
 
-        <b-modal id="modal-scrollable" scrollable title="Roster" content-class="roster-modal" size="xl" footer-class="hide-modal-footer">
+        <b-modal id="modal-scrollable" scrollable title="Roster" content-class="roster-modal" size="xl" footer-class="hide-modal-footer d-none d-lg-block">
             <div class="d-flex flex-wrap justify-content-between">
                 <RosterDetails />
                 <div class="roster-preview-area">
@@ -15,6 +15,9 @@
                 </div>
             </div>
         </b-modal>
+        <div class="d-lg-none">
+            <RosterDetails />
+        </div>
         <div class="team-order-details">
             <OrderDetails />
         </div>

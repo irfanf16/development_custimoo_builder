@@ -468,7 +468,7 @@
             </div>
         </div>
         <div class="roster-row mb-2 button-holder">
-            <button class="btn btn-secondary fw-bold pl-5 pr-5">Add Player</button>
+            <button class="btn btn-secondary fw-bold pl-4 pr-4 pl-lg-5 pr-lg-5">Add Player</button>
         </div>
     </div>
 </template>

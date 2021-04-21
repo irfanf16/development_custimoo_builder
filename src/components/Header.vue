@@ -7,7 +7,7 @@
                         <a href="/"><img src="@/assets/images/logo.svg" alt="Shirt Customizer" /></a>
                     </div>
                 </b-col>
-                <b-col cols="10">
+                <b-col cols="10 d-none d-lg-block">
                     <div>
                         <b-nav class="justify-content-end align-items-center">
                             <li class="nav-item"><router-link class="nav-link" to="#.">New</router-link></li>

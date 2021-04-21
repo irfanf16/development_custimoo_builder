@@ -30,7 +30,7 @@
             </div>
         </div>
         <div class="choose-stuff">
-            <h2 class="fw-bold mb-3 fz-18">Choose Stuff</h2>
+            <h2 class="fw-bold mb-3 fz-18 d-none d-lg-block">Choose Stuff</h2>
             <div class="stuff-row">
                 <b-form-checkbox size="sm">Fight strap</b-form-checkbox>
                 <span class="charges">+$5</span>
@@ -45,7 +45,7 @@
             </div>
         </div>
         <div class="pricing-are">
-            <h2 class="fw-bold fz-18">Price</h2>
+            <h2 class="fw-bold fz-18 d-none d-lg-block">Price</h2>
             <div class="order-details">
                 <div class="order-row">
                     <div class="order-text">
