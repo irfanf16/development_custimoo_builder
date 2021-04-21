@@ -476,5 +476,15 @@
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator'
     @Component<RosterDetails>({})
-    export default class RosterDetails extends Vue {}
+    export default class RosterDetails extends Vue {
+      public selected = null
+      public options= [
+        { value: 'a', text: 'SM' },
+        { value: 'a', text: 'MD' },
+        { value: 'a', text: 'LG' },
+        { value: 'a', text: 'XL' },
+        { value: 'a', text: '2XL' },
+        { value: null, text: '3XL' }
+      ]
+    }
 </script>

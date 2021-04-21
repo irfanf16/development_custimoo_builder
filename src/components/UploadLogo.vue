@@ -45,20 +45,17 @@ import {http} from "@/httpCommon"
   mounted() {
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
-    if(!this.logosSetting){
-      this.logosSetting = this.logosSetting.concat([{
-        width: 100,
-        height: 100,
-        x_axis: 150,
-        y_axis: 190,
-        haveControls: true,
-        side: 'front'
-      }])
-    }
   }
 })
 export default class UploadLogo extends Vue {
-  @Prop({required: false}) logosSetting!: any
+  @Prop({required: false, default: () => { return [{
+      width: 100,
+      height: 100,
+      x_axis: 150,
+      y_axis: 190,
+      haveControls: true,
+      side: 'front'
+    }]}}) logosSetting!: any
   @Prop({required: true}) customLogoIndex!: any
 
   @Watch('logoUrl', {

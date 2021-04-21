@@ -43,16 +43,6 @@
     })
 
     export default class EditRosterArea extends Vue {
-        public selected= null
-        public options= [
-          { value: 'a', text: 'SM' },
-          { value: 'a', text: 'MD' },
-          { value: 'a', text: 'LG' },
-          { value: 'a', text: 'XL' },
-          { value: 'a', text: '2XL' },
-          { value: null, text: '3XL' }
-        ]
-
         private products : any[] = []
         private company_id !: string
         private product_id !: string
