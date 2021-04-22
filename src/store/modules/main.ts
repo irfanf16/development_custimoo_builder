@@ -1,6 +1,6 @@
 import {noTokenRequest} from "@/httpCommon";
 import { Module } from "vuex";
-const mobileScreen = true
+const mobileScreen = false
 const Main:Module<any, any> = {
   state: {
     manageComponents: {

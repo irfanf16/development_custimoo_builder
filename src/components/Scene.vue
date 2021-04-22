@@ -232,8 +232,7 @@ export default class Scene extends Vue {
             selectable: logo.haveControls,
             hasControls: logo.haveControls,
             hasBorders: logo.haveControls,
-            evented: logo.haveControls,
-            globalCompositeOperation: 'source-atop'
+            evented: logo.haveControls
           })
         if(logo.customLogo){
           self.customLogoObjects.push(img)

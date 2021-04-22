@@ -51,7 +51,7 @@
         </template>
       </div>
     </b-tab>
-    <b-tab v-if="customLogos.length < numberOfLogosAllowed" @click="addTab">
+    <b-tab v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
       <template #title>
         Logo +
       </template>
@@ -69,21 +69,23 @@ import UploadLogo from "@/components/UploadLogo.vue"
   },
   mounted() {
     this.$store.dispatch('setCustomLogos')
-    if(!this.logosSetting){
-      this.logosSetting = this.logosSetting.apend({
-        width: 100,
-        height: 100,
-        x_axis: 150,
-        y_axis: 190,
-        haveControls: true,
-        side: 'front'
-      })
-    }
   }
 })
 export default class LogoPlacementTabs extends Vue {
   @Prop({required: true}) numberOfLogosAllowed!: number
-  @Prop({required: true}) logosSetting!: any
+  @Prop({required: false, default: () => { return [{
+      url: '',
+      width: 100,
+      height: 100,
+      scaleX: 1,
+      scaleY: 1,
+      x_axis: 150,
+      y_axis: 190,
+      rotation: 0,
+      haveControls: true,
+      side: 'front',
+      customLogo: true
+    }]}}) logosSetting!: [Record<any, any>]
 
   public numberOfLogos = 1
 
@@ -102,17 +104,21 @@ export default class LogoPlacementTabs extends Vue {
     return this.$store.getters.getManageComponents
   }
 
-  public addTab(){
+  public addTab(index: number){
     if(this.numberOfLogos < this.numberOfLogosAllowed) {
-      let logoSetting = this.logosSetting[0]
+      const logoSetting = this.logosSetting[index]
       let logo = {
         url: '',
         width: logoSetting.width,
         height: logoSetting.height,
+        scaleX: 1,
+        scaleY: 1,
         x_axis: logoSetting.x_axis,
         y_axis: logoSetting.y_axis,
+        rotation: logoSetting.rotation as number,
         haveControls: Boolean(logoSetting.is_locked),
-        side: logoSetting.side
+        side: logoSetting.side,
+        customLogo: true
       }
       this.$store.dispatch('setCustomLogos', logo)
     }
@@ -162,7 +168,7 @@ export default class LogoPlacementTabs extends Vue {
         max-width: 100%;
       }
     }
-    .btn{ 
+    .btn{
       flex: 0 0 30%;
       max-width: 30%;
       font-size: 12px;
