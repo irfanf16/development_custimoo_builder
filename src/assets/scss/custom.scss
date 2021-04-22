@@ -1257,35 +1257,69 @@ a:hover{color: #219f84;}
         }
     }
 }
-
+#modal-center-lockerroom{
+    @media only screen and (max-width: 991px){
+        top: auto;
+        bottom: 0;
+        height: 60vh;
+    }
+    .modal-dialog{
+        @media only screen and (max-width: 991px){
+            margin: 0;
+            min-height: 100%;
+        }
+    }
+}
 .lockerroom-modal{
     .modal-title{
-        font-size: 30px;
+        font-size: 20px;
         font-weight: 700;
+        @media only screen and (min-width: 720px){
+            font-size: 30px;
+        }
     }
     .modal-header{
-        padding: 1rem 2rem;
+        padding: 1rem;
+        @media only screen and (min-width: 720px){
+            padding: 1rem 2rem;
+        }
         .close{
             font-size: 30px;
         }
     }
     .modal-body{
-        padding: 2rem;
+        padding: 1rem;
+        @media only screen and (min-width: 720px){padding: 2rem;}
     }
     .lockerroom-tabs{
         .card-header{
             border: none;
             background: none;
+            @media only screen and (max-width: 991px){
+                padding: 0.75rem 0;
+            }
+            .card-header-tabs{
+                margin-right: 0;
+                margin-left: 0;
+            }
         }
         .card{border: none;}
         .nav-tabs{
-            .nav-item{margin: 0 15px 0 0;}
+            .nav-item{
+                margin: 0 5px;
+                @media only screen and (min-width: 992px){margin: 0 15px 0 0;}
+            }
             .nav-link{
                 border-bottom: 1px solid #EFF2F4;
                 &.active{
                     border: none;
                     border-bottom: 1px solid #219F84;
                 }
+            }
+        }
+        .card-body{
+            @media only screen and (max-width: 991px){
+                padding: 1.25rem 0;
             }
         }
     }

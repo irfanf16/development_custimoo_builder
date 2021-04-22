@@ -80,7 +80,7 @@
         </template>
         <div class="collar-section p-4">
           <h2 class="fw-bold mb-2 fz-18">Choose Product</h2>
-          <CollarStyle/>
+          <CollarStyle />
         </div>
       </b-tab>
       <b-tab>
@@ -92,7 +92,7 @@
         </template>
         <div class="team-roaster-area p-4">
           <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-          <EditRosterArea/>
+          <EditRosterArea />
         </div>
       </b-tab>
     </b-tabs>

@@ -148,6 +148,11 @@ export default class LogoPlacementTabs extends Vue {
     border-top: 1px solid #EFF2F4;
     margin: 20px -20px 0;
     padding: 15px 20px 0;
+    @media only screen and (min-width: 992px){
+      position: absolute;
+      margin: 0;
+      padding: 20px;
+    }
   }
   .logo-placement-area{
     display: flex;
@@ -162,7 +167,7 @@ export default class LogoPlacementTabs extends Vue {
         max-width: 100%;
       }
     }
-    .btn{ 
+    .btn{
       flex: 0 0 30%;
       max-width: 30%;
       font-size: 12px;

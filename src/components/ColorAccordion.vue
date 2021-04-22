@@ -11,7 +11,7 @@
             <b-nav-item class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.file_type }}</b-nav-item>
           </b-nav>
           <div class="color-holder">
-            <div class="color-container" >
+            <div class="color-container">
               <div class="color-box" v-for="color in productColor" @click="setColor(color.value)"
                    :title="color.name" :style="{background: color.value}" :key="color.position"></div>
             </div>
