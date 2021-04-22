@@ -238,7 +238,7 @@ export default class Scene extends Vue {
             hasBorders: logo.haveControls,
             evented: logo.haveControls
           })
-        console.log(logo.rotation as number)
+
         if(logo.customLogo){
           self.customLogoObjects.push(img)
         }else {
