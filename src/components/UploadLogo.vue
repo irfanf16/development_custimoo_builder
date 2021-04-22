@@ -49,13 +49,18 @@ import {http} from "@/httpCommon"
 })
 export default class UploadLogo extends Vue {
   @Prop({required: false, default: () => { return [{
+      url: '',
       width: 100,
       height: 100,
+      scaleX: 1,
+      scaleY: 1,
       x_axis: 150,
       y_axis: 190,
+      rotation: 0,
       haveControls: true,
-      side: 'front'
-    }]}}) logosSetting!: any
+      side: 'front',
+      customLogo: true
+    }]}}) logosSetting!: [Record<any, any>]
   @Prop({required: true}) customLogoIndex!: any
 
   @Watch('logoUrl', {

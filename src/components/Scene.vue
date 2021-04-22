@@ -93,12 +93,14 @@ export default class Scene extends Vue {
                 top: self.frontCanvas.getHeight() / self.mainCanvasHeight * logo.y_axis
               })
             }
-            if(logoObject.angle != logo.rotate) {
-              logoObject.rotate(logo.rotate as number)
-            }
 
             logoObject.scaleX = self.frontCanvas.getWidth() / self.mainCanvasWidth * logo.scaleX
             logoObject.scaleY = self.frontCanvas.getHeight() / self.mainCanvasHeight * logo.scaleY
+
+            if(logoObject.angle != logo.rotation) {
+              logoObject.rotate(logo.rotation as number)
+            }
+            logoObject.setCoords()
           }
         })
         if(addLogo && logo.url) {
@@ -106,9 +108,10 @@ export default class Scene extends Vue {
         }
       })
     }
+    this.mounted = true
   }
 
-  public async loadScene (ImageData: any, canvas: fabric.Canvas, side: string) {
+  public loadScene (ImageData: any, canvas: fabric.Canvas, side: string) {
     let element = this.$refs.front as HTMLCanvasElement
     if(side === 'back'){
       element = this.$refs.back as HTMLCanvasElement;
@@ -172,7 +175,7 @@ export default class Scene extends Vue {
       logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
       if (logos.length) {
         this.logosLoaded = false
-        await this.addLogos(logos, canvas)
+        this.addLogos(logos, canvas)
       }
     }
 
@@ -211,8 +214,9 @@ export default class Scene extends Vue {
           self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'scaleX', value: e.target.scaleX })
           self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'scaleY', value: e.target.scaleY })
         }else if(e.action == 'rotate') {
-          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'rotate', value: e.target.angle })
+          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'rotation', value: e.target.angle })
         }
+        this.mounted = false
       }
     })
   }
@@ -228,13 +232,13 @@ export default class Scene extends Vue {
             top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
             scaleX: canvas.getWidth() / self.mainCanvasWidth * logo.width / img.width,
             scaleY: canvas.getHeight() / self.mainCanvasHeight * logo.height / img.height,
-            angle: logo.rotate as number,
+            angle: logo.rotation as number,
             selectable: logo.haveControls,
             hasControls: logo.haveControls,
             hasBorders: logo.haveControls,
-            evented: logo.haveControls,
-            globalCompositeOperation: 'source-atop'
+            evented: logo.haveControls
           })
+
         if(logo.customLogo){
           self.customLogoObjects.push(img)
         }else {
