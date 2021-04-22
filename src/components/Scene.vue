@@ -97,8 +97,8 @@ export default class Scene extends Vue {
             logoObject.scaleX = self.frontCanvas.getWidth() / self.mainCanvasWidth * logo.scaleX
             logoObject.scaleY = self.frontCanvas.getHeight() / self.mainCanvasHeight * logo.scaleY
 
-            if(logoObject.angle != logo.rotate) {
-              logoObject.rotate(logo.rotate as number)
+            if(logoObject.angle != logo.rotation) {
+              logoObject.rotate(logo.rotation as number)
             }
             logoObject.setCoords()
           }
@@ -214,7 +214,7 @@ export default class Scene extends Vue {
           self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'scaleX', value: e.target.scaleX })
           self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'scaleY', value: e.target.scaleY })
         }else if(e.action == 'rotate') {
-          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'rotate', value: e.target.angle })
+          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'rotation', value: e.target.angle })
         }
         this.mounted = false
       }
@@ -232,12 +232,13 @@ export default class Scene extends Vue {
             top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
             scaleX: canvas.getWidth() / self.mainCanvasWidth * logo.width / img.width,
             scaleY: canvas.getHeight() / self.mainCanvasHeight * logo.height / img.height,
-            // angle: logo.rotate as number,
+            angle: logo.rotation as number,
             selectable: logo.haveControls,
             hasControls: logo.haveControls,
             hasBorders: logo.haveControls,
             evented: logo.haveControls
           })
+        console.log(logo.rotation as number)
         if(logo.customLogo){
           self.customLogoObjects.push(img)
         }else {
