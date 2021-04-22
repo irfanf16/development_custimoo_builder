@@ -415,12 +415,15 @@ a:hover{color: #219f84;}
         }
     }
     .logo-placement-tabs{
-        max-width: 400px;
         margin: 0 auto;
         padding: 0 20px;
         overflow: hidden;
         @media only screen and (min-width: 720px){
             padding: 0 10px;
+            max-width: 400px;
+        }
+        @media only screen and (min-width: 992px){
+            max-width: 340px;
         }
         .nav-tabs{
             padding: 15px 0;
@@ -1101,7 +1104,7 @@ a:hover{color: #219f84;}
             }
         }
         .hide-show{
-            flex: 0 0 20px;
+            flex: 0 0 20px; 
             max-width: 20px;
         }
         .roster-name{
@@ -1160,8 +1163,10 @@ a:hover{color: #219f84;}
         input,
         select{
             font-size: 14px;
-            border-radius: 0;
-            border-right: 0;
+            @media only screen and (max-width: 992px){
+                border-radius: 0;
+                border-right: 0;
+            }
         }
         &.button-holder{
             margin: 10px 0 0;

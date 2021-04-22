@@ -4,7 +4,7 @@
       <b-row>
         <template v-if="manageComponents.BasicCustomization">
           <b-col cols="12" lg="3" class="text-left home-color-area">
-            <div v-if="manageComponents.ChooseColor" class="py-3 pb-5 py-lg-5 overflow-hidden mt-4 mt-lg-0">
+            <div v-if="manageComponents.ChooseColor" class="py-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
               <ChooseColor :colors="colors"/>
             </div>
             <template v-if="products.length && products[designsIndex].is_logo_allowed == 1">
