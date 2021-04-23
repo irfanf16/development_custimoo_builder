@@ -733,16 +733,26 @@ a:hover{color: #219f84;}
             align-items: center;
             justify-content: space-between;
             .btn{
-                width: 90px;
-                height: 80px;
+                width: 70px;
+                height: 60px;
                 display: flex;
                 flex-wrap: wrap;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #707070;
                 background: none;
+                @media only screen and (min-width: 992px){
+                    width: 90px;
+                    height: 80px;
+                }
                 &.active,
                 &:hover{border-color: #219f84;}
+                img{
+                    display: block;
+                    max-width: 100%;
+                    margin: 0 auto;
+                    height: auto;
+                }
             }
         }
         .stuff-row{
@@ -1368,4 +1378,7 @@ a:hover{color: #219f84;}
             }
         }
     }
+}
+.available-designs-section .design-col a{
+    canvas{z-index: -1;}
 }

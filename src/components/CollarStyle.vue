@@ -117,6 +117,8 @@
                         <b-button variant="outline-light"><img src="@/assets/images/collar-style1.svg" alt="Collar Style 1" /></b-button>
                         <b-button variant="outline-light"><img src="@/assets/images/collar-style2.svg" alt="Collar Style 2" /></b-button>
                         <b-button variant="outline-light"><img src="@/assets/images/collar-style3.svg" alt="Collar Style 3" /></b-button>
+                        <b-button variant="outline-light"><img src="@/assets/images/collar-style1.svg" alt="Collar Style 1" /></b-button>
+                        <b-button variant="outline-light"><img src="@/assets/images/collar-style2.svg" alt="Collar Style 2" /></b-button>
                     </div>
                 </div>
                 <div class="choose-stuff">
