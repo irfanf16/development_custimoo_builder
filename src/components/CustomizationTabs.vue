@@ -124,15 +124,6 @@ import ColorTabs from '@/components/ColorTabs.vue'
     this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
   },
-  created() {
-    console.log("mango")
-    var obkects = document.getElementsByClassName("tab-pane");
-    console.log(obkects)
-    for(var i=0;i<obkects.length;i++){
-      obkects[i].classList.remove('active')//.classList.remove('active');
-    }
-
-  }
 })
 export default class CustomizationProcess extends Vue {
   @Prop({required: true}) productDetails!: any
