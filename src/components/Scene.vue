@@ -35,8 +35,8 @@ export default class Scene extends Vue {
   @Prop({required: false}) readonly logoAllowed !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
-  @Prop({required: false, default: 260}) readonly mainCanvasWidth!: number;
-  @Prop({required: false, default: 290}) readonly mainCanvasHeight!: number;
+  @Prop({required: false, default: 290}) readonly mainCanvasWidth!: number;
+  @Prop({required: false, default: 360}) readonly mainCanvasHeight!: number;
   @Prop({required: false, default: 260}) readonly canvasWidth!: number;
   @Prop({required: false, default: 290}) readonly canvasHeight!: number;
   private frontCanvas !: fabric.Canvas
@@ -125,7 +125,8 @@ export default class Scene extends Vue {
         hasControls: false,
         selectable: false,
         evented: false,
-        globalCompositeOperation: 'overlay'
+        globalCompositeOperation: 'multiply'
+        // globalCompositeOperation: 'overlay'
       });
       img.center().setCoords()
       model = img
