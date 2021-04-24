@@ -1,6 +1,7 @@
 <template>
+  <div>
   <b-tabs>
-    <b-tab v-for="(n, index) in customLogos" :key="index" :class="{ active: index==0 }">
+    <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
       <template #title>
         Logo {{ index+1 }}
         <div v-if="index != 0">
@@ -9,6 +10,9 @@
           </a>
         </div>
       </template>
+      <b-button  v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
+        Logo +
+      </b-button>
       <div class="tabs-logo-container">
         <div class="logo-placement-area mb-3 mb-lg-4">
           <div class="logo-placement-holder mb-lg-3">
@@ -51,12 +55,8 @@
         </template>
       </div>
     </b-tab>
-    <b-tab v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
-      <template #title>
-        Logo +
-      </template>
-    </b-tab>
   </b-tabs>
+  </div>
 </template>
 
 <script lang="ts">
@@ -91,6 +91,7 @@ export default class LogoPlacementTabs extends Vue {
 
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
   public selected = 'front'
+  public tabIndex = 0
   public options = [
     {value: 'front', text: 'Front'},
     {value: 'back', text: 'Back'}
@@ -120,6 +121,7 @@ export default class LogoPlacementTabs extends Vue {
         side: logoSetting.side,
         customLogo: true
       }
+      this.tabIndex = this.tabIndex + 1;
       this.$store.dispatch('setCustomLogos', logo)
     }
   }
@@ -127,6 +129,7 @@ export default class LogoPlacementTabs extends Vue {
     let payload = {
       index: index
     }
+    this.tabIndex = this.tabIndex - 1;
     this.$store.dispatch('deleteCustomLogo', payload)
   }
 
