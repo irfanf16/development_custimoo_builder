@@ -35,10 +35,10 @@ export default class Scene extends Vue {
   @Prop({required: false}) readonly logoAllowed !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
-  @Prop({required: false, default: 260}) readonly mainCanvasWidth!: number;
-  @Prop({required: false, default: 290}) readonly mainCanvasHeight!: number;
-  @Prop({required: false, default: 260}) readonly canvasWidth!: number;
-  @Prop({required: false, default: 290}) readonly canvasHeight!: number;
+  @Prop({required: false, default: 300}) readonly mainCanvasWidth!: number;
+  @Prop({required: false, default: 360}) readonly mainCanvasHeight!: number;
+  @Prop({required: false, default: 300}) readonly canvasWidth!: number;
+  @Prop({required: false, default: 360}) readonly canvasHeight!: number;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -46,7 +46,6 @@ export default class Scene extends Vue {
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
   private logoObjects: any[] =[]
   private customLogoObjects: any[] =[]
-  private logosLoaded = true
   private mounted = false
   private frontModel: any
   private backModel: any
@@ -61,7 +60,7 @@ export default class Scene extends Vue {
   @Watch('customLogos', {
     immediate: true, deep: true
   })
-  customLogosChanged(newVal: [Record<any, any>], oldVal: [Record<any, any>]) {
+  customLogosChanged(newVal: [Record<any, any>]) {
     if(this.mounted) {
       const self = this
       this.customLogoObjects.forEach((logoObject) => {
@@ -104,7 +103,7 @@ export default class Scene extends Vue {
           }
         })
         if(addLogo && logo.url) {
-          self.addLogos([logo], self.frontCanvas)
+          self.addLogos([logo])
         }
       })
     }
@@ -125,7 +124,8 @@ export default class Scene extends Vue {
         hasControls: false,
         selectable: false,
         evented: false,
-        globalCompositeOperation: 'overlay'
+        globalCompositeOperation: 'multiply'
+        // globalCompositeOperation: 'overlay'
       });
       img.center().setCoords()
       model = img
@@ -166,21 +166,8 @@ export default class Scene extends Vue {
 
     const self = this
 
-    let logos = this.logos
-    if(this.customLogos){
-      logos = logos.concat(this.customLogos) as [Record<any, any>]
-    }
-
-    if(logos.length) {
-      logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
-      if (logos.length) {
-        this.logosLoaded = false
-        this.addLogos(logos, canvas)
-      }
-    }
-
     const timer = setInterval(() => {
-      if(model && texture && self.logosLoaded) {
+      if(model && texture) {
         canvas.add(texture)
         self.logoObjects.forEach((logoObject) => {
           canvas.add(logoObject)
@@ -193,6 +180,18 @@ export default class Scene extends Vue {
         canvas.viewportCenterObject(texture)
         canvas.viewportCenterObject(model)
         canvas.renderAll()
+
+        let logos = this.logos
+        if(this.customLogos){
+          logos = logos.concat(this.customLogos) as [Record<any, any>]
+        }
+        if(logos.length) {
+          logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
+          if (logos.length) {
+            this.addLogos(logos)
+          }
+        }
+
         self.mounted = true
         clearInterval(timer)
       }
@@ -221,9 +220,15 @@ export default class Scene extends Vue {
     })
   }
 
-  public async addLogos(logos: [Record<any, any>], canvas: fabric.Canvas) {
+  public async addLogos(logos: [Record<any, any>]) {
     const self = this
-    logos.forEach((logo: Record<any, any>, index: number) => {
+    logos.forEach((logo: Record<any, any>) => {
+      let model = self.frontModel
+      let canvas = self.frontCanvas
+      if (logo.side == 'back') {
+        canvas = self.backCanvas
+        model = self.backModel
+      }
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
       fabric.Image.fromURL(logoUrl, (img: any) => {
@@ -244,20 +249,10 @@ export default class Scene extends Vue {
         }else {
           self.logoObjects.push(img)
         }
-        if (index + 1 == logos.length) {
-          self.logosLoaded = true
-        }
-        if (self.mounted) {
-          let model = self.frontModel
-          if (logo.side == 'back') {
-            canvas = self.backCanvas
-            model = self.backModel
-          }
 
-          canvas.add(img)
-          model.bringToFront()
-          canvas.renderAll()
-        }
+        canvas.add(img)
+        model.bringToFront()
+        canvas.renderAll()
       })
     })
   }

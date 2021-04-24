@@ -78,6 +78,8 @@ export default class DesignAvailable extends Vue {
 
     a {
       display: block;
+      position: relative;
+      z-index: 1;
     }
 
     img {

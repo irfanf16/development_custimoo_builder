@@ -1,5 +1,5 @@
 <template>
-    <div class="products-holder d-flex flex-wrap">
+    <div class="products-holder d-lg-flex flex-wrap">
         <div class="products-block">
             <div class="image-holder">
                 <img src="/img/images/image-product.png" alt="Product 1" />
@@ -7,7 +7,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-2" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-2" placement="bottom">
                             <div class="share-holder">
@@ -24,12 +24,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -40,7 +40,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-3" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-3" placement="bottom">
                             <div class="share-holder">
@@ -57,12 +57,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -73,7 +73,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-4" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-4" placement="bottom">
                             <div class="share-holder">
@@ -90,12 +90,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -106,7 +106,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-5" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-5" placement="bottom">
                             <div class="share-holder">
@@ -123,12 +123,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -139,7 +139,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-6" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-6" placement="bottom">
                             <div class="share-holder">
@@ -156,12 +156,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -172,7 +172,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-7" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-7" placement="bottom">
                             <div class="share-holder">
@@ -189,12 +189,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -205,7 +205,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-8" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-8" placement="bottom">
                             <div class="share-holder">
@@ -222,12 +222,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -238,7 +238,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-9" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-9" placement="bottom">
                             <div class="share-holder">
@@ -255,12 +255,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -271,7 +271,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-10" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-10" placement="bottom">
                             <div class="share-holder">
@@ -288,12 +288,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -304,7 +304,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-11" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-11" placement="bottom">
                             <div class="share-holder">
@@ -321,12 +321,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -337,7 +337,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-12" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-12" placement="bottom">
                             <div class="share-holder">
@@ -354,12 +354,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -370,7 +370,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-13" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-13" placement="bottom">
                             <div class="share-holder">
@@ -387,12 +387,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -403,7 +403,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-14" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-14" placement="bottom">
                             <div class="share-holder">
@@ -420,12 +420,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -436,7 +436,7 @@
                     <li>
                         <a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a id="share-button-15" href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                         <b-tooltip custom-class="share-tooltip" target="share-button-15" placement="bottom">
                             <div class="share-holder">
@@ -453,12 +453,12 @@
                             </div>
                         </b-tooltip>
                     </li>
-                    <li>
+                    <li class="d-none d-lg-block">
                         <a href="#."><font-awesome-icon :icon="['fas', 'edit']" /></a>
                     </li>
                 </ul>
             </div>
-            <div class="product-description">
+            <div class="d-none d-lg-block product-description">
                 <p>Product Name Dolor Site Ament is Dummy</p>
             </div>
         </div>
@@ -475,10 +475,26 @@
 
 <style lang="scss" scoped>
     .products-holder{
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        @media only screen and (min-width: 992px){
+            width: 100%;
+            overflow-x: hidden;
+            white-space: normal;
+        }
         .products-block{
-            flex: 0 0 18%;
-            max-width: 18%;
-            margin: 0 0.6rem 25px;
+            flex: 0 0 22%;
+            max-width: 22%;
+            margin: 0 0.3rem 10px;
+            display: inline-block;
+            @media only screen and (min-width: 992px){
+                margin: 0 0.6rem 25px;
+            }
+            @media only screen and (min-width: 1199px){
+                flex: 0 0 18%;
+                max-width: 18%;
+            }
             .image-holder{
                 position: relative;
                 overflow: hidden;
