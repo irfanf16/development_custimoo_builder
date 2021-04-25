@@ -2,7 +2,7 @@ const base_url = process.env.VUE_APP_API_BASE_URL
 import Axios, { AxiosRequestConfig } from "axios"
 
 const http = Axios.create({
-  baseURL: "http://api.custimoo.com/api",
+  baseURL: process.env.VUE_APP_API_BASE_URL+"/api",
   headers: {
     "Content-type": "application/json",
   }

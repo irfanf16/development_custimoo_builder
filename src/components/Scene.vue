@@ -12,9 +12,9 @@ import { Group } from 'fabric/fabric-impl'
 
 @Component<Scene>({
   mounted () {
-    this.loadScene(this.front, this.frontCanvas, 'front')
+    this.loadScene(this.front, 'front')
     if(this.back) {
-      this.loadScene(this.back, this.backCanvas, 'back')
+      this.loadScene(this.back, 'back')
     }
 
     const self = this
@@ -80,42 +80,51 @@ export default class Scene extends Vue {
       })
 
       newVal.forEach((logo) => {
-        let addLogo = true
-        this.customLogoObjects.forEach((logoObject) => {
-          let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
-          if(logoUrl == logoObject._element.src){
-            addLogo = false
-            logoObject.center() //add center because all events only trigger if use it in fabric js.
-            if(logoObject.left != logo.x_axis || logoObject.top != logo.y_axis) {
-              logoObject.set({
-                left: self.frontCanvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
-                top: self.frontCanvas.getHeight() / self.mainCanvasHeight * logo.y_axis
-              })
-            }
+        if((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
+          let addLogo = true
+          this.customLogoObjects.forEach((logoObject) => {
+            let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+            if (logoUrl == logoObject._element.src) {
+              addLogo = false
+              logoObject.center() //add center because all events only trigger if use it in fabric js.
 
-            logoObject.scaleX = self.frontCanvas.getWidth() / self.mainCanvasWidth * logo.scaleX
-            logoObject.scaleY = self.frontCanvas.getHeight() / self.mainCanvasHeight * logo.scaleY
+              if (logoObject.left != logo.x_axis || logoObject.top != logo.y_axis) {
+                logoObject.set({
+                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis - 5,
+                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis - 5
+                })
+              }
 
-            if(logoObject.angle != logo.rotation) {
-              logoObject.rotate(logo.rotation as number)
+              logoObject.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
+              logoObject.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
+
+              if (logoObject.angle != logo.rotation) {
+                logoObject.rotate(logo.rotation as number)
+              }
+              logoObject.setCoords()
             }
-            logoObject.setCoords()
+          })
+          if (addLogo && logo.url) {
+            self.addLogos([logo])
           }
-        })
-        if(addLogo && logo.url) {
-          self.addLogos([logo])
         }
       })
     }
     this.mounted = true
   }
 
-  public loadScene (ImageData: any, canvas: fabric.Canvas, side: string) {
+  public loadScene (ImageData: any, side: string) {
     let element = this.$refs.front as HTMLCanvasElement
     if(side === 'back'){
       element = this.$refs.back as HTMLCanvasElement;
     }
-    canvas = new fabric.Canvas(element)
+    let canvas = new fabric.Canvas(element)
+    if(side == 'back') {
+      this.backCanvas = canvas
+    }else {
+      this.frontCanvas = canvas
+    }
+
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
     let model: any
@@ -157,10 +166,8 @@ export default class Scene extends Vue {
       texture = img
       if(side === 'back'){
         self.backTexture = texture
-        self.backCanvas = canvas
       }else{
         self.frontTexture = texture
-        self.frontCanvas = canvas
       }
     })
 
@@ -233,11 +240,12 @@ export default class Scene extends Vue {
       let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
       fabric.Image.fromURL(logoUrl, (img: any) => {
         img.set({
-            left: canvas.getWidth() / self.mainCanvasWidth * logo.x_axis,
-            top: canvas.getHeight() / self.mainCanvasHeight * logo.y_axis,
-            scaleX: canvas.getWidth() / self.mainCanvasWidth * logo.width / img.width,
-            scaleY: canvas.getHeight() / self.mainCanvasHeight * logo.height / img.height,
+            left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+            top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
+            scaleX: self.canvasWidth / self.mainCanvasWidth * logo.width / img.width,
+            scaleY: self.canvasHeight / self.mainCanvasHeight * logo.height / img.height,
             angle: logo.rotation as number,
+            centeredScaling: true,
             selectable: logo.haveControls,
             hasControls: logo.haveControls,
             hasBorders: logo.haveControls,
