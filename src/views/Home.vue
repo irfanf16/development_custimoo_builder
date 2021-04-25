@@ -83,6 +83,7 @@ import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import {http} from "@/httpCommon"
 
+
 @Component<Home>({
   components: {
     ChooseColor,
@@ -113,7 +114,7 @@ import {http} from "@/httpCommon"
 })
 
 export default class Home extends Vue {
-  private products: any[] = []
+  // private products: any[] = []
   private nextPageUrl !: string
   public designsIndex = 0
   public hasProducts = true
@@ -144,6 +145,10 @@ export default class Home extends Vue {
   get customLogos(): [] {
     return this.$store.getters.getCustomLogos
   }
+  get products():[Record<any, any>]{
+    return this.$store.getters.getProducts
+  }
+
 
   getFillColors() {
     const url = '/product/colors?default_color=1'
@@ -169,20 +174,23 @@ export default class Home extends Vue {
       url = this.nextPageUrl
     }
     if (searchCall) {
-      this.products = []
+      this.$store.commit('SET_PRODUCTS', []);
     }
 
     if (this.hasProducts) {
       const self = this
       http.get(url).then((response: any) => {
-        this.products = this.products.concat(response.data.products.data)
+        let product_data = this.products.concat(response.data.products.data)
+        this.$store.commit('SET_PRODUCTS', product_data);
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
         }
         if(!this.mounted){
           this.mounted = true
-          this.customLogoInit()
+          setTimeout(() => {
+            self.customLogoInit()
+          }, 3000);
         }
       }).catch((e: any) => {
         console.log(e)
