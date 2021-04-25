@@ -7,7 +7,7 @@
             <div v-if="manageComponents.ChooseColor" class="py-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
               <ChooseColor :colors="colors"/>
             </div>
-            <template v-if="products.length && products[designsIndex].is_logo_allowed == 1">
+            <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
               <template v-if="manageComponents.LogoArea">
                 <UploadLogo :customLogoIndex="0"/>
               </template>
@@ -19,7 +19,7 @@
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs :productDetails="products[designsIndex]"/>
+            <CustomizationTabs />
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
@@ -49,7 +49,7 @@
           </template>
           <div class="customization-area d-flex flex-wrap justify-content-center align-items-center">
             <div>
-              <CustomizationPreview :designs="products[designsIndex]"/>
+              <CustomizationPreview />
               <template v-if="manageComponents.BasicCustomization">
                 <b-button @click="showAdvanceCustomization()" class="mt-5" variant="secondary">Continue</b-button>
               </template>
@@ -64,8 +64,7 @@
           </div>
         </b-col>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-          <ItemToCustomize :productListing="products" :categories="categories" ref="updateCarousel"
-                           @designsData="changeProduct" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
+          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
         </b-col>
       </b-row>
     </b-container>
@@ -116,7 +115,6 @@ import {http} from "@/httpCommon"
 export default class Home extends Vue {
   // private products: any[] = []
   private nextPageUrl !: string
-  public designsIndex = 0
   public hasProducts = true
   public category_id !: string
   public search = ''
@@ -147,6 +145,9 @@ export default class Home extends Vue {
   }
   get products():[Record<any, any>]{
     return this.$store.getters.getProducts
+  }
+  get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
   }
 
 
@@ -199,8 +200,8 @@ export default class Home extends Vue {
   }
 
   public customLogoInit(){
-    if(this.products.length && this.products[this.designsIndex].is_logo_allowed == 1){
-      let logoSetting = this.products[this.designsIndex].logos_setting[0]
+    if(this.selectedProduct && this.selectedProduct.is_logo_allowed == 1){
+      let logoSetting = this.selectedProduct.logos_setting[0]
       let logo = {
         url: '',
         width: logoSetting.width,
@@ -238,11 +239,6 @@ export default class Home extends Vue {
     }
     this.searchProducts()
   }
-
-  public changeProduct(designsIndex: number) {
-    this.designsIndex = designsIndex
-  }
-
 
   public getLogoAssociation() {
     const url = '/customer/associateresource'

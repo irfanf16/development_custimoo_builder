@@ -4,10 +4,9 @@
     <div class="customization-nav-area px-3 px-lg-0">
       <Search :categoryListing="categories" @search="searchProduct"/>
     </div>
-    <SelectItemCarousel :productListingCarousel="productListing" ref="updateCarousel" @designsData="setDesigns"
-                        @retrieveProductsC="retrieveProductsC"/>
+    <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>
-    <DesignAvailable :productDesignsData="productListing[designIndex]"/>
+    <DesignAvailable />
   </div>
 </template>
 
@@ -25,24 +24,13 @@
   }
 })
 export default class ItemToCustomize extends Vue {
-  public designIndex = 0
-
-  @Prop({required: true}) productListing!: any
   @Prop({required: true}) categories!: any
 
-  public setDesigns(designIndex :number){
-    this.designIndex = designIndex
-    this.$emit('designsData', designIndex)
-  }
   public retrieveProductsC(index :number){
     this.$emit('retrieveProducts', index)
   }
   public searchProduct(param: string, type: string){
     this.$emit('search', param, type)
-  }
-  public reRenderCarousel(): void{
-    console.log('rendered!!')
-    // this.$refs.updateCarousel.reRender()
   }
 }
 </script>

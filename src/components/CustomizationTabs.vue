@@ -2,7 +2,7 @@
   <div>
   <div class="customization-tabs">
     <b-tabs>
-      <b-tab v-if="productDetails.is_logo_allowed == 1">
+      <b-tab v-if="selectedProduct.is_logo_allowed == 1">
         <template #title>
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
@@ -10,7 +10,7 @@
           Logo
         </template>
         <div class="logo-placement-tabs">
-          <LogoPlacementTabs :numberOfLogosAllowed="productDetails.allowed_logos_count" :logosSetting="productDetails.logos_setting" />
+          <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting" />
         </div>
       </b-tab>
       <b-tab>
@@ -126,15 +126,16 @@ import ColorTabs from '@/components/ColorTabs.vue'
   },
 })
 export default class CustomizationProcess extends Vue {
-  @Prop({required: true}) productDetails!: any
-
   get manageComponents(): [] {
     return this.$store.getters.getManageComponents
+  }
+  get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
   }
   public productColors: any[] = []
 
   public productColorsManipulation(){
-    this.productDetails.colors.forEach((colors: any, key: number) => {
+    this.selectedProduct.colors.forEach((colors: any, key: number) => {
       colors.color_text = JSON.parse(colors.color_text)
       colors.selectedColor = ""
       this.productColors = this.productColors.concat(colors)

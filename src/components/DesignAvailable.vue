@@ -1,12 +1,12 @@
 <template>
-  <div class="available-designs-section px-3 px-lg-0" v-if="productDesignsData">
-    <div class="design-col" v-for="(design, index) in productDesignsData.productstyles[0].productdesigns"
+  <div class="available-designs-section px-3 px-lg-0" v-if="selectedProduct">
+    <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[0].productdesigns"
          :key="design.id">
       <a @click="changeDesign(index); showDesign()">
         <Scene :canvas-height="73" :canvas-width="59"
-               :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ productDesignsData.productstyles[0].front.file_url}"
-               :logos="productDesignsData.productstyles[0].logo"
-               :logosSettings="design.logos_setting" :logoAllowed="Boolean(design.is_logo_allowed)" :logosLimit="design.allowed_logos_count" :productColors="design.colors" />
+               :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[0].front.file_url}"
+               :logos="selectedProduct.productstyles[0].logo"
+               :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count" :productColors="selectedProduct.colors" />
       </a>
     </div>
   </div>
@@ -15,7 +15,6 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import Scene from '@/components/Scene.vue'
-import manageComponents from '@/store/modules/main'
 
 @Component<DesignAvailable>({
   components: {
@@ -24,24 +23,25 @@ import manageComponents from '@/store/modules/main'
 })
 
 export default class DesignAvailable extends Vue {
-  @Prop({required: true}) productDesignsData !: any
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
   }
+  get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
+  }
 
   public changeDesign(index: number) {
-    this.productDesignsData.productstyles[0].productdesigns.forEach((design: any, key: number) => {
+    this.selectedProduct.productstyles[0].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {
-        design.design_show = 1
+        Vue.set(design, 'design_show', 1)
       } else {
-        design.design_show = 0
+        Vue.set(design, 'design_show', 0)
       }
     })
   }
 
   public showDesign() {
-
     if(this.manageComponents.mobileScreen){
       this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
       this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
