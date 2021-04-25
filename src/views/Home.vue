@@ -9,7 +9,7 @@
             </div>
             <template v-if="products.length && products[designsIndex].is_logo_allowed == 1">
               <template v-if="manageComponents.LogoArea">
-                <UploadLogo :logosSetting="products[designsIndex].logos_setting" :customLogoIndex="0"/>
+                <UploadLogo :customLogoIndex="0"/>
               </template>
             </template>
           </b-col>
