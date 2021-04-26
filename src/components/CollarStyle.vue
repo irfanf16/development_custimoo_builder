@@ -9,10 +9,10 @@
                     <h3>*   {{ model.model_name }}</h3>
                     <div v-html="model.product_model_description">  </div>
                 </div>
-                <div class="choose-collar mb-3">
+                <div class="choose-collar mb-3" >
                     <div class="collar-designs">
                       <template v-for="(style, i) in selectedProduct.productstyles">
-                        <b-button :key="i" v-if="model.model_styles.includes(style.id)" variant="outline-light" @click="changeStyleIndex(i)"><img :src="apiBaseUrl+'/'+style.front.file_url " /></b-button>
+                        <b-button :key="i"  v-if="model.model_styles.includes(style.id)" variant="outline-light" @click="changeStyleIndex(i)"><img :src="apiBaseUrl+'/'+style.front.file_url " /></b-button>
                       </template>
                     </div>
                 </div>
@@ -56,11 +56,7 @@ import {http} from "@/httpCommon";
       public async getModels(){
         await http.get("style/information/"+ this.selectedProduct.product_id).then((res:any)=>{
           this.productModels = res.data;
-          console.log(this.styleModels);
         });
-      }
-      public changeStyleIndex(i:number){
-        this.$store.commit('STYLE_INDEX', i) ;
       }
       get styleModels(): number[]{
         let self = this;
@@ -73,6 +69,38 @@ import {http} from "@/httpCommon";
           }
         }
         return styleModels;
+      }
+      get styleIndex():number{
+        return  this.$store.getters.getCurrentStyleIndex;
+      }
+      public changeStyleIndex(i:number){
+        const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+          return item.design_show
+        })
+        if(currentDesign.length){
+          const design_name = currentDesign[0].design_name
+          let designFound = false;
+          const newDesign = this.selectedProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>) => {
+            if(item.design_name == design_name) {
+              designFound  = true
+              Vue.set(item, 'design_show', 1)
+            } else {
+              Vue.set(item, 'design_show', 0)
+            }
+          })
+          if (!designFound){
+            this.selectedProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{
+              if (index ==0 ){
+                Vue.set(this.selectedProduct.productstyles[i].productdesigns[0], 'design_show', 1)
+              }else{
+                this.selectedProduct.productstyles[i].productdesigns[i].design_show = 0;
+              }
+            })
+          }
+
+        }
+
+        this.$store.commit('CHANGE_STYLE_INDEX', i);
       }
     }
 </script>

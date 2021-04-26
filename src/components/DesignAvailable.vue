@@ -1,11 +1,11 @@
 <template>
   <div class="available-designs-section px-3 px-lg-0" v-if="selectedProduct">
-    <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[0].productdesigns"
+    <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns"
          :key="design.id">
       <a @click="changeDesign(index); showDesign()">
         <Scene :canvas-width="300" :canvas-height="360"
-               :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[0].front.file_url}"
-               :logos="selectedProduct.productstyles[0].logo"
+               :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
+               :logos="selectedProduct.productstyles[styleIndex].logo"
                :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count" :productColors="selectedProduct.colors" />
       </a>
     </div>
@@ -30,9 +30,13 @@ export default class DesignAvailable extends Vue {
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
+  get styleIndex():number{
+    return  this.$store.getters.getCurrentStyleIndex;
+  }
 
   public changeDesign(index: number) {
-    this.selectedProduct.productstyles[0].productdesigns.forEach((design: any, key: number) => {
+    console.log(index);
+    this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {
         Vue.set(design, 'design_show', 1)
       } else {
@@ -88,7 +92,7 @@ export default class DesignAvailable extends Vue {
       margin: 0;
       height: auto;
     }
-    
+
   }
 }
 </style>
