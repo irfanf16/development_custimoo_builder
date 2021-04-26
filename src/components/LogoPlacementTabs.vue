@@ -10,8 +10,8 @@
           </a>
         </div>
       </template>
-      <b-button  v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
-        Logo +
+      <b-button class="add-logo-btn"  v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
+        +
       </b-button>
       <div class="tabs-logo-container">
         <div class="logo-placement-area mb-3 mb-lg-4">
