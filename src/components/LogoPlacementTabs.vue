@@ -1,5 +1,8 @@
 <template>
   <div>
+  <b-button class="add-logo-btn"  v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
+    +
+  </b-button>
   <b-tabs>
     <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
       <template #title>
@@ -10,21 +13,23 @@
           </a>
         </div>
       </template>
-      <b-button class="add-logo-btn"  v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
-        +
-      </b-button>
+      
       <div class="tabs-logo-container">
         <div class="logo-placement-area mb-3 mb-lg-4">
           <div class="logo-placement-holder mb-lg-3">
             <div class="logo-holder">
               <template v-if="customLogos[index].url != ''">
-                <img :src="apiBaseUrl+'/'+customLogos[index].url" alt="logo Shirt"/>
+                <div class="additional-holder">
+                  <img :src="apiBaseUrl+'/'+customLogos[index].url" alt="logo Shirt"/>
+                </div>
                 <a href="#" class="remove-img" @click="deleteLogo(index)">
                   <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                 </a>
               </template>
               <template v-else>
-                <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
+                <div class="additional-holder">
+                  <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
+                </div>
               </template>
             </div>
             <div class="logo-placemet-content">
@@ -36,7 +41,7 @@
         </div>
         <div class="logo-placement-area">
           <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
-          <div class="logo-placement-holder">
+          <div class="logo-placement-holder mb-lg-3">
             <div class="logo-holder">
               <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
               <a href="#" class="remove-img">
