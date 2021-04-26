@@ -2,7 +2,7 @@
   <div>
   <div class="customization-tabs">
     <b-tabs>
-      <b-tab v-if="productDetails.is_logo_allowed == 1">
+      <b-tab v-if="selectedProduct.is_logo_allowed == 1">
         <template #title>
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
@@ -10,7 +10,7 @@
           Logo
         </template>
         <div class="logo-placement-tabs">
-          <LogoPlacementTabs :numberOfLogosAllowed="productDetails.allowed_logos_count" :logosSetting="productDetails.logos_setting" />
+          <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting" />
         </div>
       </b-tab>
       <b-tab>
@@ -21,11 +21,11 @@
           Color
         </template>
         <div>
-          <h2 class="fw-bold fz-16 p-3">Choose Color</h2>
+          <h2 class="fw-bold fz-16 p-3 d-none d-lg-block">Choose Color</h2>
           <div class="d-none d-lg-block">
             <ColorAccordion :productColors="productColors" />
           </div>
-          <div class="d-lg-none">
+          <div class="color-tabs d-lg-none">
             <ColorTabs />
           </div>
         </div>
@@ -37,7 +37,39 @@
           </div>
           Text
         </template>
-        <CustomizationText :productFonts="productDetails.namefonts" />
+        <div class="d-none d-lg-block">
+          <CustomizationText />
+          <CustomizationText />
+          <CustomizationText />
+        </div>
+        <div class="mobile-text-tabs d-lg-none">
+          <b-tabs>
+            <b-tab>
+              <template #title>
+                Player Name
+              </template>
+              <div>
+                <CustomizationText />
+              </div>
+            </b-tab>
+            <b-tab>
+              <template #title>
+                Player Number
+              </template>
+              <div>
+                <CustomizationText />
+              </div>
+            </b-tab>
+            <b-tab>
+              <template #title>
+                Player Name Or Number
+              </template>
+              <div>
+                <CustomizationText />
+              </div>
+            </b-tab>
+          </b-tabs>
+        </div>
       </b-tab>
       <b-tab>
         <template #title>
@@ -48,7 +80,7 @@
         </template>
         <div class="collar-section p-4">
           <h2 class="fw-bold mb-2 fz-18">Choose Product</h2>
-          <CollarStyle/>
+          <CollarStyle />
         </div>
       </b-tab>
       <b-tab>
@@ -60,7 +92,7 @@
         </template>
         <div class="team-roaster-area p-4">
           <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-          <EditRosterArea/>
+          <EditRosterArea />
         </div>
       </b-tab>
     </b-tabs>
@@ -71,48 +103,41 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
-import ColorTabs from '@/components/ColorTabs.vue'
 import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterArea from '@/components/EditRosterArea.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
+import ColorTabs from '@/components/ColorTabs.vue'
 
 @Component<CustomizationProcess>({
   components: {
     ColorAccordion,
-    ColorTabs,
     LogoPlacementTabs,
     CustomizationText,
     CollarStyle,
     EditRosterArea,
+    ColorTabs,
     UploadLogo
   },
   mounted() {
     this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
   },
-  created() {
-    console.log("mango")
-    var obkects = document.getElementsByClassName("tab-pane");
-    console.log(obkects)
-    for(var i=0;i<obkects.length;i++){
-      obkects[i].classList.remove('active')//.classList.remove('active');
-    }
-
-  }
 })
 export default class CustomizationProcess extends Vue {
-  @Prop({required: true}) productDetails!: any
-
   get manageComponents(): [] {
     return this.$store.getters.getManageComponents
+  }
+  get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
   }
   public productColors: any[] = []
 
   public productColorsManipulation(){
-    this.productDetails.colors.forEach((colors: any, key: number) => {
+    this.selectedProduct.colors.forEach((colors: any, key: number) => {
       colors.color_text = JSON.parse(colors.color_text)
+      colors.selectedColor = ""
       this.productColors = this.productColors.concat(colors)
     })
   }

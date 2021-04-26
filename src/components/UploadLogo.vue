@@ -45,20 +45,9 @@ import {http} from "@/httpCommon"
   mounted() {
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
-    if(!this.logosSetting){
-      this.logosSetting = this.logosSetting.concat([{
-        width: 100,
-        height: 100,
-        x_axis: 150,
-        y_axis: 190,
-        haveControls: true,
-        side: 'front'
-      }])
-    }
   }
 })
 export default class UploadLogo extends Vue {
-  @Prop({required: false}) logosSetting!: any
   @Prop({required: true}) customLogoIndex!: any
 
   @Watch('logoUrl', {
@@ -104,7 +93,6 @@ export default class UploadLogo extends Vue {
 
   public modalHandler(){
     let manageComponent = this.manageComponents as Record<any, any>
-    console.log(manageComponent.AdvanceCustomization)
     if(manageComponent.AdvanceCustomization) {
       this.showModal()
     }
@@ -130,7 +118,6 @@ export default class UploadLogo extends Vue {
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
         this.logoUrl = this.apiBaseUrl + '/' + resp.data.file.logo_url
-        console.log(resp.data.file.logo_url)
         let payload = {
           index: this.customLogoIndex,
           attribute: 'url',

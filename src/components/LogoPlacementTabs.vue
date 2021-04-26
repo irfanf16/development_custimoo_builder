@@ -1,6 +1,7 @@
 <template>
+  <div>
   <b-tabs>
-    <b-tab v-for="(n, index) in customLogos" :key="index" :class="{ active: index==0 }">
+    <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
       <template #title>
         Logo {{ index+1 }}
         <div v-if="index != 0">
@@ -9,6 +10,9 @@
           </a>
         </div>
       </template>
+      <b-button  v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
+        Logo +
+      </b-button>
       <div class="tabs-logo-container">
         <div class="logo-placement-area mb-3 mb-lg-4">
           <div class="logo-placement-holder mb-lg-3">
@@ -51,12 +55,8 @@
         </template>
       </div>
     </b-tab>
-    <b-tab v-if="customLogos.length < numberOfLogosAllowed" @click="addTab">
-      <template #title>
-        Logo +
-      </template>
-    </b-tab>
   </b-tabs>
+  </div>
 </template>
 
 <script lang="ts">
@@ -69,26 +69,29 @@ import UploadLogo from "@/components/UploadLogo.vue"
   },
   mounted() {
     this.$store.dispatch('setCustomLogos')
-    if(!this.logosSetting){
-      this.logosSetting = this.logosSetting.apend({
-        width: 100,
-        height: 100,
-        x_axis: 150,
-        y_axis: 190,
-        haveControls: true,
-        side: 'front'
-      })
-    }
   }
 })
 export default class LogoPlacementTabs extends Vue {
   @Prop({required: true}) numberOfLogosAllowed!: number
-  @Prop({required: true}) logosSetting!: any
+  @Prop({required: false, default: () => { return [{
+      url: '',
+      width: 100,
+      height: 100,
+      scaleX: 1,
+      scaleY: 1,
+      x_axis: 150,
+      y_axis: 190,
+      rotation: 0,
+      haveControls: true,
+      side: 'front',
+      customLogo: true
+    }]}}) logosSetting!: [Record<any, any>]
 
   public numberOfLogos = 1
 
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
   public selected = 'front'
+  public tabIndex = 0
   public options = [
     {value: 'front', text: 'Front'},
     {value: 'back', text: 'Back'}
@@ -102,18 +105,23 @@ export default class LogoPlacementTabs extends Vue {
     return this.$store.getters.getManageComponents
   }
 
-  public addTab(){
+  public addTab(index: number){
     if(this.numberOfLogos < this.numberOfLogosAllowed) {
-      let logoSetting = this.logosSetting[0]
+      const logoSetting = this.logosSetting[index]
       let logo = {
         url: '',
         width: logoSetting.width,
         height: logoSetting.height,
+        scaleX: 1,
+        scaleY: 1,
         x_axis: logoSetting.x_axis,
         y_axis: logoSetting.y_axis,
+        rotation: logoSetting.rotation as number,
         haveControls: Boolean(logoSetting.is_locked),
-        side: logoSetting.side
+        side: logoSetting.side,
+        customLogo: true
       }
+      this.tabIndex = this.tabIndex + 1;
       this.$store.dispatch('setCustomLogos', logo)
     }
   }
@@ -121,6 +129,7 @@ export default class LogoPlacementTabs extends Vue {
     let payload = {
       index: index
     }
+    this.tabIndex = this.tabIndex - 1;
     this.$store.dispatch('deleteCustomLogo', payload)
   }
 
@@ -148,6 +157,11 @@ export default class LogoPlacementTabs extends Vue {
     border-top: 1px solid #EFF2F4;
     margin: 20px -20px 0;
     padding: 15px 20px 0;
+    @media only screen and (min-width: 992px){
+      position: absolute;
+      margin: 0;
+      padding: 20px;
+    }
   }
   .logo-placement-area{
     display: flex;
@@ -162,7 +176,7 @@ export default class LogoPlacementTabs extends Vue {
         max-width: 100%;
       }
     }
-    .btn{ 
+    .btn{
       flex: 0 0 30%;
       max-width: 30%;
       font-size: 12px;

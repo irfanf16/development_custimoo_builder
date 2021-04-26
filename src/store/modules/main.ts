@@ -1,6 +1,6 @@
 import {noTokenRequest} from "@/httpCommon";
 import { Module } from "vuex";
-const mobileScreen = false
+const mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 const Main:Module<any, any> = {
   state: {
     manageComponents: {

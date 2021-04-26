@@ -21,12 +21,12 @@
       }
 
       public showDesign() {
-          if(!this.manageComponents.mobileScreen){
+            if(this.manageComponents.mobileScreen){
                 this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
                 this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: false})
                 this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
                 this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
-          }
+            } 
       }
     }
 </script>

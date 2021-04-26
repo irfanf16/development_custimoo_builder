@@ -52,17 +52,27 @@
         align-items: center;
         justify-content: space-between;
         .locker-opener{
-            max-width: 80%;
-            padding: 0 30px;
+            max-width: 100%;
+            padding: 15px;
             font-size: 18px;
             position: relative;
+            overflow-x: auto;
+            white-space: nowrap;
+            @media only screen and (min-width: 720px){
+                padding: 0 30px;
+                max-width: 80%;
+            }
             .btn{
-                padding: 10px 30px;
-                margin: 0 10px 10px;
+                padding: 5px 10px;
+                margin: 0 5px 10px;
                 position: relative;
                 background: none;
                 border-color: rgba(3,20,46,0.13);
                 color: #03142E;
+                @media only screen and (min-width: 720px){
+                    padding: 10px 30px;
+                    margin: 0 10px 10px;
+                }
                 &.active,
                 &:hover{
                     background: #219f84;
@@ -73,9 +83,9 @@
                     position: absolute;
                     right: -10px;
                     top: -14px;
-                    width: 30px;
-                    height: 30px;
-                    font-size: 12px;
+                    width: 20px;
+                    height: 20px;
+                    font-size: 9px;
                     color: #D53943;
                     background: #F8E1E2;
                     border-radius: 50%;
@@ -83,6 +93,11 @@
                     flex-wrap: wrap;
                     align-items: center;
                     justify-content: center;
+                    @media only screen and (min-width: 720px){
+                        width: 30px;
+                        height: 30px;
+                        font-size: 12px;
+                    }
                 }
             }
             .arrow{

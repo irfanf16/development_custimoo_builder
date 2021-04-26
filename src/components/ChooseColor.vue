@@ -26,7 +26,7 @@
         </div>
       </transition>
     </div>
-    <div class="shuffle-colors d-flex flex-wrap justify-content-between align-items-center">
+    <div class="shuffle-colors d-none d-lg-flex flex-wrap justify-content-between align-items-center">
       <button class="btn btn-secondary">Shuffle</button>
       <button class="redo-btn">
         <font-awesome-icon :icon="['fas', 'redo-alt']"/>

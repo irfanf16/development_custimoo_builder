@@ -4,12 +4,12 @@
       <b-row>
         <template v-if="manageComponents.BasicCustomization">
           <b-col cols="12" lg="3" class="text-left home-color-area">
-            <div v-if="manageComponents.ChooseColor" class="py-3 pb-5 py-lg-5 overflow-hidden mt-4 mt-lg-0">
+            <div v-if="manageComponents.ChooseColor" class="py-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
               <ChooseColor :colors="colors"/>
             </div>
-            <template v-if="products.length && products[designsIndex].is_logo_allowed == 1">
+            <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
               <template v-if="manageComponents.LogoArea">
-                <UploadLogo :logosSetting="products[designsIndex].logos_setting" :customLogoIndex="0"/>
+                <UploadLogo :customLogoIndex="0"/>
               </template>
             </template>
           </b-col>
@@ -19,7 +19,7 @@
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs :productDetails="products[designsIndex]"/>
+            <CustomizationTabs />
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
@@ -49,7 +49,7 @@
           </template>
           <div class="customization-area d-flex flex-wrap justify-content-center align-items-center">
             <div>
-              <CustomizationPreview :designs="products[designsIndex]"/>
+              <CustomizationPreview />
               <template v-if="manageComponents.BasicCustomization">
                 <b-button @click="showAdvanceCustomization()" class="mt-5" variant="secondary">Continue</b-button>
               </template>
@@ -64,8 +64,7 @@
           </div>
         </b-col>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-          <ItemToCustomize :productListing="products" :categories="categories" ref="updateCarousel"
-                           @designsData="changeProduct" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
+          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
         </b-col>
       </b-row>
     </b-container>
@@ -82,6 +81,7 @@ import CustomizationTabs from '@/components/CustomizationTabs.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import {http} from "@/httpCommon"
+
 
 @Component<Home>({
   components: {
@@ -113,9 +113,8 @@ import {http} from "@/httpCommon"
 })
 
 export default class Home extends Vue {
-  private products: any[] = []
+  // private products: any[] = []
   private nextPageUrl !: string
-  public designsIndex = 0
   public hasProducts = true
   public category_id !: string
   public search = ''
@@ -144,6 +143,13 @@ export default class Home extends Vue {
   get customLogos(): [] {
     return this.$store.getters.getCustomLogos
   }
+  get products():[Record<any, any>]{
+    return this.$store.getters.getProducts
+  }
+  get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
+  }
+
 
   getFillColors() {
     const url = '/product/colors?default_color=1'
@@ -169,20 +175,23 @@ export default class Home extends Vue {
       url = this.nextPageUrl
     }
     if (searchCall) {
-      this.products = []
+      this.$store.commit('SET_PRODUCTS', []);
     }
 
     if (this.hasProducts) {
       const self = this
       http.get(url).then((response: any) => {
-        this.products = this.products.concat(response.data.products.data)
+        let product_data = this.products.concat(response.data.products.data)
+        this.$store.commit('SET_PRODUCTS', product_data);
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
         }
         if(!this.mounted){
           this.mounted = true
-          this.customLogoInit()
+          setTimeout(() => {
+            self.customLogoInit()
+          }, 3000);
         }
       }).catch((e: any) => {
         console.log(e)
@@ -191,14 +200,17 @@ export default class Home extends Vue {
   }
 
   public customLogoInit(){
-    if(this.products.length && this.products[this.designsIndex].is_logo_allowed == 1){
-      let logoSetting = this.products[this.designsIndex].logos_setting[0]
+    if(this.selectedProduct && this.selectedProduct.is_logo_allowed == 1){
+      let logoSetting = this.selectedProduct.logos_setting[0]
       let logo = {
         url: '',
         width: logoSetting.width,
         height: logoSetting.height,
+        scaleX: 1,
+        scaleY: 1,
         x_axis: logoSetting.x_axis,
         y_axis: logoSetting.y_axis,
+        rotation: logoSetting.rotation,
         haveControls: Boolean(logoSetting.is_locked),
         side: logoSetting.side,
         customLogo: true
@@ -227,11 +239,6 @@ export default class Home extends Vue {
     }
     this.searchProducts()
   }
-
-  public changeProduct(designsIndex: number) {
-    this.designsIndex = designsIndex
-  }
-
 
   public getLogoAssociation() {
     const url = '/customer/associateresource'

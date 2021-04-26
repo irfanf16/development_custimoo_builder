@@ -7,11 +7,11 @@
       </b-card-header>
       <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
         <b-card-body>
-          <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
-            <b-nav-item v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.file_type }}</b-nav-item>
+          <b-nav class="d-flex flex-wrap align-items-center">
+            <b-nav-item class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.file_type }}</b-nav-item>
           </b-nav>
           <div class="color-holder">
-            <div class="color-container" >
+            <div class="color-container">
               <div class="color-box" v-for="color in productColor" @click="setColor(color.value)"
                    :title="color.name" :style="{background: color.value}" :key="color.position"></div>
             </div>
