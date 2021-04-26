@@ -3,7 +3,7 @@
     <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[0].productdesigns"
          :key="design.id">
       <a @click="changeDesign(index); showDesign()">
-        <Scene :canvas-height="73" :canvas-width="59"
+        <Scene :canvas-height="300" :canvas-width="360"
                :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[0].front.file_url}"
                :logos="selectedProduct.productstyles[0].logo"
                :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count" :productColors="selectedProduct.colors" />
