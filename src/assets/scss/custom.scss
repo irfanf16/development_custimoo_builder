@@ -531,8 +531,22 @@ a:hover{color: #219f84;}
         }
         .tab-content{
             padding-top: 20px;
+            position: relative;
             @media only screen and (min-width: 720px){padding-top: 30px;}
             @media only screen and (min-width: 992px){padding-top: 0;}
+            .btn.add-logo-btn{
+                position: absolute;
+                right: 0;
+                bottom: 100%;
+                z-index: 99;
+                width: 36px;
+                height: 36px;
+                padding: 0.2rem;
+                border-radius: 50%;
+                font-size: 1.6rem;
+                line-height: 1;
+                margin: 0 0 15px;
+            }
         }
         // .upload-logo-opener{
         //     @media only screen and (max-width: 991px){
@@ -962,6 +976,7 @@ a:hover{color: #219f84;}
     padding-bottom: 20px;
     min-height: 70vh;
     max-height: 100vh;
+    position: relative;
     .continue-btn-holder{
         .btn{font-weight: 600;}
         .back-btn{
