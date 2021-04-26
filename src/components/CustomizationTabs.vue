@@ -37,7 +37,7 @@
           </div>
           Text
         </template>
-        <CustomizationText/>
+        <CustomizationText :productFonts="productDetails.namefonts" />
       </b-tab>
       <b-tab>
         <template #title>
@@ -71,6 +71,7 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
+import ColorTabs from '@/components/ColorTabs.vue'
 import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
@@ -80,6 +81,7 @@ import UploadLogo from '@/components/UploadLogo.vue'
 @Component<CustomizationProcess>({
   components: {
     ColorAccordion,
+    ColorTabs,
     LogoPlacementTabs,
     CustomizationText,
     CollarStyle,
@@ -111,7 +113,6 @@ export default class CustomizationProcess extends Vue {
   public productColorsManipulation(){
     this.productDetails.colors.forEach((colors: any, key: number) => {
       colors.color_text = JSON.parse(colors.color_text)
-      colors.selectedColor = ""
       this.productColors = this.productColors.concat(colors)
     })
   }
