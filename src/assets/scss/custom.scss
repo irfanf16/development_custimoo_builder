@@ -1420,11 +1420,15 @@ a:hover{color: #219f84;}
         width: 100% !important;
         height: auto !important;
     }
+    .canvas-container{
+        width: 100px !important;
+        height: 100px !important;
+      }
 }
 .slither-slider-slide{
     .image-holder{
         .canvas-container{
-            height: 150px !important;
+            height: 100px !important;
             width: 100px !important;
             .canvas{
                 width: 100% !important;

@@ -209,6 +209,8 @@ export default class UploadLogo extends Vue {
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
+            overflow: hidden;
             @media only screen and (min-width: 992px){
               width: 64px;
               height: 64px;
