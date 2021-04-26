@@ -112,7 +112,20 @@ export default class LogoPlacementTabs extends Vue {
 
   public addTab(index: number){
     if(this.numberOfLogos < this.numberOfLogosAllowed) {
-      const logoSetting = this.logosSetting[index]
+      let logoSetting: Record<any, any>
+      if(this.logosSetting[index]) {
+        logoSetting = this.logosSetting[index] as Record<any, any>
+      }else {
+        logoSetting = {
+          width: 100,
+          height: 100,
+          x_axis: 150,
+          y_axis: 190,
+          rotation: 0,
+          haveControls: true,
+          side: 'front'
+        }
+      }
       let logo = {
         url: '',
         width: logoSetting.width,
