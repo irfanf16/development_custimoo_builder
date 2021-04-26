@@ -9,9 +9,11 @@
                     <h3>*   {{ model.model_name }}</h3>
                     <div v-html="model.product_model_description">  </div>
                 </div>
-                <div class="choose-collar mb-3" v-for="(style, i) in selectedProduct.productstyles" :key="i">
-                    <div class="collar-designs" v-if="model.model_styles.includes(style.id)">
-                        <b-button variant="outline-light"><img :src="apiBaseUrl+'/'+style.front.file_url " /></b-button>
+                <div class="choose-collar mb-3">
+                    <div class="collar-designs">
+                      <template v-for="(style, i) in selectedProduct.productstyles">
+                        <b-button :key="i" v-if="model.model_styles.includes(style.id)" variant="outline-light"><img :src="apiBaseUrl+'/'+style.front.file_url " /></b-button>
+                      </template>
                     </div>
                 </div>
                 <div class="choose-stuff">
