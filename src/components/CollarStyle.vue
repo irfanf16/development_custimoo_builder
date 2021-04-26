@@ -12,7 +12,7 @@
                 <div class="choose-collar mb-3">
                     <div class="collar-designs">
                       <template v-for="(style, i) in selectedProduct.productstyles">
-                        <b-button :key="i" v-if="model.model_styles.includes(style.id)" variant="outline-light"><img :src="apiBaseUrl+'/'+style.front.file_url " /></b-button>
+                        <b-button :key="i" v-if="model.model_styles.includes(style.id)" variant="outline-light" @click="changeStyleIndex(i)"><img :src="apiBaseUrl+'/'+style.front.file_url " /></b-button>
                       </template>
                     </div>
                 </div>
@@ -58,6 +58,9 @@ import {http} from "@/httpCommon";
           this.productModels = res.data;
           console.log(this.styleModels);
         });
+      }
+      public changeStyleIndex(i:number){
+        this.$store.commit('STYLE_INDEX', i) ;
       }
       get styleModels(): number[]{
         let self = this;

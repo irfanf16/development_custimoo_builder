@@ -5,7 +5,8 @@ const ProductAttributes:Module<any, any> = {
   state: {
     categories: [],
     customLogos: [],
-    isAssociation: false
+    isAssociation: false,
+    styleIndex:0
   },
   mutations: {
     categories(state: Record<any, any>, categories: Record<any, any>) {
@@ -31,6 +32,9 @@ const ProductAttributes:Module<any, any> = {
     isAssociation(state: Record<any, any>, isAssociation: Record<any, any>) {
       state.isAssociation = isAssociation.associate
       localStorage.setItem('isAssociation', isAssociation.associate)
+    },
+    STYLE_INDEX(state:  Record<any, any>, payload:number){
+      state.styleIndex = payload;
     }
   },
   getters: {
@@ -42,6 +46,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getIsAssociation: state => {
       return state.isAssociation
+    },
+    getCurrentStyleIndex: state => {
+      return state.styleIndex
     }
   },
   actions: {
