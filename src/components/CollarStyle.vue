@@ -7,7 +7,7 @@
             <div class="collar-area">
                 <div class="collar-description">
                     <h3>*   {{ model.model_name }}</h3>
-                    <p>  {{ model.product_model_description  }}</p>
+                    <div v-html="model.product_model_description">  </div>
                 </div>
                 <div class="choose-collar mb-3" v-for="(style, i) in selectedProduct.productstyles" :key="i">
                     <div class="collar-designs" v-if="model.model_styles.includes(style.id)">
