@@ -510,9 +510,13 @@
                     padding: 0;
                     margin: 0;
                     position: absolute;
-                    right: 5px;
-                    top: 5px;
+                    right: -5px;
+                    top: -5px;
                     z-index: 1;
+                    @media only screen and (min-width: 992px){
+                        right: 5px;
+                        top: 5px;
+                    }
                     li{
                         display: block;
                         margin: 0 0 5px;
@@ -522,11 +526,17 @@
                         flex-wrap: wrap;
                         justify-content: center;
                         align-items: center;
-                        width: 30px;
-                        height: 30px;
+                        width: 20px;
+                        height: 20px;
+                        font-size: 9px;
                         color: #219f84;
                         background: #fff;
                         border-radius: 50%;
+                        @media only screen and (min-width: 992px){
+                            width: 30px;
+                            height: 30px;
+                            font-size: 14px;
+                        }
                         &.remove{
                             background: #F8E1E2;
                             color: #D53943;

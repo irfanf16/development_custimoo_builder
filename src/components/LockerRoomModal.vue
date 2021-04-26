@@ -15,7 +15,7 @@
         <div class="lockerroom-tabs">
             <div>
                 <b-card no-body>
-                    <b-tabs card>
+                    <b-tabs card changed="currentTabs">
                         <b-tab title="Products" active>
                             <LockerRoomProducts />
                         </b-tab>
@@ -59,7 +59,7 @@
             overflow-x: auto;
             white-space: nowrap;
             @media only screen and (min-width: 720px){
-                padding: 0 30px;
+                padding: 14px 30px;
                 max-width: 80%;
             }
             .btn{
