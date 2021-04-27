@@ -71,7 +71,7 @@
           </b-tabs>
         </div>
       </b-tab>
-      <b-tab>
+      <b-tab @click="getModels">
         <template #title>
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'swatchbook']"/>
@@ -80,7 +80,7 @@
         </template>
         <div class="collar-section p-4">
           <h2 class="fw-bold mb-2 fz-18">Choose Product</h2>
-          <CollarStyle />
+          <CollarStyle  :productModels="productModels"/>
         </div>
       </b-tab>
       <b-tab>
@@ -109,6 +109,7 @@ import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterArea from '@/components/EditRosterArea.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
+import {http} from "@/httpCommon";
 
 @Component<CustomizationProcess>({
   components: {
@@ -133,6 +134,7 @@ export default class CustomizationProcess extends Vue {
     return this.$store.getters.getSelectedProduct
   }
   public productColors: any[] = []
+  public productModels:any[] = []
 
   public productColorsManipulation(){
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
@@ -140,6 +142,11 @@ export default class CustomizationProcess extends Vue {
       colors.selectedColor = ""
       this.productColors = this.productColors.concat(colors)
     })
+  }
+  public async getModels(){
+    await http.get("style/information/"+ this.selectedProduct.product_id).then((res:any)=>{
+      this.productModels = res.data;
+    });
   }
 }
 
