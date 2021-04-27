@@ -33,7 +33,9 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 
     @Component<CollarStyle>({
-
+      mounted(){
+        console.log(this.productModels);
+      }
     })
 
     export default class CollarStyle extends Vue {
@@ -42,19 +44,6 @@ import {http} from "@/httpCommon";
 
       get selectedProduct(): Record<any, any>{
         return this.$store.getters.getSelectedProduct
-      }
-
-      get styleModels(): number[]{
-        let self = this;
-        let styleModels: number[] = []
-        for (let item in this.selectedProduct.productstyles){
-          for (let data in this.selectedProduct.productstyles[item].style_models){
-            if (!styleModels.includes(this.selectedProduct.productstyles[item].style_models[data].id)) {
-              styleModels.push(this.selectedProduct.productstyles[item].style_models[data].id);
-            }
-          }
-        }
-        return styleModels;
       }
       get styleIndex():number{
         return  this.$store.getters.getCurrentStyleIndex;

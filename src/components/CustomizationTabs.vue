@@ -133,8 +133,10 @@ export default class CustomizationProcess extends Vue {
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
+  get productModels():Record<any, any>{
+    return  this.$store.getters.getProductModels;
+  }
   public productColors: any[] = []
-  public productModels:any[] = []
 
   public productColorsManipulation(){
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
@@ -144,9 +146,7 @@ export default class CustomizationProcess extends Vue {
     })
   }
   public async getModels(){
-    await http.get("style/information/"+ this.selectedProduct.product_id).then((res:any)=>{
-      this.productModels = res.data;
-    });
+    await this.$store.dispatch("getModels", this.selectedProduct.product_id);
   }
 }
 
