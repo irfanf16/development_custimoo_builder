@@ -61,17 +61,18 @@ export default class Scene extends Vue {
     immediate: true, deep: true
   })
   customLogosChanged(newVal: [Record<any, any>]) {
-    if(this.mounted) {
+    if(this.mounted && this.logoAllowed) {
       const self = this
-      this.customLogoObjects.forEach((logoObject) => {
+      this.customLogoObjects.forEach((logoObject, index) => {
         let deleteLogo = true
         newVal.forEach((logo: Record<any, any>) => {
           let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
-          if(logoUrl == logoObject._element.src){
+          if(logoUrl == logoObject._element.src && logo.side == logoObject.side){
             deleteLogo = false
           }
         })
         if(deleteLogo) {
+          this.customLogoObjects.splice(index, 1)
           self.frontCanvas.remove(logoObject)
           if(self.backCanvas) {
             self.backCanvas.remove(logoObject)
@@ -86,26 +87,41 @@ export default class Scene extends Vue {
             let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
             if (logoUrl == logoObject._element.src) {
               addLogo = false
-              logoObject.center() //add center because all events only trigger if use it in fabric js.
 
-              if (logoObject.left != logo.x_axis || logoObject.top != logo.y_axis) {
+              if (logo.action == 'drag') {
+                logoObject.center() //add center because all events only trigger if use it in fabric js.
                 logoObject.set({
-                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis - 5,
-                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis - 5
+                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
                 })
-              }
-
-              logoObject.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
-              logoObject.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
-
-              if (logoObject.angle != logo.rotation) {
+              }else if(logo.action == 'scale' || logo.action == 'scaleX' || logo.action == 'scaleY'){
+                logoObject.center()
+                logoObject.set({
+                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
+                })
+                logoObject.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
+                logoObject.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
+              } else if(logo.action == 'rotate') {
+                logoObject.center()
+                logoObject.set({
+                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
+                })``
                 logoObject.rotate(logo.rotation as number)
               }
               logoObject.setCoords()
             }
           })
           if (addLogo && logo.url) {
-            self.addLogos([logo])
+            if(self.logosLimit && self.customLogoObjects.length < self.logosLimit) {
+              console.log(self.customLogoObjects.length + " logos object length")
+              console.log(self.logosLimit + " logo limit")
+              self.addLogos([logo])
+            }else if(!self.logosLimit) {
+              console.log('issue with 117')
+              self.addLogos([logo])
+            }
           }
         }
       })
@@ -143,6 +159,8 @@ export default class Scene extends Vue {
       }else{
         self.frontModel = img
       }
+      console.log(img.width)
+      console.log(self.canvasWidth)
     })
 
     let texture: any
@@ -189,8 +207,13 @@ export default class Scene extends Vue {
         canvas.renderAll()
 
         let logos = this.logos
-        if(this.customLogos){
-          logos = logos.concat(this.customLogos) as [Record<any, any>]
+        console.log(this.logoAllowed)
+        if(this.customLogos && this.logoAllowed){
+          let customLogos = this.customLogos
+          if(this.logosLimit) {
+            customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
+          }
+          logos = logos.concat(customLogos) as [Record<any, any>]
         }
         if(logos.length) {
           logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
@@ -222,7 +245,9 @@ export default class Scene extends Vue {
         }else if(e.action == 'rotate') {
           self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'rotation', value: e.target.angle })
         }
-        this.mounted = false
+        self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'action', value: e.action })
+
+        // this.mounted = false
       }
     })
   }
@@ -249,10 +274,12 @@ export default class Scene extends Vue {
             selectable: logo.haveControls,
             hasControls: logo.haveControls,
             hasBorders: logo.haveControls,
-            evented: logo.haveControls
+            evented: logo.haveControls,
+            globalCompositeOperation: 'source-atop'
           })
 
         if(logo.customLogo){
+          img.side = logo.side
           self.customLogoObjects.push(img)
         }else {
           self.logoObjects.push(img)

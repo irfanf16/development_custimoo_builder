@@ -13,7 +13,7 @@
           </a>
         </div>
       </template>
-      
+
       <div class="tabs-logo-container">
         <div class="logo-placement-area mb-3 mb-lg-4">
           <div class="logo-placement-holder mb-lg-3">
@@ -34,7 +34,7 @@
             </div>
             <div class="logo-placemet-content">
               <h4>Logo Placement</h4>
-              <b-form-select v-model="customLogos[index].side" :options="options"></b-form-select>
+              <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
             </div>
           </div>
           <button class="btn btn-secondary w-100 fw-bold">Save Logo</button>
@@ -102,7 +102,7 @@ export default class LogoPlacementTabs extends Vue {
     {value: 'back', text: 'Back'}
   ]
 
-  get customLogos(): [] {
+  get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
   }
 
@@ -156,6 +156,16 @@ export default class LogoPlacementTabs extends Vue {
       index: index,
       attribute: 'url',
       value: ''
+    }
+    this.$store.dispatch('updateCustomLogoAttribute', payload)
+  }
+
+  public changeSide(index: number) {
+    console.log(this.customLogos[index].side)
+    const payload = {
+      index: index,
+      attribute: 'side',
+      value: this.customLogos[index].side
     }
     this.$store.dispatch('updateCustomLogoAttribute', payload)
   }
