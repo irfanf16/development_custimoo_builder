@@ -114,12 +114,13 @@ export default class Scene extends Vue {
             }
           })
           if (addLogo && logo.url) {
-            if(self.logosLimit && self.customLogoObjects.length < self.logosLimit) {
-              console.log(self.customLogoObjects.length + " logos object length")
-              console.log(self.logosLimit + " logo limit")
+            let backLogosCount = 0
+            if(!this.backCanvas) {
+              backLogosCount = self.customLogos.filter((item) => { return item.side == 'back'}).length
+            }
+            if(self.logosLimit && self.customLogoObjects.length < self.logosLimit - backLogosCount) {
               self.addLogos([logo])
             }else if(!self.logosLimit) {
-              console.log('issue with 117')
               self.addLogos([logo])
             }
           }
@@ -159,8 +160,6 @@ export default class Scene extends Vue {
       }else{
         self.frontModel = img
       }
-      console.log(img.width)
-      console.log(self.canvasWidth)
     })
 
     let texture: any
@@ -207,7 +206,6 @@ export default class Scene extends Vue {
         canvas.renderAll()
 
         let logos = this.logos
-        console.log(this.logoAllowed)
         if(this.customLogos && this.logoAllowed){
           let customLogos = this.customLogos
           if(this.logosLimit) {
