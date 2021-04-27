@@ -16,7 +16,7 @@
                       </template>
                     </div>
                 </div>
-                <div class="choose-stuff">
+                <div class="choose-stuff" v-if="selectedProduct.addons.length > 0">
                     <h2 class="fw-bold mb-3 fz-18">Choose Stuff</h2>
                     <div class="stuff-row" v-for="(item, i) in selectedProduct.addons" :key="i">
                         <b-form-checkbox size="lg">{{ item.addon.name }}</b-form-checkbox>
