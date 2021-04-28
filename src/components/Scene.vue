@@ -80,7 +80,7 @@ export default class Scene extends Vue {
         }
       })
 
-      newVal.forEach((logo) => {
+      newVal.forEach((logo: Record<any, any>, index: number) => {
         if((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
           let addLogo = true
           this.customLogoObjects.forEach((logoObject) => {
@@ -107,21 +107,32 @@ export default class Scene extends Vue {
                 logoObject.set({
                   left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
                   top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
-                })``
+                })
                 logoObject.rotate(logo.rotation as number)
               }
               logoObject.setCoords()
             }
           })
           if (addLogo && logo.url) {
+            const finalLogo = JSON.parse(JSON.stringify(logo))
+            if (addLogo && logo.url) {
+              if (!logo.action && self.logosSettings[index]) {
+                finalLogo.width = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].width
+                finalLogo.height = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].height
+                finalLogo.x_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].x_axis
+                finalLogo.y_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].y_axis
+                finalLogo.rotation = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].rotation
+              }
+            }
+
             let backLogosCount = 0
             if(!this.backCanvas) {
               backLogosCount = self.customLogos.filter((item) => { return item.side == 'back'}).length
             }
             if(self.logosLimit && self.customLogoObjects.length < self.logosLimit - backLogosCount) {
-              self.addLogos([logo])
+              self.addLogos([finalLogo])
             }else if(!self.logosLimit) {
-              self.addLogos([logo])
+              self.addLogos([finalLogo])
             }
           }
         }
@@ -211,6 +222,15 @@ export default class Scene extends Vue {
           if(this.logosLimit) {
             customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
           }
+          customLogos.forEach((item: Record<any, any>, index: number) => {
+            if(!item.action && self.logosSettings[index]) {
+              item.width = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].width
+              item.height = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].height
+              item.x_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].x_axis
+              item.y_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].y_axis
+              item.rotation = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].rotation
+            }
+          })
           logos = logos.concat(customLogos) as [Record<any, any>]
         }
         if(logos.length) {

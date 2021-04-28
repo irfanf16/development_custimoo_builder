@@ -161,7 +161,6 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public changeSide(index: number) {
-    console.log(this.customLogos[index].side)
     const payload = {
       index: index,
       attribute: 'side',
