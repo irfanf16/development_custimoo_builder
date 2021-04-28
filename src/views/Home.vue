@@ -29,7 +29,7 @@
                 <div class="buttons-preview text-left">
                   <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
                   <LockerRoomModal/>
-                  <b-button variant="outline-secondary">Save to locker room</b-button>
+                  <b-button variant="outline-secondary" @click="saveToLocker">Save to locker room</b-button>
                   <b-button variant="outline-secondary">Buy Now</b-button>
                 </div>
                 <ul class="preview-header-icons">
@@ -149,6 +149,10 @@ export default class Home extends Vue {
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
+  get styleIndex():number{
+    return  this.$store.getters.getCurrentStyleIndex;
+  }
+
 
 
   getFillColors() {
@@ -248,6 +252,20 @@ export default class Home extends Vue {
     }).catch((e: any) => {
       console.log(e)
     });
+  }
+  public saveToLocker(){
+    const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+      return item.design_show
+    })
+    let locker = {
+      product_id: this.selectedProduct.product_id,
+      style_id:     this.selectedProduct.productstyles[this.styleIndex].id,
+      design_id: currentDesign[0].id,
+      custom_logos: this.customLogos,
+      text:'',
+      colors:''
+    }
+    this.$store.dispatch("SAVE_TO_LOCKER", locker);
   }
 }
 </script>
