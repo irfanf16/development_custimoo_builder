@@ -34,6 +34,13 @@ const Product:Module<any, any> = {
       await http.get("style/information/"+paylod).then((res:any)=>{
         commit('SET_MODELS', res.data);
       });
+    },
+    SAVE_TO_LOCKER({commit}, payload){
+      http.post("save/product/locker", payload).then((res) => {
+        if (res.status == 201){
+          console.log(res.data.message);
+        }
+      });
     }
   }
 }
