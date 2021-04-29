@@ -478,10 +478,12 @@
         width: 100%;
         overflow-x: auto;
         white-space: nowrap;
+        padding-top: 7px;
         @media only screen and (min-width: 992px){
             width: 100%;
             overflow-x: hidden;
             white-space: normal;
+            padding-top: 0;
         }
         .products-block{
             flex: 0 0 22%;
@@ -497,8 +499,8 @@
             }
             .image-holder{
                 position: relative;
-                overflow: hidden;
                 margin: 0 0 15px;
+                @media only screen and (min-width: 992px){overflow: hidden;}
                 img{
                     display: block;
                     max-width: 100%;
