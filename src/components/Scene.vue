@@ -1,7 +1,11 @@
 <template>
   <div style="display: flex; justify-content: center;">
-    <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
-    <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
+      <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    </a>
+    <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}">
+      <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    </a>
   </div>
 </template>
 
@@ -49,6 +53,7 @@ export default class Scene extends Vue {
   private mounted = false
   private frontModel: any
   private backModel: any
+  private showSmall = {front: false, back: this.manageComponents.mobileScreen}
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -56,7 +61,9 @@ export default class Scene extends Vue {
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
   }
-
+  get manageComponents(): Record<any, any> {
+    return this.$store.getters.getManageComponents
+  }
   @Watch('customLogos', {
     immediate: true, deep: true
   })
@@ -129,6 +136,7 @@ export default class Scene extends Vue {
             if(!this.backCanvas) {
               backLogosCount = self.customLogos.filter((item) => { return item.side == 'back'}).length
             }
+            console.log('in change event')
             if(self.logosLimit && self.customLogoObjects.length < self.logosLimit - backLogosCount) {
               self.addLogos([finalLogo])
             }else if(!self.logosLimit) {
@@ -270,7 +278,8 @@ export default class Scene extends Vue {
     })
   }
 
-  public async addLogos(logos: [Record<any, any>]) {
+  public addLogos(logos: [Record<any, any>]) {
+    console.log('add logo call')
     const self = this
     logos.forEach((logo: Record<any, any>) => {
       let model = self.frontModel
@@ -329,6 +338,18 @@ export default class Scene extends Vue {
       }
     });
     this.frontCanvas.renderAll()
+  }
+
+  public setShowSmall(side: string) {
+    if(this.manageComponents.mobileScreen && this.backCanvas) {
+      if(side == 'back') {
+        Vue.set(this.showSmall, 'back', true)
+        Vue.set(this.showSmall, 'front', false)
+      } else {
+        Vue.set(this.showSmall, 'front', true)
+        Vue.set(this.showSmall, 'back', false)
+      }
+    }
   }
 }
 </script>

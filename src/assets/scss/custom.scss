@@ -298,10 +298,13 @@ a:hover{color: #219f84;}
                 padding: 0.5rem;
             }
             @media only screen and (min-width: 1360px){
-                font-size: 12px;
+                font-size: 11px;
                 padding: 0.5rem 1rem;
             }
-            @media only screen and (min-width: 1550px){padding: 0.5rem 1.3rem;}
+            @media only screen and (min-width: 1550px){
+                padding: 0.5rem 1.3rem;
+                font-size: 12px;
+            }
             &:hover{color: #189076;}
             &.active{
                 border: none;
@@ -563,7 +566,7 @@ a:hover{color: #219f84;}
             padding: 0.2rem;
             border-radius: 50%;
             font-size: 1.6rem;
-            line-height: 1.1;
+            line-height: 1;
             margin: 14px 0 0;
             float: right;
             @media only screen and (min-width: 992px){
@@ -900,6 +903,7 @@ a:hover{color: #219f84;}
         .nav-tabs{
           position: static;
           padding-bottom: 0;
+          border-top: 0;
           .nav-link{
               font-size: 12px;
               font-weight: 400;
@@ -915,6 +919,14 @@ a:hover{color: #219f84;}
                   border-bottom: 2px solid #219F84;
               }
           }
+        }
+    }
+    .color-tabs{
+        .card-body{
+            padding: 0 1.25rem;
+            @media only screen and (min-width: 992px){
+                padding: 1.25rem;
+            }
         }
     }
 }
@@ -989,10 +1001,14 @@ a:hover{color: #219f84;}
 
 .customization-area{
     width: 100%;
-    padding-bottom: 20px;
+    padding-top: 20px;
+    padding-bottom: 120px;
+    position: relative;
     min-height: 70vh;
     max-height: 100vh;
-    position: relative;
+    @media only screen and (min-width: 992px){
+        padding-bottom: 20px;
+    }
     .continue-btn-holder{
         .btn{font-weight: 600;}
         .back-btn{
@@ -1421,7 +1437,7 @@ a:hover{color: #219f84;}
         height: auto !important;
     }
     .canvas-container{
-        width: 100px !important;
+        width: 80px !important;
         height: 100px !important;
       }
 }
@@ -1429,27 +1445,50 @@ a:hover{color: #219f84;}
     .image-holder{
         .canvas-container{
             height: 100px !important;
-            width: 100px !important;
+            width: 70px !important;
             .canvas{
                 width: 100% !important;
                 height: auto !important;
                 top: 50% !important;
                 transform: translateY(-50%);
             }
+            .upper-canvas{z-index: -1;}
         }
     }
 }
 .preview-section{
     .image-holder{
         width: 100%;
+        @media only screen and (max-width: 991px){width: 80%;}
         .canvas-container{
-            flex: 0 0 48%;
-            max-width: 48%;
-            width: 48% !important;
+            flex: 0 0 100%;
+            max-width: 100%;
+            width: 100% !important;
+            height: auto !important;
             .canvas{
               width: 100% !important;
               height: auto !important;
             }
+        }
+        .show-small{
+            max-width: 70px;
+            position: absolute;
+            right: 0;
+            top: 10px;
+            z-index: 1;
+            &:before{
+                position: absolute;
+                content: '';
+                left: 0;
+                top: 0;
+                background: #DCF0EC url('~@/assets/images/sync-alt.png') no-repeat 50% 50% / 10px;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                color: #219F84;
+                z-index: 1;
+            }
+            .upper-canvas{z-index: -1;}
         }
     }
 }
