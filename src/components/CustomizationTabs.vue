@@ -1,16 +1,16 @@
 <template>
   <div>
   <div class="customization-tabs">
-    <button class="tab-close-btn d-lg-none"></button>
     <b-tabs>
       <b-tab v-if="selectedProduct.is_logo_allowed == 1">
+        <button @click="setHideTab('logo', !hideTab.logo)" class="tab-close-btn d-lg-none"></button>
         <template #title>
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
           </div>
           Logo
         </template>
-        <div class="logo-placement-tabs">
+        <div class="logo-placement-tabs" v-if="hideTab.logo">
           <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting" />
         </div>
       </b-tab>
@@ -148,6 +148,18 @@ export default class CustomizationProcess extends Vue {
   }
   public async getModels(){
     await this.$store.dispatch("getModels", this.selectedProduct.product_id);
+  }
+
+  public hideTab = {
+    logoHide: false,
+    colorHide: true,
+    textHide: true,
+    styleHide: true,
+    teamHide: true
+  }
+
+  public setHideTab(index: string, value: boolean) {
+    Vue.set(this.hideTab, index, value)
   }
 
 }
