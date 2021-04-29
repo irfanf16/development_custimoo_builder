@@ -22,8 +22,6 @@
     private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
 
     get selectedProduct(): Record<any, any>{
-      console.log("in preview");
-      console.log(this.$store.getters.getSelectedProduct);
       return this.$store.getters.getSelectedProduct
     }
     get styleIndex():number{

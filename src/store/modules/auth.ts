@@ -3,10 +3,12 @@ import {noTokenRequest} from "@/httpCommon";
 import { Module } from "vuex";
 const Auth:Module<any, any> = {
   state:{
-    token:''
+    token:'',
+    jwtToken:true
   },
   getters:{
-    isAuthenticated: (state: any) => state.token || localStorage.getItem("access_token")
+    isAuthenticated: (state: any) => state.token || localStorage.getItem("access_token"),
+    isCustomerAuthenticated: (state: any) => state.jwtToken
   },
   mutations:{
     AUTH_SUCCESS(state: any, payload){

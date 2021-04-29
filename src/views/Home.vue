@@ -28,7 +28,7 @@
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
                   <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
-                  <LockerRoomModal/>
+                   <LockerRoomModal v-if="isCustomerAuthenticated"/>
                   <b-button variant="outline-secondary" @click="saveToLocker">Save to locker room</b-button>
                   <b-button variant="outline-secondary">Buy Now</b-button>
                 </div>
@@ -130,6 +130,9 @@ export default class Home extends Vue {
 
   get isAuthenticated(): boolean {
     return this.$store.getters.isAuthenticated
+  }
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
   }
 
   get categories(): [] {
@@ -254,18 +257,23 @@ export default class Home extends Vue {
     });
   }
   public saveToLocker(){
-    const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-      return item.design_show
-    })
-    let locker = {
-      product_id: this.selectedProduct.product_id,
-      style_id:     this.selectedProduct.productstyles[this.styleIndex].id,
-      design_id: currentDesign[0].id,
-      custom_logos: this.customLogos,
-      text:'',
-      colors:''
+    if (this.isCustomerAuthenticated) {
+      const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+        return item.design_show
+      })
+      let locker = {
+        product_id: this.selectedProduct.product_id,
+        style_id:     this.selectedProduct.productstyles[this.styleIndex].id,
+        design_id: currentDesign[0].id,
+        custom_logos: this.customLogos,
+        text:'',
+        colors:''
+      }
+      console.log(this.customLogos);
+      // this.$store.dispatch("SAVE_TO_LOCKER", locker);
+    }else{
+      alert("please login first");
     }
-    this.$store.dispatch("SAVE_TO_LOCKER", locker);
   }
 }
 </script>
