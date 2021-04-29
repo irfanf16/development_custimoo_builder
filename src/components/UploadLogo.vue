@@ -49,6 +49,9 @@ import {http} from "@/httpCommon"
 })
 export default class UploadLogo extends Vue {
   @Prop({required: true}) customLogoIndex!: any
+  get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
+  }
 
   @Watch('logoUrl', {
     immediate: true, deep: true
@@ -115,6 +118,7 @@ export default class UploadLogo extends Vue {
       }
     }
     fd.append('file', img)
+    fd.append('product_id', this.selectedProduct.product_id)
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
         this.logoUrl = this.apiBaseUrl + '/' + resp.data.file.logo_url
