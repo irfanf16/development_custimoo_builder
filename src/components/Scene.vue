@@ -136,7 +136,7 @@ export default class Scene extends Vue {
             if(!this.backCanvas) {
               backLogosCount = self.customLogos.filter((item) => { return item.side == 'back'}).length
             }
-            console.log('in change event')
+
             if(self.logosLimit && self.customLogoObjects.length < self.logosLimit - backLogosCount) {
               self.addLogos([finalLogo])
             }else if(!self.logosLimit) {
@@ -212,12 +212,6 @@ export default class Scene extends Vue {
     const timer = setInterval(() => {
       if(model && texture) {
         canvas.add(texture)
-        self.logoObjects.forEach((logoObject) => {
-          canvas.add(logoObject)
-        })
-        self.customLogoObjects.forEach((logoObject) => {
-          canvas.add(logoObject)
-        })
         canvas.add(model)
 
         canvas.viewportCenterObject(texture)
@@ -279,7 +273,6 @@ export default class Scene extends Vue {
   }
 
   public addLogos(logos: [Record<any, any>]) {
-    console.log('add logo call')
     const self = this
     logos.forEach((logo: Record<any, any>) => {
       let model = self.frontModel
