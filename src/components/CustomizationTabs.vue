@@ -1,6 +1,7 @@
 <template>
   <div>
   <div class="customization-tabs">
+    <button class="tab-close-btn d-lg-none"></button>
     <b-tabs>
       <b-tab v-if="selectedProduct.is_logo_allowed == 1">
         <template #title>
@@ -148,6 +149,20 @@ export default class CustomizationProcess extends Vue {
   public async getModels(){
     await this.$store.dispatch("getModels", this.selectedProduct.product_id);
   }
+
 }
 
 </script>
+
+<style lang="scss" scoped>
+  .tab-close-btn{
+    display: block;
+    width: 100%;
+    max-width: 100px;
+    margin: 10px auto 0;
+    height: 4px;
+    background: #DFE5E8;
+    border-radius: 10px;
+    border: none;
+  }
+</style>

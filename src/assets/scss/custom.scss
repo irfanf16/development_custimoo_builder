@@ -920,6 +920,14 @@ a:hover{color: #219f84;}
           }
         }
     }
+    .color-tabs{
+        .card-body{
+            padding: 0 1.25rem;
+            @media only screen and (min-width: 992px){
+                padding: 1.25rem;
+            }
+        }
+    }
 }
 .color-holder{
     margin: 20px 0 0;
@@ -993,9 +1001,10 @@ a:hover{color: #219f84;}
 .customization-area{
     width: 100%;
     padding-bottom: 20px;
+    position: relative;
     min-height: 70vh;
     max-height: 100vh;
-    position: relative;
+    
     .continue-btn-holder{
         .btn{font-weight: 600;}
         .back-btn{
@@ -1449,6 +1458,12 @@ a:hover{color: #219f84;}
             flex: 0 0 48%;
             max-width: 48%;
             width: 48% !important;
+            height: auto !important;
+            @media only screen and (min-width: 992px){
+                flex: 0 0 48%;
+                max-width: 48%;
+                width: 48% !important;
+            }
             .canvas{
               width: 100% !important;
               height: auto !important;
