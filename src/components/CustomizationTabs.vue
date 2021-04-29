@@ -3,14 +3,14 @@
   <div class="customization-tabs">
     <b-tabs>
       <b-tab v-if="selectedProduct.is_logo_allowed == 1">
-        <button @click="setHideTab('logo', !hideTab.logo)" class="tab-close-btn d-lg-none"></button>
+        <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
         <template #title>
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
           </div>
           Logo
         </template>
-        <div class="logo-placement-tabs" v-if="hideTab.logo">
+        <div class="logo-placement-tabs" v-if="hideTab.logoHide">
           <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting" />
         </div>
       </b-tab>
@@ -128,7 +128,7 @@ import {http} from "@/httpCommon";
   },
 })
 export default class CustomizationProcess extends Vue {
-  get manageComponents(): [] {
+  get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
   }
   get selectedProduct(): Record<any, any>{
@@ -151,11 +151,11 @@ export default class CustomizationProcess extends Vue {
   }
 
   public hideTab = {
-    logoHide: false,
-    colorHide: true,
-    textHide: true,
-    styleHide: true,
-    teamHide: true
+    logoHide: !this.manageComponents.mobileScreen,
+    colorHide: !this.manageComponents.mobileScreen,
+    textHide: !this.manageComponents.mobileScreen,
+    styleHide: !this.manageComponents.mobileScreen,
+    teamHide: !this.manageComponents.mobileScreen
   }
 
   public setHideTab(index: string, value: boolean) {
