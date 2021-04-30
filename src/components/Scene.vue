@@ -1,7 +1,11 @@
 <template>
   <div style="display: flex; justify-content: center;">
-    <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
-    <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
+      <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    </a>
+    <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}">
+      <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+    </a>
   </div>
 </template>
 
@@ -50,6 +54,7 @@ export default class Scene extends Vue {
   private mounted = false
   private frontModel: any
   private backModel: any
+  private showSmall = {front: false, back: this.manageComponents.mobileScreen}
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -63,21 +68,28 @@ export default class Scene extends Vue {
     return this.$store.getters.getCustomTexts
   }
 
+  get manageComponents(): Record<any, any> {
+    return this.$store.getters.getManageComponents
+  }
+
   @Watch('customLogos', {
     immediate: true, deep: true
   })
   customLogosChanged(newVal: [Record<any, any>]) {
-    if (this.mounted) {
+
+    if(this.mounted && this.logoAllowed) {
+
       const self = this
-      this.customLogoObjects.forEach((logoObject) => {
+      this.customLogoObjects.forEach((logoObject, index) => {
         let deleteLogo = true
         newVal.forEach((logo: Record<any, any>) => {
-          let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
-          if (logoUrl == logoObject._element.src) {
+          let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
+          if(logoUrl == logoObject._element.src && logo.side == logoObject.side){
             deleteLogo = false
           }
         })
-        if (deleteLogo) {
+        if(deleteLogo) {
+          this.customLogoObjects.splice(index, 1)
           self.frontCanvas.remove(logoObject)
           if (self.backCanvas) {
             self.backCanvas.remove(logoObject)
@@ -85,33 +97,61 @@ export default class Scene extends Vue {
         }
       })
 
-      newVal.forEach((logo) => {
-        if ((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
+      newVal.forEach((logo: Record<any, any>, index: number) => {
+        if((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
           let addLogo = true
           this.customLogoObjects.forEach((logoObject) => {
             let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
             if (logoUrl == logoObject._element.src) {
               addLogo = false
-              logoObject.center() //add center because all events only trigger if use it in fabric js.
 
-              if (logoObject.left != logo.x_axis || logoObject.top != logo.y_axis) {
+              if (logo.action == 'drag') {
+                logoObject.center() //add center because all events only trigger if use it in fabric js.
                 logoObject.set({
-                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis - 5,
-                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis - 5
+                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
                 })
-              }
-
-              logoObject.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
-              logoObject.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
-
-              if (logoObject.angle != logo.rotation) {
+              }else if(logo.action == 'scale' || logo.action == 'scaleX' || logo.action == 'scaleY'){
+                logoObject.center()
+                logoObject.set({
+                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
+                })
+                logoObject.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
+                logoObject.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
+              } else if(logo.action == 'rotate') {
+                logoObject.center()
+                logoObject.set({
+                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
+                })
                 logoObject.rotate(logo.rotation as number)
               }
               logoObject.setCoords()
             }
           })
           if (addLogo && logo.url) {
-            self.addLogos([logo])
+            const finalLogo = JSON.parse(JSON.stringify(logo))
+            if (addLogo && logo.url) {
+              if (!logo.action && self.logosSettings[index]) {
+                finalLogo.width = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].width
+                finalLogo.height = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].height
+                finalLogo.x_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].x_axis
+                finalLogo.y_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].y_axis
+                finalLogo.rotation = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].rotation
+              }
+            }
+
+            let backLogosCount = 0
+            if(!this.backCanvas) {
+              backLogosCount = self.customLogos.filter((item) => { return item.side == 'back'}).length
+            }
+
+            if(self.logosLimit && self.customLogoObjects.length < self.logosLimit - backLogosCount) {
+              self.addLogos([finalLogo])
+            }else if(!self.logosLimit) {
+              self.addLogos([finalLogo])
+            }
           }
         }
       })
@@ -222,15 +262,29 @@ export default class Scene extends Vue {
         self.customTextObjects.forEach((textObject) => {
           canvas.add(textObject)
         })
-        canvas.add(model)
 
+        canvas.add(model)
         canvas.viewportCenterObject(texture)
         canvas.viewportCenterObject(model)
         canvas.renderAll()
 
         let logos = this.logos
-        if (this.customLogos) {
-          logos = logos.concat(this.customLogos) as [Record<any, any>]
+
+        if(this.customLogos && this.logoAllowed){
+          let customLogos = this.customLogos
+          if(this.logosLimit) {
+            customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
+          }
+          customLogos.forEach((item: Record<any, any>, index: number) => {
+            if(!item.action && self.logosSettings[index]) {
+              item.width = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].width
+              item.height = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].height
+              item.x_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].x_axis
+              item.y_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].y_axis
+              item.rotation = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].rotation
+            }
+          })
+          logos = logos.concat(customLogos) as [Record<any, any>]
         }
         if (logos.length) {
           logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
@@ -274,12 +328,14 @@ export default class Scene extends Vue {
             value: e.target.angle
           })
         }
-        this.mounted = false
+        self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'action', value: e.action })
+
+        // this.mounted = false
       }
     })
   }
 
-  public async addLogos(logos: [Record<any, any>]) {
+  public addLogos(logos: [Record<any, any>]) {
     const self = this
     logos.forEach((logo: Record<any, any>) => {
       let model = self.frontModel
@@ -292,19 +348,21 @@ export default class Scene extends Vue {
       let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
       fabric.Image.fromURL(logoUrl, (img: any) => {
         img.set({
-          left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-          top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
-          scaleX: self.canvasWidth / self.mainCanvasWidth * logo.width / img.width,
-          scaleY: self.canvasHeight / self.mainCanvasHeight * logo.height / img.height,
-          angle: logo.rotation as number,
-          centeredScaling: true,
-          selectable: logo.haveControls,
-          hasControls: logo.haveControls,
-          hasBorders: logo.haveControls,
-          evented: logo.haveControls
-        })
+            left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+            top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
+            scaleX: self.canvasWidth / self.mainCanvasWidth * logo.width / img.width,
+            scaleY: self.canvasHeight / self.mainCanvasHeight * logo.height / img.height,
+            angle: logo.rotation as number,
+            centeredScaling: true,
+            selectable: logo.haveControls,
+            hasControls: logo.haveControls,
+            hasBorders: logo.haveControls,
+            evented: logo.haveControls,
+            globalCompositeOperation: 'source-atop'
+          })
 
-        if (logo.customLogo) {
+        if(logo.customLogo){
+          img.side = logo.side
           self.customLogoObjects.push(img)
         } else {
           self.logoObjects.push(img)
@@ -356,6 +414,18 @@ export default class Scene extends Vue {
       }
     });
     this.frontCanvas.renderAll()
+  }
+
+  public setShowSmall(side: string) {
+    if(this.manageComponents.mobileScreen && this.backCanvas) {
+      if(side == 'back') {
+        Vue.set(this.showSmall, 'back', true)
+        Vue.set(this.showSmall, 'front', false)
+      } else {
+        Vue.set(this.showSmall, 'front', true)
+        Vue.set(this.showSmall, 'back', false)
+      }
+    }
   }
 }
 </script>

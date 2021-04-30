@@ -32,12 +32,10 @@ export default {
       return this.$store.getters.getProducts
     }
   },
-  products() {
-    return this.first + ' ' + this.last
-  },
   methods: {
     productDesigns: function (index) {
       this.$store.commit('CHANGE_STYLE_INDEX', 0);
+      this.$store.dispatch("getModels", this.products[index].product_id);
       this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
     },
     loadMoreProduct: function (currentIndex) {

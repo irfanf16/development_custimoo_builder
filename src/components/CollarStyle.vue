@@ -16,19 +16,11 @@
                       </template>
                     </div>
                 </div>
-                <div class="choose-stuff">
+                <div class="choose-stuff" v-if="selectedProduct.addons.length > 0">
                     <h2 class="fw-bold mb-3 fz-18">Choose Stuff</h2>
-                    <div class="stuff-row">
-                        <b-form-checkbox size="lg">Fight strap</b-form-checkbox>
-                        <span class="charges">+$5</span>
-                    </div>
-                    <div class="stuff-row">
-                        <b-form-checkbox size="lg">Embroidery</b-form-checkbox>
-                        <span class="charges">+$15</span>
-                    </div>
-                    <div class="stuff-row">
-                        <b-form-checkbox size="lg">Capt Patch</b-form-checkbox>
-                        <span class="charges">+$50</span>
+                    <div class="stuff-row" v-for="(item, i) in selectedProduct.addons" :key="i">
+                        <b-form-checkbox size="lg">{{ item.addon.name }}</b-form-checkbox>
+                        <span class="charges">+${{item.addon.price}}</span>
                     </div>
                 </div>
             </div>
@@ -41,34 +33,17 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 
     @Component<CollarStyle>({
-      mounted() {
-        this.getModels()
+      mounted(){
+        console.log(this.productModels);
       }
     })
 
     export default class CollarStyle extends Vue {
       private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
-      public productModels:any[] = []
+      @Prop({required: true}) productModels!: any
+
       get selectedProduct(): Record<any, any>{
         return this.$store.getters.getSelectedProduct
-      }
-
-      public async getModels(){
-        await http.get("style/information/"+ this.selectedProduct.product_id).then((res:any)=>{
-          this.productModels = res.data;
-        });
-      }
-      get styleModels(): number[]{
-        let self = this;
-        let styleModels: number[] = []
-        for (let item in this.selectedProduct.productstyles){
-          for (let data in this.selectedProduct.productstyles[item].style_models){
-            if (!styleModels.includes(this.selectedProduct.productstyles[item].style_models[data].id)) {
-              styleModels.push(this.selectedProduct.productstyles[item].style_models[data].id);
-            }
-          }
-        }
-        return styleModels;
       }
       get styleIndex():number{
         return  this.$store.getters.getCurrentStyleIndex;
@@ -93,13 +68,11 @@ import {http} from "@/httpCommon";
               if (index ==0 ){
                 Vue.set(this.selectedProduct.productstyles[i].productdesigns[0], 'design_show', 1)
               }else{
-                this.selectedProduct.productstyles[i].productdesigns[i].design_show = 0;
+                Vue.set(this.selectedProduct.productstyles[i].productdesigns[index], 'design_show', 0);
               }
             })
           }
-
         }
-
         this.$store.commit('CHANGE_STYLE_INDEX', i);
       }
     }
