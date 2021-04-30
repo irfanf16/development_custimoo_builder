@@ -38,9 +38,7 @@
           Text
         </template>
         <div class="d-none d-lg-block">
-          <CustomizationText />
-          <CustomizationText />
-          <CustomizationText />
+          <CustomizationText :productNames="selectedProduct.productnames" :productFonts="selectedProduct.namefonts" :fontsColors="fontsColors"/>
         </div>
         <div class="mobile-text-tabs d-lg-none">
           <b-tabs>
@@ -49,7 +47,7 @@
                 Player Name
               </template>
               <div>
-                <CustomizationText />
+<!--                <CustomizationText :productFonts="selectedProduct.namefonts" :fontsColors="fontsColors"/>-->
               </div>
             </b-tab>
             <b-tab>
@@ -57,7 +55,7 @@
                 Player Number
               </template>
               <div>
-                <CustomizationText />
+<!--                <CustomizationText :productFonts="selectedProduct.namefonts" :fontsColors="fontsColors"/>-->
               </div>
             </b-tab>
             <b-tab>
@@ -65,7 +63,7 @@
                 Player Name Or Number
               </template>
               <div>
-                <CustomizationText />
+<!--                <CustomizationText :productFonts="selectedProduct.namefonts" :fontsColors="fontsColors"/>-->
               </div>
             </b-tab>
           </b-tabs>
@@ -123,6 +121,7 @@ import ColorTabs from '@/components/ColorTabs.vue'
   mounted() {
     this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
+    this.fontsColorsManipulation()
   },
 })
 export default class CustomizationProcess extends Vue {
@@ -133,12 +132,19 @@ export default class CustomizationProcess extends Vue {
     return this.$store.getters.getSelectedProduct
   }
   public productColors: any[] = []
+  public fontsColors: any[] = []
 
   public productColorsManipulation(){
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
       colors.color_text = JSON.parse(colors.color_text)
       colors.selectedColor = ""
       this.productColors = this.productColors.concat(colors)
+    })
+  }
+
+  public fontsColorsManipulation(){
+    this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
+      this.fontsColors = JSON.parse(colors.color_text)
     })
   }
 }

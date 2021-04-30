@@ -6,14 +6,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
-import { fabric } from 'fabric'
-import { Group } from 'fabric/fabric-impl'
+import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
+import {fabric} from 'fabric'
+import {Group} from 'fabric/fabric-impl'
 
 @Component<Scene>({
-  mounted () {
+  mounted() {
     this.loadScene(this.front, 'front')
-    if(this.back) {
+    if (this.back) {
       this.loadScene(this.back, 'back')
     }
 
@@ -44,8 +44,9 @@ export default class Scene extends Vue {
   private frontTexture !: any
   private backTexture !: any
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
-  private logoObjects: any[] =[]
-  private customLogoObjects: any[] =[]
+  private logoObjects: any[] = []
+  private customLogoObjects: any[] = []
+  private customTextObjects: any[] = []
   private mounted = false
   private frontModel: any
   private backModel: any
@@ -53,34 +54,39 @@ export default class Scene extends Vue {
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
   }
+
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
+  }
+
+  get customTexts(): [Record<any, any>] {
+    return this.$store.getters.getCustomTexts
   }
 
   @Watch('customLogos', {
     immediate: true, deep: true
   })
   customLogosChanged(newVal: [Record<any, any>]) {
-    if(this.mounted) {
+    if (this.mounted) {
       const self = this
       this.customLogoObjects.forEach((logoObject) => {
         let deleteLogo = true
         newVal.forEach((logo: Record<any, any>) => {
-          let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
-          if(logoUrl == logoObject._element.src){
+          let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+          if (logoUrl == logoObject._element.src) {
             deleteLogo = false
           }
         })
-        if(deleteLogo) {
+        if (deleteLogo) {
           self.frontCanvas.remove(logoObject)
-          if(self.backCanvas) {
+          if (self.backCanvas) {
             self.backCanvas.remove(logoObject)
           }
         }
       })
 
       newVal.forEach((logo) => {
-        if((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
+        if ((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
           let addLogo = true
           this.customLogoObjects.forEach((logoObject) => {
             let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
@@ -113,22 +119,54 @@ export default class Scene extends Vue {
     this.mounted = true
   }
 
-  public loadScene (ImageData: any, side: string) {
+  @Watch('customTexts', {
+    immediate: true, deep: true
+  })
+  customTextsChanged(newVal: [Record<any, any>]) {
+    if (this.mounted) {
+      const self = this
+      newVal.forEach((text) => {
+        if ((text.side == 'back' && self.backCanvas) || text.side == 'front') {
+          let addText = true
+          this.customTextObjects.forEach((textObject) => {
+            addText = false
+            textObject.center() //add center because all events only trigger if use it in fabric js.
+            if (textObject.left != text.x_axis || textObject.top != text.y_axis) {
+              textObject.set({
+                left: self.canvasWidth / self.mainCanvasWidth * text.x_axis - 5,
+                top: self.canvasHeight / self.mainCanvasHeight * text.y_axis - 5
+              })
+            }
+            if (textObject.angle != text.rotation) {
+              textObject.rotate(text.rotation as number)
+            }
+            textObject.setCoords()
+          })
+          if (addText) {
+            self.addTexts([text])
+          }
+        }
+      })
+    }
+    this.mounted = true
+  }
+
+  public loadScene(ImageData: any, side: string) {
     let element = this.$refs.front as HTMLCanvasElement
-    if(side === 'back'){
+    if (side === 'back') {
       element = this.$refs.back as HTMLCanvasElement;
     }
     let canvas = new fabric.Canvas(element)
-    if(side == 'back') {
+    if (side == 'back') {
       this.backCanvas = canvas
-    }else {
+    } else {
       this.frontCanvas = canvas
     }
 
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
     let model: any
-    fabric.Image.fromURL(ImageData.modelUrl,  (img: any) => {
+    fabric.Image.fromURL(ImageData.modelUrl, (img: any) => {
       img.scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
         selectable: false,
@@ -138,16 +176,15 @@ export default class Scene extends Vue {
       });
       img.center().setCoords()
       model = img
-      if(side == 'back'){
+      if (side == 'back') {
         self.backModel = img
-      }else{
+      } else {
         self.frontModel = img
       }
     })
 
     let texture: any
     fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
-      // console.log(objects)
       const img = fabric.util.groupSVGElements(objects) as Group
       img.scaleToHeight(canvas.getHeight() - 10).set({
         hasControls: false,
@@ -164,9 +201,9 @@ export default class Scene extends Vue {
       // })
       img.center().setCoords();
       texture = img
-      if(side === 'back'){
+      if (side === 'back') {
         self.backTexture = texture
-      }else{
+      } else {
         self.frontTexture = texture
       }
     })
@@ -174,13 +211,16 @@ export default class Scene extends Vue {
     const self = this
 
     const timer = setInterval(() => {
-      if(model && texture) {
+      if (model && texture) {
         canvas.add(texture)
         self.logoObjects.forEach((logoObject) => {
           canvas.add(logoObject)
         })
         self.customLogoObjects.forEach((logoObject) => {
           canvas.add(logoObject)
+        })
+        self.customTextObjects.forEach((textObject) => {
+          canvas.add(textObject)
         })
         canvas.add(model)
 
@@ -189,13 +229,21 @@ export default class Scene extends Vue {
         canvas.renderAll()
 
         let logos = this.logos
-        if(this.customLogos){
+        if (this.customLogos) {
           logos = logos.concat(this.customLogos) as [Record<any, any>]
         }
-        if(logos.length) {
+        if (logos.length) {
           logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
           if (logos.length) {
             this.addLogos(logos)
+          }
+        }
+
+        let texts = this.customTexts
+        if (texts.length) {
+          texts = texts.filter((text: Record<any, any>) => text.side == side) as [Record<any, any>]
+          if (texts.length) {
+            this.addTexts(texts)
           }
         }
 
@@ -211,16 +259,20 @@ export default class Scene extends Vue {
   public objectMove(e: any) {
     const self = this;
     this.customLogos.forEach((logo, index) => {
-      let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
-      if(logoUrl == e.target._element.src){
-        if(e.action == 'drag') {
-          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'x_axis', value: e.target.left })
-          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'y_axis', value: e.target.top })
-        }else if(e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'scaleX', value: e.target.scaleX })
-          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'scaleY', value: e.target.scaleY })
-        }else if(e.action == 'rotate') {
-          self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'rotation', value: e.target.angle })
+      let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+      if (logoUrl == e.target._element.src) {
+        if (e.action == 'drag') {
+          self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'x_axis', value: e.target.left})
+          self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'y_axis', value: e.target.top})
+        } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
+          self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'scaleX', value: e.target.scaleX})
+          self.$store.dispatch('updateCustomLogoAttribute', {index: index, attribute: 'scaleY', value: e.target.scaleY})
+        } else if (e.action == 'rotate') {
+          self.$store.dispatch('updateCustomLogoAttribute', {
+            index: index,
+            attribute: 'rotation',
+            value: e.target.angle
+          })
         }
         this.mounted = false
       }
@@ -237,24 +289,24 @@ export default class Scene extends Vue {
         model = self.backModel
       }
       logo.haveControls = Boolean(logo.haveControls)
-      let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
+      let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
       fabric.Image.fromURL(logoUrl, (img: any) => {
         img.set({
-            left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-            top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
-            scaleX: self.canvasWidth / self.mainCanvasWidth * logo.width / img.width,
-            scaleY: self.canvasHeight / self.mainCanvasHeight * logo.height / img.height,
-            angle: logo.rotation as number,
-            centeredScaling: true,
-            selectable: logo.haveControls,
-            hasControls: logo.haveControls,
-            hasBorders: logo.haveControls,
-            evented: logo.haveControls
-          })
+          left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+          top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
+          scaleX: self.canvasWidth / self.mainCanvasWidth * logo.width / img.width,
+          scaleY: self.canvasHeight / self.mainCanvasHeight * logo.height / img.height,
+          angle: logo.rotation as number,
+          centeredScaling: true,
+          selectable: logo.haveControls,
+          hasControls: logo.haveControls,
+          hasBorders: logo.haveControls,
+          evented: logo.haveControls
+        })
 
-        if(logo.customLogo){
+        if (logo.customLogo) {
           self.customLogoObjects.push(img)
-        }else {
+        } else {
           self.logoObjects.push(img)
         }
 
@@ -265,10 +317,31 @@ export default class Scene extends Vue {
     })
   }
 
+  public async addTexts(texts: [Record<any, any>]) {
+    const self = this
+    texts.forEach((text: Record<any, any>) => {
+      let model = self.frontModel
+      let canvas = self.frontCanvas
+      if (text.side == 'back') {
+        canvas = self.backCanvas
+        model = self.backModel
+      }
+      let textBox = new fabric.Text(text.text, {
+        left: 150,
+        top: 150,
+        width: 150,
+        fontSize: 20
+      })
+      self.customTextObjects.push(textBox)
+      canvas.add(textBox).setActiveObject(textBox)
+      canvas.renderAll()
+    })
+  }
+
   public changeColor() {
     const self = this
 
-    const svgGroupIds = this.frontTexture.getObjects().map((item : Record<any, any>) => item.id)
+    const svgGroupIds = this.frontTexture.getObjects().map((item: Record<any, any>) => item.id)
       .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
 
     let colorsByGroup = []
@@ -276,10 +349,9 @@ export default class Scene extends Vue {
     svgGroupIds.forEach((groupId: string) => {
       colorsByGroup.push({id: groupId, color: self.fillColors[useColorIndex].color})
     })
-    console.log(svgGroupIds)
 
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
-      if(item.id == 'Base') {
+      if (item.id == 'Base') {
         item.set('fill', self.fillColors[0].color);
       }
     });
