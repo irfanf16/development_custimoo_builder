@@ -1,65 +1,6 @@
 <template>
-    <b-modal id="modal-center-lockerroom" centered scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
-        <b-tabs content-class="mt-3">
-            <b-tab title="Locker 1" active>
-                <div class="lockerroom-tabs">
-                    <div>
-                        <b-card no-body>
-                            <b-tabs card changed="currentTabs">
-                                <b-tab title="Products" active>
-                                    <LockerRoomProducts />
-                                </b-tab>
-                                <b-tab title="Assets">
-                                    <b-card-text>Tab contents 2</b-card-text>
-                                </b-tab>
-                                <b-tab title="Colors">
-                                    <b-card-text>Tab contents 2</b-card-text>
-                                </b-tab>
-                            </b-tabs>
-                        </b-card>
-                    </div>
-                </div>
-            </b-tab>
-            <b-tab title="Locker 2">
-                <div class="lockerroom-tabs">
-                    <div>
-                        <b-card no-body>
-                            <b-tabs card changed="currentTabs">
-                                <b-tab title="Products" active>
-                                    <LockerRoomProducts />
-                                </b-tab>
-                                <b-tab title="Assets">
-                                    <b-card-text>Tab contents 2</b-card-text>
-                                </b-tab>
-                                <b-tab title="Colors">
-                                    <b-card-text>Tab contents 2</b-card-text>
-                                </b-tab>
-                            </b-tabs>
-                        </b-card>
-                    </div>
-                </div>
-            </b-tab>
-            <b-tab title="Locker 3">
-                <div class="lockerroom-tabs">
-                    <div>
-                        <b-card no-body>
-                            <b-tabs card changed="currentTabs">
-                                <b-tab title="Products" active>
-                                    <LockerRoomProducts />
-                                </b-tab>
-                                <b-tab title="Assets">
-                                    <b-card-text>Tab contents 2</b-card-text>
-                                </b-tab>
-                                <b-tab title="Colors">
-                                    <b-card-text>Tab contents 2</b-card-text>
-                                </b-tab>
-                            </b-tabs>
-                        </b-card>
-                    </div>
-                </div>
-            </b-tab>
-        </b-tabs>
-        <!-- <div class="lockerroom-header">
+    <b-modal id="modal-center-addlockerroom" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
+        <div class="lockerroom-header">
             <div class="locker-opener">
                 <a href="#." class="arrow arrow-left"><font-awesome-icon :icon="['fas', 'arrow-left']" /></a>
                 <b-button variant="secondary" class="active">Locker 1</b-button>
@@ -70,10 +11,6 @@
             <div class="create-lockerroom">
                 <b-button class="create-btn" variant="secondary"><span>Create New </span>+</b-button>
             </div>
-        </div> -->
-        <div class="create-lockerroom">
-            <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
-            <CreateLockerRoomModal />
         </div>
     </b-modal>
 </template>
@@ -82,27 +19,12 @@
 
     import { Component, Vue } from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
-    import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
-    import Scene from "@/components/Scene.vue"
-    @Component<CustomizationPreviewProcess>({
+    @Component<AddLockerRoomModal>({
         components: {
-          LockerRoomProducts,
-          Scene,
-          CreateLockerRoomModal
+            LockerRoomProducts
         }
     })
-    export default class CustomizationPreviewProcess extends Vue {
-      private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
-      get getLockerProducts():Record<any, any>{
-        return this.$store.getters.getLockerProducts;
-      }
-      get products():[Record<any, any>]{
-        return this.$store.getters.getProducts
-      }
-      get lockers():Record<any, any>{
-        return  this.$store.getters.getLockers;
-      }
-    }
+    export default class AddLockerRoomModal extends Vue {}
 
 </script>
 
@@ -182,9 +104,7 @@
                 }
             }
         }
-        
-    }
-    .create-lockerroom{
+        .create-lockerroom{
             .btn{
                 padding: 0;
                 font-size: 24px;
@@ -216,13 +136,7 @@
                 }
             }
         }
-<<<<<<< HEAD
-    
-    
-</style>
-=======
     }
-
-
+    
+    
 </style>
->>>>>>> cee31bf28efa039e9313eb1b5a2dd08744507898
