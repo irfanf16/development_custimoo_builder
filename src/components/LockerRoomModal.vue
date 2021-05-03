@@ -36,12 +36,25 @@
 
     import { Component, Vue } from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
+    import Scene from "@/components/Scene.vue"
     @Component<CustomizationPreviewProcess>({
         components: {
-            LockerRoomProducts
+          LockerRoomProducts,
+          Scene
         }
     })
-    export default class CustomizationPreviewProcess extends Vue {}
+    export default class CustomizationPreviewProcess extends Vue {
+      private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
+      get getLockerProducts():Record<any, any>{
+        return this.$store.getters.getLockerProducts;
+      }
+      get products():[Record<any, any>]{
+        return this.$store.getters.getProducts
+      }
+      get lockers():Record<any, any>{
+        return  this.$store.getters.getLockers;
+      }
+    }
 
 </script>
 
@@ -124,6 +137,6 @@
             }
         }
     }
-    
-    
+
+
 </style>
