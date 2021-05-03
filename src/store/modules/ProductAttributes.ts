@@ -5,6 +5,7 @@ const ProductAttributes:Module<any, any> = {
   state: {
     categories: [],
     customLogos: [],
+    customTexts: [],
     isAssociation: false,
     styleIndex: 0
   },
@@ -35,7 +36,22 @@ const ProductAttributes:Module<any, any> = {
     },
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
-    }
+    },
+    customTexts(state: Record<any, any>, customText: Record<any, any>) {
+      if(customText){
+        Vue.set(state.customTexts, state.customTexts.length, customText)
+      }
+    },
+    customTextAttribute(state: Record<any, any>, customTextAttribute: Record<any, any>) {
+      if(customTextAttribute){
+        Vue.set(state.customTexts[customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
+      }
+    },
+    customTextsDelete(state: Record<any, any>, delCustomText: Record<any, any>) {
+      if(delCustomText){
+        state.customTexts.splice(delCustomText.index, 1)
+      }
+    },
   },
   getters: {
     getCategories: state => {
@@ -49,7 +65,10 @@ const ProductAttributes:Module<any, any> = {
     },
     getCurrentStyleIndex: state => {
       return state.styleIndex
-    }
+    },
+    getCustomTexts: state => {
+      return state.customTexts
+    },
   },
   actions: {
     setCategories({commit}){
@@ -71,7 +90,13 @@ const ProductAttributes:Module<any, any> = {
     },
     setIsAssociation({commit}, payload){
         commit('isAssociation', payload)
-    }
+    },
+    setCustomTexts({commit}, payload){
+      commit('customTexts', payload)
+    },
+    updateCustomTextAttribute({commit}, payload){
+      commit('customTextAttribute', payload)
+    },
   }
 }
 export default ProductAttributes;

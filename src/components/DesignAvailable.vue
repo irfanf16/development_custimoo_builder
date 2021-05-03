@@ -35,7 +35,6 @@ export default class DesignAvailable extends Vue {
   }
 
   public changeDesign(index: number) {
-    console.log(index);
     this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {
         Vue.set(design, 'design_show', 1)
