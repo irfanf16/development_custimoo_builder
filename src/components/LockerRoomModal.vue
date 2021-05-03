@@ -83,13 +83,26 @@
     import { Component, Vue } from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+    import Scene from "@/components/Scene.vue"
     @Component<CustomizationPreviewProcess>({
         components: {
-            LockerRoomProducts,
-            CreateLockerRoomModal
+          LockerRoomProducts,
+          Scene,
+          CreateLockerRoomModal
         }
     })
-    export default class CustomizationPreviewProcess extends Vue {}
+    export default class CustomizationPreviewProcess extends Vue {
+      private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
+      get getLockerProducts():Record<any, any>{
+        return this.$store.getters.getLockerProducts;
+      }
+      get products():[Record<any, any>]{
+        return this.$store.getters.getProducts
+      }
+      get lockers():Record<any, any>{
+        return  this.$store.getters.getLockers;
+      }
+    }
 
 </script>
 
@@ -203,6 +216,13 @@
                 }
             }
         }
+<<<<<<< HEAD
     
     
 </style>
+=======
+    }
+
+
+</style>
+>>>>>>> cee31bf28efa039e9313eb1b5a2dd08744507898
