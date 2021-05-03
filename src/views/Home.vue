@@ -27,7 +27,7 @@
             <div class="customization-preview-process w-100">
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
-                  <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
+                  <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom @click="getLockerRoomProducts">Locker room</b-button>
                    <LockerRoomModal v-if="isCustomerAuthenticated"/>
                   <b-button variant="outline-secondary" @click="saveToLocker" v-b-modal.modal-center-addlockerroom>Save to locker room</b-button>
                   <AddLockerRoomModal />
@@ -81,7 +81,6 @@ import ChooseInterest from '@/components/ChooseInterest.vue'
 import CustomizationTabs from '@/components/CustomizationTabs.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
-import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import {http} from "@/httpCommon"
 
 
@@ -93,8 +92,7 @@ import {http} from "@/httpCommon"
     ChooseInterest,
     CustomizationTabs,
     UploadLogo,
-    LockerRoomModal,
-    AddLockerRoomModal
+    LockerRoomModal
   },
   mounted() {
     if (this.isAuthenticated) {
@@ -158,6 +156,10 @@ export default class Home extends Vue {
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
   }
+  get getLockerProducts():Record<any, any>{
+    return this.$store.getters.getLockerProducts;
+  }
+
 
 
 
@@ -171,6 +173,7 @@ export default class Home extends Vue {
   }
 
   public showAdvanceCustomization() {
+    this.$store.dispatch("getLockers");
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
   }
@@ -265,6 +268,7 @@ export default class Home extends Vue {
         return item.design_show
       })
       let locker = {
+        room_id:1,
         product_id: this.selectedProduct.product_id,
         style_id:     this.selectedProduct.productstyles[this.styleIndex].id,
         design_id: currentDesign[0].id,
@@ -272,10 +276,14 @@ export default class Home extends Vue {
         text:'',
         colors:''
       }
-      console.log(this.customLogos);
-      // this.$store.dispatch("SAVE_TO_LOCKER", locker);
+      this.$store.dispatch("SAVE_TO_LOCKER", locker);
     }else{
       alert("please login first");
+    }
+  }
+  public async getLockerRoomProducts(){
+    if(this.isCustomerAuthenticated){
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS');
     }
   }
 }
