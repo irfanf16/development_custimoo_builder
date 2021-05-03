@@ -133,6 +133,7 @@ export default class UploadLogo extends Vue {
           localStorage.setItem('isAssociation', 'true')
         }
         this.hideModal()
+        this.$emit("logoChange")
       })
       .catch((e: any) => {
         console.log(e)
