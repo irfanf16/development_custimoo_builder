@@ -29,7 +29,8 @@
                 <div class="buttons-preview text-left">
                   <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
                    <LockerRoomModal v-if="isCustomerAuthenticated"/>
-                  <b-button variant="outline-secondary" @click="saveToLocker">Save to locker room</b-button>
+                  <b-button variant="outline-secondary" @click="saveToLocker" v-b-modal.modal-center-addlockerroom>Save to locker room</b-button>
+                  <AddLockerRoomModal />
                   <b-button variant="outline-secondary">Buy Now</b-button>
                 </div>
                 <ul class="preview-header-icons">
@@ -80,6 +81,7 @@ import ChooseInterest from '@/components/ChooseInterest.vue'
 import CustomizationTabs from '@/components/CustomizationTabs.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
+import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import {http} from "@/httpCommon"
 
 
@@ -91,7 +93,8 @@ import {http} from "@/httpCommon"
     ChooseInterest,
     CustomizationTabs,
     UploadLogo,
-    LockerRoomModal
+    LockerRoomModal,
+    AddLockerRoomModal
   },
   mounted() {
     if (this.isAuthenticated) {
