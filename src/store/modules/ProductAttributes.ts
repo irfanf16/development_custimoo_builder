@@ -3,6 +3,8 @@ import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 const ProductAttributes:Module<any, any> = {
   state: {
+    products:[],
+    selectedIndex: 0,
     categories: [],
     customLogos: [],
     customTexts: [],
@@ -10,6 +12,12 @@ const ProductAttributes:Module<any, any> = {
     styleIndex: 0
   },
   mutations: {
+    SET_PRODUCTS(state: Record<any, any>, payload: Record<any, any>){
+      state.products = payload;
+    },
+    SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
+      state.selectedIndex = payload.selectedIndex;
+    },
     categories(state: Record<any, any>, categories: Record<any, any>) {
       if(categories){
         state.categories = categories
@@ -39,7 +47,7 @@ const ProductAttributes:Module<any, any> = {
     },
     customTexts(state: Record<any, any>, customText: Record<any, any>) {
       if(customText){
-        Vue.set(state.customTexts, state.customTexts.length, customText)
+        Vue.set(state.customTexts, customText.index, customText.text)
       }
     },
     customTextAttribute(state: Record<any, any>, customTextAttribute: Record<any, any>) {
@@ -54,6 +62,11 @@ const ProductAttributes:Module<any, any> = {
     },
   },
   getters: {
+    getProducts: (state: any) => state.products,
+    getSelectedIndex: (state: any) => state.selectedIndex,
+    getSelectedProduct: (state => {
+      return state.products[state.selectedIndex]
+    }),
     getCategories: state => {
       return state.categories
     },
@@ -71,6 +84,9 @@ const ProductAttributes:Module<any, any> = {
     },
   },
   actions: {
+    setSelectedIndex({commit}, payload) {
+      commit('SET_SELECTED', payload)
+    },
     setCategories({commit}){
       const url = '/product/categories'
       http.get(url).then((response: any) => {

@@ -1,6 +1,65 @@
 <template>
     <b-modal id="modal-center-lockerroom" centered scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
-        <div class="lockerroom-header">
+        <b-tabs content-class="mt-3">
+            <b-tab title="Locker 1" active>
+                <div class="lockerroom-tabs">
+                    <div>
+                        <b-card no-body>
+                            <b-tabs card changed="currentTabs">
+                                <b-tab title="Products" active>
+                                    <LockerRoomProducts />
+                                </b-tab>
+                                <b-tab title="Assets">
+                                    <b-card-text>Tab contents 2</b-card-text>
+                                </b-tab>
+                                <b-tab title="Colors">
+                                    <b-card-text>Tab contents 2</b-card-text>
+                                </b-tab>
+                            </b-tabs>
+                        </b-card>
+                    </div>
+                </div>
+            </b-tab>
+            <b-tab title="Locker 2">
+                <div class="lockerroom-tabs">
+                    <div>
+                        <b-card no-body>
+                            <b-tabs card changed="currentTabs">
+                                <b-tab title="Products" active>
+                                    <LockerRoomProducts />
+                                </b-tab>
+                                <b-tab title="Assets">
+                                    <b-card-text>Tab contents 2</b-card-text>
+                                </b-tab>
+                                <b-tab title="Colors">
+                                    <b-card-text>Tab contents 2</b-card-text>
+                                </b-tab>
+                            </b-tabs>
+                        </b-card>
+                    </div>
+                </div>
+            </b-tab>
+            <b-tab title="Locker 3">
+                <div class="lockerroom-tabs">
+                    <div>
+                        <b-card no-body>
+                            <b-tabs card changed="currentTabs">
+                                <b-tab title="Products" active>
+                                    <LockerRoomProducts />
+                                </b-tab>
+                                <b-tab title="Assets">
+                                    <b-card-text>Tab contents 2</b-card-text>
+                                </b-tab>
+                                <b-tab title="Colors">
+                                    <b-card-text>Tab contents 2</b-card-text>
+                                </b-tab>
+                            </b-tabs>
+                        </b-card>
+                    </div>
+                </div>
+            </b-tab>
+        </b-tabs>
+        <!-- <div class="lockerroom-header">
             <div class="locker-opener">
                 <a href="#." class="arrow arrow-left"><font-awesome-icon :icon="['fas', 'arrow-left']" /></a>
                 <b-button variant="secondary" class="active">Locker 1</b-button>
@@ -11,23 +70,10 @@
             <div class="create-lockerroom">
                 <b-button class="create-btn" variant="secondary"><span>Create New </span>+</b-button>
             </div>
-        </div>
-        <div class="lockerroom-tabs">
-            <div>
-                <b-card no-body>
-                    <b-tabs card changed="currentTabs">
-                        <b-tab title="Products" active>
-                            <LockerRoomProducts />
-                        </b-tab>
-                        <b-tab title="Assets">
-                            <b-card-text>Tab contents 2</b-card-text>
-                        </b-tab>
-                        <b-tab title="Colors">
-                            <b-card-text>Tab contents 2</b-card-text>
-                        </b-tab>
-                    </b-tabs>
-                </b-card>
-            </div>
+        </div> -->
+        <div class="create-lockerroom">
+            <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
+            <CreateLockerRoomModal />
         </div>
     </b-modal>
 </template>
@@ -36,124 +82,142 @@
 
     import { Component, Vue } from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
+    import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+    import Scene from "@/components/Scene.vue"
     @Component<CustomizationPreviewProcess>({
         components: {
-            LockerRoomProducts
+          LockerRoomProducts,
+          Scene,
+          CreateLockerRoomModal
         }
     })
-    export default class CustomizationPreviewProcess extends Vue {}
+    export default class CustomizationPreviewProcess extends Vue {
+      private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
+      get getLockerProducts():Record<any, any>{
+        return this.$store.getters.getLockerProducts;
+      }
+      get products():[Record<any, any>]{
+        return this.$store.getters.getProducts
+      }
+      get lockers():Record<any, any>{
+        return  this.$store.getters.getLockers;
+      }
+    }
 
 </script>
 
 <style lang="scss" scoped>
-    .lockerroom-header{
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        .locker-opener{
-            max-width: 90%;
-            padding: 15px;
-            font-size: 18px;
-            position: relative;
-            overflow-x: auto;
-            white-space: nowrap;
-            @media only screen and (min-width: 992px){
-                max-width: 100%;
-                padding: 14px 30px;
-                max-width: 80%;
-            }
-            .btn{
-                padding: 5px 10px;
-                margin: 0 5px 10px;
-                position: relative;
-                background: none;
-                border-color: rgba(3,20,46,0.13);
-                color: #03142E;
-                font-size: 0.8rem;
-                @media only screen and (min-width: 992px){
-                    padding: 10px 30px;
-                    margin: 0 10px 10px;
-                    font-size: 1rem;
-                }
-                &.active,
-                &:hover{
-                    background: #219f84;
-                    color: #fff;
-                    border-color: #219f84;
-                }
-                .remove{
-                    position: absolute;
-                    right: -10px;
-                    top: -14px;
-                    width: 20px;
-                    height: 20px;
-                    font-size: 9px;
-                    color: #D53943;
-                    background: #F8E1E2;
-                    border-radius: 50%;
-                    display: flex;
-                    flex-wrap: wrap;
-                    align-items: center;
-                    justify-content: center;
-                    @media only screen and (min-width: 992px){
-                        width: 30px;
-                        height: 30px;
-                        font-size: 12px;
-                    }
-                }
-            }
-            .arrow{
-                position: absolute;
-                left: 0;
-                top: 50%;
-                transform: translateY(-50%);
-                z-index: 1;
-                color: #219f84;
-                font-size: 15px;
-                display: none;
-                @media only screen and (min-width: 992px){
-                    display: inline-block;
-                }
-                &.arrow-right{
-                    left: auto;
-                    right: 0;
-                }
-            }
+.lockerroom-header{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    .locker-opener{
+        max-width: 90%;
+        padding: 15px;
+        font-size: 18px;
+        position: relative;
+        overflow-x: auto;
+        white-space: nowrap;
+        @media only screen and (min-width: 992px){
+            max-width: 100%;
+            padding: 14px 30px;
+            max-width: 80%;
         }
-        .create-lockerroom{
-            .btn{
-                padding: 0;
-                font-size: 24px;
-                line-height: 1;
-                font-weight: 700px;
-                color: #fff;
+        .btn{
+            padding: 5px 10px;
+            margin: 0 5px 10px;
+            position: relative;
+            background: none;
+            border-color: rgba(3,20,46,0.13);
+            color: #03142E;
+            font-size: 0.8rem;
+            @media only screen and (min-width: 992px){
+                padding: 10px 30px;
+                margin: 0 10px 10px;
+                font-size: 1rem;
+            }
+            &.active,
+            &:hover{
                 background: #219f84;
-                width: 24px;
-                height: 24px;
+                color: #fff;
+                border-color: #219f84;
+            }
+            .remove{
+                position: absolute;
+                right: -10px;
+                top: -14px;
+                width: 20px;
+                height: 20px;
+                font-size: 9px;
+                color: #D53943;
+                background: #F8E1E2;
                 border-radius: 50%;
                 display: flex;
                 flex-wrap: wrap;
-                justify-content: center;
                 align-items: center;
-                border: none;
+                justify-content: center;
                 @media only screen and (min-width: 992px){
-                    padding: 10px 30px;
-                    color: #219f84;
-                    background: #E7F4F1;
-                    border: 1px solid #E7F4F1;
-                    border-radius: 0.25rem;
-                    width: auto;
-                    height: auto;
-                    font-size: 14px;
-                    font-weight: 400;
+                    width: 30px;
+                    height: 30px;
+                    font-size: 12px;
                 }
-                span{
-                    @media only screen and (max-width: 991px){display: none;}
-                }
+            }
+        }
+        .arrow{
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+            color: #219f84;
+            font-size: 15px;
+            display: none;
+            @media only screen and (min-width: 992px){
+                display: inline-block;
+            }
+            &.arrow-right{
+                left: auto;
+                right: 0;
             }
         }
     }
     
+}
+.create-lockerroom{
+    .btn{
+        padding: 0;
+        font-size: 24px;
+        line-height: 1;
+        font-weight: 700px;
+        color: #fff;
+        background: #219f84;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        border: none;
+        @media only screen and (min-width: 992px){
+            padding: 10px 30px;
+            color: #219f84;
+            background: #E7F4F1;
+            border: 1px solid #E7F4F1;
+            border-radius: 0.25rem;
+            width: auto;
+            height: auto;
+            font-size: 14px;
+            font-weight: 400;
+        }
+        span{
+            @media only screen and (max-width: 991px){display: none;}
+        }
+    }
+}
     
+    
+
+
 </style>

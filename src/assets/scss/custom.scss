@@ -1333,6 +1333,30 @@ a:hover{color: #219f84;}
     }
 }
 .lockerroom-modal{
+    .nav-tabs{
+        .nav-item{
+            margin: 0 8px 0 0;
+            @media only screen and (min-width: 992px){
+                margin: 0 15px 0 0;
+            }
+        }
+        .nav-link{
+            background: none;
+            border: 1px solid rgba(3,20,46,0.13);
+            border-radius: 0.25rem;
+            font-size: 12px;
+            @media only screen and (min-width: 992px){
+                font-size: 14px;
+            }
+            &.active{
+                background: #219f84;
+                color: #fff;
+            }
+        }
+    }
+    .nav-tabs{
+        border: none;
+    }
     .modal-title{
         font-size: 20px;
         font-weight: 700;
@@ -1372,10 +1396,14 @@ a:hover{color: #219f84;}
                 @media only screen and (min-width: 992px){margin: 0 15px 0 0;}
             }
             .nav-link{
+                border: none;
                 border-bottom: 1px solid #EFF2F4;
+                border-radius: 0;
                 &.active{
                     border: none;
                     border-bottom: 1px solid #219F84;
+                    background: none;
+                    color: #219F84;
                 }
             }
         }
@@ -1386,6 +1414,20 @@ a:hover{color: #219f84;}
         }
     }
     .modal-footer{display: none;}
+    .create-lockerroom{
+        position: absolute;
+        right: 1rem;
+        top: 1.4rem;
+        z-index: 1;
+        @media only screen and (min-width: 767px){
+            right: 2rem;
+            top: 2.3rem;
+        }
+        @media only screen and (min-width: 992px){
+            right: 2rem;
+            top: 2rem;
+        }
+    }
 }
 .bs-tooltip-top{
     .arrow{

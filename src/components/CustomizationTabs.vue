@@ -47,7 +47,7 @@
           Text
         </template>
         <div class="d-none d-lg-block">
-          <CustomizationText :productNames="selectedProduct.productnames" :productFonts="selectedProduct.namefonts" :fontsColors="fontsColors"/>
+          <CustomizationText :productFonts="selectedProduct.namefonts" :fontsColors="fontsColors"/>
         </div>
         <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
           <b-tabs>
