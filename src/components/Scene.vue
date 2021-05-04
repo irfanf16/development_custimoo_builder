@@ -188,6 +188,8 @@ export default class Scene extends Vue {
                 }
                 textObject.text = text.text
                 textObject.fontFamily = text.fontFamily
+                textObject.set('fill', text.fillColor)
+                textObject.set('stroke', text.outLineColor)
                 canvas.renderAll()
 
                 if (text.action == 'drag') {
@@ -493,8 +495,8 @@ export default class Scene extends Vue {
         evented: true,
         globalCompositeOperation: 'source-atop',
         fontFamily: text.fontFamily,
-        fill: '#000',//text.fillolor,
-        stroke: '#fff',//text.outlineColor,
+        fill: text.fillColor,
+        stroke: text.outLineColor,
         strokeWidth: 4,
         paintFirst: 'stroke'
       })
