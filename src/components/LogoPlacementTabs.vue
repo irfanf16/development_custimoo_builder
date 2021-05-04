@@ -44,7 +44,7 @@
           <div class="logo-placement-holder mb-lg-3">
             <div class="logo-holder color-extracted-area">
               <div class="color-extract-container">
-                <div class="color-box" v-for="color in ImageColors" :style="{ background : color.colorCode}" :key="color"></div>
+                <div class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.colorCode}" :key="index"></div>
               </div>
             </div>
             <div class="logo-placemet-content">
@@ -102,7 +102,7 @@ export default class LogoPlacementTabs extends Vue {
     {value: 'front', text: 'Front'},
     {value: 'back', text: 'Back'}
   ]
-  public ImageColors: any[] = []
+  public imageColors: any[] = []
 
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
@@ -172,20 +172,27 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public getLogoColors(){
-    this.ImageColors.splice(0);
-    setTimeout(() => {
-      Vibrant.from(this.$refs.logoImg[0].src).getPalette((err, palettes: any) => {
-        for (let [key, value] of Object.entries(palettes)) {
-          let colorInfo = {'colorCode': value.getHex(), 'colorPopulation': value.getPopulation()}
-          this.ImageColors.push(colorInfo)
-          this.ImageColors.sort(function(a, b){return parseFloat(b.colorPopulation)-parseFloat(a.colorPopulation)})
-        }
-        if(this.ImageColors.length > 4){
-          let deletedCount = this.ImageColors.length - 4
-          this.ImageColors.splice(4, deletedCount)
-        }
+    this.imageColors = []
+    if(this.customLogos[0] && this.customLogos[0].url) {
+      this.$nextTick(() => {
+        Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).getPalette((err: any, palettes: any) => {
+          for (let [key, value] of Object.entries(palettes) as any[]) {
+            let colorInfo = {
+              'colorCode': value.getHex(),
+              'colorPopulation': value.getPopulation()
+            }
+            this.imageColors.push(colorInfo)
+            this.imageColors.sort(function (a, b) {
+              return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
+            })
+          }
+          if (this.imageColors.length > 4) {
+            let deletedCount = this.imageColors.length - 4
+            this.imageColors.splice(4, deletedCount)
+          }
+        })
       })
-    }, 200)
+    }
   }
 }
 </script>

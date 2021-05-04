@@ -146,7 +146,8 @@ export default class CustomizationText extends Vue {
       }
       this.fontOptions = this.fontOptions.concat([font])
       let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
-      document.querySelector('head').innerHTML += "<style type='text/css'> @font-face{font-family: "+ font.value + "; src: url('" + fontUrl + "')}</style>";
+      const headElement = document.querySelector('head') as HTMLHeadElement
+      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: "+ font.value + "; src: url('" + fontUrl + "')}</style>";
     })
   }
 
