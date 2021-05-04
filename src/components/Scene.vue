@@ -47,7 +47,7 @@ export default class Scene extends Vue {
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
   private backTexture !: any
-  private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   private logoObjects: any[] = []
   private customLogoObjects: any[] = []
   private customTextObjects: any[] = []

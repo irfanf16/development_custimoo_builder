@@ -101,7 +101,7 @@ export default class LogoPlacementTabs extends Vue {
 
   public numberOfLogos = 1
 
-  private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public selected = 'front'
   public tabIndex = 0
   public options = [

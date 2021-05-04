@@ -39,7 +39,7 @@ import {http} from "@/httpCommon";
     })
 
     export default class CollarStyle extends Vue {
-      private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+      private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
       @Prop({required: true}) productModels!: any
 
       get selectedProduct(): Record<any, any>{
