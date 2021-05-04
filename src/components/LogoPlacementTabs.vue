@@ -53,7 +53,7 @@
               <b-form-select v-model="selected" :options="options"></b-form-select>
               <div class="color-holder">
                 <div class="color-container">
-                  <div class="color-box" v-for="color in ImageColors" :style="{ background : color}" :key="color"></div>
+                  <div class="color-box" v-for="color in ImageColors" :style="{ background : color.colorCode}" :key="color.colorPopulation"></div>
                 </div>
               </div>
             </div>
@@ -180,9 +180,15 @@ export default class LogoPlacementTabs extends Vue {
   public getLogoColors(){
     this.ImageColors.splice(0);
     setTimeout(() => {
-      Vibrant.from(this.$refs.logoImg[0].src).getPalette((err, palettes) => {
-        for (const [key, value] of Object.entries(palettes)) {
-          this.ImageColors.push(value.getHex())
+      Vibrant.from(this.$refs.logoImg[0].src).getPalette((err, palettes: any) => {
+        for (let [key, value] of Object.entries(palettes)) {
+          let colorInfo = {'colorCode': value.getHex(), 'colorPopulation': value.getPopulation()}
+          this.ImageColors.push(colorInfo)
+          this.ImageColors.sort(function(a, b){return parseFloat(b.colorPopulation)-parseFloat(a.colorPopulation)})
+        }
+        if(this.ImageColors.length > 4){
+          let deletedCount = this.ImageColors.length - 4
+          this.ImageColors.splice(4, deletedCount)
         }
       })
     }, 200)
@@ -256,5 +262,121 @@ export default class LogoPlacementTabs extends Vue {
       }
     }
   }
+}
+
+.color-palette-1 {
+  border-radius: 10px;
+  border-color: blue;
+  border-width: 50px;
+  border-style: solid;
+  height: 0px;
+  width: 0px;
+
+  /* To ratate */
+  -webkit-transform: rotate(360deg);
+  -moz-transform: rotate(360deg);
+  -o-transform: rotate(360deg);
+  -ms-transform: rotate(360deg);
+  transform: rotate(360deg);
+}
+.color-palette-2 {
+  border-radius: 10px;
+  border-right-color: yellow;
+  border-top-color: yellow;
+  border-bottom-color: red;
+  border-left-color: red;
+  border-width: 50px;
+  border-style: solid;
+  height: 0px;
+  width: 0px;
+
+  /* To ratate */
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+.color-palette-3 {
+  border-radius: 10px;
+  border-right-color: red;
+  border-top-color: yellow;
+  border-bottom-color: red;
+  border-left-color: green;
+  border-width: 50px;
+  border-style: solid;
+  height: 0px;
+  width: 0px;
+  position: relative;
+  /* To ratate */
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.color-palette-3::before {
+  display: block;
+  content: '';
+  position: absolute;
+  left: -50px;
+  top: -50px;
+  border-radius: 50px;
+  border-right-color: transparent;
+  border-top-color: yellow;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-width: 50px;
+  border-style: solid;
+  height: 0px;
+  width: 0px;
+  /* To ratate */
+  -webkit-transform: rotate(30deg);
+  -moz-transform: rotate(30deg);
+  -o-transform: rotate(30deg);
+  -ms-transform: rotate(30deg);
+  transform: rotate(30deg);
+}
+
+.color-palette-3::after {
+  display: block;
+  content: '';
+  position: absolute;
+  left: -50px;
+  top: -50px;
+  border-radius: 50px;
+  border-right-color: transparent;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: green;
+  border-width: 50px;
+  border-style: solid;
+  height: 0px;
+  width: 0px;
+  /* To ratate */
+  -webkit-transform: rotate(-30deg);
+  -moz-transform: rotate(-30deg);
+  -o-transform: rotate(-30deg);
+  -ms-transform: rotate(-30deg);
+  transform: rotate(-30deg);
+}
+.color-palette-4 {
+  border-radius: 10px;
+  border-right-color: blue;
+  border-top-color: yellow;
+  border-bottom-color: red;
+  border-left-color: green;
+  border-width: 50px;
+  border-style: solid;
+  height: 0px;
+  width: 0px;
+
+  /* To ratate */
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
 }
 </style>
