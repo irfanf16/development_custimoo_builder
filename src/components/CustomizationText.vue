@@ -75,7 +75,7 @@ export default class CustomizationText extends Vue {
   @Prop({required: true}) fontsColors!: any
   public selected = null
   public fontOptions: Record<any, any>[] = []
-  private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public colorImage = '/img/images/color-placeholder.png'
   public fontColorType!: string
   public fontColorIndex!: number

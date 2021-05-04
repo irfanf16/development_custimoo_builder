@@ -128,7 +128,7 @@ export default class Home extends Vue {
   public ref = this.$refs as Record<any, any>
   public mobileScreen = this.$store.state.mobileScreen
   private jwtToken !: string
-  private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public mounted = false
 
   get isAuthenticated(): boolean {

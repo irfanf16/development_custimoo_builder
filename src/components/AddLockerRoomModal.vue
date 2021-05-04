@@ -28,8 +28,8 @@
         }
     })
     export default class AddLockerRoomModal extends Vue {
-      public locker_selected:boolean = true;
-      public room_id:number = 0;
+      public locker_selected = true;
+      public room_id = 0;
       public ref = this.$refs as Record<any, any>
 
       get lockers(){

@@ -70,7 +70,7 @@ export default class UploadLogo extends Vue {
   }
 
   private jwtToken !: string
-  private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public logoUrl = ''
   public ref = this.$refs as Record<any, any>
 

@@ -19,7 +19,7 @@
     }
   })
   export default class CustomizationPreview extends Vue {
-    private apiBaseUrl: string =  process.env.VUE_APP_API_BASE_URL
+    public apiBaseUrl =  process.env.VUE_APP_API_BASE_URL
 
     get selectedProduct(): Record<any, any>{
       return this.$store.getters.getSelectedProduct

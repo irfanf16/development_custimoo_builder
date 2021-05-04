@@ -21,8 +21,8 @@
     // })
    @Component
     export default class CreateLockerRoomModal extends Vue {
-      public name:string = ''
-     public ref = this.$refs as Record<any, any>
+      public name = ''
+      public ref = this.$refs as Record<any, any>
 
       public createLocker(){
         this.$store.dispatch('createLocker', this.name);

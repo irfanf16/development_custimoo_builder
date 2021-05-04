@@ -23,7 +23,7 @@ import Scene from '@/components/Scene.vue'
 })
 
 export default class DesignAvailable extends Vue {
-  private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
   }

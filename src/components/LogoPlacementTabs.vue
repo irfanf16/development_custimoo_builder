@@ -28,7 +28,7 @@
               </template>
               <template v-else>
                 <div class="additional-holder">
-                  <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
+                   <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
                 </div>
               </template>
             </div>
@@ -42,11 +42,10 @@
         <div class="logo-placement-area">
           <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
           <div class="logo-placement-holder mb-lg-3">
-            <div class="logo-holder">
-              <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
-              <a href="#" class="remove-img">
-                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-              </a>
+            <div class="logo-holder color-extracted-area">
+              <div class="color-extract-container">
+                <div class="color-box" v-for="color in ImageColors" :style="{ background : color}" :key="color"></div>
+              </div>
             </div>
             <div class="logo-placemet-content">
               <h4>Logo Placement</h4>
@@ -101,7 +100,7 @@ export default class LogoPlacementTabs extends Vue {
 
   public numberOfLogos = 1
 
-  private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
+  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public selected = 'front'
   public tabIndex = 0
   public options = [
