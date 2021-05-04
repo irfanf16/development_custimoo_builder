@@ -1457,6 +1457,34 @@ a:hover{color: #219f84;}
             top: 2rem;
         }
     }
+    .products-holder{
+        .canvas-area-holder{display: block !important;}
+        a{
+            display: block !important;
+            width: 100% !important;
+            .canvas-container{
+                width: 120px !important;
+                height: 140px !important;
+                @media only screen and (min-width: 1023px){
+                    width: 100% !important;
+                    height: 180px !important;
+                }
+                @media only screen and (min-width: 1199px){
+                    height: 220px !important;
+                }
+                .canvas{
+                    width: 100% !important;
+                    height: 140px !important;
+                    @media only screen and (min-width: 1023px){
+                        height: 180px !important;
+                    }
+                    @media only screen and (min-width: 1199px){
+                        height: 220px !important;
+                    }
+                }
+            }
+        }
+    }
 }
 .bs-tooltip-top{
     .arrow{

@@ -8,11 +8,13 @@
                         <b-card no-body>
                             <b-tabs card changed="currentTabs">
                               <b-tab title="Products">
-                                <template v-for="(product, ind) in room.product">
-                                  <div :key="ind">
-                                  <Scene   :canvas-width="300" :canvas-height="360" :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
-                                  </div>
-                                </template>
+                                <div class="products-holder d-lg-flex flex-wrap">
+                                    <template v-for="(product, ind) in room.product">
+                                        <div :key="ind" class="products-block">
+                                            <Scen.products-blocke   :canvas-width="300" :canvas-height="360" :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
+                                        </div>
+                                    </template>
+                                </div>
                               </b-tab>
                                 <b-tab title="Assets">
                                     <b-card-text>Tab contents 2</b-card-text>
@@ -182,6 +184,82 @@
     }
 }
 
+.products-holder{
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-top: 7px;
+        @media only screen and (min-width: 992px){
+            width: 100%;
+            overflow-x: hidden;
+            white-space: normal;
+            padding-top: 0;
+        }
+        .products-block{
+            flex: 0 0 22%;
+            
+            margin: 0 0.3rem 10px;
+            display: inline-block;
+            @media only screen and (min-width: 992px){
+                margin: 0 0.6rem 25px;
+                max-width: 22%;
+            }
+            @media only screen and (min-width: 1199px){
+                flex: 0 0 18%;
+                max-width: 18%;
+            }
+            .image-holder{
+                position: relative;
+                margin: 0 0 15px;
+                @media only screen and (min-width: 992px){overflow: hidden;}
+                img{
+                    display: block;
+                    max-width: 100%;
+                    margin: 0 auto;
+                    height: auto;
+                }
+                .product-icons{
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                    position: absolute;
+                    right: -5px;
+                    top: -5px;
+                    z-index: 1;
+                    @media only screen and (min-width: 992px){
+                        right: 5px;
+                        top: 5px;
+                    }
+                    li{
+                        display: block;
+                        margin: 0 0 5px;
+                    }
+                    a{
+                        display: flex;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                        align-items: center;
+                        width: 20px;
+                        height: 20px;
+                        font-size: 9px;
+                        color: #219f84;
+                        background: #fff;
+                        border-radius: 50%;
+                        @media only screen and (min-width: 992px){
+                            width: 30px;
+                            height: 30px;
+                            font-size: 14px;
+                        }
+                        &.remove{
+                            background: #F8E1E2;
+                            color: #D53943;
+                        }
+                    }
+                }
+            }
+            
+        }
+    }
 
 
 
