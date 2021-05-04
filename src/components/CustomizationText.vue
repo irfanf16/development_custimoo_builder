@@ -21,15 +21,15 @@
         </div>
       </b-form>
       <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
-      <div class="text-color-holder" :class="{ active: colorTextActive }">
-        <a href="#." v-on:click="showColor('fill')">
+      <div class="text-color-holder" :class="{ active: customText.selectColor }">
+        <a @click="showColor('fill', index)">
           <div class="text-color-box">
             <div class="color-circle"
                  :style="{ background : customText.fillColor? customText.fillColor : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></div>
             <strong>Fill Color</strong>
           </div>
         </a>
-        <a href="#." v-on:click="showColor('outline')">
+        <a @click="showColor('outline', index)">
           <div class="text-color-box">
             <div class="color-circle"
                  :style="{ background : customText.outLineColor? customText.outLineColor : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></div>
@@ -74,15 +74,7 @@ export default class CustomizationText extends Vue {
   @Prop({required: true}) productFonts!: any
   @Prop({required: true}) fontsColors!: any
   public selected = null
-  public fontOptions = [
-    {value: 'Arial', text: 'Arial'},
-    {value: 'Times New Roman', text: 'Times New Roman'},
-    {value: 'Helvetica', text: 'Helvetica'},
-    {value: 'Times', text: 'Times'},
-    {value: 'Courier New', text: 'Courier New'},
-    {value: 'Verdana', text: 'Verdana'},
-  ]
-  public fontFaces: any[] = []
+  public fontOptions: Record<any, any>[] = []
   private colorTextActive = false
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
   public colorImage = '/img/images/color-placeholder.png'
@@ -95,13 +87,10 @@ export default class CustomizationText extends Vue {
     return this.$store.getters.getCustomTexts
   }
 
-  get getSelectedIndex(): number {
-    return this.$store.getters.getSelectedIndex
-  }
-  @Watch('selectedIndex', {
+  @Watch('productNames', {
     immediate: true
   })
-  selectedIndexChanged() {
+  productNamesChanged() {
     this.customTextInit()
   }
 
@@ -120,7 +109,8 @@ export default class CustomizationText extends Vue {
           side: productName.side,
           fontFamily: this.customTexts[index].fontFamily,
           fillColor: this.customTexts[index].fillColor,
-          outlineColor: this.customTexts[index].outlineColor
+          outlineColor: this.customTexts[index].outlineColor,
+          selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
       }else if(!this.customTexts[index]){
@@ -136,7 +126,8 @@ export default class CustomizationText extends Vue {
           side: productName.side,
           fontFamily: '',
           fillColor: '',
-          outlineColor: ''
+          outlineColor: '',
+          selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
       }
@@ -149,20 +140,16 @@ export default class CustomizationText extends Vue {
       fontNameParam = fontNameParam[0].split('.')
       let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
       let font = {
-        value: fontNameParam[0],
-        text: fontName
+        value: fontNameParam[0] as string,
+        text: fontName as string
       }
       this.fontOptions = this.fontOptions.concat([font])
       let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
-      this.fontFaces = this.fontFaces.concat()
-      let fontStyle = document.createElement('link')
-      fontStyle.setAttribute('href', fontUrl)
-      fontStyle.setAttribute('rel', 'stylesheet')
-      document.head.appendChild(fontStyle)
+      document.querySelector('head').innerHTML += "<style type='text/css'> @font-face{font-family: "+ font.value + "; src: url('" + fontUrl + "')}</style>";
     })
   }
 
-  public showColor(type: any) {
+  public showColor(type: any, textIndex: number) {
     this.fontColorType = type
     this.colorTextActive = !this.colorTextActive
   }

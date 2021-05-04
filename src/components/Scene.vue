@@ -477,7 +477,7 @@ export default class Scene extends Vue {
     })
   }
 
-  public async addTexts(texts: [Record<any, any>], addIndex = null) {
+  public async addTexts(texts: [Record<any, any>], addIndex: number|null = null) {
     const self = this
     texts.forEach((text: Record<any, any>, index: number) => {
       let textBox = new fabric.Text(text.text, {
