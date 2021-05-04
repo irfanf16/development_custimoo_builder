@@ -9,7 +9,8 @@
                 <a href="#." class="arrow arrow-right"><font-awesome-icon :icon="['fas', 'arrow-right']" /></a>
             </div>
             <div class="create-lockerroom">
-                <b-button class="create-btn" variant="secondary"><span>Create New </span>+</b-button>
+                <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
+                <CreateLockerRoomModal />
             </div>
         </div>
     </b-modal>
@@ -19,9 +20,11 @@
 
     import { Component, Vue } from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
+    import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     @Component<AddLockerRoomModal>({
         components: {
-            LockerRoomProducts
+            LockerRoomProducts,
+            CreateLockerRoomModal
         }
     })
     export default class AddLockerRoomModal extends Vue {}
