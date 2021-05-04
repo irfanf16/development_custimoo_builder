@@ -1,5 +1,5 @@
 <template>
-    <b-modal id="modal-center-addlockerroom" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="my-modal" id="modal-center-addlockerroom" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener" v-for="(locker, index) in lockers" :key="index">
                 <b-button variant="secondary" @click="showButton(locker.id)"   class="active">{{locker.room_name}}</b-button>
@@ -28,8 +28,10 @@
         }
     })
     export default class AddLockerRoomModal extends Vue {
-      public locker_selected:boolean = true;
-      public room_id:number = 0;
+      public locker_selected = true;
+      public room_id = 0;
+      public ref = this.$refs as Record<any, any>
+
       get lockers(){
         return this.$store.getters.getLockers;
       }
@@ -64,6 +66,7 @@
             colors:''
           }
           this.$store.dispatch("SAVE_TO_LOCKER", locker);
+          this.ref['my-modal'].hide();
         }else{
           alert("please login first");
         }

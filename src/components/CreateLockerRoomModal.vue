@@ -1,5 +1,5 @@
 <template>
-    <b-modal id="modal-center-createlockerroom" centered scrollable size="xl" title="Create Lockerroom" content-class="lockerroom-modal">
+    <b-modal ref="create-modal" id="modal-center-createlockerroom" centered scrollable size="xl" title="Create Lockerroom" content-class="lockerroom-modal">
         <div class="pt-4 design-name-form">
             <b-form inline>
                 <label for="inline-form-input-productname" class="w-100 d-block mb-2">Product Name</label>
@@ -21,11 +21,12 @@
     // })
    @Component
     export default class CreateLockerRoomModal extends Vue {
-      public name:string = ''
+      public name = ''
+      public ref = this.$refs as Record<any, any>
 
       public createLocker(){
         this.$store.dispatch('createLocker', this.name);
-        this.$bvModal.hide("#modal-center-createlockerroom");
+        this.ref['create-modal'].hide();
       }
     }
 

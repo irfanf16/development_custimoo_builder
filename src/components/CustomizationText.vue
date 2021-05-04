@@ -75,9 +75,10 @@ export default class CustomizationText extends Vue {
   @Prop({required: true}) fontsColors!: any
   public selected = null
   public fontOptions: Record<any, any>[] = []
-  private colorTextActive = false
   private apiBaseUrl: string = process.env.VUE_APP_API_BASE_URL
   public colorImage = '/img/images/color-placeholder.png'
+  public fontColorType!: string
+  public fontColorIndex!: number
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
@@ -149,18 +150,25 @@ export default class CustomizationText extends Vue {
     })
   }
 
-  public showColor(type: any, textIndex: number) {
-    this.fontColorType = type
-    this.colorTextActive = !this.colorTextActive
+  public showColor(fontColorType: any, fontColorIndex: number) {
+    this.fontColorType = fontColorType
+    this.fontColorIndex = fontColorIndex
+    this.customTexts.forEach((customText: Record<any, any>, index: number) => {
+      if(index == fontColorIndex) {
+        this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: true})
+      } else {
+        this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: false})
+      }
+    })
   }
 
-  public setColor(color: any) {
+  public setColor(color: string) {
     if (this.fontColorType == 'fill') {
-      this.fillColor = color
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColor', value: color})
     } else {
-      this.outLineColor = color
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColor', value: color})
     }
-    this.colorTextActive = false
+    this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'selectColor', value: false})
   }
 
   public addTab(index: number){
