@@ -28,7 +28,7 @@
               </template>
               <template v-else>
                 <div class="additional-holder">
-                  <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
+                  <!-- <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/> -->
                 </div>
               </template>
             </div>
@@ -42,20 +42,15 @@
         <div class="logo-placement-area">
           <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
           <div class="logo-placement-holder mb-lg-3">
-            <div class="logo-holder">
-              <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
-              <a href="#" class="remove-img">
-                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-              </a>
+            <div class="logo-holder color-extracted-area">
+              <div class="color-extract-container">
+                <div class="color-box" v-for="color in ImageColors" :style="{ background : color}" :key="color"></div>
+              </div>
             </div>
             <div class="logo-placemet-content">
               <h4>Logo Placement</h4>
               <b-form-select v-model="selected" :options="options"></b-form-select>
-              <div class="color-holder">
-                <div class="color-container">
-                  <div class="color-box" v-for="color in ImageColors" :style="{ background : color}" :key="color"></div>
-                </div>
-              </div>
+              
             </div>
           </div>
           <button class="btn btn-secondary w-100 fw-bold">Save Color</button>

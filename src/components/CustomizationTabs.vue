@@ -15,7 +15,7 @@
         <div class="logo-placement-tabs" v-if="hideTab.logoHide">
           <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting" />
         </div>
-      </b-tab>
+      </b-tab>  
       <b-tab>
         <button @click="setHideTab('colorHide', !hideTab.colorHide)" class="tab-close-btn d-lg-none"></button>
         <template #title>
