@@ -1,14 +1,19 @@
 <template>
     <b-modal id="modal-center-lockerroom" centered scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
         <b-tabs content-class="mt-3">
-            <b-tab title="Locker 1" active>
+          <template v-for="(room, i) in getLockerProducts">
+            <b-tab :title="room.room_name"  :key="i">
                 <div class="lockerroom-tabs">
                     <div>
                         <b-card no-body>
                             <b-tabs card changed="currentTabs">
-                                <b-tab title="Products" active>
-                                    <LockerRoomProducts />
-                                </b-tab>
+                              <b-tab title="Products">
+                                <template v-for="(product, ind) in room.product">
+                                  <div :key="ind">
+                                  <Scene   :canvas-width="300" :canvas-height="360" :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
+                                  </div>
+                                </template>
+                              </b-tab>
                                 <b-tab title="Assets">
                                     <b-card-text>Tab contents 2</b-card-text>
                                 </b-tab>
@@ -20,44 +25,8 @@
                     </div>
                 </div>
             </b-tab>
-            <b-tab title="Locker 2">
-                <div class="lockerroom-tabs">
-                    <div>
-                        <b-card no-body>
-                            <b-tabs card changed="currentTabs">
-                                <b-tab title="Products" active>
-                                    <LockerRoomProducts />
-                                </b-tab>
-                                <b-tab title="Assets">
-                                    <b-card-text>Tab contents 2</b-card-text>
-                                </b-tab>
-                                <b-tab title="Colors">
-                                    <b-card-text>Tab contents 2</b-card-text>
-                                </b-tab>
-                            </b-tabs>
-                        </b-card>
-                    </div>
-                </div>
-            </b-tab>
-            <b-tab title="Locker 3">
-                <div class="lockerroom-tabs">
-                    <div>
-                        <b-card no-body>
-                            <b-tabs card changed="currentTabs">
-                                <b-tab title="Products" active>
-                                    <LockerRoomProducts />
-                                </b-tab>
-                                <b-tab title="Assets">
-                                    <b-card-text>Tab contents 2</b-card-text>
-                                </b-tab>
-                                <b-tab title="Colors">
-                                    <b-card-text>Tab contents 2</b-card-text>
-                                </b-tab>
-                            </b-tabs>
-                        </b-card>
-                    </div>
-                </div>
-            </b-tab>
+              </template>
+
         </b-tabs>
         <!-- <div class="lockerroom-header">
             <div class="locker-opener">
@@ -71,10 +40,6 @@
                 <b-button class="create-btn" variant="secondary"><span>Create New </span>+</b-button>
             </div>
         </div> -->
-        <div class="create-lockerroom">
-            <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
-            <CreateLockerRoomModal />
-        </div>
     </b-modal>
 </template>
 
@@ -182,7 +147,7 @@
             }
         }
     }
-    
+
 }
 .create-lockerroom{
     .btn{
@@ -216,8 +181,8 @@
         }
     }
 }
-    
-    
+
+
 
 
 </style>

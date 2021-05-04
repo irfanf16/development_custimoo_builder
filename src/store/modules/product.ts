@@ -59,8 +59,10 @@ const Product:Module<any, any> = {
       })
     },
     createLocker({commit}, payload:string){
-      http.post("locker/create").then((res) =>{
-        commit('ADD_LOCKER', res.data.data);
+      http.post("locker/create", {name:payload}).then((res) =>{
+        if (res.status == 201){
+          commit('ADD_LOCKER', res.data.data);
+        }
       });
     }
   }

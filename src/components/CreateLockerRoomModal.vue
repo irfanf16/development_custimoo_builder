@@ -1,13 +1,13 @@
 <template>
-    <b-modal id="modal-center-createlockerroom" centered scrollable size="xl" title="Create Lockerroom" content-class="lockerroom-modal">
+    <b-modal ref="create-modal" id="modal-center-createlockerroom" centered scrollable size="xl" title="Create Lockerroom" content-class="lockerroom-modal">
         <div class="pt-4 design-name-form">
             <b-form inline>
                 <label for="inline-form-input-productname" class="w-100 d-block mb-2">Product Name</label>
                 <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
                     <b-input-group>
-                        <b-form-input id="inline-form-input-productname" placeholder="Type Here"></b-form-input>
+                        <b-form-input id="inline-form-input-productname" v-model="name"  placeholder="Type Here"></b-form-input>
                     </b-input-group>
-                    <b-button variant="primary">Create</b-button>
+                    <b-button variant="primary" @click="createLocker">Create</b-button>
                 </div>
             </b-form>
         </div>
@@ -17,10 +17,18 @@
 <script lang="ts">
 
     import { Component, Vue } from 'vue-property-decorator'
-    @Component<CreateLockerRoomModal>({
-        
-    })
-    export default class CreateLockerRoomModal extends Vue {}
+    // @Component<CreateLockerRoomModal>({
+    // })
+   @Component
+    export default class CreateLockerRoomModal extends Vue {
+      public name:string = ''
+     public ref = this.$refs as Record<any, any>
+
+      public createLocker(){
+        this.$store.dispatch('createLocker', this.name);
+        this.ref['create-modal'].hide();
+      }
+    }
 
 </script>
 
@@ -101,5 +109,5 @@
             border-color: #219f84;
         }
     }
-    
+
 </style>
