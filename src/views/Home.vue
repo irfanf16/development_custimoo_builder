@@ -81,6 +81,7 @@ import ChooseInterest from '@/components/ChooseInterest.vue'
 import CustomizationTabs from '@/components/CustomizationTabs.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
+import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import {http} from "@/httpCommon"
 
 
@@ -92,7 +93,8 @@ import {http} from "@/httpCommon"
     ChooseInterest,
     CustomizationTabs,
     UploadLogo,
-    LockerRoomModal
+    LockerRoomModal,
+    AddLockerRoomModal
   },
   mounted() {
     if (this.isAuthenticated) {
