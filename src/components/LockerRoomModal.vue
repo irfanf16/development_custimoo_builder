@@ -11,7 +11,7 @@
                                 <div class="products-holder d-lg-flex flex-wrap">
                                     <template v-for="(product, ind) in room.product">
                                         <div :key="ind" class="products-block">
-                                            <Scen.products-blocke   :canvas-width="300" :canvas-height="360" :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
+                                            <Scene :canvas-width="300" :canvas-height="360" :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
                                         </div>
                                     </template>
                                 </div>

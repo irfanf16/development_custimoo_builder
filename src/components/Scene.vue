@@ -1,5 +1,5 @@
 <template>
-  <div style="display: flex; justify-content: center;">
+  <div class="canvas-area-holder" style="display: flex; justify-content: center;">
     <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
       <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
     </a>

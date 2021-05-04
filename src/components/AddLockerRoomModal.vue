@@ -91,6 +91,8 @@
                 max-width: 100%;
                 padding: 14px 30px;
                 max-width: 80%;
+                overflow: hidden;
+                white-space: inherit;
             }
             .btn{
                 padding: 5px 10px;
@@ -186,6 +188,7 @@
     }
     .save-btn-holder{
           padding: 15px 40px;
+          text-align: center;
         }
 
 
