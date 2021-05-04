@@ -4,7 +4,9 @@ const Product:Module<any, any> = {
   state:{
     products:[],
     selectedIndex: 0,
-    Product_Models:[]
+    Product_Models:[],
+    locker_products:[],
+    lockers:[]
   },
   getters:{
     getProducts: (state: any) => state.products,
@@ -13,6 +15,12 @@ const Product:Module<any, any> = {
     }),
     getProductModels(state:Record<any, any>){
       return state.Product_Models;
+    },
+    getLockerProducts(state:Record<any, any>){
+      return state.locker_products
+    },
+    getLockers(state:Record<any, any>){
+      return state.lockers
     }
   },
   mutations:{
@@ -24,6 +32,15 @@ const Product:Module<any, any> = {
     },
     SET_MODELS(state:Record<any, any>, paylod:Record<any, any>){
       state.Product_Models = paylod;
+    },
+    SET_LOCKER_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
+      state.locker_products = payload;
+    },
+    SET_LOCKERS(state:Record<any, any>, payload:Record<any, any>){
+      state.lockers = payload;
+    },
+    ADD_LOCKER(state:Record<any, any>, payload:Record<any, any>){
+      state.lockers.push(payload);
     }
   },
   actions: {
@@ -40,6 +57,25 @@ const Product:Module<any, any> = {
         if (res.status == 201){
           console.log(res.data.message);
         }
+      });
+    },
+    GET_LOCKER_PRODUCTS({commit}){
+      http.get("locker/products").then((res) => {
+        if (res.status == 200){
+          commit('SET_LOCKER_PRODUCTS', res.data)
+        }
+      })
+    },
+    getLockers({commit}){
+      http.get("lockers").then((res) =>{
+        if (res.status == 200){
+          commit('SET_LOCKERS', res.data);
+        }
+      })
+    },
+    createLocker({commit}, payload:string){
+      http.post("locker/create").then((res) =>{
+        commit('ADD_LOCKER', res.data.data);
       });
     }
   }

@@ -20,7 +20,7 @@
             <div class="logo-holder">
               <template v-if="customLogos[index].url != ''">
                 <div class="additional-holder">
-                  <img :src="apiBaseUrl+'/'+customLogos[index].url" alt="logo Shirt"/>
+                  <img ref="logoImg" :src="apiBaseUrl+'/'+customLogos[index].url" alt="logo Shirt"/>
                 </div>
                 <a href="#" class="remove-img" @click="deleteLogo(index)">
                   <font-awesome-icon :icon="['fas', 'trash-alt']"/>
@@ -51,12 +51,17 @@
             <div class="logo-placemet-content">
               <h4>Logo Placement</h4>
               <b-form-select v-model="selected" :options="options"></b-form-select>
+              <div class="color-holder">
+                <div class="color-container">
+                  <div class="color-box" v-for="color in ImageColors" :style="{ background : color}" :key="color"></div>
+                </div>
+              </div>
             </div>
           </div>
           <button class="btn btn-secondary w-100 fw-bold">Save Color</button>
         </div>
         <template v-if="manageComponents.LogoArea">
-          <UploadLogo :customLogoIndex="index"/>
+          <UploadLogo :customLogoIndex="index" @logoChange="getLogoColors"/>
         </template>
       </div>
     </b-tab>
@@ -67,12 +72,14 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
+import * as Vibrant from 'node-vibrant'
 
 @Component<LogoPlacementTabs>({
   components: {
     UploadLogo
   },
   mounted() {
+    this.getLogoColors()
     this.$store.dispatch('setCustomLogos')
   }
 })
@@ -101,6 +108,7 @@ export default class LogoPlacementTabs extends Vue {
     {value: 'front', text: 'Front'},
     {value: 'back', text: 'Back'}
   ]
+  public ImageColors: any[] = []
 
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
@@ -167,6 +175,17 @@ export default class LogoPlacementTabs extends Vue {
       value: this.customLogos[index].side
     }
     this.$store.dispatch('updateCustomLogoAttribute', payload)
+  }
+
+  public getLogoColors(){
+    this.ImageColors.splice(0);
+    setTimeout(() => {
+      Vibrant.from(this.$refs.logoImg[0].src).getPalette((err, palettes) => {
+        for (const [key, value] of Object.entries(palettes)) {
+          this.ImageColors.push(value.getHex())
+        }
+      })
+    }, 200)
   }
 }
 </script>
