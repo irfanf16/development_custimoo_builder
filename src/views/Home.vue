@@ -264,25 +264,7 @@ export default class Home extends Vue {
       console.log(e)
     });
   }
-  public saveToLocker(){
-    if (this.isCustomerAuthenticated) {
-      const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-        return item.design_show
-      })
-      let locker = {
-        room_id:1,
-        product_id: this.selectedProduct.product_id,
-        style_id:     this.selectedProduct.productstyles[this.styleIndex].id,
-        design_id: currentDesign[0].id,
-        custom_logos: this.customLogos,
-        text:'',
-        colors:''
-      }
-      this.$store.dispatch("SAVE_TO_LOCKER", locker);
-    }else{
-      alert("please login first");
-    }
-  }
+
   public async getLockerRoomProducts(){
     if(this.isCustomerAuthenticated){
       await this.$store.dispatch('GET_LOCKER_PRODUCTS');

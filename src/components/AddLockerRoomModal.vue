@@ -1,18 +1,18 @@
 <template>
     <b-modal id="modal-center-addlockerroom" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
         <div class="lockerroom-header">
-            <div class="locker-opener">
-                <a href="#." class="arrow arrow-left"><font-awesome-icon :icon="['fas', 'arrow-left']" /></a>
-                <b-button variant="secondary" class="active">Locker 1</b-button>
-                <b-button variant="secondary">Locker 2<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-                <b-button variant="secondary">Locker 3<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-                <a href="#." class="arrow arrow-right"><font-awesome-icon :icon="['fas', 'arrow-right']" /></a>
-            </div>
+            <div class="locker-opener" v-for="(locker, index) in lockers" :key="index">
+                <b-button variant="secondary" @click="showButton(locker.id)"   class="active">{{locker.room_name}}</b-button>
+<!--                <b-button variant="secondary">Locker 2<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>-->
+<!--                <b-button variant="secondary">Locker 3<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>-->
+               </div>
             <div class="create-lockerroom">
                 <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
                 <CreateLockerRoomModal />
             </div>
         </div>
+      <div><b-button variant="secondary"  :disabled="locker_selected" @click="saveToLocker()">Save to Locker room </b-button></div>
+
     </b-modal>
 </template>
 
@@ -27,7 +27,48 @@
             CreateLockerRoomModal
         }
     })
-    export default class AddLockerRoomModal extends Vue {}
+    export default class AddLockerRoomModal extends Vue {
+      public locker_selected:boolean = true;
+      public room_id:number = 0;
+      get lockers(){
+        return this.$store.getters.getLockers;
+      }
+      get isCustomerAuthenticated(): boolean {
+        return this.$store.getters.isCustomerAuthenticated
+      }
+      get selectedProduct(): Record<any, any>{
+        return this.$store.getters.getSelectedProduct
+      }
+      get styleIndex():number{
+        return  this.$store.getters.getCurrentStyleIndex;
+      }
+      get customLogos(): [] {
+        return this.$store.getters.getCustomLogos
+      }
+      public showButton(id:number){
+        this.locker_selected = false;
+        this.room_id = id;
+      }
+      public saveToLocker(){
+        if (this.isCustomerAuthenticated) {
+          const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+            return item.design_show
+          })
+          let locker = {
+            room_id: this.room_id,
+            product_id: this.selectedProduct.product_id,
+            style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+            design_id: currentDesign[0].id,
+            custom_logos: this.customLogos,
+            text:'',
+            colors:''
+          }
+          this.$store.dispatch("SAVE_TO_LOCKER", locker);
+        }else{
+          alert("please login first");
+        }
+      }
+    }
 
 </script>
 
@@ -140,6 +181,6 @@
             }
         }
     }
-    
-    
+
+
 </style>
