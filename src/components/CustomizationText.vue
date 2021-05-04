@@ -37,6 +37,13 @@
           </div>
         </a>
         <div class="color-holder">
+          <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
+                    <b-nav-item>NHL</b-nav-item>
+                    <b-nav-item>Baseball</b-nav-item>
+                    <b-nav-item>Soccer</b-nav-item>
+                    <b-nav-item>Locker Room</b-nav-item>
+                    <b-nav-item>Other</b-nav-item>
+                </b-nav>
           <div class="color-container">
             <div v-for="color in fontsColors" @click="setColor(color.value)" class="color-box" :title="color.name"
                  :style="{background: color.value}"

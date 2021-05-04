@@ -533,8 +533,12 @@ a:hover{color: #219f84;}
                     justify-content: center;
                     align-items: center;
                     .color-box{
-                        width: 36.5px;
-                        height: 36.5px;
+                        width: 29px;
+                        height: 29px;
+                        @media only screen and (min-width: 992px){
+                            width: 36.5px;
+                            height: 36.5px;
+                        }
                     }
                 }
                 &.color-extracted-area{
@@ -666,6 +670,8 @@ a:hover{color: #219f84;}
                     display: flex;
                     flex-wrap: wrap;
                     align-items: center;
+                    @media only screen and (min-width: 1200px){font-size: 12px;}
+                    @media only screen and (min-width: 1599px){font-size: 14px;}
                 }
                 .color-circle{
                     width: 26px;
@@ -705,6 +711,15 @@ a:hover{color: #219f84;}
             .color-holder{
                 max-height: 0;
                 transition: none;
+                .nav{margin: 0 0 15px;}
+                a.nav-link{
+                    padding: 0;
+                    border: none;
+                    font-size: 12px;
+                    padding-bottom: 5px;
+                    border-bottom: 1px solid #808895;
+                    border-radius: 0;
+                }
             }
             &.active{
                 .color-holder{max-height: 100%;}

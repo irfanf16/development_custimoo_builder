@@ -52,7 +52,7 @@
             <div>
               <CustomizationPreview />
               <template v-if="manageComponents.BasicCustomization">
-                <b-button @click="showAdvanceCustomization()" class="mt-5" variant="secondary">Continue</b-button>
+                <b-button @click="showAdvanceCustomization()" class="d-none d-lg-inline-block mt-5" variant="secondary">Continue</b-button>
               </template>
               <template v-if="manageComponents.AdvanceCustomization">
                 <div class="continue-btn-holder pt-5">
