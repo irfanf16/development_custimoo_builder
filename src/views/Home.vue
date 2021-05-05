@@ -188,14 +188,14 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
   }
-  // public showDesign() {
-  //         if(this.manageComponents.mobileScreen){
-  //             this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
-  //             this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
-  //             this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
-  //             this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
-  //         } 
-  //   }
+  public showDesign() {
+          if(this.manageComponents.mobileScreen){
+              this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
+              this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
+              this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
+              this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
+          } 
+    }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {
     if (this.nextPageUrl && !searchCall) {
