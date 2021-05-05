@@ -4,6 +4,7 @@
     <div class="px-3 pt-3 p-lg-4">
       <h2 class="fw-bold mb-2 fz-18">Player {{ customText.type | capitalize }}</h2>
       <b-form>
+        <!-- <h4 class="mt-1 mt-lg-3 mb-2 fz-16">Player {{ customText.type | capitalize }}</h4> -->
         <b-form-input
           class="mb-2 mr-sm-2 mb-sm- 0"
           placeholder="Type Here"
@@ -51,9 +52,11 @@
       </div>
     </div>
   </div>
+  <div class="px-3 pt-3 p-lg-4 text-right">
     <b-button class="add-logo-btn"  @click="addTab(customTexts.length)">
       +
     </b-button>
+  </div>
   </div>
 
 </template>

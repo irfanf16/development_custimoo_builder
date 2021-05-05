@@ -533,8 +533,12 @@ a:hover{color: #219f84;}
                     justify-content: center;
                     align-items: center;
                     .color-box{
-                        width: 36.5px;
-                        height: 36.5px;
+                        width: 29px;
+                        height: 29px;
+                        @media only screen and (min-width: 992px){
+                            width: 36.5px;
+                            height: 36.5px;
+                        }
                     }
                 }
                 &.color-extracted-area{
@@ -648,6 +652,12 @@ a:hover{color: #219f84;}
         .custom-select,
         .form-control{
             border-color: #EFF2F4;
+            @media only screen and (min-width: 992px){
+                font-size: 0.8rem;
+            }
+            @media only screen and (min-width: 1599px){
+                font-size: 1rem;
+            }
         }
         .text-color-holder{
             padding: 0;
@@ -666,6 +676,8 @@ a:hover{color: #219f84;}
                     display: flex;
                     flex-wrap: wrap;
                     align-items: center;
+                    @media only screen and (min-width: 1200px){font-size: 12px;}
+                    @media only screen and (min-width: 1599px){font-size: 14px;}
                 }
                 .color-circle{
                     width: 26px;
@@ -705,6 +717,15 @@ a:hover{color: #219f84;}
             .color-holder{
                 max-height: 0;
                 transition: none;
+                .nav{margin: 0 0 15px;}
+                a.nav-link{
+                    padding: 0;
+                    border: none;
+                    font-size: 12px;
+                    padding-bottom: 5px;
+                    border-bottom: 1px solid #808895;
+                    border-radius: 0;
+                }
             }
             &.active{
                 .color-holder{max-height: 100%;}
@@ -719,6 +740,14 @@ a:hover{color: #219f84;}
         .form-control{
             @media only screen and (max-width: 719px){
                 font-size: 12px;
+            }
+        }
+        h4{
+            @media only screen and (min-width: 992px){
+                font-size: 0.8rem;
+            }
+            @media only screen and (min-width: 1600px){
+                font-size: 1rem;
             }
         }
     }
@@ -1431,7 +1460,7 @@ a:hover{color: #219f84;}
     .create-lockerroom{
         position: absolute;
         right: 1rem;
-        top: 1.4rem;
+        top: 2rem;
         z-index: 1;
         @media only screen and (min-width: 767px){
             right: 2rem;
@@ -1440,6 +1469,34 @@ a:hover{color: #219f84;}
         @media only screen and (min-width: 992px){
             right: 2rem;
             top: 2rem;
+        }
+    }
+    .products-holder{
+        .canvas-area-holder{display: block !important;}
+        a{
+            display: block !important;
+            width: 100% !important;
+            .canvas-container{
+                width: 120px !important;
+                height: 140px !important;
+                @media only screen and (min-width: 1023px){
+                    width: 100% !important;
+                    height: 180px !important;
+                }
+                @media only screen and (min-width: 1199px){
+                    height: 220px !important;
+                }
+                .canvas{
+                    width: 100% !important;
+                    height: 140px !important;
+                    @media only screen and (min-width: 1023px){
+                        height: 180px !important;
+                    }
+                    @media only screen and (min-width: 1199px){
+                        height: 220px !important;
+                    }
+                }
+            }
         }
     }
 }

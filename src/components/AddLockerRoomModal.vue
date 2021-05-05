@@ -1,8 +1,8 @@
 <template>
     <b-modal ref="my-modal" id="modal-center-addlockerroom" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
         <div class="lockerroom-header">
-            <div class="locker-opener" v-for="(locker, index) in lockers" :key="index">
-                <b-button variant="secondary" @click="showButton(locker.id)"   class="active">{{locker.room_name}}</b-button>
+            <div class="locker-opener">
+                <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id)"   class="active">{{locker.room_name}}</b-button>
 <!--                <b-button variant="secondary">Locker 2<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>-->
 <!--                <b-button variant="secondary">Locker 3<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>-->
                </div>
@@ -11,7 +11,7 @@
                 <CreateLockerRoomModal />
             </div>
         </div>
-      <div><b-button variant="secondary"  :disabled="locker_selected" @click="saveToLocker()">Save to Locker room </b-button></div>
+      <div class="save-btn-holder"><b-button variant="secondary"  :disabled="locker_selected" @click="saveToLocker()">Save to Locker room </b-button></div>
 
     </b-modal>
 </template>
@@ -80,7 +80,6 @@
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        justify-content: space-between;
         .locker-opener{
             max-width: 90%;
             padding: 15px;
@@ -92,6 +91,8 @@
                 max-width: 100%;
                 padding: 14px 30px;
                 max-width: 80%;
+                overflow: hidden;
+                white-space: inherit;
             }
             .btn{
                 padding: 5px 10px;
@@ -183,7 +184,12 @@
                 }
             }
         }
+        
     }
+    .save-btn-holder{
+          padding: 15px 40px;
+          text-align: center;
+        }
 
 
 </style>

@@ -9,11 +9,16 @@
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center">
             <b-nav-item class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.file_type }}</b-nav-item>
+            <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
-              <div class="color-box" v-for="color in productColor" @click="setColor(color.value)"
-                   :title="color.name" :style="{background: color.value}" :key="color.position"></div>
+              <div v-if="showOther" class="custom-color-picker">
+                <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
+              </div>
+              <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color.value)"
+                   :title="color.name" :style="{background: color.value}" :key="index">
+              </div>
             </div>
           </div>
         </b-card-body>
@@ -24,8 +29,13 @@
 
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
+import colorPicker from '@caohenghu/vue-colorpicker'
 
 @Component<ColorAccordion>({
+
+  components: {
+      colorPicker
+  },
   mounted(){
     setTimeout(() => {
     this.selectType(this.selectTypeIndex)
@@ -35,23 +45,33 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 export default class ColorAccordion extends Vue {
   @Prop({required: true}) productColors!: any
 
+  public color= '#59c7f9'
+  public showOther = false
   public selectAccordionIndex = 0
   public selectTypeIndex = 0
   public productColor: any[] = []
   public colorImage = '/img/images/color-placeholder.png'
   public svgElements = [{name: 'Base', color: null}, {name: 'Sleeves', color: null}, {name: 'Pockets', color: null}, {name: 'Hood', color: null}]
 
+
   public showColor(index: number) {
     this.selectAccordionIndex = index
   }
 
-  public selectType(index: number) {
+  public selectType(index: number, showOther = false) {
     this.selectTypeIndex = index
+    this.showOther = showOther
     this.productColor = this.productColors[this.selectTypeIndex].color_text
   }
 
   public setColor(color: any) {
     this.svgElements[this.selectAccordionIndex].color = color
   }
+
+  public changeColor(color: any) {
+    this.setColor(color.hex)
+  }
+
+
 }
 </script>
