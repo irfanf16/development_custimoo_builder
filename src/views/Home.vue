@@ -41,6 +41,10 @@
                     <font-awesome-icon :icon="['fas', 'redo-alt']"/>
                   </a></li>
                 </ul>
+                <div class="change-product-area d-lg-none">
+                  <h2>Change Product</h2>
+                  <b-button @click="showDesign()" class="change-product-opener" variant="secondary"></b-button>
+                </div>
               </header>
               <div class="undo-btn-area text-left pt-3">
                 <b-button variant="outline-secondary mr-2">Undo</b-button>
@@ -162,9 +166,6 @@ export default class Home extends Vue {
     return this.$store.getters.getLockerProducts;
   }
 
-
-
-
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
@@ -184,6 +185,14 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
   }
+  public showDesign() {
+          if(this.manageComponents.mobileScreen){
+              this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
+              this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
+              this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
+              this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
+          } 
+    }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {
     if (this.nextPageUrl && !searchCall) {
@@ -312,8 +321,10 @@ export default class Home extends Vue {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  background: #fff;
   @media only screen and (min-width: 992px){
     min-height: 91px;
+    background: none;
   }
   .btn {
     margin: 0 0.3rem 0 0;
@@ -376,6 +387,32 @@ export default class Home extends Vue {
   align-items: center;
   justify-content: center;
   height: 60vh;
+}
+.change-product-area{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 15px 0 0;
+  h2{
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .change-product-opener{
+    width: 18px;
+    height: 18px;
+    position: relative;
+    &:before{
+      position: absolute;
+      content: '';
+      left: 2px;
+      top: 6px;
+      border: 6px solid transparent;
+      border-top: 6px solid #fff;
+    }
+  }
+
 }
 
 

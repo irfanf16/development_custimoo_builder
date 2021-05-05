@@ -28,7 +28,6 @@
               </template>
               <template v-else>
                 <div class="additional-holder">
-                   <img src="@/assets/images/logo-shirt.svg" alt="logo Shirt"/>
                 </div>
               </template>
             </div>
@@ -37,7 +36,7 @@
               <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
             </div>
           </div>
-          <button class="btn btn-secondary w-100 fw-bold">Save Logo</button>
+          <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold">Save Logo</button>
         </div>
         <div class="logo-placement-area" v-if="index == 0">
           <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
@@ -48,7 +47,7 @@
               </div>
             </div>
           </div>
-          <button class="btn btn-secondary w-100 fw-bold">Save Color</button>
+          <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold">Save Color</button>
         </div>
         <template v-if="manageComponents.LogoArea">
           <UploadLogo :customLogoIndex="index" @logoChange="getLogoColors"/>

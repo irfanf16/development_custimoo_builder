@@ -13,7 +13,7 @@
         <h4 class="mt-3 mb-2 fz-16">Font Type</h4>
         <div class="font-type-area">
           <div class="type-block">
-            <b-form-select v-model="customText.fontFamily" :options="fontOptions"></b-form-select>
+            <b-form-select v-model="selectedFont" :options="fontOptions" ></b-form-select>
           </div>
           <div class="arc-block">
             <b-form-select v-model="customText.side" :options="['front', 'back']"></b-form-select>
@@ -37,19 +37,17 @@
           </div>
         </a>
         <div class="color-holder">
-          <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
-              <b-nav-item>NHL</b-nav-item>
-              <b-nav-item>Baseball</b-nav-item>
-              <b-nav-item>Soccer</b-nav-item>
-              <b-nav-item>Locker Room</b-nav-item>
-              <b-nav-item>Other</b-nav-item>
-          </b-nav>
-          <div class="color-container">
-            <div v-for="color in fontsColors" @click="setColor(color.value)" class="color-box" :title="color.name"
-                 :style="{background: color.value}"
-                 :key="color.position">
+          <b-card-body>
+            <b-nav class="d-flex flex-wrap align-items-center">
+              <b-nav-item class="mr-2" v-for="(colorType, index) in fontsColors" :key="index" @click="selectType(index)">{{ colorType.file_type }}</b-nav-item>
+            </b-nav>
+            <div class="color-holder">
+              <div class="color-container">
+                <div class="color-box" v-for="color in fontColor" @click="setColor(color.value)"
+                     :title="color.name" :style="{background: color.value}" :key="color.position"></div>
+              </div>
             </div>
-          </div>
+          </b-card-body>
         </div>
       </div>
     </div>
@@ -67,12 +65,16 @@
 
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 
-
 @Component<CustomizationText>({
-  
   mounted() {
     this.fontsList()
-    this.customTextInit()
+    this.$nextTick(() => {
+      this.selectType(this.selectTypeIndex)
+      if(this.fontColor.length){
+        this.firstColor = this.fontColor[0].value
+        this.customTextInit()
+      }
+    })
   },
   filters: {
     capitalize: (value: string) => {
@@ -85,12 +87,15 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 export default class CustomizationText extends Vue {
   @Prop({required: true}) productFonts!: any
   @Prop({required: true}) fontsColors!: any
-  public selected = null
+  public selectedFont = null
   public fontOptions: Record<any, any>[] = []
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public colorImage = '/img/images/color-placeholder.png'
   public fontColorType!: string
   public fontColorIndex!: number
+  public selectTypeIndex = 0
+  public fontColor: any[] = []
+  public firstColor!: string
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
@@ -138,7 +143,7 @@ export default class CustomizationText extends Vue {
           haveControls: Boolean(productName.is_locked),
           side: productName.side,
           fontFamily: '',
-          fillColor: '',
+          fillColor: this.firstColor,
           outlineColor: '',
           selectColor: false
         }
@@ -161,6 +166,9 @@ export default class CustomizationText extends Vue {
       const headElement = document.querySelector('head') as HTMLHeadElement
       headElement.innerHTML += "<style type='text/css'> @font-face{font-family: "+ font.value + "; src: url('" + fontUrl + "')}</style>";
     })
+    if(this.fontOptions.length){
+      this.selectedFont = this.fontOptions[0].value
+    }
   }
 
   public showColor(fontColorType: any, fontColorIndex: number) {
@@ -182,6 +190,11 @@ export default class CustomizationText extends Vue {
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColor', value: color})
     }
     this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'selectColor', value: false})
+  }
+
+  public selectType(index: number) {
+    this.selectTypeIndex = index
+    this.fontColor = this.fontsColors[this.selectTypeIndex].color_text
   }
 
   public addTab(index: number){
