@@ -13,7 +13,7 @@
         <h4 class="mt-3 mb-2 fz-16">Font Type</h4>
         <div class="font-type-area">
           <div class="type-block">
-            <b-form-select v-model="selectedFont" :options="fontOptions" ></b-form-select>
+            <b-form-select v-model="customText.fontFamily" :options="fontOptions" ></b-form-select>
           </div>
           <div class="arc-block">
             <b-form-select v-model="customText.side" :options="['front', 'back']"></b-form-select>
@@ -87,7 +87,6 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 export default class CustomizationText extends Vue {
   @Prop({required: true}) productFonts!: any
   @Prop({required: true}) fontsColors!: any
-  public selectedFont = null
   public fontOptions: Record<any, any>[] = []
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public colorImage = '/img/images/color-placeholder.png'
@@ -155,7 +154,7 @@ export default class CustomizationText extends Vue {
   public fontsList() {
     this.productFonts.forEach((fonts: any, key: number) => {
       let fontNameParam = fonts.file_url.split('/').reverse()
-      fontNameParam = fontNameParam[0].split('.')
+      fontNameParam = fontNameParam[0].replace(' ', '-').split('.')
       let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
       let font = {
         value: fontNameParam[0] as string,
@@ -164,11 +163,8 @@ export default class CustomizationText extends Vue {
       this.fontOptions = this.fontOptions.concat([font])
       let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
       const headElement = document.querySelector('head') as HTMLHeadElement
-      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: "+ font.value + "; src: url('" + fontUrl + "')}</style>";
+      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: "+ font.value + "; src:url('" + fontUrl + "') format('opentype')}</style>";
     })
-    if(this.fontOptions.length){
-      this.selectedFont = this.fontOptions[0].value
-    }
   }
 
   public showColor(fontColorType: any, fontColorIndex: number) {
