@@ -186,6 +186,7 @@ export default class LogoPlacementTabs extends Vue {
             let deletedCount = this.imageColors.length - 4
             this.imageColors.splice(4, deletedCount)
           }
+          this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
         })
       })
     }
