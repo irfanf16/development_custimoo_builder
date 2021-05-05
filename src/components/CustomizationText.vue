@@ -125,9 +125,9 @@ export default class CustomizationText extends Vue {
           rotation: productName.rotation,
           haveControls: Boolean(productName.is_locked),
           side: productName.side,
-          fontFamily: this.customTexts[index].fontFamily,
-          fillColor: this.customTexts[index].fillColor,
-          outlineColor: this.customTexts[index].outlineColor,
+          fontFamily: this.customTexts[index].fontFamily? this.customTexts[index].fontFamily : this.fontOptions[0].value,
+          fillColor: this.customTexts[index].fillColor? this.customTexts[index].fillColor : this.firstColor,
+          outLineColor: this.customTexts[index].outLineColor? this.customTexts[index].outLineColor : this.firstColor,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
@@ -142,9 +142,9 @@ export default class CustomizationText extends Vue {
           rotation: productName.rotation,
           haveControls: Boolean(productName.is_locked),
           side: productName.side,
-          fontFamily: '',
+          fontFamily: this.fontOptions[0]? this.fontOptions[0].value : '',
           fillColor: this.firstColor,
-          outlineColor: '',
+          outLineColor: this.firstColor,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
@@ -210,7 +210,7 @@ export default class CustomizationText extends Vue {
       side: 'back',
       fontFamily: this.fontOptions[0]? this.fontOptions[0].value: '',
       fillColor: '',
-      outlineColor: '',
+      outLineColor: '',
     }
 
     this.$store.dispatch('setCustomTexts', { index: this.customTexts.length, text: text })
