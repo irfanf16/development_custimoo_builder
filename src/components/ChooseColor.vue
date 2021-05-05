@@ -2,7 +2,7 @@
   <div class="choose-color-holder active">
     <h2 class="fw-bold mb-3 fz-18">Choose Color</h2>
     <div class="choose-color d-flex flex-wrap justify-content-between">
-      <a href="#" v-for="(chooseColor, index) in chooseColors" :key="index" v-on:click="showColor(index)">
+      <a v-for="(chooseColor, index) in defaultColors" :key="index" v-on:click="showColor(index)">
         <div>
           <div class="color-circle"
                :style="{ background : chooseColor.color? chooseColor.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></div>
@@ -14,8 +14,8 @@
       <transition name="list">
         <div class="color-holder">
           <div class="color-header">
-            <h3>{{ chooseColors[selectColorIndex].name }}</h3>
-            <a href="#" @click="colorPickerActive = false" class="close">
+            <h3>{{ defaultColors[selectColorIndex].name }}</h3>
+            <a @click="colorPickerActive = false" class="close">
               <font-awesome-icon :icon="['fas', 'times']"/>
             </a>
           </div>
@@ -27,8 +27,8 @@
       </transition>
     </div>
     <div class="shuffle-colors d-none d-lg-flex flex-wrap justify-content-between align-items-center">
-      <button class="btn btn-secondary">Shuffle</button>
-      <button class="redo-btn">
+      <button v-if="defaultColors.filter((color) => { return color.color }).length > 1" @click="shuffleColors()" class="btn btn-secondary">Shuffle</button>
+      <button v-if="previousDefaultColors.length" @click="rollbackPreviousColors()" class="redo-btn">
         <font-awesome-icon :icon="['fas', 'redo-alt']"/>
       </button>
     </div>
@@ -42,25 +42,53 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 export default class ChooseColor extends Vue {
   @Prop({required: true}) colors!: any
 
+  public colorImage = '/img/images/color-placeholder.png'
   private colorPickerActive = false
-  public chooseColors = [{name: 'Color One', color: null}, {name: 'Color Two', color: null}, {name: 'Color Three', color: null}, {name: 'Color Four', color: null}]
   public selectColorIndex !: number
+  public previousDefaultColors : [] = []
 
-  public showColor(index: number) {
+  get defaultColors() : [Record<any, any>] {
+    return this.$store.getters.getDefaultColors
+  }
+
+  public showColor(index: number): void {
     this.selectColorIndex = index
     this.colorPickerActive = false
-    setTimeout(() => {
+    this.$nextTick(() => {
       this.colorPickerActive = true
-    }, 300)
+    })
   }
 
-  public setColor(color: any) {
+  public setColor(color: string): void {
     this.colorPickerActive = false
-    this.chooseColors[this.selectColorIndex].color = color
-    console.log(color)
+    this.$store.dispatch('setDefaultColor', { index: this.selectColorIndex, value: color})
   }
 
-  public colorImage = '/img/images/color-placeholder.png'
+  public shuffleColors(): void {
+    this.previousDefaultColors = JSON.parse(JSON.stringify(this.defaultColors)).filter((defaultColor: Record<any, any>) => {return defaultColor.color})
+    let defaultColors = JSON.parse(JSON.stringify(this.defaultColors)).filter((defaultColor: Record<any, any>) => {return defaultColor.color})
+    let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
+      if (currentIndex !== 1) return previousValue;
+
+      array.sort(() => Math.random() - 0.5)
+
+      return array;
+    }
+
+    while (JSON.stringify(this.previousDefaultColors) == JSON.stringify(defaultColors)) {
+      defaultColors.reduce(shuffle)
+    }
+    defaultColors.forEach((defaultColor: Record<any, any>, index: number) => {
+      this.$store.dispatch('setDefaultColor', { index: index, value: defaultColor.color})
+    })
+  }
+
+  public rollbackPreviousColors (): void {
+    this.previousDefaultColors.forEach((defaultColor: Record<any, any>, index: number) => {
+      this.$store.dispatch('setDefaultColor', { index: index, value: defaultColor.color})
+    })
+    this.previousDefaultColors = []
+  }
 
 }
 </script>
