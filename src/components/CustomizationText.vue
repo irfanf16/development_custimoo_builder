@@ -25,14 +25,14 @@
         <a @click="showColor('fill', index)">
           <div class="text-color-box">
             <div class="color-circle"
-                 :style="{ background : customText.fillColor? customText.fillColor : firstColor }"></div>
+                 :style="{ background : customText.fillColor? customText.fillColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
             <strong>Fill Color</strong>
           </div>
         </a>
         <a @click="showColor('outline', index)">
           <div class="text-color-box">
             <div class="color-circle"
-                 :style="{ background : customText.outLineColor? customText.outLineColor : firstColor }"></div>
+                 :style="{ background : customText.outLineColor? customText.outLineColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
             <strong>Outline Color</strong>
           </div>
         </a>
@@ -68,11 +68,11 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 @Component<CustomizationText>({
   mounted() {
     this.fontsList()
-    this.customTextInit()
     this.$nextTick(() => {
       this.selectType(this.selectTypeIndex)
       if(this.fontColor.length){
         this.firstColor = this.fontColor[0].value
+        this.customTextInit()
       }
     })
   },
@@ -143,7 +143,7 @@ export default class CustomizationText extends Vue {
           haveControls: Boolean(productName.is_locked),
           side: productName.side,
           fontFamily: '',
-          fillColor: '',
+          fillColor: this.firstColor,
           outlineColor: '',
           selectColor: false
         }
