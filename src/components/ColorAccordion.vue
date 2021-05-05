@@ -9,23 +9,15 @@
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center">
             <b-nav-item class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.file_type }}</b-nav-item>
-            <b-nav-item>Others</b-nav-item>
+            <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
-              <div class="color-box" v-for="color in productColor" @click="setColor(color.value)"
-                   :title="color.name" :style="{background: color.value}" :key="color.position">
+              <div v-if="showOther" class="custom-color-picker">
+                <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
               </div>
-              <div class="custom-color-picker">
-                <color-picker
-                  theme="light"
-                  :color="color"
-                  :sucker-hide="false"
-                  :sucker-canvas="suckerCanvas"
-                  :sucker-area="suckerArea"
-                  @changeColor="changeColor"
-                  @openSucker="openSucker"
-                />
+              <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color.value)"
+                   :title="color.name" :style="{background: color.value}" :key="index">
               </div>
             </div>
           </div>
@@ -54,9 +46,7 @@ export default class ColorAccordion extends Vue {
   @Prop({required: true}) productColors!: any
 
   public color= '#59c7f9'
-  public suckerCanvas= null
-  public suckerArea= []
-  public isSucking= false
+  public showOther = false
   public selectAccordionIndex = 0
   public selectTypeIndex = 0
   public productColor: any[] = []
@@ -68,8 +58,9 @@ export default class ColorAccordion extends Vue {
     this.selectAccordionIndex = index
   }
 
-  public selectType(index: number) {
+  public selectType(index: number, showOther = false) {
     this.selectTypeIndex = index
+    this.showOther = showOther
     this.productColor = this.productColors[this.selectTypeIndex].color_text
   }
 
@@ -77,13 +68,10 @@ export default class ColorAccordion extends Vue {
     this.svgElements[this.selectAccordionIndex].color = color
   }
 
-  public changeColor(color, rgba, hsv, hex) {
-      const { r, g, b, a } = color.rgba
-      this.color = `rgba(${r}, ${g}, ${b}, ${a})`
-      console.log(hex)
-      this.setColor(hex)
+  public changeColor(color: any) {
+    this.setColor(color.hex)
   }
 
-  
+
 }
 </script>
