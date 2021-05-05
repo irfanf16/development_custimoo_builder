@@ -163,7 +163,8 @@ export default class CustomizationProcess extends Vue {
 
   public fontsColorsManipulation(){
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
-      this.fontsColors = JSON.parse(colors.color_text)
+      colors.color_text = JSON.parse(colors.color_text)
+      this.fontsColors = this.fontsColors.concat(colors)
     })
   }
 
