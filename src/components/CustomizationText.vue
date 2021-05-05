@@ -4,7 +4,7 @@
     <div class="px-3 pt-3 p-lg-4">
       <h2 class="fw-bold mb-2 fz-18">Player {{ customText.type | capitalize }}</h2>
       <b-form>
-        <h4 class="mt-1 mt-lg-3 mb-2 fz-16">Player {{ customText.type | capitalize }}</h4>
+        <!-- <h4 class="mt-1 mt-lg-3 mb-2 fz-16">Player {{ customText.type | capitalize }}</h4> -->
         <b-form-input
           class="mb-2 mr-sm-2 mb-sm- 0"
           placeholder="Type Here"
@@ -25,37 +25,40 @@
         <a @click="showColor('fill', index)">
           <div class="text-color-box">
             <div class="color-circle"
-                 :style="{ background : customText.fillColor? customText.fillColor : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></div>
+                 :style="{ background : customText.fillColor? customText.fillColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
             <strong>Fill Color</strong>
           </div>
         </a>
         <a @click="showColor('outline', index)">
           <div class="text-color-box">
             <div class="color-circle"
-                 :style="{ background : customText.outLineColor? customText.outLineColor : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></div>
+                 :style="{ background : customText.outLineColor? customText.outLineColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
             <strong>Outline Color</strong>
           </div>
         </a>
         <div class="color-holder">
           <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
-                    <b-nav-item>NHL</b-nav-item>
-                    <b-nav-item>Baseball</b-nav-item>
-                    <b-nav-item>Soccer</b-nav-item>
-                    <b-nav-item>Locker Room</b-nav-item>
-                    <b-nav-item>Other</b-nav-item>
-                </b-nav>
+              <b-nav-item>NHL</b-nav-item>
+              <b-nav-item>Baseball</b-nav-item>
+              <b-nav-item>Soccer</b-nav-item>
+              <b-nav-item>Locker Room</b-nav-item>
+              <b-nav-item>Other</b-nav-item>
+          </b-nav>
           <div class="color-container">
             <div v-for="color in fontsColors" @click="setColor(color.value)" class="color-box" :title="color.name"
                  :style="{background: color.value}"
-                 :key="color.position"></div>
+                 :key="color.position">
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+  <div class="px-3 pt-3 p-lg-4 text-right">
     <b-button class="add-logo-btn"  @click="addTab(customTexts.length)">
       +
     </b-button>
+  </div>
   </div>
 
 </template>
@@ -64,7 +67,9 @@
 
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 
+
 @Component<CustomizationText>({
+  
   mounted() {
     this.fontsList()
     this.customTextInit()

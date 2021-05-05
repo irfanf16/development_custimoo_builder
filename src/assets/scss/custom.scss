@@ -652,6 +652,12 @@ a:hover{color: #219f84;}
         .custom-select,
         .form-control{
             border-color: #EFF2F4;
+            @media only screen and (min-width: 992px){
+                font-size: 0.8rem;
+            }
+            @media only screen and (min-width: 1599px){
+                font-size: 1rem;
+            }
         }
         .text-color-holder{
             padding: 0;
@@ -734,6 +740,14 @@ a:hover{color: #219f84;}
         .form-control{
             @media only screen and (max-width: 719px){
                 font-size: 12px;
+            }
+        }
+        h4{
+            @media only screen and (min-width: 992px){
+                font-size: 0.8rem;
+            }
+            @media only screen and (min-width: 1600px){
+                font-size: 1rem;
             }
         }
     }
