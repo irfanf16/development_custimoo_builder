@@ -36,7 +36,7 @@
               <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
             </div>
           </div>
-          <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold">Save Logo</button>
+          <button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold">Save Logo</button>
         </div>
         <div class="logo-placement-area" v-if="index == 0">
           <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
