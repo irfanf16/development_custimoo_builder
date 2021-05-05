@@ -162,9 +162,6 @@ export default class Home extends Vue {
     return this.$store.getters.getLockerProducts;
   }
 
-
-
-
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
