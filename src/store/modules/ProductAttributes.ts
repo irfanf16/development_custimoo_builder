@@ -9,7 +9,8 @@ const ProductAttributes:Module<any, any> = {
     customLogos: [],
     customTexts: [],
     isAssociation: false,
-    styleIndex: 0
+    styleIndex: 0,
+    defaultColors: [{name: 'Color One', color: null}, {name: 'Color Two', color: null}, {name: 'Color Three', color: null}, {name: 'Color Four', color: null}]
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: Record<any, any>){
@@ -60,6 +61,11 @@ const ProductAttributes:Module<any, any> = {
         state.customTexts.splice(delCustomText.index, 1)
       }
     },
+    defaultColor (state: Record<any, any>, color: Record<any, any>) {
+      if(color) {
+        Vue.set(state.defaultColors[color.index], 'color', color.value)
+      }
+    }
   },
   getters: {
     getProducts: (state: any) => state.products,
@@ -82,6 +88,9 @@ const ProductAttributes:Module<any, any> = {
     getCustomTexts: state => {
       return state.customTexts
     },
+    getDefaultColors: state => {
+      return state.defaultColors
+    }
   },
   actions: {
     setSelectedIndex({commit}, payload) {
@@ -113,6 +122,9 @@ const ProductAttributes:Module<any, any> = {
     updateCustomTextAttribute({commit}, payload){
       commit('customTextAttribute', payload)
     },
+    setDefaultColor ({commit}, payload) {
+      commit('defaultColor', payload)
+    }
   }
 }
 export default ProductAttributes;
