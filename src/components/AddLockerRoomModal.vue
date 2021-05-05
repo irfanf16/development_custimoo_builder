@@ -47,6 +47,9 @@
       get customLogos(): [] {
         return this.$store.getters.getCustomLogos
       }
+      get logoColors():[]{
+        return  this.$store.getters.getLogosColors;
+      }
       public showButton(id:number){
         this.locker_selected = false;
         this.room_id = id;
@@ -63,7 +66,7 @@
             design_id: currentDesign[0].id,
             custom_logos: this.customLogos,
             text:'',
-            colors:''
+            colors: this.logoColors
           }
           this.$store.dispatch("SAVE_TO_LOCKER", locker);
           this.ref['my-modal'].hide();
@@ -184,7 +187,7 @@
                 }
             }
         }
-        
+
     }
     .save-btn-holder{
           padding: 15px 40px;

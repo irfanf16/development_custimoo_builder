@@ -4,7 +4,8 @@ const Product:Module<any, any> = {
   state:{
     Product_Models:[],
     locker_products:[],
-    lockers:[]
+    lockers:[],
+    logoColors:[]
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -15,6 +16,9 @@ const Product:Module<any, any> = {
     },
     getLockers(state:Record<any, any>){
       return state.lockers
+    },
+    getLogosColors(state:Record<any, any>){
+      return state.logoColors;
     }
   },
   mutations:{
@@ -29,6 +33,9 @@ const Product:Module<any, any> = {
     },
     ADD_LOCKER(state:Record<any, any>, payload:Record<any, any>){
       state.lockers.push(payload);
+    },
+    SET_LOGO_COLORS(state:Record<any, any>, payload:Record<any, any>){
+      state.logoColors = payload;
     }
   },
   actions: {
@@ -64,6 +71,9 @@ const Product:Module<any, any> = {
           commit('ADD_LOCKER', res.data.data);
         }
       });
+    },
+    SET_LOGO_COLORS({commit}, payload:Record<any, any>){
+      commit('SET_LOGO_COLORS', payload);
     }
   }
 }

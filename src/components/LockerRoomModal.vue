@@ -20,7 +20,16 @@
                                     <b-card-text>Tab contents 2</b-card-text>
                                 </b-tab>
                                 <b-tab title="Colors">
-                                    <b-card-text>Tab contents 2</b-card-text>
+                                  <div class="color-holder">
+                                    <div class="color-container">
+                                      <template v-for="(item) in room.product">
+                                        <div class="color-box" v-for="(color, index) in JSON.parse(item.colors)"
+                                             :style="{background: color.colorCode}" :key="index">
+                                        </div>
+                                      </template>
+
+                                    </div>
+                                  </div>
                                 </b-tab>
                             </b-tabs>
                         </b-card>
@@ -197,7 +206,7 @@
         }
         .products-block{
             flex: 0 0 22%;
-            
+
             margin: 0 0.3rem 10px;
             display: inline-block;
             @media only screen and (min-width: 992px){
@@ -257,7 +266,7 @@
                     }
                 }
             }
-            
+
         }
     }
 
