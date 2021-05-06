@@ -249,6 +249,7 @@ export default class LogoPlacementTabs extends Vue {
       }
       .btn{
         flex: none;
+        color: #03142E;
         &.use-btn{
           background: none;
           padding: 0 0 2px;
@@ -271,6 +272,7 @@ export default class LogoPlacementTabs extends Vue {
         }
       }
       .btn-save-color{
+        color: #fff;
         @media only screen and (max-width: 992px){
           flex: 0 0 100%;
           max-width: 100%;
