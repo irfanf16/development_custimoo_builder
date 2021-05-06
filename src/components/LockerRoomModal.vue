@@ -1,5 +1,5 @@
 <template>
-    <b-modal id="modal-center-lockerroom" centered scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="locker-modal" id="modal-center-lockerroom" centered scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
         <b-tabs content-class="mt-3">
           <template v-for="(room, i) in getLockerProducts">
             <b-tab :title="room.room_name"  :key="i">
@@ -11,7 +11,9 @@
                                 <div class="products-holder d-lg-flex flex-wrap">
                                     <template v-for="(product, ind) in room.product">
                                         <div :key="ind" class="products-block">
+                                          <a @click="editProduct(i, ind)">
                                             <Scene :canvas-width="300" :canvas-height="360" :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
+                                          </a>
                                         </div>
                                     </template>
                                 </div>
@@ -27,7 +29,6 @@
                                              :style="{background: color.colorCode}" :key="index">
                                         </div>
                                       </template>
-
                                     </div>
                                   </div>
                                 </b-tab>
@@ -69,6 +70,7 @@
     })
     export default class CustomizationPreviewProcess extends Vue {
       public apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+      public ref = this.$refs as Record<any, any>
       get getLockerProducts():Record<any, any>{
         return this.$store.getters.getLockerProducts;
       }
@@ -77,6 +79,31 @@
       }
       get lockers():Record<any, any>{
         return  this.$store.getters.getLockers;
+      }
+      get selectedProduct(): Record<any, any>{
+        return this.$store.getters.getSelectedProduct
+      }
+
+      public async editProduct(lockerIndex: number, productIndex: number){
+        const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
+        const element = this.getLockerProducts[lockerIndex].product[productIndex];
+        let res = await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
+        if (res == true){
+          let ind = this.products.length - 1;
+          await this.$store.dispatch('setSelectedIndex', {selectedIndex:ind});
+          let selectedIndex = this.selectedProduct.productstyles.findIndex((x:Record<any, any>) => x.id === element.style_id);
+          await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+          await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
+          await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
+          this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
+            if (item.id == element.design_id){
+              Vue.set(item, 'design_show', 1)
+            }else{
+              Vue.set(item, 'design_show', 0)
+            }
+          });
+          this.ref['locker-modal'].hide();
+       }
       }
     }
 

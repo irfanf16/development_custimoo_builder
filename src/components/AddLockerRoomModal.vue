@@ -32,6 +32,9 @@
       public room_id = 0;
       public ref = this.$refs as Record<any, any>
 
+      get customTexts(): [Record<any, any>] {
+        return this.$store.getters.getCustomTexts
+      }
       get lockers(){
         return this.$store.getters.getLockers;
       }
@@ -65,7 +68,7 @@
             style_id: this.selectedProduct.productstyles[this.styleIndex].id,
             design_id: currentDesign[0].id,
             custom_logos: this.customLogos,
-            text:'',
+            text: this.customTexts,
             colors: this.logoColors
           }
           this.$store.dispatch("SAVE_TO_LOCKER", locker);
