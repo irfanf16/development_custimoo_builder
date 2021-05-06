@@ -38,7 +38,7 @@
           </div>
           <button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold">Save Logo</button>
         </div>
-        <div class="logo-placement-area" v-if="index == 0">
+        <div class="logo-placement-area extracted-color-area" v-if="index == 0">
           <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
           <div class="logo-placement-holder mb-lg-3">
             <div class="logo-holder color-extracted-area">
@@ -46,8 +46,11 @@
                 <div class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.colorCode}" :key="index"></div>
               </div>
             </div>
+            <b-button class="use-btn">Use These Colors</b-button>
+            <b-button variant="outline-secondary">Shuffle</b-button>
+            <b-button class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
           </div>
-          <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold">Save Color</button>
+          <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color">Save Color</button>
         </div>
         <template v-if="manageComponents.LogoArea">
           <UploadLogo :customLogoIndex="index" @logoChange="getLogoColors"/>
@@ -235,6 +238,44 @@ export default class LogoPlacementTabs extends Vue {
         max-width: 100%;
         font-size: 14px;
         padding: 0.50rem 0.75rem;
+      }
+    }
+    &.extracted-color-area{
+      .logo-placement-holder{
+        @media only screen and (max-width: 992px){
+          flex: 0 0 100%;
+          max-width: 100%;
+        }
+      }
+      .btn{
+        flex: none;
+        &.use-btn{
+          background: none;
+          padding: 0 0 2px;
+          margin: 0;
+          border: none;
+          border-bottom: 2px solid #F7FAFC;
+          color: #808895;
+          font-size: 14px;
+          max-width: 35%;
+          @media only screen and (min-width: 992px){
+            max-width: 30%;
+          }
+        }
+        &.reset{
+          background: none;
+          color: #03142E;
+          border: none;
+          padding: 0;
+          width: auto;
+        }
+      }
+      .btn-save-color{
+        @media only screen and (max-width: 992px){
+          flex: 0 0 100%;
+          max-width: 100%;
+          margin-top: 20px;
+        }
       }
     }
   }
