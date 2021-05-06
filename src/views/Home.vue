@@ -162,9 +162,7 @@ export default class Home extends Vue {
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
   }
-  get getLockerProducts():Record<any, any>{
-    return this.$store.getters.getLockerProducts;
-  }
+
 
   getFillColors() {
     const url = '/product/colors?default_color=1'
@@ -191,7 +189,7 @@ export default class Home extends Vue {
               this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
               this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
               this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
-          } 
+          }
     }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {

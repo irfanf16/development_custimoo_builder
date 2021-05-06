@@ -65,6 +65,15 @@ const ProductAttributes:Module<any, any> = {
       if(color) {
         Vue.set(state.defaultColors[color.index], 'color', color.value)
       }
+    },
+    ADD_TO_PRODUCTS(state:Record<any, any>, payload){
+      state.products.push(payload);
+    },
+    OVERRIDE_LOGOS(state:Record<any, any>, payload){
+      state.customLogos = payload;
+    },
+    OVERRIDE_TEXT(state:Record<any, any>, payload){
+      state.customTexts = payload;
     }
   },
   getters: {
@@ -124,6 +133,22 @@ const ProductAttributes:Module<any, any> = {
     },
     setDefaultColor ({commit}, payload) {
       commit('defaultColor', payload)
+    },
+    async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
+      let done = false;
+      await http.get("product?product_id="+payload).then((res) => {
+        if (res.status == 200) {
+          commit('ADD_TO_PRODUCTS', res.data.products[0]);
+          done = true;
+        }
+      });
+      return done;
+    },
+    async OVERRIDE_CUSTOM_LOGOS({commit}, payload:Record<any, any>){
+     await commit('OVERRIDE_LOGOS', payload);
+    },
+    async OVERRIDE_CUSTOM_TEXT({commit}, payload:Record<any, any>){
+     await commit('OVERRIDE_TEXT', payload);
     }
   }
 }

@@ -17,7 +17,7 @@
         <b-card>
           <b-nav-form>
             <b-form-input v-model="search" class="mr-sm-2" placeholder="Search"></b-form-input>
-            <b-button @click="searchProducts(search, 'search')" variant="outline-success"
+            <b-button class="search-button" @click="searchProducts(search, 'search')" variant="outline-success"
                       type="button">Search
             </b-button>
           </b-nav-form>
@@ -50,6 +50,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
     .btn-outline-success{
       border-color: #219F84;
       color: #219F84;
+      font-size: 0.8rem;
     }
   }
   @media only screen and (min-width: 992px){margin: 0 0 15px;}
