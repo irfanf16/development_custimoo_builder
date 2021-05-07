@@ -168,6 +168,7 @@ export default class CustomizationProcess extends Vue {
   public productColors: any[] = []
   public fontsColors: any[] = []
   public firstColor!: string
+  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
 
   public productColorsManipulation(){
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
@@ -245,7 +246,7 @@ export default class CustomizationProcess extends Vue {
     })
   }
 
-  public fontsList() {
+  public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
     productFonts.forEach((fonts: any, key: number) => {
       let fontNameParam = fonts.file_url.split('/').reverse()
@@ -260,9 +261,6 @@ export default class CustomizationProcess extends Vue {
       const headElement = document.querySelector('head') as HTMLHeadElement
       headElement.innerHTML += "<style type='text/css'> @font-face{font-family: "+ font.value + "; src: url('" + fontUrl + "')}</style>";
     })
-    if(this.fontOptions.length){
-      this.selectedFont = this.fontOptions[0].value
-    }
   }
 
   public addTab(index: number){
