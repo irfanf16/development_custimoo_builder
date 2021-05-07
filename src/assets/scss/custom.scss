@@ -717,6 +717,7 @@ a:hover{color: #219f84;}
             .color-holder{
                 max-height: 0;
                 transition: none;
+                margin: 0;
                 .nav{margin: 0 0 15px;}
                 a.nav-link{
                     padding: 0;
@@ -947,6 +948,7 @@ a:hover{color: #219f84;}
           position: static;
           padding-bottom: 0;
           border-top: 0;
+          justify-content: flex-start;
           .nav-link{
               font-size: 12px;
               font-weight: 400;
@@ -962,6 +964,17 @@ a:hover{color: #219f84;}
                   border-bottom: 2px solid #219F84;
               }
           }
+          .nav-item{
+              margin: 0 0 0 1rem;
+              &:first-child{margin: 0;}
+            }
+        }
+        .add-logo-btn{
+            position: absolute;
+            content: '';
+            right: 20px;
+            top: 10px;
+            z-index: 1;
         }
     }
     .color-tabs{

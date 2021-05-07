@@ -59,7 +59,7 @@
                 <b-button @click="showAdvanceCustomization()" class="d-none d-lg-inline-block mt-5" variant="secondary">Continue</b-button>
               </template>
               <template v-if="manageComponents.AdvanceCustomization">
-                <div class="continue-btn-holder pt-5">
+                <div class="d-none d-lg-block continue-btn-holder pt-5">
                   <b-button @click="showBasicCustomization()" class="mx-2 px-5 back-btn" variant="secondary">Back
                   </b-button>
                   <b-button class="mx-2 px-5" variant="secondary">Next</b-button>

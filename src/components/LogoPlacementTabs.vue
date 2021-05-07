@@ -259,8 +259,12 @@ export default class LogoPlacementTabs extends Vue {
           color: #808895;
           font-size: 14px;
           max-width: 35%;
-          @media only screen and (min-width: 992px){
+          @media only screen and (min-width: 1024px){
+            font-size: 13px;
+          }
+          @media only screen and (min-width: 1367px){
             max-width: 30%;
+            font-size: 14px;
           }
         }
         &.reset{
