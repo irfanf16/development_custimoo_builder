@@ -74,7 +74,8 @@ const Product:Module<any, any> = {
     },
     SET_LOGO_COLORS({commit}, payload:Record<any, any>){
       commit('SET_LOGO_COLORS', payload);
-    }
+    },
+
   }
 }
 export default Product;

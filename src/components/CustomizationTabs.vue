@@ -15,7 +15,7 @@
         <div class="logo-placement-tabs" v-if="hideTab.logoHide">
           <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting" />
         </div>
-      </b-tab>  
+      </b-tab>
       <b-tab>
         <button @click="setHideTab('colorHide', !hideTab.colorHide)" class="tab-close-btn d-lg-none"></button>
         <template #title>
@@ -47,32 +47,28 @@
           Text
         </template>
         <div class="d-none d-lg-block">
-          <CustomizationText :productFonts="selectedProduct.namefonts" :fontsColors="fontsColors"/>
+          <div v-for="(customText, index) in customTexts" :key="index" >
+            <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index" :fontsColors="fontsColors" :fontOptions="fontOptions"/>
+          </div>
+          <div class="px-3 pt-3 p-lg-4 text-right">
+            <b-button class="add-logo-btn"  @click="addTab(customTexts.length)">
+              +
+            </b-button>
+          </div>
         </div>
         <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
           <b-tabs>
-            <b-tab>
+            <div class="px-3 pt-3 p-lg-4 text-right">
+              <b-button class="add-logo-btn"  @click="addTab(customTexts.length)">
+                +
+              </b-button>
+            </div>
+            <b-tab v-for="(customText, index) in customTexts" :key="index">
               <template #title>
                 Player Name
               </template>
               <div>
-<!--                <CustomizationText :productFonts="selectedProduct.namefonts" :fontsColors="fontsColors"/>-->
-              </div>
-            </b-tab>
-            <b-tab>
-              <template #title>
-                Player Number
-              </template>
-              <div>
-<!--                <CustomizationText :productFonts="selectedProduct.namefonts" :fontsColors="fontsColors"/>-->
-              </div>
-            </b-tab>
-            <b-tab>
-              <template #title>
-                Player Name Or Number
-              </template>
-              <div>
-<!--                <CustomizationText :productFonts="selectedProduct.namefonts" :fontsColors="fontsColors"/>-->
+                <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index" :fontsColors="fontsColors" :fontOptions="fontOptions"/>
               </div>
             </b-tab>
           </b-tabs>
@@ -114,7 +110,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
 import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
@@ -138,9 +134,12 @@ import {http} from "@/httpCommon";
     this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
     this.fontsColorsManipulation()
+    this.fontsList()
+    this.customTextInit()
   },
 })
 export default class CustomizationProcess extends Vue {
+  public fontOptions: Record<any, any>[] = []
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
   }
@@ -150,8 +149,25 @@ export default class CustomizationProcess extends Vue {
   get productModels():Record<any, any>{
     return  this.$store.getters.getProductModels;
   }
+
+  get customTexts(): [Record<any, any>] {
+    return this.$store.getters.getCustomTexts
+  }
+
+  get productNames() {
+    return this.$store.getters.getSelectedProduct.productnames;
+  }
+
+  @Watch('productNames', {
+    immediate: true
+  })
+  productNamesChanged() {
+    this.customTextInit()
+  }
+
   public productColors: any[] = []
   public fontsColors: any[] = []
+  public firstColor!: string
 
   public productColorsManipulation(){
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
@@ -166,6 +182,9 @@ export default class CustomizationProcess extends Vue {
       colors.color_text = JSON.parse(colors.color_text)
       this.fontsColors = this.fontsColors.concat(colors)
     })
+    if(this.fontsColors.length){
+      this.firstColor = this.fontsColors[0].color_text[0].value
+    }
   }
 
   public async getModels(){
@@ -182,6 +201,88 @@ export default class CustomizationProcess extends Vue {
 
   public setHideTab(index: string, value: boolean) {
     Vue.set(this.hideTab, index, value)
+  }
+
+  public customTextInit(){
+    this.productNames.forEach((productName: Record<any, any>, index: number) => {
+      if(this.customTexts[index] && !this.customTexts[index].action){
+        let text = {
+          text: this.customTexts[index].text,
+          type: productName.type,
+          width: productName.width,
+          height: productName.height,
+          x_axis: productName.x_axis,
+          y_axis: productName.y_axis,
+          rotation: productName.rotation,
+          haveControls: Boolean(productName.is_locked),
+          outlineEnabled: Boolean(productName.outline_enabled),
+          side: productName.side,
+          fontFamily: this.customTexts[index].fontFamily? this.customTexts[index].fontFamily : this.fontOptions[0].value,
+          fillColor: this.customTexts[index].fillColor? this.customTexts[index].fillColor : this.firstColor,
+          outLineColor: this.customTexts[index].outLineColor? this.customTexts[index].outLineColor : this.firstColor,
+          selectColor: false
+        }
+        this.$store.dispatch('setCustomTexts', {index: index, text: text})
+      }else if(!this.customTexts[index]){
+        let text = {
+          text: '',
+          type: productName.type,
+          width: productName.width,
+          height: productName.height,
+          x_axis: productName.x_axis,
+          y_axis: productName.y_axis,
+          rotation: productName.rotation,
+          haveControls: Boolean(productName.is_locked),
+          outlineEnabled: Boolean(productName.outline_enabled),
+          side: productName.side,
+          fontFamily: this.fontOptions[0]? this.fontOptions[0].value : '',
+          fillColor: this.firstColor,
+          outLineColor: this.firstColor,
+          selectColor: false
+        }
+        this.$store.dispatch('setCustomTexts', {index: index, text: text})
+      }
+    })
+  }
+
+  public fontsList() {
+    let productFonts = this.selectedProduct.namefonts
+    productFonts.forEach((fonts: any, key: number) => {
+      let fontNameParam = fonts.file_url.split('/').reverse()
+      fontNameParam = fontNameParam[0].split('.')
+      let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+      let font = {
+        value: fontNameParam[0] as string,
+        text: fontName as string
+      }
+      this.fontOptions = this.fontOptions.concat([font])
+      let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
+      const headElement = document.querySelector('head') as HTMLHeadElement
+      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: "+ font.value + "; src: url('" + fontUrl + "')}</style>";
+    })
+    if(this.fontOptions.length){
+      this.selectedFont = this.fontOptions[0].value
+    }
+  }
+
+  public addTab(index: number){
+    let text = {
+      text: '',
+      type: 'name',
+      width: 100,
+      height: 50,
+      x_axis: 150,
+      y_axis: 150,
+      rotation: 0,
+      haveControls: true,
+      outlineEnabled: true,
+      side: 'back',
+      fontFamily: this.fontOptions[0]? this.fontOptions[0].value: '',
+      fillColor: this.firstColor,
+      outLineColor: this.firstColor,
+    }
+
+    this.$store.dispatch('setCustomTexts', { index: this.customTexts.length, text: text })
   }
 }
 </script>

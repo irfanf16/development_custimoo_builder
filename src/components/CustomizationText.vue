@@ -1,38 +1,37 @@
 <template>
-  <div >
-  <div class="customization-text-area" v-for="(customText, index) in customTexts" :key="index">
+  <div class="customization-text-area">
     <div class="px-3 pt-3 p-lg-4">
-      <h2 class="fw-bold mb-2 fz-18">Player {{ customText.type | capitalize }}</h2>
+      <h2 class="fw-bold mb-2 fz-18">Player {{ customTexts[customTextIndex].type | capitalize }}</h2>
       <b-form>
         <!-- <h4 class="mt-1 mt-lg-3 mb-2 fz-16">Player {{ customText.type | capitalize }}</h4> -->
         <b-form-input
           class="mb-2 mr-sm-2 mb-sm- 0"
           placeholder="Type Here"
-          v-model="customText.text"
+          v-model="customTexts[customTextIndex].text"
         ></b-form-input>
         <h4 class="mt-3 mb-2 fz-16">Font Type</h4>
         <div class="font-type-area">
           <div class="type-block">
-            <b-form-select v-model="customText.fontFamily" :options="fontOptions" ></b-form-select>
+            <b-form-select v-model="customTexts[customTextIndex].fontFamily" :options="fontOptions" ></b-form-select>
           </div>
           <div class="arc-block">
-            <b-form-select v-model="customText.side" :options="['front', 'back']"></b-form-select>
+            <b-form-select v-model="customTexts[customTextIndex].side" :options="['front', 'back']"></b-form-select>
           </div>
         </div>
       </b-form>
       <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
-      <div class="text-color-holder" :class="{ active: customText.selectColor }">
-        <a @click="showColor('fill', index)">
+      <div class="text-color-holder" :class="{ active: customTexts[customTextIndex].selectColor }">
+        <a @click="showColor('fill', customTextIndex)">
           <div class="text-color-box">
             <div class="color-circle"
-                 :style="{ background : customText.fillColor? customText.fillColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
+                 :style="{ background : customTexts[customTextIndex].fillColor? customTexts[customTextIndex].fillColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
             <strong>Fill Color</strong>
           </div>
         </a>
-        <a @click="showColor('outline', index)">
+        <a @click="showColor('outline', customTextIndex)" v-if="customTexts[customTextIndex].outlineEnabled">
           <div class="text-color-box">
             <div class="color-circle"
-                 :style="{ background : customText.outLineColor? customText.outLineColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
+                 :style="{ background : customTexts[customTextIndex].outLineColor? customTexts[customTextIndex].outLineColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
             <strong>Outline Color</strong>
           </div>
         </a>
@@ -52,13 +51,6 @@
       </div>
     </div>
   </div>
-  <div class="px-3 pt-3 p-lg-4 text-right">
-    <b-button class="add-logo-btn"  @click="addTab(customTexts.length)">
-      +
-    </b-button>
-  </div>
-  </div>
-
 </template>
 
 <script lang="ts">
@@ -67,13 +59,8 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 
 @Component<CustomizationText>({
   mounted() {
-    this.fontsList()
     this.$nextTick(() => {
       this.selectType(this.selectTypeIndex)
-      if(this.fontColor.length){
-        this.firstColor = this.fontColor[0].value
-        this.customTextInit()
-      }
     })
   },
   filters: {
@@ -87,14 +74,15 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 export default class CustomizationText extends Vue {
   @Prop({required: true}) productFonts!: any
   @Prop({required: true}) fontsColors!: any
-  public fontOptions: Record<any, any>[] = []
+  @Prop({required: true}) customTextIndex!: any
+  @Prop({required: true}) fontOptions!: any
+  public selectedFont = null
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public colorImage = '/img/images/color-placeholder.png'
   public fontColorType!: string
   public fontColorIndex!: number
   public selectTypeIndex = 0
   public fontColor: any[] = []
-  public firstColor!: string
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
@@ -102,69 +90,6 @@ export default class CustomizationText extends Vue {
 
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts
-  }
-
-  @Watch('productNames', {
-    immediate: true
-  })
-  productNamesChanged() {
-    this.customTextInit()
-  }
-
-  public customTextInit(){
-    this.productNames.forEach((productName: Record<any, any>, index: number) => {
-      if(this.customTexts[index] && !this.customTexts[index].action){
-        let text = {
-          text: this.customTexts[index].text,
-          type: productName.type,
-          width: productName.width,
-          height: productName.height,
-          x_axis: productName.x_axis,
-          y_axis: productName.y_axis,
-          rotation: productName.rotation,
-          haveControls: Boolean(productName.is_locked),
-          side: productName.side,
-          fontFamily: this.customTexts[index].fontFamily? this.customTexts[index].fontFamily : this.fontOptions[0].value,
-          fillColor: this.customTexts[index].fillColor? this.customTexts[index].fillColor : this.firstColor,
-          outLineColor: this.customTexts[index].outLineColor? this.customTexts[index].outLineColor : this.firstColor,
-          selectColor: false
-        }
-        this.$store.dispatch('setCustomTexts', {index: index, text: text})
-      }else if(!this.customTexts[index]){
-        let text = {
-          text: '',
-          type: productName.type,
-          width: productName.width,
-          height: productName.height,
-          x_axis: productName.x_axis,
-          y_axis: productName.y_axis,
-          rotation: productName.rotation,
-          haveControls: Boolean(productName.is_locked),
-          side: productName.side,
-          fontFamily: this.fontOptions[0]? this.fontOptions[0].value : '',
-          fillColor: this.firstColor,
-          outLineColor: this.firstColor,
-          selectColor: false
-        }
-        this.$store.dispatch('setCustomTexts', {index: index, text: text})
-      }
-    })
-  }
-
-  public fontsList() {
-    this.productFonts.forEach((fonts: any, key: number) => {
-      let fontNameParam = fonts.file_url.split('/').reverse()
-      fontNameParam = fontNameParam[0].replace(' ', '-').split('.')
-      let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-      let font = {
-        value: fontNameParam[0] as string,
-        text: fontName as string
-      }
-      this.fontOptions = this.fontOptions.concat([font])
-      let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
-      const headElement = document.querySelector('head') as HTMLHeadElement
-      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: "+ font.value + "; src:url('" + fontUrl + "') format('opentype')}</style>";
-    })
   }
 
   public showColor(fontColorType: any, fontColorIndex: number) {
@@ -191,25 +116,6 @@ export default class CustomizationText extends Vue {
   public selectType(index: number) {
     this.selectTypeIndex = index
     this.fontColor = this.fontsColors[this.selectTypeIndex].color_text
-  }
-
-  public addTab(index: number){
-    let text = {
-      text: '',
-      type: 'name',
-      width: 100,
-      height: 50,
-      x_axis: 150,
-      y_axis: 150,
-      rotation: 0,
-      haveControls: true,
-      side: 'back',
-      fontFamily: this.fontOptions[0]? this.fontOptions[0].value: '',
-      fillColor: '',
-      outLineColor: '',
-    }
-
-    this.$store.dispatch('setCustomTexts', { index: this.customTexts.length, text: text })
   }
 
 }
