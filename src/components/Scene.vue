@@ -246,23 +246,23 @@ export default class Scene extends Vue {
     })
 
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
-      if (groupColors[item.id]) {
-        item.set('fill', groupColors[item.id]);
+      if (groupColors[item.id.toLowerCase()]) {
+        item.set('fill', groupColors[item.id.toLowerCase()]);
       }
     })
     this.frontCanvas.renderAll()
 
     if(this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
-        if (groupColors[item.id]) {
-          item.set('fill', groupColors[item.id]);
+        if (groupColors[item.id.toLowerCase()]) {
+          item.set('fill', groupColors[item.id.toLowerCase()]);
         }
       })
       this.backCanvas.renderAll()
     }
   }
   public getSvgGroups(): void {
-    this.svgGroups = this.frontTexture.getObjects().map((item: Record<any, any>) => item.id.charAt(0).toUpperCase() + item.id.slice(1))
+    this.svgGroups = this.frontTexture.getObjects().map((item: Record<any, any>) => item.id.toLowerCase())
       .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
 
     if(this.back) {
@@ -274,7 +274,7 @@ export default class Scene extends Vue {
     }
   }
 
-  public loadScene(ImageData: any, side: string) {
+  public loadScene(ImageData: any, side: string): void {
     let element = this.$refs.front as HTMLCanvasElement
     if (side === 'back') {
       element = this.$refs.back as HTMLCanvasElement;
@@ -335,7 +335,12 @@ export default class Scene extends Vue {
 
     const timer = setInterval(() => {
       if (model && texture) {
+        this.getSvgGroups()
+        if(this.defaultColors.length) {
+          this.changGroupColor()
+        }
         canvas.add(texture)
+        canvas.viewportCenterObject(texture)
         self.logoObjects.forEach((logoObject) => {
           canvas.add(logoObject)
         })
@@ -347,13 +352,8 @@ export default class Scene extends Vue {
         })
 
         canvas.add(model)
-        canvas.viewportCenterObject(texture)
-        if(this.defaultColors.length) {
-          this.changGroupColor()
-        }
         canvas.viewportCenterObject(model)
         canvas.renderAll()
-        this.getSvgGroups()
 
         let logos = this.logos
 
