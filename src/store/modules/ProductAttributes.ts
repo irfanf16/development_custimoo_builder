@@ -10,7 +10,8 @@ const ProductAttributes:Module<any, any> = {
     customTexts: [],
     isAssociation: false,
     styleIndex: 0,
-    defaultColors: [{name: 'Color One', color: null}, {name: 'Color Two', color: null}, {name: 'Color Three', color: null}, {name: 'Color Four', color: null}]
+    defaultColors: [{name: 'Color One', color: null}, {name: 'Color Two', color: null}, {name: 'Color Three', color: null}, {name: 'Color Four', color: null}],
+    mainColors: []
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: Record<any, any>){
@@ -65,6 +66,16 @@ const ProductAttributes:Module<any, any> = {
       if(color) {
         Vue.set(state.defaultColors[color.index], 'color', color.value)
       }
+    },
+    SET_MAIN_COLORS (state: Record<any, any>, colors: Record<any, any>) {
+      if(colors) {
+        state.mainColors = colors
+      }
+    },
+    UPDATE_MAIN_COLORS (state: Record<any, any>, color: Record<any, any>) {
+      if(color) {
+        Vue.set(state.mainColors, color.index, color)
+      }
     }
   },
   getters: {
@@ -90,6 +101,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getDefaultColors: state => {
       return state.defaultColors
+    },
+    getMainColors: state => {
+      return state.mainColors
     }
   },
   actions: {
@@ -124,6 +138,12 @@ const ProductAttributes:Module<any, any> = {
     },
     setDefaultColor ({commit}, payload) {
       commit('defaultColor', payload)
+    },
+    setMainColor ({commit}, payload) {
+      commit('SET_MAIN_COLORS', payload)
+    },
+    updateMainColor ({commit}, payload) {
+      commit('UPDATE_MAIN_COLORS', payload)
     }
   }
 }

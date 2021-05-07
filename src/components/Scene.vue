@@ -20,14 +20,6 @@ import {Group} from 'fabric/fabric-impl'
     if (this.back) {
       this.loadScene(this.back, 'back')
     }
-
-    const self = this
-    // setTimeout(() => {
-    //   console.log(self.fillColors)
-    //   if(self.fillColors){
-    //     self.changeColor()
-    //   }
-    // }, 3000)
   }
 })
 
@@ -54,7 +46,8 @@ export default class Scene extends Vue {
   private mounted = false
   private frontModel: any
   private backModel: any
-  private showSmall = {front: false, back: this.manageComponents.mobileScreen}
+  private showSmall = { front: false, back: this.manageComponents.mobileScreen }
+  private svgGroups: any[] = []
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -70,6 +63,10 @@ export default class Scene extends Vue {
 
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
+  }
+
+  get defaultColors() : [Record<any, any>] {
+    return this.$store.getters.getDefaultColors.filter((defaultColor: Record<any, any>) => { return defaultColor.color })
   }
 
   @Watch('customLogos', {
@@ -190,6 +187,7 @@ export default class Scene extends Vue {
                 textObject.fontFamily = text.fontFamily
                 textObject.set('fill', text.fillColor)
                 textObject.set('stroke', text.outLineColor)
+                console.log(textObject.fontFamily)
                 canvas.renderAll()
 
                 if (text.action == 'drag') {
@@ -226,6 +224,54 @@ export default class Scene extends Vue {
       })
     }
     this.mounted = true
+  }
+
+  @Watch('defaultColors', {
+    deep: true
+  })
+  defaultColorsChanged() {
+    this.changGroupColor()
+  }
+
+  public changGroupColor () {
+    let groupColors: string[] = []
+    let useColorIndex = 0
+
+    this.svgGroups.forEach((svgGroup: any) => {
+      groupColors[svgGroup] = this.defaultColors[useColorIndex].color
+      useColorIndex++
+      if(useColorIndex >= this.defaultColors.length) {
+        useColorIndex = 0
+      }
+    })
+
+    this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+      if (groupColors[item.id]) {
+        item.set('fill', groupColors[item.id]);
+      }
+    })
+    this.frontCanvas.renderAll()
+
+    if(this.back) {
+      this.backTexture.getObjects().forEach((item: Record<any, any>) => {
+        if (groupColors[item.id]) {
+          item.set('fill', groupColors[item.id]);
+        }
+      })
+      this.backCanvas.renderAll()
+    }
+  }
+  public getSvgGroups(): void {
+    this.svgGroups = this.frontTexture.getObjects().map((item: Record<any, any>) => item.id.charAt(0).toUpperCase() + item.id.slice(1))
+      .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
+
+    if(this.back) {
+      let back = this.backTexture.getObjects().map((item: Record<any, any>) => item.id)
+        .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
+
+      this.svgGroups = ([...this.svgGroups, ...back])
+        .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
+    }
   }
 
   public loadScene(ImageData: any, side: string) {
@@ -302,8 +348,12 @@ export default class Scene extends Vue {
 
         canvas.add(model)
         canvas.viewportCenterObject(texture)
+        if(this.defaultColors.length) {
+          this.changGroupColor()
+        }
         canvas.viewportCenterObject(model)
         canvas.renderAll()
+        this.getSvgGroups()
 
         let logos = this.logos
 
@@ -519,27 +569,7 @@ export default class Scene extends Vue {
     })
   }
 
-  public changeColor() {
-    const self = this
-
-    const svgGroupIds = this.frontTexture.getObjects().map((item: Record<any, any>) => item.id)
-      .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
-
-    let colorsByGroup = []
-    let useColorIndex = 0
-    svgGroupIds.forEach((groupId: string) => {
-      colorsByGroup.push({id: groupId, color: self.fillColors[useColorIndex].color})
-    })
-
-    this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
-      if (item.id == 'Base') {
-        item.set('fill', self.fillColors[0].color);
-      }
-    });
-    this.frontCanvas.renderAll()
-  }
-
-  public setShowSmall(side: string) {
+  public setShowSmall(side: string): void {
     if(this.manageComponents.mobileScreen && this.backCanvas) {
       if(side == 'back') {
         Vue.set(this.showSmall, 'back', true)
