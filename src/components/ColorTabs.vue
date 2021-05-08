@@ -1,213 +1,78 @@
 <template>
-    <b-tabs>
-        <b-tab>
-            <template #title>
-            Primary
-            </template>
-            <div>
-            <b-card-body>
-                <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
-                    <b-nav-item>NHL</b-nav-item>
-                    <b-nav-item>Baseball</b-nav-item>
-                    <b-nav-item>Soccer</b-nav-item>
-                    <b-nav-item>Locker Room</b-nav-item>
-                    <b-nav-item>Other</b-nav-item>
-                </b-nav>
-                <div class="color-holder">
-                    <div class="color-container">
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                    </div>
-                </div>
-            </b-card-body>
+  <b-tabs>
+    <b-tab v-for="(svgElement, index) in svgElements" :key="index" @click="showColor(index)">
+      <template #title>
+        {{ svgElement.name }}
+      </template>
+      <div>
+        <b-card-body>
+          <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
+            <b-nav-item v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
+              {{ colorType.file_type }}
+            </b-nav-item>
+            <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
+          </b-nav>
+          <div class="color-holder">
+            <div class="color-container">
+              <div v-if="showOther" class="custom-color-picker">
+                <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
+              </div>
+              <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color.value)"
+                   :title="color.name" :style="{background: color.value}" :key="index">
+              </div>
             </div>
-        </b-tab>
-        <b-tab>
-            <template #title>
-            Stripe
-            </template>
-            <div>
-            <b-card-body>
-                <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
-                    <b-nav-item>NHL</b-nav-item>
-                    <b-nav-item>Baseball</b-nav-item>
-                    <b-nav-item>Soccer</b-nav-item>
-                    <b-nav-item>Locker Room</b-nav-item>
-                    <b-nav-item>Other</b-nav-item>
-                </b-nav>
-                <div class="color-holder">
-                    <div class="color-container">
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                    </div>
-                </div>
-            </b-card-body>
-            </div>
-        </b-tab>
-        <b-tab>
-            <template #title>
-            Sleeves
-            </template>
-            <div>
-            <b-card-body>
-                <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
-                    <b-nav-item>NHL</b-nav-item>
-                    <b-nav-item>Baseball</b-nav-item>
-                    <b-nav-item>Soccer</b-nav-item>
-                    <b-nav-item>Locker Room</b-nav-item>
-                    <b-nav-item>Other</b-nav-item>
-                </b-nav>
-                <div class="color-holder">
-                    <div class="color-container">
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                    </div>
-                </div>
-            </b-card-body>
-            </div>
-        </b-tab>
-        <b-tab>
-            <template #title>
-            Collar
-            </template>
-            <div>
-            <b-card-body>
-                <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
-                    <b-nav-item>NHL</b-nav-item>
-                    <b-nav-item>Baseball</b-nav-item>
-                    <b-nav-item>Soccer</b-nav-item>
-                    <b-nav-item>Locker Room</b-nav-item>
-                    <b-nav-item>Other</b-nav-item>
-                </b-nav>
-                <div class="color-holder">
-                    <div class="color-container">
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                    </div>
-                </div>
-            </b-card-body>
-            </div>
-        </b-tab>
-        <b-tab>
-            <template #title>
-            Secondry
-            </template>
-            <div>
-            <b-card-body>
-                <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
-                    <b-nav-item>NHL</b-nav-item>
-                    <b-nav-item>Baseball</b-nav-item>
-                    <b-nav-item>Soccer</b-nav-item>
-                    <b-nav-item>Locker Room</b-nav-item>
-                    <b-nav-item>Other</b-nav-item>
-                </b-nav>
-                <div class="color-holder">
-                    <div class="color-container">
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                        <div class="color-box"></div>
-                    </div>
-                </div>
-            </b-card-body>
-            </div>
-        </b-tab>
-    </b-tabs>
+          </div>
+        </b-card-body>
+      </div>
+    </b-tab>
+  </b-tabs>
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator'
+import {Component, Prop, Vue} from 'vue-property-decorator'
+import colorPicker from '@caohenghu/vue-colorpicker'
 
-@Component<ColorTabs>({})
+@Component<ColorTabs>({
+  components: {
+    colorPicker
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.selectType(this.selectTypeIndex)
+    })
+  }
+})
 
-export default class ColorTabs extends Vue{}
+export default class ColorTabs extends Vue {
+  @Prop({required: true}) productColors!: any
+
+  public color = '#59c7f9'
+  public showOther = false
+  public selectTabIndex = 0
+  public selectTypeIndex = 0
+  public productColor: any[] = []
+  public svgElements = [{name: 'Base', color: null}, {name: 'Sleeves', color: null}, {
+    name: 'Pockets',
+    color: null
+  }, {name: 'Hood', color: null}]
+
+  public showColor(index: number) {
+    this.selectTabIndex = index
+  }
+
+  public selectType(index: number, showOther = false) {
+    this.selectTypeIndex = index
+    this.showOther = showOther
+    this.productColor = this.productColors[this.selectTypeIndex].color_text
+  }
+
+  public setColor(color: any) {
+    this.svgElements[this.selectTabIndex].color = color
+  }
+
+  public changeColor(color: any) {
+    this.setColor(color.hex)
+  }
+}
 
 </script>

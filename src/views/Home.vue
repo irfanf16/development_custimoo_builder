@@ -14,7 +14,7 @@
             </template>
           </b-col>
           <b-col v-if="manageComponents.ChooseInterest" cols="12" class="pb-5">
-            <ChooseInterest/>
+            <ChooseInterest :categories="categories" @search="getSearchQuery"/>
           </b-col>
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
