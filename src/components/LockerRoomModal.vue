@@ -12,7 +12,10 @@
                                     <template v-for="(product, ind) in room.product">
                                         <div :key="ind" class="products-block">
                                           <a @click="editProduct(i, ind)">
-                                            <Scene :canvas-width="300" :canvas-height="360" :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
+                                            <Scene :canvas-width="300" :canvas-height="360"
+                                                   :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
+                                                   :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''"
+                                                   :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
                                           </a>
                                         </div>
                                     </template>

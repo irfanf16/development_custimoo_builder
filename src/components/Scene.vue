@@ -26,6 +26,7 @@ import {Group} from 'fabric/fabric-impl'
 export default class Scene extends Vue {
   @Prop({required: true}) readonly front!: Record<string, unknown>;
   @Prop({required: false}) readonly back!: Record<string, unknown>;
+  @Prop({required: false}) readonly backTextureUrl!: string;
   @Prop({required: false}) readonly logos !: [Record<string, any>];
   @Prop({required: false}) readonly logosSettings !: Record<any, any>
   @Prop({required: false}) readonly logoAllowed !: boolean
@@ -236,9 +237,8 @@ export default class Scene extends Vue {
   public changGroupColor () {
     let groupColors: string[] = []
     let useColorIndex = 0
-
-    this.svgGroups.forEach((svgGroup: any) => {
-      groupColors[svgGroup] = this.defaultColors[useColorIndex].color
+    this.svgGroups.forEach((svgGroup: Record<any, any>) => {
+      groupColors[svgGroup.id.toLowerCase()] = this.defaultColors[useColorIndex].color
       useColorIndex++
       if(useColorIndex >= this.defaultColors.length) {
         useColorIndex = 0
@@ -246,32 +246,75 @@ export default class Scene extends Vue {
     })
 
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
-      if (groupColors[item.id.toLowerCase()]) {
-        item.set('fill', groupColors[item.id.toLowerCase()]);
+      item.id = item.id.toLowerCase()
+      if (groupColors[item.id]) {
+        item.set('fill', groupColors[item.id]);
       }
     })
     this.frontCanvas.renderAll()
 
     if(this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
-        if (groupColors[item.id.toLowerCase()]) {
-          item.set('fill', groupColors[item.id.toLowerCase()]);
+        item.id = item.id.toLowerCase()
+        if (groupColors[item.id]) {
+          item.set('fill', groupColors[item.id]);
         }
       })
       this.backCanvas.renderAll()
     }
   }
   public getSvgGroups(): void {
-    this.svgGroups = this.frontTexture.getObjects().map((item: Record<any, any>) => item.id.toLowerCase())
-      .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
+    this.svgGroups = []
+    this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+      item.id = item.id.toLowerCase()
+      if(!this.containsObject({ id: item.id, color: item.fill })) {
+        let count = 1
+        if(item.id == 'base') {
+          count = 100000 // to make base always at first color position
+        }
+        if(item.id != 'inside') {
+          this.svgGroups.push({ id: item.id, color: item.fill, count: count })
+        }
+      }else {
+        this.svgGroups.map((existingItem: Record<any, any>) => {
+          if(existingItem.id == item.id){
+            existingItem.count++
+          }
+        })
+      }
+    })
 
-    if(this.back) {
-      let back = this.backTexture.getObjects().map((item: Record<any, any>) => item.id)
-        .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
-
-      this.svgGroups = ([...this.svgGroups, ...back])
-        .filter((value: string, index: number, self: Record<any, any>) => self.indexOf(value) === index)
+    if(this.backTexture) {
+      this.backTexture.getObjects().forEach((item: Record<any, any>) => {
+        item.id = item.id.toLowerCase()
+        if(!this.containsObject({ id: item.id, color: item.fill })) {
+          let count = 1
+          if(item.id == 'base') {
+            count = 100000 // to make base always at first color position
+          }
+          if(item.id != 'inside') {
+            this.svgGroups.push({ id: item.id, color: item.fill, count: count })
+          }
+        }else {
+          this.svgGroups.map((existingItem: Record<any, any>) => {
+            if(existingItem.id == item.id){
+              existingItem.count++
+            }
+          })
+        }
+      })
     }
+
+    this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
+  }
+
+  public containsObject(obj: Record<any, any>): boolean {
+    for (let i = 0; i < this.svgGroups.length; i++) {
+      if( this.svgGroups[i].id == obj.id) {
+        return true
+      }
+    }
+    return false
   }
 
   public loadScene(ImageData: any, side: string): void {
@@ -306,38 +349,30 @@ export default class Scene extends Vue {
       }
     })
 
-    let texture: any
-    fabric.loadSVGFromURL(ImageData.textureUrl, function (objects: any, options: any) {
-      const img = fabric.util.groupSVGElements(objects) as Group
-      img.scaleToHeight(canvas.getHeight() - 10).set({
-        hasControls: false,
-        selectable: false,
-        evented: false,
-        lockMovementX: true,
-        lockMovementY: true
-      })
+    this.addTexture(ImageData.textureUrl, side)
 
-      // img._objects.forEach((element: any) => {
-      //   if(element.id === 'Laces') {
-      //     element.globalCompositeOperation = 'destination-out'
-      //   }
-      // })
-      img.center().setCoords();
-      texture = img
-      if (side === 'back') {
-        self.backTexture = texture
-      } else {
-        self.frontTexture = texture
-      }
-    })
+    if(this.backTextureUrl) {
+      this.addTexture(this.apiBaseUrl + '/' + this.backTextureUrl, 'back')
+    }
 
     const self = this
 
     const timer = setInterval(() => {
-      if (model && texture) {
-        this.getSvgGroups()
-        if(this.defaultColors.length) {
-          this.changGroupColor()
+      let texture = this.frontTexture
+      if (side == 'back') {
+        texture = this.backTexture
+      }
+      if (model && texture && (!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
+        if (this.back && side == 'back') {
+          this.getSvgGroups()
+          if(this.defaultColors.length) {
+            this.changGroupColor()
+          }
+        } else if(!this.back) {
+          this.getSvgGroups()
+          if(this.defaultColors.length) {
+            this.changGroupColor()
+          }
         }
         canvas.add(texture)
         canvas.viewportCenterObject(texture)
@@ -487,6 +522,33 @@ export default class Scene extends Vue {
         }
       })
     }
+  }
+
+  public addTexture (textureUrl: string, side: string): void {
+    const self = this
+    fabric.loadSVGFromURL(textureUrl, function (objects: any, options: any) {
+      const img = fabric.util.groupSVGElements(objects) as Group
+      img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
+        hasControls: false,
+        selectable: false,
+        evented: false,
+        lockMovementX: true,
+        lockMovementY: true
+      })
+
+      // img._objects.forEach((element: any) => {
+      //   if(element.id === 'Laces') {
+      //     element.globalCompositeOperation = 'destination-out'
+      //   }
+      // })
+      img.center().setCoords();
+
+      if (side == 'back') {
+        self.backTexture = img
+      } else {
+        self.frontTexture = img
+      }
+    })
   }
 
   public addLogos(logos: [Record<any, any>]) {

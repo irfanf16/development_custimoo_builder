@@ -5,6 +5,7 @@
       <a @click="changeDesign(index); showDesign()">
         <Scene :canvas-width="300" :canvas-height="360"
                :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
+               :backTextureUrl="design.back_design? design.back_design.file_url: ''"
                :logos="selectedProduct.productstyles[styleIndex].logo"
                :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count" :productColors="selectedProduct.colors" />
       </a>
