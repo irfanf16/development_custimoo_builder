@@ -7,8 +7,8 @@
                 <RosterDetails />
                 <div class="roster-preview-area">
                     <div class="roster-template-area">
-                        <button class="btn btn-secondary fw-bold">Download Roster Template <a href="#." v-b-tooltip.hover title="Enter roster in excel file"><font-awesome-icon :icon="['fas', 'info-circle']" /></a></button>
-                        <button class="btn btn-secondary fw-bold">Upload Roster Template <a href="#." v-b-tooltip.hover title="Upload the template here to populate the roster"><font-awesome-icon :icon="['fas', 'info-circle']" /></a></button>
+                        <button class="btn btn-secondary fw-bold">Download Roster Template <a href="#" v-b-tooltip.hover title="Enter roster in excel file"><font-awesome-icon :icon="['fas', 'info-circle']" /></a></button>
+                        <button class="btn btn-secondary fw-bold">Upload Roster Template <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster"><font-awesome-icon :icon="['fas', 'info-circle']" /></a></button>
                     </div>
                     <CustomizationPreview :designs="products[designsIndex]" />
                     <OrderDetails />

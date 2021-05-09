@@ -42,11 +42,11 @@
         </b-tabs>
         <!-- <div class="lockerroom-header">
             <div class="locker-opener">
-                <a href="#." class="arrow arrow-left"><font-awesome-icon :icon="['fas', 'arrow-left']" /></a>
+                <a href="#" class="arrow arrow-left"><font-awesome-icon :icon="['fas', 'arrow-left']" /></a>
                 <b-button variant="secondary" class="active">Locker 1</b-button>
-                <b-button variant="secondary">Locker 2<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-                <b-button variant="secondary">Locker 3<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-                <a href="#." class="arrow arrow-right"><font-awesome-icon :icon="['fas', 'arrow-right']" /></a>
+                <b-button variant="secondary">Locker 2<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
+                <b-button variant="secondary">Locker 3<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
+                <a href="#" class="arrow arrow-right"><font-awesome-icon :icon="['fas', 'arrow-right']" /></a>
             </div>
             <div class="create-lockerroom">
                 <b-button class="create-btn" variant="secondary"><span>Create New </span>+</b-button>

@@ -2,11 +2,11 @@
     <b-modal id="modal-center-design" centered scrollable size="xl" title="Save Design" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener">
-                <a href="#." class="arrow arrow-left"><font-awesome-icon :icon="['fas', 'arrow-left']" /></a>
+                <a href="#" class="arrow arrow-left"><font-awesome-icon :icon="['fas', 'arrow-left']" /></a>
                 <b-button variant="secondary" class="active">Locker 1</b-button>
-                <b-button variant="secondary">Locker 2<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-                <b-button variant="secondary">Locker 3<a class="remove" href="#."><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-                <a href="#." class="arrow arrow-right"><font-awesome-icon :icon="['fas', 'arrow-right']" /></a>
+                <b-button variant="secondary">Locker 2<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
+                <b-button variant="secondary">Locker 3<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
+                <a href="#" class="arrow arrow-right"><font-awesome-icon :icon="['fas', 'arrow-right']" /></a>
             </div>
             <div class="create-lockerroom">
                 <b-button class="create-btn" variant="secondary">Create New</b-button>
@@ -30,7 +30,7 @@
 
     import { Component, Vue } from 'vue-property-decorator'
     @Component<SaveDesignModal>({
-        
+
     })
     export default class SaveDesignModal extends Vue {}
 
@@ -113,5 +113,5 @@
             border-color: #219f84;
         }
     }
-    
+
 </style>

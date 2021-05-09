@@ -10,7 +10,7 @@
                         <b-button variant="outline-secondary" v-b-modal.modal-center-design>Edit Your Design</b-button>
                         <SaveDesignModal />
                         <b-button variant="outline-secondary">Save to locker room</b-button>
-                        <a href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
+                        <a href="#"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                     </div>
                 </b-col>
             </b-row>

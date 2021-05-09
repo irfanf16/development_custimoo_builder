@@ -8,8 +8,8 @@
           <b-button variant="outline-secondary">Buy Now</b-button>
         </div>
         <ul class="preview-header-icons">
-          <li><a href="#."><font-awesome-icon :icon="['fas', 'share-alt']" /></a></li>
-          <li><a href="#."><font-awesome-icon :icon="['fas', 'redo-alt']" /></a></li>
+          <li><a href="#"><font-awesome-icon :icon="['fas', 'share-alt']" /></a></li>
+          <li><a href="#"><font-awesome-icon :icon="['fas', 'redo-alt']" /></a></li>
         </ul>
       </header>
       <div class="undo-btn-area text-left pt-3">
@@ -101,5 +101,5 @@
     justify-content: center;
     height: 60vh;
   }
-  
+
 </style>

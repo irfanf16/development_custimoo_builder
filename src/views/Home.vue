@@ -34,10 +34,10 @@
                   <b-button variant="outline-secondary">Buy Now</b-button>
                 </div>
                 <ul class="preview-header-icons">
-                  <li><a href="#.">
+                  <li><a>
                     <font-awesome-icon :icon="['fas', 'share-alt']"/>
                   </a></li>
-                  <li><a href="#.">
+                  <li><a href="#">
                     <font-awesome-icon :icon="['fas', 'redo-alt']"/>
                   </a></li>
                 </ul>
