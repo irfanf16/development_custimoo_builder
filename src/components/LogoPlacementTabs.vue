@@ -1,63 +1,65 @@
 <template>
   <div>
-  <b-button class="add-logo-btn"  v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
-    +
-  </b-button>
-  <b-tabs>
-    <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
-      <template #title>
-        Logo {{ index+1 }}
-        <div v-if="index != 0">
-          <a href="#" class="remove-logo" @click="removeLogoTab(index)">
-            <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-          </a>
-        </div>
-      </template>
-
-      <div class="tabs-logo-container">
-        <div class="logo-placement-area mb-3 mb-lg-4">
-          <div class="logo-placement-holder mb-lg-3">
-            <div class="logo-holder">
-              <template v-if="customLogos[index].url != ''">
-                <div class="additional-holder">
-                  <img ref="logoImg" :src="apiBaseUrl+'/'+customLogos[index].url" alt="logo Shirt"/>
-                </div>
-                <a href="#" class="remove-img" @click="deleteLogo(index)">
-                  <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-                </a>
-              </template>
-              <template v-else>
-                <div class="additional-holder">
-                </div>
-              </template>
-            </div>
-            <div class="logo-placemet-content">
-              <h4>Logo Placement</h4>
-              <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
-            </div>
+    <b-button class="add-logo-btn"  v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
+      +
+    </b-button>
+    <b-tabs>
+      <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
+        <template #title>
+          Logo {{ index+1 }}
+          <div v-if="index != 0">
+            <a href="#" class="remove-logo" @click="removeLogoTab(index)">
+              <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+            </a>
           </div>
-          <button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold">Save Logo</button>
-        </div>
-        <div class="logo-placement-area extracted-color-area" v-if="index == 0">
-          <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
-          <div class="logo-placement-holder mb-lg-3">
-            <div class="logo-holder color-extracted-area">
-              <div class="color-extract-container">
-                <div class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.colorCode}" :key="index"></div>
-              </div>
-            </div>
-            <b-button class="use-btn">Use These Colors</b-button>
-            <b-button variant="outline-secondary">Shuffle</b-button>
-            <b-button class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
-          </div>
-          <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color">Save Color</button>
-        </div>
-        <template v-if="manageComponents.LogoArea">
-          <UploadLogo :customLogoIndex="index" @logoChange="getLogoColors"/>
         </template>
-      </div>
-    </b-tab>
-  </b-tabs>
+
+        <div class="tabs-logo-container">
+          <template v-if="customLogos[index].url != ''">
+            <div class="logo-placement-area mb-3 mb-lg-4">
+              <div class="logo-placement-holder mb-lg-3">
+                <div class="logo-holder">
+                  <template v-if="customLogos[index].url != ''">
+                    <div class="additional-holder">
+                      <img ref="logoImg" :src="apiBaseUrl+'/'+customLogos[index].url" alt="logo Shirt"/>
+                    </div>
+                    <a href="#" class="remove-img" @click="deleteLogo(index)">
+                      <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                    </a>
+                  </template>
+                  <template v-else>
+                    <div class="additional-holder">
+                    </div>
+                  </template>
+                </div>
+                <div class="logo-placemet-content">
+                  <h4>Logo Placement</h4>
+                  <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
+                </div>
+              </div>
+              <button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold">Save Logo</button>
+            </div>
+            <div class="logo-placement-area extracted-color-area" v-if="index == 0">
+              <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
+              <div class="logo-placement-holder mb-lg-3">
+                <div class="logo-holder color-extracted-area">
+                  <div class="color-extract-container">
+                    <div class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.colorCode}" :key="index"></div>
+                  </div>
+                </div>
+                <b-button class="use-btn">Use These Colors</b-button>
+                <b-button variant="outline-secondary">Shuffle</b-button>
+                <b-button class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
+              </div>
+              <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color">Save Color</button>
+            </div>
+          </template>
+          <template v-if="manageComponents.LogoArea">
+            <UploadLogo :customLogoIndex="index" @logoChange="getLogoColors"/>
+          </template>
+        </div>
+      </b-tab>
+    </b-tabs>
   </div>
 </template>
 
