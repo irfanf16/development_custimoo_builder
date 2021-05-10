@@ -14,11 +14,6 @@ const routes: Array<RouteConfig> = [
     component: Home
   },
   {
-    path: '/view-scene',
-    name: 'viewScene',
-    component: ViewScene
-  },
-  {
     path: '/customization-process',
     name: 'CustomizationProcess',
     component: CustomizationProcess
