@@ -20,8 +20,8 @@
             </a>
           </div>
           <div class="color-container">
-            <div v-for="color in colors" @click="setColor(color.value)" class="color-box" :title="color.name" :style="{background: color.value}"
-                  :key="color.position"></div>
+            <div v-for="(color, index) in colors" @click="setColor(color.value)" class="color-box" :title="color.name" :style="{background: color.value}"
+                  :key="index"></div>
           </div>
         </div>
       </transition>
