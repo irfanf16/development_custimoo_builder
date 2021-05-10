@@ -21,7 +21,7 @@
         <h4>Image Requirements</h4>
         <p>Need High Res Image</p>
       </div>
-      </div>
+    </div>
 <!--    </b-button>-->
     <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
       <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may
