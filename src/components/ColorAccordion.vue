@@ -1,8 +1,8 @@
 <template>
   <div class="accordion" role="tablist">
-    <b-card no-body v-for="(svgElement, index) in svgElements" :key="index">
+    <b-card no-body v-for="(svgElement, index) in svgGroups" :key="index">
       <b-card-header header-tag="header" class="p-0" role="tab">
-        <b-button block v-b-toggle="'accordion-'+(index+1)" class="p-3" @click="showColor(index)"><span class="text">{{ svgElement.name }}</span> <span class="color"><span
+        <b-button block v-b-toggle="'accordion-'+(index+1)" class="p-3" @click="showColor(index)"><span class="text">{{ svgElement.id | capitalize }}</span> <span class="color"><span
           class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span> {{ svgElement.color }}</span> <span class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
@@ -32,9 +32,15 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
 @Component<ColorAccordion>({
-
   components: {
       colorPicker
+  },
+  filters: {
+    capitalize: (value: string) => {
+      if (!value) return ''
+      value = value.toString()
+      return value.charAt(0).toUpperCase() + value.slice(1)
+    }
   },
   mounted(){
     setTimeout(() => {
@@ -51,8 +57,10 @@ export default class ColorAccordion extends Vue {
   public selectTypeIndex = 0
   public productColor: any[] = []
   public colorImage = '/img/images/color-placeholder.png'
-  public svgElements = [{name: 'Base', color: null}, {name: 'Sleeves', color: null}, {name: 'Pockets', color: null}, {name: 'Hood', color: null}]
 
+  get svgGroups() {
+    return this.$store.getters.getSvgGroups
+  }
 
   public showColor(index: number) {
     this.selectAccordionIndex = index
@@ -65,7 +73,7 @@ export default class ColorAccordion extends Vue {
   }
 
   public setColor(color: any) {
-    this.svgElements[this.selectAccordionIndex].color = color
+    this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, color: color })
   }
 
   public changeColor(color: any) {

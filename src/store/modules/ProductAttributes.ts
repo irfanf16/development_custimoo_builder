@@ -11,7 +11,8 @@ const ProductAttributes:Module<any, any> = {
     isAssociation: false,
     styleIndex: 0,
     defaultColors: [{name: 'Color One', color: null}, {name: 'Color Two', color: null}, {name: 'Color Three', color: null}, {name: 'Color Four', color: null}],
-    mainColors: []
+    mainColors: [],
+    svgGroups: []
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: Record<any, any>){
@@ -77,6 +78,16 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.mainColors, color.index, color)
       }
     },
+    SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
+      if(svgGroups) {
+        state.svgGroups = svgGroups
+      }
+    },
+    UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
+      if (color) {
+        Vue.set(state.svgGroups[color.index], 'color', color.color)
+      }
+    },
     ADD_TO_PRODUCTS(state:Record<any, any>, payload){
       state.products.push(payload);
     },
@@ -113,6 +124,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getMainColors: state => {
       return state.mainColors
+    },
+    getSvgGroups: state => {
+      return state.svgGroups
     }
   },
   actions: {
@@ -153,6 +167,12 @@ const ProductAttributes:Module<any, any> = {
     },
     updateMainColor ({commit}, payload){
       commit('UPDATE_MAIN_COLORS', payload)
+    },
+    setSvgGroups ({commit}, payload) {
+      commit('SET_SVG_GROUPS', payload)
+    },
+    updateSvgGroups ({commit}, payload){
+      commit('UPDATE_SVG_GROUPS', payload)
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
       let done = false;
