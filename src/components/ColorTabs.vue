@@ -74,6 +74,7 @@ export default class ColorTabs extends Vue {
   }
 
   public setColor(color: any) {
+    this.$store.dispatch('setCurrentColorApplied', 'single')
     this.$store.dispatch('updateSvgGroups', { index: this.selectTabIndex, color: color })
   }
 

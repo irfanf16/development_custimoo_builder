@@ -135,6 +135,9 @@ const ProductAttributes:Module<any, any> = {
     getSvgGroups: state => {
       return state.svgGroups
     },
+    getCurrentColorApplied: state => {
+      return state.currentColorApplied
+    },
     getRosterDetails: state => {
       return state.rosterDetails
     }
@@ -177,6 +180,9 @@ const ProductAttributes:Module<any, any> = {
     },
     updateSvgGroups ({commit}, payload){
       commit('UPDATE_SVG_GROUPS', payload)
+    },
+    setCurrentColorApplied ({commit}, payload) {
+      commit('SET_CURRENT_COLOR_APPLIED', payload)
     },
     setRosterDetails({commit}, payload){
       commit('rosterDetails', payload)

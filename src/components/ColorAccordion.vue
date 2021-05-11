@@ -73,6 +73,7 @@ export default class ColorAccordion extends Vue {
   }
 
   public setColor(color: any) {
+    this.$store.dispatch('setCurrentColorApplied', 'single')
     this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, color: color })
   }
 
