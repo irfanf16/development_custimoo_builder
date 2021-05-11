@@ -282,7 +282,7 @@ export default class Scene extends Vue {
     }
   }
 
-  public changGroupColor () {
+  public changGroupColor (dispatchUpdateColor = true): void {
     let groupColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
@@ -291,13 +291,14 @@ export default class Scene extends Vue {
         this.mainSvgGroups.forEach((mainSvgGroup: Record<any, any>) => {
           if(svgGroup.id == mainSvgGroup.id) {
             groupColors[svgGroup.id] = mainSvgGroup.color
+            svgGroup.color = mainSvgGroup.color
             idExist = true
           }
         })
       }
       if(!idExist) {
         groupColors[svgGroup.id] = this.defaultColors[useColorIndex].color
-        if (this.mainPreview) {
+        if (this.mainPreview && dispatchUpdateColor) {
           this.$store.dispatch('updateSvgGroups', { index: index, color: this.defaultColors[useColorIndex].color })
         }
         svgGroup.color = this.defaultColors[useColorIndex].color
@@ -372,7 +373,9 @@ export default class Scene extends Vue {
     }
 
     this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
-    if(this.currentColorApplied == 'single') {
+    if(this.defaultColors.length) {
+      this.changGroupColor(false)
+    }else if(this.currentColorApplied == 'single') {
       this.mainSvgGroups.forEach((mainSvgGroup: Record<any, any>) => {
         this.svgGroups.forEach((svgGroup: Record<any, any>) => {
           if(mainSvgGroup.id == svgGroup.id) {
@@ -443,13 +446,19 @@ export default class Scene extends Vue {
       if (model && texture && (!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
         if (this.back && side == 'back') {
           this.getSvgGroups()
-          if(this.defaultColors.length) {
-            this.changGroupColor()
+          if(!this.defaultColors.length) {
+            this.allowColorChange = true
+            if(this.currentColorApplied == 'single') {
+              this.changeColor()
+            }
           }
         } else if(!this.back) {
           this.getSvgGroups()
-          if(this.defaultColors.length) {
-            this.changGroupColor()
+          if(!this.defaultColors.length) {
+            this.allowColorChange = true
+            if(this.currentColorApplied == 'single') {
+              this.changeColor()
+            }
           }
         }
         canvas.add(texture)
