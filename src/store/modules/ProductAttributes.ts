@@ -1,6 +1,7 @@
 import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
+import RosterDetails from "@/components/RosterDetails.vue";
 const ProductAttributes:Module<any, any> = {
   state: {
     products:[],
@@ -11,6 +12,7 @@ const ProductAttributes:Module<any, any> = {
     isAssociation: false,
     styleIndex: 0,
     defaultColors: [{name: 'Color One', color: null}, {name: 'Color Two', color: null}, {name: 'Color Three', color: null}, {name: 'Color Four', color: null}],
+    rosterDetails: [],
     mainColors: []
   },
   mutations: {
@@ -67,6 +69,16 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.defaultColors[color.index], 'color', color.value)
       }
     },
+    rosterDetails(state: Record<any, any>, rosterDetail: Record<any, any>) {
+      if(rosterDetail){
+        Vue.set(state.rosterDetails, rosterDetail.index, rosterDetail.roster)
+      }
+    },
+    rosterDetailAttribute(state: Record<any, any>, rosterDetailAttribute: Record<any, any>) {
+      if(rosterDetailAttribute){
+        Vue.set(state.rosterDetails[rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)
+      }
+    },
     SET_MAIN_COLORS (state: Record<any, any>, colors: Record<any, any>) {
       if(colors) {
         state.mainColors = colors
@@ -111,6 +123,9 @@ const ProductAttributes:Module<any, any> = {
     getDefaultColors: state => {
       return state.defaultColors
     },
+    getRosterDetails: state => {
+      return state.rosterDetails
+    },
     getMainColors: state => {
       return state.mainColors
     }
@@ -153,6 +168,12 @@ const ProductAttributes:Module<any, any> = {
     },
     updateMainColor ({commit}, payload){
       commit('UPDATE_MAIN_COLORS', payload)
+    },
+    setRosterDetails({commit}, payload){
+      commit('rosterDetails', payload)
+    },
+    updateRosterDetailAttribute({commit}, payload){
+      commit('rosterDetailAttribute', payload)
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
       let done = false;
