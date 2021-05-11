@@ -263,6 +263,7 @@ export default class Scene extends Vue {
       this.backCanvas.renderAll()
     }
   }
+
   public getSvgGroups(): void {
     this.svgGroups = []
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
@@ -272,7 +273,7 @@ export default class Scene extends Vue {
         if(item.id == 'base') {
           count = 100000 // to make base always at first color position
         }
-        if(item.id != 'inside') {
+        if(!item.id.includes('inside')) {
           this.svgGroups.push({ id: item.id, color: item.fill, count: count })
         }
       }else {
@@ -292,7 +293,7 @@ export default class Scene extends Vue {
           if(item.id == 'base') {
             count = 100000 // to make base always at first color position
           }
-          if(item.id != 'inside') {
+          if(!item.id.includes('inside')) {
             this.svgGroups.push({ id: item.id, color: item.fill, count: count })
           }
         }else {

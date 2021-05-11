@@ -42,8 +42,8 @@
             </b-nav>
             <div class="color-holder">
               <div class="color-container">
-                <div class="color-box" v-for="color in fontColor" @click="setColor(color.value)"
-                     :title="color.name" :style="{background: color.value}" :key="color.position"></div>
+                <div class="color-box" v-for="(color, index) in fontColor" @click="setColor(color.value)"
+                     :title="color.name" :style="{background: color.value}" :key="index"></div>
               </div>
             </div>
           </b-card-body>
