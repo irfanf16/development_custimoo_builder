@@ -11,12 +11,16 @@ const ProductAttributes:Module<any, any> = {
     isAssociation: false,
     styleIndex: 0,
     defaultColors: [{name: 'Color One', color: null}, {name: 'Color Two', color: null}, {name: 'Color Three', color: null}, {name: 'Color Four', color: null}],
-    mainColors: [],
-    svgGroups: []
+    svgGroups: [],
+    currentColorApplied: 'group'
   },
   mutations: {
-    SET_PRODUCTS(state: Record<any, any>, payload: Record<any, any>){
-      state.products = payload;
+    SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
+      if(payload.length) {
+        state.products = [...state.products, ...payload];
+      } else {
+        state.products = []
+      }
     },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
@@ -68,16 +72,6 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.defaultColors[color.index], 'color', color.value)
       }
     },
-    SET_MAIN_COLORS (state: Record<any, any>, colors: Record<any, any>) {
-      if(colors) {
-        state.mainColors = colors
-      }
-    },
-    UPDATE_MAIN_COLORS (state: Record<any, any>, color: Record<any, any>) {
-      if (color) {
-        Vue.set(state.mainColors, color.index, color)
-      }
-    },
     SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
       if(svgGroups) {
         state.svgGroups = svgGroups
@@ -86,6 +80,11 @@ const ProductAttributes:Module<any, any> = {
     UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
         Vue.set(state.svgGroups[color.index], 'color', color.color)
+      }
+    },
+    SET_CURRENT_COLOR_APPLIED (state: Record<any, any>, colorApplied: Record<any, any>) {
+      if(colorApplied) {
+        state.currentColorApplied = colorApplied
       }
     },
     ADD_TO_PRODUCTS(state:Record<any, any>, payload){
@@ -121,9 +120,6 @@ const ProductAttributes:Module<any, any> = {
     },
     getDefaultColors: state => {
       return state.defaultColors
-    },
-    getMainColors: state => {
-      return state.mainColors
     },
     getSvgGroups: state => {
       return state.svgGroups
@@ -161,12 +157,6 @@ const ProductAttributes:Module<any, any> = {
     },
     setDefaultColor ({commit}, payload) {
       commit('defaultColor', payload)
-    },
-    setMainColor ({commit}, payload) {
-      commit('SET_MAIN_COLORS', payload)
-    },
-    updateMainColor ({commit}, payload){
-      commit('UPDATE_MAIN_COLORS', payload)
     },
     setSvgGroups ({commit}, payload) {
       commit('SET_SVG_GROUPS', payload)
