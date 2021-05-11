@@ -354,7 +354,7 @@ export default class Scene extends Vue {
 
     this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
     if(this.mainSvgGroups.length) {
-      this.changeColor()
+      // this.changeColor()
     }
     if (this.mainPreview) {
       this.$store.dispatch('setSvgGroups', this.svgGroups)
@@ -370,7 +370,7 @@ export default class Scene extends Vue {
     return false
   }
 
-  public loadScene(ImageData: any, side: string): void {
+  public loadScene(ImageData: Record<any, any>, side: string): void {
     let element = this.$refs.front as HTMLCanvasElement
     if (side === 'back') {
       element = this.$refs.back as HTMLCanvasElement;
@@ -421,13 +421,11 @@ export default class Scene extends Vue {
           if(this.defaultColors.length) {
             this.changGroupColor()
           }
-          this.changeColor()
         } else if(!this.back) {
           this.getSvgGroups()
           if(this.defaultColors.length) {
             this.changGroupColor()
           }
-          this.changeColor()
         }
         canvas.add(texture)
         canvas.viewportCenterObject(texture)

@@ -104,7 +104,7 @@
           </template>
           <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
             <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-            <EditRosterArea/>
+            <EditRosterArea :productSizes="selectedProduct.sizes"/>
           </div>
         </b-tab>
       </b-tabs>
