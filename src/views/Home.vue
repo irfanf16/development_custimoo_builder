@@ -23,7 +23,8 @@
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
-          <template v-if="manageComponents.AdvanceCustomization">
+          <!-- <template v-if="manageComponents.AdvanceCustomization"> -->
+            <template>
             <div class="customization-preview-process w-100">
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">

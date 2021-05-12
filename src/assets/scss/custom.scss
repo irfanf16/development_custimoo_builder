@@ -375,10 +375,11 @@ a:hover{color: #219f84;}
                 display: flex;
                 flex-wrap: wrap;
                 align-items: center;
-                justify-content: space-between;
+                // justify-content: space-between;
                 font-size: 12px;
                 font-weight: 400;
                 max-width: 90px;
+                width: 100%;
                 .color-box{
                     width: 23px;
                     height: 23px;
@@ -387,7 +388,7 @@ a:hover{color: #219f84;}
                     display: block;
                     position: relative;
                     border: 1px solid #000;
-                    margin: 0 8px 0 0;
+                    margin: 0 5px 0 0;
                     &:before{
                         position: absolute;
                         content: '';
@@ -403,6 +404,9 @@ a:hover{color: #219f84;}
             .text{
                 max-width: 80px;
                 width: 100%;
+                @media only screen and (min-width: 1200px){
+                    max-width: 140px;
+                }
             }
         }
         .nav-link{
@@ -699,18 +703,12 @@ a:hover{color: #219f84;}
                     &:before{
                         position: absolute;
                         content: '';
-                        left: 0;
-                        right: 0;
-                        top: 0;
-                        bottom: 0;
+                        left: 1px;
+                        right: 1px;
+                        top: 1px;
+                        bottom: 1px;
                         border-radius: 50%;
-                        border: 5px solid #fff;
-                        @media only screen and (min-width: 1024px){
-                            border: 3px solid #fff;
-                        }
-                        @media only screen and (min-width: 1274px){
-                            border: 3px solid #fff;
-                        }
+                        border: 4px solid #fff;
                     }
                 }
             }
@@ -928,9 +926,19 @@ a:hover{color: #219f84;}
                 height: 33px;
                 margin: 0 3px 10px;
                 @media only screen and (min-width: 992px){
+                    width: 36px;
+                    height: 36px;
+                    margin: 0 5px 10px;
+                }
+                @media only screen and (min-width: 1440px){
                     width: 40px;
                     height: 40px;
-                    margin: 0 5px 10px;
+                }
+                &:before{
+                    left: 1px;
+                    right: 1px;
+                    top: 1px;
+                    bottom: 1px;
                 }
             }
         }
@@ -1043,12 +1051,12 @@ a:hover{color: #219f84;}
                 top: 0;
                 bottom: 0;
                 border-radius: 50%;
-                border: 5px solid #fff;
+                border: 4px solid #fff;
                 @media only screen and (min-width: 1024px){
                     border: 3px solid #fff;
                 }
                 @media only screen and (min-width: 1274px){
-                    border: 5px solid #fff;
+                    border: 4px solid #fff;
                 }
             }
         }
@@ -1215,14 +1223,18 @@ a:hover{color: #219f84;}
                 flex: 0 0 12%;
                 max-width: 12%;
             }
+            @media only screen and (min-width: 1024px){
+                flex: 0 0 14%;
+                max-width: 14%;
+            }
         }
         .hide-show{
             flex: 0 0 20px; 
             max-width: 20px;
         }
         .roster-name{
-            flex: 0 0 51.5%;
-            max-width: 51.5%;
+            flex: 0 0 46%;
+            max-width: 46%;
             @media only screen and (min-width: 992px){
                 flex: 0 0 55%;
                 max-width: 55%;
@@ -1246,12 +1258,17 @@ a:hover{color: #219f84;}
             }
         }
         .shirt-size{
-            flex: 0 0 20%;
-            max-width: 20%;
+            flex: 0 0 25%;
+            max-width: 25%;
+            @media only screen and (min-width: 992px){
+                flex: 0 0 20%;
+                max-width: 20%;
+            }
         }
         .qty{
-            flex: 0 0 55%;
-            max-width: 55%;
+            flex: 0 0 58%;
+            max-width: 58%;
+            
             input{
                 @media only screen and (max-width: 992px){
                     border-right: 1px solid #ced4da;
@@ -1633,7 +1650,7 @@ a:hover{color: #219f84;}
     width: 100% !important;
     div:nth-child(4){display: none;}
     
-    .saturation{
-        width: 100% !important;
-    }
+    // .saturation{
+    //     width: 100% !important;
+    // }
 }

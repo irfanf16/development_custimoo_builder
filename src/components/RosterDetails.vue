@@ -20,7 +20,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -55,7 +55,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -90,7 +90,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -125,7 +125,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -160,7 +160,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -195,7 +195,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -230,7 +230,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -265,7 +265,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -300,7 +300,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -335,7 +335,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -370,7 +370,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -405,7 +405,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
@@ -440,7 +440,7 @@
                 <div class="roster-name">
                     <b-form-input
                     id="inline-form-input-name"
-                    placeholder="Brandon"
+                    placeholder="Enter Name"
                     ></b-form-input>
                 </div>
                 <div class="shirt-no">
