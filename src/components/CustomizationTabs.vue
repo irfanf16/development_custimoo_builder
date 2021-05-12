@@ -121,7 +121,7 @@ import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterArea from '@/components/EditRosterArea.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
-import {http} from "@/httpCommon";
+import * as $ from 'jquery';
 
 @Component<CustomizationProcess>({
   components: {
@@ -266,7 +266,9 @@ export default class CustomizationProcess extends Vue {
       this.fontOptions = this.fontOptions.concat([font])
       let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
       const headElement = document.querySelector('head') as HTMLHeadElement
-      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "') format('font/woff2')}</style>";
+      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}</style>";
+      let obj = document.createElement("p")
+      obj.style.cssText = 'font-family: '+font.value
     })
   }
 
