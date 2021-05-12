@@ -5,6 +5,7 @@
       <b-form>
         <!-- <h4 class="mt-1 mt-lg-3 mb-2 fz-16">Player {{ customText.type | capitalize }}</h4> -->
         <b-form-input
+        @click="isHidden = !isHidden"
           class="mb-2 mr-sm-2 mb-sm- 0"
           placeholder="Type Here"
           v-model="customTexts[customTextIndex].text"
@@ -117,6 +118,9 @@ export default class CustomizationText extends Vue {
     this.selectTypeIndex = index
     this.fontColor = this.fontsColors[this.selectTypeIndex].color_text
   }
+
+  public isHidden= false
+
 
 }
 </script>

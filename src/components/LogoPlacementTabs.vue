@@ -284,6 +284,7 @@ export default class LogoPlacementTabs extends Vue {
           max-width: 100%;
           margin-top: 20px;
         }
+        &:hover{color: #219F84;}
       }
     }
   }

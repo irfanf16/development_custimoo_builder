@@ -29,7 +29,7 @@
       <div class="upload-logo-buttons">
         <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
         <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
-               accept="image/x-png,image/jpeg">
+               accept="image/*">
         <b-button class="btn-upload" @click="uploadLogo">Confirm and Upload logo</b-button>
       </div>
     </b-modal>
