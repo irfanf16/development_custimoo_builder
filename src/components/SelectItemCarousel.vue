@@ -1,7 +1,7 @@
 <template>
   <slither-slider @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: products.length > 3? 4: products.length, loop: false, dots: false, gap: 10}" class="select-item-slider p-3 p-lg-0">
     <template v-for="(product, index) in products">
-      <a href="#" ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
+      <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">
           <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
             <Scene :canvas-width="300" :canvas-height="360"

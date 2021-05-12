@@ -104,7 +104,7 @@
           </template>
           <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
             <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-            <EditRosterArea/>
+            <EditRosterArea :productSizes="selectedProduct.sizes"/>
           </div>
         </b-tab>
       </b-tabs>
@@ -178,16 +178,17 @@ export default class CustomizationProcess extends Vue {
 
   public productColorsManipulation() {
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
-      colors.color_text = JSON.parse(colors.color_text)
-      colors.selectedColor = ""
-      this.productColors = this.productColors.concat(colors)
+      let finalColor = {color_text: [], selectedColor: ""}
+      finalColor.color_text = JSON.parse(colors.color_text)
+      this.productColors = this.productColors.concat(finalColor)
     })
   }
 
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
-      colors.color_text = JSON.parse(colors.color_text)
-      this.fontsColors = this.fontsColors.concat(colors)
+      let finalColor = {color_text: []}
+      finalColor.color_text = JSON.parse(colors.color_text)
+      this.fontsColors = this.fontsColors.concat(finalColor)
     })
     if (this.fontsColors.length) {
       this.firstColor = this.fontsColors[0].color_text[0].value

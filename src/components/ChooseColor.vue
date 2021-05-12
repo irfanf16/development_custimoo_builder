@@ -61,6 +61,7 @@ export default class ChooseColor extends Vue {
 
   public setColor(color: string): void {
     this.colorPickerActive = false
+    this.$store.dispatch('setCurrentColorApplied', 'group')
     this.$store.dispatch('setDefaultColor', { index: this.selectColorIndex, value: color})
   }
 

@@ -1,8 +1,8 @@
 <template>
   <b-tabs>
-    <b-tab v-for="(svgElement, index) in svgElements" :key="index" @click="showColor(index)">
+    <b-tab v-for="(svgElement, index) in svgGroups" :key="index" @click="showColor(index)">
       <template #title>
-        {{ svgElement.name }}
+        {{ svgElement.id }}
       </template>
       <div>
         <b-card-body>
@@ -36,6 +36,13 @@ import colorPicker from '@caohenghu/vue-colorpicker'
   components: {
     colorPicker
   },
+  filters: {
+    capitalize: (value: string) => {
+      if (!value) return ''
+      value = value.toString()
+      return value.charAt(0).toUpperCase() + value.slice(1)
+    }
+  },
   mounted() {
     this.$nextTick(() => {
       this.selectType(this.selectTypeIndex)
@@ -51,10 +58,10 @@ export default class ColorTabs extends Vue {
   public selectTabIndex = 0
   public selectTypeIndex = 0
   public productColor: any[] = []
-  public svgElements = [{name: 'Base', color: null}, {name: 'Sleeves', color: null}, {
-    name: 'Pockets',
-    color: null
-  }, {name: 'Hood', color: null}]
+
+  get svgGroups() {
+    return this.$store.getters.getSvgGroups
+  }
 
   public showColor(index: number) {
     this.selectTabIndex = index
@@ -67,7 +74,8 @@ export default class ColorTabs extends Vue {
   }
 
   public setColor(color: any) {
-    this.svgElements[this.selectTabIndex].color = color
+    this.$store.dispatch('setCurrentColorApplied', 'single')
+    this.$store.dispatch('updateSvgGroups', { index: this.selectTabIndex, color: color })
   }
 
   public changeColor(color: any) {

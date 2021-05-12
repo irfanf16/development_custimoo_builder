@@ -11,11 +11,17 @@ const ProductAttributes:Module<any, any> = {
     isAssociation: false,
     styleIndex: 0,
     defaultColors: [{name: 'Color One', color: null}, {name: 'Color Two', color: null}, {name: 'Color Three', color: null}, {name: 'Color Four', color: null}],
-    mainColors: []
+    svgGroups: [],
+    currentColorApplied: 'group',
+    rosterDetails: []
   },
   mutations: {
-    SET_PRODUCTS(state: Record<any, any>, payload: Record<any, any>){
-      state.products = payload;
+    SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
+      if(payload.length) {
+        state.products = [...state.products, ...payload];
+      } else {
+        state.products = []
+      }
     },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
@@ -67,14 +73,29 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.defaultColors[color.index], 'color', color.value)
       }
     },
-    SET_MAIN_COLORS (state: Record<any, any>, colors: Record<any, any>) {
-      if(colors) {
-        state.mainColors = colors
+    SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
+      if(svgGroups) {
+        state.svgGroups = svgGroups
       }
     },
-    UPDATE_MAIN_COLORS (state: Record<any, any>, color: Record<any, any>) {
+    UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
-        Vue.set(state.mainColors, color.index, color)
+        Vue.set(state.svgGroups[color.index], 'color', color.color)
+      }
+    },
+    rosterDetails(state: Record<any, any>, rosterDetail: Record<any, any>) {
+      if(rosterDetail){
+        Vue.set(state.rosterDetails, rosterDetail.index, rosterDetail.roster)
+      }
+    },
+    rosterDetailAttribute(state: Record<any, any>, rosterDetailAttribute: Record<any, any>) {
+      if(rosterDetailAttribute){
+        Vue.set(state.rosterDetails[rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)
+      }
+    },
+    SET_CURRENT_COLOR_APPLIED (state: Record<any, any>, colorApplied: Record<any, any>) {
+      if(colorApplied) {
+        state.currentColorApplied = colorApplied
       }
     },
     ADD_TO_PRODUCTS(state:Record<any, any>, payload){
@@ -111,8 +132,14 @@ const ProductAttributes:Module<any, any> = {
     getDefaultColors: state => {
       return state.defaultColors
     },
-    getMainColors: state => {
-      return state.mainColors
+    getSvgGroups: state => {
+      return state.svgGroups
+    },
+    getCurrentColorApplied: state => {
+      return state.currentColorApplied
+    },
+    getRosterDetails: state => {
+      return state.rosterDetails
     }
   },
   actions: {
@@ -148,11 +175,20 @@ const ProductAttributes:Module<any, any> = {
     setDefaultColor ({commit}, payload) {
       commit('defaultColor', payload)
     },
-    setMainColor ({commit}, payload) {
-      commit('SET_MAIN_COLORS', payload)
+    setSvgGroups ({commit}, payload) {
+      commit('SET_SVG_GROUPS', payload)
     },
-    updateMainColor ({commit}, payload){
-      commit('UPDATE_MAIN_COLORS', payload)
+    updateSvgGroups ({commit}, payload){
+      commit('UPDATE_SVG_GROUPS', payload)
+    },
+    setCurrentColorApplied ({commit}, payload) {
+      commit('SET_CURRENT_COLOR_APPLIED', payload)
+    },
+    setRosterDetails({commit}, payload){
+      commit('rosterDetails', payload)
+    },
+    updateRosterDetailAttribute({commit}, payload){
+      commit('rosterDetailAttribute', payload)
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
       let done = false;

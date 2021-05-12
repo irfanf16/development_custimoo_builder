@@ -33,9 +33,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 
     @Component<CollarStyle>({
-      mounted(){
-        console.log(this.productModels);
-      }
+
     })
 
     export default class CollarStyle extends Vue {
