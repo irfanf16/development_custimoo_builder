@@ -12,7 +12,8 @@
         <div class="remove"></div>
       </div>
     </div>
-    <div class="roster-row mb-2" v-for="(roster, index) in rosterDetails" :key="index">
+    <template v-for="(roster, index) in rosterDetails">
+    <div class="roster-row mb-2"  :key="index">
       <div class="align-left">
         <div class="hide-show">
           <a href="#">
@@ -21,38 +22,42 @@
         </div>
         <div class="roster-name">
           <b-form-input
+            ref="myInputs"
             id="inline-form-input-name"
-            placeholder="Name"
+            placeholder="Name" v-model="roster.text"
           ></b-form-input>
         </div>
         <div class="shirt-no">
-          <b-form-input
+          <b-form-input ref="myInputs"
             id="inline-form-input-name"
             class="text-center"
-            placeholder="00"
+            placeholder="00" v-model="roster.number"
           ></b-form-input>
         </div>
         <div class="shirt-size">
-          <b-form-select v-model="roster.size" :options="productSizes"></b-form-select>
+          <b-form-select ref="myInputs" v-model="roster.size" :options="productSizes"></b-form-select>
         </div>
       </div>
       <div class="align-right">
         <div class="qty">
           <b-form-input
             id="inline-form-input-name"
-            class="text-center"
-            placeholder="0"
+            class="text-center" ref="myInputs"
+            placeholder="0" v-model="roster.quantity"
           ></b-form-input>
         </div>
         <div class="remove">
-          <a href="#">
+          <a @click="removeIndex(index)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
       </div>
+
     </div>
+    </template>
+
     <div class="roster-row mb-2 button-holder">
-      <button class="btn btn-secondary fw-bold pl-4 pr-4 pl-lg-5 pr-lg-5" @click="addPlayer">Add Player</button>
+      <button class="btn btn-secondary fw-bold pl-4 pr-4 pl-lg-5 pr-lg-5" @click="addPlayer(roster)">Add Player</button>
     </div>
   </div>
 </template>
@@ -65,13 +70,32 @@ export default class RosterDetails extends Vue {
   @Prop({required: true}) productSizes!: any
   private roster: any[] = []
   public selected = this.productSizes[0]
+  public obj = {
+    text:'',
+    number:'',
+    size:'SM',
+    quantity:5,
+    information:''
+  };
+  public rosters:any[]=[]
+  public ref = this.$refs as Record<any, any>
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
 
-  public addPlayer() {
-    this.$emit('addPlayer')
+  public addPlayer(obj:Record<any, any>) {
+    // let d =0;
+    // for (let i in this.rosterDetails[ind]){
+    //   if (this.rosterDetails[ind][i] == ""){
+    //     this.ref.myInputs[d].focus();
+    //   }
+    //   d++;
+    // }
+    this.$emit('addPlayer');
+  }
+  public removeIndex(ind:number){
+    this.$store.dispatch('removeRoster', ind);
   }
 }
 </script>
