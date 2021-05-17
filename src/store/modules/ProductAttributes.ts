@@ -106,6 +106,22 @@ const ProductAttributes:Module<any, any> = {
     },
     OVERRIDE_TEXT(state:Record<any, any>, payload){
       state.customTexts = payload;
+    },
+    REMOVE_ROSTER(state:Record<any, any>, payload:number){
+      console.log(payload);
+      state.rosterDetails.splice(payload, 1);
+    },
+    UPDATE_ROSTER(state:Record<any, any>, payload:Record<any, any>){
+      state.rosterDetails = payload;
+    },
+    OVERRIDE_ROSTER(state:Record<any, any>){
+      state.rosterDetails = [{
+        text: '',
+        number: 0,
+        size: 'SM',
+        quantity: 1,
+        information:''
+      }];
     }
   },
   getters: {
@@ -205,6 +221,12 @@ const ProductAttributes:Module<any, any> = {
     },
     async OVERRIDE_CUSTOM_TEXT({commit}, payload:Record<any, any>){
      await commit('OVERRIDE_TEXT', payload);
+    },
+    removeRoster({commit}, payload:number){
+      commit('REMOVE_ROSTER', payload);
+    },
+    async updateRoster({commit}, payload:Record<any, any>){
+     await commit('UPDATE_ROSTER', payload);
     }
   }
 }
