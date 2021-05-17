@@ -121,7 +121,7 @@ import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterArea from '@/components/EditRosterArea.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
-import {http} from "@/httpCommon";
+import * as $ from 'jquery';
 
 @Component<CustomizationProcess>({
   components: {
@@ -174,6 +174,7 @@ export default class CustomizationProcess extends Vue {
   public productColors: any[] = []
   public fontsColors: any[] = []
   public firstColor!: string
+  public secondColor!: string
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
 
   public productColorsManipulation() {
@@ -192,6 +193,7 @@ export default class CustomizationProcess extends Vue {
     })
     if (this.fontsColors.length) {
       this.firstColor = this.fontsColors[0].color_text[0].value
+      this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1].value : this.fontsColors[0].color_text[0].value
     }
   }
 
@@ -227,7 +229,7 @@ export default class CustomizationProcess extends Vue {
           side: productName.side,
           fontFamily: this.customTexts[index].fontFamily ? this.customTexts[index].fontFamily : this.fontOptions[0].value,
           fillColor: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor,
-          outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.firstColor,
+          outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
@@ -245,7 +247,7 @@ export default class CustomizationProcess extends Vue {
           side: productName.side,
           fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
           fillColor: this.firstColor,
-          outLineColor: this.firstColor,
+          outLineColor: this.secondColor,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
@@ -266,7 +268,11 @@ export default class CustomizationProcess extends Vue {
       this.fontOptions = this.fontOptions.concat([font])
       let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
       const headElement = document.querySelector('head') as HTMLHeadElement
-      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "') format('font/woff2')}</style>";
+      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}</style>";
+      $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
+      setTimeout(() => {
+        $("#delete_after_load").remove()
+      }, 1000)
     })
   }
 
@@ -284,7 +290,7 @@ export default class CustomizationProcess extends Vue {
       side: 'back',
       fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
       fillColor: this.firstColor,
-      outLineColor: this.firstColor,
+      outLineColor: this.secondColor,
     }
 
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})

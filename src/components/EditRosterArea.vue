@@ -3,7 +3,7 @@
     <b-button class="d-none d-lg-block" v-b-modal.modal-scrollable>Edit Roster</b-button>
 
     <b-modal id="modal-scrollable" scrollable title="Roster" content-class="roster-modal" size="xl"
-             footer-class="hide-modal-footer d-none d-lg-block">
+             footer-class="hide-modal-footer d-none">
       <div class="d-flex flex-wrap justify-content-between">
         <RosterDetails :productSizes="sizeOptions" @addPlayer="rosterDetailsInit"/>
         <div class="roster-preview-area">
@@ -12,8 +12,10 @@
                                                                                   title="Enter roster in excel file">
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
             </a></button>
-            <button class="btn btn-secondary fw-bold">Upload Roster Template <a href="#" v-b-tooltip.hover
-                                                                                title="Upload the template here to populate the roster">
+            
+            <button type="upload" name="Upload Template" ref="fileInput" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template
+              <b-form-file v-model="file" ref="file-input" class="mb-2"></b-form-file>
+              <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
             </a></button>
           </div>
