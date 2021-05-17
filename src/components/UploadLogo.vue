@@ -45,6 +45,9 @@ import {http} from "@/httpCommon"
   mounted() {
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
+    if(this.customLogoIndex != 0){
+      this.modalHandler()
+    }
   }
 })
 export default class UploadLogo extends Vue {
