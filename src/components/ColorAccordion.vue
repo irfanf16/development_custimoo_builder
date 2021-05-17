@@ -31,6 +31,8 @@
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
+import {default as pant} from 'nearest-pantone'
+
 @Component<ColorAccordion>({
   components: {
       colorPicker
@@ -78,7 +80,9 @@ export default class ColorAccordion extends Vue {
   }
 
   public changeColor(color: any) {
-    this.setColor(color.hex)
+    let pantoneColor = pant.getClosestColor(color.hex)
+    console.log(pantoneColor)
+    this.setColor(pantoneColor.hex)
   }
 
 
