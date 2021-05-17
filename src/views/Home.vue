@@ -61,9 +61,9 @@
               </template>
               <template v-if="manageComponents.AdvanceCustomization">
                 <div class="d-none d-lg-block continue-btn-holder pt-5">
-                  <b-button @click="showBasicCustomization()" class="mx-2 px-5 back-btn" variant="secondary">Back
+                  <b-button @click="tabIndex--" class="mx-2 px-5 back-btn" variant="secondary">Back
                   </b-button>
-                  <b-button class="mx-2 px-5" variant="secondary">Next</b-button>
+                  <b-button @click="tabIndex++" class="mx-2 px-5" variant="secondary">Next</b-button>
                 </div>
               </template>
             </div>
@@ -78,6 +78,7 @@
 </template>
 
 <script lang="ts">
+
 import {Component, Vue} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
@@ -121,6 +122,7 @@ import {http} from "@/httpCommon"
 })
 
 export default class Home extends Vue {
+  public tabIndex = 1
   // private products: any[] = []
   private nextPageUrl !: string
   public hasProducts = true

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="customization-tabs">
-      <b-tabs>
+      <b-tabs v-model="tabIndex">
         <b-tab v-if="selectedProduct.is_logo_allowed == 1">
           <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
           <template #title>
@@ -108,6 +108,10 @@
           </div>
         </b-tab>
       </b-tabs>
+      <!-- <b-button-group class="mt-2">
+        <b-button @click="tabIndex--">Previous</b-button>
+        <b-button @click="tabIndex++">Next</b-button>
+      </b-button-group> -->
     </div>
   </div>
 </template>
@@ -170,6 +174,8 @@ export default class CustomizationProcess extends Vue {
   productNamesChanged() {
     this.customTextInit()
   }
+
+  public tabIndex = 1
 
   public productColors: any[] = []
   public fontsColors: any[] = []
