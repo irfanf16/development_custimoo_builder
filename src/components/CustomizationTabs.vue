@@ -121,7 +121,7 @@ import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterArea from '@/components/EditRosterArea.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
-import * as $ from 'jquery';
+import {default as $} from 'jquery';
 
 @Component<CustomizationProcess>({
   components: {
