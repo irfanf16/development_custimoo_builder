@@ -23,7 +23,8 @@
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
-          <template v-if="manageComponents.AdvanceCustomization">
+          <!-- <template v-if="manageComponents.AdvanceCustomization"> -->
+            <template>
             <div class="customization-preview-process w-100">
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
@@ -60,9 +61,9 @@
               </template>
               <template v-if="manageComponents.AdvanceCustomization">
                 <div class="d-none d-lg-block continue-btn-holder pt-5">
-                  <b-button @click="showBasicCustomization()" class="mx-2 px-5 back-btn" variant="secondary">Back
+                  <b-button @click="tabIndex--" class="mx-2 px-5 back-btn" variant="secondary">Back
                   </b-button>
-                  <b-button class="mx-2 px-5" variant="secondary">Next</b-button>
+                  <b-button @click="tabIndex++" class="mx-2 px-5" variant="secondary">Next</b-button>
                 </div>
               </template>
             </div>
@@ -77,6 +78,7 @@
 </template>
 
 <script lang="ts">
+
 import {Component, Vue} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
@@ -120,6 +122,7 @@ import {http} from "@/httpCommon"
 })
 
 export default class Home extends Vue {
+  public tabIndex = 1
   // private products: any[] = []
   private nextPageUrl !: string
   public hasProducts = true

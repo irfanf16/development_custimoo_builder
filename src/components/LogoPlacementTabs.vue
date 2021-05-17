@@ -66,7 +66,7 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
-import * as Vibrant from 'node-vibrant'
+import {default as Vibrant} from 'node-vibrant'
 
 @Component<LogoPlacementTabs>({
   components: {
@@ -284,6 +284,7 @@ export default class LogoPlacementTabs extends Vue {
           max-width: 100%;
           margin-top: 20px;
         }
+        &:hover{color: #219F84;}
       }
     }
   }
