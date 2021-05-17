@@ -1667,3 +1667,7 @@ a:hover{color: #219f84;}
     //     width: 100% !important;
     // }
 }
+.custom-color-picker {
+    .colors .item:nth-child(8n + 1){margin-left: 10px !important;}
+    .color-type{display: none !important;}
+}
