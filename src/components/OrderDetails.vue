@@ -13,24 +13,24 @@
                 <div class="total-qty">{{ total }}</div>
             </div>
         </div>
-<!--        <div class="choose-stuff">-->
-<!--            <h2 class="fw-bold mb-3 fz-18 d-none d-lg-block">Choose Stuff</h2>-->
-<!--            <div class="stuff-row">-->
-<!--                <b-form-checkbox size="sm">Fight strap</b-form-checkbox>-->
-<!--                <span class="charges">+$5</span>-->
-<!--            </div>-->
-<!--            <div class="stuff-row">-->
-<!--                <b-form-checkbox size="sm">Embroidery</b-form-checkbox>-->
-<!--                <span class="charges">+$15</span>-->
-<!--            </div>-->
-<!--            <div class="stuff-row">-->
-<!--                <b-form-checkbox size="sm">Capt Patch</b-form-checkbox>-->
-<!--                <span class="charges">+$50</span>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="pricing-are">-->
+        <div class="choose-stuff">
+            <h2 class="fw-bold mb-3 fz-18 d-none d-lg-block">Choose Stuff</h2>
+            <div class="stuff-row">
+                <b-form-checkbox size="sm">Fight strap</b-form-checkbox>
+                <span class="charges">+$5</span>
+            </div>
+            <div class="stuff-row">
+                <b-form-checkbox size="sm">Embroidery</b-form-checkbox>
+                <span class="charges">+$15</span>
+            </div>
+            <div class="stuff-row">
+                <b-form-checkbox size="sm">Capt Patch</b-form-checkbox>
+                <span class="charges">+$50</span>
+            </div>
+        </div>
+        <div class="pricing-are">
 <!--            <h2 class="fw-bold fz-18 d-none d-lg-block">Price</h2>-->
-<!--            <div class="order-details">-->
+            <div class="order-details">
 <!--                <div class="order-row">-->
 <!--                    <div class="order-text">-->
 <!--                        Shipping &#38; Handling-->
@@ -55,11 +55,11 @@
 <!--                    </div>-->
 <!--                    <div class="cost-area">$188.95</div>-->
 <!--                </div>-->
-<!--                <div class="order-row">-->
-<!--                    <button class="btn btn-secondary fw-bold w-100">Buy Now</button>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
+                <div class="order-row">
+                    <button class="btn btn-secondary fw-bold w-100">Buy Now</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
