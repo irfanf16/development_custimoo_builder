@@ -1,7 +1,7 @@
 <template>
     <div class="order-details-area">
         <div class="qty-area">
-            <h2 class="fw-bold fz-18">Qty.</h2>
+<!--            <h2 class="fw-bold fz-18">Qty.</h2>-->
             <div class="qty-details" v-for="(roster,index) in rosterDetails" :key="index">
 <!--                <div class="order-row">-->
 <!--                    <div class="size">{{ roster.size }}</div>-->

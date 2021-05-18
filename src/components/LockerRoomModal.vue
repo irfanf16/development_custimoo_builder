@@ -50,6 +50,9 @@
                                                 </li>
                                             </ul>
                                           </div>
+                                          <div class="d-none d-lg-block product-description">
+                                                <p>{{ product.product_name }}</p>
+                                            </div>
 
                                         </div>
                                     </template>
