@@ -13,7 +13,7 @@
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
             </a></button>
 
-            <button type="upload" name="Upload Template"  @change="onChange"  class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template
+            <button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template
               <b-form-file  class="mb-2"></b-form-file>
               <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
@@ -130,30 +130,30 @@ export default class EditRosterArea extends Vue {
     let count = (val.match(/\*/g) || []).length;
     return count
   }
-  public onChange(event){
+  public onChange(event: Record<any, any>){
     let status = true;
     let files = event.target.files ? event.target.files[0] : null;
-    readXlsxFile(files).then((rows) => {
+    readXlsxFile(files).then((rows: any[][]) => {
       if (rows[0].length != 5){
         alert("please upload valid file")
         return false
       }
       for (let i in rows[0]){
-        if (i == 1){
+        if (i == '1'){
           let count = this.getOccurence(rows[0][i]);
           if (count != 1 || rows[0][i] != "SIZE*"){
             status = false
             break;
           }
         }
-        if (i == 2){
+        if (i == '2'){
           let count = this.getOccurence(rows[0][i]);
           if (count != 2 || rows[0][i] != "NAME ON PRODUCT**"){
             status = false
             break;
           }
         }
-        if (i == 4){
+        if (i == '4'){
           let count = this.getOccurence(rows[0][i]);
           if (count != 3 || rows[0][i] != "OTHER INFORMATION***"){
             status = false
@@ -161,8 +161,8 @@ export default class EditRosterArea extends Vue {
           }
         }
       }
-      if (status == true) {
-        rows.forEach((item, index) => {
+      if (status) {
+        rows.forEach((item: any[], index) => {
           let obj = {
             text: '',
             number: '',
@@ -172,16 +172,16 @@ export default class EditRosterArea extends Vue {
           };
           if (index > 0) {
             for (let i in item) {
-              if (i == 1) {
+              if (i == '1') {
                 obj.size   = item[i];
               }
-              if (i == 2) {
+              if (i == '2') {
                 obj.text = item[i];
               }
-              if (i == 3) {
+              if (i == '3') {
                 obj.number = item[i];
               }
-              if (i == 4) {
+              if (i == '4') {
                 obj.information = item[i];
               }
             }

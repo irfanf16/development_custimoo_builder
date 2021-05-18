@@ -700,7 +700,7 @@ export default class Scene extends Vue {
         selectable: false,
         evented: false,
         lockMovementX: true,
-        lockMovementY: true
+        lockMovementY: true,
       })
 
       // img._objects.forEach((element: any) => {
@@ -724,18 +724,19 @@ export default class Scene extends Vue {
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
       fabric.Image.fromURL(logoUrl, (img: any) => {
-        img.scaleToWidth(logo.width)
+        img.scaleToWidth(logo.width as number)
         img.set({
-            left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-            top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
-            angle: logo.rotation as number,
-            centeredScaling: true,
-            selectable: logo.haveControls,
-            hasControls: logo.haveControls,
-            hasBorders: logo.haveControls,
-            evented: logo.haveControls,
-            globalCompositeOperation: 'source-atop'
-          })
+          left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+          top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
+          angle: logo.rotation as number,
+          centeredScaling: true,
+          selectable: logo.haveControls,
+          hasControls: logo.haveControls,
+          hasBorders: logo.haveControls,
+          evented: logo.haveControls,
+          globalCompositeOperation: 'source-atop',
+          lockScalingFlip: true
+        })
 
         if(logo.customLogo){
           img.side = logo.side
@@ -787,7 +788,8 @@ export default class Scene extends Vue {
         fill: text.fillColor,
         stroke: text.outLineColor,
         strokeWidth: 4,
-        paintFirst: 'stroke'
+        paintFirst: 'stroke',
+        lockScalingFlip: true
       })
       let finalIndex = index
       if(addIndex !== null) {
