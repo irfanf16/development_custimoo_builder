@@ -16,7 +16,7 @@
                 <label for="inline-form-input-productname" class="w-100 d-block mb-2">Product Name</label>
                 <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
                     <b-input-group>
-                        <b-form-input id="inline-form-input-productname" v-model="name"  placeholder="Type Here"></b-form-input>
+                        <b-form-input id="inline-form-input-productname" v-model="product_name"  placeholder="Type Here"></b-form-input>
                     </b-input-group>
                     <b-button variant="primary" :disabled="locker_selected" @click="saveToLocker()">Save Design</b-button>
                 </div>
@@ -40,6 +40,7 @@
     export default class AddLockerRoomModal extends Vue {
       public locker_selected = true;
       public room_id = 0;
+      public product_name = '';
       public ref = this.$refs as Record<any, any>
 
       get customTexts(): [Record<any, any>] {
@@ -75,6 +76,7 @@
           let locker = {
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
+            product_name: this.product_name,
             style_id: this.selectedProduct.productstyles[this.styleIndex].id,
             design_id: currentDesign[0].id,
             custom_logos: this.customLogos,

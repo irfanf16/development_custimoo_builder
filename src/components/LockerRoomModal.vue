@@ -51,7 +51,7 @@
                                             </ul>
                                           </div>
                                           <div class="d-none d-lg-block product-description">
-                                                <p>Product Name Dolor Site Ament is Dummy</p>
+                                                <p>{{ product.product_name }}</p>
                                             </div>
 
                                         </div>
