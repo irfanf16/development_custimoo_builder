@@ -50,6 +50,9 @@
                                                 </li>
                                             </ul>
                                           </div>
+                                          <div class="d-none d-lg-block product-description">
+                                                <p>Product Name Dolor Site Ament is Dummy</p>
+                                            </div>
 
                                         </div>
                                     </template>
