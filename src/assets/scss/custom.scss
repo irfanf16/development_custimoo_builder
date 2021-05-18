@@ -1410,7 +1410,9 @@ a:hover{color: #219f84;}
         }
     }
 }
+#modal-center-addlockerroom,
 #modal-center-lockerroom{
+    height: auto;
     @media only screen and (max-width: 991px){
         top: auto;
         bottom: 0;
