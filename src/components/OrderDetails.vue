@@ -80,7 +80,9 @@
         return total;
       }
       public buyNow(){
-        this.$router.push('/confirm-order')
+        if (this.total >0){
+          this.$router.push('/confirm-order')
+        }
       }
     }
 </script>
