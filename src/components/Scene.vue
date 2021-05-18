@@ -23,11 +23,12 @@ import {fabric} from 'fabric'
 
     let scaleImg = document.createElement('img');
     scaleImg.src = "./img/images/expand-alt-light.svg";
-    fabric.Object.prototype.controls.br = new fabric.Control({
+    let fabricObj: Record<any, any> = fabric
+    fabricObj.Object.prototype.controls.br = new fabricObj.Control({
       x: 0.5,
       y: 0.5,
       cursorStyle: 'nw-resize',
-      actionHandler: fabric.controlsUtils.scalingEqually,
+      actionHandler: fabricObj.controlsUtils.scalingEqually,
       actionName: 'scale',
       render: renderIconScale,
       withConnection: true
@@ -37,18 +38,18 @@ import {fabric} from 'fabric'
       let size = 20;
       ctx.save();
       ctx.translate(left, top);
-      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle));
       ctx.drawImage(scaleImg, -size / 2, -size / 2, size, size);
       ctx.restore();
     }
 
     let rotationImg = document.createElement('img');
     rotationImg.src = "./img/images/sync-alt-regular.svg";
-    fabric.Object.prototype.controls.tr = new fabric.Control({
+    fabricObj.Object.prototype.controls.tr = new fabricObj.Control({
       x: 0.5,
       y: -0.5,
       cursorStyle: 'crosshair',
-      actionHandler: fabric.controlsUtils.rotationWithSnapping,
+      actionHandler: fabricObj.controlsUtils.rotationWithSnapping,
       actionName: 'rotate',
       render: renderIconRotation,
       withConnection: true
@@ -58,7 +59,7 @@ import {fabric} from 'fabric'
       let size = 20;
       ctx.save();
       ctx.translate(left, top);
-      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
       ctx.drawImage(rotationImg, -size / 2, -size / 2, size, size);
       ctx.restore();
     }
@@ -66,7 +67,7 @@ import {fabric} from 'fabric'
     let deleteImg = document.createElement('img');
     deleteImg.src = "./img/images/times-light.svg";
 
-    fabric.Object.prototype.controls.deleteControl = new fabric.Control({
+    fabricObj.Object.prototype.controls.deleteControl = new fabricObj.Control({
       x: -0.5,
       y: -0.5,
       cursorStyle: 'pointer',
@@ -80,7 +81,7 @@ import {fabric} from 'fabric'
       let size = 20;
       ctx.save();
       ctx.translate(left, top);
-      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
       ctx.drawImage(deleteImg, -size / 2, -size / 2, size, size);
       ctx.restore();
     }
