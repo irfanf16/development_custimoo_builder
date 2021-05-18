@@ -138,7 +138,7 @@
        }
       }
       public async deleteProduct(i:number, ind:number, id:number){
-        this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+        await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
       }
     }
 

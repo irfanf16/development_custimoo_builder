@@ -98,7 +98,6 @@ const Product:Module<any, any> = {
           alert(res.data.message);
           commit('DELETE_ROOM_PRODUCT', payload);
         }
-
       })
     }
 
