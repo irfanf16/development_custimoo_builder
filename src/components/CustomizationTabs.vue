@@ -175,7 +175,7 @@ export default class CustomizationProcess extends Vue {
     this.customTextInit()
   }
 
-  public tabIndex = 1
+  public tabIndex = 0
 
   public productColors: any[] = []
   public fontsColors: any[] = []

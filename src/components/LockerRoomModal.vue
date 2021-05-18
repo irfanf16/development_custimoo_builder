@@ -2,7 +2,13 @@
     <b-modal ref="locker-modal" id="modal-center-lockerroom" centered scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
         <b-tabs content-class="mt-3">
           <template v-for="(room, i) in getLockerProducts">
-            <b-tab :title="room.room_name"  :key="i">
+            <b-tab :key="i">
+                <template #title>
+                    {{room.room_name}}
+                    <a class="remove-tab">
+                        <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                    </a>
+                </template>
                 <div class="lockerroom-tabs">
                     <div>
                         <b-card no-body>
@@ -265,7 +271,6 @@
         }
         .products-block{
             flex: 0 0 22%;
-
             margin: 0 0.3rem 10px;
             display: inline-block;
             @media only screen and (min-width: 992px){
