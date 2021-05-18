@@ -2,7 +2,13 @@
     <b-modal ref="locker-modal" id="modal-center-lockerroom" centered scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
         <b-tabs content-class="mt-3">
           <template v-for="(room, i) in getLockerProducts">
-            <b-tab :title="room.room_name"  :key="i">
+            <b-tab :key="i">
+                <template #title>
+                    {{room.room_name}}
+                    <a class="remove-tab" @click="deleteRoom(room.id, i)">
+                        <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                    </a>
+                </template>
                 <div class="lockerroom-tabs">
                     <div>
                         <b-card no-body>
@@ -11,12 +17,40 @@
                                 <div class="products-holder d-lg-flex flex-wrap">
                                     <template v-for="(product, ind) in room.product">
                                         <div :key="ind" class="products-block">
+                                            <div class="image-holder">
                                           <a @click="editProduct(i, ind)">
-                                            <Scene :canvas-width="300" :canvas-height="360"
-                                                   :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
-                                                   :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''"
-                                                   :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
+
+                                                <Scene :canvas-width="300" :canvas-height="360"
+                                                    :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
+                                                    :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''"
+                                                    :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
                                           </a>
+                                          <ul class="product-icons">
+                                                <li>
+                                                    <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
+                                                </li>
+                                                <li class="d-none d-lg-block">
+                                                    <a id="share-button-2" href="#"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
+                                                    <b-tooltip custom-class="share-tooltip" target="share-button-2" placement="bottom">
+                                                        <div class="share-holder">
+                                                            <h3>Copy link and Share</h3>
+                                                            <div class="share-form">
+                                                                <b-form inline>
+                                                                    <b-form-input
+                                                                    placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                                                    ></b-form-input>
+                                                                    <b-button variant="primary">Copy Link</b-button>
+                                                                </b-form>
+                                                            </div>
+                                                        </div>
+                                                    </b-tooltip>
+                                                </li>
+                                                <li class="d-none d-lg-block">
+                                                    <a href="#"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                                                </li>
+                                            </ul>
+                                          </div>
+
                                         </div>
                                     </template>
                                 </div>
@@ -107,6 +141,12 @@
           });
           this.ref['locker-modal'].hide();
        }
+      }
+      public async deleteProduct(i:number, ind:number, id:number){
+        await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+      }
+      public async deleteRoom(id:number, index:number){
+        await this.$store.dispatch('deleteRoom', {id: id, index: index});
       }
     }
 
@@ -236,12 +276,87 @@
         }
         .products-block{
             flex: 0 0 22%;
-
             margin: 0 0.3rem 10px;
             display: inline-block;
             @media only screen and (min-width: 992px){
                 margin: 0 0.6rem 25px;
                 max-width: 22%;
+            }
+            @media only screen and (min-width: 1199px){
+                flex: 0 0 18%;
+                max-width: 18%;
+            }
+            .image-holder{
+                position: relative;
+                margin: 0 0 15px;
+                @media only screen and (min-width: 992px){overflow: hidden;}
+                img{
+                    display: block;
+                    max-width: 100%;
+                    margin: 0 auto;
+                    height: auto;
+                }
+                .product-icons{
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                    position: absolute;
+                    right: -5px;
+                    top: -5px;
+                    z-index: 1;
+                    @media only screen and (min-width: 992px){
+                        right: 5px;
+                        top: 5px;
+                    }
+                    li{
+                        display: block;
+                        margin: 0 0 5px;
+                    }
+                    a{
+                        display: flex !important;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                        align-items: center;
+                        width: 20px !important;
+                        height: 20px;
+                        font-size: 9px;
+                        color: #219f84;
+                        background: #fff;
+                        border-radius: 50%;
+                        @media only screen and (min-width: 992px){
+                            width: 30px !important;
+                            height: 30px;
+                            font-size: 14px;
+                        }
+                        &.remove{
+                            background: #F8E1E2;
+                            color: #D53943;
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    .products-holder{
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-top: 7px;
+        @media only screen and (min-width: 992px){
+            width: 100%;
+            overflow-x: hidden;
+            white-space: normal;
+            padding-top: 0;
+        }
+        .products-block{
+            flex: 0 0 22%;
+            max-width: 22%;
+            margin: 0 0.3rem 10px;
+            display: inline-block;
+            @media only screen and (min-width: 992px){
+                margin: 0 0.6rem 25px;
             }
             @media only screen and (min-width: 1199px){
                 flex: 0 0 18%;
@@ -296,7 +411,6 @@
                     }
                 }
             }
-
         }
     }
 

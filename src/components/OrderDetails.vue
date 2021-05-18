@@ -56,7 +56,7 @@
 <!--                    <div class="cost-area">$188.95</div>-->
 <!--                </div>-->
                 <div class="order-row">
-                    <button class="btn btn-secondary fw-bold w-100">Buy Now</button>
+                    <button class="btn btn-secondary  fw-bold w-100" @click="buyNow">Buy Now</button>
                 </div>
             </div>
         </div>
@@ -78,6 +78,11 @@
           total = total + parseInt(item.quantity);
         })
         return total;
+      }
+      public buyNow(){
+        if (this.total >0){
+          this.$router.push('/confirm-order')
+        }
       }
     }
 </script>
