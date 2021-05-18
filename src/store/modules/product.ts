@@ -40,7 +40,12 @@ const Product:Module<any, any> = {
     DELETE_ROOM(state:Record<any, any>, payload:number){
       state.lockers.splice(payload, 1);
       state.locker_products.splice(payload, 1);
+    },
+    DELETE_ROOM_PRODUCT(state:Record<any, any>, payload){
+      state.locker_products[payload.room_index].product.splice(payload.product_index, 1);
     }
+
+
   },
   actions: {
     async getModels({commit}, paylod:number){
@@ -84,6 +89,14 @@ const Product:Module<any, any> = {
         if (res.status == 200){
           alert(res.data.message);
           commit('DELETE_ROOM', payload.index);
+        }
+      })
+    },
+    async deleteRoomProduct({commit}, payload){
+      await http.get("deletelockerproduct/"+payload.id).then((res) => {
+        if (res.status == 200){
+          alert(res.data.message);
+          commit('DELETE_ROOM_PRODUCT', payload);
         }
 
       })

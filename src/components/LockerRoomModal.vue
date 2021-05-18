@@ -13,7 +13,7 @@
                                         <div :key="ind" class="products-block">
                                             <div class="image-holder">
                                           <a @click="editProduct(i, ind)">
-                                              
+
                                                 <Scene :canvas-width="300" :canvas-height="360"
                                                     :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
                                                     :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''"
@@ -21,7 +21,7 @@
                                           </a>
                                           <ul class="product-icons">
                                                 <li>
-                                                    <a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
+                                                    <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                                                 </li>
                                                 <li class="d-none d-lg-block">
                                                     <a id="share-button-2" href="#"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
@@ -45,7 +45,7 @@
                                                 </li>
                                             </ul>
                                           </div>
-                                          
+
                                         </div>
                                     </template>
                                 </div>
@@ -136,6 +136,9 @@
           });
           this.ref['locker-modal'].hide();
        }
+      }
+      public async deleteProduct(i:number, ind:number, id:number){
+        this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
       }
     }
 
