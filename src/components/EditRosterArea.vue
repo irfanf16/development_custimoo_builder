@@ -172,7 +172,6 @@ export default class EditRosterArea extends Vue {
             information: ''
           };
           for (let i in rows[row]){
-            console.log(i);
             if (row == 0){
               continue
             }
@@ -209,7 +208,7 @@ export default class EditRosterArea extends Vue {
     })
   }
   public checkSize(size:string){
-    let sizes = ['SM', 'MD', 'LG', 'XL','2XL', '3XL', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'];
+    let sizes = ['SM', 'MD', 'LG', 'XL','2XL', '3XL'];
     return sizes.includes(size);
   }
 }
