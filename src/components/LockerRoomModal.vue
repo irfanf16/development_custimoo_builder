@@ -5,7 +5,7 @@
             <b-tab :key="i">
                 <template #title>
                     {{room.room_name}}
-                    <a class="remove-tab">
+                    <a class="remove-tab" @click="deleteRoom(room.id, i)">
                         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                     </a>
                 </template>
@@ -37,7 +37,6 @@
                                                             <div class="share-form">
                                                                 <b-form inline>
                                                                     <b-form-input
-                                                                    id="inline-form-input-name"
                                                                     placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
                                                                     ></b-form-input>
                                                                     <b-button variant="primary">Copy Link</b-button>
@@ -145,6 +144,9 @@
       }
       public async deleteProduct(i:number, ind:number, id:number){
         await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+      }
+      public async deleteRoom(id:number, index:number){
+        await this.$store.dispatch('deleteRoom', {id: id, index: index});
       }
     }
 

@@ -23,13 +23,13 @@
         <div class="roster-name">
           <b-form-input
             ref="myInputs"
-            id="inline-form-input-name"
+
             placeholder="Name" v-model="roster.text"
           ></b-form-input>
         </div>
         <div class="shirt-no">
           <b-form-input ref="myInputs"
-            id="inline-form-input-name"
+
             class="text-center"
             placeholder="00" v-model="roster.number"
           ></b-form-input>
@@ -41,7 +41,7 @@
       <div class="align-right">
         <div class="qty">
           <b-form-input
-            id="inline-form-input-name"
+
             class="text-center" ref="myInputs"
             placeholder="0" v-model="roster.quantity"
           ></b-form-input>

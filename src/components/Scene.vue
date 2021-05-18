@@ -12,13 +12,94 @@
 <script lang="ts">
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
-import {Group} from 'fabric/fabric-impl'
 
 @Component<Scene>({
   mounted() {
+    const self = this
     this.loadScene(this.front, 'front')
     if (this.back) {
       this.loadScene(this.back, 'back')
+    }
+
+    let scaleImg = document.createElement('img');
+    scaleImg.src = "./img/images/expand-alt-light.svg";
+    fabric.Object.prototype.controls.br = new fabric.Control({
+      x: 0.5,
+      y: 0.5,
+      cursorStyle: 'nw-resize',
+      actionHandler: fabric.controlsUtils.scalingEqually,
+      actionName: 'scale',
+      render: renderIconScale,
+      withConnection: true
+    })
+
+    function renderIconScale(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
+      let size = 20;
+      ctx.save();
+      ctx.translate(left, top);
+      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.drawImage(scaleImg, -size / 2, -size / 2, size, size);
+      ctx.restore();
+    }
+
+    let rotationImg = document.createElement('img');
+    rotationImg.src = "./img/images/sync-alt-regular.svg";
+    fabric.Object.prototype.controls.tr = new fabric.Control({
+      x: 0.5,
+      y: -0.5,
+      cursorStyle: 'crosshair',
+      actionHandler: fabric.controlsUtils.rotationWithSnapping,
+      actionName: 'rotate',
+      render: renderIconRotation,
+      withConnection: true
+    })
+
+    function renderIconRotation(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
+      let size = 20;
+      ctx.save();
+      ctx.translate(left, top);
+      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.drawImage(rotationImg, -size / 2, -size / 2, size, size);
+      ctx.restore();
+    }
+
+    let deleteImg = document.createElement('img');
+    deleteImg.src = "./img/images/times-light.svg";
+
+    fabric.Object.prototype.controls.deleteControl = new fabric.Control({
+      x: -0.5,
+      y: -0.5,
+      cursorStyle: 'pointer',
+      mouseUpHandler: deleteObject,
+      actionName: 'remove',
+      render: renderIconDelete,
+      withConnection: true
+    })
+
+    function renderIconDelete(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
+      let size = 20;
+      ctx.save();
+      ctx.translate(left, top);
+      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.drawImage(deleteImg, -size / 2, -size / 2, size, size);
+      ctx.restore();
+    }
+
+    function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
+      let target = transform.target;
+      let canvas = target.canvas;
+      if('textIndex' in target) {
+        self.$store.dispatch('updateCustomTextAttribute', {index: target.textIndex, attribute: 'text', value: ''})
+      }else {
+        self.customLogos.forEach((logo, index) => {
+          let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
+          if(logoUrl == target._element.src){
+            self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'url', value: '' })
+          }
+        })
+      }
+      canvas.remove(target);
+      canvas.requestRenderAll();
     }
   }
 })
@@ -173,7 +254,7 @@ export default class Scene extends Vue {
       const self = this
       newVal.forEach((text: Record<any, any>, index: number) => {
         this.customTextObjects.forEach((textObject, dIndex) => {
-          if(textObject.textIndex == index && text.side != textObject.side){
+          if((textObject.textIndex == index && text.side != textObject.side) || !text.text){
             this.customTextObjects.splice(dIndex, 1)
             self.frontCanvas.remove(textObject)
             if (self.backCanvas) {
@@ -197,7 +278,6 @@ export default class Scene extends Vue {
                 textObject.fontFamily = text.fontFamily
                 textObject.set('fill', text.fillColor)
                 textObject.set('stroke', text.outLineColor)
-                console.log(textObject.fontFamily)
                 canvas.renderAll()
 
                 if (text.action == 'drag') {
@@ -614,7 +694,7 @@ export default class Scene extends Vue {
   public addTexture (textureUrl: string, side: string): void {
     const self = this
     fabric.loadSVGFromURL(textureUrl, function (objects: any, options: any) {
-      const img = fabric.util.groupSVGElements(objects) as Group
+      const img = fabric.util.groupSVGElements(objects) as fabric.Group
       img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
         hasControls: false,
         selectable: false,
@@ -670,6 +750,17 @@ export default class Scene extends Vue {
           canvas = self.backCanvas
           model = self.backModel
         }
+        img.setControlsVisibility({
+          tl: false,
+          bl: false,
+          tr: true,
+          br: true,
+          ml: false,
+          mb: false,
+          mr: false,
+          mt: false,
+          mtr: false
+        })
         canvas.add(img)
         model.bringToFront()
         canvas.renderAll()
@@ -711,6 +802,17 @@ export default class Scene extends Vue {
         canvas = self.backCanvas
         model = self.backModel
       }
+      textBox.setControlsVisibility({
+        tl: false,
+        bl: false,
+        tr: true,
+        br: true,
+        ml: false,
+        mb: false,
+        mr: false,
+        mt: false,
+        mtr: false
+      })
       canvas.add(textBox)
       model.bringToFront()
       canvas.renderAll()

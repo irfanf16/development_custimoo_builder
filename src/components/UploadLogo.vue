@@ -5,7 +5,7 @@
       <div class="upload-box">
         <div v-if="logoUrl && manageComponents.BasicCustomization">
           <img :src="logoUrl" width="100%"/>
-          <a href="#" class="remove-img" @click="deleteFirstLogo">
+          <a class="remove-img" @click="deleteFirstLogo">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
