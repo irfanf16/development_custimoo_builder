@@ -2,9 +2,9 @@
     <b-modal ref="my-modal" id="modal-center-addlockerroom" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener">
-                <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id)"   class="active">{{locker.room_name}}</b-button>
+                <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id)"   class="active">{{locker.room_name}}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
 <!--                <b-button variant="secondary">Locker 2<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>-->
-<!--                <b-button variant="secondary">Locker 3<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>-->
+<!--                <b-button variant="secondary">Locker 3<a class="remove" href="#"><font-awesome-icon :ico  n="['fas', 'trash-alt']" /></a></b-button>-->
                </div>
             <div class="create-lockerroom">
                 <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
@@ -76,6 +76,9 @@
         }else{
           alert("please login first");
         }
+      }
+      public async deleteRoom(id:number, index:number){
+        await this.$store.dispatch('deleteRoom', {id: id, index: index});
       }
     }
 
