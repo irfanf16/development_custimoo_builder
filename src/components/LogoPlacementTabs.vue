@@ -66,7 +66,7 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
-import * as Vibrant from 'node-vibrant'
+import {default as Vibrant} from 'node-vibrant'
 
 @Component<LogoPlacementTabs>({
   components: {

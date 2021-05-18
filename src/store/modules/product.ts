@@ -36,7 +36,16 @@ const Product:Module<any, any> = {
     },
     SET_LOGO_COLORS(state:Record<any, any>, payload:Record<any, any>){
       state.logoColors = payload;
+    },
+    DELETE_ROOM(state:Record<any, any>, payload:number){
+      state.lockers.splice(payload, 1);
+      state.locker_products.splice(payload, 1);
+    },
+    DELETE_ROOM_PRODUCT(state:Record<any, any>, payload){
+      state.locker_products[payload.room_index].product.splice(payload.product_index, 1);
     }
+
+
   },
   actions: {
     async getModels({commit}, paylod:number){
@@ -75,6 +84,22 @@ const Product:Module<any, any> = {
     SET_LOGO_COLORS({commit}, payload:Record<any, any>){
       commit('SET_LOGO_COLORS', payload);
     },
+    async deleteRoom({commit}, payload){
+      await http.get("deletelocker/"+payload.id).then((res) => {
+        if (res.status == 200){
+          alert(res.data.message);
+          commit('DELETE_ROOM', payload.index);
+        }
+      })
+    },
+    async deleteRoomProduct({commit}, payload){
+      await http.get("deletelockerproduct/"+payload.id).then((res) => {
+        if (res.status == 200){
+          alert(res.data.message);
+          commit('DELETE_ROOM_PRODUCT', payload);
+        }
+      })
+    }
 
   }
 }

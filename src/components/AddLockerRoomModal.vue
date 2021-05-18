@@ -2,16 +2,26 @@
     <b-modal ref="my-modal" id="modal-center-addlockerroom" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener">
-                <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id)"   class="active">{{locker.room_name}}</b-button>
+                <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id)"   class="active">{{locker.room_name}}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
 <!--                <b-button variant="secondary">Locker 2<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>-->
-<!--                <b-button variant="secondary">Locker 3<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>-->
+<!--                <b-button variant="secondary">Locker 3<a class="remove" href="#"><font-awesome-icon :ico  n="['fas', 'trash-alt']" /></a></b-button>-->
                </div>
             <div class="create-lockerroom">
                 <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
                 <CreateLockerRoomModal />
             </div>
         </div>
-      <div class="save-btn-holder"><b-button variant="secondary"  :disabled="locker_selected" @click="saveToLocker()">Save to Locker room </b-button></div>
+        <div class="pt-4 design-name-form">
+            <b-form inline>
+                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Product Name</label>
+                <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
+                    <b-input-group>
+                        <b-form-input id="inline-form-input-productname" v-model="name"  placeholder="Type Here"></b-form-input>
+                    </b-input-group>
+                    <b-button variant="primary"  :disabled="locker_selected" @click="saveToLocker()">Save Design</b-button>
+                </div>
+            </b-form>
+        </div>
 
     </b-modal>
 </template>
@@ -76,6 +86,9 @@
         }else{
           alert("please login first");
         }
+      }
+      public async deleteRoom(id:number, index:number){
+        await this.$store.dispatch('deleteRoom', {id: id, index: index});
       }
     }
 
@@ -196,6 +209,18 @@
           padding: 15px 40px;
           text-align: center;
         }
-
+.design-name-form{
+        label{font-size: 16px;}
+        .input-group{
+            flex: 0 0 55%;
+            max-width: 55%;
+        }
+        .btn{
+            flex: 0 0 44%;
+            max-width: 44%;
+            background: #219f84;
+            border-color: #219f84;
+        }
+    }
 
 </style>

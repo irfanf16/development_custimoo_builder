@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="nav-customize-area">
-      <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
+      <b-nav class="d-flex flex-wrap align-items-center">
         <b-nav-item class="search-opener">
           <b-button v-b-toggle.collapse-1 variant="primary">
             <font-awesome-icon :icon="['fas', 'search']"/>
@@ -57,12 +57,15 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
   .nav-item {
     font-size: 12px;
     font-weight: 600;
+    margin-right: 15px;
     @media only screen and (min-width: 992px){
       font-size: 10px;
     }
     @media only screen and (min-width: 1170px) {
       font-size: 12px;
     }
+
+    &:last-child{margin-right: 0;}
 
     &.search-opener {
       .nav-link {

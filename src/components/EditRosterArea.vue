@@ -12,14 +12,28 @@
                                                                                   title="Enter roster in excel file">
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
             </a></button>
-            
-            <button type="upload" name="Upload Template" ref="fileInput" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template
-              <b-form-file v-model="file" ref="file-input" class="mb-2"></b-form-file>
+
+            <button type="upload" name="Upload Template"  @change="onChange"  class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template
+              <b-form-file  class="mb-2"></b-form-file>
               <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
             </a></button>
           </div>
-          <CustomizationPreview :designs="products[designsIndex]"/>
+          <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
+            <div v-if="design.design_show == 1" class="image-holder p-4" :key="'front'+design.id">
+              <Scene v-if="selectedProduct.productstyles[styleIndex].back" :canvas-width="300" :canvas-height="360"
+                     :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
+                     :back="{textureUrl: apiBaseUrl+'/'+ design.back_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].back.file_url}"
+                     :logos="selectedProduct.productstyles[styleIndex].logo"
+                     :productColors="selectedProduct.colors"  />
+
+              <Scene v-else class="view-back" :canvas-width="300" :canvas-height="360"
+                     :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
+                     :logos="selectedProduct.productstyles[styleIndex].logo"
+                      :productColors="selectedProduct.colors"  />
+            </div>
+          </template>
+          <!-- <CustomizationPreview :designs="products[designsIndex]"/> -->
           <OrderDetails/>
         </div>
       </div>
@@ -39,12 +53,16 @@ import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import OrderDetails from '@/components/OrderDetails.vue'
 import RosterDetails from '@/components/RosterDetails.vue'
 import {http} from "@/httpCommon";
+import readXlsxFile from "read-excel-file";
+import Scene from "@/components/Scene.vue"
+
 
 @Component<EditRosterArea>({
   components: {
     CustomizationPreview,
     OrderDetails,
-    RosterDetails
+    RosterDetails,
+    Scene
   },
   mounted() {
     this.setProductSizes()
@@ -61,9 +79,17 @@ export default class EditRosterArea extends Vue {
   private product_id !: string
   public designsIndex = 0
   public sizeOptions: Record<any, any>[] = []
+  public fileData: Record<any, any>[] = []
+  public apiBaseUrl =  process.env.VUE_APP_API_BASE_URL
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
+  }
+  get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
+  }
+  get styleIndex():number{
+    return  this.$store.getters.getCurrentStyleIndex;
   }
 
   retrieveProducts(): void {
@@ -84,7 +110,8 @@ export default class EditRosterArea extends Vue {
       text: '',
       number: 0,
       size: this.sizeOptions[0].value ? this.sizeOptions[0].value : '',
-      quantity: 0
+      quantity: 1,
+      information:''
     }
     this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
   }
@@ -98,6 +125,74 @@ export default class EditRosterArea extends Vue {
 
   public changeProduct(designsIndex: number) {
     this.designsIndex = designsIndex
+  }
+  public getOccurence(val:string){
+    let count = (val.match(/\*/g) || []).length;
+    return count
+  }
+  public onChange(event){
+    let status = true;
+    let files = event.target.files ? event.target.files[0] : null;
+    readXlsxFile(files).then((rows) => {
+      if (rows[0].length != 5){
+        alert("please upload valid file")
+        return false
+      }
+      for (let i in rows[0]){
+        if (i == 1){
+          let count = this.getOccurence(rows[0][i]);
+          if (count != 1 || rows[0][i] != "SIZE*"){
+            status = false
+            break;
+          }
+        }
+        if (i == 2){
+          let count = this.getOccurence(rows[0][i]);
+          if (count != 2 || rows[0][i] != "NAME ON PRODUCT**"){
+            status = false
+            break;
+          }
+        }
+        if (i == 4){
+          let count = this.getOccurence(rows[0][i]);
+          if (count != 3 || rows[0][i] != "OTHER INFORMATION***"){
+            status = false
+            break;
+          }
+        }
+      }
+      if (status == true) {
+        rows.forEach((item, index) => {
+          let obj = {
+            text: '',
+            number: '',
+            size: '',
+            quantity: 1,
+            information: ''
+          };
+          if (index > 0) {
+            for (let i in item) {
+              if (i == 1) {
+                obj.size   = item[i];
+              }
+              if (i == 2) {
+                obj.text = item[i];
+              }
+              if (i == 3) {
+                obj.number = item[i];
+              }
+              if (i == 4) {
+                obj.information = item[i];
+              }
+            }
+            this.fileData.push(obj);
+          }
+        })
+        this.$store.dispatch('updateRoster', this.fileData);
+      }else{
+        alert("please upload a valid file");
+      }
+    })
   }
 }
 
