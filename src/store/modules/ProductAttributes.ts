@@ -13,7 +13,8 @@ const ProductAttributes:Module<any, any> = {
     defaultColors: [{name: 'Color One', color: null}, {name: 'Color Two', color: null}, {name: 'Color Three', color: null}, {name: 'Color Four', color: null}],
     svgGroups: [],
     currentColorApplied: 'group',
-    rosterDetails: []
+    rosterDetails: [],
+    productionSVGs: {}
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
@@ -93,6 +94,11 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.rosterDetails[rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)
       }
     },
+    productionSVGs(state: Record<any, any>, productionSvg: Record<any, any>) {
+      if(productionSvg){
+        state.productionSVGs = productionSvg
+      }
+    },
     SET_CURRENT_COLOR_APPLIED (state: Record<any, any>, colorApplied: Record<any, any>) {
       if(colorApplied) {
         state.currentColorApplied = colorApplied
@@ -140,7 +146,10 @@ const ProductAttributes:Module<any, any> = {
     },
     getRosterDetails: state => {
       return state.rosterDetails
-    }
+    },
+    getProductionSVGs: state => {
+      return state.productionSVGs
+    },
   },
   actions: {
     setSelectedIndex({commit}, payload) {
@@ -189,6 +198,9 @@ const ProductAttributes:Module<any, any> = {
     },
     updateRosterDetailAttribute({commit}, payload){
       commit('rosterDetailAttribute', payload)
+    },
+    setProductionSVGs({commit}, payload){
+      commit('productionSVGs', payload)
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
       let done = false;
