@@ -18,7 +18,7 @@
                     <b-input-group>
                         <b-form-input id="inline-form-input-productname" v-model="name"  placeholder="Type Here"></b-form-input>
                     </b-input-group>
-                    <b-button variant="primary"  :disabled="locker_selected" @click="saveToLocker()">Save Design</b-button>
+                    <b-button variant="primary" :disabled="locker_selected" @click="saveToLocker()">Save Design</b-button>
                 </div>
             </b-form>
         </div>
