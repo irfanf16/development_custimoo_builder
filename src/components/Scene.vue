@@ -23,7 +23,6 @@ import {fabric} from 'fabric'
 
     let scaleImg = document.createElement('img');
     scaleImg.src = "./img/images/expand-alt-light.svg";
-    console.log(fabric.controlsUtils)
     fabric.Object.prototype.controls.br = new fabric.Control({
       x: 0.5,
       y: 0.5,
@@ -88,7 +87,6 @@ import {fabric} from 'fabric'
 
     function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
       let target = transform.target;
-      console.log(target)
       let canvas = target.canvas;
       if('textIndex' in target) {
         self.$store.dispatch('updateCustomTextAttribute', {index: target.textIndex, attribute: 'text', value: ''})
@@ -280,7 +278,6 @@ export default class Scene extends Vue {
                 textObject.fontFamily = text.fontFamily
                 textObject.set('fill', text.fillColor)
                 textObject.set('stroke', text.outLineColor)
-                console.log(textObject.fontFamily)
                 canvas.renderAll()
 
                 if (text.action == 'drag') {
