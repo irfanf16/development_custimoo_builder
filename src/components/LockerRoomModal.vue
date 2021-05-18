@@ -37,7 +37,6 @@
                                                             <div class="share-form">
                                                                 <b-form inline>
                                                                     <b-form-input
-                                                                    id="inline-form-input-name"
                                                                     placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
                                                                     ></b-form-input>
                                                                     <b-button variant="primary">Copy Link</b-button>
