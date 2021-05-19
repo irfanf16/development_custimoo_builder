@@ -837,9 +837,9 @@ export default class Scene extends Vue {
 
   public setProductionSVG() {
     let productionSVGs: Record<any, any> = {}
-    productionSVGs.front = this.frontCanvas.toSVG()
+    productionSVGs.front = this.frontCanvas
     if (this.backCanvas) {
-      productionSVGs.back = this.backCanvas.toSVG()
+      productionSVGs.back = this.backCanvas
     }
     this.$store.dispatch('setProductionSVGs', productionSVGs)
   }
