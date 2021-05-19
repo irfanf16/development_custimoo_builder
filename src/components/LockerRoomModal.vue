@@ -62,15 +62,78 @@
                                     <b-card-text>Tab contents 2</b-card-text>
                                 </b-tab>
                                 <b-tab title="Colors">
-                                  <div class="color-holder">
-                                    <div class="color-container">
-                                      <template v-for="(item) in room.product">
-                                        <div class="color-box" v-for="(color, index) in JSON.parse(item.colors)"
-                                             :style="{background: color.colorCode}" :key="index">
+                                    <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
+                                        <div class="p-lg-4 folder-wrapper">
+                                            <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
+                                            <div class="d-flex flex-wrap">
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            <a href="#." class="text-center d-block">
+                                                <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                <span class="folder-name d-block">Folder Name</span>
+                                            </a>
+                                            </div>
                                         </div>
-                                      </template>
+                                        <div class="color-holder">
+                                            <div class="color-container">
+                                            <template v-for="(item) in room.product">
+                                                <div class="color-box" v-for="(color, index) in JSON.parse(item.colors)"
+                                                    :style="{background: color.colorCode}" :key="index">
+                                                </div>
+                                            </template>
+                                            </div>
+                                        </div>
                                     </div>
-                                  </div>
                                 </b-tab>
                             </b-tabs>
                         </b-card>
@@ -415,6 +478,37 @@
                 }
             }
         }
+    }
+    
+
+    .folder-wrapper{
+      h3{
+        font-weight: 600;
+        @media only screen and (min-width: 992px){
+          font-size: 20px;
+        }
+      }
+      a{
+        margin: 0 10px 12px;
+        font-size: 10px;
+        flex: 0 0 18%;
+        max-width: 18%;
+        @media only screen and (min-width: 768px){
+          font-size: 14px;
+          flex: 0 0 9%;
+          max-width: 9%;
+        }
+        svg{
+          font-size: 32px;
+          display: block;
+          margin: 0 auto 10px;
+          fill: #219f84;
+          color: #219f84;
+          @media only screen and (min-width: 768px){
+            font-size: 46px;
+          }
+        }
+      }
     }
 
 
