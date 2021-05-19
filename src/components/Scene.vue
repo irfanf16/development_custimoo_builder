@@ -23,11 +23,12 @@ import {fabric} from 'fabric'
 
     let scaleImg = document.createElement('img');
     scaleImg.src = "./img/images/expand-alt-light.svg";
-    fabric.Object.prototype.controls.br = new fabric.Control({
+    let fabricObj: Record<any, any> = fabric
+    fabricObj.Object.prototype.controls.br = new fabricObj.Control({
       x: 0.5,
       y: 0.5,
       cursorStyle: 'nw-resize',
-      actionHandler: fabric.controlsUtils.scalingEqually,
+      actionHandler: fabricObj.controlsUtils.scalingEqually,
       actionName: 'scale',
       render: renderIconScale,
       withConnection: true
@@ -37,18 +38,18 @@ import {fabric} from 'fabric'
       let size = 20;
       ctx.save();
       ctx.translate(left, top);
-      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle));
       ctx.drawImage(scaleImg, -size / 2, -size / 2, size, size);
       ctx.restore();
     }
 
     let rotationImg = document.createElement('img');
     rotationImg.src = "./img/images/sync-alt-regular.svg";
-    fabric.Object.prototype.controls.tr = new fabric.Control({
+    fabricObj.Object.prototype.controls.tr = new fabricObj.Control({
       x: 0.5,
       y: -0.5,
       cursorStyle: 'crosshair',
-      actionHandler: fabric.controlsUtils.rotationWithSnapping,
+      actionHandler: fabricObj.controlsUtils.rotationWithSnapping,
       actionName: 'rotate',
       render: renderIconRotation,
       withConnection: true
@@ -58,7 +59,7 @@ import {fabric} from 'fabric'
       let size = 20;
       ctx.save();
       ctx.translate(left, top);
-      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
       ctx.drawImage(rotationImg, -size / 2, -size / 2, size, size);
       ctx.restore();
     }
@@ -66,7 +67,7 @@ import {fabric} from 'fabric'
     let deleteImg = document.createElement('img');
     deleteImg.src = "./img/images/times-light.svg";
 
-    fabric.Object.prototype.controls.deleteControl = new fabric.Control({
+    fabricObj.Object.prototype.controls.deleteControl = new fabricObj.Control({
       x: -0.5,
       y: -0.5,
       cursorStyle: 'pointer',
@@ -80,7 +81,7 @@ import {fabric} from 'fabric'
       let size = 20;
       ctx.save();
       ctx.translate(left, top);
-      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
       ctx.drawImage(deleteImg, -size / 2, -size / 2, size, size);
       ctx.restore();
     }
@@ -704,7 +705,7 @@ export default class Scene extends Vue {
         selectable: false,
         evented: false,
         lockMovementX: true,
-        lockMovementY: true
+        lockMovementY: true,
       })
 
       // img._objects.forEach((element: any) => {
@@ -728,18 +729,19 @@ export default class Scene extends Vue {
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
       fabric.Image.fromURL(logoUrl, (img: any) => {
-        img.scaleToWidth(logo.width)
+        img.scaleToWidth(logo.width as number)
         img.set({
-            left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-            top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
-            angle: logo.rotation as number,
-            centeredScaling: true,
-            selectable: logo.haveControls,
-            hasControls: logo.haveControls,
-            hasBorders: logo.haveControls,
-            evented: logo.haveControls,
-            globalCompositeOperation: 'source-atop'
-          })
+          left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+          top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
+          angle: logo.rotation as number,
+          centeredScaling: true,
+          selectable: logo.haveControls,
+          hasControls: logo.haveControls,
+          hasBorders: logo.haveControls,
+          evented: logo.haveControls,
+          globalCompositeOperation: 'source-atop',
+          lockScalingFlip: true
+        })
 
         if(logo.customLogo){
           img.side = logo.side
@@ -791,7 +793,8 @@ export default class Scene extends Vue {
         fill: text.fillColor,
         stroke: text.outLineColor,
         strokeWidth: 4,
-        paintFirst: 'stroke'
+        paintFirst: 'stroke',
+        lockScalingFlip: true
       })
       let finalIndex = index
       if(addIndex !== null) {

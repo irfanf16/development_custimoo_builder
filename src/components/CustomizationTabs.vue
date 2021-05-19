@@ -183,6 +183,10 @@ export default class CustomizationProcess extends Vue {
   public secondColor!: string
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
 
+  get hideTab(): Record<any, any> {
+    return this.$store.getters.getHideTab
+  }
+
   public productColorsManipulation() {
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: [], selectedColor: ""}
@@ -207,16 +211,8 @@ export default class CustomizationProcess extends Vue {
     await this.$store.dispatch("getModels", this.selectedProduct.product_id);
   }
 
-  public hideTab = {
-    logoHide: !this.manageComponents.mobileScreen,
-    colorHide: !this.manageComponents.mobileScreen,
-    textHide: !this.manageComponents.mobileScreen,
-    styleHide: !this.manageComponents.mobileScreen,
-    teamHide: !this.manageComponents.mobileScreen
-  }
-
   public setHideTab(index: string, value: boolean) {
-    Vue.set(this.hideTab, index, value)
+    this.$store.dispatch('setHideTab', {index: index, value: value})
   }
 
   public customTextInit() {

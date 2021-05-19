@@ -29,7 +29,7 @@
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
                   <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom @click="getLockerRoomProducts">Locker room</b-button>
-                   <LockerRoomModal v-if="isCustomerAuthenticated"/>
+                  <LockerRoomModal v-if="isCustomerAuthenticated"/>
                   <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom>Save to locker room</b-button>
                   <AddLockerRoomModal />
                   <b-button variant="outline-secondary">Buy Now</b-button>
@@ -53,7 +53,7 @@
               </div>
             </div>
           </template>
-          <div class="customization-area d-flex flex-wrap justify-content-center align-items-center">
+          <div class="customization-area d-flex flex-wrap justify-content-center align-items-center" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
             <div>
               <CustomizationPreview />
               <template v-if="manageComponents.BasicCustomization">
@@ -137,6 +137,10 @@ export default class Home extends Vue {
   private jwtToken !: string
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public mounted = false
+  
+  get hideTab(): Record<any, any> {
+    return this.$store.getters.getHideTab
+  }
 
   get isAuthenticated(): boolean {
     return this.$store.getters.isAuthenticated

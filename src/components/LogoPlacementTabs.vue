@@ -16,7 +16,7 @@
 
         <div class="tabs-logo-container">
           <template v-if="customLogos[index].url != ''">
-            <div class="logo-placement-area mb-3 mb-lg-4">
+            <div class="logo-placement-area mb-3 mb-lg-4 pt-2">
               <div class="logo-placement-holder mb-lg-3">
                 <div class="logo-holder">
                   <template v-if="customLogos[index].url != ''">
@@ -67,6 +67,8 @@
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
 import {default as Vibrant} from 'node-vibrant'
+import {default as pant} from 'nearest-pantone'
+
 
 @Component<LogoPlacementTabs>({
   components: {
@@ -172,6 +174,7 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public getLogoColors(){
+
     this.imageColors = []
     if(this.customLogos[0] && this.customLogos[0].url) {
       this.$nextTick(() => {
@@ -181,6 +184,8 @@ export default class LogoPlacementTabs extends Vue {
               'colorCode': value.getHex(),
               'colorPopulation': value.getPopulation()
             }
+            let pantoneColor = pant.getClosestColor(colorInfo.colorCode)
+            console.log(pantoneColor)
             this.imageColors.push(colorInfo)
             this.imageColors.sort(function (a, b) {
               return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
@@ -194,6 +199,8 @@ export default class LogoPlacementTabs extends Vue {
         })
       })
     }
+    // let pantoneColor = pant.getClosestColor(this.imageColors)
+    
   }
 }
 </script>

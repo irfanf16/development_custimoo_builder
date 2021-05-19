@@ -16,7 +16,7 @@
     <div class="roster-row mb-2"  :key="index">
       <div class="align-left">
         <div class="hide-show">
-          <a href="#">
+          <a  @click="changeText(roster.text)">
             <font-awesome-icon :icon="['fas', 'eye-slash']"/>
           </a>
         </div>
@@ -47,7 +47,7 @@
           ></b-form-input>
         </div>
         <div class="remove">
-          <a @click="removeIndex(index)">
+          <a @click="removeIndex(index, roster.text)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
@@ -83,6 +83,9 @@ export default class RosterDetails extends Vue {
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
+  get customText():[Record<any, any>]{
+    return this.$store.getters.getCustomTexts;
+  }
 
   public addPlayer(obj:Record<any, any>) {
     // let d =0;
@@ -94,8 +97,16 @@ export default class RosterDetails extends Vue {
     // }
     this.$emit('addPlayer');
   }
-  public removeIndex(ind:number){
+  public removeIndex(ind:number, text:string){
+    if (this.customText.length>0){
+      if (this.customText[0].text  == text){
+        this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: ''})
+      }
+    }
     this.$store.dispatch('removeRoster', ind);
+  }
+  public changeText(text:string){
+      this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
   }
 }
 </script>
