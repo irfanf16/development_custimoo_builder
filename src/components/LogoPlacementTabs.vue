@@ -37,7 +37,8 @@
                   <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
                 </div>
               </div>
-              <button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold">Save Logo</button>
+              <b-button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold" v-b-modal.modal-center-savelogomodal>Save Logo</b-button>
+              <SaveLogoModal />
             </div>
             <div class="logo-placement-area extracted-color-area" v-if="index == 0">
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
@@ -51,7 +52,8 @@
                 <b-button variant="outline-secondary">Shuffle</b-button>
                 <b-button class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
               </div>
-              <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color">Save Color</button>
+              <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal>Save Color</button>
+              <SaveColorModal />
             </div>
           </template>
           <template v-if="manageComponents.LogoArea">
@@ -66,13 +68,17 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
+import SaveLogoModal from "@/components/SaveLogoModal.vue"
+import SaveColorModal from "@/components/SaveColorModal.vue"
 import {default as Vibrant} from 'node-vibrant'
 import {default as pant} from 'nearest-pantone'
 
 
 @Component<LogoPlacementTabs>({
   components: {
-    UploadLogo
+    UploadLogo,
+    SaveLogoModal,
+    SaveColorModal
   },
   mounted() {
     this.getLogoColors()
