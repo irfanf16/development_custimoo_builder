@@ -7,7 +7,7 @@
       <div class="d-flex flex-wrap justify-content-between">
         <RosterDetails :productSizes="sizeOptions" @addPlayer="rosterDetailsInit"/>
         <div class="roster-preview-area">
-          <div class="roster-template-area">
+          <!-- <div class="roster-template-area">
             <button class="btn btn-secondary fw-bold">Download Roster Template <a href="#" v-b-tooltip.hover
                                                                                   title="Enter roster in excel file">
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
@@ -18,7 +18,7 @@
               <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
             </a></button>
-          </div>
+          </div> -->
           <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
             <div v-if="design.design_show == 1" class="image-holder p-4" :key="'front'+design.id">
               <Scene v-if="selectedProduct.productstyles[styleIndex].back"
