@@ -3,12 +3,12 @@
     <b-card no-body v-for="(svgElement, index) in svgGroups" :key="index">
       <b-card-header header-tag="header" class="p-0" role="tab">
         <b-button block v-b-toggle="'accordion-'+(index+1)" class="p-3" @click="showColor(index)"><span class="text">{{ svgElement.id | capitalize }}</span> <span class="color"><span
-          class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span> {{ svgElement.color }}</span> <span class="accordion-icon"></span></b-button>
+          class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span> {{ svgElement.pantone }}</span> <span class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center">
-            <b-nav-item class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.file_type }}</b-nav-item>
+            <b-nav-item class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name }}</b-nav-item>
             <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
@@ -16,7 +16,7 @@
               <div v-if="showOther" class="custom-color-picker">
                 <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
               </div>
-              <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color.value)"
+              <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
                    :title="color.name" :style="{background: color.value}" :key="index">
               </div>
             </div>
@@ -31,7 +31,7 @@
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
-import {default as pant} from 'nearest-pantone'
+import getClosestColor from '@/pantoneColor'
 
 @Component<ColorAccordion>({
   components: {
@@ -74,15 +74,14 @@ export default class ColorAccordion extends Vue {
     this.productColor = this.productColors[this.selectTypeIndex].color_text
   }
 
-  public setColor(color: any) {
+  public setColor(color: Record<any, any>) {
     this.$store.dispatch('setCurrentColorApplied', 'single')
-    this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, color: color })
+    this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, color: color.value, pantone: color.name })
   }
 
-  public changeColor(color: any) {
-    let pantoneColor = pant.getClosestColor(color.hex)
-    console.log(pantoneColor)
-    this.setColor(pantoneColor.hex)
+  public changeColor(color: Record<any, any>) {
+    let pantoneColor = getClosestColor(color.hex)
+    this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone})
   }
 
 

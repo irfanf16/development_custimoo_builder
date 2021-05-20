@@ -1,5 +1,5 @@
 <template>
-  <div class="canvas-area-holder" style="display: flex; justify-content: center;">
+  <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;">
     <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
       <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
     </a>
@@ -12,6 +12,8 @@
 <script lang="ts">
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
+import getClosestColor from '@/pantoneColor'
+import rgbHex from 'rgb-hex'
 
 @Component<Scene>({
   mounted() {
@@ -22,11 +24,11 @@ import {fabric} from 'fabric'
     }
 
     let scaleImg = document.createElement('img');
-    scaleImg.src = "./img/images/expand-alt-light.svg";
+    scaleImg.src = "./img/images/scale.jpg";
     let fabricObj: Record<any, any> = fabric
     fabricObj.Object.prototype.controls.br = new fabricObj.Control({
-      x: 0.5,
-      y: 0.5,
+      x: 0.6,
+      y: 0.6,
       cursorStyle: 'nw-resize',
       actionHandler: fabricObj.controlsUtils.scalingEqually,
       actionName: 'scale',
@@ -38,16 +40,16 @@ import {fabric} from 'fabric'
       let size = 20;
       ctx.save();
       ctx.translate(left, top);
-      ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle));
+      ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
       ctx.drawImage(scaleImg, -size / 2, -size / 2, size, size);
       ctx.restore();
     }
 
     let rotationImg = document.createElement('img');
-    rotationImg.src = "./img/images/sync-alt-regular.svg";
+    rotationImg.src = "./img/images/rotate.jpg";
     fabricObj.Object.prototype.controls.tr = new fabricObj.Control({
-      x: 0.5,
-      y: -0.5,
+      x: 0.6,
+      y: -0.6,
       cursorStyle: 'crosshair',
       actionHandler: fabricObj.controlsUtils.rotationWithSnapping,
       actionName: 'rotate',
@@ -65,11 +67,11 @@ import {fabric} from 'fabric'
     }
 
     let deleteImg = document.createElement('img');
-    deleteImg.src = "./img/images/times-light.svg";
+    deleteImg.src = "./img/images/remove.jpg";
 
     fabricObj.Object.prototype.controls.deleteControl = new fabricObj.Control({
-      x: -0.5,
-      y: -0.5,
+      x: -0.6,
+      y: -0.6,
       cursorStyle: 'pointer',
       mouseUpHandler: deleteObject,
       actionName: 'remove',
@@ -114,10 +116,10 @@ export default class Scene extends Vue {
   @Prop({required: false}) readonly logoAllowed !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
-  @Prop({required: false, default: 300}) readonly mainCanvasWidth!: number;
-  @Prop({required: false, default: 360}) readonly mainCanvasHeight!: number;
-  @Prop({required: false, default: 300}) readonly canvasWidth!: number;
-  @Prop({required: false, default: 360}) readonly canvasHeight!: number;
+  @Prop({required: false, default: 280}) readonly mainCanvasWidth!: number;
+  @Prop({required: false, default: 300}) readonly mainCanvasHeight!: number;
+  @Prop({required: false, default: 280}) readonly canvasWidth!: number;
+  @Prop({required: false, default: 300}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly mainPreview!: boolean;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
@@ -339,6 +341,7 @@ export default class Scene extends Vue {
       this.mainSvgGroups.forEach((mainSvgGroup: Record<any, any>) => {
         if(svgGroup.id == mainSvgGroup.id) {
           svgGroup.color = mainSvgGroup.color
+          svgGroup.pantone = mainSvgGroup.pantone
           groupColors[svgGroup.id] = mainSvgGroup.color
         }
       })
@@ -371,8 +374,9 @@ export default class Scene extends Vue {
       if(this.currentColorApplied == 'single') {
         this.mainSvgGroups.forEach((mainSvgGroup: Record<any, any>) => {
           if(svgGroup.id == mainSvgGroup.id) {
-            groupColors[svgGroup.id] = mainSvgGroup.color
             svgGroup.color = mainSvgGroup.color
+            svgGroup.pantone = mainSvgGroup.pantone
+            groupColors[svgGroup.id] = mainSvgGroup.color
             idExist = true
           }
         })
@@ -380,9 +384,10 @@ export default class Scene extends Vue {
       if(!idExist) {
         groupColors[svgGroup.id] = this.defaultColors[useColorIndex].color
         if (this.mainPreview && dispatchUpdateColor) {
-          this.$store.dispatch('updateSvgGroups', { index: index, color: this.defaultColors[useColorIndex].color })
+          this.$store.dispatch('updateSvgGroups', { index: index, color: this.defaultColors[useColorIndex].color, pantone: this.defaultColors[useColorIndex].pantone })
         }
         svgGroup.color = this.defaultColors[useColorIndex].color
+        svgGroup.pantone = this.defaultColors[useColorIndex].pantone
       }
 
       useColorIndex++
@@ -421,7 +426,11 @@ export default class Scene extends Vue {
           count = 100000 // to make base always at first color position
         }
         if(!item.id.includes('inside')) {
-          this.svgGroups.push({ id: item.id, color: item.fill, count: count })
+          if(item.fill.includes('rgb')) {
+            item.fill = rgbHex(item.fill)
+          }
+          const pantoneColor = getClosestColor(item.fill)
+          this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone })
         }
       }else {
         this.svgGroups.map((existingItem: Record<any, any>) => {
@@ -441,7 +450,11 @@ export default class Scene extends Vue {
             count = 100000 // to make base always at first color position
           }
           if(!item.id.includes('inside')) {
-            this.svgGroups.push({ id: item.id, color: item.fill, count: count })
+            if(item.fill.includes('rgb')) {
+              item.fill = rgbHex(item.fill)
+            }
+            const pantoneColor = getClosestColor(item.fill)
+            this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone })
           }
         }else {
           this.svgGroups.map((existingItem: Record<any, any>) => {
@@ -461,11 +474,14 @@ export default class Scene extends Vue {
         this.svgGroups.forEach((svgGroup: Record<any, any>) => {
           if(mainSvgGroup.id == svgGroup.id) {
             svgGroup.color = mainSvgGroup.color
+            svgGroup.pantone = mainSvgGroup.pantone
           }
         })
       })
     }
     if (this.mainPreview) {
+      console.log(this.svgGroups)
+
       this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
   }
@@ -836,5 +852,11 @@ export default class Scene extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.fix-space {
+  a{
+    flex: 0 0 48%;
+    max-width: 48%;
+  }
+}
 </style>
