@@ -21,13 +21,13 @@
           </div>
           <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
             <div v-if="design.design_show == 1" class="image-holder p-4" :key="'front'+design.id">
-              <Scene v-if="selectedProduct.productstyles[styleIndex].back" :canvas-width="300" :canvas-height="360"
+              <Scene v-if="selectedProduct.productstyles[styleIndex].back"
                      :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
                      :back="{textureUrl: apiBaseUrl+'/'+ design.back_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].back.file_url}"
                      :logos="selectedProduct.productstyles[styleIndex].logo"
                      :productColors="selectedProduct.colors"  />
 
-              <Scene v-else class="view-back" :canvas-width="300" :canvas-height="360"
+              <Scene v-else class="view-back"
                      :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
                      :logos="selectedProduct.productstyles[styleIndex].logo"
                       :productColors="selectedProduct.colors"  />
