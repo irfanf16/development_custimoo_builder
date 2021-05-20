@@ -8,7 +8,7 @@
         <b-card-body>
           <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
             <b-nav-item v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
-              {{ colorType.file_type }}
+              {{ colorType.name }}
             </b-nav-item>
             <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
@@ -17,7 +17,7 @@
               <div v-if="showOther" class="custom-color-picker">
                 <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
               </div>
-              <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color.value)"
+              <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
                    :title="color.name" :style="{background: color.value}" :key="index">
               </div>
             </div>
@@ -31,6 +31,7 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
+import getClosestColor from '@/pantoneColor'
 
 @Component<ColorTabs>({
   components: {
@@ -73,13 +74,14 @@ export default class ColorTabs extends Vue {
     this.productColor = this.productColors[this.selectTypeIndex].color_text
   }
 
-  public setColor(color: any) {
+  public setColor(color: Record<any, any>) {
     this.$store.dispatch('setCurrentColorApplied', 'single')
-    this.$store.dispatch('updateSvgGroups', { index: this.selectTabIndex, color: color })
+    this.$store.dispatch('updateSvgGroups', { index: this.selectTabIndex, color: color.value, pantone: color.name })
   }
 
-  public changeColor(color: any) {
-    this.setColor(color.hex)
+  public changeColor(color: Record<any, any>) {
+    let pantoneColor = getClosestColor(color.hex)
+    this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone})
   }
 }
 

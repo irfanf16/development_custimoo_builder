@@ -10,7 +10,7 @@ const ProductAttributes:Module<any, any> = {
     customTexts: [],
     isAssociation: false,
     styleIndex: 0,
-    defaultColors: [{name: 'Color One', color: null}, {name: 'Color Two', color: null}, {name: 'Color Three', color: null}, {name: 'Color Four', color: null}],
+    defaultColors: [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}],
     svgGroups: [],
     currentColorApplied: 'group',
     rosterDetails: []
@@ -70,7 +70,8 @@ const ProductAttributes:Module<any, any> = {
     },
     defaultColor (state: Record<any, any>, color: Record<any, any>) {
       if(color) {
-        Vue.set(state.defaultColors[color.index], 'color', color.value)
+        Vue.set(state.defaultColors[color.index], 'color', color.color)
+        Vue.set(state.defaultColors[color.index], 'pantone', color.pantone)
       }
     },
     SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
@@ -81,6 +82,7 @@ const ProductAttributes:Module<any, any> = {
     UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
         Vue.set(state.svgGroups[color.index], 'color', color.color)
+        Vue.set(state.svgGroups[color.index], 'pantone', color.pantone)
       }
     },
     rosterDetails(state: Record<any, any>, rosterDetail: Record<any, any>) {
