@@ -18,7 +18,7 @@
                                     <template v-for="(product, ind) in room.product">
                                         <div :key="ind" class="products-block">
                                             <div class="image-holder">
-                                          <a @click="editProduct(i, ind)">
+                                          <a >
                                             <Scene :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
                                                 :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''"
                                                 :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
@@ -44,7 +44,7 @@
                                                     </b-tooltip>
                                                 </li>
                                                 <li class="d-none d-lg-block">
-                                                    <a href="#"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                                                    <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                                                 </li>
                                             </ul>
                                           </div>
@@ -74,12 +74,10 @@
                                         </div>
                                         <div class="color-holder">
                                             <div class="color-container">
-                                            <template v-for="(item, ixx) in colors">
-                                              <template v-for="(col, ix) in JSON.parse(item.color)">
+                                            <template v-for="(item, ix) in colors">
                                                 <div class="color-box"
-                                                    :style="{background: col.colorCode}" :key="`${ixx}_${ix}`">
+                                                    :style="{background: item.value}" :key="`${ix}`">
                                                 </div>
-                                              </template>
                                             </template>
                                             </div>
                                         </div>
@@ -166,7 +164,7 @@
         await this.$store.dispatch('deleteRoom', {id: id, index: index});
       }
       public fetchColors(i:number, ind:number){
-      this.colors = this.getLockerProducts[ind].folders[i].colors;
+      this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
       console.log(this.colors)
       }
       public changeColor(){

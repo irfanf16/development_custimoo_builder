@@ -89,9 +89,7 @@
           this.ref['my-modal'].hide();
         }
       }
-
     }
-
 </script>
 
 <style lang="scss" scoped>
