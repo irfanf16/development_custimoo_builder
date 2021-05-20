@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-button class="add-logo-btn"  v-if="customLogos.length < numberOfLogosAllowed" @click="addTab(customLogos.length)">
+    <b-button class="add-logo-btn"  v-if="customLogos.length < allowedLogosLimit" @click="addTab(customLogos.length)">
       +
     </b-button>
     <b-tabs>
@@ -83,6 +83,9 @@ import getClosestColor from '@/pantoneColor'
   mounted() {
     this.getLogoColors()
     this.$store.dispatch('setCustomLogos')
+    if(this.numberOfLogosAllowed > 0) {
+      this.allowedLogosLimit = this.numberOfLogosAllowed
+    }
   }
 })
 export default class LogoPlacementTabs extends Vue {
@@ -111,6 +114,7 @@ export default class LogoPlacementTabs extends Vue {
     {value: 'back', text: 'Back'}
   ]
   public imageColors: any[] = []
+  public allowedLogosLimit = 1000
 
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
@@ -124,7 +128,7 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public addTab(index: number){
-    if(this.numberOfLogos < this.numberOfLogosAllowed) {
+    if(this.numberOfLogos < this.allowedLogosLimit) {
       let logoSetting: Record<any, any>
       if(this.logosSetting[index]) {
         logoSetting = this.logosSetting[index] as Record<any, any>

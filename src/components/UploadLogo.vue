@@ -45,7 +45,7 @@ import {http} from "@/httpCommon"
   mounted() {
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
-    if(this.customLogoIndex != 0){
+    if(this.customLogoIndex != 0 && this.customLogos[this.customLogoIndex].url == '') {
       this.modalHandler()
     }
   }
