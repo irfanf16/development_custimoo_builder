@@ -149,7 +149,7 @@ export default class LogoPlacementTabs extends Vue {
         x_axis: logoSetting.x_axis,
         y_axis: logoSetting.y_axis,
         rotation: logoSetting.rotation as number,
-        haveControls: Boolean(logoSetting.is_locked),
+        haveControls: Boolean(!logoSetting.is_locked),
         side: logoSetting.side,
         customLogo: true
       }
@@ -202,6 +202,13 @@ export default class LogoPlacementTabs extends Vue {
             let deletedCount = this.imageColors.length - 4
             this.imageColors.splice(4, deletedCount)
           }
+          let logoColors = []
+          this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
+            let pantoneColor = getClosestColor(imageColor.hex)
+            this.imageColors[index].pantone = pantoneColor.pantone
+            this.imageColors[index].hex = pantoneColor.hex
+            logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
+          })
           this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
         })
       })
@@ -210,9 +217,7 @@ export default class LogoPlacementTabs extends Vue {
 
   useLogoColors() {
     this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-      let pantoneColor = getClosestColor(imageColor.hex)
-      this.imageColors[index].pantone = pantoneColor.pantone
-      this.$store.dispatch('setDefaultColor', { index: index, color: pantoneColor.hex, pantone: pantoneColor.pantone })
+      this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.hex, pantone: imageColor.pantone })
     })
   }
 
