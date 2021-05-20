@@ -149,7 +149,7 @@ export default class LogoPlacementTabs extends Vue {
         x_axis: logoSetting.x_axis,
         y_axis: logoSetting.y_axis,
         rotation: logoSetting.rotation as number,
-        haveControls: Boolean(logoSetting.is_locked),
+        haveControls: Boolean(!logoSetting.is_locked),
         side: logoSetting.side,
         customLogo: true
       }
