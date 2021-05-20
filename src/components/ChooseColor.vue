@@ -20,7 +20,7 @@
             </a>
           </div>
           <div class="color-container">
-            <div v-for="(color, index) in colors" @click="setColor(color.value)" class="color-box" :title="color.name" :style="{background: color.value}"
+            <div v-for="(color, index) in colors" @click="setColor(color)" class="color-box" :title="color.name" :style="{background: color.value}"
                   :key="index"></div>
           </div>
         </div>
@@ -59,10 +59,10 @@ export default class ChooseColor extends Vue {
     })
   }
 
-  public setColor(color: string): void {
+  public setColor(color: Record<any, any>): void {
     this.colorPickerActive = false
     this.$store.dispatch('setCurrentColorApplied', 'group')
-    this.$store.dispatch('setDefaultColor', { index: this.selectColorIndex, value: color})
+    this.$store.dispatch('setDefaultColor', { index: this.selectColorIndex, color: color.value, pantone: color.name })
   }
 
   public shuffleColors(): void {
@@ -80,13 +80,13 @@ export default class ChooseColor extends Vue {
       defaultColors.reduce(shuffle)
     }
     defaultColors.forEach((defaultColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, value: defaultColor.color})
+      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.name })
     })
   }
 
   public rollbackPreviousColors (): void {
     this.previousDefaultColors.forEach((defaultColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, value: defaultColor.color})
+      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.name })
     })
     this.previousDefaultColors = []
   }
