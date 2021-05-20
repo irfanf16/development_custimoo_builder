@@ -378,7 +378,7 @@ a:hover{color: #219f84;}
                 // justify-content: space-between;
                 font-size: 12px;
                 font-weight: 400;
-                max-width: 90px;
+                max-width: 110px;
                 width: 100%;
                 .color-box{
                     width: 23px;
@@ -399,6 +399,9 @@ a:hover{color: #219f84;}
                         border-radius: 50%;
                         border: 3px solid #fff;
                     }
+                }
+                .color-pantone-name{
+                    max-width: 80px;
                 }
             }
             .text{
@@ -1639,7 +1642,7 @@ a:hover{color: #219f84;}
         height: auto !important;
     }
     .canvas-container{
-        width: 80px !important;
+        width: 100% !important;
         height: 100px !important;
       }
 }
@@ -1648,6 +1651,7 @@ a:hover{color: #219f84;}
         .canvas-container{
             height: 100px !important;
             width: 70px !important;
+            margin: 0 auto;
             .canvas{
                 width: 100% !important;
                 height: auto !important;

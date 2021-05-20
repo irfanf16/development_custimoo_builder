@@ -45,7 +45,7 @@
               <div class="logo-placement-holder mb-lg-3">
                 <div class="logo-holder color-extracted-area">
                   <div class="color-extract-container">
-                    <div class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.value}" :key="index"></div>
+                    <div class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.hex}" :key="index"></div>
                   </div>
                 </div>
                 <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
@@ -190,8 +190,8 @@ export default class LogoPlacementTabs extends Vue {
         Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).getPalette((err: any, palettes: any) => {
           for (let [key, value] of Object.entries(palettes) as any[]) {
             let colorInfo = {
-              'value': value.getHex(),
-              // 'colorPopulation': value.getPopulation()
+              'hex': value.getHex(),
+              'colorPopulation': value.getPopulation()
             }
             this.imageColors.push(colorInfo)
             this.imageColors.sort(function (a, b) {
@@ -202,9 +202,12 @@ export default class LogoPlacementTabs extends Vue {
             let deletedCount = this.imageColors.length - 4
             this.imageColors.splice(4, deletedCount)
           }
+          let logoColors = []
           this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-            let pantoneColor = getClosestColor(imageColor.value)
-            this.imageColors[index].name = pantoneColor.pantone
+            let pantoneColor = getClosestColor(imageColor.hex)
+            this.imageColors[index].pantone = pantoneColor.pantone
+            this.imageColors[index].hex = pantoneColor.hex
+            logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
           })
           this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
         })
@@ -214,13 +217,13 @@ export default class LogoPlacementTabs extends Vue {
 
   useLogoColors() {
     this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.value, pantone: imageColor.name })
+      this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.hex, pantone: imageColor.pantone })
     })
   }
 
   shuffleLogoColors() {
-    this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {return imageColor.value})
-    let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {return imageColor.value})
+    this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {return imageColor.hex})
+    let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {return imageColor.hex})
 
     let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
       if (currentIndex !== 1) return previousValue;
@@ -236,7 +239,7 @@ export default class LogoPlacementTabs extends Vue {
 
     this.imageColors = imageColors
     imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.value, pantone: imageColor.name })
+      this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.hex, pantone: imageColor.pantone })
     })
   }
 
