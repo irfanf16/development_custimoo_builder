@@ -71,7 +71,7 @@ import UploadLogo from "@/components/UploadLogo.vue"
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
 import {default as Vibrant} from 'node-vibrant'
-import {default as pant} from 'nearest-pantone'
+import getClosestColor from '@/pantoneColor'
 
 
 @Component<LogoPlacementTabs>({
@@ -193,7 +193,7 @@ export default class LogoPlacementTabs extends Vue {
               'colorCode': value.getHex(),
               'colorPopulation': value.getPopulation()
             }
-            let pantoneColor = pant.getClosestColor(colorInfo.colorCode)
+            let pantoneColor = getClosestColor(colorInfo.colorCode)
             console.log(pantoneColor)
             this.imageColors.push(colorInfo)
             this.imageColors.sort(function (a, b) {
@@ -208,7 +208,6 @@ export default class LogoPlacementTabs extends Vue {
         })
       })
     }
-    // let pantoneColor = pant.getClosestColor(this.imageColors)
 
   }
   public async callRooms(){
