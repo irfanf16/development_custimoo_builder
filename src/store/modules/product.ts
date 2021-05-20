@@ -99,6 +99,15 @@ const Product:Module<any, any> = {
           commit('DELETE_ROOM_PRODUCT', payload);
         }
       })
+    },
+    async storeFolder({commit}, payload){
+      let saved = false;
+      await  http.post("locker/folder", payload).then((res) => {
+        if (res.status == 201){
+          saved = true;
+        }
+      });
+      return saved;
     }
 
   }
