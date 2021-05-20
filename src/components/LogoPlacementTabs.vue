@@ -45,11 +45,11 @@
               <div class="logo-placement-holder mb-lg-3">
                 <div class="logo-holder color-extracted-area">
                   <div class="color-extract-container">
-                    <div class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.colorCode}" :key="index"></div>
+                    <div class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.hex}" :key="index"></div>
                   </div>
                 </div>
-                <b-button class="use-btn">Use These Colors</b-button>
-                <b-button variant="outline-secondary">Shuffle</b-button>
+                <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
+                <b-button @click="shuffleLogoColors()" variant="outline-secondary">Shuffle</b-button>
                 <b-button class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
               </div>
               <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal @click="callRooms">Save Color</button>
@@ -113,6 +113,7 @@ export default class LogoPlacementTabs extends Vue {
     {value: 'front', text: 'Front'},
     {value: 'back', text: 'Back'}
   ]
+  public previousImageColors = []
   public imageColors: any[] = []
   public allowedLogosLimit = 1000
 
@@ -152,7 +153,7 @@ export default class LogoPlacementTabs extends Vue {
         x_axis: logoSetting.x_axis,
         y_axis: logoSetting.y_axis,
         rotation: logoSetting.rotation as number,
-        haveControls: Boolean(logoSetting.is_locked),
+        haveControls: Boolean(!logoSetting.is_locked),
         side: logoSetting.side,
         customLogo: true
       }
@@ -187,18 +188,15 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public getLogoColors(){
-
     this.imageColors = []
     if(this.customLogos[0] && this.customLogos[0].url) {
       this.$nextTick(() => {
         Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).getPalette((err: any, palettes: any) => {
           for (let [key, value] of Object.entries(palettes) as any[]) {
             let colorInfo = {
-              'colorCode': value.getHex(),
+              'hex': value.getHex(),
               'colorPopulation': value.getPopulation()
             }
-            let pantoneColor = getClosestColor(colorInfo.colorCode)
-            console.log(pantoneColor)
             this.imageColors.push(colorInfo)
             this.imageColors.sort(function (a, b) {
               return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
@@ -212,8 +210,38 @@ export default class LogoPlacementTabs extends Vue {
         })
       })
     }
-
   }
+
+  useLogoColors() {
+    this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
+      let pantoneColor = getClosestColor(imageColor.hex)
+      this.imageColors[index].pantone = pantoneColor.pantone
+      this.$store.dispatch('setDefaultColor', { index: index, color: pantoneColor.hex, pantone: pantoneColor.pantone })
+    })
+  }
+
+  shuffleLogoColors() {
+    this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {return imageColor.hex})
+    let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {return imageColor.hex})
+
+    let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
+      if (currentIndex !== 1) return previousValue;
+
+      array.sort(() => Math.random() - 0.5)
+
+      return array;
+    }
+
+    while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
+      imageColors.reduce(shuffle)
+    }
+
+    this.imageColors = imageColors
+    imageColors.forEach((imageColor: Record<any, any>, index: number) => {
+      this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.hex, pantone: imageColor.pantone })
+    })
+  }
+
   public async callRooms(){
     if(this.isCustomerAuthenticated){
       await this.$store.dispatch('GET_LOCKER_PRODUCTS');

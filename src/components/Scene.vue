@@ -116,10 +116,10 @@ export default class Scene extends Vue {
   @Prop({required: false}) readonly logoAllowed !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
-  @Prop({required: false, default: 300}) readonly mainCanvasWidth!: number;
-  @Prop({required: false, default: 360}) readonly mainCanvasHeight!: number;
-  @Prop({required: false, default: 300}) readonly canvasWidth!: number;
-  @Prop({required: false, default: 360}) readonly canvasHeight!: number;
+  @Prop({required: false, default: 280}) readonly mainCanvasWidth!: number;
+  @Prop({required: false, default: 300}) readonly mainCanvasHeight!: number;
+  @Prop({required: false, default: 280}) readonly canvasWidth!: number;
+  @Prop({required: false, default: 300}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly mainPreview!: boolean;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
