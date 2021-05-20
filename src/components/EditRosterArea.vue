@@ -172,7 +172,7 @@ export default class EditRosterArea extends Vue {
             information: ''
           };
           for (let i in rows[row]){
-            if (row == 0){
+            if (row == '0'){
               continue
             }
             if (i == '1') {

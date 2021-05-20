@@ -52,7 +52,7 @@
                 <b-button variant="outline-secondary">Shuffle</b-button>
                 <b-button class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
               </div>
-              <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal>Save Color</button>
+              <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal @click="callRooms">Save Color</button>
               <SaveColorModal />
             </div>
           </template>
@@ -118,6 +118,9 @@ export default class LogoPlacementTabs extends Vue {
 
   get manageComponents(): [] {
     return this.$store.getters.getManageComponents
+  }
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
   }
 
   public addTab(index: number){
@@ -206,7 +209,12 @@ export default class LogoPlacementTabs extends Vue {
       })
     }
     // let pantoneColor = pant.getClosestColor(this.imageColors)
-    
+
+  }
+  public async callRooms(){
+    if(this.isCustomerAuthenticated){
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS');
+    }
   }
 }
 </script>

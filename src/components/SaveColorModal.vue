@@ -1,224 +1,34 @@
 <template>
     <b-modal ref="my-modal" id="modal-center-savecolormodal" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
       <b-tabs content-class="mt-3">
-        <b-tab>
-          <template #title>
-            test
-            <a class="remove-tab" @click="deleteRoom(room.id, i)">
-                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-            </a>
+        <template v-for="(room, i) in getLockerProducts">
+        <b-tab :key="i">
+          <template #title >
+            <a @click="changeRoom(room.id)">{{room.room_name}}</a>
           </template>
           <div class="pt-lg-4 folder-wrapper">
             <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Recent Folder</h3>
-            <div class="d-flex flex-wrap">
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-            </div>
+            <template v-for="(folder, i) in room.folders">
+              <div class="d-flex flex-wrap" :key="i">
+                <a  class="text-center d-block" @click="changeFolder(folder.folder_name)">
+                  <font-awesome-icon :icon="['fas', 'folder']"/>
+                  <span class="folder-name d-block">{{ folder.folder_name }}</span>
+                </a>
+              </div>
+            </template>
           </div>
         </b-tab>
-        <b-tab>
-          <template #title>
-            test
-            <a class="remove-tab" @click="deleteRoom(room.id, i)">
-                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-            </a>
-          </template>
-          <div class="pt-lg-4 folder-wrapper">
-            <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Recent Folder</h3>
-            <div class="d-flex flex-wrap">
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-            </div>
-          </div>
-        </b-tab>
-        <b-tab>
-          <template #title>
-            test
-            <a class="remove-tab" @click="deleteRoom(room.id, i)">
-                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-            </a>
-          </template>
-          <div class="pt-lg-4 folder-wrapper">
-            <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Recent Folder</h3>
-            <div class="d-flex flex-wrap">
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-              <a href="#." class="text-center d-block">
-                <font-awesome-icon :icon="['fas', 'folder']"/>
-                <span class="folder-name d-block">Folder Name</span>
-              </a>
-            </div>
-          </div>
-        </b-tab>
+        </template>
       </b-tabs>
-        
-        
+
         <div class="pt-4 design-name-form">
             <b-form inline>
                 <label for="inline-form-input-productname" class="w-100 d-block mb-2">Color Group Name</label>
                 <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
                     <b-input-group>
-                        <b-form-input id="inline-form-input-productname" v-model="product_name"  placeholder="Type Here"></b-form-input>
+                        <b-form-input id="inline-form-input-productname" v-model="folder_name"  placeholder="Type Here"></b-form-input>
                     </b-input-group>
-                    <b-button variant="primary" :disabled="locker_selected" @click="saveToLocker()">Save Design</b-button>
+                    <b-button variant="primary"  @click="saveFolder" >Save Folder</b-button>
                 </div>
             </b-form>
         </div>
@@ -240,58 +50,46 @@
     export default class SaveColorModal extends Vue {
       public locker_selected = true;
       public room_id = 0;
-      public product_name = '';
+      public folder_name = '';
       public ref = this.$refs as Record<any, any>
 
-      get customTexts(): [Record<any, any>] {
-        return this.$store.getters.getCustomTexts
+      get getLockerProducts():Record<any, any>{
+        return this.$store.getters.getLockerProducts;
       }
+
       get lockers(){
         return this.$store.getters.getLockers;
       }
       get isCustomerAuthenticated(): boolean {
         return this.$store.getters.isCustomerAuthenticated
       }
-      get selectedProduct(): Record<any, any>{
-        return this.$store.getters.getSelectedProduct
-      }
-      get styleIndex():number{
-        return  this.$store.getters.getCurrentStyleIndex;
-      }
-      get customLogos(): [] {
-        return this.$store.getters.getCustomLogos
-      }
       get logoColors():[]{
         return  this.$store.getters.getLogosColors;
       }
+
       public showButton(id:number){
         this.locker_selected = false;
         this.room_id = id;
       }
-      public saveToLocker(){
-        if (this.isCustomerAuthenticated) {
-          const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-            return item.design_show
-          })
-          let locker = {
-            room_id: this.room_id,
-            product_id: this.selectedProduct.product_id,
-            product_name: this.product_name,
-            style_id: this.selectedProduct.productstyles[this.styleIndex].id,
-            design_id: currentDesign[0].id,
-            custom_logos: this.customLogos,
-            text: this.customTexts,
-            colors: this.logoColors
-          }
-          this.$store.dispatch("SAVE_TO_LOCKER", locker);
+
+      public changeFolder(folder:string, id:number){
+        this.folder_name = folder;
+      }
+      public changeRoom(id:number){
+        this.room_id = id;
+      }
+      public async saveFolder(){
+        if (this.room_id == 0){
+          alert('select room first');
+          return false;
+        }
+       let saved = await this.$store.dispatch('storeFolder', {folder_name: this.folder_name, room_id: this.room_id, colors: this.logoColors});
+        if (saved == true){
+          await this.$store.dispatch('GET_LOCKER_PRODUCTS');
           this.ref['my-modal'].hide();
-        }else{
-          alert("please login first");
         }
       }
-      public async deleteRoom(id:number, index:number){
-        await this.$store.dispatch('deleteRoom', {id: id, index: index});
-      }
+
     }
 
 </script>
@@ -455,6 +253,6 @@
       }
     }
 
-    
+
 
 </style>
