@@ -62,15 +62,302 @@
                                     <b-card-text>Tab contents 2</b-card-text>
                                 </b-tab>
                                 <b-tab title="Colors">
-                                  <div class="color-holder">
-                                    <div class="color-container">
-                                      <template v-for="(item) in room.product">
-                                        <div class="color-box" v-for="(color, index) in JSON.parse(item.colors)"
-                                             :style="{background: color.colorCode}" :key="index">
+                                    <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
+                                        <div class="pt-lg-2 folder-wrapper">
+                                            <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
+                                            <div class="d-flex flex-wrap color-folder-holder">
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                                <a href="#." class="text-center d-block">
+                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                    <span class="folder-name d-block">Folder Name</span>
+                                                </a>
+                                            </div>
                                         </div>
-                                      </template>
+                                        <div class="color-holder">
+                                            <div class="color-container">
+                                            <template v-for="(item) in room.product">
+                                                <div class="color-box" v-for="(color, index) in JSON.parse(item.colors)"
+                                                    :style="{background: color.colorCode}" :key="index">
+                                                </div>
+                                            </template>
+                                            </div>
+                                        </div>
                                     </div>
-                                  </div>
                                 </b-tab>
                             </b-tabs>
                         </b-card>
@@ -416,6 +703,75 @@
             }
         }
     }
+    .lockerroom-color-folders{
+        position: relative;
+        .folder-wrapper{
+            flex: 0 0 50%;
+            max-width: 50%;
+            @media only screen and (min-width: 1200px){
+                flex: 0 0 70%;
+                max-width: 70%;
+            }
+            h3{
+                font-weight: 600;
+                @media only screen and (min-width: 992px){
+                font-size: 20px;
+                }
+            }
+            a{
+                margin: 0 10px 12px;
+                font-size: 10px;
+                flex: 0 0 38%;
+                max-width: 38%;
+                @media only screen and (min-width: 768px){
+                    font-size: 10px;
+                    flex: 0 0 19%;
+                    max-width: 19%;
+                }
+                @media only screen and (min-width: 1200px){
+                    font-size: 14px;
+                    flex: 0 0 13%;
+                    max-width: 13%;
+                }
+                svg{
+                    font-size: 32px;
+                    display: block;
+                    margin: 0 auto 10px;
+                    fill: #219f84;
+                    color: #219f84;
+                    @media only screen and (min-width: 768px){
+                        font-size: 46px;
+                    }
+                }
+            }
+        }
+        .color-holder{
+            flex: 0 0 45%;
+            max-width: 45%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            max-height: 180px;
+            @media only screen and (min-width: 768px){
+                max-height: 300px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            @media only screen and (min-width: 1200px){
+                flex: 0 0 25%;
+                max-width: 25%;
+            }
+        }
+        .color-folder-holder{
+            overflow-y: auto;
+            max-height: 20vh;
+            @media only screen and (min-width: 768px){max-height: 50vh;}
+        }
+    }
+
+    
 
 
 

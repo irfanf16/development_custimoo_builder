@@ -212,7 +212,8 @@ const ProductAttributes:Module<any, any> = {
       let done = false;
       await http.get("product?product_id="+payload).then((res) => {
         if (res.status == 200) {
-          commit('ADD_TO_PRODUCTS', res.data.products[0]);
+          console.log(res.data.products);
+          commit('ADD_TO_PRODUCTS', res.data.products);
           done = true;
         }
       });

@@ -16,7 +16,7 @@
 
         <div class="tabs-logo-container">
           <template v-if="customLogos[index].url != ''">
-            <div class="logo-placement-area mb-3 mb-lg-4">
+            <div class="logo-placement-area mb-3 mb-lg-4 pt-2">
               <div class="logo-placement-holder mb-lg-3">
                 <div class="logo-holder">
                   <template v-if="customLogos[index].url != ''">
@@ -37,7 +37,8 @@
                   <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
                 </div>
               </div>
-              <button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold">Save Logo</button>
+              <b-button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold" v-b-modal.modal-center-savelogomodal>Save Logo</b-button>
+              <SaveLogoModal />
             </div>
             <div class="logo-placement-area extracted-color-area" v-if="index == 0">
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
@@ -51,7 +52,8 @@
                 <b-button variant="outline-secondary">Shuffle</b-button>
                 <b-button class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
               </div>
-              <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color">Save Color</button>
+              <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal @click="callRooms">Save Color</button>
+              <SaveColorModal />
             </div>
           </template>
           <template v-if="manageComponents.LogoArea">
@@ -66,11 +68,17 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
+import SaveLogoModal from "@/components/SaveLogoModal.vue"
+import SaveColorModal from "@/components/SaveColorModal.vue"
 import {default as Vibrant} from 'node-vibrant'
+import {default as pant} from 'nearest-pantone'
+
 
 @Component<LogoPlacementTabs>({
   components: {
-    UploadLogo
+    UploadLogo,
+    SaveLogoModal,
+    SaveColorModal
   },
   mounted() {
     this.getLogoColors()
@@ -110,6 +118,9 @@ export default class LogoPlacementTabs extends Vue {
 
   get manageComponents(): [] {
     return this.$store.getters.getManageComponents
+  }
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
   }
 
   public addTab(index: number){
@@ -172,6 +183,7 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public getLogoColors(){
+
     this.imageColors = []
     if(this.customLogos[0] && this.customLogos[0].url) {
       this.$nextTick(() => {
@@ -181,6 +193,8 @@ export default class LogoPlacementTabs extends Vue {
               'colorCode': value.getHex(),
               'colorPopulation': value.getPopulation()
             }
+            let pantoneColor = pant.getClosestColor(colorInfo.colorCode)
+            console.log(pantoneColor)
             this.imageColors.push(colorInfo)
             this.imageColors.sort(function (a, b) {
               return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
@@ -193,6 +207,13 @@ export default class LogoPlacementTabs extends Vue {
           this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
         })
       })
+    }
+    // let pantoneColor = pant.getClosestColor(this.imageColors)
+
+  }
+  public async callRooms(){
+    if(this.isCustomerAuthenticated){
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS');
     }
   }
 }

@@ -12,21 +12,37 @@ const Main:Module<any, any> = {
       ItemToCustomize: !mobileScreen,
       BasicCustomization: true,
       AdvanceCustomization: false,
+    },
+    hideTab: {
+      logoHide: !mobileScreen,
+      colorHide: !mobileScreen,
+      textHide: !mobileScreen,
+      styleHide: !mobileScreen,
+      teamHide: !mobileScreen
     }
   },
   mutations: {
     manageComponents(state: Record<any, any>, payload: Record<any, any>) {
       state.manageComponents[payload.index] = payload.value
+    },
+    SET_HIDE_TAB(state: Record<any, any>, payload: Record<any, any>) {
+      state.hideTab[payload.index] = payload.value
     }
   },
   getters: {
     getManageComponents: state => {
       return state.manageComponents
+    },
+    getHideTab: state => {
+      return state.hideTab
     }
   },
   actions: {
     setManageComponents({ commit }, payload) {
       commit('manageComponents', payload)
+    },
+    setHideTab({ commit }, payload) {
+      commit('SET_HIDE_TAB', payload)
     },
     setJwtToken() {
       if(!localStorage.getItem('jwtToken')) {

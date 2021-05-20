@@ -132,9 +132,10 @@ export default class EditRosterArea extends Vue {
   }
   public onChange(event: Record<any, any>){
     let status = true;
+    let loopStatus = true;
     let files = event.target.files ? event.target.files[0] : null;
     readXlsxFile(files).then((rows: any[][]) => {
-      if (rows[0].length != 5){
+      if (rows[0].length != 6){
         alert("please upload valid file")
         return false
       }
@@ -162,7 +163,7 @@ export default class EditRosterArea extends Vue {
         }
       }
       if (status) {
-        rows.forEach((item: any[], index) => {
+        for (let row in rows){
           let obj = {
             text: '',
             number: '',
@@ -170,29 +171,45 @@ export default class EditRosterArea extends Vue {
             quantity: 1,
             information: ''
           };
-          if (index > 0) {
-            for (let i in item) {
-              if (i == '1') {
-                obj.size   = item[i];
-              }
-              if (i == '2') {
-                obj.text = item[i];
-              }
-              if (i == '3') {
-                obj.number = item[i];
-              }
-              if (i == '4') {
-                obj.information = item[i];
-              }
+          for (let i in rows[row]){
+            if (row == '0'){
+              continue
             }
-            this.fileData.push(obj);
+            if (i == '1') {
+              if (rows[row][i] == null || !this.checkSize(rows[row][i])){
+                loopStatus = false;
+                break;
+              }
+              obj.size   = rows[row][i];
+            }
+            if (i == '2') {
+              obj.text = rows[row][i];
+            }
+            if (i == '3') {
+              obj.number = rows[row][i];
+            }
+            if (i == '4') {
+              obj.information = rows[row][i];
+            }
           }
-        })
-        this.$store.dispatch('updateRoster', this.fileData);
+          if (loopStatus == false){
+            break
+          }
+          this.fileData.push(obj);
+        }
+        if (loopStatus == true){
+          this.$store.dispatch('updateRoster', this.fileData);
+        }else{
+          alert('Size is missing');
+        }
       }else{
         alert("please upload a valid file");
       }
     })
+  }
+  public checkSize(size:string){
+    let sizes = ['SM', 'MD', 'LG', 'XL','2XL', '3XL'];
+    return sizes.includes(size);
   }
 }
 
