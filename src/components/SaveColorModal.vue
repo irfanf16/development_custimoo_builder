@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="my-modal" id="modal-center-savecolormodal" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="my-modal" id="modal-center-savecolormodal" centered scrollable size="xl" title="Add Color to Locker Room" content-class="lockerroom-modal">
       <b-tabs content-class="mt-3">
         <template v-for="(room, i) in getLockerProducts">
         <b-tab :key="i">
@@ -19,6 +19,10 @@
           </div>
         </b-tab>
         </template>
+        <div class="create-lockerroom">
+            <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
+            <CreateLockerRoomModal />
+        </div>
       </b-tabs>
 
         <div class="pt-4 design-name-form">
@@ -28,7 +32,7 @@
                     <b-input-group>
                         <b-form-input id="inline-form-input-productname" v-model="folder_name"  placeholder="Type Here"></b-form-input>
                     </b-input-group>
-                    <b-button variant="primary"  @click="saveFolder" >Save Folder</b-button>
+                    <b-button variant="primary"  @click="saveFolder" >Save Color</b-button>
                 </div>
             </b-form>
         </div>
