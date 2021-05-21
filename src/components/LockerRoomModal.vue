@@ -89,7 +89,10 @@
                 </div>
             </b-tab>
               </template>
-
+          <div class="create-lockerroom">
+            <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
+            <CreateLockerRoomModal />
+          </div>
         </b-tabs>
         <!-- <div class="lockerroom-header">
             <div class="locker-opener">
@@ -161,7 +164,9 @@
         await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
       }
       public async deleteRoom(id:number, index:number){
-        await this.$store.dispatch('deleteRoom', {id: id, index: index});
+        if (confirm('You are going to delete associated product')) {
+          await this.$store.dispatch('deleteRoom', {id: id, index: index});
+        }
       }
       public fetchColors(i:number, ind:number){
       this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);

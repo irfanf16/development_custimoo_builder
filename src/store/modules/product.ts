@@ -54,11 +54,18 @@ const Product:Module<any, any> = {
       });
     },
     SAVE_TO_LOCKER({commit}, payload){
-      http.post("save/product/locker", payload).then((res) => {
+      let err = '';
+      const res = http.post("save/product/locker", payload).then((res) => {
         if (res.status == 201){
-          console.log(res.data.message);
+          return '';
         }
+      }).catch((errors)=>{
+        if (errors.response.status == 422){
+          err =  errors.response.data.errors.name[0];
+        }
+        return err;
       });
+      return res;
     },
     GET_LOCKER_PRODUCTS({commit}){
       http.get("locker/products").then((res) => {
@@ -74,12 +81,20 @@ const Product:Module<any, any> = {
         }
       })
     },
-    createLocker({commit}, payload:string){
-      http.post("locker/create", {name:payload}).then((res) =>{
+   async createLocker({commit}, payload:string){
+     let err = '';
+      const res = await http.post("locker/create", {name:payload}).then((res:Record<any, any>) =>{
         if (res.status == 201){
           commit('ADD_LOCKER', res.data.data);
+          return '';
         }
+      }).catch((errors)=>{
+        if (errors.response.status == 422){
+          err =  errors.response.data.errors.name[0];
+        }
+        return err;
       });
+     return res;
     },
     SET_LOGO_COLORS({commit}, payload:Record<any, any>){
       commit('SET_LOGO_COLORS', payload);

@@ -24,9 +24,14 @@
       public name = ''
       public ref = this.$refs as Record<any, any>
 
-      public createLocker(){
-        this.$store.dispatch('createLocker', this.name);
-        this.ref['create-modal'].hide();
+      public async createLocker(){
+        let res = await this.$store.dispatch('createLocker', this.name);
+       if (res == ''){
+         await this.$store.dispatch('GET_LOCKER_PRODUCTS');
+         this.ref['create-modal'].hide();
+       }else{
+         alert(res);
+       }
       }
     }
 
@@ -109,6 +114,6 @@
             border-color: #219f84;
         }
     }
-    
+
 
 </style>
