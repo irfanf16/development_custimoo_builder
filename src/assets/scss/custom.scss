@@ -1005,6 +1005,15 @@ a:hover{color: #219f84;}
     .tab-content{
         max-height: calc(100vh - 250px);
         overflow-y: auto;
+        &::-webkit-scrollbar{
+            width: 5px;
+        }
+        &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: #219F84;
+        }
     }
 }
 .color-holder{
@@ -1722,4 +1731,24 @@ a:hover{color: #219f84;}
 .custom-color-picker {
     .colors .item:nth-child(8n + 1){margin-left: 10px !important;}
     .color-type{display: none !important;}
+}
+#modal-center-savecolormodal___BV_modal_body_{
+    .nav-tabs{
+        max-width: 85%;
+        padding-bottom: 3px;
+        overflow: hidden;
+        overflow-x: auto;
+        white-space: nowrap;
+        flex-wrap: nowrap;
+        cursor: grab;
+        &::-webkit-scrollbar{
+            height: 10px;
+        }
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: #219F84;
+        }
+    }
 }
