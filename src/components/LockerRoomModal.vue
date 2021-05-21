@@ -72,7 +72,7 @@
                                             </div>
                                           </template>
                                         </div>
-                                        <div class="color-holder">
+                                        <div class="color-holder" v-if="colors.length > 0">
                                             <div class="color-container">
                                             <template v-for="(item, ix) in colors">
                                                 <div class="color-box"
