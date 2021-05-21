@@ -255,9 +255,9 @@ export default class Scene extends Vue {
   customTextsChanged(newVal: [Record<any, any>]) {
     if (this.mounted) {
       const self = this
-      newVal.forEach((text: Record<any, any>) => {
-        this.customTextObjects.forEach((textObject, dIndex) => {
-          if((textObject.textIndex == dIndex && text.side != textObject.side) || (!text.text)){
+      newVal.forEach((text: Record<any, any>, index: number) => {
+        this.customTextObjects.forEach((textObject) => {
+          if((textObject.textIndex == index && text.side != textObject.side) || (textObject.textIndex == index && !text.text)){
             self.frontCanvas.remove(textObject)
             if (self.backCanvas) {
               self.backCanvas.remove(textObject)
@@ -789,8 +789,6 @@ export default class Scene extends Vue {
         let textBox = new fabric.Text(text.text, {
           left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
           top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
-          scaleX: self.canvasWidth / self.mainCanvasWidth * text.width / text.width,
-          scaleY: self.canvasHeight / self.mainCanvasHeight * text.height / text.height,
           angle: text.rotation as number,
           centeredScaling: true,
           selectable: true,
@@ -805,6 +803,11 @@ export default class Scene extends Vue {
           paintFirst: 'stroke',
           lockScalingFlip: true
         })
+
+        if(text.scaleX && text.scaleY) {
+          textBox.scaleX = self.canvasWidth / self.mainCanvasWidth * text.scaleX
+          textBox.scaleY = self.canvasHeight / self.mainCanvasHeight * text.scaleY
+        }
         let finalIndex = index
         if (addIndex !== null) {
           finalIndex = addIndex
