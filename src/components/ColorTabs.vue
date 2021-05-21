@@ -8,7 +8,7 @@
         <b-card-body>
           <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
             <b-nav-item v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
-              {{ colorType.name }}
+              {{ colorType.name | capitalize}}
             </b-nav-item>
             <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
@@ -41,7 +41,7 @@ import getClosestColor from '@/pantoneColor'
     capitalize: (value: string) => {
       if (!value) return ''
       value = value.toString()
-      return value.charAt(0).toUpperCase() + value.slice(1)
+      return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
     }
   },
   mounted() {

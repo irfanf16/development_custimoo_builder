@@ -68,7 +68,7 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
     capitalize: (value: string) => {
       if (!value) return ''
       value = value.toString()
-      return value.charAt(0).toUpperCase() + value.slice(1)
+      return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
     }
   }
 })
