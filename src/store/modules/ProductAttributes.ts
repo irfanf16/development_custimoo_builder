@@ -74,7 +74,7 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.defaultColors[color.index], 'pantone', color.pantone)
       }
     },
-    SET_Group_COLORS (state: Record<any, any>, groupColors: Record<any, any>) {
+    SET_GROUP_COLORS (state: Record<any, any>, groupColors: Record<any, any>) {
       if(groupColors) {
         state.groupColors = groupColors
       }

@@ -89,12 +89,12 @@ export default class LogoPlacementTabs extends Vue {
   @Prop({required: true}) numberOfLogosAllowed!: number
   @Prop({required: false, default: () => { return [{
       url: '',
-      width: 100,
-      height: 100,
+      width: 200,
+      height: 200,
       scaleX: 1,
       scaleY: 1,
-      x_axis: 150,
-      y_axis: 190,
+      x_axis: 250,
+      y_axis: 200,
       rotation: 0,
       haveControls: true,
       side: 'front',
@@ -131,8 +131,7 @@ export default class LogoPlacementTabs extends Vue {
         logoSetting = this.logosSetting[index] as Record<any, any>
       }else {
         logoSetting = {
-          width: 100,
-          height: 100,
+          width: 200,
           x_axis: 150,
           y_axis: 190,
           rotation: 0,
@@ -188,22 +187,26 @@ export default class LogoPlacementTabs extends Vue {
     if(this.customLogos[0] && this.customLogos[0].url) {
       this.$nextTick(() => {
         let logoColors: Record<any, any>[] = []
-        Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).getPalette((err: any, palettes: any) => {
+        Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(4)
+        .getPalette((err: any, palettes: any) => {
           for (let [key, value] of Object.entries(palettes) as any[]) {
-            let colorInfo = {
-              'hex': value.getHex(),
-              'colorPopulation': value.getPopulation()
+            console.log(value.getPopulation())
+            console.log(value.getHex())
+            if(value.getPopulation() >= 100) {
+              this.imageColors.push({
+                'hex': value.getHex(),
+                'colorPopulation': value.getPopulation()
+              })
             }
-            this.imageColors.push(colorInfo)
-            this.imageColors.sort(function (a, b) {
-              return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
-            })
           }
+          this.imageColors.sort(function (a, b) {
+            return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
+          })
           if (this.imageColors.length > 4) {
             let deletedCount = this.imageColors.length - 4
             this.imageColors.splice(4, deletedCount)
           }
-
+          console.log(this.imageColors)
           this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
             let pantoneColor = getClosestColor(imageColor.hex)
             this.imageColors[index].pantone = pantoneColor.pantone

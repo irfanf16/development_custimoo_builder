@@ -37,7 +37,7 @@ import rgbHex from 'rgb-hex'
     })
 
     function renderIconScale(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
-      let size = 20;
+      let size = 30;
       ctx.save();
       ctx.translate(left, top);
       ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
@@ -58,7 +58,7 @@ import rgbHex from 'rgb-hex'
     })
 
     function renderIconRotation(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
-      let size = 20;
+      let size = 30;
       ctx.save();
       ctx.translate(left, top);
       ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
@@ -80,7 +80,7 @@ import rgbHex from 'rgb-hex'
     })
 
     function renderIconDelete(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
-      let size = 20;
+      let size = 30;
       ctx.save();
       ctx.translate(left, top);
       ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
