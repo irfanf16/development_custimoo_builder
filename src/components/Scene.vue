@@ -862,10 +862,12 @@ export default class Scene extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.canvas-area-holder,
 .fix-space {
   a{
-    flex: 0 0 48%;
-    max-width: 48%;
+    flex: 0 0 100%;
+    max-width: 100%;
+    &:last-child{display: none;}
   }
 }
 </style>

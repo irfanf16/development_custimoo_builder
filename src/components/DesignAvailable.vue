@@ -72,9 +72,18 @@ export default class DesignAvailable extends Vue {
   }
 
   .design-col {
-    flex: 0 0 23%;
-    max-width: 23%;
+    flex: 0 0 22%;
+    max-width: 22%;
     margin-bottom: 10px;
+
+    @media only screen and (min-width: 1024px){
+      flex: 0 0 30%;
+      max-width: 30%;
+    }
+    @media only screen and (min-width: 1360px){
+      flex: 0 0 22%;
+      max-width: 22%;
+    }
 
     &:last-child {
       margin-left: 10px;
