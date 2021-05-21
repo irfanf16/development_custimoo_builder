@@ -133,6 +133,10 @@ export default class RosterDetails extends Vue {
   public changeText(text:string){
       this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
   }
+  public getOccurence(val:string){
+    let count = (val.match(/\*/g) || []).length;
+    return count
+  }
   public onChange(event: Record<any, any>){
     let status = true;
     let loopStatus = true;
