@@ -3,7 +3,7 @@
     <b-card no-body v-for="(svgElement, index) in svgGroups" :key="index">
       <b-card-header header-tag="header" class="p-0" role="tab">
         <b-button block v-b-toggle="'accordion-'+(index+1)" class="p-3" @click="showColor(index)"><span class="text">{{ svgElement.id | capitalize }}</span> <span class="color"><span
-          class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span> {{ svgElement.pantone }}</span> <span class="accordion-icon"></span></b-button>
+          class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span> <span class="color-pantone-name">{{ svgElement.pantone }}</span></span> <span class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
         <b-card-body>
