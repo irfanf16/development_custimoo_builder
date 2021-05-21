@@ -255,9 +255,9 @@ export default class Scene extends Vue {
   customTextsChanged(newVal: [Record<any, any>]) {
     if (this.mounted) {
       const self = this
-      newVal.forEach((text: Record<any, any>, index: number) => {
+      newVal.forEach((text: Record<any, any>) => {
         this.customTextObjects.forEach((textObject, dIndex) => {
-          if((textObject.textIndex == index && text.side != textObject.side)){
+          if((textObject.textIndex == dIndex && text.side != textObject.side) || (!text.text)){
             self.frontCanvas.remove(textObject)
             if (self.backCanvas) {
               self.backCanvas.remove(textObject)
