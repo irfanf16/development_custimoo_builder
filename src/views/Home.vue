@@ -369,7 +369,7 @@ export default class Home extends Vue {
 //}
 .preview-section {
   overflow: hidden;
-  max-width: 610px;
+  max-width: 900px;
   margin: 0 auto;
 
   .image-holder {
