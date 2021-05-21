@@ -4,7 +4,7 @@
           <template v-for="(room, i) in getLockerProducts">
             <b-tab :key="i">
                 <template #title>
-                  <a @click="changeColor">{{room.room_name}}</a>
+                  <span @click="changeColor">{{room.room_name}}</span>
                     <a class="remove-tab" @click="deleteRoom(room.id, i)">
                         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                     </a>
@@ -72,7 +72,7 @@
                                             </div>
                                           </template>
                                         </div>
-                                        <div class="color-holder">
+                                        <div class="color-holder" v-if="colors.length > 0">
                                             <div class="color-container">
                                             <template v-for="(item, ix) in colors">
                                                 <div class="color-box"
@@ -173,7 +173,7 @@
       console.log(this.colors)
       }
       public changeColor(){
-        return this.colors = [];
+         this.colors = [];
       }
     }
 
