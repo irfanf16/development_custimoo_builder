@@ -187,6 +187,7 @@ export default class LogoPlacementTabs extends Vue {
     this.imageColors = []
     if(this.customLogos[0] && this.customLogos[0].url) {
       this.$nextTick(() => {
+        let logoColors: Record<any, any>[]
         Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).getPalette((err: any, palettes: any) => {
           for (let [key, value] of Object.entries(palettes) as any[]) {
             let colorInfo = {
@@ -202,14 +203,14 @@ export default class LogoPlacementTabs extends Vue {
             let deletedCount = this.imageColors.length - 4
             this.imageColors.splice(4, deletedCount)
           }
-          let logoColors = []
+
           this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
             let pantoneColor = getClosestColor(imageColor.hex)
             this.imageColors[index].pantone = pantoneColor.pantone
             this.imageColors[index].hex = pantoneColor.hex
             logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
           })
-          this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
+          this.$store.dispatch("SET_LOGO_COLORS", logoColors);
         })
       })
     }
