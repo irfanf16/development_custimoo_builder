@@ -257,8 +257,7 @@ export default class Scene extends Vue {
       const self = this
       newVal.forEach((text: Record<any, any>, index: number) => {
         this.customTextObjects.forEach((textObject, dIndex) => {
-          if((textObject.textIndex == index && text.side != textObject.side) || !text.text){
-            this.customTextObjects.splice(dIndex, 1)
+          if((textObject.textIndex == index && text.side != textObject.side)){
             self.frontCanvas.remove(textObject)
             if (self.backCanvas) {
               self.backCanvas.remove(textObject)
@@ -271,7 +270,7 @@ export default class Scene extends Vue {
         if ((text.side == 'back' && self.backCanvas) || text.side == 'front') {
           let addText = true
           this.customTextObjects.forEach((textObject) => {
-            if ('textIndex' in textObject) {
+            if ('textIndex' in textObject && textObject.text) {
               if(textObject.textIndex == index) {
                 let canvas = this.frontCanvas
                 if (text.side == 'back') {
@@ -480,8 +479,6 @@ export default class Scene extends Vue {
       })
     }
     if (this.mainPreview) {
-      console.log(this.svgGroups)
-
       this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
   }
@@ -574,36 +571,35 @@ export default class Scene extends Vue {
         canvas.viewportCenterObject(model)
         canvas.renderAll()
 
-        let logos = this.logos
+        if(!this.back || (this.back && side == 'back')) {
+          let logos = this.logos
 
-        if(this.customLogos && this.logoAllowed){
-          let customLogos = this.customLogos
-          if(this.logosLimit) {
-            customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
-          }
-          customLogos.forEach((item: Record<any, any>, index: number) => {
-            if(!item.action && self.logosSettings[index]) {
-              item.width = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].width
-              item.height = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].height
-              item.x_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].x_axis
-              item.y_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].y_axis
-              item.rotation = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].rotation
+          if (this.customLogos && this.logoAllowed) {
+            let customLogos = this.customLogos
+            if (this.logosLimit) {
+              customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
             }
-          })
-          logos = logos.concat(customLogos) as [Record<any, any>]
-        }
-        if (logos.length) {
-          logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
-          if (logos.length) {
-            setTimeout(() => {
-              self.addLogos(logos)
-            }, 100)
+            customLogos.forEach((item: Record<any, any>, index: number) => {
+              if (!item.action && self.logosSettings[index]) {
+                item.width = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].width
+                item.height = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].height
+                item.x_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].x_axis
+                item.y_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].y_axis
+                item.rotation = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].rotation
+              }
+            })
+            logos = logos.concat(customLogos) as [Record<any, any>]
           }
-        }
+          if (logos.length) {
+            logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
+            if (logos.length) {
+              setTimeout(() => {
+                self.addLogos(logos)
+              }, 100)
+            }
+          }
 
-        let texts = JSON.parse(JSON.stringify(this.customTexts))
-        if (texts.length) {
-          texts = texts.filter((text: Record<any, any>) => text.side == side && text.text) as [Record<any, any>]
+          let texts = JSON.parse(JSON.stringify(this.customTexts))
           if (texts.length) {
             setTimeout(() => {
               self.addTexts(texts)
@@ -789,52 +785,65 @@ export default class Scene extends Vue {
   public async addTexts(texts: [Record<any, any>], addIndex: number|null = null) {
     const self = this
     texts.forEach((text: Record<any, any>, index: number) => {
-      let textBox = new fabric.Text(text.text, {
-        left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
-        top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
-        scaleX: self.canvasWidth / self.mainCanvasWidth * text.width / text.width,
-        scaleY: self.canvasHeight / self.mainCanvasHeight * text.height / text.height,
-        angle: text.rotation as number,
-        centeredScaling: true,
-        selectable: true,
-        hasControls: true,
-        hasBorders: true,
-        evented: true,
-        globalCompositeOperation: 'source-atop',
-        fontFamily: text.fontFamily,
-        fill: text.fillColor,
-        stroke: text.outLineColor,
-        strokeWidth: 4,
-        paintFirst: 'stroke',
-        lockScalingFlip: true
-      })
-      let finalIndex = index
-      if(addIndex !== null) {
-        finalIndex = addIndex
-      }
-      Object.assign(textBox, {textIndex: finalIndex, side: text.side})
-      self.customTextObjects.push(textBox)
+      if(text.text) {
+        let textBox = new fabric.Text(text.text, {
+          left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
+          top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
+          scaleX: self.canvasWidth / self.mainCanvasWidth * text.width / text.width,
+          scaleY: self.canvasHeight / self.mainCanvasHeight * text.height / text.height,
+          angle: text.rotation as number,
+          centeredScaling: true,
+          selectable: true,
+          hasControls: true,
+          hasBorders: true,
+          evented: true,
+          globalCompositeOperation: 'source-atop',
+          fontFamily: text.fontFamily,
+          fill: text.fillColor,
+          stroke: text.outLineColor,
+          strokeWidth: 4,
+          paintFirst: 'stroke',
+          lockScalingFlip: true
+        })
+        let finalIndex = index
+        if (addIndex !== null) {
+          finalIndex = addIndex
+        }
+        Object.assign(textBox, {
+          textIndex: finalIndex,
+          side: text.side
+        })
 
-      let canvas = self.frontCanvas
-      let model = self.frontModel
-      if (text.side == 'back') {
-        canvas = self.backCanvas
-        model = self.backModel
+        self.customTextObjects[finalIndex] = textBox
+
+        let canvas = self.frontCanvas
+        let model = self.frontModel
+        if (text.side == 'back') {
+          canvas = self.backCanvas
+          model = self.backModel
+        }
+        textBox.setControlsVisibility({
+          tl: false,
+          bl: false,
+          tr: true,
+          br: true,
+          ml: false,
+          mb: false,
+          mr: false,
+          mt: false,
+          mtr: false
+        })
+
+        canvas.add(textBox)
+        model.bringToFront()
+        canvas.renderAll()
+      } else {
+        let finalIndex = index
+        if (addIndex !== null) {
+          finalIndex = addIndex
+        }
+        this.customTextObjects[finalIndex] = {textIndex: finalIndex, side: text.side}
       }
-      textBox.setControlsVisibility({
-        tl: false,
-        bl: false,
-        tr: true,
-        br: true,
-        ml: false,
-        mb: false,
-        mr: false,
-        mt: false,
-        mtr: false
-      })
-      canvas.add(textBox)
-      model.bringToFront()
-      canvas.renderAll()
     })
   }
 
