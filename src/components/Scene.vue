@@ -156,12 +156,12 @@ export default class Scene extends Vue {
     return this.$store.getters.getDefaultColors.filter((defaultColor: Record<any, any>) => { return defaultColor.color })
   }
 
-  get mainSvgGroups(): [Record<any, any>] {
-    return this.$store.getters.getSvgGroups
+  get groupColors() : [Record<any, any>] {
+    return this.$store.getters.getGroupColors
   }
 
-  get currentColorApplied(): string {
-    return this.$store.getters.getCurrentColorApplied
+  get mainSvgGroups(): [Record<any, any>] {
+    return this.$store.getters.getSvgGroups
   }
 
   @Watch('customLogos', {
@@ -322,34 +322,30 @@ export default class Scene extends Vue {
     deep: true
   })
   defaultColorsChanged() {
-    this.changGroupColor()
+    this.changeDefaultColors()
   }
 
-  @Watch('mainSvgGroups', {
+  @Watch('groupColors', {
     deep: true
   })
-  mainSvgGroupsChanged() {
-    if(this.currentColorApplied == 'single' && this.allowColorChange) {
-      this.changeColor()
-    }
+  groupColorsChanged(newVal: [Record<any, any>]) {
+    this.changeGroupColor()
   }
 
-  public changeColor (): void {
-    let groupColors: string[] = []
-    this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      this.mainSvgGroups.forEach((mainSvgGroup: Record<any, any>) => {
-        if(svgGroup.id == mainSvgGroup.id) {
-          svgGroup.color = mainSvgGroup.color
-          svgGroup.pantone = mainSvgGroup.pantone
-          groupColors[svgGroup.id] = mainSvgGroup.color
-        }
-      })
-    })
-
+  public changeGroupColor (): void {
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if (groupColors[item.id]) {
-        item.set('fill', groupColors[item.id]);
+      if (this.groupColors[item.id]) {
+        item.set('fill', this.groupColors[item.id].color);
+        if (this.mainPreview) {
+          let svgIndex = 0
+          this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+            if(svgGroup.id == item.id) {
+              svgIndex = index
+            }
+          })
+          this.$store.dispatch('updateSvgGroups', { index: svgIndex, color: this.groupColors[item.id].color, pantone: this.groupColors[item.id].pantone })
+        }
       }
     })
     this.frontCanvas.renderAll()
@@ -357,37 +353,33 @@ export default class Scene extends Vue {
     if(this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
-        if (groupColors[item.id]) {
-          item.set('fill', groupColors[item.id]);
+        if (this.groupColors[item.id]) {
+          item.set('fill', this.groupColors[item.id].color);
+          if (this.mainPreview) {
+            let svgIndex = 0
+            this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+              if(svgGroup.id == item.id) {
+                svgIndex = index
+              }
+            })
+            this.$store.dispatch('updateSvgGroups', { index: svgIndex, color: this.groupColors[item.id].color, pantone: this.groupColors[item.id].pantone })
+          }
         }
       })
       this.backCanvas.renderAll()
     }
   }
 
-  public changGroupColor (dispatchUpdateColor = true): void {
-    let groupColors: string[] = []
+  public changeDefaultColors (): void {
+    let defaultColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      let idExist = false
-      if(this.currentColorApplied == 'single') {
-        this.mainSvgGroups.forEach((mainSvgGroup: Record<any, any>) => {
-          if(svgGroup.id == mainSvgGroup.id) {
-            svgGroup.color = mainSvgGroup.color
-            svgGroup.pantone = mainSvgGroup.pantone
-            groupColors[svgGroup.id] = mainSvgGroup.color
-            idExist = true
-          }
-        })
+      defaultColors[svgGroup.id] = this.defaultColors[useColorIndex].color
+      if (this.mainPreview) {
+        this.$store.dispatch('updateSvgGroups', { index: index, color: this.defaultColors[useColorIndex].color, pantone: this.defaultColors[useColorIndex].pantone })
       }
-      if(!idExist) {
-        groupColors[svgGroup.id] = this.defaultColors[useColorIndex].color
-        if (this.mainPreview && dispatchUpdateColor) {
-          this.$store.dispatch('updateSvgGroups', { index: index, color: this.defaultColors[useColorIndex].color, pantone: this.defaultColors[useColorIndex].pantone })
-        }
-        svgGroup.color = this.defaultColors[useColorIndex].color
-        svgGroup.pantone = this.defaultColors[useColorIndex].pantone
-      }
+      svgGroup.color = this.defaultColors[useColorIndex].color
+      svgGroup.pantone = this.defaultColors[useColorIndex].pantone
 
       useColorIndex++
       if(useColorIndex >= this.defaultColors.length) {
@@ -397,8 +389,8 @@ export default class Scene extends Vue {
 
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if (groupColors[item.id]) {
-        item.set('fill', groupColors[item.id]);
+      if (defaultColors[item.id]) {
+        item.set('fill', defaultColors[item.id]);
       }
     })
     this.frontCanvas.renderAll()
@@ -406,13 +398,12 @@ export default class Scene extends Vue {
     if(this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
-        if (groupColors[item.id]) {
-          item.set('fill', groupColors[item.id]);
+        if (defaultColors[item.id]) {
+          item.set('fill', defaultColors[item.id]);
         }
       })
       this.backCanvas.renderAll()
     }
-    this.allowColorChange = true
   }
 
   public getSvgGroups(): void {
@@ -466,20 +457,16 @@ export default class Scene extends Vue {
     }
 
     this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
-    if(this.defaultColors.length) {
-      this.changGroupColor(false)
-    }else if(this.currentColorApplied == 'single') {
-      this.mainSvgGroups.forEach((mainSvgGroup: Record<any, any>) => {
-        this.svgGroups.forEach((svgGroup: Record<any, any>) => {
-          if(mainSvgGroup.id == svgGroup.id) {
-            svgGroup.color = mainSvgGroup.color
-            svgGroup.pantone = mainSvgGroup.pantone
-          }
-        })
-      })
-    }
+
     if (this.mainPreview) {
       this.$store.dispatch('setSvgGroups', this.svgGroups)
+    }
+
+    if(this.defaultColors.length) {
+      this.changeDefaultColors()
+    }
+    if(this.groupColors) {
+      this.changeGroupColor()
     }
   }
 
@@ -538,22 +525,8 @@ export default class Scene extends Vue {
         texture = this.backTexture
       }
       if (model && texture && (!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
-        if (this.back && side == 'back') {
+        if (!this.back || (this.back && side == 'back')) {
           this.getSvgGroups()
-          if(!this.defaultColors.length) {
-            this.allowColorChange = true
-            if(this.currentColorApplied == 'single') {
-              this.changeColor()
-            }
-          }
-        } else if(!this.back) {
-          this.getSvgGroups()
-          if(!this.defaultColors.length) {
-            this.allowColorChange = true
-            if(this.currentColorApplied == 'single') {
-              this.changeColor()
-            }
-          }
         }
         canvas.add(texture)
         canvas.viewportCenterObject(texture)
@@ -591,7 +564,7 @@ export default class Scene extends Vue {
             logos = logos.concat(customLogos) as [Record<any, any>]
           }
           if (logos.length) {
-            logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
+            logos = logos.filter((logo: Record<any, any>) => logo.url) as [Record<any, any>]
             if (logos.length) {
               setTimeout(() => {
                 self.addLogos(logos)
