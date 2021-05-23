@@ -192,7 +192,7 @@ export default class LogoPlacementTabs extends Vue {
           for (let [key, value] of Object.entries(palettes) as any[]) {
             console.log(value.getPopulation())
             console.log(value.getHex())
-            if(value.getPopulation() >= 100) {
+            if(value.getPopulation() >= 10) {
               this.imageColors.push({
                 'hex': value.getHex(),
                 'colorPopulation': value.getPopulation()

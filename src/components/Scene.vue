@@ -222,14 +222,13 @@ export default class Scene extends Vue {
           })
           if (addLogo && logo.url) {
             const finalLogo = JSON.parse(JSON.stringify(logo))
-            if (addLogo && logo.url) {
-              if (!logo.action && self.logosSettings[index]) {
-                finalLogo.width = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].width
-                finalLogo.height = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].height
-                finalLogo.x_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].x_axis
-                finalLogo.y_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].y_axis
-                finalLogo.rotation = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].rotation
-              }
+
+            if (!logo.action && self.logosSettings[index]) {
+              finalLogo.width = self.logosSettings[index].width
+              finalLogo.height = self.logosSettings[index].height
+              finalLogo.x_axis = self.logosSettings[index].x_axis
+              finalLogo.y_axis = self.logosSettings[index].y_axis
+              finalLogo.rotation = self.logosSettings[index].rotation
             }
 
             let backLogosCount = 0
@@ -465,7 +464,7 @@ export default class Scene extends Vue {
     if(this.defaultColors.length) {
       this.changeDefaultColors()
     }
-    if(this.groupColors) {
+    if(Object.keys(this.groupColors).length) {
       this.changeGroupColor()
     }
   }
@@ -554,11 +553,11 @@ export default class Scene extends Vue {
             }
             customLogos.forEach((item: Record<any, any>, index: number) => {
               if (!item.action && self.logosSettings[index]) {
-                item.width = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].width
-                item.height = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].height
-                item.x_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].x_axis
-                item.y_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].y_axis
-                item.rotation = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].rotation
+                item.width = self.logosSettings[index].width
+                item.height = self.logosSettings[index].height
+                item.x_axis = self.logosSettings[index].x_axis
+                item.y_axis = self.logosSettings[index].y_axis
+                item.rotation = self.logosSettings[index].rotation
               }
             })
             logos = logos.concat(customLogos) as [Record<any, any>]
@@ -710,7 +709,7 @@ export default class Scene extends Vue {
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
       fabric.Image.fromURL(logoUrl, (img: any) => {
-        img.scaleToWidth(logo.width as number)
+        img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
         img.set({
           left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
           top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
@@ -723,6 +722,11 @@ export default class Scene extends Vue {
           globalCompositeOperation: 'source-atop',
           lockScalingFlip: true
         })
+
+        if(logo.scaleX && logo.scaleY) {
+          img.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
+          img.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
+        }
 
         if(logo.customLogo){
           img.side = logo.side
