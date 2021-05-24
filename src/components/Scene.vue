@@ -116,6 +116,7 @@ export default class Scene extends Vue {
   @Prop({required: false}) readonly logoAllowed !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
+  @Prop({required: true, default: 10}) readonly measurementRatio!: number;
   @Prop({required: false, default: 600}) readonly mainCanvasWidth!: number;
   @Prop({required: false, default: 600}) readonly mainCanvasHeight!: number;
   @Prop({required: false, default: 600}) readonly canvasWidth!: number;
@@ -613,7 +614,7 @@ export default class Scene extends Vue {
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'originalWidth',
-              value: width
+              value: Math.floor(width * this.measurementRatio / 100)
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
@@ -623,7 +624,7 @@ export default class Scene extends Vue {
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'originalHeight',
-              value: height
+              value: Math.floor(height * this.measurementRatio / 100)
             })
           } else if (e.action == 'rotate') {
             self.$store.dispatch('updateCustomTextAttribute', {
@@ -667,7 +668,7 @@ export default class Scene extends Vue {
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'originalWidth',
-              value: width
+              value: Math.floor(width * this.measurementRatio / 100)
             })
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
@@ -677,7 +678,7 @@ export default class Scene extends Vue {
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'originalHeight',
-              value: height
+              value: Math.floor(height * this.measurementRatio / 100)
             })
           } else if (e.action == 'rotate') {
             self.$store.dispatch('updateCustomLogoAttribute', {
@@ -782,14 +783,13 @@ export default class Scene extends Vue {
           self.$store.dispatch('updateCustomLogoAttribute', {
             index: index,
             attribute: 'originalWidth',
-            value: img.width
+            value: Math.floor(img.width * this.measurementRatio / 100)
           })
           self.$store.dispatch('updateCustomLogoAttribute', {
             index: index,
             attribute: 'originalHeight',
-            value: img.height
+            value: Math.floor(img.height * this.measurementRatio / 100)
           })
-          console.log(this.customLogos[index])
         }
       })
     })
@@ -859,12 +859,12 @@ export default class Scene extends Vue {
           self.$store.dispatch('updateCustomTextAttribute', {
             index: index,
             attribute: 'originalWidth',
-            value: textBox.width
+            value: Math.floor(textBox.width as number * this.measurementRatio / 100)
           })
           self.$store.dispatch('updateCustomTextAttribute', {
             index: index,
             attribute: 'originalHeight',
-            value: textBox.height
+            value: Math.floor(textBox.height as number * this.measurementRatio / 100)
           })
         }
       } else {

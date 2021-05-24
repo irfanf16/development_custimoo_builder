@@ -3,7 +3,7 @@
     <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns"
          :key="design.id">
       <a @click="changeDesign(index); showDesign()">
-        <Scene canvas-width="100" canvas-height="100"
+        <Scene canvas-width="100" canvas-height="100" :measurement-ratio="design.measurement_ratio"
           :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
            :backTextureUrl="design.back_design? design.back_design.file_url: ''"
            :logos="selectedProduct.productstyles[styleIndex].logo"
