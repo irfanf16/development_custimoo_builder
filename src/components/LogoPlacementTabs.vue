@@ -45,11 +45,14 @@
               <div class="logo-placement-holder mb-lg-3">
                 <div class="logo-holder color-extracted-area">
                   <div class="color-extract-container">
-                    <div :class="{'one-colors' : imageColors.length === 1, 'two-colors': imageColors.length === 2, 'three-colors' : imageColors.length === 3}" class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.hex}" :key="index"></div>
+                    <div v-if="imageColors.length == 1" class="color-box" :style="{background: imageColors[0].hex}"></div>
+                    <div v-if="imageColors.length == 2" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 50%, ' + imageColors[1].hex +' 50% 100%)'}"></div>
+                    <div v-if="imageColors.length == 3" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 33.33%, ' + imageColors[1].hex +' 33.33% 66.66%, ' + imageColors[2].hex +' 66.66% 100%)'}"></div>
+                    <div v-if="imageColors.length == 4" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 25%, ' + imageColors[1].hex +' 25% 50%, ' + imageColors[2].hex +' 50% 75%, ' + imageColors[3].hex +' 75% 100%)'}"></div>
                   </div>
                 </div>
                 <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
-                <b-button @click="shuffleLogoColors()" variant="outline-secondary">Shuffle</b-button>
+                <b-button @click="shuffleLogoColors()" v-if="imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
                 <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
               </div>
               <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal @click="callRooms">Save Color</button>
@@ -195,8 +198,6 @@ export default class LogoPlacementTabs extends Vue {
         Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(4)
         .getPalette((err: any, palettes: any) => {
           for (let [key, value] of Object.entries(palettes) as any[]) {
-            console.log(value.getPopulation())
-            console.log(value.getHex())
             if(value.getPopulation() >= 10) {
               this.imageColors.push({
                 'hex': value.getHex(),
@@ -211,7 +212,6 @@ export default class LogoPlacementTabs extends Vue {
             let deletedCount = this.imageColors.length - 4
             this.imageColors.splice(4, deletedCount)
           }
-          console.log(this.imageColors)
           this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
             let pantoneColor = getClosestColor(imageColor.hex)
             this.imageColors[index].pantone = pantoneColor.pantone
@@ -232,24 +232,34 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   shuffleLogoColors() {
-    this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {return imageColor.hex})
-    let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {return imageColor.hex})
+    if(this.imageColors.length > 1) {
+      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
+        return imageColor.hex
+      })
+      let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
+        return imageColor.hex
+      })
 
-    let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
-      if (currentIndex !== 1) return previousValue;
+      let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
+        if (currentIndex !== 1) return previousValue;
 
-      array.sort(() => Math.random() - 0.5)
-      return array;
+        array.sort(() => Math.random() - 0.5)
+        return array;
+      }
+
+      while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
+        imageColors.reduce(shuffle)
+      }
+
+      this.imageColors = imageColors
+      imageColors.forEach((imageColor: Record<any, any>, index: number) => {
+        this.$store.dispatch('setDefaultColor', {
+          index: index,
+          color: imageColor.hex,
+          pantone: imageColor.pantone
+        })
+      })
     }
-
-    while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
-      imageColors.reduce(shuffle)
-    }
-
-    this.imageColors = imageColors
-    imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.hex, pantone: imageColor.pantone })
-    })
   }
 
   public rollbackPreviousColors (): void {
