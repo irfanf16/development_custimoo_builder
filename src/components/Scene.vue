@@ -37,7 +37,7 @@ import rgbHex from 'rgb-hex'
     })
 
     function renderIconScale(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
-      let size = 20;
+      let size = 30;
       ctx.save();
       ctx.translate(left, top);
       ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
@@ -58,7 +58,7 @@ import rgbHex from 'rgb-hex'
     })
 
     function renderIconRotation(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
-      let size = 20;
+      let size = 30;
       ctx.save();
       ctx.translate(left, top);
       ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
@@ -80,7 +80,7 @@ import rgbHex from 'rgb-hex'
     })
 
     function renderIconDelete(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
-      let size = 20;
+      let size = 30;
       ctx.save();
       ctx.translate(left, top);
       ctx.rotate(fabricObj.util.degreesToRadians(fabricObject.angle as number));
@@ -116,10 +116,10 @@ export default class Scene extends Vue {
   @Prop({required: false}) readonly logoAllowed !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
-  @Prop({required: false, default: 280}) readonly mainCanvasWidth!: number;
-  @Prop({required: false, default: 300}) readonly mainCanvasHeight!: number;
-  @Prop({required: false, default: 280}) readonly canvasWidth!: number;
-  @Prop({required: false, default: 300}) readonly canvasHeight!: number;
+  @Prop({required: false, default: 600}) readonly mainCanvasWidth!: number;
+  @Prop({required: false, default: 600}) readonly mainCanvasHeight!: number;
+  @Prop({required: false, default: 600}) readonly canvasWidth!: number;
+  @Prop({required: false, default: 600}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly mainPreview!: boolean;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
@@ -156,12 +156,12 @@ export default class Scene extends Vue {
     return this.$store.getters.getDefaultColors.filter((defaultColor: Record<any, any>) => { return defaultColor.color })
   }
 
-  get mainSvgGroups(): [Record<any, any>] {
-    return this.$store.getters.getSvgGroups
+  get groupColors() : [Record<any, any>] {
+    return this.$store.getters.getGroupColors
   }
 
-  get currentColorApplied(): string {
-    return this.$store.getters.getCurrentColorApplied
+  get mainSvgGroups(): [Record<any, any>] {
+    return this.$store.getters.getSvgGroups
   }
 
   @Watch('customLogos', {
@@ -222,14 +222,13 @@ export default class Scene extends Vue {
           })
           if (addLogo && logo.url) {
             const finalLogo = JSON.parse(JSON.stringify(logo))
-            if (addLogo && logo.url) {
-              if (!logo.action && self.logosSettings[index]) {
-                finalLogo.width = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].width
-                finalLogo.height = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].height
-                finalLogo.x_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].x_axis
-                finalLogo.y_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].y_axis
-                finalLogo.rotation = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].rotation
-              }
+
+            if (!logo.action && self.logosSettings[index]) {
+              finalLogo.width = self.logosSettings[index].width
+              finalLogo.height = self.logosSettings[index].height
+              finalLogo.x_axis = self.logosSettings[index].x_axis
+              finalLogo.y_axis = self.logosSettings[index].y_axis
+              finalLogo.rotation = self.logosSettings[index].rotation
             }
 
             let backLogosCount = 0
@@ -322,34 +321,30 @@ export default class Scene extends Vue {
     deep: true
   })
   defaultColorsChanged() {
-    this.changGroupColor()
+    this.changeDefaultColors()
   }
 
-  @Watch('mainSvgGroups', {
+  @Watch('groupColors', {
     deep: true
   })
-  mainSvgGroupsChanged() {
-    if(this.currentColorApplied == 'single' && this.allowColorChange) {
-      this.changeColor()
-    }
+  groupColorsChanged(newVal: [Record<any, any>]) {
+    this.changeGroupColor()
   }
 
-  public changeColor (): void {
-    let groupColors: string[] = []
-    this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      this.mainSvgGroups.forEach((mainSvgGroup: Record<any, any>) => {
-        if(svgGroup.id == mainSvgGroup.id) {
-          svgGroup.color = mainSvgGroup.color
-          svgGroup.pantone = mainSvgGroup.pantone
-          groupColors[svgGroup.id] = mainSvgGroup.color
-        }
-      })
-    })
-
+  public changeGroupColor (): void {
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if (groupColors[item.id]) {
-        item.set('fill', groupColors[item.id]);
+      if (this.groupColors[item.id]) {
+        item.set('fill', this.groupColors[item.id].color);
+        if (this.mainPreview) {
+          let svgIndex = 0
+          this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+            if(svgGroup.id == item.id) {
+              svgIndex = index
+            }
+          })
+          this.$store.dispatch('updateSvgGroups', { index: svgIndex, color: this.groupColors[item.id].color, pantone: this.groupColors[item.id].pantone })
+        }
       }
     })
     this.frontCanvas.renderAll()
@@ -357,37 +352,33 @@ export default class Scene extends Vue {
     if(this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
-        if (groupColors[item.id]) {
-          item.set('fill', groupColors[item.id]);
+        if (this.groupColors[item.id]) {
+          item.set('fill', this.groupColors[item.id].color);
+          if (this.mainPreview) {
+            let svgIndex = 0
+            this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+              if(svgGroup.id == item.id) {
+                svgIndex = index
+              }
+            })
+            this.$store.dispatch('updateSvgGroups', { index: svgIndex, color: this.groupColors[item.id].color, pantone: this.groupColors[item.id].pantone })
+          }
         }
       })
       this.backCanvas.renderAll()
     }
   }
 
-  public changGroupColor (dispatchUpdateColor = true): void {
-    let groupColors: string[] = []
+  public changeDefaultColors (): void {
+    let defaultColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      let idExist = false
-      if(this.currentColorApplied == 'single') {
-        this.mainSvgGroups.forEach((mainSvgGroup: Record<any, any>) => {
-          if(svgGroup.id == mainSvgGroup.id) {
-            svgGroup.color = mainSvgGroup.color
-            svgGroup.pantone = mainSvgGroup.pantone
-            groupColors[svgGroup.id] = mainSvgGroup.color
-            idExist = true
-          }
-        })
+      defaultColors[svgGroup.id] = this.defaultColors[useColorIndex].color
+      if (this.mainPreview) {
+        this.$store.dispatch('updateSvgGroups', { index: index, color: this.defaultColors[useColorIndex].color, pantone: this.defaultColors[useColorIndex].pantone })
       }
-      if(!idExist) {
-        groupColors[svgGroup.id] = this.defaultColors[useColorIndex].color
-        if (this.mainPreview && dispatchUpdateColor) {
-          this.$store.dispatch('updateSvgGroups', { index: index, color: this.defaultColors[useColorIndex].color, pantone: this.defaultColors[useColorIndex].pantone })
-        }
-        svgGroup.color = this.defaultColors[useColorIndex].color
-        svgGroup.pantone = this.defaultColors[useColorIndex].pantone
-      }
+      svgGroup.color = this.defaultColors[useColorIndex].color
+      svgGroup.pantone = this.defaultColors[useColorIndex].pantone
 
       useColorIndex++
       if(useColorIndex >= this.defaultColors.length) {
@@ -397,8 +388,8 @@ export default class Scene extends Vue {
 
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if (groupColors[item.id]) {
-        item.set('fill', groupColors[item.id]);
+      if (defaultColors[item.id]) {
+        item.set('fill', defaultColors[item.id]);
       }
     })
     this.frontCanvas.renderAll()
@@ -406,13 +397,12 @@ export default class Scene extends Vue {
     if(this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
-        if (groupColors[item.id]) {
-          item.set('fill', groupColors[item.id]);
+        if (defaultColors[item.id]) {
+          item.set('fill', defaultColors[item.id]);
         }
       })
       this.backCanvas.renderAll()
     }
-    this.allowColorChange = true
   }
 
   public getSvgGroups(): void {
@@ -466,20 +456,16 @@ export default class Scene extends Vue {
     }
 
     this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
-    if(this.defaultColors.length) {
-      this.changGroupColor(false)
-    }else if(this.currentColorApplied == 'single') {
-      this.mainSvgGroups.forEach((mainSvgGroup: Record<any, any>) => {
-        this.svgGroups.forEach((svgGroup: Record<any, any>) => {
-          if(mainSvgGroup.id == svgGroup.id) {
-            svgGroup.color = mainSvgGroup.color
-            svgGroup.pantone = mainSvgGroup.pantone
-          }
-        })
-      })
-    }
+
     if (this.mainPreview) {
       this.$store.dispatch('setSvgGroups', this.svgGroups)
+    }
+
+    if(this.defaultColors.length) {
+      this.changeDefaultColors()
+    }
+    if(Object.keys(this.groupColors).length) {
+      this.changeGroupColor()
     }
   }
 
@@ -538,22 +524,8 @@ export default class Scene extends Vue {
         texture = this.backTexture
       }
       if (model && texture && (!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
-        if (this.back && side == 'back') {
+        if (!this.back || (this.back && side == 'back')) {
           this.getSvgGroups()
-          if(!this.defaultColors.length) {
-            this.allowColorChange = true
-            if(this.currentColorApplied == 'single') {
-              this.changeColor()
-            }
-          }
-        } else if(!this.back) {
-          this.getSvgGroups()
-          if(!this.defaultColors.length) {
-            this.allowColorChange = true
-            if(this.currentColorApplied == 'single') {
-              this.changeColor()
-            }
-          }
         }
         canvas.add(texture)
         canvas.viewportCenterObject(texture)
@@ -581,17 +553,17 @@ export default class Scene extends Vue {
             }
             customLogos.forEach((item: Record<any, any>, index: number) => {
               if (!item.action && self.logosSettings[index]) {
-                item.width = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].width
-                item.height = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].height
-                item.x_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].x_axis
-                item.y_axis = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].y_axis
-                item.rotation = self.canvasWidth / self.mainCanvasWidth * self.logosSettings[index].rotation
+                item.width = self.logosSettings[index].width
+                item.height = self.logosSettings[index].height
+                item.x_axis = self.logosSettings[index].x_axis
+                item.y_axis = self.logosSettings[index].y_axis
+                item.rotation = self.logosSettings[index].rotation
               }
             })
             logos = logos.concat(customLogos) as [Record<any, any>]
           }
           if (logos.length) {
-            logos = logos.filter((logo: Record<any, any>) => logo.side == side && logo.url) as [Record<any, any>]
+            logos = logos.filter((logo: Record<any, any>) => logo.url) as [Record<any, any>]
             if (logos.length) {
               setTimeout(() => {
                 self.addLogos(logos)
@@ -737,7 +709,7 @@ export default class Scene extends Vue {
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
       fabric.Image.fromURL(logoUrl, (img: any) => {
-        img.scaleToWidth(logo.width as number)
+        img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
         img.set({
           left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
           top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
@@ -750,6 +722,11 @@ export default class Scene extends Vue {
           globalCompositeOperation: 'source-atop',
           lockScalingFlip: true
         })
+
+        if(logo.scaleX && logo.scaleY) {
+          img.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
+          img.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
+        }
 
         if(logo.customLogo){
           img.side = logo.side
