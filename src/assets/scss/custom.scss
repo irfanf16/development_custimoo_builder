@@ -563,6 +563,36 @@ a:hover{color: #219f84;}
                             width: 36.5px;
                             height: 36.5px;
                         }
+                        &.one-colors{
+                            width: 58px;
+                            height: 58px;
+                            @media only screen and (min-width: 992px){
+                                width: 73px;
+                                height: 73px;
+                            }
+                        }
+                        &.two-colors{
+                            height: 58px;
+                            @media only screen and (min-width: 992px){height: 73px;}
+                        }
+                        &.three-colors{
+                            // width: 0;
+                            // height: 0;
+                            // position: absolute;
+                            // transform: rotate(45deg);
+                            &:first-child{
+                                width: 73px;
+                                
+                            }
+                            // &:last-child{
+                            //     right: 0;
+                            //     left: auto;
+                            // }
+                            // &:nth-child(2){
+                            //     top: 0;
+                            //     left: 0;
+                            // }
+                        }
                     }
                 }
                 &.color-extracted-area{

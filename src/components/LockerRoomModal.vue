@@ -48,7 +48,7 @@
                                                 </li>
                                             </ul>
                                           </div>
-                                          <div class="d-none d-lg-block product-description">
+                                          <div class="d-none d-lg-block product-description text-center">
                                                 <p>{{ product.product_name }}</p>
                                             </div>
 
@@ -69,9 +69,9 @@
                                             <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
                                           <template v-for="(folder, inde) in room.folders">
                                           <div class="d-flex flex-wrap color-folder-holder" :key="inde">
-                                                <a href="#." class="text-center d-block">
+                                                <a href="#" class="text-center d-block" @click="fetchColors(inde, i)">
                                                     <font-awesome-icon :icon="['fas', 'folder']"/>
-                                                    <span class="folder-name d-block" @click="fetchColors(inde, i)">{{ folder.folder_name }}</span>
+                                                    <span class="folder-name d-block">{{ folder.folder_name }}</span>
                                                 </a>
                                             </div>
                                           </template>
