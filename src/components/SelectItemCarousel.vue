@@ -1,10 +1,10 @@
 <template>
-  <slither-slider @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: products.length > 3? 4: products.length, loop: false, dots: false, gap: 10}" class="select-item-slider p-3 p-lg-0">
+  <slither-slider @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: products.length > 3? 4: products.length, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
     <template v-for="(product, index) in products">
       <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">
           <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
-            <Scene canvas-width="100" canvas-height="100"
+            <Scene canvas-width="120" canvas-height="120"
               :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.productstyles[0].front.file_url}"
                    :backTextureUrl="design.back_design? design.back_design.file_url: ''"
                    :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"

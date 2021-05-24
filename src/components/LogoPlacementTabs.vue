@@ -45,7 +45,7 @@
               <div class="logo-placement-holder mb-lg-3">
                 <div class="logo-holder color-extracted-area">
                   <div class="color-extract-container">
-                    <div class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.hex}" :key="index"></div>
+                    <div :class="{'one-colors' : imageColors.length === 1, 'two-colors': imageColors.length === 2, 'three-colors' : imageColors.length === 3}" class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.hex}" :key="index"></div>
                   </div>
                 </div>
                 <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>

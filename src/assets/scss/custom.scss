@@ -155,6 +155,20 @@ a:hover{color: #219f84;}
     .canvas-area-holder{
         justify-content: center !important;
     }
+    &.three-product{
+        .image-holder{
+            .canvas-container{
+                width: 100px !important;
+                height: 100px !important;
+                @media only screen and (min-width: 1024px){
+                    width: 70px !important;
+                }
+                @media only screen and (min-width: 1360px){
+                    width: 100px !important;
+                }
+            }
+        }
+    }
 }
 .confirm-order-area{
     .accordion{
@@ -548,6 +562,36 @@ a:hover{color: #219f84;}
                         @media only screen and (min-width: 992px){
                             width: 36.5px;
                             height: 36.5px;
+                        }
+                        &.one-colors{
+                            width: 58px;
+                            height: 58px;
+                            @media only screen and (min-width: 992px){
+                                width: 73px;
+                                height: 73px;
+                            }
+                        }
+                        &.two-colors{
+                            height: 58px;
+                            @media only screen and (min-width: 992px){height: 73px;}
+                        }
+                        &.three-colors{
+                            // width: 0;
+                            // height: 0;
+                            // position: absolute;
+                            // transform: rotate(45deg);
+                            &:first-child{
+                                width: 73px;
+                                
+                            }
+                            // &:last-child{
+                            //     right: 0;
+                            //     left: auto;
+                            // }
+                            // &:nth-child(2){
+                            //     top: 0;
+                            //     left: 0;
+                            // }
                         }
                     }
                 }
@@ -1455,12 +1499,16 @@ a:hover{color: #219f84;}
         }
         .modal-content{
             height: 100%;
-            
         }
     }
 }
 .lockerroom-modal{
     .nav-tabs{
+        white-space: nowrap;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 10px 0;
+        max-width: 85%;
         .nav-item{
             margin: 0 8px 0 0;
             @media only screen and (min-width: 992px){
@@ -1589,13 +1637,13 @@ a:hover{color: #219f84;}
                 }
                 .canvas{
                     width: 100% !important;
-                    height: 140px !important;
-                    @media only screen and (min-width: 1023px){
-                        height: 180px !important;
-                    }
-                    @media only screen and (min-width: 1199px){
-                        height: 220px !important;
-                    }
+                    height: auto !important;
+                    // @media only screen and (min-width: 1023px){
+                    //     height: 180px !important;
+                    // }
+                    // @media only screen and (min-width: 1199px){
+                    //     height: 220px !important;
+                    // }
                 }
             }
         }
