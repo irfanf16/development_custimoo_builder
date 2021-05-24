@@ -130,7 +130,6 @@ export default class Scene extends Vue {
   private customLogoObjects: any[] = []
   private customTextObjects: any[] = []
   private mounted = false
-  private allowColorChange = false
   private frontModel: any
   private backModel: any
   private showSmall = { front: false, back: this.manageComponents.mobileScreen }
@@ -571,10 +570,9 @@ export default class Scene extends Vue {
             }
           }
 
-          let texts = JSON.parse(JSON.stringify(this.customTexts))
-          if (texts.length) {
+          if (this.customTexts.length) {
             setTimeout(() => {
-              self.addTexts(texts)
+              self.addTexts(this.customTexts)
             }, 100)
           }
         }
@@ -605,6 +603,8 @@ export default class Scene extends Vue {
               value: e.target.top
             })
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
+            const width = e.target.width * e.target.scaleX;
+            const height = e.target.width * e.target.scaleY;
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'scaleX',
@@ -612,8 +612,18 @@ export default class Scene extends Vue {
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
+              attribute: 'originalWidth',
+              value: width
+            })
+            self.$store.dispatch('updateCustomTextAttribute', {
+              index: index,
               attribute: 'scaleY',
               value: e.target.scaleY
+            })
+            self.$store.dispatch('updateCustomTextAttribute', {
+              index: index,
+              attribute: 'originalHeight',
+              value: height
             })
           } else if (e.action == 'rotate') {
             self.$store.dispatch('updateCustomTextAttribute', {
@@ -647,6 +657,8 @@ export default class Scene extends Vue {
               value: e.target.top
             })
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
+            const width = e.target.width * e.target.scaleX;
+            const height = e.target.width * e.target.scaleY;
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'scaleX',
@@ -654,8 +666,18 @@ export default class Scene extends Vue {
             })
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
+              attribute: 'originalWidth',
+              value: width
+            })
+            self.$store.dispatch('updateCustomLogoAttribute', {
+              index: index,
               attribute: 'scaleY',
               value: e.target.scaleY
+            })
+            self.$store.dispatch('updateCustomLogoAttribute', {
+              index: index,
+              attribute: 'originalHeight',
+              value: height
             })
           } else if (e.action == 'rotate') {
             self.$store.dispatch('updateCustomLogoAttribute', {
@@ -705,7 +727,7 @@ export default class Scene extends Vue {
 
   public addLogos(logos: [Record<any, any>]) {
     const self = this
-    logos.forEach((logo: Record<any, any>) => {
+    logos.forEach((logo: Record<any, any>, index: number) => {
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
       fabric.Image.fromURL(logoUrl, (img: any) => {
@@ -755,6 +777,20 @@ export default class Scene extends Vue {
         canvas.add(img)
         model.bringToFront()
         canvas.renderAll()
+
+        if(this.mainPreview) {
+          self.$store.dispatch('updateCustomLogoAttribute', {
+            index: index,
+            attribute: 'originalWidth',
+            value: img.width
+          })
+          self.$store.dispatch('updateCustomLogoAttribute', {
+            index: index,
+            attribute: 'originalHeight',
+            value: img.height
+          })
+          console.log(this.customLogos[index])
+        }
       })
     })
   }
@@ -781,6 +817,7 @@ export default class Scene extends Vue {
           lockScalingFlip: true
         })
 
+        textBox.scaleToHeight(self.canvasWidth / self.mainCanvasWidth * text.width)
         if(text.scaleX && text.scaleY) {
           textBox.scaleX = self.canvasWidth / self.mainCanvasWidth * text.scaleX
           textBox.scaleY = self.canvasHeight / self.mainCanvasHeight * text.scaleY
@@ -817,6 +854,19 @@ export default class Scene extends Vue {
         canvas.add(textBox)
         model.bringToFront()
         canvas.renderAll()
+
+        if(this.mainPreview) {
+          self.$store.dispatch('updateCustomTextAttribute', {
+            index: index,
+            attribute: 'originalWidth',
+            value: textBox.width
+          })
+          self.$store.dispatch('updateCustomTextAttribute', {
+            index: index,
+            attribute: 'originalHeight',
+            value: textBox.height
+          })
+        }
       } else {
         let finalIndex = index
         if (addIndex !== null) {
