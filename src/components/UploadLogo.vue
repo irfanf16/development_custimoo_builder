@@ -45,8 +45,10 @@ import {http} from "@/httpCommon"
   mounted() {
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
-    if(this.customLogoIndex != 0 && this.customLogos[this.customLogoIndex].url == '') {
-      this.modalHandler()
+    if (this.customLogoIndex != 0 && this.customLogos.length) {
+      if (this.customLogos[this.customLogoIndex].url == '') {
+        this.modalHandler()
+      }
     }
   }
 })
