@@ -11,9 +11,9 @@
                 <CreateLockerRoomModal />
             </div> -->
         </div>
-        
+
         <div class="pt-4 design-name-form text-center">
-            <b-button variant="primary" :disabled="locker_selected" @click="saveToLocker()">Save Logo</b-button>
+            <b-button variant="primary" :disabled="locker_selected" @click="saveLogo(logoIndex)">Save Logo</b-button>
         </div>
 
     </b-modal>
@@ -21,7 +21,7 @@
 
 <script lang="ts">
 
-    import { Component, Vue } from 'vue-property-decorator'
+import {Component, Prop, Vue} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     @Component<SaveLogoModal>({
@@ -35,7 +35,11 @@
       public room_id = 0;
       public product_name = '';
       public ref = this.$refs as Record<any, any>
+      @Prop({required: true}) logoIndex!: number
 
+      get customLogos(): [Record<any, any>] {
+        return this.$store.getters.getCustomLogos
+      }
       get customTexts(): [Record<any, any>] {
         return this.$store.getters.getCustomTexts
       }
@@ -51,9 +55,7 @@
       get styleIndex():number{
         return  this.$store.getters.getCurrentStyleIndex;
       }
-      get customLogos(): [] {
-        return this.$store.getters.getCustomLogos
-      }
+
       get logoColors():[]{
         return  this.$store.getters.getLogosColors;
       }
@@ -61,23 +63,15 @@
         this.locker_selected = false;
         this.room_id = id;
       }
-      public saveToLocker(){
+      public async saveLogo(index:number){
         if (this.isCustomerAuthenticated) {
-          const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-            return item.design_show
-          })
-          let locker = {
-            room_id: this.room_id,
-            product_id: this.selectedProduct.product_id,
-            product_name: this.product_name,
-            style_id: this.selectedProduct.productstyles[this.styleIndex].id,
-            design_id: currentDesign[0].id,
-            custom_logos: this.customLogos,
-            text: this.customTexts,
-            colors: this.logoColors
-          }
-          this.$store.dispatch("SAVE_TO_LOCKER", locker);
-          this.ref['my-modal'].hide();
+          let logo = {
+            id: null,
+            room_id: 0
+          };
+           logo.id = this.customLogos[index].id;
+           logo.room_id = this.room_id;
+           await this.$store.dispatch('saveLogo', logo);
         }else{
           alert("please login first");
         }
@@ -217,6 +211,6 @@
             border-color: #219f84;
         }
     }
-    
+
 
 </style>

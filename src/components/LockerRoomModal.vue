@@ -4,7 +4,7 @@
           <template v-for="(room, i) in getLockerProducts">
             <b-tab :key="i">
                 <template #title>
-                  <a @click="changeColor">{{room.room_name}}</a>
+                  <span @click="changeColor">{{room.room_name}}</span>
                     <a class="remove-tab" @click="deleteRoom(room.id, i)">
                         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                     </a>
@@ -57,7 +57,11 @@
                                 </div>
                               </b-tab>
                                 <b-tab title="Assets">
-                                    <b-card-text>Tab contents 2</b-card-text>
+                                  <template v-for="(logo, inda) in room.logos">
+                                    <div :key="inda">
+                                      <img :src="apiBaseUrl+'/'+logo.logo_url "/>
+                                    </div>
+                                  </template>
                                 </b-tab>
                                 <b-tab title="Colors">
                                     <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
@@ -72,7 +76,7 @@
                                             </div>
                                           </template>
                                         </div>
-                                        <div class="color-holder">
+                                        <div class="color-holder" v-if="colors.length > 0">
                                             <div class="color-container">
                                             <template v-for="(item, ix) in colors">
                                                 <div class="color-box"
@@ -89,7 +93,10 @@
                 </div>
             </b-tab>
               </template>
-
+          <div class="create-lockerroom">
+            <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
+            <CreateLockerRoomModal />
+          </div>
         </b-tabs>
         <!-- <div class="lockerroom-header">
             <div class="locker-opener">
@@ -161,14 +168,16 @@
         await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
       }
       public async deleteRoom(id:number, index:number){
-        await this.$store.dispatch('deleteRoom', {id: id, index: index});
+        if (confirm('You are going to delete associated product')) {
+          await this.$store.dispatch('deleteRoom', {id: id, index: index});
+        }
       }
       public fetchColors(i:number, ind:number){
       this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
       console.log(this.colors)
       }
       public changeColor(){
-        return this.colors = [];
+         this.colors = [];
       }
     }
 

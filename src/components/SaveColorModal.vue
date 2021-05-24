@@ -87,9 +87,9 @@
           alert('select room first');
           return false;
         }
+        console.log(this.logoColors)
        let saved = await this.$store.dispatch('storeFolder', {folder_name: this.folder_name, room_id: this.room_id, colors: this.logoColors});
         if (saved == true){
-          await this.$store.dispatch('GET_LOCKER_PRODUCTS');
           this.ref['my-modal'].hide();
         }
       }

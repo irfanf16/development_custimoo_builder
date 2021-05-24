@@ -11,6 +11,7 @@ const ProductAttributes:Module<any, any> = {
     isAssociation: false,
     styleIndex: 0,
     defaultColors: [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}],
+    groupColors: {},
     svgGroups: [],
     currentColorApplied: 'group',
     rosterDetails: [],
@@ -73,6 +74,16 @@ const ProductAttributes:Module<any, any> = {
       if(color) {
         Vue.set(state.defaultColors[color.index], 'color', color.color)
         Vue.set(state.defaultColors[color.index], 'pantone', color.pantone)
+      }
+    },
+    SET_GROUP_COLORS (state: Record<any, any>, groupColors: Record<any, any>) {
+      if(groupColors) {
+        state.groupColors = groupColors
+      }
+    },
+    UPDATE_GROUP_COLORS (state: Record<any, any>, color: Record<any, any>) {
+      if (color) {
+        Vue.set(state.groupColors, color.index, { color: color.color, pantone: color.pantone })
       }
     },
     SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
@@ -156,11 +167,11 @@ const ProductAttributes:Module<any, any> = {
     getDefaultColors: state => {
       return state.defaultColors
     },
+    getGroupColors: state => {
+      return state.groupColors
+    },
     getSvgGroups: state => {
       return state.svgGroups
-    },
-    getCurrentColorApplied: state => {
-      return state.currentColorApplied
     },
     getRosterDetails: state => {
       return state.rosterDetails
@@ -202,14 +213,17 @@ const ProductAttributes:Module<any, any> = {
     setDefaultColor ({commit}, payload) {
       commit('defaultColor', payload)
     },
+    setGroupColors ({commit}, payload) {
+      commit('SET_GROUP_COLORS', payload)
+    },
+    updateGroupColors ({commit}, payload){
+      commit('UPDATE_GROUP_COLORS', payload)
+    },
     setSvgGroups ({commit}, payload) {
       commit('SET_SVG_GROUPS', payload)
     },
     updateSvgGroups ({commit}, payload){
       commit('UPDATE_SVG_GROUPS', payload)
-    },
-    setCurrentColorApplied ({commit}, payload) {
-      commit('SET_CURRENT_COLOR_APPLIED', payload)
     },
     setRosterDetails({commit}, payload){
       commit('rosterDetails', payload)

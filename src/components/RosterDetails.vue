@@ -94,6 +94,7 @@ import readXlsxFile from "read-excel-file";
 export default class RosterDetails extends Vue {
   @Prop({required: true}) productSizes!: any
   private roster: any[] = []
+  public fileData: Record<any, any>[] = []
   public selected = this.productSizes[0]
   public obj = {
     text:'',
@@ -213,6 +214,10 @@ export default class RosterDetails extends Vue {
         alert("please upload a valid file");
       }
     })
+  }
+  public checkSize(size:string){
+    let sizes = ['SM', 'MD', 'LG', 'XL','2XL', '3XL'];
+    return sizes.includes(size);
   }
 }
 </script>

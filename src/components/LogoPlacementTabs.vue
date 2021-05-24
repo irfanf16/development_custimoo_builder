@@ -38,7 +38,7 @@
                 </div>
               </div>
               <b-button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold" v-b-modal.modal-center-savelogomodal>Save Logo</b-button>
-              <SaveLogoModal />
+              <SaveLogoModal :logoIndex="index" />
             </div>
             <div class="logo-placement-area extracted-color-area" v-if="index == 0">
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
@@ -50,7 +50,7 @@
                 </div>
                 <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
                 <b-button @click="shuffleLogoColors()" variant="outline-secondary">Shuffle</b-button>
-                <b-button class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
+                <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
               </div>
               <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal @click="callRooms">Save Color</button>
               <SaveColorModal />
@@ -92,12 +92,12 @@ export default class LogoPlacementTabs extends Vue {
   @Prop({required: true}) numberOfLogosAllowed!: number
   @Prop({required: false, default: () => { return [{
       url: '',
-      width: 100,
-      height: 100,
+      width: 200,
+      height: 200,
       scaleX: 1,
       scaleY: 1,
-      x_axis: 150,
-      y_axis: 190,
+      x_axis: 250,
+      y_axis: 200,
       rotation: 0,
       haveControls: true,
       side: 'front',
@@ -135,8 +135,7 @@ export default class LogoPlacementTabs extends Vue {
         logoSetting = this.logosSetting[index] as Record<any, any>
       }else {
         logoSetting = {
-          width: 100,
-          height: 100,
+          width: 200,
           x_axis: 150,
           y_axis: 190,
           rotation: 0,
@@ -145,6 +144,7 @@ export default class LogoPlacementTabs extends Vue {
         }
       }
       let logo = {
+        id:null,
         url: '',
         width: logoSetting.width,
         height: logoSetting.height,
@@ -191,29 +191,34 @@ export default class LogoPlacementTabs extends Vue {
     this.imageColors = []
     if(this.customLogos[0] && this.customLogos[0].url) {
       this.$nextTick(() => {
-        Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).getPalette((err: any, palettes: any) => {
+        let logoColors: Record<any, any>[] = []
+        Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(4)
+        .getPalette((err: any, palettes: any) => {
           for (let [key, value] of Object.entries(palettes) as any[]) {
-            let colorInfo = {
-              'hex': value.getHex(),
-              'colorPopulation': value.getPopulation()
+            console.log(value.getPopulation())
+            console.log(value.getHex())
+            if(value.getPopulation() >= 10) {
+              this.imageColors.push({
+                'hex': value.getHex(),
+                'colorPopulation': value.getPopulation()
+              })
             }
-            this.imageColors.push(colorInfo)
-            this.imageColors.sort(function (a, b) {
-              return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
-            })
           }
+          this.imageColors.sort(function (a, b) {
+            return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
+          })
           if (this.imageColors.length > 4) {
             let deletedCount = this.imageColors.length - 4
             this.imageColors.splice(4, deletedCount)
           }
-          let logoColors = []
+          console.log(this.imageColors)
           this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
             let pantoneColor = getClosestColor(imageColor.hex)
             this.imageColors[index].pantone = pantoneColor.pantone
             this.imageColors[index].hex = pantoneColor.hex
             logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
           })
-          this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
+          this.$store.dispatch("SET_LOGO_COLORS", logoColors);
         })
       })
     }
@@ -221,6 +226,7 @@ export default class LogoPlacementTabs extends Vue {
 
   useLogoColors() {
     this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
+      this.$store.dispatch('setGroupColors', {})
       this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.hex, pantone: imageColor.pantone })
     })
   }
@@ -233,7 +239,6 @@ export default class LogoPlacementTabs extends Vue {
       if (currentIndex !== 1) return previousValue;
 
       array.sort(() => Math.random() - 0.5)
-
       return array;
     }
 
@@ -245,6 +250,13 @@ export default class LogoPlacementTabs extends Vue {
     imageColors.forEach((imageColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.hex, pantone: imageColor.pantone })
     })
+  }
+
+  public rollbackPreviousColors (): void {
+    this.previousImageColors.forEach((defaultColor: Record<any, any>, index: number) => {
+      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.name })
+    })
+    this.previousImageColors = []
   }
 
   public async callRooms(){

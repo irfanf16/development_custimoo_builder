@@ -8,7 +8,7 @@
       <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center">
-            <b-nav-item class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name }}</b-nav-item>
+            <b-nav-item class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
             <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
@@ -41,7 +41,7 @@ import getClosestColor from '@/pantoneColor'
     capitalize: (value: string) => {
       if (!value) return ''
       value = value.toString()
-      return value.charAt(0).toUpperCase() + value.slice(1)
+      return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
     }
   },
   mounted(){
@@ -75,8 +75,7 @@ export default class ColorAccordion extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
-    this.$store.dispatch('setCurrentColorApplied', 'single')
-    this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, color: color.value, pantone: color.name })
+    this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectAccordionIndex].id, color: color.value, pantone: color.name })
   }
 
   public changeColor(color: Record<any, any>) {

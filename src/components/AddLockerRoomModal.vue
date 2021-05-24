@@ -46,7 +46,7 @@
       get customTexts(): [Record<any, any>] {
         return this.$store.getters.getCustomTexts
       }
-      get lockers(){
+      get lockers():[Record<any, any>]{
         return this.$store.getters.getLockers;
       }
       get isCustomerAuthenticated(): boolean {
@@ -68,7 +68,7 @@
         this.locker_selected = false;
         this.room_id = id;
       }
-      public saveToLocker(){
+      public async saveToLocker(){
         if (this.isCustomerAuthenticated) {
           const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
             return item.design_show
@@ -83,14 +83,20 @@
             text: this.customTexts,
             colors: this.logoColors
           }
-          this.$store.dispatch("SAVE_TO_LOCKER", locker);
-          this.ref['my-modal'].hide();
+         let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
+          if (res == ''){
+            this.ref['my-modal'].hide();
+          }else{
+            alert(res);
+          }
         }else{
           alert("please login first");
         }
       }
       public async deleteRoom(id:number, index:number){
-        await this.$store.dispatch('deleteRoom', {id: id, index: index});
+        if (confirm('You are going to delete associated product')){
+          await this.$store.dispatch('deleteRoom', {id: id, index: index});
+        }
       }
     }
 
