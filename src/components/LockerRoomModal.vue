@@ -57,7 +57,11 @@
                                 </div>
                               </b-tab>
                                 <b-tab title="Assets">
-                                    <b-card-text>Tab contents 2</b-card-text>
+                                  <template v-for="(logo, inda) in room.logos">
+                                    <div :key="inda">
+                                      <img :src="apiBaseUrl+'/'+logo.logo_url "/>
+                                    </div>
+                                  </template>
                                 </b-tab>
                                 <b-tab title="Colors">
                                     <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">

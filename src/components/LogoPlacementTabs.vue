@@ -38,7 +38,7 @@
                 </div>
               </div>
               <b-button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold" v-b-modal.modal-center-savelogomodal>Save Logo</b-button>
-              <SaveLogoModal />
+              <SaveLogoModal :logoIndex="index" />
             </div>
             <div class="logo-placement-area extracted-color-area" v-if="index == 0">
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
@@ -141,6 +141,7 @@ export default class LogoPlacementTabs extends Vue {
         }
       }
       let logo = {
+        id:null,
         url: '',
         width: logoSetting.width,
         height: logoSetting.height,

@@ -125,12 +125,18 @@ export default class UploadLogo extends Vue {
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
         this.logoUrl = this.apiBaseUrl + '/' + resp.data.file.logo_url
-        let payload = {
+        let payload = [{
           index: this.customLogoIndex,
           attribute: 'url',
           value: resp.data.file.logo_url
-        }
-        this.$store.dispatch('updateCustomLogoAttribute', payload)
+        },{
+          index: this.customLogoIndex,
+          attribute: 'id',
+          value: resp.data.file.id
+        }];
+        payload.forEach((data) => {
+          this.$store.dispatch('updateCustomLogoAttribute', data)
+        })
 
         if (!this.jwtToken) {
           localStorage.setItem('isAssociation', 'true')
