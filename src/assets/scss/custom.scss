@@ -1461,6 +1461,11 @@ a:hover{color: #219f84;}
 }
 .lockerroom-modal{
     .nav-tabs{
+        white-space: nowrap;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 10px 0;
+        max-width: 85%;
         .nav-item{
             margin: 0 8px 0 0;
             @media only screen and (min-width: 992px){
@@ -1589,13 +1594,13 @@ a:hover{color: #219f84;}
                 }
                 .canvas{
                     width: 100% !important;
-                    height: 140px !important;
-                    @media only screen and (min-width: 1023px){
-                        height: 180px !important;
-                    }
-                    @media only screen and (min-width: 1199px){
-                        height: 220px !important;
-                    }
+                    height: auto !important;
+                    // @media only screen and (min-width: 1023px){
+                    //     height: 180px !important;
+                    // }
+                    // @media only screen and (min-width: 1199px){
+                    //     height: 220px !important;
+                    // }
                 }
             }
         }
