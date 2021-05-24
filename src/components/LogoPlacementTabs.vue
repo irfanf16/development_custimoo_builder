@@ -45,7 +45,10 @@
               <div class="logo-placement-holder mb-lg-3">
                 <div class="logo-holder color-extracted-area">
                   <div class="color-extract-container">
-                    <div :class="{'one-colors' : imageColors.length === 1, 'two-colors': imageColors.length === 2, 'three-colors' : imageColors.length === 3}" class="color-box" v-for="(color, index) in imageColors" :style="{ background : color.hex}" :key="index"></div>
+                    <div v-if="imageColors.length == 1" class="color-box" :style="{background: imageColors[0].hex}"></div>
+                    <div v-if="imageColors.length == 2" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 50%, ' + imageColors[1].hex +' 50% 100%)'}"></div>
+                    <div v-if="imageColors.length == 3" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 33.33%, ' + imageColors[1].hex +' 33.33% 66.66%, ' + imageColors[2].hex +' 66.66% 100%)'}"></div>
+                    <div v-if="imageColors.length == 4" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 25%, ' + imageColors[1].hex +' 25% 50%, ' + imageColors[2].hex +' 50% 75%, ' + imageColors[3].hex +' 75% 100%)'}"></div>
                   </div>
                 </div>
                 <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
@@ -191,8 +194,6 @@ export default class LogoPlacementTabs extends Vue {
         Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(4)
         .getPalette((err: any, palettes: any) => {
           for (let [key, value] of Object.entries(palettes) as any[]) {
-            console.log(value.getPopulation())
-            console.log(value.getHex())
             if(value.getPopulation() >= 10) {
               this.imageColors.push({
                 'hex': value.getHex(),
@@ -207,7 +208,6 @@ export default class LogoPlacementTabs extends Vue {
             let deletedCount = this.imageColors.length - 4
             this.imageColors.splice(4, deletedCount)
           }
-          console.log(this.imageColors)
           this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
             let pantoneColor = getClosestColor(imageColor.hex)
             this.imageColors[index].pantone = pantoneColor.pantone
