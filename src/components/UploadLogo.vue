@@ -30,7 +30,7 @@
         <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
         <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
                accept="image/*">
-        <b-button class="btn-upload" @click="uploadLogo">Confirm and Upload logo</b-button>
+        <b-button class="btn-upload" @click="uploadLogoBtn">Confirm and Upload logo</b-button>
       </div>
     </b-modal>
   </div>
@@ -45,7 +45,7 @@ import {http} from "@/httpCommon"
   mounted() {
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
-    if(this.customLogoIndex != 0){
+    if (this.customLogos[this.customLogoIndex].url == '') {
       this.modalHandler()
     }
   }
@@ -77,7 +77,7 @@ export default class UploadLogo extends Vue {
   public logoUrl = ''
   public ref = this.$refs as Record<any, any>
 
-  public uploadLogo() {
+  public uploadLogoBtn() {
     this.ref.fileInput.click()
   }
 
@@ -102,6 +102,9 @@ export default class UploadLogo extends Vue {
     if(manageComponent.AdvanceCustomization) {
       this.showModal()
     }
+    if(this.customLogos.length === 0) {
+      this.customLogoInit()
+    }
     if(Object.keys(this.customLogos).length && manageComponent.BasicCustomization) {
       const firstImage = Object.values(this.customLogos)[0] as Record<any, any>
       let customLogoUrl = firstImage.url
@@ -109,6 +112,26 @@ export default class UploadLogo extends Vue {
       if(!customLogoUrl){
         this.showModal()
       }
+    }
+  }
+
+  public customLogoInit(){
+    if(this.selectedProduct && this.selectedProduct.is_logo_allowed == 1){
+      let logoSetting = this.selectedProduct.logos_setting[0]
+      let logo = {
+        url: '',
+        width: logoSetting.width,
+        height: logoSetting.height,
+        scaleX: 1,
+        scaleY: 1,
+        x_axis: logoSetting.x_axis,
+        y_axis: logoSetting.y_axis,
+        rotation: logoSetting.rotation,
+        haveControls: Boolean(!logoSetting.is_locked),
+        side: logoSetting.side,
+        customLogo: true
+      }
+      this.$store.dispatch('setCustomLogos', logo)
     }
   }
 
