@@ -158,10 +158,28 @@ export default class RosterDetails extends Vue {
         fillColor: this.firstColor,
         outLineColor: this.secondColor,
       }
-      console.log(texts);
       this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
       this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
-  }
+    }else if(text){
+      this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
+    }else if(num){
+      let texts = {
+        text: num.toString(),
+        type: 'number',
+        width: 50,
+        height: 50,
+        x_axis: 300,
+        y_axis: 180,
+        rotation: 0,
+        haveControls: true,
+        outlineEnabled: true,
+        side: 'back',
+        fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+        fillColor: this.firstColor,
+        outLineColor: this.secondColor,
+      }
+      this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
+    }
     }
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
