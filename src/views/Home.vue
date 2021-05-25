@@ -137,7 +137,7 @@ export default class Home extends Vue {
   private jwtToken !: string
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public mounted = false
-  
+
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab
   }
@@ -208,7 +208,6 @@ export default class Home extends Vue {
     }
 
     if (this.hasProducts) {
-      const self = this
       http.get(url).then((response: any) => {
         let product_data = this.products.concat(response.data.products.data)
         this.$store.commit('SET_PRODUCTS', product_data);
@@ -218,33 +217,10 @@ export default class Home extends Vue {
         }
         if(!this.mounted){
           this.mounted = true
-          setTimeout(() => {
-            self.customLogoInit()
-          }, 3000);
         }
       }).catch((e: any) => {
         console.log(e)
       });
-    }
-  }
-
-  public customLogoInit(){
-    if(this.selectedProduct && this.selectedProduct.is_logo_allowed == 1){
-      let logoSetting = this.selectedProduct.logos_setting[0]
-      let logo = {
-        url: '',
-        width: logoSetting.width,
-        height: logoSetting.height,
-        scaleX: 1,
-        scaleY: 1,
-        x_axis: logoSetting.x_axis,
-        y_axis: logoSetting.y_axis,
-        rotation: logoSetting.rotation,
-        haveControls: Boolean(!logoSetting.is_locked),
-        side: logoSetting.side,
-        customLogo: true
-      }
-      this.$store.dispatch('setCustomLogos', logo)
     }
   }
 

@@ -578,6 +578,10 @@ export default class Scene extends Vue {
           }
         }
 
+        if (this.mainPreview) {
+          this.setProductionSVG()
+        }
+
         self.mounted = true
         clearInterval(timer)
       }
@@ -887,6 +891,15 @@ export default class Scene extends Vue {
         Vue.set(this.showSmall, 'back', false)
       }
     }
+  }
+
+  public setProductionSVG() {
+    let productionSVGs: Record<any, any> = {}
+    productionSVGs.front = this.frontCanvas
+    if (this.backCanvas) {
+      productionSVGs.back = this.backCanvas
+    }
+    this.$store.dispatch('setProductionSVGs', productionSVGs)
   }
 }
 </script>
