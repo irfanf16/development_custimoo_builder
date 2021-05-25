@@ -14,6 +14,14 @@
           <div class="color-holder">
             <div class="color-container">
               <div v-if="showOther" class="custom-color-picker">
+                <b-form class="pantone-color-field">
+                  <label class="mb-2" for="inline-form-input-pantone-color">Pantone:</label>
+                  <b-form-input
+                    id="inline-form-input-pantone-color"
+                    class="mb-2 mr-sm-2 mb-sm-0"
+                    placeholder="Pantone"
+                  ></b-form-input>
+                </b-form>
                 <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
               </div>
               <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
@@ -86,3 +94,17 @@ export default class ColorAccordion extends Vue {
 
 }
 </script>
+
+<style lang="scss" scoped>
+  .pantone-color-field{
+      background: #f7f8f9;
+      padding: 10px 10px 0;
+      .form-control{
+        background: #fff;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .hu-color-picker{box-shadow: none !important;}
+  }
+</style>
