@@ -123,12 +123,14 @@
                         <th>Size</th>
                         <th>Qty</th>
                       </tr>
+                      <template v-if="rosterDetails.length && rosterDetails[0].text">
                       <tr v-for="(roster, index) in rosterDetails" :key="index">
                         <td>{{ roster.text }}</td>
                         <td>{{ roster.number }}</td>
                         <td>{{ roster.size }}</td>
                         <td>{{ roster.quantity }}</td>
                       </tr>
+                      </template>
                     </table>
                   </div>
                 </div>
@@ -218,13 +220,7 @@ import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
 
-@Component<OrderDetails>({
-  mounted(){
-    this.$nextTick(() => {
-      this.logosConversionToBase64()
-    })
-  }
-})
+@Component<OrderDetails>({})
 
 export default class OrderDetails extends Vue {
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL+'/'
@@ -273,15 +269,14 @@ export default class OrderDetails extends Vue {
   }
 
   public logosConversionToBase64() {
+    const self = this
     this.customLogos.forEach((logos: Record<any, any>, index: number) => {
       let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
-      let logoData64 = ''
-      this.toDataURL(this.apiBaseUrl + logos.url, function (dataUrl: any) {
-        logoData64 = dataUrl
+      self.toDataURL(this.apiBaseUrl + logos.url,  (dataUrl: any) => {
+        if(dataUrl) {
+          self.base64Logos.push({'b64logo':dataUrl, 'logoSize': logoDimension})
+        }
       })
-      setTimeout(() => {
-        this.base64Logos.push({'b64logo':logoData64, 'logoSize': logoDimension})
-      }, 700)
     })
   }
 
@@ -323,7 +318,7 @@ export default class OrderDetails extends Vue {
       }
     })
 
-    // this.logosConversionToBase64()
+    this.logosConversionToBase64()
 
     setTimeout(() => {
       const element = document.getElementById("production-pdf-html")
