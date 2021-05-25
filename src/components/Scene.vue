@@ -268,7 +268,6 @@ export default class Scene extends Vue {
         }
       })
     }
-    this.mounted = true
   }
 
   @Watch('customTexts', {
@@ -598,6 +597,9 @@ export default class Scene extends Vue {
               }, 100)
             }
           }
+          if(!logos.length) {
+            self.mounted = true
+          }
 
           if (this.customTexts.length) {
             setTimeout(() => {
@@ -610,7 +612,6 @@ export default class Scene extends Vue {
           this.setProductionSVG()
         }
 
-        self.mounted = true
         clearInterval(timer)
       }
     }, 1000)
@@ -759,95 +760,103 @@ export default class Scene extends Vue {
   }
 
   public addLogos(logos: [Record<any, any>]) {
+    console.log('add logos')
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
-      logo.haveControls = Boolean(logo.haveControls)
-      let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
-      fabric.Image.fromURL(logoUrl, (img: any) => {
-        img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
-        img.set({
-          left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-          top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
-          angle: logo.rotation as number,
-          centeredScaling: true,
-          selectable: logo.haveControls,
-          hasControls: logo.haveControls,
-          hasBorders: logo.haveControls,
-          evented: logo.haveControls,
-          globalCompositeOperation: 'source-atop',
-          lockScalingFlip: true
-        })
-
-        if(logo.scaleX && logo.scaleY) {
-          img.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
-          img.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
-        }
-
-        let model = self.frontModel
-        let canvas = self.frontCanvas
-        let dimText = this.dimTextFront
-        if (logo.side == 'back') {
-          canvas = self.backCanvas
-          model = self.backModel
-          dimText = self.dimTextBack
-        }
-        img.setControlsVisibility({
-          tl: false,
-          bl: false,
-          tr: true,
-          br: true,
-          ml: false,
-          mb: false,
-          mr: false,
-          mt: false,
-          mtr: false
-        })
-        canvas.add(img)
-        model.bringToFront()
-        canvas.renderAll()
-
-        if(this.mainPreview) {
-          const width = Math.floor(img.width * this.measurementRatio)
-          const height = Math.floor(img.height * this.measurementRatio)
-          self.$store.dispatch('updateCustomLogoAttribute', {
-            index: index,
-            attribute: 'originalWidth',
-            value: width
+      if(logo.side == 'front' || (logo.side == 'back' && self.back)) {
+        logo.haveControls = Boolean(logo.haveControls)
+        let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+        fabric.Image.fromURL(logoUrl, (img: any) => {
+          img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
+          img.set({
+            left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+            top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
+            angle: logo.rotation as number,
+            centeredScaling: true,
+            selectable: logo.haveControls,
+            hasControls: logo.haveControls,
+            hasBorders: logo.haveControls,
+            evented: logo.haveControls,
+            globalCompositeOperation: 'source-atop',
+            lockScalingFlip: true
           })
-          self.$store.dispatch('updateCustomLogoAttribute', {
-            index: index,
-            attribute: 'originalHeight',
-            value: height
+
+          if (logo.scaleX && logo.scaleY) {
+            img.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
+            img.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
+          }
+
+          let model = self.frontModel
+          let canvas = self.frontCanvas
+          let dimText = this.dimTextFront
+          if (logo.side == 'back') {
+            canvas = self.backCanvas
+            model = self.backModel
+            dimText = self.dimTextBack
+          }
+
+          img.setControlsVisibility({
+            tl: false,
+            bl: false,
+            tr: true,
+            br: true,
+            ml: false,
+            mb: false,
+            mr: false,
+            mt: false,
+            mtr: false
           })
-        }
+          canvas.add(img)
+          model.bringToFront()
+          canvas.renderAll()
 
-        if(logo.customLogo){
-          img.side = logo.side
-          self.customLogoObjects.push(img)
-        } else {
-          self.logoObjects.push(img)
-        }
+          if (this.mainPreview) {
+            const width = Math.floor(img.width * this.measurementRatio)
+            const height = Math.floor(img.height * this.measurementRatio)
+            self.$store.dispatch('updateCustomLogoAttribute', {
+              index: index,
+              attribute: 'originalWidth',
+              value: width
+            })
+            self.$store.dispatch('updateCustomLogoAttribute', {
+              index: index,
+              attribute: 'originalHeight',
+              value: height
+            })
+          }
 
-        img.on('selected', (e: Record<any, any>) => {
-          let object = e.target;
-          dimText.set({
-            left: object.left,
-            top: object.top + object.height * object.scaleY / 1.6,
-            text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
-            visible: true
-          }).bringToFront()
-        })
-        canvas.on('selection:cleared', () => {
-          dimText.set({
-            visible: false
+          if (logo.customLogo) {
+            img.side = logo.side
+            self.customLogoObjects.push(img)
+          } else {
+            self.logoObjects.push(img)
+          }
+
+          img.on('selected', (e: Record<any, any>) => {
+            this.showDimensions(e, dimText)
+          })
+          canvas.on('selection:cleared', () => {
+            dimText.set({
+              visible: false
+            })
           })
         })
-      })
+      }
+      this.mounted = true
     })
   }
 
+  public showDimensions(e: any, dimText) {
+    let object = e.target;
+    dimText.set({
+      left: object.left,
+      top: object.top + object.height * object.scaleY / 1.6,
+      text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
+      visible: true
+    }).bringToFront()
+  }
+
   public async addTexts(texts: [Record<any, any>], addIndex: number|null = null) {
-    console.log('call add texts')
     const self = this
     texts.forEach((text: Record<any, any>, index: number) => {
       if(text.text) {
