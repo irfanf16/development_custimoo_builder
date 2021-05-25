@@ -760,7 +760,6 @@ export default class Scene extends Vue {
   }
 
   public addLogos(logos: [Record<any, any>]) {
-    console.log('add logos')
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
       if(logo.side == 'front' || (logo.side == 'back' && self.back)) {
@@ -813,15 +812,10 @@ export default class Scene extends Vue {
           if (this.mainPreview) {
             const width = Math.floor(img.width * this.measurementRatio)
             const height = Math.floor(img.height * this.measurementRatio)
-            self.$store.dispatch('updateCustomLogoAttribute', {
+            self.$store.dispatch('updateCustomLogoDimension', {
               index: index,
-              attribute: 'originalWidth',
-              value: width
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'originalHeight',
-              value: height
+              width: width,
+              height: height
             })
           }
 

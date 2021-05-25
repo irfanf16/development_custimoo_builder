@@ -43,6 +43,14 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.customLogos[customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
       }
     },
+    CUSTOM_LOGO_DIMENSION(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
+      if(customLogoAttribute){
+        Object.assign(state.customLogos[customLogoAttribute.index], {
+          'originalWidth': customLogoAttribute.width,
+          'originalHeight': customLogoAttribute.height
+        })
+      }
+    },
     customLogoDelete(state: Record<any, any>, delCustomLogo: Record<any, any>) {
       if(delCustomLogo){
         state.customLogos.splice(delCustomLogo.index, 1)
@@ -197,6 +205,9 @@ const ProductAttributes:Module<any, any> = {
     },
     updateCustomLogoAttribute({commit}, payload){
       commit('customLogoAttribute', payload)
+    },
+    updateCustomLogoDimension({commit}, payload){
+      commit('CUSTOM_LOGO_DIMENSION', payload)
     },
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
