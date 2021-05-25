@@ -76,10 +76,10 @@
                     </div>
                     <div class="details-col">
                       <h2>Name+Numbers</h2>
-                      <div>
-                        <div class="name-no-details" v-for="(textData, index) in customTexts" :key="index">
+                      <div v-for="(textData, index) in customTexts" :key="index">
+                        <div class="name-no-details" v-if="textData.text">
                           <div class="text-details">
-                            <span>{{ textData.type }}: {{ textData.text }}</span>
+                            <span>{{ textData.type.toUpperCase() }}: {{ textData.text }}</span>
                             <span>Font: {{ textData.fontFamily }}</span>
                             <span>Size: {{ textData.originalWidth }}cm x {{ textData.originalHeight }}cm</span>
                           </div>
