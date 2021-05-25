@@ -842,11 +842,13 @@ export default class Scene extends Vue {
           })
         })
       }
-      this.mounted = true
+      if(index - 1 == logos.length) {
+        this.mounted = true
+      }
     })
   }
 
-  public showDimensions(e: any, dimText) {
+  public showDimensions(e: any, dimText: fabric.Text) {
     let object = e.target;
     dimText.set({
       left: object.left,
