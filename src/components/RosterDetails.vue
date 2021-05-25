@@ -116,7 +116,6 @@ export default class RosterDetails extends Vue {
   public rosters:any[]=[]
   public fontsColors: any[] = []
   public fontOptions: Record<any, any>[] = []
-  public ref = this.$refs as Record<any, any>
 
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct

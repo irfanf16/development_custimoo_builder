@@ -552,12 +552,12 @@ export default class OrderDetails extends Vue {
     return this.$store.getters.getRosterDetails
   }
 
-  get total(): number {
-    let total = 0;
-    this.rosterDetails.forEach((item) => {
-      total = total + parseInt(item.quantity);
+  get total():number{
+    let sum = 0;
+    this.rosterDetails.forEach((item)=>{
+      sum +=  parseInt(item.quantity);
     })
-    return total;
+    return sum;
   }
 
   public buyNow() {
@@ -685,21 +685,5 @@ export default class OrderDetails extends Vue {
     return lines.join('\n')
   }
 }
-    export default class OrderDetails extends Vue {
-      get rosterDetails(): [Record<any, any>] {
-        return this.$store.getters.getRosterDetails
-      }
-      get total():number{
-        let sum = 0;
-        this.rosterDetails.forEach((item)=>{
-          sum +=  parseInt(item.quantity);
-        })
-        return sum;
-      }
-      public buyNow(){
-        if (this.total >0 ){
-          this.$router.push('/confirm-order')
-        }
-      }
-    }
+
 </script>
