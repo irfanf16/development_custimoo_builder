@@ -38,6 +38,21 @@
         </div>
       </div>
     </b-modal>
+    <b-modal ref="myModal" content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered scrollable size="lg" title="Upload Team Roster">
+        <p class="mb-4">The Team Roster can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
+        <div class="roster-template-area">
+            <b-button class="btn btn-secondary fw-bold">Download Roster Template <a href="#" v-b-tooltip.hover
+                                                                                  title="Enter roster in excel file">
+              <font-awesome-icon :icon="['fas', 'info-circle']"/>
+            </a></b-button>
+
+            <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template
+              <b-form-file  class="mb-2"></b-form-file>
+              <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
+              <font-awesome-icon :icon="['fas', 'info-circle']"/>
+            </a></b-button>
+        </div>
+      </b-modal>
     <div class="d-lg-none">
       <RosterDetails :productSizes="productSizes"/>
     </div>
@@ -214,3 +229,45 @@ export default class EditRosterArea extends Vue {
 }
 
 </script>
+
+<style lang="scss" scoped>
+  .roster-template-area{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        .btn-secondary{
+            font-size: 14px;
+            color: #219F84;
+            background: #E7F4F1;
+            font-weight: 500;
+            flex: 0 0 48%;
+            max-width: 48%;
+            border-color: #E7F4F1;
+            transition: all 0.3s ease;
+            position: relative;
+            &:hover{
+                background: #219f84;
+                color: #fff;
+                a{color: #fff;}
+            }
+            .custom-file{
+                position: absolute;
+                right: 22%;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                opacity: 0;
+                margin: 0;
+                width: auto;
+            }
+            a{
+                color: #219f84;
+                margin: 0 0 0 3px;
+                &:hover{
+                    color: #fff;
+                }
+            }
+        }
+    }
+</style>
