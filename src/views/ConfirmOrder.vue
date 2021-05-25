@@ -1,11 +1,11 @@
 <template>
     <div class="confirm-order-area">
-        <b-container class="order-details-holder my-5 bg-white border">
+        <b-container class="order-details-holder my-lg-5 bg-white border">
             <b-row class="align-items-center p-3 order-details-header border-bottom">
-                <b-col class="text-left">
+                <b-col cols="12" lg="6" class="text-left mb-3 mb-lg-0">
                     <h1>Confirm Your Order</h1>
                 </b-col>
-                <b-col class="text-right">
+                <b-col cols="12" lg="6" class="text-left text-lg-right">
                     <div class="header-buttons">
                         <b-button variant="outline-secondary" v-b-modal.modal-center-design>Edit Your Design</b-button>
                         <SaveDesignModal />
@@ -89,13 +89,20 @@
 <style lang="scss" scoped>
     .order-details-holder{
         h1{
-            font-size: 30px;
+            font-size: 24px;
             font-weight: 700;
+            @media only screen and (min-width: 1024px){
+                font-size: 30px;
+            }
         }
         .header-buttons{
             .btn{
                 margin-right: 15px;
                 color: #000;
+                font-size: 0.8rem;
+                @media only screen and (min-width: 768px){
+                    font-size: 1rem;
+                }
                 &:hover{
                     background: #219F84;
                     color: #fff;

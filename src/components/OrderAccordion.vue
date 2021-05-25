@@ -141,6 +141,10 @@
 
 <style lang="scss" scoped>
     .order-selected-colors{
+        justify-content: space-between;
+        @media only screen and (min-width: 768px){
+            justify-content: flex-start;
+        }
         button{
             background: none;
             border: 1px solid #E1E6EA;
@@ -150,7 +154,10 @@
             align-items: center;
             justify-content: space-between;
             margin: 0 5px 10px;
-            font-size: 14px;
+            font-size: 12px;
+            @media only screen and (min-width: 768px){
+                font-size: 14px;
+            }
             .color-circle{
                 width: 20px;
                 height: 20px;
