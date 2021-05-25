@@ -53,10 +53,10 @@
               </div>
             </div>
             <div id="main">
-              <div class="image-holder">
-                <div class="image-area" id="front-svg">
+              <div class="image-holder" style="text-align: center;">
+                <div class="image-area" id="front-svg" style="text-align: center;">
                 </div>
-                <div class="image-area" id="back-svg">
+                <div class="image-area" id="back-svg" style="text-align: center;">
                 </div>
               </div>
               <div class="two-columns">
@@ -123,12 +123,14 @@
                         <th>Size</th>
                         <th>Qty</th>
                       </tr>
+                      <template v-if="rosterDetails.length && rosterDetails[0].text">
                       <tr v-for="(roster, index) in rosterDetails" :key="index">
                         <td>{{ roster.text }}</td>
                         <td>{{ roster.number }}</td>
                         <td>{{ roster.size }}</td>
                         <td>{{ roster.quantity }}</td>
                       </tr>
+                      </template>
                     </table>
                   </div>
                 </div>
@@ -218,13 +220,7 @@ import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
 
-@Component<OrderDetails>({
-  mounted(){
-    this.$nextTick(() => {
-      this.logosConversionToBase64()
-    })
-  }
-})
+@Component<OrderDetails>({})
 
 export default class OrderDetails extends Vue {
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL+'/'
@@ -273,19 +269,19 @@ export default class OrderDetails extends Vue {
   }
 
   public logosConversionToBase64() {
+    const self = this
     this.customLogos.forEach((logos: Record<any, any>, index: number) => {
       let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
-      let logoData64 = ''
-      this.toDataURL(this.apiBaseUrl + logos.url, function (dataUrl: any) {
-        logoData64 = dataUrl
+      self.toDataURL(this.apiBaseUrl + logos.url,  (dataUrl: any) => {
+        if(dataUrl) {
+          self.base64Logos.push({'b64logo':dataUrl, 'logoSize': logoDimension})
+        }
       })
-      setTimeout(() => {
-        this.base64Logos.push({'b64logo':logoData64, 'logoSize': logoDimension})
-      }, 700)
     })
   }
 
   public generateProductionPdf(e: any) {
+    console.log(this.base64Logos)
     let frontSVG = this.productionSVGs.front.toSVG()
     let backSVG = this.productionSVGs.back.toSVG()
 
@@ -323,7 +319,7 @@ export default class OrderDetails extends Vue {
       }
     })
 
-    // this.logosConversionToBase64()
+    this.logosConversionToBase64()
 
     setTimeout(() => {
       const element = document.getElementById("production-pdf-html")
@@ -527,11 +523,14 @@ a {
   overflow: hidden;
   align-items: center;
   padding: 20px 0;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .image-holder .image-area {
   display: inline-block;
   vertical-align: middle;
+  width: 100%;
   max-width: 47%;
   margin: 0 1%;
 }
@@ -609,6 +608,7 @@ a {
 
 .two-columns .color-block {
   max-width: 45%;
+  width: 100%;
   vertical-align: top;
   display: inline-block;
   margin: 0 0 10px;
@@ -624,7 +624,8 @@ a {
 }
 
 .two-columns .color-details {
-  max-width: 90px;
+  max-width: 80px;
+  width: 100%;
   font-size: 12px;
   vertical-align: top;
   display: inline-block;
@@ -658,7 +659,8 @@ a {
   display: block;
   height: auto;
   width: 100%;
-  margin: 0;
+  margin: 0 auto;
+  max-width: 50px;
 }
 
 .two-columns .right-col {
