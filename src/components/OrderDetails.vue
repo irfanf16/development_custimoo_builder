@@ -73,14 +73,14 @@
         return this.$store.getters.getRosterDetails
       }
       get total():number{
-        let total = 0;
+        let sum = 0;
         this.rosterDetails.forEach((item)=>{
-          total = total + parseInt(item.quantity);
+          sum +=  parseInt(item.quantity);
         })
-        return total;
+        return sum;
       }
       public buyNow(){
-        if (this.total >0){
+        if (this.total >0 ){
           this.$router.push('/confirm-order')
         }
       }
