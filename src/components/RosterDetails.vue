@@ -40,7 +40,7 @@
     <div class="roster-row mb-2"  :key="index">
       <div class="align-left">
         <div class="hide-show">
-          <a  @click="changeText(roster.text)">
+          <a  @click="changeText(roster.text, roster.number)">
             <font-awesome-icon :icon="['fas', 'eye-slash']"/>
           </a>
         </div>
@@ -71,7 +71,7 @@
           ></b-form-input>
         </div>
         <div class="remove">
-          <a @click="removeIndex(index, roster.text)">
+          <a @click="removeIndex(index, roster.text, roster.number)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
@@ -89,13 +89,21 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import readXlsxFile from "read-excel-file";
+import {default as $} from "jquery";
 
-@Component<RosterDetails>({})
+@Component<RosterDetails>({
+  mounted() {
+    this.fontsColorsManipulation()
+    this.fontsList()
+  },
+})
 export default class RosterDetails extends Vue {
   @Prop({required: true}) productSizes!: any
   private roster: any[] = []
   public fileData: Record<any, any>[] = []
   public selected = this.productSizes[0]
+  public firstColor!: string
+  public secondColor!: string
   public obj = {
     text:'',
     number:'',
@@ -104,8 +112,13 @@ export default class RosterDetails extends Vue {
     information:''
   };
   public rosters:any[]=[]
+  public fontsColors: any[] = []
+  public fontOptions: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
 
+  get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
+  }
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
@@ -114,26 +127,67 @@ export default class RosterDetails extends Vue {
   }
 
   public addPlayer(obj:Record<any, any>) {
-    // let d =0;
-    // for (let i in this.rosterDetails[ind]){
-    //   if (this.rosterDetails[ind][i] == ""){
-    //     this.ref.myInputs[d].focus();
-    //   }
-    //   d++;
-    // }
     this.$emit('addPlayer');
   }
-  public removeIndex(ind:number, text:string){
-    if (this.customText.length>0){
-      if (this.customText[0].text  == text){
+  public removeIndex(ind:number, text:string, num:number){
+    if (this.customText.length > 0){
+      if (text){
         this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: ''})
+      }
+       if (num){
+        this.$store.dispatch('updateCustomTextAttribute', {index: 1, attribute: 'text', value: ''})
       }
     }
     this.$store.dispatch('removeRoster', ind);
   }
-  public changeText(text:string){
+  public changeText(text:string, num:number) {
+    if (text && num){
+      let texts = {
+        text: num.toString(),
+        type: 'number',
+        width: 50,
+        height: 50,
+        x_axis: 300,
+        y_axis: 180,
+        rotation: 0,
+        haveControls: true,
+        outlineEnabled: true,
+        side: 'back',
+        fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+        fillColor: this.firstColor,
+        outLineColor: this.secondColor,
+      }
+      console.log(texts);
       this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
+      this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
   }
+    }
+  public fontsColorsManipulation() {
+    this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
+      let finalColor = {color_text: []}
+      finalColor.color_text = JSON.parse(colors.color_text)
+      this.fontsColors = this.fontsColors.concat(finalColor)
+    })
+    if (this.fontsColors.length) {
+      this.firstColor = this.fontsColors[0].color_text[0].value
+      this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1].value : this.fontsColors[0].color_text[0].value
+    }
+  }
+
+  public fontsList(): void {
+    let productFonts = this.selectedProduct.namefonts
+    productFonts.forEach((fonts: any, key: number) => {
+      let fontNameParam = fonts.file_url.split('/').reverse()
+      fontNameParam = fontNameParam[0].split('.')
+      let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+      let font = {
+        value: fontNameParam[0] as string,
+        text: fontName as string
+      }
+      this.fontOptions = this.fontOptions.concat([font])
+    })
+  }
+
   public getOccurence(val:string){
     let count = (val.match(/\*/g) || []).length;
     return count
@@ -142,27 +196,32 @@ export default class RosterDetails extends Vue {
     let status = true;
     let loopStatus = true;
     let files = event.target.files ? event.target.files[0] : null;
+    let ext = files.name.split('.').pop();
+    if (ext != 'xlsx'){
+      alert("please upload a valid excel file");
+      return false
+    }
     readXlsxFile(files).then((rows: any[][]) => {
-      if (rows[0].length != 6){
+      if (rows[0].length != 8){
         alert("please upload valid file")
         return false
       }
       for (let i in rows[0]){
-        if (i == '1'){
+        if (i == '3'){
           let count = this.getOccurence(rows[0][i]);
           if (count != 1 || rows[0][i] != "SIZE*"){
             status = false
             break;
           }
         }
-        if (i == '2'){
+        if (i == '4'){
           let count = this.getOccurence(rows[0][i]);
-          if (count != 2 || rows[0][i] != "NAME ON PRODUCT**"){
+          if (count != 3 || rows[0][i] != "NAME ON PRODUCT***"){
             status = false
             break;
           }
         }
-        if (i == '4'){
+        if (i == '6'){
           let count = this.getOccurence(rows[0][i]);
           if (count != 3 || rows[0][i] != "OTHER INFORMATION***"){
             status = false
@@ -170,6 +229,7 @@ export default class RosterDetails extends Vue {
           }
         }
       }
+      alert(status)
       if (status) {
         for (let row in rows){
           let obj = {
@@ -179,26 +239,35 @@ export default class RosterDetails extends Vue {
             quantity: 1,
             information: ''
           };
+          if (row == '0'){
+            continue
+          }
           for (let i in rows[row]){
-            if (row == '0'){
-              continue
-            }
-            if (i == '1') {
-              if (rows[row][i] == null || !this.checkSize(rows[row][i])){
+            if (i == '3') {
+              if (rows[row][i] == null){
                 loopStatus = false;
                 break;
+              }else{
+                obj.size   = rows[row][i];
               }
-              obj.size   = rows[row][i];
             }
-            if (i == '2') {
-              obj.text = rows[row][i];
-            }
-            if (i == '3') {
+            if (i == '4'){
+              if (rows[row][i] == null){
+                break;
+              }
+             if (this.selectedProduct.product_name == rows[row][i]){
+               obj.text = rows[row][i];
+             }else{
+               break;
+             }
+           }
+            if (i  == '5'){
               obj.number = rows[row][i];
             }
-            if (i == '4') {
+            if (i == '6'){
               obj.information = rows[row][i];
             }
+
           }
           if (loopStatus == false){
             break
