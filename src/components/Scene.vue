@@ -260,6 +260,7 @@ export default class Scene extends Vue {
             }
 
             if(self.logosLimit && self.customLogoObjects.length < self.logosLimit - backLogosCount) {
+              console.log('call from change')
               self.addLogos([finalLogo])
             }else if(!self.logosLimit) {
               self.addLogos([finalLogo])
@@ -336,7 +337,6 @@ export default class Scene extends Vue {
         }
       })
     }
-    this.mounted = true
   }
 
   @Watch('defaultColors', {
@@ -501,6 +501,7 @@ export default class Scene extends Vue {
   }
 
   public loadScene(ImageData: Record<any, any>, side: string): void {
+    this.mounted = false
     let element = this.$refs.front as HTMLCanvasElement
     if (side === 'back') {
       element = this.$refs.back as HTMLCanvasElement;
@@ -541,13 +542,13 @@ export default class Scene extends Vue {
     const self = this
 
     const timer = setInterval(() => {
-      let texture = this.frontTexture
+      let texture = self.frontTexture
       if (side == 'back') {
-        texture = this.backTexture
+        texture = self.backTexture
       }
-      if (model && texture && (!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
-        if (!this.back || (this.back && side == 'back')) {
-          this.getSvgGroups()
+      if (model && texture && (!self.backTextureUrl || (self.backTextureUrl && self.backTexture))) {
+        if (!self.back || (self.back && side == 'back')) {
+          self.getSvgGroups()
         }
         canvas.add(texture)
         canvas.viewportCenterObject(texture)
@@ -564,20 +565,21 @@ export default class Scene extends Vue {
         canvas.add(model)
         canvas.viewportCenterObject(model)
         if (side == 'back') {
-          canvas.add(this.dimTextBack)
+          canvas.add(self.dimTextBack)
         } else {
-          canvas.add(this.dimTextFront)
+          canvas.add(self.dimTextFront)
         }
         canvas.renderAll()
 
-        if(!this.back || (this.back && side == 'back')) {
-          let logos = this.logos
+        if(!self.back || (self.back && side == 'back')) {
+          let logos = self.logos
 
-          if (this.customLogos && this.logoAllowed) {
-            let customLogos = this.customLogos
-            if (this.logosLimit) {
-              customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
+          if (self.customLogos && self.logoAllowed) {
+            let customLogos = self.customLogos
+            if (self.logosLimit) {
+              customLogos = self.customLogos.slice(0, self.logosLimit) as [Record<any, any>]
             }
+            console.log(self.mounted)
             customLogos.forEach((item: Record<any, any>, index: number) => {
               if (!item.action && self.logosSettings[index]) {
                 item.width = self.logosSettings[index].width
@@ -592,6 +594,7 @@ export default class Scene extends Vue {
           if (logos.length) {
             logos = logos.filter((logo: Record<any, any>) => logo.url) as [Record<any, any>]
             if (logos.length) {
+              console.log(logos.length)
               setTimeout(() => {
                 self.addLogos(logos)
               }, 100)
@@ -601,15 +604,15 @@ export default class Scene extends Vue {
             self.mounted = true
           }
 
-          if (this.customTexts.length) {
+          if (self.customTexts.length) {
             setTimeout(() => {
-              self.addTexts(this.customTexts)
+              self.addTexts(self.customTexts)
             }, 100)
           }
         }
 
-        if (this.mainPreview) {
-          this.setProductionSVG()
+        if (self.mainPreview) {
+          self.setProductionSVG()
         }
 
         clearInterval(timer)
@@ -672,8 +675,6 @@ export default class Scene extends Vue {
             value: e.action
           })
         }
-
-        this.mounted = false
       })
     } else {
       this.customLogos.forEach((logo, index) => {
@@ -726,7 +727,6 @@ export default class Scene extends Vue {
             value: e.action
           })
 
-          this.mounted = false
         }
       })
     }
