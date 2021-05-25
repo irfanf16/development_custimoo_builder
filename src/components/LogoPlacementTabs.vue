@@ -52,7 +52,7 @@
                   </div>
                 </div>
                 <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
-                <b-button @click="shuffleLogoColors()" v-if="imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
+                <b-button @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
                 <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
               </div>
               <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal @click="callRooms">Save Color</button>
@@ -115,6 +115,7 @@ export default class LogoPlacementTabs extends Vue {
   ]
   public previousImageColors = []
   public imageColors: any[] = []
+  public logoColorUsed = false
 
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
@@ -221,6 +222,7 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   useLogoColors() {
+    this.logoColorUsed = true
     this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setGroupColors', {})
       this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.hex, pantone: imageColor.pantone })
