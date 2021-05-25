@@ -85,7 +85,6 @@ import getClosestColor from '@/pantoneColor'
   },
   mounted() {
     this.getLogoColors()
-    this.$store.dispatch('setCustomLogos')
     if(this.numberOfLogosAllowed > 0) {
       this.allowedLogosLimit = this.numberOfLogosAllowed
     }
