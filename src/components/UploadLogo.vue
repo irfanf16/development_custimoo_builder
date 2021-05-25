@@ -24,8 +24,20 @@
     </div>
 <!--    </b-button>-->
     <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
-      <p>By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may
+      <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may
         review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
+        <div class="mb-2">
+          <b-form-checkbox
+            id="checkbox-1"
+            v-model="status"
+            name="checkbox-1"
+            value="accepted"
+            unchecked-value="not_accepted"
+          >
+            Confirm for all logos
+          </b-form-checkbox>
+
+        </div>
       <div class="upload-logo-buttons">
         <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
         <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
@@ -53,6 +65,7 @@ import {http} from "@/httpCommon"
   }
 })
 export default class UploadLogo extends Vue {
+  public status= 'not_accepted'
   @Prop({required: true}) customLogoIndex!: any
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
