@@ -53,10 +53,10 @@
               </div>
             </div>
             <div id="main">
-              <div class="image-holder">
-                <div class="image-area" id="front-svg">
+              <div class="image-holder" style="text-align: center;">
+                <div class="image-area" id="front-svg" style="text-align: center;">
                 </div>
-                <div class="image-area" id="back-svg">
+                <div class="image-area" id="back-svg" style="text-align: center;">
                 </div>
               </div>
               <div class="two-columns">
@@ -281,6 +281,7 @@ export default class OrderDetails extends Vue {
   }
 
   public generateProductionPdf(e: any) {
+    console.log(this.base64Logos)
     let frontSVG = this.productionSVGs.front.toSVG()
     let backSVG = this.productionSVGs.back.toSVG()
 
@@ -522,11 +523,14 @@ a {
   overflow: hidden;
   align-items: center;
   padding: 20px 0;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .image-holder .image-area {
   display: inline-block;
   vertical-align: middle;
+  width: 100%;
   max-width: 47%;
   margin: 0 1%;
 }
@@ -604,6 +608,7 @@ a {
 
 .two-columns .color-block {
   max-width: 45%;
+  width: 100%;
   vertical-align: top;
   display: inline-block;
   margin: 0 0 10px;
@@ -619,7 +624,8 @@ a {
 }
 
 .two-columns .color-details {
-  max-width: 90px;
+  max-width: 80px;
+  width: 100%;
   font-size: 12px;
   vertical-align: top;
   display: inline-block;
@@ -653,7 +659,8 @@ a {
   display: block;
   height: auto;
   width: 100%;
-  margin: 0;
+  margin: 0 auto;
+  max-width: 50px;
 }
 
 .two-columns .right-col {
