@@ -104,7 +104,7 @@ export default class RosterDetails extends Vue {
   public selected = this.productSizes[0]
   public firstColor!: string
   public secondColor!: string
-  public currentIcon = 'eye'
+  public currentIcon = 'eye-slash'
   public ref = this.$refs as Record<any, any>
   public obj = {
     text:'',
@@ -142,6 +142,7 @@ export default class RosterDetails extends Vue {
     this.$store.dispatch('removeRoster', ind);
   }
   public changeText(text:string, num:number) {
+    this.currentIcon = 'eye'
     if (text && num){
       let texts = {
         text: num.toString(),
@@ -228,14 +229,14 @@ export default class RosterDetails extends Vue {
       for (let i in rows[0]){
         if (i == '3'){
           let count = this.getOccurence(rows[0][i]);
-          if (count != 1 || rows[0][i] != "SIZE*"){
+          if (count != 1 || rows[0][i] != "2. SIZE*"){
             status = false
             break;
           }
         }
         if (i == '4'){
           let count = this.getOccurence(rows[0][i]);
-          if (count != 3 || rows[0][i] != "NAME ON PRODUCT***"){
+          if (count != 2 || rows[0][i] != "3. NAME ON PRODUCT**"){
             status = false
             break;
           }
@@ -263,12 +264,7 @@ export default class RosterDetails extends Vue {
           let objStatus = true;
           for (let i in rows[row]){
             if (i == '3') {
-              if (rows[row][i] == null){
-                loopStatus = false;
-                break;
-              }else{
                 obj.size   = rows[row][i];
-              }
             }
             if (i == '4'){
               if (rows[row][i] == null){
