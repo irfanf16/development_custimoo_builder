@@ -107,7 +107,8 @@
                     <h2>Logos</h2>
                     <div class="logo-holder">
                       <div class="logo-block" v-for="(logo, index) in base64Logos" :key="index">
-                        <img :src="logo.logo" height="80" width="80">
+                        <img :src="logo.b64logo" height="80" width="80">
+                        <p>{{ logo.logoSize }}</p>
                       </div>
                     </div>
                   </div>
@@ -201,6 +202,9 @@
                 </div>
             </div>
         </div>
+      <div class="row">
+        <button class="btn btn-secondary  fw-bold w-100" @click="generateProductionPdf">Production PDF</button>
+      </div>
     </div>
 
   </div>
@@ -276,15 +280,12 @@ export default class OrderDetails extends Vue {
         logoData64 = dataUrl
       })
       setTimeout(() => {
-        this.base64Logos.push({'logo':logoData64, 'logoSize': logoDimension})
-      }, 500)
+        this.base64Logos.push({'b64logo':logoData64, 'logoSize': logoDimension})
+      }, 700)
     })
-
-    console.log(this.base64Logos)
   }
 
   public generateProductionPdf(e: any) {
-    console.log(this.customLogos)
     let frontSVG = this.productionSVGs.front.toSVG()
     let backSVG = this.productionSVGs.back.toSVG()
 
@@ -326,7 +327,6 @@ export default class OrderDetails extends Vue {
 
     setTimeout(() => {
       const element = document.getElementById("production-pdf-html")
-      console.log(element)
       const footerXAxis = 250;
       const footerYAxis = 200;
       const opt = {
@@ -336,7 +336,7 @@ export default class OrderDetails extends Vue {
         jsPDF: {
           unit: "mm",
           format: "letter",
-          orientation: 'portrait'
+          orientation: 'landscape'
         }
       };
       let ppdf = html2pdf()
@@ -357,7 +357,7 @@ export default class OrderDetails extends Vue {
           console.error("PDF Generation Error", e);
         })
         .save();
-    }, 500)
+    }, 700)
   }
 
   public toDataURL(url: string, callback: any) {
@@ -386,3 +386,321 @@ export default class OrderDetails extends Vue {
 }
 
 </script>
+
+
+
+<style scoped>
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+/*body {*/
+/* min-width: 320px;*/
+/* overflow-x: hidden;*/
+/* width: 100%;*/
+/* font-family: 'Ubuntu', sans-serif;*/
+/* font-size: 14px;*/
+/* line-height: 1.3;*/
+/* background: #fff;*/
+/* color: #03142E;*/
+/* margin: 0;*/
+/* box-sizing: border-box;*/
+/*}*/
+div {
+  box-sizing: border-box;
+}
+
+ol, ul {
+  list-style: none;
+  box-sizing: border-box;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+a {
+  color: #75b4e4;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+#production-pdf-html,
+#wrapper {
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 10px;
+  position: relative;
+  max-width: 1020px;
+  margin: 0 auto;
+}
+
+#header {
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+#header .year {
+  font-weight: 700;
+  background: #000;
+  color: #fff;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 7%;
+  width: 100%;
+  text-align: center;
+  font-size: 24px;
+  padding: 2px;
+}
+
+#header .header-content {
+  background: #009eda;
+  color: #000;
+  text-align: center;
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 77%;
+  width: 100%;
+  font-size: 20px;
+  position: relative;
+  padding: 5px;
+}
+
+#header .header-content:before {
+  position: absolute;
+  content: '';
+  right: -20px;
+  top: 0;
+  border: 20px solid transparent;
+  border-top: 30px solid #fff;
+}
+
+#header .logo {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 15%;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  padding: 5px;
+}
+
+#header .logo svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#main {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.image-holder {
+  overflow: hidden;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.image-holder .image-area {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 47%;
+  margin: 0 1%;
+}
+
+.image-holder .image-area image,
+.image-holder .image-area svg {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 auto !important;
+}
+
+.two-columns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.two-columns .left-col {
+  flex: 0 0 65%;
+  max-width: 65%;
+}
+
+.two-columns .product-details-area {
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.two-columns .details-col {
+  flex: 0 0 48%;
+  max-width: 48%;
+}
+
+.two-columns h2 {
+  font-size: 24px;
+  font-weight: 700;
+  padding: 0;
+  border: 2px solid #03142E;
+  padding: 5px 10px;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.two-columns h2:before {
+  position: absolute;
+  content: '';
+  right: -30px;
+  top: -2px;
+  border: 30px solid transparent;
+  border-top: 50px solid #fff;
+  z-index: 1;
+}
+
+.two-columns h2:after {
+  position: absolute;
+  content: '';
+  right: 16px;
+  top: -4px;
+  bottom: -4px;
+  background: #03142E;
+  width: 2px;
+  z-index: 2;
+  transform: rotate(-30deg);
+}
+
+.two-columns .colors-area {
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+.two-columns .color-block {
+  max-width: 45%;
+  vertical-align: top;
+  display: inline-block;
+  margin: 0 0 10px;
+}
+
+.two-columns .color-box {
+  width: 35px;
+  height: 35px;
+  vertical-align: top;
+  display: inline-block;
+  background: #03142E;
+  margin: 0 10px 0 0;
+}
+
+.two-columns .color-details {
+  max-width: 90px;
+  font-size: 12px;
+  vertical-align: top;
+  display: inline-block;
+}
+
+.logo-area .logo-holder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0 0 0 2px;
+}
+
+.logo-area .logo-block {
+  flex: 0 0 24.7%;
+  max-width: 24.7%;
+  padding: 20px;
+  border: 1px solid #03142E;
+  margin: 0 0.2% 2px 0;
+  min-height: 120px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-area .logo-block:last-child {
+  margin-left: 0;
+}
+
+.logo-area .logo-block svg {
+  display: block;
+  height: auto;
+  width: 100%;
+  margin: 0;
+}
+
+.two-columns .right-col {
+  flex: 0 0 30%;
+  max-width: 30%;
+}
+
+.name-no-details {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 0 0 10px;
+}
+
+.name-no-details .text-details {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+.name-no-details .color-details {
+  flex: 0 0 45%;
+  max-width: 45%;
+}
+
+.name-no-details .text-details span {
+  display: block;
+  margin: 0 0 7px;
+}
+
+.name-no-details .color-details-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 0 10px;
+}
+
+.name-no-details .color-details-wrapper .color-box {
+  height: 15px;
+}
+
+.name-no-details .color-name-details {
+  flex: 0 0 50px;
+  max-width: 50px;
+}
+</style>
