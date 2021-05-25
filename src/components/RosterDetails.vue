@@ -41,7 +41,7 @@
       <div class="align-left">
         <div class="hide-show">
           <a  @click="changeText(roster.text, roster.number)">
-            <font-awesome-icon :icon="['fas', 'eye-slash']"/>
+            <font-awesome-icon :icon="['fas', currentIcon]"/>
           </a>
         </div>
         <div class="roster-name">
@@ -104,6 +104,8 @@ export default class RosterDetails extends Vue {
   public selected = this.productSizes[0]
   public firstColor!: string
   public secondColor!: string
+  public currentIcon = 'eye'
+  public ref = this.$refs as Record<any, any>
   public obj = {
     text:'',
     number:'',
@@ -114,7 +116,6 @@ export default class RosterDetails extends Vue {
   public rosters:any[]=[]
   public fontsColors: any[] = []
   public fontOptions: Record<any, any>[] = []
-  public ref = this.$refs as Record<any, any>
 
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
@@ -157,10 +158,28 @@ export default class RosterDetails extends Vue {
         fillColor: this.firstColor,
         outLineColor: this.secondColor,
       }
-      console.log(texts);
       this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
       this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
-  }
+    }else if(text){
+      this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
+    }else if(num){
+      let texts = {
+        text: num.toString(),
+        type: 'number',
+        width: 50,
+        height: 50,
+        x_axis: 300,
+        y_axis: 180,
+        rotation: 0,
+        haveControls: true,
+        outlineEnabled: true,
+        side: 'back',
+        fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+        fillColor: this.firstColor,
+        outLineColor: this.secondColor,
+      }
+      this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
+    }
     }
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
@@ -229,7 +248,6 @@ export default class RosterDetails extends Vue {
           }
         }
       }
-      alert(status)
       if (status) {
         for (let row in rows){
           let obj = {
@@ -242,6 +260,7 @@ export default class RosterDetails extends Vue {
           if (row == '0'){
             continue
           }
+          let objStatus = true;
           for (let i in rows[row]){
             if (i == '3') {
               if (rows[row][i] == null){
@@ -253,11 +272,13 @@ export default class RosterDetails extends Vue {
             }
             if (i == '4'){
               if (rows[row][i] == null){
+                objStatus = false
                 break;
               }
              if (this.selectedProduct.product_name == rows[row][i]){
                obj.text = rows[row][i];
              }else{
+               objStatus = false
                break;
              }
            }
@@ -267,26 +288,25 @@ export default class RosterDetails extends Vue {
             if (i == '6'){
               obj.information = rows[row][i];
             }
-
           }
           if (loopStatus == false){
             break
           }
-          this.fileData.push(obj);
+          if (objStatus == true){
+            this.fileData.push(obj);
+          }
         }
         if (loopStatus == true){
           this.$store.dispatch('updateRoster', this.fileData);
+          this.ref['myModal'].hide();
         }else{
           alert('Size is missing');
+          this.ref['myModal'].hide();
         }
       }else{
         alert("please upload a valid file");
       }
     })
-  }
-  public checkSize(size:string){
-    let sizes = ['SM', 'MD', 'LG', 'XL','2XL', '3XL'];
-    return sizes.includes(size);
   }
 }
 </script>

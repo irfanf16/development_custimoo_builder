@@ -17,6 +17,18 @@ import rgbHex from 'rgb-hex'
 
 @Component<Scene>({
   mounted() {
+    if(this.back) {
+      this.dimTextBack = new fabric.Text('', {
+        fontSize: 20,
+        backgroundColor: '#fff',
+        hasControls: false,
+        selectable: false,
+        evented: false,
+        lockMovementX: true,
+        lockMovementY: true,
+        visible: false
+      })
+    }
     const self = this
     this.loadScene(this.front, 'front')
     if (this.back) {
@@ -135,6 +147,17 @@ export default class Scene extends Vue {
   private backModel: any
   private showSmall = { front: false, back: this.manageComponents.mobileScreen }
   private svgGroups: any[] = []
+  public dimTextFront = new fabric.Text('', {
+    fontSize: 20,
+    backgroundColor: '#fff',
+    hasControls: false,
+    selectable: false,
+    evented: false,
+    lockMovementX: true,
+    lockMovementY: true,
+    visible: false
+  })
+  public dimTextBack!: fabric.Text
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -541,6 +564,11 @@ export default class Scene extends Vue {
 
         canvas.add(model)
         canvas.viewportCenterObject(model)
+        if (side == 'back') {
+          canvas.add(this.dimTextBack)
+        } else {
+          canvas.add(this.dimTextFront)
+        }
         canvas.renderAll()
 
         if(!this.back || (this.back && side == 'back')) {
@@ -618,7 +646,7 @@ export default class Scene extends Vue {
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'originalWidth',
-              value: Math.floor(width * this.measurementRatio / 100)
+              value: Math.floor(width * this.measurementRatio)
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
@@ -628,7 +656,7 @@ export default class Scene extends Vue {
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'originalHeight',
-              value: Math.floor(height * this.measurementRatio / 100)
+              value: Math.floor(height * this.measurementRatio)
             })
           } else if (e.action == 'rotate') {
             self.$store.dispatch('updateCustomTextAttribute', {
@@ -672,7 +700,7 @@ export default class Scene extends Vue {
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'originalWidth',
-              value: Math.floor(width * this.measurementRatio / 100)
+              value: Math.floor(width * this.measurementRatio)
             })
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
@@ -682,7 +710,7 @@ export default class Scene extends Vue {
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'originalHeight',
-              value: Math.floor(height * this.measurementRatio / 100)
+              value: Math.floor(height * this.measurementRatio)
             })
           } else if (e.action == 'rotate') {
             self.$store.dispatch('updateCustomLogoAttribute', {
@@ -755,18 +783,13 @@ export default class Scene extends Vue {
           img.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
         }
 
-        if(logo.customLogo){
-          img.side = logo.side
-          self.customLogoObjects.push(img)
-        } else {
-          self.logoObjects.push(img)
-        }
-
         let model = self.frontModel
         let canvas = self.frontCanvas
+        let dimText = this.dimTextFront
         if (logo.side == 'back') {
           canvas = self.backCanvas
           model = self.backModel
+          dimText = self.dimTextBack
         }
         img.setControlsVisibility({
           tl: false,
@@ -784,22 +807,47 @@ export default class Scene extends Vue {
         canvas.renderAll()
 
         if(this.mainPreview) {
+          const width = Math.floor(img.width * this.measurementRatio)
+          const height = Math.floor(img.height * this.measurementRatio)
           self.$store.dispatch('updateCustomLogoAttribute', {
             index: index,
             attribute: 'originalWidth',
-            value: Math.floor(img.width * this.measurementRatio / 100)
+            value: width
           })
           self.$store.dispatch('updateCustomLogoAttribute', {
             index: index,
             attribute: 'originalHeight',
-            value: Math.floor(img.height * this.measurementRatio / 100)
+            value: height
           })
         }
+
+        if(logo.customLogo){
+          img.side = logo.side
+          self.customLogoObjects.push(img)
+        } else {
+          self.logoObjects.push(img)
+        }
+
+        img.on('selected', (e: Record<any, any>) => {
+          let object = e.target;
+          dimText.set({
+            left: object.left,
+            top: object.top + object.height * object.scaleY / 1.6,
+            text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
+            visible: true
+          }).bringToFront()
+        })
+        canvas.on('selection:cleared', () => {
+          dimText.set({
+            visible: false
+          })
+        })
       })
     })
   }
 
   public async addTexts(texts: [Record<any, any>], addIndex: number|null = null) {
+    console.log('call add texts')
     const self = this
     texts.forEach((text: Record<any, any>, index: number) => {
       if(text.text) {
@@ -835,13 +883,13 @@ export default class Scene extends Vue {
           side: text.side
         })
 
-        self.customTextObjects[finalIndex] = textBox
-
         let canvas = self.frontCanvas
         let model = self.frontModel
+        let dimText = self.dimTextFront
         if (text.side == 'back') {
           canvas = self.backCanvas
           model = self.backModel
+          dimText = self.dimTextBack
         }
         textBox.setControlsVisibility({
           tl: false,
@@ -855,22 +903,40 @@ export default class Scene extends Vue {
           mtr: false
         })
 
+        self.customTextObjects[finalIndex] = textBox
         canvas.add(textBox)
         model.bringToFront()
         canvas.renderAll()
 
         if(this.mainPreview) {
+          const width = Math.floor(textBox.width as number * this.measurementRatio)
+          const height = Math.floor(textBox.height as number * this.measurementRatio)
           self.$store.dispatch('updateCustomTextAttribute', {
             index: index,
             attribute: 'originalWidth',
-            value: Math.floor(textBox.width as number * this.measurementRatio / 100)
+            value: width
           })
           self.$store.dispatch('updateCustomTextAttribute', {
             index: index,
             attribute: 'originalHeight',
-            value: Math.floor(textBox.height as number * this.measurementRatio / 100)
+            value: height
           })
         }
+        textBox.on('selected', (e: Record<any, any>) => {
+          let object = e.target;
+          dimText.set({
+            left: object.left,
+            top: object.top + object.height * object.scaleY / 1.4,
+            text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
+            visible: true
+          }).bringToFront()
+        })
+        canvas.on('selection:cleared', () => {
+          dimText.set({
+            visible: false
+          })
+        })
+
       } else {
         let finalIndex = index
         if (addIndex !== null) {

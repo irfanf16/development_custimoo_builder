@@ -141,39 +141,66 @@
     </template>
 
     <div class="order-details-area">
-      <div class="qty-area">
-        <div class="qty-details" v-for="(roster,index) in rosterDetails" :key="index">
+        <div class="qty-area">
+<!--            <h2 class="fw-bold fz-18">Qty.</h2>-->
+            <div class="qty-details" v-for="(roster,index) in rosterDetails" :key="index">
+<!--                <div class="order-row">-->
+<!--                    <div class="size">{{ roster.size }}</div>-->
+<!--                    <div class="total-qty">{{ roster.quantity }}</div>-->
+<!--                </div>-->
+            </div>
+            <div class="order-row total">
+                <div class="total">Total</div>
+                <div class="total-qty">{{ total }}</div>
+            </div>
         </div>
-        <div class="order-row total">
-          <div class="total">Total</div>
-          <div class="total-qty">{{ total }}</div>
+        <div class="choose-stuff">
+            <h2 class="fw-bold mb-3 fz-18 d-none d-lg-block">Choose Stuff</h2>
+            <div class="stuff-row">
+                <b-form-checkbox size="sm">Fight strap</b-form-checkbox>
+                <span class="charges">+$5</span>
+            </div>
+            <div class="stuff-row">
+                <b-form-checkbox size="sm">Embroidery</b-form-checkbox>
+                <span class="charges">+$15</span>
+            </div>
+            <div class="stuff-row">
+                <b-form-checkbox size="sm">Capt Patch</b-form-checkbox>
+                <span class="charges">+$50</span>
+            </div>
         </div>
-      </div>
-      <div class="choose-stuff">
-        <h2 class="fw-bold mb-3 fz-18 d-none d-lg-block">Choose Stuff</h2>
-        <div class="stuff-row">
-          <b-form-checkbox size="sm">Fight strap</b-form-checkbox>
-          <span class="charges">+$5</span>
+        <div class="pricing-are">
+<!--            <h2 class="fw-bold fz-18 d-none d-lg-block">Price</h2>-->
+            <div class="order-details">
+<!--                <div class="order-row">-->
+<!--                    <div class="order-text">-->
+<!--                        Shipping &#38; Handling-->
+<!--                    </div>-->
+<!--                    <div class="cost-area">$20.00</div>-->
+<!--                </div>12-->
+<!--                <div class="order-row">-->
+<!--                    <div class="order-text">-->
+<!--                        Total VAT-->
+<!--                    </div>-->
+<!--                    <div class="cost-area">$16.00</div>-->
+<!--                </div>-->
+<!--                <div class="order-row">-->
+<!--                    <div class="order-text">-->
+<!--                        The Damage-->
+<!--                    </div>-->
+<!--                    <div class="cost-area">$152.95</div>-->
+<!--                </div>-->
+<!--                <div class="order-row total">-->
+<!--                    <div class="order-text">-->
+<!--                        Total-->
+<!--                    </div>-->
+<!--                    <div class="cost-area">$188.95</div>-->
+<!--                </div>-->
+                <div class="order-row">
+                    <button class="btn btn-secondary  fw-bold w-100" @click="buyNow">Buy Now</button>
+                </div>
+            </div>
         </div>
-        <div class="stuff-row">
-          <b-form-checkbox size="sm">Embroidery</b-form-checkbox>
-          <span class="charges">+$15</span>
-        </div>
-        <div class="stuff-row">
-          <b-form-checkbox size="sm">Capt Patch</b-form-checkbox>
-          <span class="charges">+$50</span>
-        </div>
-      </div>
-      <div class="pricing-are">
-        <div class="order-details">
-          <div class="order-row">
-            <button class="btn btn-secondary  fw-bold w-100" @click="buyNow">Buy Now</button>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <button class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Production PDF</button>
-      </div>
     </div>
 
   </div>
@@ -207,12 +234,12 @@ export default class OrderDetails extends Vue {
     return this.$store.getters.getRosterDetails
   }
 
-  get total(): number {
-    let total = 0;
-    this.rosterDetails.forEach((item) => {
-      total = total + parseInt(item.quantity);
+  get total():number{
+    let sum = 0;
+    this.rosterDetails.forEach((item)=>{
+      sum +=  parseInt(item.quantity);
     })
-    return total;
+    return sum;
   }
 
   public buyNow() {
@@ -357,316 +384,5 @@ export default class OrderDetails extends Vue {
     return lines.join('\n')
   }
 }
+
 </script>
-
-
-<style scoped>
-
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
-/*body {*/
-/*  min-width: 320px;*/
-/*  overflow-x: hidden;*/
-/*  width: 100%;*/
-/*  font-family: 'Ubuntu', sans-serif;*/
-/*  font-size: 14px;*/
-/*  line-height: 1.3;*/
-/*  background: #fff;*/
-/*  color: #03142E;*/
-/*  margin: 0;*/
-/*  box-sizing: border-box;*/
-/*}*/
-div {
-  box-sizing: border-box;
-}
-
-ol, ul {
-  list-style: none;
-  box-sizing: border-box;
-}
-
-blockquote, q {
-  quotes: none;
-}
-
-blockquote:before, blockquote:after,
-q:before, q:after {
-  content: '';
-  content: none;
-}
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-
-td, th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
-}
-
-tr:nth-child(even) {
-  background-color: #dddddd;
-}
-
-a {
-  color: #75b4e4;
-  text-decoration: none;
-  box-sizing: border-box;
-}
-
-#production-pdf-html,
-#wrapper {
-  width: 100%;
-  overflow: hidden;
-  margin: 0;
-  padding: 10px;
-  position: relative;
-  max-width: 1020px;
-  margin: 0 auto;
-}
-
-#header {
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
-  position: relative;
-}
-
-#header .year {
-  font-weight: 700;
-  background: #000;
-  color: #fff;
-  padding: 0;
-  display: inline-block;
-  vertical-align: middle;
-  max-width: 7%;
-  text-align: center;
-  font-size: 24px;
-  padding: 2px;
-}
-
-#header .header-content {
-  background: #009eda;
-  color: #000;
-  text-align: center;
-  display: inline-block;
-  vertical-align: middle;
-  max-width: 77%;
-  font-size: 20px;
-  position: relative;
-  padding: 5px;
-}
-
-#header .header-content:before {
-  position: absolute;
-  content: '';
-  right: -20px;
-  top: 0;
-  border: 20px solid transparent;
-  border-top: 30px solid #fff;
-}
-
-#header .logo {
-  display: inline-block;
-  vertical-align: middle;
-  max-width: 15%;
-  position: relative;
-  z-index: 1;
-  padding: 5px;
-}
-
-#header .logo svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-#main {
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-}
-
-.image-holder {
-  overflow: hidden;
-  align-items: center;
-  padding: 20px 0;
-}
-
-.image-holder .image-area {
-  display: inline-block;
-  vertical-align: middle;
-  max-width: 47%;
-  margin: 0 1%;
-}
-
-.image-holder .image-area image,
-.image-holder .image-area svg {
-  display: block;
-  width: 100% !important;
-  height: auto !important;
-  margin: 0;
-}
-
-.two-columns {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-.two-columns .left-col {
-  flex: 0 0 65%;
-  max-width: 65%;
-}
-
-.two-columns .product-details-area {
-  margin: 0;
-  overflow: hidden;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-.two-columns .details-col {
-  flex: 0 0 48%;
-  max-width: 48%;
-}
-
-.two-columns h2 {
-  font-size: 24px;
-  font-weight: 700;
-  padding: 0;
-  border: 2px solid #03142E;
-  padding: 5px 10px;
-  position: relative;
-}
-
-.two-columns h2:before {
-  position: absolute;
-  content: '';
-  right: -30px;
-  top: -2px;
-  border: 30px solid transparent;
-  border-top: 50px solid #fff;
-  z-index: 1;
-}
-
-.two-columns h2:after {
-  position: absolute;
-  content: '';
-  right: 16px;
-  top: -4px;
-  bottom: -4px;
-  background: #03142E;
-  width: 2px;
-  z-index: 2;
-  transform: rotate(-30deg);
-}
-
-.two-columns .colors-area {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-.two-columns .color-block {
-  flex: 0 0 45%;
-  max-width: 45%;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0 0 10px;
-}
-
-.two-columns .color-box {
-  width: 35px;
-  height: 35px;
-  background: #03142E;
-  margin: 0 10px 0 0;
-}
-
-.two-columns .color-details {
-  max-width: 90px;
-  flex: 0 0 90px;
-  font-size: 12px;
-}
-
-.logo-area .logo-holder {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  padding: 0 0 0 2px;
-}
-
-.logo-area .logo-block {
-  flex: 0 0 24.7%;
-  max-width: 24.7%;
-  padding: 20px;
-  border: 1px solid #03142E;
-  margin: 0 0.2% 2px 0;
-  min-height: 120px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-}
-
-.logo-area .logo-block:last-child {
-  margin-left: 0;
-}
-
-.logo-area .logo-block svg {
-  display: block;
-  height: auto;
-  width: 100%;
-  margin: 0;
-}
-
-.two-columns .right-col {
-  flex: 0 0 30%;
-  max-width: 30%;
-}
-
-.name-no-details {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin: 0 0 10px;
-}
-
-.name-no-details .text-details {
-  flex: 0 0 50%;
-  max-width: 50%;
-}
-
-.name-no-details .color-details {
-  flex: 0 0 45%;
-  max-width: 45%;
-}
-
-.name-no-details .text-details span {
-  display: block;
-  margin: 0 0 7px;
-}
-
-.name-no-details .color-details-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0 0 10px;
-}
-
-.name-no-details .color-details-wrapper .color-box {
-  height: 15px;
-}
-
-.name-no-details .color-name-details {
-  flex: 0 0 50px;
-  max-width: 50px;
-}
-</style>
