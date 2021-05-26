@@ -146,6 +146,7 @@ import {default as $} from 'jquery';
   },
 })
 export default class CustomizationProcess extends Vue {
+  @Prop({required: false, default:0}) tabIndex!: number
   public fontOptions: Record<any, any>[] = []
 
   get manageComponents(): Record<any, any> {

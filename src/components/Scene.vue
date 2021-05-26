@@ -261,7 +261,6 @@ export default class Scene extends Vue {
             }
 
             if(self.logosLimit && self.customLogoObjects.length < self.logosLimit - backLogosCount) {
-              console.log('call from change')
               self.addLogos([finalLogo])
             }else if(!self.logosLimit) {
               self.addLogos([finalLogo])
@@ -588,7 +587,6 @@ export default class Scene extends Vue {
             if (self.logosLimit) {
               customLogos = self.customLogos.slice(0, self.logosLimit) as [Record<any, any>]
             }
-            console.log(self.mounted)
             customLogos.forEach((item: Record<any, any>, index: number) => {
               if (!item.action && self.logosSettings[index]) {
                 item.width = self.logosSettings[index].width
@@ -616,7 +614,6 @@ export default class Scene extends Vue {
           if (logos.length) {
             logos = logos.filter((logo: Record<any, any>) => logo.url) as [Record<any, any>]
             if (logos.length) {
-              console.log(logos.length)
               setTimeout(() => {
                 self.addLogos(logos)
               }, 100)
@@ -715,6 +712,11 @@ export default class Scene extends Vue {
             attribute: 'action',
             value: e.action
           })
+          let dimText = this.dimTextFront
+          if(e.target.side == 'back') {
+            dimText = this.dimTextBack
+          }
+          this.showDimensions(e, dimText, 1.4)
         }
       })
     } else {
@@ -767,7 +769,11 @@ export default class Scene extends Vue {
             attribute: 'action',
             value: e.action
           })
-
+          let dimText = this.dimTextFront
+          if(e.target.side == 'back') {
+            dimText = this.dimTextBack
+          }
+          this.showDimensions(e, dimText, 1.6)
         }
       })
     }
@@ -870,7 +876,7 @@ export default class Scene extends Vue {
           }
 
           img.on('selected', (e: Record<any, any>) => {
-            this.showDimensions(e, dimText)
+            this.showDimensions(e, dimText, 1.6)
           })
           canvas.on('selection:cleared', () => {
             dimText.set({
@@ -882,11 +888,13 @@ export default class Scene extends Vue {
     })
   }
 
-  public showDimensions(e: any, dimText: fabric.Text) {
+  public showDimensions(e: any, dimText: fabric.Text, scale: number) {
     let object = e.target;
+    console.log("object top: "+object.top + " object height: " + object.height +" scaleY: "+ object.scaleY +" scale multiply: "+ scale)
+    console.log(object.top + object.height * object.scaleY / scale)
     dimText.set({
       left: object.left,
-      top: object.top + object.height * object.scaleY / 1.6,
+      top: object.top + object.height * object.scaleY / scale,
       text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
       visible: true
     }).bringToFront()
@@ -965,13 +973,12 @@ export default class Scene extends Vue {
           })
         }
         textBox.on('selected', (e: Record<any, any>) => {
-          let object = e.target;
+          this.showDimensions(e, dimText, 1.4)
+        })
+        canvas.on('selection:cleared', () => {
           dimText.set({
-            left: object.left,
-            top: object.top + object.height * object.scaleY / 1.4,
-            text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
-            visible: true
-          }).bringToFront()
+            visible: false
+          })
         })
 
       } else {
