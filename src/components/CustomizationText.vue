@@ -94,6 +94,7 @@ export default class CustomizationText extends Vue {
   }
 
   public showColor(fontColorType: any, fontColorIndex: number) {
+    console.log('set Color call on show color')
     this.fontColorType = fontColorType
     this.fontColorIndex = fontColorIndex
     this.customTexts.forEach((customText: Record<any, any>, index: number) => {
@@ -106,6 +107,7 @@ export default class CustomizationText extends Vue {
   }
 
   public setColor(color: string) {
+    console.log('set Color call on scene change')
     if (this.fontColorType == 'fill') {
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColor', value: color})
     } else {

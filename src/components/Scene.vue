@@ -124,7 +124,8 @@ export default class Scene extends Vue {
   @Prop({required: false}) readonly back!: Record<string, unknown>;
   @Prop({required: false}) readonly backTextureUrl!: string;
   @Prop({required: false}) readonly logos !: [Record<string, any>];
-  @Prop({required: false}) readonly logosSettings !: Record<any, any>
+  @Prop({required: false}) readonly logosSettings !: [Record<any, any>]
+  @Prop({required: false}) readonly productNamesSetting !: [Record<any, any>]
   @Prop({required: false}) readonly logoAllowed !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
@@ -278,8 +279,9 @@ export default class Scene extends Vue {
     if (this.mounted) {
       const self = this
       newVal.forEach((text: Record<any, any>, index: number) => {
-        this.customTextObjects.forEach((textObject) => {
+        self.customTextObjects.forEach((textObject, dIndex) => {
           if((textObject.textIndex == index && text.side != textObject.side) || (textObject.textIndex == index && !text.text)){
+            self.customTextObjects.splice(dIndex, 1)
             self.frontCanvas.remove(textObject)
             if (self.backCanvas) {
               self.backCanvas.remove(textObject)
@@ -291,7 +293,7 @@ export default class Scene extends Vue {
       newVal.forEach((text, index) => {
         if ((text.side == 'back' && self.backCanvas) || text.side == 'front') {
           let addText = true
-          this.customTextObjects.forEach((textObject) => {
+          self.customTextObjects.forEach((textObject) => {
             if ('textIndex' in textObject && textObject.text) {
               if(textObject.textIndex == index) {
                 let canvas = this.frontCanvas
@@ -332,6 +334,13 @@ export default class Scene extends Vue {
             }
           })
           if (addText && text.text) {
+            if (!text.action && self.productNamesSetting[index]) {
+              text.width = self.productNamesSetting[index].width
+              text.height = self.productNamesSetting[index].height
+              text.x_axis = self.productNamesSetting[index].x_axis
+              text.y_axis = self.productNamesSetting[index].y_axis
+              text.rotation = self.productNamesSetting[index].rotation
+            }
             self.addTexts([text], index)
           }
         }
@@ -587,6 +596,19 @@ export default class Scene extends Vue {
                 item.x_axis = self.logosSettings[index].x_axis
                 item.y_axis = self.logosSettings[index].y_axis
                 item.rotation = self.logosSettings[index].rotation
+
+                if(self.mainPreview) {
+                  self.$store.dispatch('updateCustomLogoWithoutTrigger', {
+                    index: index,
+                    data: {
+                      width: self.logosSettings[index].width,
+                      height: self.logosSettings[index].height,
+                      x_axis: self.logosSettings[index].x_axis,
+                      y_axis: self.logosSettings[index].y_axis,
+                      rotation: self.logosSettings[index].rotation
+                    }
+                  })
+                }
               }
             })
             logos = logos.concat(customLogos) as [Record<any, any>]
@@ -600,11 +622,30 @@ export default class Scene extends Vue {
               }, 100)
             }
           }
-          if(!logos.length) {
-            self.mounted = true
-          }
 
           if (self.customTexts.length) {
+            self.customTexts.forEach((item: Record<any, any>, index: number) => {
+              if (!item.action && self.productNamesSetting[index]) {
+                item.width = self.productNamesSetting[index].width
+                item.height = self.productNamesSetting[index].height
+                item.x_axis = self.productNamesSetting[index].x_axis
+                item.y_axis = self.productNamesSetting[index].y_axis
+                item.rotation = self.productNamesSetting[index].rotation
+
+                if(self.mainPreview) {
+                  self.$store.dispatch('updateCustomTextWithoutTrigger', {
+                    index: index,
+                    data: {
+                      width: self.productNamesSetting[index].width,
+                      height: self.productNamesSetting[index].height,
+                      x_axis: self.productNamesSetting[index].x_axis,
+                      y_axis: self.productNamesSetting[index].y_axis,
+                      rotation: self.productNamesSetting[index].rotation
+                    }
+                  })
+                }
+              }
+            })
             setTimeout(() => {
               self.addTexts(self.customTexts)
             }, 100)
@@ -614,7 +655,7 @@ export default class Scene extends Vue {
         if (self.mainPreview) {
           self.setProductionSVG()
         }
-
+        self.mounted = true
         clearInterval(timer)
       }
     }, 1000)
@@ -812,10 +853,12 @@ export default class Scene extends Vue {
           if (this.mainPreview) {
             const width = Math.floor(img.width * this.measurementRatio)
             const height = Math.floor(img.height * this.measurementRatio)
-            self.$store.dispatch('updateCustomLogoDimension', {
+            self.$store.dispatch('updateCustomLogoWithoutTrigger', {
               index: index,
-              width: width,
-              height: height
+              data: {
+                originalWidth: width,
+                originalHeight: height
+              }
             })
           }
 
@@ -836,9 +879,6 @@ export default class Scene extends Vue {
           })
         })
       }
-      if(index - 1 == logos.length) {
-        this.mounted = true
-      }
     })
   }
 
@@ -855,7 +895,7 @@ export default class Scene extends Vue {
   public async addTexts(texts: [Record<any, any>], addIndex: number|null = null) {
     const self = this
     texts.forEach((text: Record<any, any>, index: number) => {
-      if(text.text) {
+      if(text.text && (text.side == 'front' || (text.side == 'back' && self.back))) {
         let textBox = new fabric.Text(text.text, {
           left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
           top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
@@ -916,15 +956,12 @@ export default class Scene extends Vue {
         if(this.mainPreview) {
           const width = Math.floor(textBox.width as number * this.measurementRatio)
           const height = Math.floor(textBox.height as number * this.measurementRatio)
-          self.$store.dispatch('updateCustomTextAttribute', {
+          self.$store.dispatch('updateCustomTextWithoutTrigger', {
             index: index,
-            attribute: 'originalWidth',
-            value: width
-          })
-          self.$store.dispatch('updateCustomTextAttribute', {
-            index: index,
-            attribute: 'originalHeight',
-            value: height
+            data: {
+              originalWidth: width,
+              originalHeight: height
+            }
           })
         }
         textBox.on('selected', (e: Record<any, any>) => {
@@ -935,11 +972,6 @@ export default class Scene extends Vue {
             text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
             visible: true
           }).bringToFront()
-        })
-        canvas.on('selection:cleared', () => {
-          dimText.set({
-            visible: false
-          })
         })
 
       } else {

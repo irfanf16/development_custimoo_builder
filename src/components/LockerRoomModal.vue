@@ -22,7 +22,7 @@
                                             <Scene :measurement-ratio="product.design.measurement_ratio"
                                               :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
                                                 :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''"
-                                                :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" />
+                                                :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames"  />
                                           </a>
                                           <ul class="product-icons">
                                                 <li>
