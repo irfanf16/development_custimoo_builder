@@ -194,7 +194,7 @@ export default class LogoPlacementTabs extends Vue {
       if (this.customLogos[0] && this.customLogos[0].url) {
         this.$nextTick(() => {
           let logoColors: Record<any, any>[] = []
-          Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(4)
+          Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(5)
             .getPalette((err: any, palettes: any) => {
               for (let [key, value] of Object.entries(palettes) as any[]) {
                 if (value.getPopulation() >= 10) {

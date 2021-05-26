@@ -297,16 +297,13 @@ export default class Home extends Vue {
 
   public getLogoColors(){
     this.imageColors = []
-    console.log(this.customLogos);
     if(this.customLogos.length){
       if(this.customLogos[0] && this.customLogos[0].url) {
-        console.log("mango 2");
         this.$nextTick(() => {
           let logoColors: Record<any, any>[] = []
-          Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(4)
+          Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(5)
           .getPalette((err: any, palettes: any) => {
             for (let [key, value] of Object.entries(palettes) as any[]) {
-              console.log("mango 3");
               if(value.getPopulation() >= 10) {
                 this.imageColors.push({
                   'hex': value.getHex(),
@@ -379,7 +376,7 @@ export default class Home extends Vue {
     })
     this.previousImageColors = []
   }
-  
+
   public changeTabs(index: number) {
     if(index > 4){
       index = 4
