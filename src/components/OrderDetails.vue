@@ -269,6 +269,9 @@ export default class OrderDetails extends Vue {
   public logosConversionToBase64() {
     const self = this
     self.base64Logos = []
+    if (!self.customLogos.length) {
+      self.htmlPdfGenerator()
+    }
     self.customLogos.forEach((logos: Record<any, any>, index: number) => {
       let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
       self.toDataURL(self.apiBaseUrl + logos.url, (dataUrl: any) => {
