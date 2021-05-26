@@ -1,6 +1,5 @@
 <template>
   <div>
-    <template>
       <div class="d-none">
         <div id="production-pdf-html">
           <html>
@@ -11,7 +10,7 @@
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
           </head>
           <body style="background: #fff;">
-          <div id="wrapper">
+          <div id="wrapper" >
             <div id="header">
               <div class="year">2021</div>
               <div class="header-content">1:10 scale artwork on adult size large</div>
@@ -108,7 +107,7 @@
                     <div class="logo-holder">
                       <div class="logo-block" v-for="(logo, index) in base64Logos" :key="index">
                         <img :src="logo.b64logo" height="80" width="80">
-                        <p>{{ logo.logoSize }}</p>
+                        <p>Size: {{ logo.logoSize }}</p>
                       </div>
                     </div>
                   </div>
@@ -141,7 +140,6 @@
           </html>
         </div>
       </div>
-    </template>
 
     <div class="order-details-area">
         <div class="qty-area">
@@ -270,6 +268,7 @@ export default class OrderDetails extends Vue {
 
   public logosConversionToBase64() {
     const self = this
+    self.base64Logos = []
     this.customLogos.forEach((logos: Record<any, any>, index: number) => {
       let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
       self.toDataURL(this.apiBaseUrl + logos.url,  (dataUrl: any) => {
@@ -285,7 +284,7 @@ export default class OrderDetails extends Vue {
     let frontSVG = this.productionSVGs.front.toSVG()
     let backSVG = this.productionSVGs.back.toSVG()
 
-    $("#front-svg").html('<svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="300" height="450" viewBox="0 0 590 450" xml:space="preserve">' + this.getSVGInnerHtml(frontSVG) + '</svg>')
+    $("#front-svg").html('<svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="350px" height="480px" viewBox="0 0 660 900" xml:space="preserve">' + this.getSVGInnerHtml(frontSVG) + '</svg>')
     $("#front-svg").find('image').each((index: number, image: any) => {
       let string = image.href.baseVal
       if (string.indexOf("logos") >= 0) {
@@ -302,7 +301,7 @@ export default class OrderDetails extends Vue {
       }
     })
 
-    $("#back-svg").html('<svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="300" height="450" viewBox="0 0 590 450" xml:space="preserve">' + this.getSVGInnerHtml(backSVG) + '</svg>')
+    $("#back-svg").html('<svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="350px" height="480px" viewBox="0 0 660 900" xml:space="preserve">' + this.getSVGInnerHtml(backSVG) + '</svg>')
     $("#back-svg").find('image').each((index: number, image: any) => {
       let string = image.href.baseVal
       if (string.indexOf("logos") >= 0) {
@@ -353,7 +352,7 @@ export default class OrderDetails extends Vue {
           console.error("PDF Generation Error", e);
         })
         .save();
-    }, 700)
+    }, 1000)
   }
 
   public toDataURL(url: string, callback: any) {
@@ -641,7 +640,7 @@ a {
 .logo-area .logo-block {
   flex: 0 0 24.7%;
   max-width: 24.7%;
-  padding: 20px;
+  padding: 20px 20px 40px;
   border: 1px solid #03142E;
   margin: 0 0.2% 2px 0;
   min-height: 120px;
@@ -649,12 +648,23 @@ a {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  position: relative;
+}
+.logo-area .logo-block p {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-top: 1px solid #03142e;
+  z-index: 1;
+  padding: 5px;
+  text-align: center;
 }
 
 .logo-area .logo-block:last-child {
   margin-left: 0;
 }
-
+.logo-area .logo-block img,
 .logo-area .logo-block svg {
   display: block;
   height: auto;
