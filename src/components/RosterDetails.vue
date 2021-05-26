@@ -6,8 +6,22 @@
                                                                                   title="Import roster details from excel sheet">
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
             </a></b-button>
+      <b-modal ref="myModal" content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered scrollable size="lg" title="Upload Team Roster">
+        <p class="mb-4">The Team Roster can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
+        <div class="roster-template-area">
+          <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download Roster Template <a  v-b-tooltip.hover
+                                                                                  title="Enter roster in excel file">
+            <font-awesome-icon :icon="['fas', 'info-circle']"/>
+          </a></b-button>
 
-      
+          <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template
+            <b-form-file  class="mb-2"></b-form-file>
+            <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
+              <font-awesome-icon :icon="['fas', 'info-circle']"/>
+            </a></b-button>
+        </div>
+      </b-modal>
+
       <p>Or insert details manually below</p>
     </div>
     <div class="roster-row mb-2">
@@ -76,6 +90,7 @@
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import readXlsxFile from "read-excel-file";
 import {default as $} from "jquery";
+import {http} from "@/httpCommon";
 
 @Component<RosterDetails>({
   mounted() {
@@ -247,34 +262,28 @@ export default class RosterDetails extends Vue {
           if (row == '0'){
             continue
           }
-          let objStatus = true;
-          for (let i in rows[row]){
-            if (i == '3') {
-                obj.size   = rows[row][i];
-            }
-            if (i == '4'){
-              if (rows[row][i] == null){
-                objStatus = false
-                break;
+          let objStatus = false;
+          for (let i in rows[row]) {
+            if (rows[row][2] && this.selectedProduct.product_name == rows[row][2]) {
+              objStatus = true
+              if (i == '3') {
+                obj.size = rows[row][i];
               }
-             if (this.selectedProduct.product_name == rows[row][i]){
-               obj.text = rows[row][i];
-             }else{
-               objStatus = false
-               break;
-             }
-           }
-            if (i  == '5'){
-              obj.number = rows[row][i];
+              if (i == '4') {
+                obj.text = rows[row][i];
+              }
+              if (i == '5') {
+                obj.number = rows[row][i];
+              }
+              if (i == '6') {
+                obj.information = rows[row][i];
+              }
             }
-            if (i == '6'){
-              obj.information = rows[row][i];
+            if (loopStatus == false) {
+              break
             }
           }
-          if (loopStatus == false){
-            break
-          }
-          if (objStatus == true){
+          if (objStatus) {
             this.fileData.push(obj);
           }
         }
@@ -288,6 +297,17 @@ export default class RosterDetails extends Vue {
       }else{
         alert("please upload a valid file");
       }
+    })
+  }
+  public async downloadTemplate(){
+   await http.get('template/download',{
+      responseType: 'blob',
+    }).then((res) => {
+     let blob = new Blob([res.data],{type:res.headers['content-type']})
+     let link = document.createElement('a')
+     link.href = window.URL.createObjectURL(blob)
+     link.download = 'roster_template.xlsx';
+     link.click();
     })
   }
 }
@@ -317,5 +337,44 @@ export default class RosterDetails extends Vue {
       }
     }
   }
-  
+  .roster-template-area{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    .btn-secondary{
+      font-size: 14px;
+      color: #219F84;
+      background: #E7F4F1;
+      font-weight: 500;
+      flex: 0 0 48%;
+      max-width: 48%;
+      border-color: #E7F4F1;
+      transition: all 0.3s ease;
+      position: relative;
+      &:hover{
+        background: #219f84;
+        color: #fff;
+        a{color: #fff;}
+      }
+      .custom-file{
+        position: absolute;
+        right: 22%;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        opacity: 0;
+        margin: 0;
+        width: auto;
+      }
+      a{
+        color: #219f84;
+        margin: 0 0 0 3px;
+        &:hover{
+          color: #fff;
+        }
+      }
+    }
+  }
+
 </style>
