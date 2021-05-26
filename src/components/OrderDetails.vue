@@ -103,6 +103,29 @@
                     </div>
                   </div>
                   <div class="logo-area">
+                    <h2>Team Roster</h2>
+                      <div class="roster-details">
+                        <table>
+                          <tr>
+                            <th>Name</th>
+                            <th>Number</th>
+                            <th>Size</th>
+                            <th>Qty</th>
+                          </tr>
+                          <template v-if="rosterDetails.length && rosterDetails[0].text">
+                          <tr v-for="(roster, index) in rosterDetails" :key="index">
+                            <td>{{ roster.text }}</td>
+                            <td>{{ roster.number }}</td>
+                            <td>{{ roster.size }}</td>
+                            <td>{{ roster.quantity }}</td>
+                          </tr>
+                          </template>
+                        </table>
+                      </div>
+                  </div>
+                </div>
+                <div class="right-col">
+                  <div class="logo-area">
                     <h2>Logos</h2>
                     <div class="logo-holder">
                       <div class="logo-block" v-for="(logo, index) in base64Logos" :key="index">
@@ -111,27 +134,7 @@
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="right-col">
-                  <h2>Team Roster</h2>
-                  <div class="roster-details">
-                    <table>
-                      <tr>
-                        <th>Name</th>
-                        <th>Number</th>
-                        <th>Size</th>
-                        <th>Qty</th>
-                      </tr>
-                      <template v-if="rosterDetails.length && rosterDetails[0].text">
-                      <tr v-for="(roster, index) in rosterDetails" :key="index">
-                        <td>{{ roster.text }}</td>
-                        <td>{{ roster.number }}</td>
-                        <td>{{ roster.size }}</td>
-                        <td>{{ roster.quantity }}</td>
-                      </tr>
-                      </template>
-                    </table>
-                  </div>
+                  
                 </div>
               </div>
             </div>
@@ -647,15 +650,16 @@ a {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   padding: 0 0 0 2px;
 }
 
 .logo-area .logo-block {
-  flex: 0 0 24.7%;
-  max-width: 24.7%;
+  flex: 0 0 48%;
+  max-width: 48%;
   padding: 20px 20px 40px;
   border: 1px solid #03142E;
-  margin: 0 0.2% 2px 0;
+  margin: 0 0 2px 0;
   min-height: 120px;
   display: flex;
   flex-wrap: wrap;
