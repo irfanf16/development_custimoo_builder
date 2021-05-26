@@ -24,12 +24,12 @@
               <Scene v-if="selectedProduct.productstyles[styleIndex].back" :measurement-ratio="design.measurement_ratio"
                      :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
                      :back="{textureUrl: apiBaseUrl+'/'+ design.back_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].back.file_url}"
-                     :logos="selectedProduct.productstyles[styleIndex].logo"
+                     :logos="selectedProduct.productstyles[styleIndex].logo" :productNamesSetting="selectedProduct.productnames"
                      :productColors="selectedProduct.colors"  />
 
               <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio"
                      :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
-                     :logos="selectedProduct.productstyles[styleIndex].logo"
+                     :logos="selectedProduct.productstyles[styleIndex].logo" :productNamesSetting="selectedProduct.productnames"
                       :productColors="selectedProduct.colors"  />
             </div>
           </template>

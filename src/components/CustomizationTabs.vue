@@ -146,6 +146,7 @@ import {default as $} from 'jquery';
   },
 })
 export default class CustomizationProcess extends Vue {
+  @Prop({required: false, default:0}) tabIndex!: number
   public fontOptions: Record<any, any>[] = []
 
   get manageComponents(): Record<any, any> {
@@ -166,13 +167,6 @@ export default class CustomizationProcess extends Vue {
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
-  }
-
-  @Watch('productNames', {
-    immediate: true
-  })
-  productNamesChanged() {
-    this.customTextInit()
   }
 
   public tabIndex = 0
