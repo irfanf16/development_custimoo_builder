@@ -1,4 +1,4 @@
-import {noTokenRequest} from "@/httpCommon";
+import {http, noTokenRequest} from "@/httpCommon";
 import { Module } from "vuex";
 const mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 const Main:Module<any, any> = {
@@ -54,9 +54,9 @@ const Main:Module<any, any> = {
           crossDomain: true,
           headers: {'Access-Control-Allow-Origin': '*'}
         };
-        noTokenRequest.get(url, config).then((response: any) => {
-          if (response.data.accessToken) {
-            localStorage.setItem('jwtToken', response.data.accessToken)
+        http.get("oauth/token", config).then((response: any) => {
+          if (response.data.access_token) {
+            localStorage.setItem('jwtToken', response.data.access_token)
           }
         }).catch((e) => {
           console.log(e)

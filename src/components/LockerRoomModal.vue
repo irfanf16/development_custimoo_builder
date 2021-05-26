@@ -21,8 +21,8 @@
                                           <a >
                                             <Scene :measurement-ratio="product.design.measurement_ratio"
                                               :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
-                                                :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''"
-                                                :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames"  />
+                                                :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
+                                                   :lockerGroupColors="product.groupcolors"   :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames"  />
                                           </a>
                                           <ul class="product-icons">
                                                 <li>
@@ -155,6 +155,8 @@
           await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
           await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
           await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
+          await  this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
+          await  this.$store.dispatch('overRideGroupColors', JSON.parse(element.defaultcolors));
           this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
             if (item.id == element.design_id){
               Vue.set(item, 'design_show', 1)

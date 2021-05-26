@@ -136,6 +136,12 @@ const ProductAttributes:Module<any, any> = {
     OVERRIDE_TEXT(state:Record<any, any>, payload){
       state.customTexts = payload;
     },
+    OVERRIDE_DEFAULT_COLOR(state:Record<any, any>, payload){
+      state.defaultColors = payload;
+    },
+    OVERRIDE_GROUP_COLORS(state:Record<any, any>, payload){
+      state.groupColors = payload;
+    },
     REMOVE_ROSTER(state:Record<any, any>, payload:number){
       console.log(payload);
       state.rosterDetails.splice(payload, 1);
@@ -266,6 +272,12 @@ const ProductAttributes:Module<any, any> = {
     },
     async OVERRIDE_CUSTOM_TEXT({commit}, payload:Record<any, any>){
      await commit('OVERRIDE_TEXT', payload);
+    },
+    overRideDefaultColors({commit}, payload:Record<any, any>){
+      commit('OVERRIDE_DEFAULT_COLOR', payload);
+    },
+    overRideGroupColors({commit}, payload:Record<any, any>){
+      commit('OVERRIDE_GROUP_COLORS', payload);
     },
     removeRoster({commit}, payload:number){
       commit('REMOVE_ROSTER', payload);

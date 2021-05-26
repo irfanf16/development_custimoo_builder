@@ -147,7 +147,6 @@ export default class RosterDetails extends Vue {
     let textAdd = false
     let numberAdd = false
     if(text) {
-      alert("text")
       if (this.customText[0]) {
         this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
         textAdd = true

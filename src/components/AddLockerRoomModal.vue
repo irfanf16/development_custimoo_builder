@@ -61,8 +61,14 @@
       get customLogos(): [] {
         return this.$store.getters.getCustomLogos
       }
+      get defaultColors() : [Record<any, any>] {
+        return this.$store.getters.getDefaultColors
+      }
       get logoColors():[]{
         return  this.$store.getters.getLogosColors;
+      }
+      get groupColors() : [Record<any, any>] {
+        return this.$store.getters.getGroupColors
       }
       public showButton(id:number){
         this.locker_selected = false;
@@ -81,7 +87,9 @@
             design_id: currentDesign[0].id,
             custom_logos: this.customLogos,
             text: this.customTexts,
-            colors: this.logoColors
+            colors: this.logoColors,
+            defaultcolors: this.defaultColors,
+            groupcolors: this.groupColors
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res == ''){
