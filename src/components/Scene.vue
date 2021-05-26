@@ -124,6 +124,9 @@ export default class Scene extends Vue {
   @Prop({required: false}) readonly back!: Record<string, unknown>;
   @Prop({required: false}) readonly backTextureUrl!: string;
   @Prop({required: false}) readonly logos !: [Record<string, any>];
+  @Prop({required: false, default: () => { return [] }}) readonly texts !: [Record<string, any>];
+  @Prop({required: false, default: () => { return [] }}) readonly lockerDefaultColors !: [Record<string, any>];
+  @Prop({required: false, default:  () => { return {} }}) readonly lockerGroupColors !: Record<string, any>;
   @Prop({required: false}) readonly logosSettings !: [Record<any, any>]
   @Prop({required: false}) readonly productNamesSetting !: [Record<any, any>]
   @Prop({required: false}) readonly logoAllowed !: boolean
@@ -350,22 +353,22 @@ export default class Scene extends Vue {
   @Watch('defaultColors', {
     deep: true
   })
-  defaultColorsChanged() {
-    this.changeDefaultColors()
+  defaultColorsChanged(newVal: [Record<any, any>]) {
+    this.changeDefaultColors(newVal)
   }
 
   @Watch('groupColors', {
     deep: true
   })
-  groupColorsChanged(newVal: [Record<any, any>]) {
-    this.changeGroupColor()
+  groupColorsChanged(newVal: Record<any, any>) {
+    this.changeGroupColor(newVal)
   }
 
-  public changeGroupColor (): void {
+  public changeGroupColor (groupColors: Record<any, any>): void {
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if (this.groupColors[item.id]) {
-        item.set('fill', this.groupColors[item.id].color);
+      if (groupColors[item.id]) {
+        item.set('fill', groupColors[item.id].color);
         if (this.mainPreview) {
           let svgIndex = 0
           this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
@@ -373,7 +376,7 @@ export default class Scene extends Vue {
               svgIndex = index
             }
           })
-          this.$store.dispatch('updateSvgGroups', { index: svgIndex, color: this.groupColors[item.id].color, pantone: this.groupColors[item.id].pantone })
+          this.$store.dispatch('updateSvgGroups', { index: svgIndex, color: groupColors[item.id].color, pantone: groupColors[item.id].pantone })
         }
       }
     })
@@ -382,8 +385,8 @@ export default class Scene extends Vue {
     if(this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
-        if (this.groupColors[item.id]) {
-          item.set('fill', this.groupColors[item.id].color);
+        if (groupColors[item.id]) {
+          item.set('fill', groupColors[item.id].color);
           if (this.mainPreview) {
             let svgIndex = 0
             this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
@@ -391,7 +394,7 @@ export default class Scene extends Vue {
                 svgIndex = index
               }
             })
-            this.$store.dispatch('updateSvgGroups', { index: svgIndex, color: this.groupColors[item.id].color, pantone: this.groupColors[item.id].pantone })
+            this.$store.dispatch('updateSvgGroups', { index: svgIndex, color: groupColors[item.id].color, pantone: groupColors[item.id].pantone })
           }
         }
       })
@@ -399,27 +402,27 @@ export default class Scene extends Vue {
     }
   }
 
-  public changeDefaultColors (): void {
-    let defaultColors: string[] = []
+  public changeDefaultColors (defaultColors: [Record<any, any>]): void {
+    let appliedDefaultColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      defaultColors[svgGroup.id] = this.defaultColors[useColorIndex].color
+      appliedDefaultColors[svgGroup.id] = defaultColors[useColorIndex].color
       if (this.mainPreview) {
-        this.$store.dispatch('updateSvgGroups', { index: index, color: this.defaultColors[useColorIndex].color, pantone: this.defaultColors[useColorIndex].pantone })
+        this.$store.dispatch('updateSvgGroups', { index: index, color: defaultColors[useColorIndex].color, pantone: defaultColors[useColorIndex].pantone })
       }
-      svgGroup.color = this.defaultColors[useColorIndex].color
-      svgGroup.pantone = this.defaultColors[useColorIndex].pantone
+      svgGroup.color = defaultColors[useColorIndex].color
+      svgGroup.pantone = defaultColors[useColorIndex].pantone
 
       useColorIndex++
-      if(useColorIndex >= this.defaultColors.length) {
+      if(useColorIndex >= defaultColors.length) {
         useColorIndex = 0
       }
     })
 
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if (defaultColors[item.id]) {
-        item.set('fill', defaultColors[item.id]);
+      if (appliedDefaultColors[item.id]) {
+        item.set('fill', appliedDefaultColors[item.id]);
       }
     })
     this.frontCanvas.renderAll()
@@ -427,8 +430,8 @@ export default class Scene extends Vue {
     if(this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
-        if (defaultColors[item.id]) {
-          item.set('fill', defaultColors[item.id]);
+        if (appliedDefaultColors[item.id]) {
+          item.set('fill', appliedDefaultColors[item.id]);
         }
       })
       this.backCanvas.renderAll()
@@ -491,11 +494,18 @@ export default class Scene extends Vue {
       this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
-    if(this.defaultColors.length) {
-      this.changeDefaultColors()
+    if(this.lockerDefaultColors.length) {
+      this.changeDefaultColors(this.lockerDefaultColors)
     }
-    if(Object.keys(this.groupColors).length) {
-      this.changeGroupColor()
+    else if(this.defaultColors.length) {
+      this.changeDefaultColors(this.defaultColors)
+    }
+
+    if(Object.keys(this.lockerGroupColors).length) {
+      this.changeGroupColor(this.lockerGroupColors)
+    }
+    else if(Object.keys(this.groupColors).length) {
+      this.changeGroupColor(this.groupColors)
     }
   }
 
@@ -620,7 +630,8 @@ export default class Scene extends Vue {
             }
           }
 
-          if (self.customTexts.length) {
+          if (self.customTexts.length || self.texts.length) {
+            let texts = self.texts
             self.customTexts.forEach((item: Record<any, any>, index: number) => {
               if (!item.action && self.productNamesSetting[index]) {
                 item.width = self.productNamesSetting[index].width
@@ -643,8 +654,9 @@ export default class Scene extends Vue {
                 }
               }
             })
+            texts = texts.concat(self.customTexts) as [Record<any, any>]
             setTimeout(() => {
-              self.addTexts(self.customTexts)
+              self.addTexts(texts)
             }, 100)
           }
         }
