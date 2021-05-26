@@ -168,13 +168,6 @@ export default class CustomizationProcess extends Vue {
     return this.$store.getters.getSelectedProduct.productnames;
   }
 
-  @Watch('productNames', {
-    immediate: true
-  })
-  productNamesChanged() {
-    this.customTextInit()
-  }
-
   public tabIndex = 0
 
   public productColors: any[] = []

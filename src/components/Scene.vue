@@ -279,8 +279,9 @@ export default class Scene extends Vue {
     if (this.mounted) {
       const self = this
       newVal.forEach((text: Record<any, any>, index: number) => {
-        this.customTextObjects.forEach((textObject) => {
+        self.customTextObjects.forEach((textObject, dIndex) => {
           if((textObject.textIndex == index && text.side != textObject.side) || (textObject.textIndex == index && !text.text)){
+            self.customTextObjects.splice(dIndex, 1)
             self.frontCanvas.remove(textObject)
             if (self.backCanvas) {
               self.backCanvas.remove(textObject)
@@ -292,7 +293,7 @@ export default class Scene extends Vue {
       newVal.forEach((text, index) => {
         if ((text.side == 'back' && self.backCanvas) || text.side == 'front') {
           let addText = true
-          this.customTextObjects.forEach((textObject) => {
+          self.customTextObjects.forEach((textObject) => {
             if ('textIndex' in textObject && textObject.text) {
               if(textObject.textIndex == index) {
                 let canvas = this.frontCanvas
@@ -894,7 +895,7 @@ export default class Scene extends Vue {
   public async addTexts(texts: [Record<any, any>], addIndex: number|null = null) {
     const self = this
     texts.forEach((text: Record<any, any>, index: number) => {
-      if(text.text) {
+      if(text.text && (text.side == 'front' || (text.side == 'back' && self.back))) {
         let textBox = new fabric.Text(text.text, {
           left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
           top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
