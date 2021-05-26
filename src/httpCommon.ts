@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const base_url = process.env.VUE_APP_API_BASE_URL
 import Axios, { AxiosRequestConfig } from "axios"
 
@@ -32,5 +34,17 @@ http.interceptors.request.use((request: AxiosRequestConfig ) => {
 
   return request
 })
+
+http.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  if (401 === error.response.status) {
+    localStorage.setItem('access_token', '');
+    localStorage.setItem('browserToken', '');
+    location.reload()
+  } else {
+    return Promise.reject(error);
+  }
+});
 
 export {http, noTokenRequest}

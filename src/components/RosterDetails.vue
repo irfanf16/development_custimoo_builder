@@ -144,43 +144,98 @@ export default class RosterDetails extends Vue {
   }
   public changeText(text:string, num:number) {
     this.currentIcon = 'eye'
-    if (text && num){
-      let texts = {
-        text: num.toString(),
-        type: 'number',
-        width: 50,
-        height: 50,
-        x_axis: 300,
-        y_axis: 180,
-        rotation: 0,
-        haveControls: true,
-        outlineEnabled: true,
-        side: 'back',
-        fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-        fillColor: this.firstColor,
-        outLineColor: this.secondColor,
+    let textAdd = false
+    let numberAdd = false
+    if(text) {
+      alert("text")
+      if (this.customText[0]) {
+        this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
+        textAdd = true
       }
-      this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
-      this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
-    }else if(text){
-      this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
-    }else if(num){
-      let texts = {
-        text: num.toString(),
-        type: 'number',
-        width: 50,
-        height: 50,
-        x_axis: 300,
-        y_axis: 180,
-        rotation: 0,
-        haveControls: true,
-        outlineEnabled: true,
-        side: 'back',
-        fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-        fillColor: this.firstColor,
-        outLineColor: this.secondColor,
+      if (!textAdd) {
+        let texts: Record<any, any>
+        if(this.selectedProduct.productnames[0]) {
+          texts = {
+            text: text.toString(),
+            type: this.selectedProduct.productnames[0].type,
+            width: this.selectedProduct.productnames[0].width,
+            height: this.selectedProduct.productnames[0].height,
+            x_axis: this.selectedProduct.productnames[0].x_axis,
+            y_axis: this.selectedProduct.productnames[0].y_axis,
+            rotation: this.selectedProduct.productnames[0].rotation,
+            haveControls: Boolean(!this.selectedProduct.productnames[0].is_locked),
+            outlineEnabled: Boolean(this.selectedProduct.productnames[0].outline_enabled),
+            side: this.selectedProduct.productnames[0].side,
+            fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+            fillColor: this.firstColor,
+            outLineColor: this.secondColor,
+            selectColor: false
+          }
+        } else {
+          texts = {
+            text: text.toString(),
+            type: 'name',
+            width: 50,
+            height: 50,
+            x_axis: 300,
+            y_axis: 180,
+            rotation: 0,
+            haveControls: true,
+            outlineEnabled: true,
+            side: 'back',
+            fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+            fillColor: this.firstColor,
+            outLineColor: this.secondColor,
+            selectColor: false
+          }
+          this.$store.dispatch('setCustomTexts', {index: 0, text: texts})
+        }
       }
-      this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
+    }
+    if(num) {
+      if (this.customText[1] && num) {
+        this.$store.dispatch('updateCustomTextAttribute', {index: 1, attribute: 'text', value: num})
+        numberAdd = true
+      }
+      if(!numberAdd) {
+        let texts: Record<any, any>
+        if(this.selectedProduct.productnames[1]) {
+          texts = {
+            text: num.toString(),
+            type: this.selectedProduct.productnames[1].type,
+            width: this.selectedProduct.productnames[1].width,
+            height: this.selectedProduct.productnames[1].height,
+            x_axis: this.selectedProduct.productnames[1].x_axis,
+            y_axis: this.selectedProduct.productnames[1].y_axis,
+            rotation: this.selectedProduct.productnames[1].rotation,
+            haveControls: Boolean(!this.selectedProduct.productnames[1].is_locked),
+            outlineEnabled: Boolean(this.selectedProduct.productnames[1].outline_enabled),
+            side: this.selectedProduct.productnames[1].side,
+            fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+            fillColor: this.firstColor,
+            outLineColor: this.secondColor,
+            selectColor: false
+          }
+        } else {
+          texts = {
+            text: num.toString(),
+            type: 'number',
+            width: 50,
+            height: 50,
+            x_axis: 300,
+            y_axis: 180,
+            rotation: 0,
+            haveControls: true,
+            outlineEnabled: true,
+            side: 'back',
+            fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+            fillColor: this.firstColor,
+            outLineColor: this.secondColor,
+            selectColor: false
+          }
+          this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
+        }
+      }
     }
     }
   public fontsColorsManipulation() {
