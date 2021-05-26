@@ -127,8 +127,8 @@ export default class Scene extends Vue {
   @Prop({required: false, default: () => { return [] }}) readonly texts !: [Record<string, any>];
   @Prop({required: false, default: () => { return [] }}) readonly lockerDefaultColors !: [Record<string, any>];
   @Prop({required: false, default:  () => { return {} }}) readonly lockerGroupColors !: Record<string, any>;
-  @Prop({required: false}) readonly logosSettings !: [Record<any, any>]
-  @Prop({required: false}) readonly productNamesSetting !: [Record<any, any>]
+  @Prop({required: false, default: () => { return [] }}) readonly logosSettings !: [Record<any, any>]
+  @Prop({required: false, default: () => { return [] }}) readonly productNamesSetting !: [Record<any, any>]
   @Prop({required: false}) readonly logoAllowed !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
