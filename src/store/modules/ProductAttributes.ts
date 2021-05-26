@@ -43,12 +43,9 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.customLogos[customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
       }
     },
-    CUSTOM_LOGO_DIMENSION(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
+    CUSTOM_LOGO_WITHOUT_TRIGGER(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
-        Object.assign(state.customLogos[customLogoAttribute.index], {
-          'originalWidth': customLogoAttribute.width,
-          'originalHeight': customLogoAttribute.height
-        })
+        Object.assign(state.customLogos[customLogoAttribute.index], customLogoAttribute.data)
       }
     },
     customLogoDelete(state: Record<any, any>, delCustomLogo: Record<any, any>) {
@@ -71,6 +68,11 @@ const ProductAttributes:Module<any, any> = {
     customTextAttribute(state: Record<any, any>, customTextAttribute: Record<any, any>) {
       if(customTextAttribute){
         Vue.set(state.customTexts[customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
+      }
+    },
+    CUSTOM_TEXT_WITHOUT_TRIGGER(state: Record<any, any>, customTextsAttribute: Record<any, any>) {
+      if(customTextsAttribute){
+        Object.assign(state.customTexts[customTextsAttribute.index], customTextsAttribute.data)
       }
     },
     customTextsDelete(state: Record<any, any>, delCustomText: Record<any, any>) {
@@ -206,8 +208,8 @@ const ProductAttributes:Module<any, any> = {
     updateCustomLogoAttribute({commit}, payload){
       commit('customLogoAttribute', payload)
     },
-    updateCustomLogoDimension({commit}, payload){
-      commit('CUSTOM_LOGO_DIMENSION', payload)
+    updateCustomLogoWithoutTrigger({commit}, payload){
+      commit('CUSTOM_LOGO_WITHOUT_TRIGGER', payload)
     },
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
@@ -220,6 +222,9 @@ const ProductAttributes:Module<any, any> = {
     },
     updateCustomTextAttribute({commit}, payload){
       commit('customTextAttribute', payload)
+    },
+    updateCustomTextWithoutTrigger({commit}, payload){
+      commit('CUSTOM_TEXT_WITHOUT_TRIGGER', payload)
     },
     setDefaultColor ({commit}, payload) {
       commit('defaultColor', payload)
