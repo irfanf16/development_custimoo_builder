@@ -61,8 +61,8 @@
               </template>
               <template v-if="manageComponents.AdvanceCustomization">
                 <div class="d-none d-lg-block continue-btn-holder pt-5">
-                  <b-button @click="tabIndex--" class="mx-2 px-5 back-btn" variant="secondary">Back
-                  </b-button>
+                  <b-button v-if="tabIndex == 1" @click="showBasicCustomization()" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
+                  <b-button v-else @click="tabIndex--" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                   <b-button @click="tabIndex++" class="mx-2 px-5" variant="secondary">Next</b-button>
                 </div>
               </template>
