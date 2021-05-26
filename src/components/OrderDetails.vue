@@ -334,20 +334,27 @@ export default class OrderDetails extends Vue {
         margin: [15, 10, 25, 10],
         filename: 'production.pdf',
         image: {type: "jpeg", quality: 1},
+        html2canvas: {
+          dpi: 192,
+          scale:4,
+          letterRendering: true,
+          useCORS: true
+        },
         jsPDF: {
           unit: "mm",
           format: "letter",
           orientation: 'landscape'
         }
       };
-      let ppdf = html2pdf()
+      html2pdf()
         .set(opt)
         .from(element)
         .toPdf()
         .get("pdf")
         .then(function (pdf: any) {
           let totalPages = pdf.internal.getNumberOfPages();
-          pdf.setFontSize(11);
+          // pdf.internal.scaleFactor = 283
+          // pdf.setFontSize(11);
           // for (let i = 1; i <= totalPages; i++) {
           //   // pdf.text(header, 10, 10);
           //   pdf.setPage(i);
