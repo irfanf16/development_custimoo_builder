@@ -715,6 +715,11 @@ export default class Scene extends Vue {
             attribute: 'action',
             value: e.action
           })
+          let dimText = this.dimTextFront
+          if(e.target.side == 'back') {
+            dimText = this.dimTextBack
+          }
+          this.showDimensions(e, dimText, 1.6)
         }
       })
     } else {
@@ -767,7 +772,11 @@ export default class Scene extends Vue {
             attribute: 'action',
             value: e.action
           })
-
+          let dimText = this.dimTextFront
+          if(e.target.side == 'back') {
+            dimText = this.dimTextBack
+          }
+          this.showDimensions(e, dimText, 1.2)
         }
       })
     }
@@ -870,7 +879,7 @@ export default class Scene extends Vue {
           }
 
           img.on('selected', (e: Record<any, any>) => {
-            this.showDimensions(e, dimText)
+            this.showDimensions(e, dimText, 1.6)
           })
           canvas.on('selection:cleared', () => {
             dimText.set({
@@ -882,11 +891,11 @@ export default class Scene extends Vue {
     })
   }
 
-  public showDimensions(e: any, dimText: fabric.Text) {
+  public showDimensions(e: any, dimText: fabric.Text, scale: number) {
     let object = e.target;
     dimText.set({
       left: object.left,
-      top: object.top + object.height * object.scaleY / 1.6,
+      top: object.top + object.height * object.scaleY / scale,
       text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
       visible: true
     }).bringToFront()
@@ -965,13 +974,12 @@ export default class Scene extends Vue {
           })
         }
         textBox.on('selected', (e: Record<any, any>) => {
-          let object = e.target;
+          this.showDimensions(e, dimText, 1.4)
+        })
+        canvas.on('selection:cleared', () => {
           dimText.set({
-            left: object.left,
-            top: object.top + object.height * object.scaleY / 1.4,
-            text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
-            visible: true
-          }).bringToFront()
+            visible: false
+          })
         })
 
       } else {
