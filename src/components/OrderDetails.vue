@@ -589,23 +589,23 @@ a {
 .two-columns h2:before {
   position: absolute;
   content: '';
-  right: -30px;
-  top: -2px;
-  border: 30px solid transparent;
-  border-top: 50px solid #fff;
+  right: -3px;
+  top: -3px;
+  border-top: 47px solid #fff;
+  border-left: 33px solid transparent;
   z-index: 1;
 }
 
 .two-columns h2:after {
   position: absolute;
   content: '';
-  right: 16px;
-  top: -4px;
-  bottom: -4px;
+  right: 14px;
+  top: -6px;
+  bottom: -6px;
   background: #03142E;
   width: 2px;
   z-index: 2;
-  transform: rotate(-30deg);
+  transform: rotate(-35deg);
 }
 
 .two-columns .colors-area {
