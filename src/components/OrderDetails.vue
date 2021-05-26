@@ -269,18 +269,20 @@ export default class OrderDetails extends Vue {
   public logosConversionToBase64() {
     const self = this
     self.base64Logos = []
-    this.customLogos.forEach((logos: Record<any, any>, index: number) => {
+    self.customLogos.forEach((logos: Record<any, any>, index: number) => {
       let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
-      self.toDataURL(this.apiBaseUrl + logos.url,  (dataUrl: any) => {
-        if(dataUrl) {
-          self.base64Logos.push({'b64logo':dataUrl, 'logoSize': logoDimension})
+      self.toDataURL(self.apiBaseUrl + logos.url, (dataUrl: any) => {
+        if (dataUrl) {
+          self.base64Logos.push({'b64logo': dataUrl, 'logoSize': logoDimension})
+          if (index == self.customLogos.length - 1) {
+            self.htmlPdfGenerator()
+          }
         }
       })
     })
   }
 
   public generateProductionPdf(e: any) {
-    console.log(this.base64Logos)
     let frontSVG = this.productionSVGs.front.toSVG()
     let backSVG = this.productionSVGs.back.toSVG()
 
@@ -317,9 +319,10 @@ export default class OrderDetails extends Vue {
         })
       }
     })
-
     this.logosConversionToBase64()
+  }
 
+  public htmlPdfGenerator() {
     setTimeout(() => {
       const element = document.getElementById("production-pdf-html")
       const footerXAxis = 250;
