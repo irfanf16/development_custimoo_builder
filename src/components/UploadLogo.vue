@@ -1,13 +1,20 @@
 <template>
   <div class="upload-logo-opener">
 <!--    <b-button v-b-modal.modal-center>-->
+    <div v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
+      <a class="remove-img" @click="deleteFirstLogo">
+        <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+      </a>
+    </div>
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
-        <div v-if="logoUrl && manageComponents.BasicCustomization">
-          <img :src="logoUrl" width="100%"/>
-          <a class="remove-img" @click="deleteFirstLogo">
-            <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-          </a>
+<!--        <div v-if="logoUrl && manageComponents.BasicCustomization">-->
+<!--          <img :src="logoUrl" width="100%"/>-->
+        <div v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
+          <img :src="apiBaseUrl+'/'+customLogos[0].url" width="100%"/>
+<!--          <a class="remove-img" @click="deleteFirstLogo">-->
+<!--            <font-awesome-icon :icon="['fas', 'trash-alt']"/>-->
+<!--          </a>-->
         </div>
         <div v-else>
           <div class="icon-holder">
@@ -117,16 +124,8 @@ export default class UploadLogo extends Vue {
     if(manageComponent.AdvanceCustomization) {
       this.showModal()
     }
-    if(this.customLogos.length === 0) {
-      this.customLogoInit()
-    }
-    if(Object.keys(this.customLogos).length && manageComponent.BasicCustomization) {
-      const firstImage = Object.values(this.customLogos)[0] as Record<any, any>
-      let customLogoUrl = firstImage.url
-      this.logoUrl = this.apiBaseUrl + '/' + customLogoUrl
-      if(!customLogoUrl){
+    if(manageComponent.BasicCustomization) {
         this.showModal()
-      }
     }
   }
 
@@ -151,6 +150,9 @@ export default class UploadLogo extends Vue {
   }
 
   public uploadLogoImage(e: any) {
+    if(this.customLogos.length === 0) {
+      this.customLogoInit()
+    }
     let img = e.target.files[0]
     let fd = new FormData()
     let header = {
@@ -189,12 +191,9 @@ export default class UploadLogo extends Vue {
 
   public deleteFirstLogo() {
     let payload = {
-      index: 0,
-      attribute: 'url',
-      value: ''
+      index: 0
     }
-    this.$store.dispatch('updateCustomLogoAttribute', payload)
-    this.logoUrl = ''
+    this.$store.dispatch('deleteCustomLogo', payload)
   }
 }
 
@@ -313,6 +312,21 @@ export default class UploadLogo extends Vue {
                 }
             }
         }
+      .remove-img {
+        position: absolute;
+        right: 194px;
+        top: 20px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #F8E1E2;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        font-size: 10px;
+        color: #D53943;
+      }
     }
 
   .upload-box {

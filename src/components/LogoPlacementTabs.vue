@@ -174,11 +174,9 @@ export default class LogoPlacementTabs extends Vue {
 
   public deleteLogo(index: number) {
     let payload = {
-      index: index,
-      attribute: 'url',
-      value: ''
+      index: index
     }
-    this.$store.dispatch('updateCustomLogoAttribute', payload)
+    this.$store.dispatch('deleteCustomLogo', payload)
   }
 
   public changeSide(index: number) {
@@ -190,37 +188,39 @@ export default class LogoPlacementTabs extends Vue {
     this.$store.dispatch('updateCustomLogoAttribute', payload)
   }
 
-  public getLogoColors(){
+  public getLogoColors() {
     this.imageColors = []
-    if(this.customLogos[0] && this.customLogos[0].url) {
-      this.$nextTick(() => {
-        let logoColors: Record<any, any>[] = []
-        Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(4)
-        .getPalette((err: any, palettes: any) => {
-          for (let [key, value] of Object.entries(palettes) as any[]) {
-            if(value.getPopulation() >= 10) {
-              this.imageColors.push({
-                'hex': value.getHex(),
-                'colorPopulation': value.getPopulation()
+    if (this.customLogos.length) {
+      if (this.customLogos[0] && this.customLogos[0].url) {
+        this.$nextTick(() => {
+          let logoColors: Record<any, any>[] = []
+          Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(4)
+            .getPalette((err: any, palettes: any) => {
+              for (let [key, value] of Object.entries(palettes) as any[]) {
+                if (value.getPopulation() >= 10) {
+                  this.imageColors.push({
+                    'hex': value.getHex(),
+                    'colorPopulation': value.getPopulation()
+                  })
+                }
+              }
+              this.imageColors.sort(function (a, b) {
+                return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
               })
-            }
-          }
-          this.imageColors.sort(function (a, b) {
-            return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
-          })
-          if (this.imageColors.length > 4) {
-            let deletedCount = this.imageColors.length - 4
-            this.imageColors.splice(4, deletedCount)
-          }
-          this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-            let pantoneColor = getClosestColor(imageColor.hex)
-            this.imageColors[index].pantone = pantoneColor.pantone
-            this.imageColors[index].hex = pantoneColor.hex
-            logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
-          })
-          this.$store.dispatch("SET_LOGO_COLORS", logoColors);
+              if (this.imageColors.length > 4) {
+                let deletedCount = this.imageColors.length - 4
+                this.imageColors.splice(4, deletedCount)
+              }
+              this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
+                let pantoneColor = getClosestColor(imageColor.hex)
+                this.imageColors[index].pantone = pantoneColor.pantone
+                this.imageColors[index].hex = pantoneColor.hex
+                logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
+              })
+              this.$store.dispatch("SET_LOGO_COLORS", logoColors);
+            })
         })
-      })
+      }
     }
   }
 
