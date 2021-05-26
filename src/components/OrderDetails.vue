@@ -103,6 +103,29 @@
                     </div>
                   </div>
                   <div class="logo-area">
+                    <h2>Team Roster</h2>
+                      <div class="roster-details">
+                        <table>
+                          <tr>
+                            <th>Name</th>
+                            <th>Number</th>
+                            <th>Size</th>
+                            <th>Qty</th>
+                          </tr>
+                          <template v-if="rosterDetails.length && rosterDetails[0].text">
+                          <tr v-for="(roster, index) in rosterDetails" :key="index">
+                            <td>{{ roster.text }}</td>
+                            <td>{{ roster.number }}</td>
+                            <td>{{ roster.size }}</td>
+                            <td>{{ roster.quantity }}</td>
+                          </tr>
+                          </template>
+                        </table>
+                      </div>
+                  </div>
+                </div>
+                <div class="right-col">
+                  <div class="logo-area">
                     <h2>Logos</h2>
                     <div class="logo-holder">
                       <div class="logo-block" v-for="(logo, index) in base64Logos" :key="index">
@@ -111,27 +134,7 @@
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="right-col">
-                  <h2>Team Roster</h2>
-                  <div class="roster-details">
-                    <table>
-                      <tr>
-                        <th>Name</th>
-                        <th>Number</th>
-                        <th>Size</th>
-                        <th>Qty</th>
-                      </tr>
-                      <template v-if="rosterDetails.length && rosterDetails[0].text">
-                      <tr v-for="(roster, index) in rosterDetails" :key="index">
-                        <td>{{ roster.text }}</td>
-                        <td>{{ roster.number }}</td>
-                        <td>{{ roster.size }}</td>
-                        <td>{{ roster.quantity }}</td>
-                      </tr>
-                      </template>
-                    </table>
-                  </div>
+                  
                 </div>
               </div>
             </div>
@@ -334,20 +337,27 @@ export default class OrderDetails extends Vue {
         margin: [15, 10, 25, 10],
         filename: 'production.pdf',
         image: {type: "jpeg", quality: 1},
+        html2canvas: {
+          dpi: 192,
+          scale:4,
+          letterRendering: true,
+          useCORS: true
+        },
         jsPDF: {
           unit: "mm",
           format: "letter",
           orientation: 'landscape'
         }
       };
-      let ppdf = html2pdf()
+      html2pdf()
         .set(opt)
         .from(element)
         .toPdf()
         .get("pdf")
         .then(function (pdf: any) {
           let totalPages = pdf.internal.getNumberOfPages();
-          pdf.setFontSize(11);
+          // pdf.internal.scaleFactor = 283
+          // pdf.setFontSize(11);
           // for (let i = 1; i <= totalPages; i++) {
           //   // pdf.text(header, 10, 10);
           //   pdf.setPage(i);
@@ -586,23 +596,23 @@ a {
 .two-columns h2:before {
   position: absolute;
   content: '';
-  right: -30px;
-  top: -2px;
-  border: 30px solid transparent;
-  border-top: 50px solid #fff;
+  right: -3px;
+  top: -3px;
+  border-top: 47px solid #fff;
+  border-left: 33px solid transparent;
   z-index: 1;
 }
 
 .two-columns h2:after {
   position: absolute;
   content: '';
-  right: 16px;
-  top: -4px;
-  bottom: -4px;
+  right: 14px;
+  top: -6px;
+  bottom: -6px;
   background: #03142E;
   width: 2px;
   z-index: 2;
-  transform: rotate(-30deg);
+  transform: rotate(-35deg);
 }
 
 .two-columns .colors-area {
@@ -640,15 +650,16 @@ a {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   padding: 0 0 0 2px;
 }
 
 .logo-area .logo-block {
-  flex: 0 0 24.7%;
-  max-width: 24.7%;
+  flex: 0 0 48%;
+  max-width: 48%;
   padding: 20px 20px 40px;
   border: 1px solid #03142E;
-  margin: 0 0.2% 2px 0;
+  margin: 0 0 2px 0;
   min-height: 120px;
   display: flex;
   flex-wrap: wrap;
