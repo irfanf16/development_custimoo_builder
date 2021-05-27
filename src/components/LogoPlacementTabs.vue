@@ -213,8 +213,10 @@ export default class LogoPlacementTabs extends Vue {
               }
               console.log("Colors extracted from logo:")
               console.log(JSON.parse(JSON.stringify(this.imageColors)))
-              this.imageColors.forEach((imageColor: Record<any, any>) => {
+              this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
                 let pantoneColor = getClosestColor(imageColor.hex)
+                this.imageColors[index].pantone = pantoneColor.pantone
+                this.imageColors[index].hex = pantoneColor.hex
                 logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
               })
               console.log("Colors after convert to pantone:")
