@@ -19,7 +19,7 @@
                   <b-form-input
                     id="inline-form-input-pantone-color"
                     class="mb-2 mr-sm-2 mb-sm-0"
-                    placeholder="Pantone"
+                    placeholder="XX-XXXX"
                   ></b-form-input>
                 </b-form>
                 <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
