@@ -29,8 +29,10 @@
         <p>Need High Res Image</p>
       </div>
     </div>
+    <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
+           accept="image/*">
 <!--    </b-button>-->
-    <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
+    <b-modal  ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
       <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may
         review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
         <div class="mb-2">
@@ -62,8 +64,15 @@ import {http} from "@/httpCommon"
 
 @Component<UploadLogo>({
   mounted() {
+    if (localStorage.getItem('logo_modal_status') == null){
+      this.open_modal = true
+    }
+    else{
+      this.open_modal = false
+    }
     this.$store.dispatch('setJwtToken')
     this.$store.dispatch('setBrowserToken')
+
     if(this.customLogos.length){
       if (this.customLogos[this.customLogoIndex].url == '') {
         this.modalHandler()
@@ -73,6 +82,8 @@ import {http} from "@/httpCommon"
 })
 export default class UploadLogo extends Vue {
   public status= 'not_accepted'
+  public open_modal !:boolean
+  public mounted !:boolean
   @Prop({required: true}) customLogoIndex!: any
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
@@ -100,6 +111,10 @@ export default class UploadLogo extends Vue {
   public ref = this.$refs as Record<any, any>
 
   public uploadLogoBtn() {
+    if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null){
+      localStorage.setItem('logo_modal_status', 'false')
+      this.open_modal = false
+    }
     this.ref.fileInput.click()
   }
 
@@ -122,12 +137,17 @@ export default class UploadLogo extends Vue {
   public modalHandler(){
     let manageComponent = this.manageComponents as Record<any, any>
     if(manageComponent.AdvanceCustomization) {
-      this.showModal()
+      if (this.open_modal){
+        this.showModal()
+      }else{
+        this.uploadLogoBtn()
+      }
     }
     if(manageComponent.BasicCustomization) {
         this.showModal()
     }
   }
+
 
   public customLogoInit(){
     if(this.selectedProduct && this.selectedProduct.is_logo_allowed == 1){
