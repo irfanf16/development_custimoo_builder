@@ -87,14 +87,14 @@
                               <div class="color-box" :style="{background: textData.fillColor}"></div>
                               <span class="color-name-details">
                                       <span>Fill color</span>
-                                      <span>Pantone: {{ textData.fillColor }}</span>
+                                      <span>Pantone: {{ textData.fillColorPantone }}</span>
                                     </span>
                             </div>
                             <div class="color-details-wrapper">
                               <div class="color-box" :style="{background: textData.outLineColor}"></div>
                               <span class="color-name-details">
                                       <span>Outline color</span>
-                                      <span>Pantone: {{ textData.outLineColor }}</span>
+                                      <span>Pantone: {{ textData.outLineColorPantone }}</span>
                                     </span>
                             </div>
                           </div>
