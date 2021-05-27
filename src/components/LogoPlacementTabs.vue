@@ -211,12 +211,14 @@ export default class LogoPlacementTabs extends Vue {
                 let deletedCount = this.imageColors.length - 4
                 this.imageColors.splice(4, deletedCount)
               }
-              this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
+              console.log("Colors extracted from logo:")
+              console.log(JSON.parse(JSON.stringify(this.imageColors)))
+              this.imageColors.forEach((imageColor: Record<any, any>) => {
                 let pantoneColor = getClosestColor(imageColor.hex)
-                this.imageColors[index].pantone = pantoneColor.pantone
-                this.imageColors[index].hex = pantoneColor.hex
                 logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
               })
+              console.log("Colors after convert to pantone:")
+              console.log(JSON.parse(JSON.stringify(logoColors)))
               this.$store.dispatch("SET_LOGO_COLORS", logoColors);
             })
         })
