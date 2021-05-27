@@ -106,7 +106,7 @@ export default class CustomizationText extends Vue {
     })
   }
 
-  public setColor(color: string) {
+  public setColor(color: Record<any, any>) {
     if (this.fontColorType == 'fill') {
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColor', value: color.value})
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColorPantone', value: color.name})
