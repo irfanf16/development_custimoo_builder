@@ -783,7 +783,12 @@ a:hover{color: #219f84;}
             padding: 0;
             border: none;
             margin: 0 0 15px;
-            position: static; 
+            position: static;
+            justify-content: flex-start;
+            .nav-item{
+                margin-right: 5px;
+                &:nth-child(4n + 4){margin-right: 0;}
+            }
              .nav-link{
                 padding: 0;
                 border: 1px solid #707070;
@@ -845,7 +850,7 @@ a:hover{color: #219f84;}
                 &:hover{border-color: #219f84;}
                 img{
                     display: block;
-                    max-width: 100%;
+                    max-width: 50px;
                     margin: 0 auto;
                     height: auto;
                 }
@@ -1673,7 +1678,9 @@ a:hover{color: #219f84;}
     }
     .canvas-container{
         width: 100% !important;
-        height: 100px !important;
+        height: 80px !important;
+        @media only screen and (min-width: 767px){height: 180px !important;}
+        @media only screen and (min-width: 992px){height: 100px !important;}
       }
 }
 .slither-slider-slide{

@@ -7,10 +7,10 @@
             <font-awesome-icon :icon="['fas', 'search']"/>
           </b-button>
         </b-nav-item>
-        <b-nav-item @click="searchProducts(0, 'category_id')">All</b-nav-item>
+        <!-- <b-nav-item @click="searchProducts(0, 'category_id')">All</b-nav-item>
         <b-nav-item v-for="category in categoryListing" @click="searchProducts(category.id, 'category_id')"
                     :key="category.id">{{ category.category_name.toUpperCase() }}
-        </b-nav-item>
+        </b-nav-item> -->
       </b-nav>
 
       <b-collapse id="collapse-1" class="mt-2">
@@ -105,5 +105,13 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
       }
     }
   }
+  .nav{
+      @media only screen and (min-width: 992px){
+        position: absolute;
+        right: 10px;
+        top: 38px;
+        z-index: 1;
+      }
+    }
 }
 </style>
