@@ -38,7 +38,7 @@
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs :tabIndex="tabIndex"/>
+            <CustomizationTabs :tabIndexNew="tabIndex" @tabIndexChange="changeTabs"/>
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
@@ -51,7 +51,7 @@
                   <LockerRoomModal v-if="isCustomerAuthenticated"/>
                   <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom>Save to locker room</b-button>
                   <AddLockerRoomModal />
-                  <b-button variant="outline-secondary">Buy Now</b-button>
+                  <b-button variant="outline-secondary" @click="buyNow">Buy Now</b-button>
                 </div>
                 <ul class="preview-header-icons">
                   <li><a>
@@ -319,12 +319,16 @@ export default class Home extends Vue {
               let deletedCount = this.imageColors.length - 4
               this.imageColors.splice(4, deletedCount)
             }
+            console.log("Colors extracted from logo:")
+            console.log(JSON.parse(JSON.stringify(this.imageColors)))
             this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
               let pantoneColor = getClosestColor(imageColor.hex)
               this.imageColors[index].pantone = pantoneColor.pantone
               this.imageColors[index].hex = pantoneColor.hex
               logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
             })
+            console.log("Colors after convert to pantone:")
+            console.log(JSON.parse(JSON.stringify(logoColors)))
             this.$store.dispatch("SET_LOGO_COLORS", logoColors);
           })
         })
@@ -383,6 +387,10 @@ export default class Home extends Vue {
       index = 4
     }
     this.tabIndex = index
+  }
+
+  public buyNow() {
+    this.$router.push('/confirm-order')
   }
 }
 </script>
