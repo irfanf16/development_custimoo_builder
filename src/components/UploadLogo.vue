@@ -111,7 +111,7 @@ export default class UploadLogo extends Vue {
     this.ref.myModal.hide()
   }
 
-  get customLogos(): [] {
+  get customLogos(): Record<any, any>[] {
     return this.$store.getters.getCustomLogos
   }
 
