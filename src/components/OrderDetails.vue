@@ -201,13 +201,11 @@
 <!--                    <div class="cost-area">$188.95</div>-->
 <!--                </div>-->
                 <div class="order-row">
-                    <button class="btn btn-secondary  fw-bold w-100" @click="buyNow">Buy Now</button>
+                    <button class="btn btn-secondary fw-bold w-100 mb-2" @click="buyNow">Buy Now</button>
                 </div>
+                <button class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Production PDF</button>
             </div>
         </div>
-      <div class="row">
-        <button class="btn btn-secondary  fw-bold w-100" @click="generateProductionPdf">Production PDF</button>
-      </div>
     </div>
 
   </div>

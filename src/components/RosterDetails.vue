@@ -48,14 +48,14 @@
           <b-form-input
             ref="myInputs"
 
-            placeholder="Name" v-model="roster.text"
+            v-model="roster.text"
           ></b-form-input>
         </div>
         <div class="shirt-no">
           <b-form-input ref="myInputs"
 
             class="text-center"
-            placeholder="00" v-model="roster.number"
+            v-model="roster.number"
           ></b-form-input>
         </div>
         <div class="shirt-size">
