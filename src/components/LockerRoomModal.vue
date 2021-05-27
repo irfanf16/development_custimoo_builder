@@ -22,14 +22,14 @@
                                             <Scene :measurement-ratio="product.design.measurement_ratio"
                                               :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
                                                 :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
-                                                   :lockerGroupColors="product.groupcolors"   :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames"  />
+                                                 :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames"  />
                                           </a>
                                           <ul class="product-icons">
                                                 <li>
                                                     <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                                                 </li>
                                                 <li class="d-none d-lg-block">
-                                                    <a id="share-button-2" href="#"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
+                                                    <a id="share-button-2"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                                                     <b-tooltip custom-class="share-tooltip" target="share-button-2" placement="bottom">
                                                         <div class="share-holder">
                                                             <h3>Copy link and Share</h3>
@@ -156,7 +156,7 @@
           await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
           await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
           await  this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
-          await  this.$store.dispatch('overRideGroupColors', JSON.parse(element.defaultcolors));
+          await  this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
           this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
             if (item.id == element.design_id){
               Vue.set(item, 'design_show', 1)
