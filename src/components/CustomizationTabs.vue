@@ -189,6 +189,14 @@ export default class CustomizationProcess extends Vue {
     this.tabIndex = this.tabIndexNew
   }
 
+  @Watch('tabIndex', {
+    immediate: true, deep: true
+  })
+
+  tabIndexChanged() {
+    this.$emit('tabIndexChange', this.tabIndex)
+  }
+
   public productColorsManipulation() {
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}

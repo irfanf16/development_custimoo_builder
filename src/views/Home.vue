@@ -38,7 +38,7 @@
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs :tabIndexNew="tabIndex"/>
+            <CustomizationTabs :tabIndexNew="tabIndex" @tabIndexChange="changeTabs"/>
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
