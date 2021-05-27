@@ -1,6 +1,6 @@
 <template>
   <div class="interest-area">
-    <h2 class="fw-bold mb-3 fz-18 text-left">Please Choose Your Interests</h2>
+    <!-- <h2 class="fw-bold mb-3 fz-18 text-left">Please Choose Your Interests</h2>
     <div class="interest-btn-holder d-flex flex-wrap justify-content-between align-items-center">
       <b-button @click="searchProducts(0, 'category_id')">
         <div class="icon-holder">
@@ -11,7 +11,7 @@
                 @click="searchProducts(category.id, 'category_id')">
         <div class="icon-holder"><img :src="apiBaseUrl+'/'+category.image_url" width="22px"></div>
         <strong>{{ category.category_name.toUpperCase() }}</strong></b-button>
-    </div>
+    </div> -->
     <button @click="showDesign()" class="btn btn-secondary w-100 fw-bold">Show Me Design</button>
   </div>
 </template>

@@ -16,7 +16,7 @@
                       <div v-if="imageColors.length == 1" class="color-box" :style="{background: imageColors[0].hex}"></div>
                       <div v-if="imageColors.length == 2" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 50%, ' + imageColors[1].hex +' 50% 100%)'}"></div>
                       <div v-if="imageColors.length == 3" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 33.33%, ' + imageColors[1].hex +' 33.33% 66.66%, ' + imageColors[2].hex +' 66.66% 100%)'}"></div>
-                      <div v-if="imageColors.length == 4" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 25%, ' + imageColors[1].hex +' 25% 50%, ' + imageColors[2].hex +' 50% 75%, ' + imageColors[3].hex +' 75% 100%)'}"></div>
+                      <div v-if="imageColors.length == 4" class="color-box" :style="{background: 'conic-gradient(' + imageColors[1].hex +' 0% 25%, ' + imageColors[2].hex +' 25% 50%, ' + imageColors[3].hex +' 50% 75%, ' + imageColors[0].hex +' 75% 100%)'}"></div>
                     </div>
                   </div>
                   <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
@@ -38,7 +38,7 @@
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs :tabIndex="tabIndex"/>
+            <CustomizationTabs :tabIndexNew="tabIndex" @tabIndexChange="changeTabs"/>
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
@@ -51,7 +51,7 @@
                   <LockerRoomModal v-if="isCustomerAuthenticated"/>
                   <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom>Save to locker room</b-button>
                   <AddLockerRoomModal />
-                  <b-button variant="outline-secondary">Buy Now</b-button>
+                  <b-button variant="outline-secondary" @click="buyNow">Buy Now</b-button>
                 </div>
                 <ul class="preview-header-icons">
                   <li><a>
@@ -130,7 +130,7 @@ import getClosestColor from '@/pantoneColor'
       this.retrieveProducts()
       this.getFillColors()
     }
-
+    this.getLogoColors()
     let isAssociation = JSON.parse(localStorage.getItem('isAssociation') as string) as boolean
     this.jwtToken = localStorage.getItem('jwtToken') as string
     if (isAssociation && this.jwtToken) {
@@ -214,6 +214,7 @@ export default class Home extends Vue {
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
+    this.getLogoColors()
   }
   public showDesign() {
           if(this.manageComponents.mobileScreen){
@@ -318,12 +319,16 @@ export default class Home extends Vue {
               let deletedCount = this.imageColors.length - 4
               this.imageColors.splice(4, deletedCount)
             }
+            console.log("Colors extracted from logo:")
+            console.log(JSON.parse(JSON.stringify(this.imageColors)))
             this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
               let pantoneColor = getClosestColor(imageColor.hex)
               this.imageColors[index].pantone = pantoneColor.pantone
               this.imageColors[index].hex = pantoneColor.hex
               logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
             })
+            console.log("Colors after convert to pantone:")
+            console.log(JSON.parse(JSON.stringify(logoColors)))
             this.$store.dispatch("SET_LOGO_COLORS", logoColors);
           })
         })
@@ -382,6 +387,10 @@ export default class Home extends Vue {
       index = 4
     }
     this.tabIndex = index
+  }
+
+  public buyNow() {
+    this.$router.push('/confirm-order')
   }
 }
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="upload-logo-opener">
 <!--    <b-button v-b-modal.modal-center>-->
-    <div v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
+    <div class="position-relative" v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
       <a class="remove-img" @click="deleteFirstLogo">
         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
       </a>
@@ -126,7 +126,7 @@ export default class UploadLogo extends Vue {
     this.ref.myModal.hide()
   }
 
-  get customLogos(): [] {
+  get customLogos(): Record<any, any>[] {
     return this.$store.getters.getCustomLogos
   }
 
@@ -285,6 +285,7 @@ export default class UploadLogo extends Vue {
             @media only screen and (min-width: 992px){
               width: 64px;
               height: 64px;
+              position: relative;
             }
             @media only screen and (min-width: 1200px){
                 width: 74px;
@@ -334,8 +335,8 @@ export default class UploadLogo extends Vue {
         }
       .remove-img {
         position: absolute;
-        right: 194px;
-        top: 20px;
+        left: 64px;
+        top: -10px;
         width: 20px;
         height: 20px;
         border-radius: 50%;
@@ -346,6 +347,10 @@ export default class UploadLogo extends Vue {
         align-items: center;
         font-size: 10px;
         color: #D53943;
+        @media only screen and (min-width: 992px){
+          left: 84px;
+          top: -7px;
+        }
       }
     }
 

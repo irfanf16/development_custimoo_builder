@@ -1,6 +1,6 @@
 <template>
   <div class="item-to-customize text-left py-lg-5">
-    <h2 class="fw-bold p-3 p-lg-0 mb-lg-2 fz-18">Select Item to Customize</h2>
+    <h2 class="fw-bold p-3 p-lg-0 mb-lg-4 fz-18">Select Item to Customize</h2>
     <div class="customization-nav-area px-3 px-lg-0">
       <Search :categoryListing="categories" @search="searchProduct"/>
     </div>
@@ -53,6 +53,8 @@ export default class ItemToCustomize extends Vue {
   }
   .customization-nav-area{
     background: #fff;
-    @media only screen and (min-width: 992px){background: none;}
+    @media only screen and (min-width: 992px){
+      background: none;
+    }
   }
 </style>

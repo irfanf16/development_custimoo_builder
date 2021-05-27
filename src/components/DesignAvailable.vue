@@ -64,9 +64,25 @@ export default class DesignAvailable extends Vue {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  max-height: 50vh;
+  max-height: 15vh;
   overflow: hidden;
   overflow-y: auto;
+  @media only screen and (min-width: 350px){
+    max-height: 30vh;
+  }
+  @media only screen and (min-width: 374px){
+    max-height: 32vh;
+  }
+  @media only screen and (min-width: 410px){
+    max-height: 38vh;
+  }
+  @media only screen and (min-width: 768px){
+    max-height: 52vh;
+  }
+  
+  @media only screen and (min-width: 992px){
+    max-height: 50vh;
+  }
 
   &:after {
     content: '';

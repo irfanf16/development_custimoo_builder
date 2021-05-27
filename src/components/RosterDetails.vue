@@ -103,8 +103,8 @@ export default class RosterDetails extends Vue {
   private roster: any[] = []
   public fileData: Record<any, any>[] = []
   public selected = this.productSizes[0]
-  public firstColor!: string
-  public secondColor!: string
+  public firstColor!: Record<any, any>
+  public secondColor!: Record<any, any>
   public currentIcon = 'eye-slash'
   public ref = this.$refs as Record<any, any>
   public obj = {
@@ -124,7 +124,7 @@ export default class RosterDetails extends Vue {
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
-  get customText():[Record<any, any>]{
+  get customText():Record<any, any>[]{
     return this.$store.getters.getCustomTexts;
   }
 
@@ -166,8 +166,10 @@ export default class RosterDetails extends Vue {
             outlineEnabled: Boolean(this.selectedProduct.productnames[0].outline_enabled),
             side: this.selectedProduct.productnames[0].side,
             fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-            fillColor: this.firstColor,
-            outLineColor: this.secondColor,
+            fillColor: this.firstColor.value,
+            fillColorPantone: this.firstColor.name,
+            outLineColor: this.secondColor.value,
+            outLineColorPantone: this.secondColor.name,
             selectColor: false
           }
         } else {
@@ -183,8 +185,10 @@ export default class RosterDetails extends Vue {
             outlineEnabled: true,
             side: 'back',
             fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-            fillColor: this.firstColor,
-            outLineColor: this.secondColor,
+            fillColor: this.firstColor.value,
+            fillColorPantone: this.firstColor.name,
+            outLineColor: this.secondColor.value,
+            outLineColorPantone: this.secondColor.name,
             selectColor: false
           }
           this.$store.dispatch('setCustomTexts', {index: 0, text: texts})
@@ -211,8 +215,10 @@ export default class RosterDetails extends Vue {
             outlineEnabled: Boolean(this.selectedProduct.productnames[1].outline_enabled),
             side: this.selectedProduct.productnames[1].side,
             fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-            fillColor: this.firstColor,
-            outLineColor: this.secondColor,
+            fillColor: this.firstColor.value,
+            fillColorPantone: this.firstColor.name,
+            outLineColor: this.secondColor.value,
+            outLineColorPantone: this.secondColor.name,
             selectColor: false
           }
         } else {
@@ -228,8 +234,10 @@ export default class RosterDetails extends Vue {
             outlineEnabled: true,
             side: 'back',
             fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-            fillColor: this.firstColor,
-            outLineColor: this.secondColor,
+            fillColor: this.firstColor.value,
+            fillColorPantone: this.firstColor.name,
+            outLineColor: this.secondColor.value,
+            outLineColorPantone: this.secondColor.name,
             selectColor: false
           }
           this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
@@ -244,8 +252,8 @@ export default class RosterDetails extends Vue {
       this.fontsColors = this.fontsColors.concat(finalColor)
     })
     if (this.fontsColors.length) {
-      this.firstColor = this.fontsColors[0].color_text[0].value
-      this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1].value : this.fontsColors[0].color_text[0].value
+      this.firstColor = this.fontsColors[0].color_text[0]
+      this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1] : this.fontsColors[0].color_text[0]
     }
   }
 

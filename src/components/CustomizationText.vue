@@ -43,7 +43,7 @@
             </b-nav>
             <div class="color-holder">
               <div class="color-container">
-                <div class="color-box" v-for="(color, index) in fontColor" @click="setColor(color.value)"
+                <div class="color-box" v-for="(color, index) in fontColor" @click="setColor(color)"
                      :title="color.name" :style="{background: color.value}" :key="index"></div>
               </div>
             </div>
@@ -106,12 +106,13 @@ export default class CustomizationText extends Vue {
     })
   }
 
-  public setColor(color: string) {
-    console.log('set Color call on scene change')
+  public setColor(color: Record<any, any>) {
     if (this.fontColorType == 'fill') {
-      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColor', value: color})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColor', value: color.value})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColorPantone', value: color.name})
     } else {
-      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColor', value: color})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColor', value: color.value})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColorPantone', value: color.name})
     }
     this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'selectColor', value: false})
   }

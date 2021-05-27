@@ -495,7 +495,8 @@ export default class Scene extends Vue {
     }
 
     if(this.lockerDefaultColors.length) {
-      this.changeDefaultColors(this.lockerDefaultColors)
+      let lockerDefaultColors = this.lockerDefaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
+      this.changeDefaultColors(lockerDefaultColors)
     }
     else if(this.defaultColors.length) {
       this.changeDefaultColors(this.defaultColors)
@@ -902,8 +903,6 @@ export default class Scene extends Vue {
 
   public showDimensions(e: any, dimText: fabric.Text, scale: number) {
     let object = e.target;
-    console.log("object top: "+object.top + " object height: " + object.height +" scaleY: "+ object.scaleY +" scale multiply: "+ scale)
-    console.log(object.top + object.height * object.scaleY / scale)
     dimText.set({
       left: object.left,
       top: object.top + object.height * object.scaleY / scale,
