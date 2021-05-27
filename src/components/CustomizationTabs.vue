@@ -173,8 +173,8 @@ export default class CustomizationProcess extends Vue {
 
   public productColors: any[] = []
   public fontsColors: any[] = []
-  public firstColor!: string
-  public secondColor!: string
+  public firstColor!: Record<any, any>
+  public secondColor!: Record<any, any>
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
 
   get hideTab(): Record<any, any> {
@@ -212,8 +212,8 @@ export default class CustomizationProcess extends Vue {
       this.fontsColors = this.fontsColors.concat(finalColor)
     })
     if (this.fontsColors.length) {
-      this.firstColor = this.fontsColors[0].color_text[0].value
-      this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1].value : this.fontsColors[0].color_text[0].value
+      this.firstColor = this.fontsColors[0].color_text[0]
+      this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1] : this.fontsColors[0].color_text[0]
     }
   }
 
@@ -240,8 +240,10 @@ export default class CustomizationProcess extends Vue {
           outlineEnabled: Boolean(productName.outline_enabled),
           side: productName.side,
           fontFamily: this.customTexts[index].fontFamily ? this.customTexts[index].fontFamily : this.fontOptions[0].value,
-          fillColor: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor,
-          outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor,
+          fillColor: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.value,
+          fillColorPantone: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.name,
+          outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.value,
+          outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
@@ -258,8 +260,10 @@ export default class CustomizationProcess extends Vue {
           outlineEnabled: Boolean(productName.outline_enabled),
           side: productName.side,
           fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-          fillColor: this.firstColor,
-          outLineColor: this.secondColor,
+          fillColor: this.firstColor.value,
+          fillColorPantone: this.firstColor.name,
+          outLineColor: this.secondColor.value,
+          outLineColorPantone: this.secondColor.name,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
@@ -301,8 +305,10 @@ export default class CustomizationProcess extends Vue {
       outlineEnabled: true,
       side: 'back',
       fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-      fillColor: this.firstColor,
-      outLineColor: this.secondColor,
+      fillColor: this.firstColor.value,
+      fillColorPantone: this.firstColor.name,
+      outLineColor: this.secondColor.value,
+      outLineColorPantone: this.secondColor.name
     }
 
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
