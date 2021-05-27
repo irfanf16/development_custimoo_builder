@@ -124,7 +124,7 @@ export default class RosterDetails extends Vue {
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
-  get customText():[Record<any, any>]{
+  get customText():Record<any, any>[]{
     return this.$store.getters.getCustomTexts;
   }
 

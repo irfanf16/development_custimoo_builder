@@ -902,8 +902,6 @@ export default class Scene extends Vue {
 
   public showDimensions(e: any, dimText: fabric.Text, scale: number) {
     let object = e.target;
-    console.log("object top: "+object.top + " object height: " + object.height +" scaleY: "+ object.scaleY +" scale multiply: "+ scale)
-    console.log(object.top + object.height * object.scaleY / scale)
     dimText.set({
       left: object.left,
       top: object.top + object.height * object.scaleY / scale,
