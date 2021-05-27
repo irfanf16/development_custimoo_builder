@@ -104,6 +104,7 @@ export default class ColorAccordion extends Vue {
         border: none;
         border-radius: 0;
         box-shadow: none;
+        font-size: 0.8rem;
       }
       .hu-color-picker{box-shadow: none !important;}
   }

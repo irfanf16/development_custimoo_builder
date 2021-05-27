@@ -1697,7 +1697,8 @@ a:hover{color: #219f84;}
         width: 100% !important;
         height: 80px !important;
         @media only screen and (min-width: 767px){height: 180px !important;}
-        @media only screen and (min-width: 992px){height: 100px !important;}
+        @media only screen and (min-width: 992px){height: 80px !important;}
+        @media only screen and (min-width: 1439px){height: 100px !important;}
       }
 }
 .slither-slider-slide{
