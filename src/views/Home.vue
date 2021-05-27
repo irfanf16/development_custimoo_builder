@@ -38,7 +38,7 @@
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs :tabIndex="tabIndex"/>
+            <CustomizationTabs :tabIndexNew="tabIndex"/>
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
@@ -51,7 +51,7 @@
                   <LockerRoomModal v-if="isCustomerAuthenticated"/>
                   <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom>Save to locker room</b-button>
                   <AddLockerRoomModal />
-                  <b-button variant="outline-secondary">Buy Now</b-button>
+                  <b-button variant="outline-secondary" @click="buyNow">Buy Now</b-button>
                 </div>
                 <ul class="preview-header-icons">
                   <li><a>
@@ -387,6 +387,10 @@ export default class Home extends Vue {
       index = 4
     }
     this.tabIndex = index
+  }
+
+  public buyNow() {
+    this.$router.push('/confirm-order')
   }
 }
 </script>

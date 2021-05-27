@@ -146,7 +146,7 @@ import {default as $} from 'jquery';
   },
 })
 export default class CustomizationProcess extends Vue {
-  @Prop({required: false, default:0}) tabIndex!: number
+  @Prop({required: false, default:0}) tabIndexNew!: number
   public fontOptions: Record<any, any>[] = []
 
   get manageComponents(): Record<any, any> {
@@ -169,6 +169,8 @@ export default class CustomizationProcess extends Vue {
     return this.$store.getters.getSelectedProduct.productnames;
   }
 
+  public tabIndex = 0
+
   public productColors: any[] = []
   public fontsColors: any[] = []
   public firstColor!: string
@@ -177,6 +179,14 @@ export default class CustomizationProcess extends Vue {
 
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab
+  }
+
+  @Watch('tabIndexNew', {
+    immediate: true, deep: true
+  })
+
+  tabIndexNewChanged() {
+    this.tabIndex = this.tabIndexNew
   }
 
   public productColorsManipulation() {
