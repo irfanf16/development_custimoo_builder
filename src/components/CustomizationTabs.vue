@@ -169,8 +169,6 @@ export default class CustomizationProcess extends Vue {
     return this.$store.getters.getSelectedProduct.productnames;
   }
 
-  public tabIndex = 0
-
   public productColors: any[] = []
   public fontsColors: any[] = []
   public firstColor!: string

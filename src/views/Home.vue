@@ -130,7 +130,7 @@ import getClosestColor from '@/pantoneColor'
       this.retrieveProducts()
       this.getFillColors()
     }
-
+    this.getLogoColors()
     let isAssociation = JSON.parse(localStorage.getItem('isAssociation') as string) as boolean
     this.jwtToken = localStorage.getItem('jwtToken') as string
     if (isAssociation && this.jwtToken) {
@@ -214,6 +214,7 @@ export default class Home extends Vue {
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
+    this.getLogoColors()
   }
   public showDesign() {
           if(this.manageComponents.mobileScreen){
