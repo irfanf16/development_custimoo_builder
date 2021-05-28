@@ -36,7 +36,7 @@ import rgbHex from 'rgb-hex'
     }
 
     let scaleImg = document.createElement('img');
-    scaleImg.src = "./img/images/scale.jpg";
+    scaleImg.src = "./img/images/scale.png";
     let fabricObj: Record<any, any> = fabric
     fabricObj.Object.prototype.controls.br = new fabricObj.Control({
       x: 0.6,
@@ -58,7 +58,7 @@ import rgbHex from 'rgb-hex'
     }
 
     let rotationImg = document.createElement('img');
-    rotationImg.src = "./img/images/rotate.jpg";
+    rotationImg.src = "./img/images/rotate.png";
     fabricObj.Object.prototype.controls.tr = new fabricObj.Control({
       x: 0.6,
       y: -0.6,
@@ -79,7 +79,7 @@ import rgbHex from 'rgb-hex'
     }
 
     let deleteImg = document.createElement('img');
-    deleteImg.src = "./img/images/remove.jpg";
+    deleteImg.src = "./img/images/remove.png";
 
     fabricObj.Object.prototype.controls.deleteControl = new fabricObj.Control({
       x: -0.6,
@@ -672,6 +672,39 @@ export default class Scene extends Vue {
     canvas.on('object:modified', (e) => {
       self.objectMove(e)
     })
+    canvas.on('object:moving', (e) => {
+      self.objectScaling(e, side)
+    });
+  }
+
+  public objectScaling(e: any, side: string) {
+    let model = this.frontModel
+    if(side == 'back') {
+      model = this.backModel
+    }
+    // console.log(e.target.intersectsWithObject(model, false))
+    // console.log(e.target.isContainedWithinObject(model, true))
+    // console.log(e.target.isContainedWithinObject(model, false, true))
+    const modelBoundingRect = model.getBoundingRect()
+    let boundingRect = {
+      left: modelBoundingRect.left,
+      right: modelBoundingRect.left + modelBoundingRect.width,
+      top: modelBoundingRect.top,
+      bottom: modelBoundingRect.top + modelBoundingRect.height,
+    }
+
+    if(e.target.left > boundingRect.right - (e.target.width / 4)) {
+      e.target.left = boundingRect.right - (e.target.width / 4)
+    }
+    else if(e.target.left < boundingRect.left + (e.target.width / 4)) {
+      e.target.left = boundingRect.left + (e.target.width / 4)
+    }
+    if(e.target.top > boundingRect.bottom - (e.target.height / 6)){
+      e.target.top = boundingRect.bottom - (e.target.height / 6)
+    }
+    else if(e.target.top < boundingRect.top + (e.target.height / 6)) {
+      e.target.top = boundingRect.top + (e.target.height / 6)
+    }
   }
 
   public objectMove(e: any) {
