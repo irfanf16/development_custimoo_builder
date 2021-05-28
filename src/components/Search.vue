@@ -70,7 +70,6 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
     &.search-opener {
       .nav-link {
         border-bottom: none;
-
         &:hover {
           border-bottom: none;
         }
@@ -109,7 +108,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
       
         position: absolute;
         right: 10px;
-        top: 8px;
+        top: 10px;
         z-index: 1;
         @media only screen and (min-width: 992px){
           top: 38px;

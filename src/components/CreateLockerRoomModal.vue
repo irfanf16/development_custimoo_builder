@@ -2,7 +2,7 @@
     <b-modal ref="create-modal" id="modal-center-createlockerroom" centered scrollable size="xl" title="Create Lockerroom" content-class="lockerroom-modal create-lockerroom-modal">
         <div class="pt-4 design-name-form">
             <b-form inline>
-                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Product Name</label>
+                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Name</label>
                 <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
                     <b-input-group>
                         <b-form-input id="inline-form-input-productname" v-model="name"  placeholder="Type Here"></b-form-input>
