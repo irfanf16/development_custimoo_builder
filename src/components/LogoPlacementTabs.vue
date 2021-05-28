@@ -299,6 +299,7 @@ export default class LogoPlacementTabs extends Vue {
       position: absolute;
       margin: 0;
       padding: 20px;
+      background: #fff;
     }
   }
   .logo-placement-area{

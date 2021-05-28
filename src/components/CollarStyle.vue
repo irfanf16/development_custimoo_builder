@@ -1,5 +1,6 @@
 <template>
     <b-tabs>
+      <template v-if="productModels.index.length > 1">
         <b-tab v-for="(model, index)  in productModels" :key="index">
             <template #title>
               {{ model.model_name }}
@@ -27,6 +28,7 @@
                 </div>
             </div>
         </b-tab>
+        </template>
     </b-tabs>
 </template>
 

@@ -52,19 +52,19 @@
               <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
                                  :fontsColors="fontsColors" :fontOptions="fontOptions"/>
             </div>
-            <div class="px-3 pt-3 p-lg-4 text-right">
+            <!-- <div class="px-3 pt-3 p-lg-4 text-right">
               <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
                 +
               </b-button>
-            </div>
+            </div> -->
           </div>
           <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
             <b-tabs>
-              <div class="p-lg-4 text-right">
+              <!-- <div class="p-lg-4 text-right">
                 <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
                   +
                 </b-button>
-              </div>
+              </div> -->
               <b-tab v-for="(customText, index) in customTexts" :key="index">
                 <template #title>
                   Player Name
