@@ -134,7 +134,7 @@
                       </div>
                     </div>
                   </div>
-                  
+
                 </div>
               </div>
             </div>
@@ -292,7 +292,7 @@ export default class OrderDetails extends Vue {
     let frontSVG = this.productionSVGs.front.toSVG()
     let backSVG = this.productionSVGs.back.toSVG()
 
-    $("#front-svg").html('<svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="350px" height="480px" viewBox="0 0 660 900" xml:space="preserve">' + this.getSVGInnerHtml(frontSVG) + '</svg>')
+    $("#front-svg").html('<svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="450px" height="650px" viewBox="0 0 550 550" xml:space="preserve">' + this.getSVGInnerHtml(frontSVG) + '</svg>')
     $("#front-svg").find('image').each((index: number, image: any) => {
       let string = image.href.baseVal
       if (string.indexOf("logos") >= 0) {
@@ -309,7 +309,7 @@ export default class OrderDetails extends Vue {
       }
     })
 
-    $("#back-svg").html('<svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="350px" height="480px" viewBox="0 0 660 900" xml:space="preserve">' + this.getSVGInnerHtml(backSVG) + '</svg>')
+    $("#back-svg").html('<svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="450px" height="650px" viewBox="0 0 550 550" xml:space="preserve">' + this.getSVGInnerHtml(backSVG) + '</svg>')
     $("#back-svg").find('image').each((index: number, image: any) => {
       let string = image.href.baseVal
       if (string.indexOf("logos") >= 0) {
@@ -538,7 +538,7 @@ a {
   overflow: hidden;
   align-items: center;
   padding: 20px 0;
-  max-width: 600px;
+  /*max-width: 600px;*/
   margin: 0 auto;
 }
 
