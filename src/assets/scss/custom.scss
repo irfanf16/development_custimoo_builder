@@ -612,6 +612,8 @@ a:hover{color: #219f84;}
             line-height: 1;
             margin: 14px 0 0;
             float: right;
+            position: relative;
+            z-index: 999;
             @media only screen and (min-width: 992px){
                 margin: 20px 0 0;
             }
