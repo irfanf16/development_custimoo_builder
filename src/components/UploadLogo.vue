@@ -156,8 +156,6 @@ export default class UploadLogo extends Vue {
         url: '',
         width: logoSetting.width,
         height: logoSetting.height,
-        scaleX: 1,
-        scaleY: 1,
         x_axis: logoSetting.x_axis,
         y_axis: logoSetting.y_axis,
         rotation: logoSetting.rotation,
