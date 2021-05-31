@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" v-cloak>
     <Header />
     <router-view/>
   </div>
@@ -26,6 +26,7 @@ export default{
   color: #2c3e50;
 }
 
+[v-cloak] {display: none}
 #nav {
   padding: 30px;
 

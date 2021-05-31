@@ -73,8 +73,9 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
-import {default as Vibrant} from 'node-vibrant'
 import getClosestColor from '@/pantoneColor'
+import { prominent } from 'color.js'
+import rgbHex from 'rgb-hex'
 
 
 @Component<LogoPlacementTabs>({
@@ -184,41 +185,24 @@ export default class LogoPlacementTabs extends Vue {
     this.$store.dispatch('updateCustomLogoAttribute', payload)
   }
 
-  public getLogoColors() {
-    this.imageColors = []
-    if (this.customLogos.length) {
-      if (this.customLogos[0] && this.customLogos[0].url) {
+  public getLogoColors(){
+    if(this.customLogos.length){
+      if(this.customLogos[0] && this.customLogos[0].url) {
         this.$nextTick(() => {
-          let logoColors: Record<any, any>[] = []
-          Vibrant.from(this.apiBaseUrl + '/' + this.customLogos[0].url).quality(1).maxColorCount(5)
-            .getPalette((err: any, palettes: any) => {
-              for (let [key, value] of Object.entries(palettes) as any[]) {
-                if (value.getPopulation() >= 10) {
-                  this.imageColors.push({
-                    'hex': value.getHex(),
-                    'colorPopulation': value.getPopulation()
-                  })
-                }
-              }
-              this.imageColors.sort(function (a, b) {
-                return parseFloat(b.colorPopulation) - parseFloat(a.colorPopulation)
-              })
-              if (this.imageColors.length > 4) {
-                let deletedCount = this.imageColors.length - 4
-                this.imageColors.splice(4, deletedCount)
-              }
-              console.log("Colors extracted from logo:")
-              console.log(JSON.parse(JSON.stringify(this.imageColors)))
-              this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-                let pantoneColor = getClosestColor(imageColor.hex)
-                this.imageColors[index].pantone = pantoneColor.pantone
-                this.imageColors[index].hex = pantoneColor.hex
-                logoColors.push({value: pantoneColor.hex, name: pantoneColor.pantone})
-              })
-              console.log("Colors after convert to pantone:")
-              console.log(JSON.parse(JSON.stringify(logoColors)))
-              this.$store.dispatch("SET_LOGO_COLORS", logoColors);
+          this.imageColors = []
+          prominent(this.apiBaseUrl + '/' + this.customLogos[0].url).then((colors: any) => {
+            let deletedCount = colors.length - 4
+            colors.splice(4, deletedCount)
+            colors.forEach((color: number[]) => {
+              const hex = rgbHex(color[0], color[1], color[2])
+              console.log(hex)
+              let pantoneColor = getClosestColor(hex)
+              console.log(pantoneColor)
+              this.imageColors.push({ hex: pantoneColor.hex, pantone: pantoneColor.pantone})
             })
+          })
+
+          this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
         })
       }
     }
@@ -226,10 +210,14 @@ export default class LogoPlacementTabs extends Vue {
 
   useLogoColors() {
     this.logoColorUsed = true
-    this.imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setGroupColors', {})
-      this.$store.dispatch('setDefaultColor', { index: index, color: imageColor.hex, pantone: imageColor.pantone })
-    })
+    this.$store.dispatch('setGroupColors', {})
+    for (let i = 0; i < 4; i++) {
+      if(this.imageColors[i]) {
+        this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone })
+      } else {
+        this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '' })
+      }
+    }
   }
 
   shuffleLogoColors() {

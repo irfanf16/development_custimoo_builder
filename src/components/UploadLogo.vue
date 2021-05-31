@@ -8,13 +8,8 @@
     </div>
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
-<!--        <div v-if="logoUrl && manageComponents.BasicCustomization">-->
-<!--          <img :src="logoUrl" width="100%"/>-->
         <div v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
           <img :src="apiBaseUrl+'/'+customLogos[0].url" width="100%"/>
-<!--          <a class="remove-img" @click="deleteFirstLogo">-->
-<!--            <font-awesome-icon :icon="['fas', 'trash-alt']"/>-->
-<!--          </a>-->
         </div>
         <div v-else>
           <div class="icon-holder">
@@ -89,25 +84,8 @@ export default class UploadLogo extends Vue {
     return this.$store.getters.getSelectedProduct
   }
 
-  @Watch('logoUrl', {
-    immediate: true, deep: true
-  })
-
-  logoUrlChanged() {
-    if(Object.keys(this.customLogos).length) {
-      const firstImage = Object.values(this.customLogos)[0] as Record<any, any>
-      let customLogoUrl = firstImage.url
-      if(customLogoUrl != '') {
-        this.logoUrl = this.apiBaseUrl + '/' + customLogoUrl
-      } else {
-        this.logoUrl = ''
-      }
-    }
-  }
-
   private jwtToken !: string
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
-  public logoUrl = ''
   public ref = this.$refs as Record<any, any>
 
   public uploadLogoBtn() {
@@ -182,7 +160,6 @@ export default class UploadLogo extends Vue {
     fd.append('product_id', this.selectedProduct.product_id)
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
-        this.logoUrl = this.apiBaseUrl + '/' + resp.data.file.logo_url
         let payload = [{
           index: this.customLogoIndex,
           attribute: 'url',
