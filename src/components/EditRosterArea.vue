@@ -40,7 +40,7 @@
     </b-modal>
 
     <div class="d-lg-none">
-      <RosterDetails :productSizes="productSizes"/>
+      <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>
     </div>
     <div class="team-order-details">
       <OrderDetails/>
@@ -109,7 +109,7 @@ export default class EditRosterArea extends Vue {
   public rosterDetailsInit() {
     let payload = {
       text: '',
-      number: 0,
+      number: null,
       size: this.sizeOptions[0].value ? this.sizeOptions[0].value : '',
       quantity: 1,
       information:''

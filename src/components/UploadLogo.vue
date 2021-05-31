@@ -122,7 +122,11 @@ export default class UploadLogo extends Vue {
       }
     }
     if(manageComponent.BasicCustomization) {
+      if (this.open_modal){
         this.showModal()
+      }else{
+        this.uploadLogoBtn()
+      }
     }
   }
 
