@@ -172,7 +172,7 @@
         .roster-row{
             padding: 1.25rem;
             border-bottom: 1px solid #E1E6EA;
-            &:first-child{border-top: 1px solid #E1E6EA;;}
+            &:first-child{border-top: 1px solid #E1E6EA;}
             &.head{font-weight: 600;}
             span.name{
                 width: 40%;

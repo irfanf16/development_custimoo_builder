@@ -8,7 +8,7 @@
               <ChooseColor :colors="colors"/>
             </div>
             <template v-if="customLogos.length">
-              <div class="logo-placement-area extracted-color-area">
+              <div class="logo-placement-area extracted-color-area d-none d-lg-block">
                 <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
                 <div class="logo-placement-holder mb-lg-3">
                   <div class="logo-holder">
@@ -222,6 +222,7 @@ export default class Home extends Vue {
               this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
               this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
               this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
+              this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
           }
     }
 

@@ -36,7 +36,7 @@ import rgbHex from 'rgb-hex'
     }
 
     let scaleImg = document.createElement('img');
-    scaleImg.src = "./img/images/scale.jpg";
+    scaleImg.src = "./img/images/scale.png";
     let fabricObj: Record<any, any> = fabric
     fabricObj.Object.prototype.controls.br = new fabricObj.Control({
       x: 0.6,
@@ -58,7 +58,7 @@ import rgbHex from 'rgb-hex'
     }
 
     let rotationImg = document.createElement('img');
-    rotationImg.src = "./img/images/rotate.jpg";
+    rotationImg.src = "./img/images/rotate.png";
     fabricObj.Object.prototype.controls.tr = new fabricObj.Control({
       x: 0.6,
       y: -0.6,
@@ -79,7 +79,7 @@ import rgbHex from 'rgb-hex'
     }
 
     let deleteImg = document.createElement('img');
-    deleteImg.src = "./img/images/remove.jpg";
+    deleteImg.src = "./img/images/remove.png";
 
     fabricObj.Object.prototype.controls.deleteControl = new fabricObj.Control({
       x: -0.6,
@@ -496,7 +496,9 @@ export default class Scene extends Vue {
 
     if(this.lockerDefaultColors.length) {
       let lockerDefaultColors = this.lockerDefaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
-      this.changeDefaultColors(lockerDefaultColors)
+      if(lockerDefaultColors.length) {
+        this.changeDefaultColors(lockerDefaultColors)
+      }
     }
     else if(this.defaultColors.length) {
       this.changeDefaultColors(this.defaultColors)
@@ -542,7 +544,7 @@ export default class Scene extends Vue {
         evented: false,
         globalCompositeOperation: 'multiply'
         // globalCompositeOperation: 'overlay'
-      });
+      })
       img.center().setCoords()
       model = img
       if (side == 'back') {
@@ -550,7 +552,7 @@ export default class Scene extends Vue {
       } else {
         self.frontModel = img
       }
-    })
+    }, { crossOrigin: 'Anonymous'})
 
     this.addTexture(ImageData.textureUrl, side)
 
@@ -670,11 +672,116 @@ export default class Scene extends Vue {
       }
     }, 1000)
     canvas.on('object:modified', (e) => {
-      self.objectMove(e)
+      self.objectMove(e, side)
     })
+    canvas.on('object:moving', (e) => {
+      self.objectScaling(e, side)
+    });
   }
 
-  public objectMove(e: any) {
+  public objectScaling(e: any, side: string) {
+    let model = this.frontModel
+    let canvas = this.frontCanvas
+    if(side == 'back') {
+      model = this.backModel
+      canvas = this.backCanvas
+    }
+
+    const modelBoundingRect = model.getBoundingRect()
+    let boundingRect = {
+      left: modelBoundingRect.left,
+      right: modelBoundingRect.left + modelBoundingRect.width,
+      top: modelBoundingRect.top,
+      bottom: modelBoundingRect.top + modelBoundingRect.height,
+    }
+
+    if(e.target.left > boundingRect.right - (e.target.width / 4)) {
+      e.target.left = boundingRect.right - (e.target.width / 4)
+    }
+    else if(e.target.left < boundingRect.left + (e.target.width / 4)) {
+      e.target.left = boundingRect.left + (e.target.width / 4)
+    }
+    if(e.target.top > boundingRect.bottom - (e.target.height / 6)){
+      e.target.top = boundingRect.bottom - (e.target.height / 6)
+    }
+    else if(e.target.top < boundingRect.top + (e.target.height / 6)) {
+      e.target.top = boundingRect.top + (e.target.height / 6)
+    }
+
+    const centerPoint = e.target.getCenterPoint()
+    if(canvas.isTargetTransparent(model, centerPoint.x, centerPoint.y)) {
+      const boundingDistance = {
+        left: Math.abs(boundingRect.left - centerPoint.x),
+        right: Math.abs(boundingRect.right - centerPoint.x)
+      } as Record<any, any>
+
+      let moveTo = 'left'
+      Object.keys(boundingDistance).forEach((key: string) => {
+        if(boundingDistance[key] < boundingDistance[moveTo]) {
+          moveTo = key
+        }
+      })
+
+      let direction = this.targetNonTransparent(canvas, model, e.target.left, e.target.top, moveTo)
+
+      e.target.left = direction.left
+    }
+    let dimText = this.dimTextFront
+    if(e.target.side == 'back') {
+      dimText = this.dimTextBack
+    }
+    let scale = 1.6
+    if(e.target.text) {
+      scale = 1.3
+    }
+    this.showDimensions(e, dimText, scale)
+  }
+
+  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
+    if(canvas.isTargetTransparent(model, pointX, pointY)) {
+      if(moveTo == 'left') {
+        pointX = pointX + 1
+      } else if(moveTo == 'right') {
+        pointX = pointX - 1
+      }
+      return this.targetNonTransparent(canvas, model, pointX, pointY, moveTo)
+    }
+    return {left: pointX, top: pointY}
+  }
+
+  public objectMove(e: any, side: string) {
+    let model = this.frontModel
+    let canvas = this.frontCanvas
+    if(side == 'back') {
+      model = this.backModel
+      canvas = this.backCanvas
+    }
+    const modelBoundingRect = model.getBoundingRect()
+    let boundingRect = {
+      left: modelBoundingRect.left,
+      right: modelBoundingRect.left + modelBoundingRect.width,
+      top: modelBoundingRect.top,
+      bottom: modelBoundingRect.top + modelBoundingRect.height,
+    }
+
+    const centerPoint = e.target.getCenterPoint()
+    if(canvas.isTargetTransparent(model, centerPoint.x, centerPoint.y)) {
+      const boundingDistance = {
+        left: Math.abs(boundingRect.left - centerPoint.x),
+        right: Math.abs(boundingRect.right - centerPoint.x)
+      } as Record<any, any>
+
+      let moveTo = 'left'
+      Object.keys(boundingDistance).forEach((key: string) => {
+        if(boundingDistance[key] < boundingDistance[moveTo]) {
+          moveTo = key
+        }
+      })
+
+      let direction = this.targetNonTransparent(canvas, model, e.target.left, e.target.top, moveTo)
+
+      e.target.left = direction.left
+    }
     const self = this;
     if(e.target.text) {
       this.customTexts.forEach((text, index) => {
@@ -729,7 +836,7 @@ export default class Scene extends Vue {
           if(e.target.side == 'back') {
             dimText = this.dimTextBack
           }
-          this.showDimensions(e, dimText, 1.4)
+          this.showDimensions(e, dimText, 1.3)
         }
       })
     } else {
@@ -896,7 +1003,7 @@ export default class Scene extends Vue {
               visible: false
             })
           })
-        })
+        }, { crossOrigin: 'Anonymous'})
       }
     })
   }
@@ -984,7 +1091,7 @@ export default class Scene extends Vue {
           })
         }
         textBox.on('selected', (e: Record<any, any>) => {
-          this.showDimensions(e, dimText, 1.4)
+          this.showDimensions(e, dimText, 1.3)
         })
         canvas.on('selection:cleared', () => {
           dimText.set({
