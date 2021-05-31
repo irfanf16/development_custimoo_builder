@@ -222,9 +222,7 @@ export default class LogoPlacementTabs extends Vue {
 
   shuffleLogoColors() {
     if(this.imageColors.length > 1) {
-      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
-        return imageColor.hex
-      })
+      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
       let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
         return imageColor.hex
       })
@@ -253,8 +251,9 @@ export default class LogoPlacementTabs extends Vue {
 
   public rollbackPreviousColors (): void {
     this.previousImageColors.forEach((defaultColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.name })
+      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
     })
+    this.imageColors = this.previousImageColors
     this.previousImageColors = []
   }
 
