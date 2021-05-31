@@ -50,30 +50,14 @@
                   <span>Size</span>
                   <span>Qty</span>
               </div>
-              <div class="roster-row d-flex flex-wrap align-items-center justify-content-between">
-                  <span class="name">Brandon</span>
-                  <span>18</span>
-                  <span>3XL</span>
-                  <span>1</span>
+            <template v-for="(roster, key) in rosterDetails">
+              <div :key="key" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
+                <span class="name">{{ roster.text }}</span>
+                <span>{{ roster.number }}</span>
+                <span>{{ roster.size }}</span>
+                <span>{{ roster.quantity }}</span>
               </div>
-              <div class="roster-row d-flex flex-wrap align-items-center justify-content-between">
-                  <span class="name">Brandon</span>
-                  <span>18</span>
-                  <span>3XL</span>
-                  <span>1</span>
-              </div>
-              <div class="roster-row d-flex flex-wrap align-items-center justify-content-between">
-                  <span class="name">Brandon</span>
-                  <span>18</span>
-                  <span>3XL</span>
-                  <span>1</span>
-              </div>
-              <div class="roster-row d-flex flex-wrap align-items-center justify-content-between">
-                  <span class="name">Brandon</span>
-                  <span>18</span>
-                  <span>3XL</span>
-                  <span>1</span>
-              </div>
+            </template>
           </div>
         </b-card-body>
       </b-collapse>
@@ -102,7 +86,7 @@
     </b-card>
 
     <b-card no-body>
-      <b-card-header header-tag="header" class="p-1" role="tab"> 
+      <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-4 class="p-3"><span class="text">Logos</span> <span class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-4" accordion="my-accordion" role="tabpanel">
@@ -136,7 +120,11 @@
 <script lang="ts">
     import {Component, Vue} from 'vue-property-decorator'
     @Component<OrderAccordion>({})
-    export default class OrderAccordion extends Vue {}
+    export default class OrderAccordion extends Vue {
+      get rosterDetails(): [Record<any, any>] {
+        return this.$store.getters.getRosterDetails
+      }
+    }
 </script>
 
 <style lang="scss" scoped>
