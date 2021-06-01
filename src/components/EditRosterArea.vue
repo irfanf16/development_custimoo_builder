@@ -24,13 +24,15 @@
               <Scene v-if="selectedProduct.productstyles[styleIndex].back" :measurement-ratio="design.measurement_ratio"
                      :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
                      :back="{textureUrl: apiBaseUrl+'/'+ design.back_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].back.file_url}"
-                     :logos="selectedProduct.productstyles[styleIndex].logo" :productNamesSetting="selectedProduct.productnames"
-                     :productColors="selectedProduct.colors"  />
+                     :logos="selectedProduct.productstyles[styleIndex].logo"
+                     :productNamesSetting="selectedProduct.productnames"
+                     :productColors="selectedProduct.colors"/>
 
               <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio"
                      :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
-                     :logos="selectedProduct.productstyles[styleIndex].logo" :productNamesSetting="selectedProduct.productnames"
-                      :productColors="selectedProduct.colors"  />
+                     :logos="selectedProduct.productstyles[styleIndex].logo"
+                     :productNamesSetting="selectedProduct.productnames"
+                     :productColors="selectedProduct.colors"/>
             </div>
           </template>
           <!-- <CustomizationPreview :designs="products[designsIndex]"/> -->
@@ -68,7 +70,9 @@ import Scene from "@/components/Scene.vue"
   mounted() {
     this.setProductSizes()
     this.$nextTick(() => {
-      this.rosterDetailsInit()
+      if (!this.rosterDetails.length) {
+        this.rosterDetailsInit()
+      }
     })
   }
 })
@@ -81,16 +85,18 @@ export default class EditRosterArea extends Vue {
   public designsIndex = 0
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
-  public apiBaseUrl =  process.env.VUE_APP_API_BASE_URL
+  public apiBaseUrl = process.env.VUE_APP_API_BASE_URL
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
-  get selectedProduct(): Record<any, any>{
+
+  get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-  get styleIndex():number{
-    return  this.$store.getters.getCurrentStyleIndex;
+
+  get styleIndex(): number {
+    return this.$store.getters.getCurrentStyleIndex;
   }
 
   retrieveProducts(): void {
@@ -112,7 +118,7 @@ export default class EditRosterArea extends Vue {
       number: null,
       size: this.sizeOptions[0].value ? this.sizeOptions[0].value : '',
       quantity: 1,
-      information:''
+      information: ''
     }
     this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
   }
@@ -127,7 +133,8 @@ export default class EditRosterArea extends Vue {
   public changeProduct(designsIndex: number) {
     this.designsIndex = designsIndex
   }
-  public getOccurence(val:string){
+
+  public getOccurence(val: string) {
     let count = (val.match(/\*/g) || []).length;
     return count
   }
