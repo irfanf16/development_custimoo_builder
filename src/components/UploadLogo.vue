@@ -9,14 +9,14 @@
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
         <div v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
-          <img :src="apiBaseUrl+'/'+customLogos[0].url" width="100%"/>
+          <img ref="logoImageExtract" :src="apiBaseUrl+'/'+customLogos[0].url" width="100%"/>
         </div>
         <div v-else>
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
           </div>
           Upload Logo
-          <img ref="logoImageExtract" :style="{visibility : manageComponents.BasicCustomization? 'visible' : 'hidden'}"
+          <img ref="logoImageExtract" v-if="customLogos[0] && customLogos[0].url" :style="{visibility : manageComponents.BasicCustomization? 'visible' : 'hidden'}"
                crossorigin="anonymous" :src="apiBaseUrl+'/'+customLogos[0].url" width="0" height="0"/>
         </div>
       </div>
