@@ -1832,3 +1832,18 @@ a:hover{color: #219f84;}
         }
     }
 }
+
+#back-pdf,
+#front-pdf {
+    position: relative !important;
+    width: 500px !important;
+    height: 500px !important;
+}
+
+#front-pdf {
+    left: -40px !important;
+}
+
+#back-pdf {
+    left: -20px !important;
+}

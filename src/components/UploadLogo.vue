@@ -9,13 +9,15 @@
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
         <div v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
-          <img :src="apiBaseUrl+'/'+customLogos[0].url" width="100%"/>
+          <img ref="logoImageExtract" crossorigin="anonymous" :src="apiBaseUrl+'/'+customLogos[0].url" width="100%"/>
         </div>
         <div v-else>
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
           </div>
           Upload Logo
+          <img ref="logoImageExtract" v-if="customLogos[0] && customLogos[0].url" :style="{visibility : manageComponents.BasicCustomization? 'visible' : 'hidden'}"
+               crossorigin="anonymous" :src="apiBaseUrl+'/'+customLogos[0].url" width="0" height="0"/>
         </div>
       </div>
       <div class="upload-logo-content">
@@ -56,6 +58,9 @@
 
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import {http} from "@/httpCommon"
+import ColorThief from 'colorthief'
+import getClosestColor from '@/pantoneColor'
+import rgbHex from 'rgb-hex'
 
 @Component<UploadLogo>({
   mounted() {
@@ -87,6 +92,7 @@ export default class UploadLogo extends Vue {
   private jwtToken !: string
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public ref = this.$refs as Record<any, any>
+  public imageColors: any[] = []
 
   public uploadLogoBtn() {
     if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null){
@@ -181,11 +187,53 @@ export default class UploadLogo extends Vue {
           localStorage.setItem('isAssociation', 'true')
         }
         this.hideModal()
-        this.$emit("logoChange")
+        this.getLogoColors()
       })
       .catch((e: any) => {
         console.log(e)
       })
+  }
+
+  public getLogoColors(){
+    if(this.customLogos.length){
+      if(this.customLogos[0] && this.customLogos[0].url) {
+        this.$nextTick(() => {
+          const colorThief = new ColorThief();
+          const img = this.$refs.logoImageExtract as HTMLImageElement
+          if (img.complete) {
+            let colors = colorThief.getPalette(img)
+            this.processColors(colors)
+          } else {
+            img.addEventListener('load', () => {
+              let colors = colorThief.getPalette(img)
+              this.processColors(colors)
+            });
+          }
+
+        })
+      }
+    }
+  }
+
+  processColors(colors: []) {
+    this.imageColors = []
+    let uniqueColors: string[] = []
+    colors.forEach((color: number[]) => {
+      const hex = rgbHex(color[0], color[1], color[2])
+      if ((!uniqueColors.includes(hex))) {
+        uniqueColors.push(hex)
+      }
+    })
+    let deletedCount = uniqueColors.length - 4
+    uniqueColors.splice(4, deletedCount)
+
+    uniqueColors.forEach((color: string) => {
+      console.log(color)
+      let pantoneColor = getClosestColor(color)
+      console.log(JSON.parse(JSON.stringify(pantoneColor)))
+      this.imageColors.push({ hex: pantoneColor.hex, pantone: pantoneColor.pantone})
+    })
+    this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
   }
 
   public deleteFirstLogo() {
