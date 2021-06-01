@@ -57,7 +57,7 @@
                                     </template>
                                 </div>
                               </b-tab>
-                                <b-tab title="Assets">
+                                <b-tab title="Assets" class="assets-file">
                                   <template v-for="(logo, inda) in room.logos">
                                     <div :key="inda">
                                       <img :src="apiBaseUrl+'/'+logo.logo_url "/>

@@ -168,7 +168,7 @@ export default class ChooseColor extends Vue {
     border-radius: 50%;
     width: 52px;
     height: 52px;
-    border: 1px solid #EFF2F4;
+    border: 2px solid #EFF2F4;
     position: relative;
     margin: 0 auto 12px;
     @media only screen and (min-width: 1366px) {

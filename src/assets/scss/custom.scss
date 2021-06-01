@@ -1575,7 +1575,40 @@ a:hover{color: #219f84;}
                 margin-left: 0;
             }
         }
-        .card{border: none;}
+        .card{
+            border: none;
+            .assets-file{
+                display: flex;
+                flex-wrap: wrap;
+                flex-direction: row;
+                max-height: 50vh;
+                overflow-y: auto;
+                div{
+                    display: flex;
+                    flex-basis: 33.3%;
+                    justify-content: center;
+                    margin-bottom: 20px;
+                    @media only screen and (min-width: 768px){
+                        flex-basis: 20%;
+                    }
+                    img{
+                        display: block;
+                        max-width: 90%;
+                        height: auto;
+                        margin: 0;
+                    }
+                }
+                &::-webkit-scrollbar{
+                    width: 5px;
+                }
+                &::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                &::-webkit-scrollbar-thumb {
+                    background: #219F84;
+                }
+            }
+        }
         .nav-tabs{
             .nav-item{
                 margin: 0 5px;
@@ -1620,7 +1653,7 @@ a:hover{color: #219f84;}
             display: block !important;
             width: 100% !important;
             .canvas-container{
-                width: 120px !important;
+                width: 100px !important;
                 height: 140px !important;
                 @media only screen and (min-width: 1023px){
                     width: 100% !important;

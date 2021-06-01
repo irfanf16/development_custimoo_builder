@@ -60,7 +60,7 @@
             </div>
           </template>
           <template v-if="manageComponents.LogoArea">
-            <UploadLogo :customLogoIndex="index" @logoChange="getLogoColors"/>
+            <UploadLogo :customLogoIndex="index"/>
           </template>
         </div>
       </b-tab>
@@ -73,9 +73,6 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
-import getClosestColor from '@/pantoneColor'
-import { prominent } from 'color.js'
-import rgbHex from 'rgb-hex'
 
 
 @Component<LogoPlacementTabs>({
@@ -85,7 +82,6 @@ import rgbHex from 'rgb-hex'
     SaveColorModal
   },
   mounted() {
-    this.getLogoColors()
     if(this.numberOfLogosAllowed > 0) {
       this.allowedLogosLimit = this.numberOfLogosAllowed
     }
@@ -115,9 +111,12 @@ export default class LogoPlacementTabs extends Vue {
     {value: 'back', text: 'Back'}
   ]
   public previousImageColors = []
-  public imageColors: any[] = []
   public logoColorUsed = false
   public allowedLogosLimit = 1000
+
+  get imageColors(): any[] {
+    return this.$store.getters.getLogosColors
+  }
 
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
@@ -185,29 +184,6 @@ export default class LogoPlacementTabs extends Vue {
     this.$store.dispatch('updateCustomLogoAttribute', payload)
   }
 
-  public getLogoColors(){
-    if(this.customLogos.length){
-      if(this.customLogos[0] && this.customLogos[0].url) {
-        this.$nextTick(() => {
-          this.imageColors = []
-          prominent(this.apiBaseUrl + '/' + this.customLogos[0].url).then((colors: any) => {
-            let deletedCount = colors.length - 4
-            colors.splice(4, deletedCount)
-            colors.forEach((color: number[]) => {
-              const hex = rgbHex(color[0], color[1], color[2])
-              console.log(hex)
-              let pantoneColor = getClosestColor(hex)
-              console.log(pantoneColor)
-              this.imageColors.push({ hex: pantoneColor.hex, pantone: pantoneColor.pantone})
-            })
-          })
-
-          this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
-        })
-      }
-    }
-  }
-
   useLogoColors() {
     this.logoColorUsed = true
     this.$store.dispatch('setGroupColors', {})
@@ -238,7 +214,7 @@ export default class LogoPlacementTabs extends Vue {
         imageColors.reduce(shuffle)
       }
 
-      this.imageColors = imageColors
+      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
       imageColors.forEach((imageColor: Record<any, any>, index: number) => {
         this.$store.dispatch('setDefaultColor', {
           index: index,
@@ -253,7 +229,7 @@ export default class LogoPlacementTabs extends Vue {
     this.previousImageColors.forEach((defaultColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
     })
-    this.imageColors = this.previousImageColors
+    this.$store.dispatch("SET_LOGO_COLORS", this.previousImageColors);
     this.previousImageColors = []
   }
 
