@@ -108,7 +108,6 @@ export default class DesignAvailable extends Vue {
       display: block;
       position: relative;
       z-index: 1;
-      
     }
     h3{
         text-align: center;
