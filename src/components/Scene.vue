@@ -542,6 +542,7 @@ export default class Scene extends Vue {
         hasControls: false,
         selectable: false,
         evented: false,
+        crossOrigin: 'Anonymous',
         globalCompositeOperation: 'multiply'
         // globalCompositeOperation: 'overlay'
       })
@@ -907,6 +908,7 @@ export default class Scene extends Vue {
         hasControls: false,
         selectable: false,
         evented: false,
+        crossOrigin: 'Anonymous',
         lockMovementX: true,
         lockMovementY: true,
       })
@@ -943,6 +945,7 @@ export default class Scene extends Vue {
             hasControls: logo.haveControls,
             hasBorders: logo.haveControls,
             evented: logo.haveControls,
+            crossOrigin: 'Anonymous',
             globalCompositeOperation: 'source-atop',
             lockScalingFlip: true
           })
