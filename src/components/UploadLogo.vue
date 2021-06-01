@@ -9,7 +9,7 @@
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
         <div v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
-          <img ref="logoImageExtract" :src="apiBaseUrl+'/'+customLogos[0].url" width="100%"/>
+          <img ref="logoImageExtract" crossorigin="anonymous" :src="apiBaseUrl+'/'+customLogos[0].url" width="100%"/>
         </div>
         <div v-else>
           <div class="icon-holder">
