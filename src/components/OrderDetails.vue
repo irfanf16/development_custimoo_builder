@@ -173,7 +173,7 @@
           <div class="order-row">
             <button class="btn btn-secondary fw-bold w-100 mb-2" @click="buyNow">Buy Now</button>
           </div>
-          <button class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Production PDF</button>
+          <button class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
         </div>
       </div>
     </div>
