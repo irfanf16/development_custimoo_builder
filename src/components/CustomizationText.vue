@@ -50,6 +50,15 @@
           </b-card-body>
         </div>
       </div>
+      <div class="outline-slider-area pt-4">
+        <template>
+          <div>
+            <label for="range-2 fz-16">Outline Width</label>
+            <b-form-input class="mt-2" id="range-2" v-model="rangeValue" type="range" min="0" max="5" step="0.5"></b-form-input>
+            <!-- <div class="mt-2">Value: {{ rangeValue }}</div> -->
+          </div>
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -84,6 +93,7 @@ export default class CustomizationText extends Vue {
   public fontColorIndex!: number
   public selectTypeIndex = 0
   public fontColor: any[] = []
+  public rangeValue= '2'
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
