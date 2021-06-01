@@ -10,6 +10,7 @@
            :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
            :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" />
       </a>
+      <h3>{{ design.design_name }}</h3>
     </div>
   </div>
 </template>
@@ -101,12 +102,21 @@ export default class DesignAvailable extends Vue {
   .design-col {
     margin-bottom: 10px;
     flex-basis: 25%;
+    max-width: 25%;
 
     a {
       display: block;
       position: relative;
       z-index: 1;
+      
     }
+    h3{
+        text-align: center;
+        padding: 10px 0;
+        text-transform: uppercase;
+        overflow: hidden;
+        font-size: 0.75rem;
+      }
 
     img {
       display: block;
