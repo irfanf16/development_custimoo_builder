@@ -28,7 +28,7 @@
             </template>
             <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
               <template v-if="manageComponents.LogoArea">
-                <UploadLogo :customLogoIndex="0" @logoChange="getLogoColors"/>
+                <UploadLogo :customLogoIndex="0"/>
               </template>
             </template>
           </b-col>
@@ -109,10 +109,6 @@ import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import {http} from "@/httpCommon"
-import { prominent } from 'color.js'
-import getClosestColor from '@/pantoneColor'
-import rgbHex from 'rgb-hex'
-
 
 @Component<Home>({
   components: {
@@ -131,7 +127,6 @@ import rgbHex from 'rgb-hex'
       this.retrieveProducts()
       this.getFillColors()
     }
-    this.getLogoColors()
     let isAssociation = JSON.parse(localStorage.getItem('isAssociation') as string) as boolean
     this.jwtToken = localStorage.getItem('jwtToken') as string
     if (isAssociation && this.jwtToken) {
@@ -162,7 +157,6 @@ export default class Home extends Vue {
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public mounted = false
   public previousImageColors = []
-  public imageColors: any[] = []
   public logoColorUsed = false
 
   get hideTab(): Record<any, any> {
@@ -197,6 +191,10 @@ export default class Home extends Vue {
     return  this.$store.getters.getCurrentStyleIndex;
   }
 
+  get imageColors(): any[] {
+    return this.$store.getters.getLogosColors
+  }
+
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
@@ -215,7 +213,6 @@ export default class Home extends Vue {
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
-    this.getLogoColors()
   }
   public showDesign() {
           if(this.manageComponents.mobileScreen){
@@ -298,29 +295,6 @@ export default class Home extends Vue {
     this.$store.dispatch('updateCustomLogoAttribute', payload)
   }
 
-  public getLogoColors(){
-    if(this.customLogos.length){
-      if(this.customLogos[0] && this.customLogos[0].url) {
-        this.$nextTick(() => {
-          this.imageColors = []
-          prominent(this.apiBaseUrl + '/' + this.customLogos[0].url).then((colors: any) => {
-            let deletedCount = colors.length - 4
-            colors.splice(4, deletedCount)
-            colors.forEach((color: number[]) => {
-              const hex = rgbHex(color[0], color[1], color[2])
-              console.log(hex)
-              let pantoneColor = getClosestColor(hex)
-              console.log(pantoneColor)
-              this.imageColors.push({ hex: pantoneColor.hex, pantone: pantoneColor.pantone})
-            })
-          })
-
-          this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
-        })
-      }
-    }
-  }
-
   useLogoColors() {
     this.logoColorUsed = true
     this.$store.dispatch('setGroupColors', {})
@@ -351,7 +325,7 @@ export default class Home extends Vue {
         imageColors.reduce(shuffle)
       }
 
-      this.imageColors = imageColors
+      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
       imageColors.forEach((imageColor: Record<any, any>, index: number) => {
         this.$store.dispatch('setDefaultColor', {
           index: index,
@@ -366,7 +340,7 @@ export default class Home extends Vue {
     this.previousImageColors.forEach((defaultColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
     })
-    this.imageColors = this.previousImageColors
+    this.$store.dispatch("SET_LOGO_COLORS", this.previousImageColors);
     this.previousImageColors = []
   }
 
