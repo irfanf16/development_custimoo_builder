@@ -62,7 +62,7 @@ export default class DesignAvailable extends Vue {
 .available-designs-section {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  // justify-content: space-between;
   align-items: center;
   max-height: 15vh;
   overflow: hidden;
@@ -83,29 +83,24 @@ export default class DesignAvailable extends Vue {
   @media only screen and (min-width: 992px){
     max-height: 50vh;
   }
-
-  &:after {
-    content: '';
-    flex: auto;
+  &::-webkit-scrollbar{
+      width: 3px;
+  }
+  &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+  }
+  &::-webkit-scrollbar-thumb {
+      background: #219F84;
   }
 
+  // &:after {
+  //   content: '';
+  //   flex: auto;
+  // }
+
   .design-col {
-    flex: 0 0 22%;
-    max-width: 22%;
     margin-bottom: 10px;
-
-    @media only screen and (min-width: 1024px){
-      flex: 0 0 30%;
-      max-width: 30%;
-    }
-    @media only screen and (min-width: 1360px){
-      flex: 0 0 22%;
-      max-width: 22%;
-    }
-
-    &:last-child {
-      margin-left: 10px;
-    }
+    flex-basis: 25%;
 
     a {
       display: block;

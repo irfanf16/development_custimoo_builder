@@ -54,8 +54,8 @@
         <template>
           <div>
             <label for="range-2 fz-16">Outline Width</label>
-            <b-form-input class="mt-2" id="range-2" v-model="rangeValue" type="range" min="0" max="5" step="0.5"></b-form-input>
-            <!-- <div class="mt-2">Value: {{ rangeValue }}</div> -->
+            <b-form-input class="mt-2" id="range-2" v-model="rangeValue" type="range" min="0" max="10" step="1"></b-form-input>
+            <div class="mt-2">Outline Size: {{ rangeValue }}px</div>
           </div>
         </template>
       </div>
