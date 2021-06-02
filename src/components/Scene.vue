@@ -848,6 +848,7 @@ export default class Scene extends Vue {
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
             const width = e.target.width * e.target.scaleX;
             const height = e.target.width * e.target.scaleY;
+            const outLineWidth = e.target.strokeWidth * e.target.scaleX
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'scaleX',
@@ -867,6 +868,11 @@ export default class Scene extends Vue {
               index: index,
               attribute: 'originalHeight',
               value: Math.floor(height * this.measurementRatio)
+            })
+            self.$store.dispatch('updateCustomTextAttribute', {
+              index: index,
+              attribute: 'originalOutLineWidth',
+              value: outLineWidth * this.measurementRatio
             })
           } else if (e.action == 'rotate') {
             self.$store.dispatch('updateCustomTextAttribute', {
@@ -1132,11 +1138,13 @@ export default class Scene extends Vue {
         if(this.mainPreview) {
           const width = Math.floor(textBox.width as number * this.measurementRatio)
           const height = Math.floor(textBox.height as number * this.measurementRatio)
+          const outLineWidth = textBox.strokeWidth * this.measurementRatio
           self.$store.dispatch('updateCustomTextWithoutTrigger', {
             index: index,
             data: {
               originalWidth: width,
-              originalHeight: height
+              originalHeight: height,
+              originalOutLineWidth: outLineWidth
             }
           })
         }
