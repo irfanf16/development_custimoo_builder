@@ -138,6 +138,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 600}) readonly canvasWidth!: number;
   @Prop({required: false, default: 600}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly mainPreview!: boolean;
+  @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -942,7 +943,7 @@ export default class Scene extends Vue {
             top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
             angle: logo.rotation as number,
             centeredScaling: true,
-            selectable: logo.haveControls,
+            selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
             hasControls: logo.haveControls,
             hasBorders: logo.haveControls,
             evented: logo.haveControls,
@@ -1031,7 +1032,7 @@ export default class Scene extends Vue {
           top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
           angle: text.rotation as number,
           centeredScaling: true,
-          selectable: true,
+          selectable: this.canvasSelection,
           hasControls: true,
           hasBorders: true,
           evented: true,
