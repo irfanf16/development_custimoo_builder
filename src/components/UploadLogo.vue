@@ -1,6 +1,5 @@
 <template>
   <div class="upload-logo-opener">
-<!--    <b-button v-b-modal.modal-center>-->
     <div class="position-relative" v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
       <a class="remove-img" @click="deleteFirstLogo">
         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
@@ -28,7 +27,6 @@
     </div>
     <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
            accept="image/*">
-<!--    </b-button>-->
     <b-modal  ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
       <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or laws. You may
         review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
@@ -46,8 +44,6 @@
         </div>
       <div class="upload-logo-buttons">
         <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
-        <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
-               accept="image/*">
         <b-button class="btn-upload" @click="uploadLogoBtn">Confirm and Upload logo</b-button>
       </div>
     </b-modal>
@@ -93,7 +89,16 @@ export default class UploadLogo extends Vue {
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
-
+  
+  @Watch('customLogos', {
+    deep: true
+  })
+  customLogosChanged(newVal: [Record<any, any>]) {
+    if(this.customLogos[0].url == ''){
+      let inputRef = this.$refs.fileInput as Record<any, any>
+      inputRef.value=null;
+    }
+  }
   public uploadLogoBtn() {
     if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null){
       localStorage.setItem('logo_modal_status', 'false')
@@ -237,6 +242,8 @@ export default class UploadLogo extends Vue {
   }
 
   public deleteFirstLogo() {
+    let inputRef = this.$refs.fileInput as Record<any, any>
+    inputRef.value=null;
     let payload = {
       index: 0
     }
