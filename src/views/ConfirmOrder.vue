@@ -20,7 +20,7 @@
                 </b-col>
                 <b-col md="6">
                     <div class="roster-preview-area">
-                        <CustomizationPreview :designs="products[designsIndex]" />
+                        <CustomizationPreview :designs="products[designsIndex]" :canvasSelection="false" />
                         <OrderDetails />
                     </div>
                 </b-col>

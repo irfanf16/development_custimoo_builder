@@ -92,7 +92,7 @@ export default class CustomizationText extends Vue {
   public fontColorIndex!: number
   public selectTypeIndex = 0
   public fontColor: any[] = []
-  public outLineWidthValue= 0
+  public outLineWidthValue = 0
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
