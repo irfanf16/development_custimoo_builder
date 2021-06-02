@@ -257,8 +257,8 @@ export default class OrderDetails extends Vue {
     let front2dCtx = frontCanvas.getContext("2d")
     let backCanvas = this.productionSVGs.back
     let back2dCtx = backCanvas.getContext("2d")
-    let front2D = $(front2dCtx.canvas) as string
-    let back2D = $(back2dCtx.canvas) as string
+    let front2D = $(front2dCtx.canvas)
+    let back2D = $(back2dCtx.canvas)
     $(front2D).attr("id", "front-pdf")
     $(back2D).attr("id", "back-pdf")
     $(front2D).attr("class", "canvas")
@@ -271,8 +271,8 @@ export default class OrderDetails extends Vue {
       $(back2D).removeAttr("data-" + i)
     })
 
-    $("#front-svg").html(front2D)
-    $("#back-svg").html(back2D)
+    $("#front-svg").html(front2D.get(0))
+    $("#back-svg").html(back2D.get(0))
     this.logosConversionToBase64()
   }
 

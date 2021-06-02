@@ -544,7 +544,6 @@ export default class Scene extends Vue {
         hasControls: false,
         selectable: false,
         evented: false,
-        crossOrigin: 'Anonymous',
         globalCompositeOperation: 'multiply'
         // globalCompositeOperation: 'overlay'
       })
@@ -711,7 +710,7 @@ export default class Scene extends Vue {
       e.target.top = boundingRect.top + (e.target.height / 6)
     }
 
-    const centerPoint = e.target.getCenterPoint()
+    let centerPoint = e.target.getCenterPoint()
     if(canvas.isTargetTransparent(model, centerPoint.x, centerPoint.y)) {
       const boundingDistance = {
         left: Math.abs(boundingRect.left - centerPoint.x),
@@ -729,6 +728,13 @@ export default class Scene extends Vue {
 
       e.target.left = direction.left
     }
+
+    // centerPoint = e.target.getCenterPoint()
+    // const width = e.target.width * e.target.scaleX;
+    // if(canvas.isTargetTransparent(model, e.target.left + width / 2, centerPoint.y)){
+    //   this.addToOtherSide(e, side, boundingRect, canvas, model)
+    // }
+
     let dimText = this.dimTextFront
     if(e.target.side == 'back') {
       dimText = this.dimTextBack
@@ -738,6 +744,45 @@ export default class Scene extends Vue {
       scale = 1.3
     }
     this.showDimensions(e, dimText, scale)
+  }
+
+  public otherSideObjects: any[] = []
+  public addToOtherSide(e: any, side: string, boundingRect: Record<any, any>, canvas: fabric.Canvas, model: fabric.Image) {
+    const centerPoint = e.target.getCenterPoint()
+
+    const boundingDistance = {
+      left: Math.abs(boundingRect.left + e.target.width),
+      top: Math.abs(boundingRect.top + centerPoint.y),
+      right: Math.abs(boundingRect.right + centerPoint.x),
+      bottom: Math.abs(boundingRect.bottom + centerPoint.y)
+    } as Record<any, any>
+
+    let moveTo = 'left'
+    Object.keys(boundingDistance).forEach((key: string) => {
+      if(boundingDistance[key] < boundingDistance[moveTo]) {
+        moveTo = key
+      }
+    })
+    console.log(moveTo)
+    if(moveTo == 'left') {
+      let objectAdd = fabric.util.object.clone(e.target)
+      const width = objectAdd.width * objectAdd.scaleX;
+      let direction = this.targetNonTransparent(canvas, model, objectAdd.left + width, objectAdd.top, 'right')
+      const outside = objectAdd.left + objectAdd.width - direction.left
+      objectAdd.left = Math.abs(this.canvasWidth - direction.left - objectAdd.width + outside)
+      console.log(objectAdd.left)
+
+      this.otherSideObjects.forEach((logo, index) => {
+        console.log(logo)
+      })
+      if(side == 'back') {
+        this.frontCanvas.add(objectAdd)
+      } else {
+        console.log(objectAdd)
+        this.otherSideObjects.push(objectAdd)
+        this.backCanvas.add(objectAdd)
+      }
+    }
   }
 
   public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
@@ -904,13 +949,13 @@ export default class Scene extends Vue {
 
   public addTexture (textureUrl: string, side: string): void {
     const self = this
-    fabric.loadSVGFromURL(textureUrl, function (objects: any, options: any) {
+    fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
+      options.crossOrigin = 'Anonymous'
       const img = fabric.util.groupSVGElements(objects) as fabric.Group
       img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
         hasControls: false,
         selectable: false,
         evented: false,
-        crossOrigin: 'Anonymous',
         lockMovementX: true,
         lockMovementY: true,
       })
