@@ -68,14 +68,14 @@
                                     <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
                                         <div class="pt-lg-2 folder-wrapper">
                                             <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
-                                          <template v-for="(folder, inde) in room.folders">
-                                          <div class="d-flex flex-wrap color-folder-holder" :key="inde">
-                                                <a href="#" class="text-center d-block" @click="fetchColors(inde, i)">
-                                                    <font-awesome-icon :icon="['fas', 'folder']"/>
-                                                    <span class="folder-name d-block">{{ folder.folder_name }}</span>
-                                                </a>
+                                            <div class="d-flex flex-wrap color-folder-holder">
+                                                <template v-for="(folder, inde) in room.folders">
+                                                    <a href="#" class="text-center d-block" @click="fetchColors(inde, i)" :key="inde">
+                                                        <font-awesome-icon :icon="['fas', 'folder']"/>
+                                                        <span class="folder-name d-block">{{ folder.folder_name }}</span>
+                                                    </a>
+                                                </template>
                                             </div>
-                                          </template>
                                         </div>
                                         <div class="color-holder" v-if="colors.length > 0">
                                             <div class="color-container">
@@ -357,6 +357,7 @@
                         color: #219f84;
                         background: #fff;
                         border-radius: 50%;
+                        cursor: pointer;
                         @media only screen and (min-width: 992px){
                             width: 30px !important;
                             height: 30px;
@@ -506,6 +507,30 @@
             @media only screen and (min-width: 1200px){
                 flex: 0 0 25%;
                 max-width: 25%;
+            }
+            &::-webkit-scrollbar{
+                display: none;
+            }
+            .color-container{
+                gap: 7px;
+                @media only screen and (min-width: 410px){
+                    gap: 16px;
+                }
+                @media only screen and (min-width: 768px){
+                    gap: 5px;
+                }
+                @media only screen and (min-width: 1024px){
+                    gap: 9px;
+                }
+                @media only screen and (min-width: 1200px){
+                    gap: 7px;
+                }
+                @media only screen and (min-width: 1274px){
+                    gap: 16px;
+                }
+                @media only screen and (min-width: 1274px){
+                    gap: 16px;
+                }
             }
         }
         .color-folder-holder{

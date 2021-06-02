@@ -1084,17 +1084,37 @@ a:hover{color: #219f84;}
         padding: 15px;
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between;
+        // justify-content: space-between;
+        gap: 0.9%;
+        @media only screen and (min-width: 768px){
+            gap: 1px;
+        }
+        @media only screen and (min-width: 1024px){
+            gap: 1.9%;
+        }
+        @media only screen and (min-width: 1200px){
+            gap: 2px;
+        }
+        @media only screen and (min-width: 1366px){
+            gap: 1px;
+        }
+        @media only screen and (min-width: 1440px){
+            gap: 12px;
+        }
+        @media only screen and (min-width: 1600px){
+            gap: 7px;
+        }
+        @media only screen and (min-width: 1600px){
+            gap: 2.2%;
+        }
         
         .color-box{
-            width: 40px;
-            height: 40px;
-            margin: 0 2px;
+            width: 36px;
+            height: 36px;
             background: #000;
             border-radius: 50%;
             border: 1px solid #EFF2F4;
             position: relative;
-            margin-bottom: 10px;
             @media only screen and (min-width: 1024px){
                 width: 32px;
                 height: 32px;
@@ -1156,7 +1176,35 @@ a:hover{color: #219f84;}
           margin: 0 !important;
           display: block !important;
         }
-      }
+    }
+    .sketchfab-embed-wrapper{
+        width: 300px;
+        display: block;
+        margin: 0 auto;
+        @media only screen and (min-width: 768px){
+            width: 600px;
+        }
+        @media only screen and (min-width: 1024px){
+            width: 400px;
+        }
+        @media only screen and (min-width: 1366px){
+            width: 600px;
+        }
+        iframe{
+          display: block;
+          width: 100%;
+          height: 300px;
+          @media only screen and (min-width: 768px){
+              height: 400px;
+          }
+          @media only screen and (min-width: 1024px){
+              height: 300px;
+          }
+          @media only screen and (min-width: 1600px){
+              height: 400px;
+          }
+        }
+    }
 }
 .upload-logo-disclaimer{
     .modal-header{

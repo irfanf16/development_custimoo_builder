@@ -8,14 +8,14 @@
           </template>
           <div class="pt-lg-4 folder-wrapper">
             <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Recent Folder</h3>
-            <template v-for="(folder, i) in room.folders">
-              <div class="d-flex flex-wrap" :key="i">
-                <a  class="text-center d-block" @click="changeFolder(folder.folder_name)">
+            <div class="d-flex flex-wrap">
+              <template v-for="(folder, i) in room.folders">
+                <a class="text-center d-block" @click="changeFolder(folder.folder_name)" :key="i">
                   <font-awesome-icon :icon="['fas', 'folder']"/>
                   <span class="folder-name d-block">{{ folder.folder_name }}</span>
                 </a>
-              </div>
-            </template>
+              </template>
+            </div>
           </div>
         </b-tab>
         </template>
