@@ -3,7 +3,6 @@
     <div class="px-3 pt-3 p-lg-4">
       <h2 class="fw-bold mb-2 fz-18">Player {{ customTexts[customTextIndex].type | capitalize }}</h2>
       <b-form>
-        <!-- <h4 class="mt-1 mt-lg-3 mb-2 fz-16">Player {{ customText.type | capitalize }}</h4> -->
         <b-form-input
         @click="isHidden = !isHidden"
           class="mb-2 mr-sm-2 mb-sm- 0"
@@ -29,7 +28,7 @@
             <strong>Fill Color</strong>
           </div>
         </a>
-        <a @click="showColor('outline', customTextIndex)" v-if="customTexts[customTextIndex].outlineEnabled">
+        <a @click="showColor('outline', customTextIndex)" v-if="customTexts[customTextIndex].outlineEnabled && outLineWidthValue > 0">
           <div class="text-color-box">
             <div class="color-circle"
                  :style="{ background : customTexts[customTextIndex].outLineColor? customTexts[customTextIndex].outLineColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
@@ -54,8 +53,8 @@
         <template>
           <div>
             <label for="range-2 fz-16">Outline Width</label>
-            <b-form-input class="mt-2" id="range-2" v-model="rangeValue" type="range" min="0" max="10" step="1"></b-form-input>
-            <div class="mt-2">Outline Size: {{ rangeValue }}px</div>
+            <b-form-input class="mt-2" id="range-2" v-model="outLineWidthValue" @change="outLineWidthValueChanged" type="range" min="0" max="10" step="1"></b-form-input>
+            <div class="mt-2">Outline Size: {{ outLineWidthValue }}px</div>
           </div>
         </template>
       </div>
@@ -93,7 +92,7 @@ export default class CustomizationText extends Vue {
   public fontColorIndex!: number
   public selectTypeIndex = 0
   public fontColor: any[] = []
-  public rangeValue= '2'
+  public outLineWidthValue= 0
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
@@ -132,8 +131,20 @@ export default class CustomizationText extends Vue {
     this.fontColor = this.fontsColors[this.selectTypeIndex].color_text
   }
 
+  outLineWidthValueChanged() {
+    let payload = {index: this.customTextIndex, attribute: 'outLineWidth', value: this.outLineWidthValue}
+    this.$store.commit('customTextAttribute', payload)
+  }
   public isHidden= false
-
-
 }
 </script>
+
+<style lang="scss" scoped>
+  .outline-slider-area{
+    #range-2{
+      &::-webkit-slider-thumb{
+        background: #189076;
+      }
+    }
+  }
+</style>

@@ -108,14 +108,28 @@ export default class DesignAvailable extends Vue {
       display: block;
       position: relative;
       z-index: 1;
-      
     }
     h3{
         text-align: center;
         padding: 10px 0;
         text-transform: uppercase;
         overflow: hidden;
-        font-size: 0.75rem;
+        font-size: 0.65rem;
+        min-height: 50px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        @media only screen and (min-width: 768px){
+          font-size: 0.85rem;
+        }
+        @media only screen and (min-width: 1024px){
+          font-size: 0.6rem;
+        }
+        
+        @media only screen and (min-width: 1700px){
+          font-size: 0.75rem;
+        }
       }
 
     img {
