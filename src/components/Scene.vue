@@ -543,7 +543,6 @@ export default class Scene extends Vue {
         hasControls: false,
         selectable: false,
         evented: false,
-        crossOrigin: 'Anonymous',
         globalCompositeOperation: 'multiply'
         // globalCompositeOperation: 'overlay'
       })
@@ -949,13 +948,13 @@ export default class Scene extends Vue {
 
   public addTexture (textureUrl: string, side: string): void {
     const self = this
-    fabric.loadSVGFromURL(textureUrl, function (objects: any, options: any) {
+    fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
+      options.crossOrigin = 'Anonymous'
       const img = fabric.util.groupSVGElements(objects) as fabric.Group
       img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
         hasControls: false,
         selectable: false,
         evented: false,
-        crossOrigin: 'Anonymous',
         lockMovementX: true,
         lockMovementY: true,
       })
