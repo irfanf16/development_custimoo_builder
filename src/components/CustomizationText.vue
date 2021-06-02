@@ -138,3 +138,13 @@ export default class CustomizationText extends Vue {
   public isHidden= false
 }
 </script>
+
+<style lang="scss" scoped>
+  .outline-slider-area{
+    #range-2{
+      &::-webkit-slider-thumb{
+        background: #189076;
+      }
+    }
+  }
+</style>

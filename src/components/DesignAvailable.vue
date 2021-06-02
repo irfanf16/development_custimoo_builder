@@ -115,6 +115,11 @@ export default class DesignAvailable extends Vue {
         text-transform: uppercase;
         overflow: hidden;
         font-size: 0.75rem;
+        min-height: 50px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
       }
 
     img {
