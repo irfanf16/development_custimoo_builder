@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="locker-modal" id="modal-center-lockerroom" centered scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="locker-modal" id="modal-center-lockerroom" scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
         <b-tabs content-class="mt-3">
           <template v-for="(room, i) in getLockerProducts">
             <b-tab :key="i">
