@@ -109,7 +109,7 @@ import rgbHex from 'rgb-hex'
         self.customLogos.forEach((logo, index) => {
           let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
           if(logoUrl == target._element.src){
-            self.$store.dispatch('updateCustomLogoAttribute', { index: index, attribute: 'url', value: '' })
+            self.$store.dispatch('deleteCustomLogo', {index: index})
           }
         })
       }
