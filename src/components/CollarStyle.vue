@@ -1,13 +1,12 @@
 <template>
     <b-tabs>
-      <!-- <template v-if="productModels.length > 1"> -->
-        <b-tab v-for="(model, index)  in productModels" :key="index">
+        <b-tab v-for="(model, index)  in productModels" :key="index" @click="selectModelStyle(index)">
             <template #title>
               {{ model.model_name }}
             </template>
             <div class="collar-area">
                 <div class="collar-description">
-                    <h3>*   {{ model.model_name }}</h3>
+                    <h3>* {{ model.model_name }}</h3>
                     <div v-html="model.product_model_description">  </div>
                 </div>
                 <div class="choose-collar mb-3">
@@ -28,7 +27,6 @@
                 </div>
             </div>
         </b-tab>
-        <!-- </template> -->
     </b-tabs>
 </template>
 
@@ -50,7 +48,17 @@ import {http} from "@/httpCommon";
       get styleIndex():number{
         return  this.$store.getters.getCurrentStyleIndex;
       }
-      public changeStyleIndex(i:number){
+      public selectModelStyle(modelIndex: number) {
+        for (let styleIndex = 0; styleIndex < this.selectedProduct.productstyles.length; styleIndex++) {
+          if (this.productModels[modelIndex].model_styles.includes(this.selectedProduct.productstyles[styleIndex].id)) {
+            if(styleIndex != this.styleIndex) {
+              this.changeStyleIndex(styleIndex)
+              break;
+            }
+          }
+        }
+      }
+      public changeStyleIndex(i: number) {
         const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
           return item.design_show
         })
@@ -58,7 +66,7 @@ import {http} from "@/httpCommon";
           const design_name = currentDesign[0].design_name
           let designFound = false;
           const newDesign = this.selectedProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>) => {
-            if(item.design_name == design_name) {
+            if(item.design_name.toLowerCase() == design_name.toLowerCase()) {
               designFound  = true
               Vue.set(item, 'design_show', 1)
             } else {
@@ -66,13 +74,15 @@ import {http} from "@/httpCommon";
             }
           })
           if (!designFound){
-            this.selectedProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{
-              if (index ==0 ){
-                Vue.set(this.selectedProduct.productstyles[i].productdesigns[0], 'design_show', 1)
-              }else{
-                Vue.set(this.selectedProduct.productstyles[i].productdesigns[index], 'design_show', 0);
-              }
-            })
+            if(!this.selectedProduct.productstyles[i].productdesigns.filter(design => design.design_show).length) {
+              this.selectedProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{
+                if (index ==0 ){
+                  Vue.set(this.selectedProduct.productstyles[i].productdesigns[0], 'design_show', 1)
+                }else{
+                  Vue.set(this.selectedProduct.productstyles[i].productdesigns[index], 'design_show', 0);
+                }
+              })
+            }
           }
         }
         this.$store.commit('CHANGE_STYLE_INDEX', i);

@@ -1063,8 +1063,8 @@ export default class Scene extends Vue {
           canvas.renderAll()
 
           if (this.mainPreview) {
-            const width = Math.floor(img.width * this.measurementRatio)
-            const height = Math.floor(img.height * this.measurementRatio)
+            const width = Math.floor(img.width * img.scaleX * this.measurementRatio)
+            const height = Math.floor(img.height * img.scaleY * this.measurementRatio)
             self.$store.dispatch('updateCustomLogoWithoutTrigger', {
               index: index,
               data: {
@@ -1166,9 +1166,9 @@ export default class Scene extends Vue {
         canvas.renderAll()
 
         if(this.mainPreview) {
-          const width = Math.floor(textBox.width as number * this.measurementRatio)
-          const height = Math.floor(textBox.height as number * this.measurementRatio)
-          const outLineWidth = textBox.strokeWidth * this.measurementRatio
+          const width = Math.floor(textBox.width as number * textBox.scaleX as number * this.measurementRatio)
+          const height = Math.floor(textBox.height as number * textBox.scaleY as number * this.measurementRatio)
+          const outLineWidth = textBox.strokeWidth as number * this.measurementRatio
           self.$store.dispatch('updateCustomTextWithoutTrigger', {
             index: index,
             data: {

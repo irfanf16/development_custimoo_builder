@@ -27,6 +27,7 @@
       public async createLocker(){
         let res = await this.$store.dispatch('createLocker', this.name);
        if (res == ''){
+         this.name = ''
          await this.$store.dispatch('GET_LOCKER_PRODUCTS');
          this.ref['create-modal'].hide();
        }else{

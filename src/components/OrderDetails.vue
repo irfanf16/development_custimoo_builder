@@ -154,19 +154,11 @@
           <div class="total-qty">{{ total }}</div>
         </div>
       </div>
-      <div class="choose-stuff">
+      <div class="choose-stuff" v-if="selectedProduct.addons.length">
         <h2 class="fw-bold mb-3 fz-18 d-none d-lg-block">Choose Stuff</h2>
-        <div class="stuff-row">
-          <b-form-checkbox size="sm">Fight strap</b-form-checkbox>
-          <span class="charges">+$5</span>
-        </div>
-        <div class="stuff-row">
-          <b-form-checkbox size="sm">Embroidery</b-form-checkbox>
-          <span class="charges">+$15</span>
-        </div>
-        <div class="stuff-row">
-          <b-form-checkbox size="sm">Capt Patch</b-form-checkbox>
-          <span class="charges">+$50</span>
+        <div class="stuff-row" v-for="(item, i) in selectedProduct.addons" :key="i">
+          <b-form-checkbox size="sm">{{ item.addon.name }}</b-form-checkbox>
+          <span class="charges">+${{ item.addon.price }}</span>
         </div>
       </div>
       <div class="pricing-are">
