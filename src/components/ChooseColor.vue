@@ -231,11 +231,19 @@ export default class ChooseColor extends Vue {
     padding: 15px;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    // &:after{
-    //     flex: auto;
-    //     content: '';
-    // }
+    gap: 1.7%;
+    @media only screen and (min-width: 768px){
+      gap: 1.1%;
+    }
+    @media only screen and (min-width: 1024px){
+      gap: 7%;
+    }
+    @media only screen and (min-width: 1200px){
+      gap: 5%;
+    }
+    @media only screen and (min-width: 1366px){
+      gap: 2.1%;
+    }
     .color-box {
       width: 40px;
       height: 40px;

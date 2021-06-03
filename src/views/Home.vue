@@ -7,7 +7,7 @@
             <div v-if="manageComponents.ChooseColor" class="py-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
               <ChooseColor :colors="colors"/>
             </div>
-            <template v-if="customLogos.length">
+            <template v-if="customLogos.length && customLogos[0].url">
               <div class="logo-placement-area extracted-color-area d-none d-lg-block">
                 <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
                 <div class="logo-placement-holder mb-lg-3">
@@ -73,8 +73,17 @@
             </div>
           </template>
           <div class="customization-area d-flex flex-wrap justify-content-center align-items-center" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
-            <div>
-              <CustomizationPreview />
+            <div v-bind:class="{active: isActive}">
+              <b-button class="preview-btn" variant="secondary" v-on:click="myFilter">
+                <span class="three-d-btn"><font-awesome-icon :icon="['fas', 'cube']"/> 3D View</span>
+                <span class="two-d-btn"><font-awesome-icon :icon="['fas', 'dice-two']"/> 2D View</span>
+              </b-button>
+              <div class="twoD-view">
+                <CustomizationPreview />
+              </div>
+              <div class="threeD-view">
+                <CustomizationPreviewThreeD />
+              </div>
               <template v-if="manageComponents.BasicCustomization">
                 <b-button @click="showAdvanceCustomization()" class="d-none d-lg-inline-block mt-5" variant="secondary">Continue</b-button>
               </template>
@@ -108,6 +117,7 @@ import SaveColorModal from "@/components/SaveColorModal.vue"
 import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
+import CustomizationPreviewThreeD from '@/components/CustomizationPreviewThreeD.vue'
 import {http} from "@/httpCommon"
 
 @Component<Home>({
@@ -120,7 +130,8 @@ import {http} from "@/httpCommon"
     UploadLogo,
     LockerRoomModal,
     AddLockerRoomModal,
-    SaveColorModal
+    SaveColorModal,
+    CustomizationPreviewThreeD
   },
   mounted() {
     if (this.isAuthenticated) {
@@ -354,10 +365,17 @@ export default class Home extends Vue {
   public buyNow() {
     this.$router.push('/confirm-order')
   }
+
+  public isActive = false;
+  public myFilter() {
+    this.isActive = !this.isActive
+  }
+
 }
 </script>
 
 <style lang="scss" scoped>
+
 .page-wrapper {
   @media only screen and (min-width: 992px) {
     border: 1px solid #dee2e6;
@@ -585,6 +603,37 @@ export default class Home extends Vue {
   }
 
 }
+.customization-area{
+  .preview-btn{
+    position: absolute;
+    left: 0;
+    top: 20px;
+    font-size: 0.7rem;
+    @media only screen and (min-width: 768px){
+      left: auto;
+      right: 0;
+      top: -30px;
+      font-size: 1rem;
+    }
+    svg{margin-right: 5px;}
+  }
+  .two-d-btn{
+    display: none;
+  }
+  .threeD-view{display: none;}
+  .active{
+    .threeD-view,
+    .two-d-btn{
+      display: block;
+    }
+    .twoD-view,
+    .three-d-btn{
+      display: none;
+    }
+  }
+
+}
+
 
 
 </style>

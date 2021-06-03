@@ -138,6 +138,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 600}) readonly canvasWidth!: number;
   @Prop({required: false, default: 600}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly mainPreview!: boolean;
+  @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -306,7 +307,7 @@ export default class Scene extends Vue {
                 textObject.fontFamily = text.fontFamily
                 textObject.set('fill', text.fillColor)
                 textObject.set('stroke', text.outLineColor)
-                textObject.set('strokeWidth', text.outLineWidth)
+                textObject.set('strokeWidth', parseInt(text.outLineWidth))
                 canvas.renderAll()
 
                 if (text.action == 'drag') {
@@ -877,6 +878,7 @@ export default class Scene extends Vue {
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
             const width = e.target.width * e.target.scaleX;
             const height = e.target.width * e.target.scaleY;
+            const outLineWidth = e.target.strokeWidth * e.target.scaleX
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'scaleX',
@@ -896,6 +898,11 @@ export default class Scene extends Vue {
               index: index,
               attribute: 'originalHeight',
               value: Math.floor(height * this.measurementRatio)
+            })
+            self.$store.dispatch('updateCustomTextAttribute', {
+              index: index,
+              attribute: 'originalOutLineWidth',
+              value: outLineWidth * this.measurementRatio
             })
           } else if (e.action == 'rotate') {
             self.$store.dispatch('updateCustomTextAttribute', {
@@ -1017,7 +1024,7 @@ export default class Scene extends Vue {
             top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
             angle: logo.rotation as number,
             centeredScaling: true,
-            selectable: logo.haveControls,
+            selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
             hasControls: logo.haveControls,
             hasBorders: logo.haveControls,
             evented: logo.haveControls,
@@ -1106,7 +1113,7 @@ export default class Scene extends Vue {
           top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
           angle: text.rotation as number,
           centeredScaling: true,
-          selectable: true,
+          selectable: this.canvasSelection,
           hasControls: true,
           hasBorders: true,
           evented: true,
@@ -1114,7 +1121,7 @@ export default class Scene extends Vue {
           fontFamily: text.fontFamily,
           fill: text.fillColor,
           stroke: text.outLineColor,
-          strokeWidth: text.outLineWidth,
+          strokeWidth: parseInt(text.outLineWidth),
           paintFirst: 'stroke',
           lockScalingFlip: true
         })
@@ -1161,11 +1168,13 @@ export default class Scene extends Vue {
         if(this.mainPreview) {
           const width = Math.floor(textBox.width as number * this.measurementRatio)
           const height = Math.floor(textBox.height as number * this.measurementRatio)
+          const outLineWidth = textBox.strokeWidth * this.measurementRatio
           self.$store.dispatch('updateCustomTextWithoutTrigger', {
             index: index,
             data: {
               originalWidth: width,
-              originalHeight: height
+              originalHeight: height,
+              originalOutLineWidth: outLineWidth
             }
           })
         }

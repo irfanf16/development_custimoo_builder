@@ -7,6 +7,8 @@ import {
   faArrowLeft,
   faArrowRight,
   faBaseballBall,
+  faCube,
+  faDiceTwo,
   faEdit,
   faEye,
   faEyeSlash,
@@ -57,6 +59,8 @@ library.add(faHockeyPuck)
 library.add(faBaseballBall)
 library.add(faTshirt)
 library.add(faFolder)
+library.add(faCube)
+library.add(faDiceTwo)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false
