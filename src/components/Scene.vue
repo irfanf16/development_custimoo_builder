@@ -675,6 +675,7 @@ export default class Scene extends Vue {
     }, 1000)
     canvas.on('object:modified', (e) => {
       self.objectMove(e, side)
+      // self.addToOtherSide(e.target, side)
     })
     canvas.on('object:moving', (e) => {
       self.objectScaling(e, side)
@@ -719,7 +720,7 @@ export default class Scene extends Vue {
 
       let moveTo = 'left'
       Object.keys(boundingDistance).forEach((key: string) => {
-        if(boundingDistance[key] < boundingDistance[moveTo]) {
+        if(boundingDistance[key] > boundingDistance[moveTo]) {
           moveTo = key
         }
       })
@@ -728,12 +729,6 @@ export default class Scene extends Vue {
 
       e.target.left = direction.left
     }
-
-    // centerPoint = e.target.getCenterPoint()
-    // const width = e.target.width * e.target.scaleX;
-    // if(canvas.isTargetTransparent(model, e.target.left + width / 2, centerPoint.y)){
-    //   this.addToOtherSide(e, side, boundingRect, canvas, model)
-    // }
 
     let dimText = this.dimTextFront
     if(e.target.side == 'back') {
@@ -747,63 +742,26 @@ export default class Scene extends Vue {
   }
 
   public otherSideObjects: any[] = []
-  public addToOtherSide(e: any, side: string, boundingRect: Record<any, any>, canvas: fabric.Canvas, model: fabric.Image) {
-    const centerPoint = e.target.getCenterPoint()
-
-    const boundingDistance = {
-      left: Math.abs(boundingRect.left + e.target.width),
-      top: Math.abs(boundingRect.top + centerPoint.y),
-      right: Math.abs(boundingRect.right + centerPoint.x),
-      bottom: Math.abs(boundingRect.bottom + centerPoint.y)
-    } as Record<any, any>
-
-    let moveTo = 'left'
-    Object.keys(boundingDistance).forEach((key: string) => {
-      if(boundingDistance[key] < boundingDistance[moveTo]) {
-        moveTo = key
-      }
-    })
-    console.log(moveTo)
-    if(moveTo == 'left') {
-      let objectAdd = fabric.util.object.clone(e.target)
-      const width = objectAdd.width * objectAdd.scaleX;
-      let direction = this.targetNonTransparent(canvas, model, objectAdd.left + width, objectAdd.top, 'right')
-      const outside = objectAdd.left + objectAdd.width - direction.left
-      objectAdd.left = Math.abs(this.canvasWidth - direction.left - objectAdd.width + outside)
-      console.log(objectAdd.left)
-
-      this.otherSideObjects.forEach((logo, index) => {
-        console.log(logo)
-      })
-      if(side == 'back') {
-        this.frontCanvas.add(objectAdd)
-      } else {
-        console.log(objectAdd)
-        this.otherSideObjects.push(objectAdd)
-        this.backCanvas.add(objectAdd)
-      }
-    }
-  }
-
-  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
-    if(canvas.isTargetTransparent(model, pointX, pointY)) {
-      if(moveTo == 'left') {
-        pointX = pointX + 1
-      } else if(moveTo == 'right') {
-        pointX = pointX - 1
-      }
-      return this.targetNonTransparent(canvas, model, pointX, pointY, moveTo)
-    }
-    return {left: pointX, top: pointY}
-  }
-
-  public objectMove(e: any, side: string) {
+  public addToOtherSide(target: any, side: string) {
     let model = this.frontModel
     let canvas = this.frontCanvas
     if(side == 'back') {
       model = this.backModel
       canvas = this.backCanvas
     }
+
+    let addIndex = 0
+    if (target.text) {
+      addIndex = target.textIndex
+    } else {
+      this.customLogos.forEach((logo: Record<any, any>, index: number) => {
+        let logoUrl = (this.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+        if (logoUrl == target._element.src) {
+          addIndex = index
+        }
+      })
+    }
+
     const modelBoundingRect = model.getBoundingRect()
     let boundingRect = {
       left: modelBoundingRect.left,
@@ -812,24 +770,96 @@ export default class Scene extends Vue {
       bottom: modelBoundingRect.top + modelBoundingRect.height,
     }
 
-    const centerPoint = e.target.getCenterPoint()
-    if(canvas.isTargetTransparent(model, centerPoint.x, centerPoint.y)) {
-      const boundingDistance = {
-        left: Math.abs(boundingRect.left - centerPoint.x),
-        right: Math.abs(boundingRect.right - centerPoint.x)
-      } as Record<any, any>
+    let centerPoint = target.getCenterPoint()
+    const boundingDistance = {
+      left: Math.abs(boundingRect.left - centerPoint.x),
+      top: Math.abs(boundingRect.top - centerPoint.y),
+      right: Math.abs(boundingRect.right - centerPoint.x),
+      bottom: Math.abs(boundingRect.bottom - centerPoint.y)
+    } as Record<any, any>
 
-      let moveTo = 'left'
-      Object.keys(boundingDistance).forEach((key: string) => {
-        if(boundingDistance[key] < boundingDistance[moveTo]) {
-          moveTo = key
-        }
-      })
+    let nearTo = 'left'
+    Object.keys(boundingDistance).forEach((key: string) => {
+      if(boundingDistance[key] < boundingDistance[nearTo]) {
+        nearTo = key
+      }
+    })
 
-      let direction = this.targetNonTransparent(canvas, model, e.target.left, e.target.top, moveTo)
-
-      e.target.left = direction.left
+    const width = target.width * target.scaleX;
+    let checkPointX = target.left + width / 2
+    let checkPointY = centerPoint.y
+    if(nearTo == 'left') {
+      checkPointX = target.left - width / 2
+      checkPointY = centerPoint.x
     }
+    console.log(nearTo)
+
+    if(canvas.isTargetTransparent(model, checkPointX, centerPoint.y)) {
+      console.log('comes here')
+      let addLeft = 0
+      let addTop = 0
+      const width = target.width * target.scaleX;
+      if (nearTo == 'left') {
+        let direction = this.targetNonTransparent(canvas, model, target.left - width, target.top, 'right')
+        const outside = target.left - direction.left
+        console.log(outside)
+        addLeft = Math.abs(this.canvasWidth - direction.left - target.width + outside)
+        addTop = target.top
+        // console.log(addLeft)
+
+      } else {
+        let direction = this.targetNonTransparent(canvas, model, target.left + width, target.top, 'left')
+        const outside = target.left + target.width - direction.left
+        console.log(outside)
+        addLeft = Math.abs(this.canvasWidth + direction.left + target.width - outside)
+        console.log(addLeft)
+        addTop = target.top
+      }
+
+      if (this.otherSideObjects[addIndex]) {
+        this.otherSideObjects[addIndex].left = addLeft
+        this.otherSideObjects[addIndex].top = addTop
+        if (side == 'back') {
+          this.frontCanvas.renderAll()
+        } else {
+          this.backCanvas.renderAll()
+        }
+      } else {
+        let objectAdd = fabric.util.object.clone(target)
+        objectAdd.left = addLeft
+        objectAdd.top = addTop
+        this.otherSideObjects[addIndex] = objectAdd
+        if (side == 'back') {
+          this.frontCanvas.add(objectAdd)
+        } else {
+          this.backCanvas.add(objectAdd)
+        }
+      }
+    } else {
+      if (this.otherSideObjects[addIndex]) {
+        if (side == 'back') {
+          this.frontCanvas.remove(this.otherSideObjects[addIndex])
+        } else {
+          this.backCanvas.remove(this.otherSideObjects[addIndex])
+        }
+        this.otherSideObjects.splice(addIndex, 1)
+      }
+    }
+  }
+
+  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
+    if(canvas.isTargetTransparent(model, pointX, pointY)) {
+      if(moveTo == 'left') {
+        pointX = pointX - 1
+      } else {
+        pointX = pointX + 1
+      }
+      return this.targetNonTransparent(canvas, model, pointX, pointY, moveTo)
+    }
+    return {left: pointX, top: pointY}
+  }
+
+  public objectMove(e: any, side: string) {
     const self = this;
     if(e.target.text) {
       this.customTexts.forEach((text, index) => {
