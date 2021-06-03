@@ -1,6 +1,6 @@
 <template>
     <div class="preview-section p-3 d-flex flex-wrap justify-content-center align-items-center">
-      <div class="sketchfab-embed-wrapper"> <iframe title="Button down test" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" allow="fullscreen; autoplay; vr" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/336b431cd7ba46c1946a30a818695024/embed"> </iframe> </div>
+      <div class="sketchfab-embed-wrapper"> <iframe title="Button down test" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" allow="fullscreen; autoplay; vr" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/336b431cd7ba46c1946a30a818695024/embed?autostart=1"> </iframe> </div>
     </div>
 </template>
 
