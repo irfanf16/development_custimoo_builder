@@ -81,7 +81,7 @@
                                             <div class="color-container">
                                             <template v-for="(item, ix) in colors">
                                                 <div class="color-box"
-                                                    :style="{background: item.value}" :key="`${ix}`">
+                                                    :style="{backgroundColor: item.hex}" :key="`${ix}`">
                                                 </div>
                                             </template>
                                             </div>
@@ -176,6 +176,7 @@
         }
       }
       public fetchColors(i:number, ind:number){
+        console.log(this.getLockerProducts[ind].folders[i].color)
       this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
       console.log(this.colors)
       }
