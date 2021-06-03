@@ -176,12 +176,11 @@
         }
       }
       public fetchColors(i:number, ind:number){
-        console.log(this.getLockerProducts[ind].folders[i].color)
+        this.colors = []
       this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
-      console.log(this.colors)
       }
       public changeColor(){
-         this.colors = [];
+        this.colors = []
       }
     }
 
