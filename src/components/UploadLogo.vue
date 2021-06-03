@@ -89,12 +89,12 @@ export default class UploadLogo extends Vue {
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
-  
+
   @Watch('customLogos', {
     deep: true
   })
   customLogosChanged(newVal: [Record<any, any>]) {
-    if(this.customLogos[0].url == ''){
+    if(!this.customLogos[0].url){
       let inputRef = this.$refs.fileInput as Record<any, any>
       inputRef.value=null;
     }

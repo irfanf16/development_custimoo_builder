@@ -7,7 +7,7 @@
             <div v-if="manageComponents.ChooseColor" class="py-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
               <ChooseColor :colors="colors"/>
             </div>
-            <template v-if="customLogos.length">
+            <template v-if="customLogos.length && customLogos[0].url">
               <div class="logo-placement-area extracted-color-area d-none d-lg-block">
                 <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
                 <div class="logo-placement-holder mb-lg-3">
@@ -375,7 +375,7 @@ export default class Home extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  
+
 .page-wrapper {
   @media only screen and (min-width: 992px) {
     border: 1px solid #dee2e6;
@@ -631,7 +631,7 @@ export default class Home extends Vue {
       display: none;
     }
   }
-  
+
 }
 
 
