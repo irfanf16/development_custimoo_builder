@@ -4,7 +4,7 @@
       <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">
           <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
-            <Scene canvas-width="120" canvas-height="120" :measurement-ratio="design.measurement_ratio"
+            <Scene canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
               :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.productstyles[0].front.file_url}"
                    :backTextureUrl="design.back_design? design.back_design.file_url: ''"
                    :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
