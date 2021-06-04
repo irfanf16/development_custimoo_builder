@@ -182,7 +182,6 @@
       public changeColor(){
         this.colors = []
         alert("selected");
-        console.log(this.getLockerProducts);
       }
     }
 

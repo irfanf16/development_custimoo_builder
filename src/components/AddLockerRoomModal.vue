@@ -94,6 +94,7 @@
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res == ''){
             this.ref['my-modal'].hide();
+            this.product_name = "";
           }else{
             alert(res);
           }
