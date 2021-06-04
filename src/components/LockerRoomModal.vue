@@ -4,7 +4,7 @@
           <template v-for="(room, i) in getLockerProducts">
             <b-tab :key="i">
                 <template #title>
-                  <span @click="changeColor">{{room.room_name}}</span>
+                    <span @click="changeColor">{{room.room_name}}</span>
                     <a class="remove-tab" @click="deleteRoom(room.id, i)">
                         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                     </a>
@@ -18,7 +18,7 @@
                                     <template v-for="(product, ind) in room.product">
                                         <div :key="ind" class="products-block">
                                             <div class="image-holder">
-                                          <a >
+                                          <a>
                                             <Scene :measurement-ratio="product.design.measurement_ratio"
                                               :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
                                                 :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
@@ -29,8 +29,8 @@
                                                     <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                                                 </li>
                                                 <li class="d-none d-lg-block">
-                                                    <a id="share-button-2"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                                                    <b-tooltip custom-class="share-tooltip" target="share-button-2" placement="bottom">
+                                                    <a :id="'share'+ind"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
+                                                    <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom">
                                                         <div class="share-holder">
                                                             <h3>Copy link and Share</h3>
                                                             <div class="share-form">
@@ -181,8 +181,12 @@
       }
       public changeColor(){
         this.colors = []
+        alert("selected");
+        console.log(this.getLockerProducts);
       }
     }
+
+    
 
 </script>
 

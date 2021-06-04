@@ -1563,8 +1563,13 @@ a:hover{color: #219f84;}
             border-radius: 0.25rem;
             font-size: 12px;
             position: relative;
+            padding: 0;
             @media only screen and (min-width: 992px){
                 font-size: 14px;
+            }
+            span{
+                padding: 0.5rem 1rem;
+                display: block;
             }
             &.active{
                 background: #219f84;
@@ -1666,6 +1671,7 @@ a:hover{color: #219f84;}
                 border: none;
                 border-bottom: 1px solid #EFF2F4;
                 border-radius: 0;
+                padding: 0.5rem 1rem;
                 &.active{
                     border: none;
                     border-bottom: 1px solid #219F84;
