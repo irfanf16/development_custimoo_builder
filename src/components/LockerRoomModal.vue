@@ -4,7 +4,7 @@
           <template v-for="(room, i) in getLockerProducts">
             <b-tab :key="i">
                 <template #title>
-                  <span @click="changeColor">{{room.room_name}}</span>
+                    <span @click="changeColor">{{room.room_name}}</span>
                     <a class="remove-tab" @click="deleteRoom(room.id, i)">
                         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                     </a>
@@ -18,7 +18,7 @@
                                     <template v-for="(product, ind) in room.product">
                                         <div :key="ind" class="products-block">
                                             <div class="image-holder">
-                                          <a >
+                                          <a>
                                             <Scene :measurement-ratio="product.design.measurement_ratio"
                                               :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
                                                 :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
@@ -181,6 +181,7 @@
       }
       public changeColor(){
         this.colors = []
+        alert("selected")
       }
     }
 
