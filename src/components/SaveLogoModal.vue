@@ -72,6 +72,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
            logo.id = this.customLogos[index].id;
            logo.room_id = this.room_id;
            await this.$store.dispatch('saveLogo', logo);
+           this.ref['my-modal'].hide();
         }else{
           alert("please login first");
         }
