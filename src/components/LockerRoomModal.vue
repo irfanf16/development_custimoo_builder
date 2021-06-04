@@ -181,11 +181,10 @@
       }
       public changeColor(){
         this.colors = []
-        alert("selected");
       }
     }
 
-    
+
 
 </script>
 
