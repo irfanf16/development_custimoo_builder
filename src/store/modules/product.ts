@@ -5,7 +5,8 @@ const Product:Module<any, any> = {
     Product_Models:[],
     locker_products:[],
     lockers:[],
-    logoColors:[]
+    logoColors:[],
+    logoUrl:''
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -19,6 +20,9 @@ const Product:Module<any, any> = {
     },
     getLogosColors(state:Record<any, any>){
       return state.logoColors;
+    },
+    getLogoUrl(state:Record<any, any>){
+      return state.logoUrl;
     }
   },
   mutations:{
@@ -36,6 +40,9 @@ const Product:Module<any, any> = {
     },
     SET_LOGO_COLORS(state:Record<any, any>, payload:Record<any, any>){
       state.logoColors = payload;
+    },
+    SET_LOGO_URL(state:Record<any, any>, payload:Record<any, any>){
+      state.logoUrl = payload.logoUrl;
     },
     DELETE_ROOM(state:Record<any, any>, payload:number){
       state.lockers.splice(payload, 1);
@@ -98,6 +105,9 @@ const Product:Module<any, any> = {
     },
     SET_LOGO_COLORS({commit}, payload:Record<any, any>){
       commit('SET_LOGO_COLORS', payload);
+    },
+    SET_LOGO_URL({commit}, payload:Record<any, any>){
+      commit('SET_LOGO_URL', payload);
     },
     async deleteRoom({commit}, payload){
       await http.get("deletelocker/"+payload.id).then((res) => {
