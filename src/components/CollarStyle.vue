@@ -74,7 +74,7 @@ import {http} from "@/httpCommon";
             }
           })
           if (!designFound){
-            if(!this.selectedProduct.productstyles[i].productdesigns.filter(design => design.design_show).length) {
+            if(!this.selectedProduct.productstyles[i].productdesigns.filter((design: Record<any, any>) => design.design_show).length) {
               this.selectedProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{
                 if (index ==0 ){
                   Vue.set(this.selectedProduct.productstyles[i].productdesigns[0], 'design_show', 1)
