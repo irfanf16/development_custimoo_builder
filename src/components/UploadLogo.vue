@@ -98,6 +98,7 @@ export default class UploadLogo extends Vue {
       let inputRef = this.$refs.fileInput as Record<any, any>
       inputRef.value=null;
     }
+    this.getLogoColors()
   }
   public uploadLogoBtn() {
     if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null){
