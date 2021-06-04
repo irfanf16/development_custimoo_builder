@@ -11,7 +11,7 @@
                 <CreateLockerRoomModal />
             </div>
         </div>
-        <div class="pt-4 design-name-form">
+        <div class="pt-4 design-name-form" v-if="lockers.length > 0">
             <b-form inline>
                 <label for="inline-form-input-productname" class="w-100 d-block mb-2">Product Name</label>
                 <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
@@ -79,6 +79,10 @@
           const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
             return item.design_show
           })
+          if (this.product_name == ''){
+            alert('product name is required')
+            return false
+          }
           let locker = {
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
@@ -94,6 +98,8 @@
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res == ''){
             this.ref['my-modal'].hide();
+            this.locker_selected = true
+            this.product_name = ''
           }else{
             alert(res);
           }
