@@ -1300,6 +1300,8 @@ a:hover{color: #219f84;}
             a{
                 color: #219f84;
                 margin: 0 0 0 3px;
+                position: relative;
+                z-index: 99;
                 &:hover{
                     color: #fff;
                 }
@@ -1700,6 +1702,21 @@ a:hover{color: #219f84;}
             right: 2rem;
             top: 2rem;
         }
+        .btn{
+            @media only screen and (max-width: 767px){
+                position: absolute;
+                right: 0;
+                top: -7px;
+            }
+            @media only screen and (max-width: 1023px){
+                top: 0;
+            }
+            span{
+                @media only screen and (max-width: 1023px){
+                    display: none;
+                }
+            }
+        }
     }
     .products-holder{
         .canvas-area-holder{display: block !important;}
@@ -1734,12 +1751,12 @@ a:hover{color: #219f84;}
 }
 .bs-tooltip-top{
     .arrow{
-        &:before{border-top-color: #fff;}
+        &:before{border-top-color: #000;}
     }
 }
 .tooltip.b-tooltip.share-tooltip{
     .arrow{
-        &:before{border-bottom-color: #fff;}
+        &:before{border-bottom-color: #000;}
     }
     opacity: 1;
     .tooltip-inner{
@@ -1887,7 +1904,7 @@ a:hover{color: #219f84;}
         flex-wrap: nowrap;
         cursor: grab;
         &::-webkit-scrollbar{
-            height: 10px;
+            height: 5px;
         }
         &::-webkit-scrollbar-track {
             background: transparent;
@@ -1919,3 +1936,7 @@ a:hover{color: #219f84;}
 //     visibility: hidden !important;
 //     z-index: -1 !important;
 // }
+
+#modal-center-savecolormodal{
+    .lockerroom-modal .nav-tabs .nav-link{padding: 0.5rem 1rem;}
+}
