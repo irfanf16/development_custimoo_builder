@@ -2,15 +2,15 @@
   <div class="choose-color-holder active">
     <h2 class="fw-bold mb-3 fz-18">Choose Color</h2>
     <div class="choose-color d-flex flex-wrap justify-content-between">
-      <a v-for="(chooseColor, index) in defaultColors" :key="index" v-on:click="showColor(index)">
+      <a class="chosen-colors-section" v-for="(chooseColor, index) in defaultColors" :key="index" v-on:click="showColor(index)">
         <div>
-          <div class="color-circle"
+          <div class="color-circle chosen-colors-section"
                :style="{ background : chooseColor.color? chooseColor.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></div>
-          <strong>{{ chooseColor.name }}</strong>
+          <strong class="chosen-colors-section">{{ chooseColor.name }}</strong>
         </div>
       </a>
     </div>
-    <div v-if="colorPickerActive">
+    <div id="color-picker" v-if="colorPickerActive" >
       <transition name="list">
         <div class="color-holder">
           <div class="color-header">
@@ -38,7 +38,17 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 
-@Component<ChooseColor>({})
+@Component<ChooseColor>({
+  created() {
+    window.addEventListener('click', (e) => {
+      let element = document.getElementById('color-picker') as Record<any, any>
+      if (this.colorPickerActive && e.target !== element && !element.contains(e.target) && !e.target.classList.contains('chosen-colors-section')){
+        this.colorPickerActive = false
+      }
+    })
+  }
+})
+
 export default class ChooseColor extends Vue {
   @Prop({required: true}) colors!: any
 
