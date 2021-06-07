@@ -33,6 +33,7 @@ const Product:Module<any, any> = {
       state.locker_products = payload;
     },
     SET_LOCKERS(state:Record<any, any>, payload:Record<any, any>){
+      state.lockers = []
       state.lockers = payload;
     },
     ADD_LOCKER(state:Record<any, any>, payload:Record<any, any>){

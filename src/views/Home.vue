@@ -169,6 +169,7 @@ export default class Home extends Vue {
   public mounted = false
   public previousImageColors = []
   public logoColorUsed = false
+  public showModal = false
 
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab
