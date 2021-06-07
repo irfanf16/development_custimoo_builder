@@ -82,7 +82,7 @@
                           <span>{{ textData.type.toUpperCase() }}: {{ textData.text }}</span>
                           <span>Font: {{ textData.fontFamily }}</span>
                           <span>Size: {{ textData.originalWidth }}cm x {{ textData.originalHeight }}cm</span>
-                          <span>OutLine: {{ textData.originalOutLineWidth.toFixed(2) }}cm</span>
+                          <span>OutLine: {{ textData.originalOutLineWidth ? textData.originalOutLineWidth.toFixed(2) : '' }}cm</span>
                         </div>
                         <div class="color-details">
                           <div class="color-details-wrapper">
