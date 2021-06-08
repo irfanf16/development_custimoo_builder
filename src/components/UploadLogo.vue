@@ -78,7 +78,7 @@ import rgbHex from 'rgb-hex'
   }
 })
 export default class UploadLogo extends Vue {
-  public status = 'not_accepted'
+  public status = 'accepted'
   public open_modal !: boolean
   public mounted !: boolean
   @Prop({required: true}) customLogoIndex!: any
