@@ -23,6 +23,7 @@
                     placeholder="XX-XXXX"
                     @change="changePantoneColor"
                   ></b-form-input>
+                  {{ pantoneMessage}}
                 </b-form>
                 <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" :key="svgElement.color"/>
               </div>
@@ -70,6 +71,7 @@ export default class ColorAccordion extends Vue {
   public selectTypeIndex = 0
   public productColor: any[] = []
   public colorImage = '/img/images/color-placeholder.png'
+  public pantoneMessage = ''
 
   get svgGroups() {
     return this.$store.getters.getSvgGroups
@@ -98,6 +100,10 @@ export default class ColorAccordion extends Vue {
     let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), name: pantoneColor.pantone})
+      this.pantoneMessage = ''
+    }
+    else {
+      this.pantoneMessage = 'Color Not in List.'
     }
   }
 
