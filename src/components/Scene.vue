@@ -12,7 +12,7 @@
 <script lang="ts">
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
-import getClosestColor from '@/pantoneColor'
+import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 
 @Component<Scene>({
