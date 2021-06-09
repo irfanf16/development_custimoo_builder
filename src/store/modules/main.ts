@@ -12,6 +12,7 @@ const Main:Module<any, any> = {
       ItemToCustomize: !mobileScreen,
       BasicCustomization: true,
       AdvanceCustomization: false,
+      ExtractedColors: true,
     },
     hideTab: {
       logoHide: !mobileScreen,
