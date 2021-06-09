@@ -14,7 +14,17 @@
           <div class="color-holder">
             <div class="color-container">
               <div v-if="showOther" class="custom-color-picker">
-                <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true"/>
+                <b-form class="pantone-color-field" v-on:submit.prevent>
+                  <label class="mb-2" for="inline-form-input-pantone-color">Pantone:</label>
+                  <b-form-input
+                    id="inline-form-input-pantone-color"
+                    v-model="svgGroups[selectAccordionIndex].pantone"
+                    class="mb-2 mr-sm-2 mb-sm-0"
+                    placeholder="XX-XXXX"
+                    @change="changePantoneColor"
+                  ></b-form-input>
+                </b-form>
+                <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" :key="svgElement.color"/>
               </div>
               <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
                    :title="color.name" :style="{background: color.value}" :key="index">
@@ -28,10 +38,10 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
-import getClosestColor from '@/pantoneColor'
+import {getClosestColor, pantones, getPantoneColor} from '@/pantoneColor'
 
 @Component<ColorAccordion>({
   components: {
@@ -54,6 +64,7 @@ export default class ColorAccordion extends Vue {
   @Prop({required: true}) productColors!: any
 
   public color= '#59c7f9'
+  public pantoneColorVal= '18-0107'
   public showOther = false
   public selectAccordionIndex = 0
   public selectTypeIndex = 0
@@ -83,7 +94,19 @@ export default class ColorAccordion extends Vue {
     this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone})
   }
 
+  public changePantoneColor() {
+    let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
+    if (pantoneColor) {
+      this.setColor({value: pantoneColor.hex.toUpperCase(), name: pantoneColor.pantone})
+    }
+  }
 
+  @Watch('svgGroups', {
+    deep: true
+  })
+  svgGroupsChanged(newVal: [Record<any, any>]) {
+    this.changePantoneColor()
+  }
 }
 </script>
 

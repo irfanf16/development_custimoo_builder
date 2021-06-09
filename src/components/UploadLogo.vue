@@ -57,7 +57,7 @@
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import {http} from "@/httpCommon"
 import ColorThief from 'colorthief'
-import getClosestColor from '@/pantoneColor'
+import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 
 @Component<UploadLogo>({
