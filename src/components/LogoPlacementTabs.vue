@@ -52,8 +52,8 @@
                   </div>
                 </div>
                 <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
-                <b-button @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
                 <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
+                <b-button @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
               </div>
               <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal @click="callRooms">Save Color</button>
               <SaveColorModal />
@@ -320,6 +320,8 @@ export default class LogoPlacementTabs extends Vue {
           padding: 0;
           width: auto;
         }
+        &:focus{box-shadow: none;}
+        &:hover{color: #fff;}
       }
       .btn-save-color{
         color: #fff;
