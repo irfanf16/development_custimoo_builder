@@ -12,7 +12,7 @@
                 <ExtractedColors />
               </div>
             </template>
-            
+
             <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
               <template>
                 <UploadLogo :customLogoIndex="0"/>
@@ -22,7 +22,7 @@
               <ChooseInterest :categories="categories" @search="getSearchQuery"/>
             </template>
           </b-col>
-          
+
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">

@@ -38,7 +38,7 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
-import getClosestColor from '@/pantoneColor'
+import {getClosestColor} from '@/pantoneColor'
 
 @Component<ColorTabs>({
   components: {

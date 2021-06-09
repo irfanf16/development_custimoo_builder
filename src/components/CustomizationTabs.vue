@@ -1,5 +1,6 @@
 <template>
   <div>
+    <LazyLoader :loader="trigger"/>
     <div class="customization-tabs">
       <b-tabs v-model="tabIndex">
         <b-tab v-if="selectedProduct.is_logo_allowed == 1">
@@ -122,9 +123,11 @@ import EditRosterArea from '@/components/EditRosterArea.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
+import LazyLoader from "@/components/LazyLoader.vue";
 
 @Component<CustomizationProcess>({
   components: {
+    LazyLoader,
     ColorAccordion,
     LogoPlacementTabs,
     CustomizationText,
@@ -167,6 +170,8 @@ export default class CustomizationProcess extends Vue {
 
   public tabIndex = 0
 
+  public trigger = false
+
   public productColors: any[] = []
   public fontsColors: any[] = []
   public firstColor!: Record<any, any>
@@ -191,6 +196,7 @@ export default class CustomizationProcess extends Vue {
 
   tabIndexChanged() {
     this.$emit('tabIndexChange', this.tabIndex)
+    this.trigger = true
   }
 
   public productColorsManipulation() {
