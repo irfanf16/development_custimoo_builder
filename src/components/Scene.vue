@@ -682,7 +682,7 @@ export default class Scene extends Vue {
     }, 1000)
     canvas.on('object:modified', (e) => {
       self.objectMove(e, side)
-      // self.addToOtherSide(e.target, side)
+      self.addToOtherSide(e.target, side)
     })
     canvas.on('object:moving', (e) => {
       self.objectScaling(e, side)
@@ -780,9 +780,9 @@ export default class Scene extends Vue {
     let centerPoint = target.getCenterPoint()
     const boundingDistance = {
       left: Math.abs(boundingRect.left - centerPoint.x),
-      top: Math.abs(boundingRect.top - centerPoint.y),
+      top: Math.abs(boundingRect.top - centerPoint.y) + 50,
       right: Math.abs(boundingRect.right - centerPoint.x),
-      bottom: Math.abs(boundingRect.bottom - centerPoint.y)
+      bottom: Math.abs(boundingRect.bottom - centerPoint.y) + 50
     } as Record<any, any>
 
     let nearTo = 'left'
@@ -806,20 +806,20 @@ export default class Scene extends Vue {
       let addLeft = 0
       let addTop = 0
       const width = target.width * target.scaleX;
+      const height = target.height * target.scaleY;
       if (nearTo == 'left') {
-        let direction = this.targetNonTransparent(canvas, model, target.left - width, target.top, 'right')
-        const outside = target.left - direction.left
-        console.log(outside)
-        addLeft = Math.abs(this.canvasWidth - direction.left - target.width + outside)
+        const direction = this.targetNonTransparent(canvas, model, checkPointX, centerPoint.y, 'right')
+        const directionFromRight = this.targetNonTransparent(canvas, model, this.canvasWidth, centerPoint.y, 'left')
+        const outside = direction.left - checkPointX
+        const modelSpaceLeft = directionFromRight.left + (width / 2) + 10
+        addLeft = Math.abs(modelSpaceLeft - outside)
         addTop = target.top
-        // console.log(addLeft)
-
       } else {
-        let direction = this.targetNonTransparent(canvas, model, target.left + width, target.top, 'left')
-        const outside = target.left + target.width - direction.left
-        console.log(outside)
-        addLeft = Math.abs(this.canvasWidth + direction.left + target.width - outside)
-        console.log(addLeft)
+        const direction = this.targetNonTransparent(canvas, model, target.left + width, target.top, 'left')
+        const directionFromRight = this.targetNonTransparent(canvas, model, 0, centerPoint.y, 'right')
+        const outside = checkPointX - direction.left
+        const modelSpaceRight = directionFromRight.left - (width / 2) - 10
+        addLeft = Math.abs(modelSpaceRight + outside)
         addTop = target.top
       }
 
@@ -835,11 +835,16 @@ export default class Scene extends Vue {
         let objectAdd = fabric.util.object.clone(target)
         objectAdd.left = addLeft
         objectAdd.top = addTop
+        objectAdd.hasControls = false
+        objectAdd.selectable = false
+        objectAdd.evented = false
         this.otherSideObjects[addIndex] = objectAdd
         if (side == 'back') {
           this.frontCanvas.add(objectAdd)
+          this.frontModel.bringToFront()
         } else {
           this.backCanvas.add(objectAdd)
+          this.backModel.bringToFront()
         }
       }
     } else {
@@ -862,8 +867,23 @@ export default class Scene extends Vue {
         pointX = pointX + 1
       }
       return this.targetNonTransparent(canvas, model, pointX, pointY, moveTo)
+    } else {
+      return {left: pointX, top: pointY}
     }
-    return {left: pointX, top: pointY}
+  }
+
+  public targetTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
+    console.log(pointX)
+    if(canvas.isTargetTransparent(model, pointX, pointY)) {
+      if(moveTo == 'left') {
+        pointX = pointX - 1
+      } else {
+        pointX = pointX + 1
+      }
+      return this.targetTransparent(canvas, model, pointX, pointY, moveTo)
+    } else {
+      return {left: pointX, top: pointY}
+    }
   }
 
   public objectMove(e: any, side: string) {
