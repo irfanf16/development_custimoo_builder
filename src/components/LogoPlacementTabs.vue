@@ -320,6 +320,8 @@ export default class LogoPlacementTabs extends Vue {
           padding: 0;
           width: auto;
         }
+        &:focus{box-shadow: none;}
+        &:hover{color: #fff;}
       }
       .btn-save-color{
         color: #fff;
