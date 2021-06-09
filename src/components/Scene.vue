@@ -6,17 +6,22 @@
     <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}">
       <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
     </a>
+    <LazyLoader :loader="trigger"/>
   </div>
 </template>
 
 <script lang="ts">
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
-import getClosestColor from '@/pantoneColor'
+import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
+import LazyLoader from "@/components/LazyLoader.vue";
 
 @Component<Scene>({
+  components: {LazyLoader},
   mounted() {
+    this.trigger = true
+
     if(this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -163,6 +168,8 @@ export default class Scene extends Vue {
     visible: false
   })
   public dimTextBack!: fabric.Text
+
+  public trigger = false
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
