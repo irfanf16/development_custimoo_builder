@@ -195,7 +195,7 @@ export default class CustomizationProcess extends Vue {
 
   public productColorsManipulation() {
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
-      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
+      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.indexOf('.') != -1? colors.file_name.substr(0, colors.file_name.indexOf('.')) : colors.file_name}
       finalColor.color_text = JSON.parse(colors.color_text)
       this.productColors = this.productColors.concat(finalColor)
     })
