@@ -15,7 +15,8 @@ const ProductAttributes:Module<any, any> = {
     svgGroups: [],
     currentColorApplied: 'group',
     rosterDetails: [],
-    productionSVGs: {}
+    productionSVGs: {},
+    lockerColors:[]
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
@@ -157,6 +158,14 @@ const ProductAttributes:Module<any, any> = {
         quantity: 1,
         information:''
       }];
+    },
+    ADD_LOCKER_ROOM_COLORS(state:Record<any, any>, payload:Record<any, any>){
+      payload = payload.map((item: Record<any, any>) => {
+         item.color_text = JSON.parse(item.color_text)
+        return item
+      })
+      console.log(payload)
+      state.lockerColors = payload
     }
   },
   getters: {
@@ -195,6 +204,9 @@ const ProductAttributes:Module<any, any> = {
     getProductionSVGs: state => {
       return state.productionSVGs
     },
+    getLockerColors: state => {
+      return state.lockerColors
+    }
   },
   actions: {
     setSelectedIndex({commit}, payload) {
@@ -283,6 +295,11 @@ const ProductAttributes:Module<any, any> = {
     },
     async updateRoster({commit}, payload:Record<any, any>){
      await commit('UPDATE_ROSTER', payload);
+    },
+    getLockerRoomColors({commit}){
+      http.get('folder/colors').then((res) =>{
+        commit('ADD_LOCKER_ROOM_COLORS', res.data)
+      })
     }
   }
 }

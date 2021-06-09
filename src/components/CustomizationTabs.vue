@@ -176,6 +176,9 @@ export default class CustomizationProcess extends Vue {
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab
   }
+  get lockerColors(){
+    return this.$store.getters.getLockerColors
+  }
 
   @Watch('tabIndexNew', {
     immediate: true, deep: true
@@ -199,6 +202,8 @@ export default class CustomizationProcess extends Vue {
       finalColor.color_text = JSON.parse(colors.color_text)
       this.productColors = this.productColors.concat(finalColor)
     })
+    this.productColors = this.productColors.concat(this.lockerColors)
+    console.log(this.productColors)
   }
 
   public fontsColorsManipulation() {

@@ -87,9 +87,17 @@
           alert('select room first');
           return false;
         }
-        console.log(this.logoColors)
+        let productColors = []
+        this.logoColors.forEach((item:Record<any, any>) => {
+          let obj = {
+            name: item.pantone, value: item.hex
+          }
+          productColors.push(obj)
+        })
+
        let saved = await this.$store.dispatch('storeFolder', {folder_name: this.folder_name, room_id: this.room_id, colors: this.logoColors});
         if (saved == true){
+          await this.$store.dispatch('getLockerRoomColors')
           this.ref['my-modal'].hide();
         }
       }
