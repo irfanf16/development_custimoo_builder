@@ -202,14 +202,30 @@ export default class CustomizationProcess extends Vue {
     this.trigger = true
   }
 
+  @Watch('selectedProduct', {
+    deep: false
+  })
+
+  selectedProductChanged() {
+    this.productColorsManipulation()
+  }
+
+  @Watch('lockerColors', {
+    deep: false
+  })
+
+  lockerColorsChanged() {
+    this.productColorsManipulation()
+  }
+
   public productColorsManipulation() {
+    this.productColors = []
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
-      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.indexOf('.') != -1? colors.file_name.substr(0, colors.file_name.indexOf('.')) : colors.file_name}
+      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
       finalColor.color_text = JSON.parse(colors.color_text)
       this.productColors = this.productColors.concat(finalColor)
     })
     this.productColors = this.productColors.concat(this.lockerColors)
-    console.log(this.productColors)
   }
 
   public fontsColorsManipulation() {
