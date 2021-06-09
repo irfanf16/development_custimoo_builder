@@ -7,34 +7,22 @@
             <div v-if="manageComponents.ChooseColor" class="py-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
               <ChooseColor :colors="colors"/>
             </div>
-            <template v-if="customLogos.length && customLogos[0].url">
-              <div class="logo-placement-area extracted-color-area d-none d-lg-block">
-                <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
-                <div class="logo-placement-holder mb-lg-3">
-                  <div class="logo-holder">
-                    <div class="color-extract-container">
-                      <div v-if="imageColors.length == 1" class="color-box" :style="{background: imageColors[0].hex}"></div>
-                      <div v-if="imageColors.length == 2" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 50%, ' + imageColors[1].hex +' 50% 100%)'}"></div>
-                      <div v-if="imageColors.length == 3" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 33.33%, ' + imageColors[1].hex +' 33.33% 66.66%, ' + imageColors[2].hex +' 66.66% 100%)'}"></div>
-                      <div v-if="imageColors.length == 4" class="color-box" :style="{background: 'conic-gradient(' + imageColors[1].hex +' 0% 25%, ' + imageColors[2].hex +' 25% 50%, ' + imageColors[3].hex +' 50% 75%, ' + imageColors[0].hex +' 75% 100%)'}"></div>
-                    </div>
-                  </div>
-                  <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
-                  <b-button @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
-                  <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
-                </div>
-                <SaveColorModal />
+            <template v-if="manageComponents.ExtractedColors">
+              <div class="mb-4 mb-lg-0" v-if="customLogos.length && customLogos[0].url">
+                <ExtractedColors />
               </div>
             </template>
+            
             <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
-              <template v-if="manageComponents.LogoArea">
+              <template>
                 <UploadLogo :customLogoIndex="0"/>
               </template>
             </template>
+            <template v-if="manageComponents.ChooseInterest">
+              <ChooseInterest :categories="categories" @search="getSearchQuery"/>
+            </template>
           </b-col>
-          <b-col v-if="manageComponents.ChooseInterest" cols="12" class="pb-5">
-            <ChooseInterest :categories="categories" @search="getSearchQuery"/>
-          </b-col>
+          
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
@@ -118,6 +106,7 @@ import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import CustomizationPreviewThreeD from '@/components/CustomizationPreviewThreeD.vue'
+import ExtractedColors from '@/components/ExtractedColors.vue'
 import {http} from "@/httpCommon"
 
 @Component<Home>({
@@ -131,7 +120,8 @@ import {http} from "@/httpCommon"
     LockerRoomModal,
     AddLockerRoomModal,
     SaveColorModal,
-    CustomizationPreviewThreeD
+    CustomizationPreviewThreeD,
+    ExtractedColors
   },
   mounted() {
     if (this.isAuthenticated) {
@@ -468,6 +458,11 @@ export default class Home extends Vue {
           @media only screen and (min-width: 1367px){
             max-width: 30%;
             font-size: 14px;
+          }
+          &:focus{
+            outline: none;
+            box-shadow: none;
+            border: none;
           }
         }
         &.reset{
