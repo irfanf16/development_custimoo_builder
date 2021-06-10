@@ -54,6 +54,7 @@ export default class DesignAvailable extends Vue {
       this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
       this.$store.dispatch('setManageComponents', {index: 'showAdvanceCustomization', value: true})
       this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
+      this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: false})
     }
   }
 }
@@ -80,7 +81,7 @@ export default class DesignAvailable extends Vue {
   @media only screen and (min-width: 768px){
     max-height: 52vh;
   }
-  
+
   @media only screen and (min-width: 992px){
     max-height: 50vh;
   }
@@ -126,7 +127,7 @@ export default class DesignAvailable extends Vue {
         @media only screen and (min-width: 1024px){
           font-size: 0.6rem;
         }
-        
+
         @media only screen and (min-width: 1700px){
           font-size: 0.75rem;
         }

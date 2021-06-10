@@ -1963,3 +1963,47 @@ a:hover{color: #219f84;}
 #modal-center-savecolormodal{
     .lockerroom-modal .nav-tabs .nav-link{padding: 0.5rem 1rem;}
 }
+
+.home-color-area{
+    .extracted-color-shuffle-btn{display: none;}
+    .additional-class{
+        position: fixed;
+        right: 10px;
+        bottom: 20px;
+        max-width: 40%;
+        z-index: 99;
+        margin: 0 !important;
+        h4{display: none;}
+        .extracted-color-shuffle-btn{
+            display: block;
+            max-width: 100px;
+            width: 100%;
+            padding: 0;
+            border: none;
+            color: #808895;
+            margin: -8px 0 0;
+            &:focus,
+            &:active{
+                box-shadow: none;
+                background: none;
+                color: #808895;
+                outline: none;
+                border: none;
+            }
+        }
+        .logo-placement-area{
+            &.extracted-color-area{
+                .btn.use-btn{
+                    max-width: 100px;
+                    font-size: 12px;
+                }
+                .logo-holder{
+                    width: 44px;
+                    height: 44px;
+                    margin: 0 5px 0 0;
+                }
+            }
+            .logo-placement-holder{justify-content: flex-end;}
+        }
+    }
+}

@@ -8,7 +8,7 @@
               <ChooseColor :colors="colors"/>
             </div>
             <template v-if="manageComponents.ExtractedColors">
-              <div class="mb-4 mb-lg-0" v-if="customLogos.length && customLogos[0].url">
+              <div class="mb-4 mb-lg-0" v-if="customLogos.length && customLogos[0].url" :class="extractedcolorclass">
                 <ExtractedColors />
               </div>
             </template>
@@ -19,7 +19,7 @@
               </template>
             </template>
             <template v-if="manageComponents.ChooseInterest">
-              <ChooseInterest :categories="categories" @search="getSearchQuery"/>
+              <ChooseInterest :categories="categories" @search="getSearchQuery" @additionalClassTrigger="additionalClass"/>
             </template>
           </b-col>
 
@@ -162,6 +162,8 @@ export default class Home extends Vue {
   public logoColorUsed = false
   public showModal = false
 
+  public extractedcolorclass = ""
+
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab
   }
@@ -227,6 +229,17 @@ export default class Home extends Vue {
               this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
               this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
           }
+
+
+    }
+
+    public additionalClass(additionalClassTrigger: string) {
+      console.log(additionalClassTrigger)
+      if(additionalClassTrigger){
+        this.extractedcolorclass = "additional-class"
+        console.log("if mango")
+      }
+      console.log("mango")
     }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {

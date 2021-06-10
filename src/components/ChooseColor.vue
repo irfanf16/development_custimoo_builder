@@ -26,7 +26,7 @@
         </div>
       </transition>
     </div>
-    <div class="shuffle-colors d-flex flex-wrap justify-content-between align-items-center">
+    <div class="shuffle-colors d-none d-lg-flex flex-wrap justify-content-between align-items-center">
       <button v-if="defaultColors.filter((color) => { return color.color }).length > 1" @click="shuffleColors()" class="btn btn-secondary">Shuffle</button>
       <button v-if="previousDefaultColors.length" @click="rollbackPreviousColors()" class="redo-btn">
         <font-awesome-icon :icon="['fas', 'redo-alt']"/>

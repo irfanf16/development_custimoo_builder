@@ -26,6 +26,8 @@ export default class ChooseInterest extends Vue {
 
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
 
+  public extractedcolorclass = ""
+
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
   }
@@ -35,12 +37,14 @@ export default class ChooseInterest extends Vue {
   }
 
   public showDesign() {
+    console.log("choose")
+    this.$emit('additionalClassTrigger', "true")
     if (this.manageComponents.mobileScreen) {
       this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
       this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: false})
       this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
       this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
-      this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: true})
     }
   }
 }

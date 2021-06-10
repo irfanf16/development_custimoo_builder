@@ -3,16 +3,16 @@
     <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
     <div class="logo-placement-holder mb-lg-3">
         <div class="logo-holder">
-        <div class="color-extract-container">
-            <div v-if="imageColors.length == 1" class="color-box" :style="{background: imageColors[0].hex}"></div>
-            <div v-if="imageColors.length == 2" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 50%, ' + imageColors[1].hex +' 50% 100%)'}"></div>
-            <div v-if="imageColors.length == 3" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 33.33%, ' + imageColors[1].hex +' 33.33% 66.66%, ' + imageColors[2].hex +' 66.66% 100%)'}"></div>
-            <div v-if="imageColors.length == 4" class="color-box" :style="{background: 'conic-gradient(' + imageColors[1].hex +' 0% 25%, ' + imageColors[2].hex +' 25% 50%, ' + imageColors[3].hex +' 50% 75%, ' + imageColors[0].hex +' 75% 100%)'}"></div>
-        </div>
+          <div class="color-extract-container">
+              <div v-if="imageColors.length == 1" class="color-box" :style="{background: imageColors[0].hex}"></div>
+              <div v-if="imageColors.length == 2" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 50%, ' + imageColors[1].hex +' 50% 100%)'}"></div>
+              <div v-if="imageColors.length == 3" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 33.33%, ' + imageColors[1].hex +' 33.33% 66.66%, ' + imageColors[2].hex +' 66.66% 100%)'}"></div>
+              <div v-if="imageColors.length == 4" class="color-box" :style="{background: 'conic-gradient(' + imageColors[1].hex +' 0% 25%, ' + imageColors[2].hex +' 25% 50%, ' + imageColors[3].hex +' 50% 75%, ' + imageColors[0].hex +' 75% 100%)'}"></div>
+          </div>
         </div>
         <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
-        <b-button class="d-none d-lg-none" @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
-        <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
+        <b-button class="extracted-color-shuffle-btn" @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
+        <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset d-none d-lg-block"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
     </div>
     <SaveColorModal />
     </div>
@@ -40,7 +40,7 @@
         get customLogos(): [Record<any, any>] {
             return this.$store.getters.getCustomLogos
         }
-        
+
 
         useLogoColors() {
             this.logoColorUsed = true
@@ -90,7 +90,7 @@
             this.$store.dispatch("SET_LOGO_COLORS", this.previousImageColors);
             this.previousImageColors = []
         }
-        
+
     }
 
 </script>
@@ -172,6 +172,9 @@
           @media only screen and (min-width: 1367px){
             max-width: 30%;
             font-size: 14px;
+          }
+          &:focus{
+            box-shadow: none;
           }
         }
         &.reset{
