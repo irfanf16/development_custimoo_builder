@@ -780,9 +780,9 @@ export default class Scene extends Vue {
     let centerPoint = target.getCenterPoint()
     const boundingDistance = {
       left: Math.abs(boundingRect.left - centerPoint.x),
-      top: Math.abs(boundingRect.top - centerPoint.y) + 50,
+      top: Math.abs(boundingRect.top - centerPoint.y) + 100,
       right: Math.abs(boundingRect.right - centerPoint.x),
-      bottom: Math.abs(boundingRect.bottom - centerPoint.y) + 50
+      bottom: Math.abs(boundingRect.bottom - centerPoint.y) + 100
     } as Record<any, any>
 
     let nearTo = 'left'
