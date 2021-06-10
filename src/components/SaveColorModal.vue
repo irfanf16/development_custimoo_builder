@@ -42,7 +42,7 @@
 
 <script lang="ts">
 
-    import { Component, Vue } from 'vue-property-decorator'
+import {Component, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     @Component<SaveColorModal>({
@@ -59,6 +59,14 @@
 
       get getLockerProducts():Record<any, any>{
         return this.$store.getters.getLockerProducts;
+      }
+      @Watch('getLockerProducts', {
+        deep: true
+      })
+      getLockerProductsChanged() {
+        if (this.getLockerProducts.length > 0 && !this.room_id){
+          this.room_id = this.getLockerProducts[0].id
+        }
       }
 
       get lockers(){
@@ -81,6 +89,7 @@
       }
       public changeRoom(id:number){
         this.room_id = id;
+        console.log(this.room_id)
       }
       public async saveFolder(){
         if (this.room_id == 0){
@@ -98,6 +107,7 @@
        let saved = await this.$store.dispatch('storeFolder', {folder_name: this.folder_name, room_id: this.room_id, colors: this.logoColors});
         if (saved == true){
           await this.$store.dispatch('getLockerRoomColors')
+          this.folder_name = ''
           this.ref['my-modal'].hide();
         }
       }

@@ -2,9 +2,7 @@
     <b-modal ref="my-modal" id="modal-center-addlockerroom" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener">
-                <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id)"   class="active">{{locker.room_name}}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-<!--                <b-button variant="secondary">Locker 2<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>-->
-<!--                <b-button variant="secondary">Locker 3<a class="remove" href="#"><font-awesome-icon :ico  n="['fas', 'trash-alt']" /></a></b-button>-->
+                <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
                </div>
             <div class="create-lockerroom">
                 <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
@@ -18,7 +16,7 @@
                     <b-input-group>
                         <b-form-input id="inline-form-input-productname" v-model="product_name"  placeholder="Type Here"></b-form-input>
                     </b-input-group>
-                    <b-button variant="primary" :disabled="locker_selected" @click="saveToLocker()">Save Design</b-button>
+                  <b-button variant="primary" :disabled="locker_selected" @click="saveToLocker()">Save Design</b-button>
                 </div>
             </b-form>
         </div>
@@ -28,7 +26,7 @@
 
 <script lang="ts">
 
-    import { Component, Vue } from 'vue-property-decorator'
+import {Component, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     @Component<AddLockerRoomModal>({
@@ -42,6 +40,7 @@
       public room_id = 0;
       public product_name = '';
       public ref = this.$refs as Record<any, any>
+      public tabIndex = 0
 
       get customTexts(): [Record<any, any>] {
         return this.$store.getters.getCustomTexts
@@ -49,6 +48,16 @@
       get lockers():[Record<any, any>]{
         return this.$store.getters.getLockers;
       }
+      @Watch('lockers', {
+        deep: true
+      })
+      lockersChanged() {
+        if (this.lockers.length > 0 && !this.room_id){
+          this.room_id = this.lockers[0].id
+          this.locker_selected = false
+        }
+      }
+
       get isCustomerAuthenticated(): boolean {
         return this.$store.getters.isCustomerAuthenticated
       }
@@ -70,9 +79,10 @@
       get groupColors() : [Record<any, any>] {
         return this.$store.getters.getGroupColors
       }
-      public showButton(id:number){
+      public showButton(id:number, index:number){
         this.locker_selected = false;
         this.room_id = id;
+        this.tabIndex = index
       }
       public async saveToLocker(){
         if (this.isCustomerAuthenticated) {

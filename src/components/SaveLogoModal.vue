@@ -2,14 +2,14 @@
     <b-modal ref="my-modal" id="modal-center-savelogomodal" size="lg" centered scrollable title="Save Logo" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener">
-                <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id)"   class="active">{{locker.room_name}}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
+                <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"   v-bind:class="tabIndex === index ? 'active' : '' ">{{locker.room_name}}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
 <!--                <b-button variant="secondary">Locker 2<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>-->
 <!--                <b-button variant="secondary">Locker 3<a class="remove" href="#"><font-awesome-icon :ico  n="['fas', 'trash-alt']" /></a></b-button>-->
             </div>
-            <!-- <div class="create-lockerroom">
+            <div class="create-lockerroom">
                 <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
                 <CreateLockerRoomModal />
-            </div> -->
+            </div>
         </div>
 
         <div class="pt-4 design-name-form text-center">
@@ -21,20 +21,25 @@
 
 <script lang="ts">
 
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     @Component<SaveLogoModal>({
         components: {
             LockerRoomProducts,
             CreateLockerRoomModal
-        }
+        },
+      mounted() {
+          this.room_id = this.lockers[0].id;
+          this.locker_selected = false
+      }
     })
     export default class SaveLogoModal extends Vue {
       public locker_selected = true;
       public room_id = 0;
       public product_name = '';
       public ref = this.$refs as Record<any, any>
+      public tabIndex = 0
       @Prop({required: true}) logoIndex!: number
 
       get customLogos(): [Record<any, any>] {
@@ -43,9 +48,11 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
       get customTexts(): [Record<any, any>] {
         return this.$store.getters.getCustomTexts
       }
-      get lockers(){
+      get lockers():[Record<any, any>]{
         return this.$store.getters.getLockers;
       }
+
+
       get isCustomerAuthenticated(): boolean {
         return this.$store.getters.isCustomerAuthenticated
       }
@@ -59,9 +66,10 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
       get logoColors():[]{
         return  this.$store.getters.getLogosColors;
       }
-      public showButton(id:number){
+      public showButton(id:number, index:number){
         this.locker_selected = false;
         this.room_id = id;
+        this.tabIndex = index
       }
       public async saveLogo(index:number){
         if (this.isCustomerAuthenticated) {

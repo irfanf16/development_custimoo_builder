@@ -133,7 +133,6 @@ export default class RosterDetails extends Vue {
     let textAdd = false
     let numberAdd = false
 
-    if(text || text == '') {
       if (this.customText[0]) {
         this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
         textAdd = true
@@ -181,7 +180,6 @@ export default class RosterDetails extends Vue {
           this.$store.dispatch('setCustomTexts', {index: 0, text: texts})
         }
       }
-    }
     if (this.customText[1]) {
       this.$store.dispatch('updateCustomTextAttribute', {index: 1, attribute: 'text', value: num.toString()})
       numberAdd = true
