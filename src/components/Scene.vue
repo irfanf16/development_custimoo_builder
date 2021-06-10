@@ -8,7 +8,7 @@
         <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
       </a>
     </div>
-    <div class="loader" v-if="seen"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 </template>
 
@@ -20,9 +20,6 @@ import rgbHex from 'rgb-hex'
 
 @Component<Scene>({
   mounted() {
-
-    this.seen = true
-
     if(this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -169,8 +166,8 @@ export default class Scene extends Vue {
     visible: false
   })
   public dimTextBack!: fabric.Text
-
-  public seen = true
+  public showLoader = true
+  public otherSideObjects: any[] = []
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -672,6 +669,7 @@ export default class Scene extends Vue {
               self.addTexts(texts)
             }, 100)
           }
+          this.showLoader = false
         }
 
         if (self.mainPreview) {
@@ -679,7 +677,6 @@ export default class Scene extends Vue {
         }
         self.mounted = true
         clearInterval(timer)
-        this.seen = false
       }
     }, 1000)
     canvas.on('object:modified', (e) => {
@@ -750,114 +747,115 @@ export default class Scene extends Vue {
     this.showDimensions(e, dimText, scale)
   }
 
-  public otherSideObjects: any[] = []
   public addToOtherSide(target: any, side: string) {
-    let model = this.frontModel
-    let canvas = this.frontCanvas
-    if(side == 'back') {
-      model = this.backModel
-      canvas = this.backCanvas
-    }
+    if(side == 'front' || (this.back && side == 'back')) {
+      let model = this.frontModel
+      let canvas = this.frontCanvas
+      if (side == 'back') {
+        model = this.backModel
+        canvas = this.backCanvas
+      }
 
-    let addIndex = 0
-    if (target.text) {
-      addIndex = target.textIndex
-    } else {
-      this.customLogos.forEach((logo: Record<any, any>, index: number) => {
-        let logoUrl = (this.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
-        if (logoUrl == target._element.src) {
-          addIndex = index
+      let addIndex = 0
+      if (target.text) {
+        addIndex = target.textIndex
+      } else {
+        this.customLogos.forEach((logo: Record<any, any>, index: number) => {
+          let logoUrl = (this.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+          if (logoUrl == target._element.src) {
+            addIndex = index
+          }
+        })
+      }
+
+      const modelBoundingRect = model.getBoundingRect()
+      let boundingRect = {
+        left: modelBoundingRect.left,
+        right: modelBoundingRect.left + modelBoundingRect.width,
+        top: modelBoundingRect.top,
+        bottom: modelBoundingRect.top + modelBoundingRect.height,
+      }
+
+      let centerPoint = target.getCenterPoint()
+      const boundingDistance = {
+        left: Math.abs(boundingRect.left - centerPoint.x),
+        top: Math.abs(boundingRect.top - centerPoint.y) + 100,
+        right: Math.abs(boundingRect.right - centerPoint.x),
+        bottom: Math.abs(boundingRect.bottom - centerPoint.y) + 100
+      } as Record<any, any>
+
+      let nearTo = 'left'
+      Object.keys(boundingDistance).forEach((key: string) => {
+        if (boundingDistance[key] < boundingDistance[nearTo]) {
+          nearTo = key
         }
       })
-    }
 
-    const modelBoundingRect = model.getBoundingRect()
-    let boundingRect = {
-      left: modelBoundingRect.left,
-      right: modelBoundingRect.left + modelBoundingRect.width,
-      top: modelBoundingRect.top,
-      bottom: modelBoundingRect.top + modelBoundingRect.height,
-    }
-
-    let centerPoint = target.getCenterPoint()
-    const boundingDistance = {
-      left: Math.abs(boundingRect.left - centerPoint.x),
-      top: Math.abs(boundingRect.top - centerPoint.y) + 100,
-      right: Math.abs(boundingRect.right - centerPoint.x),
-      bottom: Math.abs(boundingRect.bottom - centerPoint.y) + 100
-    } as Record<any, any>
-
-    let nearTo = 'left'
-    Object.keys(boundingDistance).forEach((key: string) => {
-      if(boundingDistance[key] < boundingDistance[nearTo]) {
-        nearTo = key
-      }
-    })
-
-    const width = target.width * target.scaleX;
-    let checkPointX = target.left + width / 2
-    let checkPointY = centerPoint.y
-    if(nearTo == 'left') {
-      checkPointX = target.left - width / 2
-      checkPointY = centerPoint.x
-    }
-    console.log(nearTo)
-
-    if(canvas.isTargetTransparent(model, checkPointX, centerPoint.y)) {
-      console.log('comes here')
-      let addLeft = 0
-      let addTop = 0
-      const model_start = (model.left - ((model.width * model.scaleX) / 2)) - 1
-      const model_end = (model.left + ((model.width * model.scaleX) / 2)) + 1
       const width = target.width * target.scaleX;
+      let checkPointX = target.left + width / 2
+      let checkPointY = centerPoint.y
       if (nearTo == 'left') {
-        const direction = this.targetNonTransparent(canvas, model, checkPointX, centerPoint.y, 'right')
-        const directionFromRight = this.targetNonTransparent(canvas, model, model_end, centerPoint.y, 'left')
-        const outside = direction.left - checkPointX
-        const modelSpaceLeft = directionFromRight.left + (width / 2) + 10
-        addLeft = Math.abs(modelSpaceLeft - outside)
-        addTop = target.top
-      } else {
-        const direction = this.targetNonTransparent(canvas, model, target.left + width, target.top, 'left')
-        const directionFromRight = this.targetNonTransparent(canvas, model, model_start, centerPoint.y, 'right')
-        const outside = checkPointX - direction.left
-        const modelSpaceRight = directionFromRight.left - (width / 2) - 10
-        addLeft = Math.abs(modelSpaceRight + outside)
-        addTop = target.top
+        checkPointX = target.left - width / 2
+        checkPointY = centerPoint.x
       }
+      console.log(nearTo)
 
-      if (this.otherSideObjects[addIndex]) {
-        this.otherSideObjects[addIndex].left = addLeft
-        this.otherSideObjects[addIndex].top = addTop
-        if (side == 'back') {
-          this.frontCanvas.renderAll()
+      if (canvas.isTargetTransparent(model, checkPointX, centerPoint.y)) {
+        console.log('comes here')
+        let addLeft = 0
+        let addTop = 0
+        const model_start = (model.left - ((model.width * model.scaleX) / 2)) - 1
+        const model_end = (model.left + ((model.width * model.scaleX) / 2)) + 1
+        const width = target.width * target.scaleX;
+        if (nearTo == 'left') {
+          const direction = this.targetNonTransparent(canvas, model, checkPointX, centerPoint.y, 'right')
+          const directionFromRight = this.targetNonTransparent(canvas, model, model_end, centerPoint.y, 'left')
+          const outside = direction.left - checkPointX
+          const modelSpaceLeft = directionFromRight.left + (width / 2) + 10
+          addLeft = Math.abs(modelSpaceLeft - outside)
+          addTop = target.top
         } else {
-          this.backCanvas.renderAll()
+          const direction = this.targetNonTransparent(canvas, model, target.left + width, target.top, 'left')
+          const directionFromRight = this.targetNonTransparent(canvas, model, model_start, centerPoint.y, 'right')
+          const outside = checkPointX - direction.left
+          const modelSpaceRight = directionFromRight.left - (width / 2) - 10
+          addLeft = Math.abs(modelSpaceRight + outside)
+          addTop = target.top
+        }
+
+        if (this.otherSideObjects[addIndex]) {
+          this.otherSideObjects[addIndex].left = addLeft
+          this.otherSideObjects[addIndex].top = addTop
+          if (side == 'back') {
+            this.frontCanvas.renderAll()
+          } else {
+            this.backCanvas.renderAll()
+          }
+        } else {
+          let objectAdd = fabric.util.object.clone(target)
+          objectAdd.left = addLeft
+          objectAdd.top = addTop
+          objectAdd.hasControls = false
+          objectAdd.selectable = false
+          objectAdd.evented = false
+          this.otherSideObjects[addIndex] = objectAdd
+          if (side == 'back') {
+            this.frontCanvas.add(objectAdd)
+            this.frontModel.bringToFront()
+          } else {
+            this.backCanvas.add(objectAdd)
+            this.backModel.bringToFront()
+          }
         }
       } else {
-        let objectAdd = fabric.util.object.clone(target)
-        objectAdd.left = addLeft
-        objectAdd.top = addTop
-        objectAdd.hasControls = false
-        objectAdd.selectable = false
-        objectAdd.evented = false
-        this.otherSideObjects[addIndex] = objectAdd
-        if (side == 'back') {
-          this.frontCanvas.add(objectAdd)
-          this.frontModel.bringToFront()
-        } else {
-          this.backCanvas.add(objectAdd)
-          this.backModel.bringToFront()
+        if (this.otherSideObjects[addIndex]) {
+          if (side == 'back') {
+            this.frontCanvas.remove(this.otherSideObjects[addIndex])
+          } else {
+            this.backCanvas.remove(this.otherSideObjects[addIndex])
+          }
+          this.otherSideObjects.splice(addIndex, 1)
         }
-      }
-    } else {
-      if (this.otherSideObjects[addIndex]) {
-        if (side == 'back') {
-          this.frontCanvas.remove(this.otherSideObjects[addIndex])
-        } else {
-          this.backCanvas.remove(this.otherSideObjects[addIndex])
-        }
-        this.otherSideObjects.splice(addIndex, 1)
       }
     }
   }
@@ -1275,7 +1273,7 @@ export default class Scene extends Vue {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.9);
   z-index: 9999;
   img{
     max-width: 15%;
