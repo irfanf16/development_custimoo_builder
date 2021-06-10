@@ -1551,6 +1551,24 @@ a:hover{color: #219f84;}
         }
     }
 }
+#modal-center-addlockerroom{
+    .lockerroom-header{
+        .locker-opener{
+            padding: 10px 0;
+            .btn{
+                padding: 0.5rem 1rem;
+                margin: 0 15px 0 0;
+                font-size: 14px;
+                .remove{
+                    width: 20px;
+                    height: 20px;
+                    font-size: 9px;
+                    top: -8px;
+                }
+            }
+        }
+    }
+}
 .lockerroom-modal{
     .nav-tabs{
         white-space: nowrap;
