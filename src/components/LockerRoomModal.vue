@@ -77,11 +77,11 @@
                                                 </template>
                                             </div>
                                         </div>
-                                        <div class="color-holder" v-if="colors.length > 0">
+                                        <div class="color-holder" v-if="colors">
                                             <div class="color-container">
                                             <template v-for="(item, ix) in colors">
                                                 <div class="color-box"
-                                                    :style="{backgroundColor: item.hex}" :key="`${ix}`">
+                                                    :style="{backgroundColor: item.value}" :key="`${ix}`">
                                                 </div>
                                             </template>
                                             </div>
@@ -176,8 +176,7 @@
         }
       }
       public fetchColors(i:number, ind:number){
-        this.colors = []
-      this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
+        this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
       }
       public changeColor(){
         this.colors = []
