@@ -40,7 +40,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 
 @Component<ChooseColor>({
   created() {
-    window.addEventListener('click', (e) => {
+    window.addEventListener('click', (e: Record<any, any>) => {
       let element = document.getElementById('color-picker') as Record<any, any>
       if (this.colorPickerActive && e.target !== element && !element.contains(e.target) && !e.target.classList.contains('chosen-colors-section')){
         this.colorPickerActive = false
