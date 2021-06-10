@@ -182,56 +182,55 @@ export default class RosterDetails extends Vue {
         }
       }
     }
-    if(num || num == '') {
-      if (this.customText[1]) {
-        this.$store.dispatch('updateCustomTextAttribute', {index: 1, attribute: 'text', value: num.toString()})
-        numberAdd = true
-      }
-      if(!numberAdd) {
-        let texts: Record<any, any>
-        if(this.selectedProduct.productnames[1]) {
-          texts = {
-            text: num.toString(),
-            type: this.selectedProduct.productnames[1].type,
-            width: this.selectedProduct.productnames[1].width,
-            height: this.selectedProduct.productnames[1].height,
-            x_axis: this.selectedProduct.productnames[1].x_axis,
-            y_axis: this.selectedProduct.productnames[1].y_axis,
-            rotation: this.selectedProduct.productnames[1].rotation,
-            haveControls: Boolean(!this.selectedProduct.productnames[1].is_locked),
-            outlineEnabled: Boolean(this.selectedProduct.productnames[1].outline_enabled),
-            side: this.selectedProduct.productnames[1].side,
-            fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-            fillColor: this.firstColor.value,
-            fillColorPantone: this.firstColor.name,
-            outLineColor: this.secondColor.value,
-            outLineColorPantone: this.secondColor.name,
-            selectColor: false
-          }
-        } else {
-          texts = {
-            text: num.toString(),
-            type: 'number',
-            width: 50,
-            height: 50,
-            x_axis: 300,
-            y_axis: 180,
-            rotation: 0,
-            haveControls: true,
-            outlineEnabled: true,
-            side: 'back',
-            fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-            fillColor: this.firstColor.value,
-            fillColorPantone: this.firstColor.name,
-            outLineColor: this.secondColor.value,
-            outLineColorPantone: this.secondColor.name,
-            selectColor: false
-          }
-          this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
+    if (this.customText[1]) {
+      this.$store.dispatch('updateCustomTextAttribute', {index: 1, attribute: 'text', value: num.toString()})
+      numberAdd = true
+    }
+    if(!numberAdd) {
+      let texts: Record<any, any>
+      if(this.selectedProduct.productnames[1]) {
+        texts = {
+          text: num.toString(),
+          type: this.selectedProduct.productnames[1].type,
+          width: this.selectedProduct.productnames[1].width,
+          height: this.selectedProduct.productnames[1].height,
+          x_axis: this.selectedProduct.productnames[1].x_axis,
+          y_axis: this.selectedProduct.productnames[1].y_axis,
+          rotation: this.selectedProduct.productnames[1].rotation,
+          haveControls: Boolean(!this.selectedProduct.productnames[1].is_locked),
+          outlineEnabled: Boolean(this.selectedProduct.productnames[1].outline_enabled),
+          side: this.selectedProduct.productnames[1].side,
+          fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+          fillColor: this.firstColor.value,
+          fillColorPantone: this.firstColor.name,
+          outLineColor: this.secondColor.value,
+          outLineColorPantone: this.secondColor.name,
+          selectColor: false
         }
+      } else {
+        texts = {
+          text: num.toString(),
+          type: 'number',
+          width: 50,
+          height: 50,
+          x_axis: 300,
+          y_axis: 180,
+          rotation: 0,
+          haveControls: true,
+          outlineEnabled: true,
+          side: 'back',
+          fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+          fillColor: this.firstColor.value,
+          fillColorPantone: this.firstColor.name,
+          outLineColor: this.secondColor.value,
+          outLineColorPantone: this.secondColor.name,
+          selectColor: false
+        }
+        this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
       }
     }
-    }
+  }
+
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: []}
