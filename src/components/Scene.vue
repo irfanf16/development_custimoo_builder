@@ -799,18 +799,19 @@ export default class Scene extends Vue {
       console.log('comes here')
       let addLeft = 0
       let addTop = 0
+      const model_start = (model.left - ((model.width * model.scaleX) / 2)) - 1
+      const model_end = (model.left + ((model.width * model.scaleX) / 2)) + 1
       const width = target.width * target.scaleX;
-      const height = target.height * target.scaleY;
       if (nearTo == 'left') {
         const direction = this.targetNonTransparent(canvas, model, checkPointX, centerPoint.y, 'right')
-        const directionFromRight = this.targetNonTransparent(canvas, model, this.canvasWidth, centerPoint.y, 'left')
+        const directionFromRight = this.targetNonTransparent(canvas, model, model_end, centerPoint.y, 'left')
         const outside = direction.left - checkPointX
         const modelSpaceLeft = directionFromRight.left + (width / 2) + 10
         addLeft = Math.abs(modelSpaceLeft - outside)
         addTop = target.top
       } else {
         const direction = this.targetNonTransparent(canvas, model, target.left + width, target.top, 'left')
-        const directionFromRight = this.targetNonTransparent(canvas, model, 0, centerPoint.y, 'right')
+        const directionFromRight = this.targetNonTransparent(canvas, model, model_start, centerPoint.y, 'right')
         const outside = checkPointX - direction.left
         const modelSpaceRight = directionFromRight.left - (width / 2) - 10
         addLeft = Math.abs(modelSpaceRight + outside)

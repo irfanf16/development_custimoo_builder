@@ -164,7 +164,6 @@ const ProductAttributes:Module<any, any> = {
          item.color_text = JSON.parse(item.color_text)
         return item
       })
-      console.log(payload)
       state.lockerColors = payload
     }
   },
