@@ -17,15 +17,16 @@
                 <b-form class="pantone-color-field" v-on:submit.prevent>
                   <label class="mb-2" for="inline-form-input-pantone-color">Pantone:</label>
                   <b-form-input
-                    id="inline-form-input-pantone-color"
                     v-model="svgGroups[selectAccordionIndex].pantone"
                     class="mb-2 mr-sm-2 mb-sm-0"
                     placeholder="XX-XXXX"
                     @change="changePantoneColor"
                   ></b-form-input>
-                  {{ pantoneMessage}}
+                  <div class="pantone-message">
+                    {{ pantoneMessage}}
+                  </div>
                 </b-form>
-                <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" :key="svgElement.color"/>
+                <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />
               </div>
               <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
                    :title="color.name" :style="{background: color.value}" :key="index">
