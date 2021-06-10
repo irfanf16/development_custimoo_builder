@@ -1,11 +1,14 @@
 <template>
-  <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;">
-    <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
-      <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
-    </a>
-    <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}">
-      <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
-    </a>
+  <div style="position: relative;">
+    <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;">
+      <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
+        <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+      </a>
+      <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}">
+        <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+      </a>
+    </div>
+    <div class="loader" v-if="seen"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 </template>
 
@@ -17,6 +20,8 @@ import rgbHex from 'rgb-hex'
 
 @Component<Scene>({
   mounted() {
+
+    this.seen = true
 
     if(this.back) {
       this.dimTextBack = new fabric.Text('', {
@@ -164,6 +169,8 @@ export default class Scene extends Vue {
     visible: false
   })
   public dimTextBack!: fabric.Text
+
+  public seen = true
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -672,6 +679,7 @@ export default class Scene extends Vue {
         }
         self.mounted = true
         clearInterval(timer)
+        this.seen = false
       }
     }, 1000)
     canvas.on('object:modified', (e) => {
@@ -1252,6 +1260,27 @@ export default class Scene extends Vue {
       max-width: 100%;
       &:last-child{display: none;}
     }
+  }
+}
+.loader{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.5);
+  z-index: 9999;
+  img{
+    max-width: 15%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
   }
 }
 </style>
