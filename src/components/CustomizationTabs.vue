@@ -165,6 +165,10 @@ export default class CustomizationProcess extends Vue {
     return this.$store.getters.getSelectedProduct.productnames;
   }
 
+  get logoColors(): [] {
+    return this.$store.getters.getLogosColors
+  }
+
   public tabIndex = 0
 
   public productColors: any[] = []
@@ -220,6 +224,15 @@ export default class CustomizationProcess extends Vue {
       this.productColors = this.productColors.concat(finalColor)
     })
     this.productColors = this.productColors.concat(this.lockerColors)
+
+    if(this.logoColors.length){
+      let logoColorsNew = []
+      this.logoColors.forEach((color: any, index: number) => {
+        logoColorsNew = logoColorsNew.concat([{name: color.pantone, value: color.hex, position: index+1}])
+      })
+      let teamLogoColors = [{name: 'Team Logo Colors', color_text: logoColorsNew, selectedColor: ''}]
+      this.productColors = this.productColors.concat(teamLogoColors)
+    }
   }
 
   public fontsColorsManipulation() {
