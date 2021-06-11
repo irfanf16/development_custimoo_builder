@@ -1,6 +1,6 @@
 <template>
   <div class="roster-section">
-    <div class="roster-upload-area">
+    <div class="d-none d-md-block roster-upload-area">
       <h3>Import Roster from Excel sheet</h3>
       <b-button  v-b-modal.modal-center-uploadroster class="btn btn-secondary fw-bold">Download/Upload Roster Template <a href="#" v-b-tooltip.hover
                                                                                   title="Import roster details from excel sheet">

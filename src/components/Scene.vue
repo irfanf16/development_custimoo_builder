@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative;">
+  <div class="loading-holder">
     <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
         <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
