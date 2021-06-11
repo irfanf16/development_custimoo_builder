@@ -58,6 +58,13 @@ a{
     transition: all 0.3s ease;
 }
 a:hover{color: #219f84;}
+button{
+    &:focus,
+    &:active{
+        outline: none !important;
+        box-shadow: none !important;
+    }
+}
 #app{
     overflow: hidden;
     width: 100%;
@@ -1754,7 +1761,7 @@ a:hover{color: #219f84;}
                     height: 180px !important;
                 }
                 @media only screen and (min-width: 1199px){
-                    height: 220px !important;
+                    height: 195px !important;
                 }
                 .canvas{
                     width: 100% !important;
@@ -1877,7 +1884,7 @@ a:hover{color: #219f84;}
             right: 0;
             top: 10px;
             z-index: 1;
-            @media only screen and (min-width: 720px){
+            @media only screen and (min-width: 768px){
                 max-width: inherit;
                 position: relative;
                 right: auto;
@@ -1897,6 +1904,11 @@ a:hover{color: #219f84;}
                 @media only screen and (min-width: 720px){display: none;}
             }
             .upper-canvas{z-index: -1;}
+        }
+        .loading-holder{
+            @media only screen and (min-width: 768px){
+                position: relative;
+            }
         }
     }
 }
@@ -1998,8 +2010,8 @@ a:hover{color: #219f84;}
                     font-size: 12px;
                 }
                 .logo-holder{
-                    width: 44px;
-                    height: 44px;
+                    width: 40px;
+                    height: 40px;
                     margin: 0 5px 0 0;
                 }
             }

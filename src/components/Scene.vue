@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative;">
+  <div class="loading-holder">
     <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
         <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
@@ -361,7 +361,8 @@ export default class Scene extends Vue {
     deep: true
   })
   defaultColorsChanged(newVal: [Record<any, any>]) {
-    this.changeDefaultColors(newVal)
+    if (newVal.length)
+      this.changeDefaultColors(this.defaultColors)
   }
 
   @Watch('groupColors', {
