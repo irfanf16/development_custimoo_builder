@@ -6,7 +6,7 @@
     <b-tabs>
       <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
         <template #title>
-          Logo {{ index+1 }}
+          <span> {{  index == 0 ? 'Team Logo' : 'logo ' + index  }}</span>
           <div v-if="index != 0">
             <a href="#" class="remove-logo" @click="removeLogoTab(index)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
