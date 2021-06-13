@@ -361,7 +361,8 @@ export default class Scene extends Vue {
     deep: true
   })
   defaultColorsChanged(newVal: [Record<any, any>]) {
-    this.changeDefaultColors(newVal)
+    if (newVal.length)
+      this.changeDefaultColors(this.defaultColors)
   }
 
   @Watch('groupColors', {

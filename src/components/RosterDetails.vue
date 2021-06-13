@@ -23,20 +23,16 @@
       </div>
     </div>
     <template v-for="(roster, index) in rosterDetails">
-    <div class="roster-row mb-2"  :key="index">
-      <div class="align-left">
-        <div class="hide-show">
-          <a  @click="changeText(roster.text, roster.number)">
-            <font-awesome-icon :icon="['fas', currentIcon]"/>
-          </a>
-        </div>
-        <div class="roster-name">
-          <b-form-input
-            ref="myInputs"
-
-            v-model="roster.text"
-          ></b-form-input>
-        </div>
+      <div class="roster-row mb-2"  :key="index">
+        <div class="align-left">
+          <div class="hide-show" :class="{ active: isActive }">
+            <a  @click="changeText(roster.text, roster.number, index)">
+              <font-awesome-icon  :icon="['fas',  index === currentIndex ? 'eye' : 'eye-slash']"/>
+            </a>
+          </div>
+          <div class="roster-name">
+            <b-form-input ref="myInputs" v-model="roster.text"></b-form-input>
+          </div>
         <div class="shirt-no">
           <b-form-input ref="myInputs"
 
@@ -92,6 +88,7 @@ export default class RosterDetails extends Vue {
   public firstColor!: Record<any, any>
   public secondColor!: Record<any, any>
   public currentIcon = 'eye-slash'
+  public currentIndex = -1;
   public ref = this.$refs as Record<any, any>
   public obj = {
     text:'',
@@ -117,6 +114,10 @@ export default class RosterDetails extends Vue {
   public addPlayer(obj:Record<any, any>) {
     this.$emit('addPlayer');
   }
+  public isActive = false;
+  public myFilter() {
+    this.isActive = !this.isActive
+  }
   public removeIndex(ind:number, text:string, num:number){
     if (this.customText.length > 0){
       if (this.customText[0]){
@@ -128,8 +129,8 @@ export default class RosterDetails extends Vue {
     }
     this.$store.dispatch('removeRoster', ind);
   }
-  public changeText(text:string, num:number) {
-    this.currentIcon = 'eye'
+  public changeText(text:string, num:number, index:number) {
+    this.currentIndex = index
     let textAdd = false
     let numberAdd = false
 
