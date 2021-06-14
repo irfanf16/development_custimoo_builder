@@ -364,7 +364,10 @@ export default class Scene extends Vue {
   })
   defaultColorsChanged(newVal: [Record<any, any>]) {
     if(this.mounted) {
-      this.changeDefaultColors(this.defaultColors)
+      let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
+      if(defaultColors.length) {
+        this.changeDefaultColors(defaultColors)
+      }
     }
   }
 
