@@ -17,6 +17,9 @@ export default{
 </script>
 
 <style lang="scss">
+* {
+  touch-action: manipulation;
+}
 @import '@/assets/scss/custom';
 
 #app {

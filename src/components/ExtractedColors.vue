@@ -1,6 +1,6 @@
 <template>
     <div class="logo-placement-area extracted-color-area">
-    <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
+    <h4 class="mb-3 mb-md-3 mb-lg-4">Color Extracted from Logo</h4>
     <div class="logo-placement-holder mb-lg-3">
         <div class="logo-holder">
           <div class="color-extract-container">
@@ -11,7 +11,8 @@
           </div>
         </div>
         <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
-        <b-button class="extracted-color-shuffle-btn" @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
+<!--        <b-button class="extracted-color-shuffle-btn" @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>-->
+        <b-button class="extracted-color-shuffle-btn" @click="shuffleLogoColors()" variant="outline-secondary">Shuffle</b-button>
         <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset d-none d-lg-block"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
     </div>
     <SaveColorModal />
