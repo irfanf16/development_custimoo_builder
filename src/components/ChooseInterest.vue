@@ -37,13 +37,12 @@ export default class ChooseInterest extends Vue {
   }
 
   public showDesign() {
-    console.log("choose")
     this.$emit('additionalClassTrigger', "true")
     if (this.manageComponents.mobileScreen) {
       this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
       this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: false})
       this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
-      this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
+      this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
       this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: true})
     }
   }

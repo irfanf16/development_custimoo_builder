@@ -5,7 +5,7 @@
       <a class="chosen-colors-section" v-for="(chooseColor, index) in defaultColors" :key="index" v-on:click="showColor(index)">
         <div>
           <div class="color-circle chosen-colors-section"
-               :style="{ background : chooseColor.color? chooseColor.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></div>
+               :style="{ background : chooseColor.color? chooseColor.color : ' url(' + colorImage + ') no-repeat 50% 50% / 14px' }"></div>
           <strong class="chosen-colors-section">{{ chooseColor.name }}</strong>
         </div>
       </a>
@@ -140,7 +140,7 @@ export default class ChooseColor extends Vue {
   a {
     display: block;
     width: 130px;
-    height: 130px;
+    height: 90px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -153,7 +153,6 @@ export default class ChooseColor extends Vue {
     background: #fff;
     @media only screen and (min-width: 375px){
       width: 140px;
-      height: 140px;
     }
     @media only screen and (min-width: 992px){
       width: 100px;
@@ -177,11 +176,16 @@ export default class ChooseColor extends Vue {
 
   .color-circle {
     border-radius: 50%;
-    width: 52px;
-    height: 52px;
+    width: 42px;
+    height: 42px;
     border: 2px solid #EFF2F4;
     position: relative;
-    margin: 0 auto 12px;
+    margin: 0 auto 10px;
+    @media only screen and (min-width: 768px){
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 12px;
+    }
     @media only screen and (min-width: 1366px) {
       width: 72px;
       height: 72px;
