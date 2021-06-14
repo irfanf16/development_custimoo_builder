@@ -105,14 +105,11 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
             overflow-x: auto;
             white-space: nowrap;
             @media only screen and (min-width: 992px){
-                max-width: 100%;
-                padding: 14px 0;
+                padding: 14px 0 0;
                 max-width: 80%;
-                overflow: hidden;
-                white-space: inherit;
             }
             .btn{
-                padding: 5px 10px;
+                padding: 0.5rem 1rem;
                 margin: 0 5px 10px;
                 position: relative;
                 background: none;
@@ -120,9 +117,8 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
                 color: #03142E;
                 font-size: 0.8rem;
                 @media only screen and (min-width: 992px){
-                    padding: 10px 30px;
                     margin: 0 10px 10px;
-                    font-size: 1rem;
+                    font-size: 14px;
                 }
                 &.active,
                 &:hover{
@@ -133,7 +129,7 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
                 .remove{
                     position: absolute;
                     right: -10px;
-                    top: -14px;
+                    top: -10px;
                     width: 20px;
                     height: 20px;
                     font-size: 9px;
@@ -145,9 +141,9 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
                     align-items: center;
                     justify-content: center;
                     @media only screen and (min-width: 992px){
-                        width: 30px;
-                        height: 30px;
-                        font-size: 12px;
+                        width: 20px;
+                        height: 20px;
+                        font-size: 10px;
                     }
                 }
             }
@@ -167,6 +163,15 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
                     left: auto;
                     right: 0;
                 }
+            }
+            &::-webkit-scrollbar{
+              height: 5px;
+            }
+            &::-webkit-scrollbar-track {
+              background: transparent;
+            }
+            &::-webkit-scrollbar-thumb {
+              background: #219F84;
             }
         }
         .create-lockerroom{

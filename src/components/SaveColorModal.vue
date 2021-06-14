@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="my-modal" id="modal-center-savecolormodal" centered scrollable size="xl" title="Add Color to Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="my-modal" id="modal-center-savecolormodal" centered scrollable size="lg" title="Add Color to Locker Room" content-class="lockerroom-modal">
       <b-tabs content-class="mt-3">
         <template v-for="(room, i) in getLockerProducts">
         <b-tab :key="i">
@@ -127,7 +127,6 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
             overflow-x: auto;
             white-space: nowrap;
             @media only screen and (min-width: 992px){
-                max-width: 100%;
                 padding: 14px 0;
                 max-width: 80%;
                 overflow: hidden;

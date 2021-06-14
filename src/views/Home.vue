@@ -486,6 +486,11 @@ export default class Home extends Vue {
           padding: 0;
           width: auto;
         }
+        &:hover{
+          @media only screen and (min-width: 1024px){
+            color: #808895 !important;
+          }
+        }
       }
       .btn-save-color{
         color: #fff;

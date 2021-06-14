@@ -424,7 +424,7 @@
             }
             .image-holder{
                 position: relative;
-                margin: 0 0 15px;
+                margin: 0;
                 @media only screen and (min-width: 992px){overflow: hidden;}
                 img{
                     display: block;

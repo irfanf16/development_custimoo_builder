@@ -66,24 +66,26 @@ export default class DesignAvailable extends Vue {
   flex-wrap: wrap;
   // justify-content: space-between;
   align-items: center;
-  max-height: 15vh;
+  //max-height: 15vh;
   overflow: hidden;
   overflow-y: auto;
-  @media only screen and (min-width: 350px){
-    max-height: 36vh;
-  }
-  @media only screen and (min-width: 374px){
-    max-height: 32vh;
-  }
-  @media only screen and (min-width: 410px){
-    max-height: 38vh;
-  }
-  @media only screen and (min-width: 768px){
-    max-height: 52vh;
-  }
+  padding-bottom: 15vh;
+  //@media only screen and (min-width: 350px){
+  //  max-height: 36vh;
+  //}
+  //@media only screen and (min-width: 374px){
+  //  max-height: 32vh;
+  //}
+  //@media only screen and (min-width: 410px){
+  //  max-height: 38vh;
+  //}
+  //@media only screen and (min-width: 768px){
+  //  max-height: 52vh;
+  //}
 
   @media only screen and (min-width: 992px){
     max-height: 50vh;
+    padding-bottom: 0;
   }
   &::-webkit-scrollbar{
       width: 3px;
@@ -112,11 +114,11 @@ export default class DesignAvailable extends Vue {
     }
     h3{
         text-align: center;
-        padding: 10px 0;
+        padding: 0;
         text-transform: uppercase;
         overflow: hidden;
         font-size: 0.65rem;
-        min-height: 50px;
+        min-height: 30px;
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
@@ -127,7 +129,6 @@ export default class DesignAvailable extends Vue {
         @media only screen and (min-width: 1024px){
           font-size: 0.6rem;
         }
-
         @media only screen and (min-width: 1700px){
           font-size: 0.75rem;
         }

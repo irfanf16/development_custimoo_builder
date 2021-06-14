@@ -1116,8 +1116,8 @@ button{
         }
         
         .color-box{
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             background: #000;
             border-radius: 50%;
             border: 1px solid #EFF2F4;
@@ -1929,9 +1929,10 @@ button{
     .colors .item:nth-child(8n + 1){margin-left: 10px !important;}
     .color-type{display: none !important;}
 }
+
 #modal-center-savecolormodal___BV_modal_body_{
     .nav-tabs{
-        max-width: 85%;
+        max-width: 80%;
         padding-bottom: 3px;
         overflow: hidden;
         overflow-x: auto;
@@ -1980,12 +1981,14 @@ button{
     .extracted-color-shuffle-btn{display: none;}
     .additional-class{
         position: fixed;
-        right: 10px;
-        bottom: 20px;
-        left: 10px;
+        right: 0;
+        bottom: -2px;
+        left: 0;
         max-width: 100%;
         z-index: 99;
         margin: 0 !important;
+        padding: 20px;
+        background: #fff;
         h4{display: none;}
         .extracted-color-shuffle-btn{
             display: block;
