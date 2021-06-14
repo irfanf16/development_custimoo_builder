@@ -27,7 +27,7 @@
         <div class="align-left">
           <div class="hide-show" :class="{ active: isActive }">
             <a  @click="changeText(roster.text, roster.number, index)">
-              <font-awesome-icon  :icon="['fas',  index === currentIndex ? 'eye' : 'eye-slash']"/>
+              <font-awesome-icon  :icon="['fas',  index === eyeIndex ? 'eye' : 'eye-slash']"/>
             </a>
           </div>
           <div class="roster-name">
@@ -88,7 +88,6 @@ export default class RosterDetails extends Vue {
   public firstColor!: Record<any, any>
   public secondColor!: Record<any, any>
   public currentIcon = 'eye-slash'
-  public currentIndex = -1;
   public ref = this.$refs as Record<any, any>
   public obj = {
     text:'',
@@ -110,6 +109,9 @@ export default class RosterDetails extends Vue {
   get customText():Record<any, any>[]{
     return this.$store.getters.getCustomTexts;
   }
+  get eyeIndex():number{
+    return this.$store.getters.getEyeIndex;
+  }
 
   public addPlayer(obj:Record<any, any>) {
     this.$emit('addPlayer');
@@ -130,7 +132,7 @@ export default class RosterDetails extends Vue {
     this.$store.dispatch('removeRoster', ind);
   }
   public changeText(text:string, num:number, index:number) {
-    this.currentIndex = index
+    this.$store.commit('CHANGE_EYE_INDEX', index)
     let textAdd = false
     let numberAdd = false
 

@@ -167,7 +167,10 @@ export default class Scene extends Vue {
   })
   public dimTextBack!: fabric.Text
   public showLoader = true
-  public otherSideObjects: any[] = []
+  public otherSideLogos: any[] = []
+  public otherSideTexts: any[] = []
+  public logoIndex = 0
+  public textIndex = 0
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -206,8 +209,7 @@ export default class Scene extends Vue {
       this.customLogoObjects.forEach((logoObject, index) => {
         let deleteLogo = true
         newVal.forEach((logo: Record<any, any>) => {
-          let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
-          if(logoUrl == logoObject._element.src && logo.side == logoObject.side){
+          if(logo.logoIndex == logoObject.logoIndex && logo.side == logoObject.side){
             deleteLogo = false
           }
         })
@@ -281,21 +283,20 @@ export default class Scene extends Vue {
   }
 
   @Watch('customTexts', {
-    deep: true
+    deep: true, immediate: false
   })
   customTextsChanged(newVal: [Record<any, any>]) {
     if (this.mounted) {
       const self = this
-      newVal.forEach((text: Record<any, any>, index: number) => {
-        self.customTextObjects.forEach((textObject, dIndex) => {
-          if((textObject.textIndex == index && text.side != textObject.side) || (textObject.textIndex == index && !text.text)){
-            self.customTextObjects.splice(dIndex, 1)
-            self.frontCanvas.remove(textObject)
-            if (self.backCanvas) {
-              self.backCanvas.remove(textObject)
-            }
+      newVal.forEach((text: Record<any, any>) => {
+        if((this.customTextObjects[text.textIndex] && text.side != this.customTextObjects[text.textIndex].side) || (this.customTextObjects[text.textIndex] && !text.text)){
+          console.log('remove call')
+          self.frontCanvas.remove(this.customTextObjects[text.textIndex])
+          if (self.backCanvas) {
+            self.backCanvas.remove(this.customTextObjects[text.textIndex])
           }
-        })
+          self.customTextObjects.splice(text.textIndex, 1)
+        }
       })
 
       newVal.forEach((text, index) => {
@@ -343,14 +344,15 @@ export default class Scene extends Vue {
             }
           })
           if (addText && text.text) {
+            let finalText = JSON.parse(JSON.stringify(text))
             if (!text.action && self.productNamesSetting[index]) {
-              text.width = self.productNamesSetting[index].width
-              text.height = self.productNamesSetting[index].height
-              text.x_axis = self.productNamesSetting[index].x_axis
-              text.y_axis = self.productNamesSetting[index].y_axis
-              text.rotation = self.productNamesSetting[index].rotation
+              finalText.width = self.productNamesSetting[index].width
+              finalText.height = self.productNamesSetting[index].height
+              finalText.x_axis = self.productNamesSetting[index].x_axis
+              finalText.y_axis = self.productNamesSetting[index].y_axis
+              finalText.rotation = self.productNamesSetting[index].rotation
             }
-            self.addTexts([text], index)
+            self.addTexts([finalText])
           }
         }
       })
@@ -361,15 +363,18 @@ export default class Scene extends Vue {
     deep: true
   })
   defaultColorsChanged(newVal: [Record<any, any>]) {
-    if (newVal.length)
+    if(this.mounted) {
       this.changeDefaultColors(this.defaultColors)
+    }
   }
 
   @Watch('groupColors', {
-    deep: true
+    deep: true, immediate: false
   })
   groupColorsChanged(newVal: Record<any, any>) {
-    this.changeGroupColor(newVal)
+    if(this.mounted) {
+      this.changeGroupColor(newVal)
+    }
   }
 
   public changeGroupColor (groupColors: Record<any, any>): void {
@@ -380,17 +385,20 @@ export default class Scene extends Vue {
         if (this.mainPreview) {
           let svgIndex = 0
           this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-            if(svgGroup.id == item.id) {
+            if (svgGroup.id == item.id) {
               svgIndex = index
             }
           })
-          this.$store.dispatch('updateSvgGroups', { index: svgIndex, color: groupColors[item.id].color, pantone: groupColors[item.id].pantone })
+          this.$store.dispatch('updateSvgGroups', {
+            index: svgIndex,
+            color: groupColors[item.id].color,
+            pantone: groupColors[item.id].pantone
+          })
         }
       }
     })
     this.frontCanvas.renderAll()
-
-    if(this.back) {
+    if (this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
         if (groupColors[item.id]) {
@@ -398,11 +406,15 @@ export default class Scene extends Vue {
           if (this.mainPreview) {
             let svgIndex = 0
             this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-              if(svgGroup.id == item.id) {
+              if (svgGroup.id == item.id) {
                 svgIndex = index
               }
             })
-            this.$store.dispatch('updateSvgGroups', { index: svgIndex, color: groupColors[item.id].color, pantone: groupColors[item.id].pantone })
+            this.$store.dispatch('updateSvgGroups', {
+              index: svgIndex,
+              color: groupColors[item.id].color,
+              pantone: groupColors[item.id].pantone
+            })
           }
         }
       })
@@ -601,7 +613,12 @@ export default class Scene extends Vue {
         canvas.renderAll()
 
         if(!self.back || (self.back && side == 'back')) {
-          let logos = self.logos
+          if(self.logos.length) {
+            setTimeout(() => {
+              self.addLogos(self.logos)
+            }, 200)
+          }
+          let logos: Record<any, any>[] = []
 
           if (self.customLogos && self.logoAllowed) {
             let customLogos = self.customLogos
@@ -636,8 +653,8 @@ export default class Scene extends Vue {
             logos = logos.filter((logo: Record<any, any>) => logo.url) as [Record<any, any>]
             if (logos.length) {
               setTimeout(() => {
-                self.addLogos(logos)
-              }, 100)
+                self.addLogos(logos as [Record<any, any>])
+              }, 200)
             }
           }
 
@@ -794,13 +811,15 @@ export default class Scene extends Vue {
 
       const width = target.width * target.scaleX;
       let checkPointX = target.left + width / 2
-      let checkPointY = centerPoint.y
       if (nearTo == 'left') {
         checkPointX = target.left - width / 2
-        checkPointY = centerPoint.x
       }
       console.log(nearTo)
 
+      let otherSideObjects = this.otherSideLogos
+      if(target.text) {
+        otherSideObjects = this.otherSideTexts
+      }
       if (canvas.isTargetTransparent(model, checkPointX, centerPoint.y)) {
         console.log('comes here')
         let addLeft = 0
@@ -824,9 +843,9 @@ export default class Scene extends Vue {
           addTop = target.top
         }
 
-        if (this.otherSideObjects[addIndex]) {
-          this.otherSideObjects[addIndex].left = addLeft
-          this.otherSideObjects[addIndex].top = addTop
+        if (otherSideObjects[addIndex]) {
+          otherSideObjects[addIndex].left = addLeft
+          otherSideObjects[addIndex].top = addTop
           if (side == 'back') {
             this.frontCanvas.renderAll()
           } else {
@@ -839,7 +858,7 @@ export default class Scene extends Vue {
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
-          this.otherSideObjects[addIndex] = objectAdd
+          otherSideObjects[addIndex] = objectAdd
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)
             this.frontModel.bringToFront()
@@ -849,13 +868,13 @@ export default class Scene extends Vue {
           }
         }
       } else {
-        if (this.otherSideObjects[addIndex]) {
+        if (otherSideObjects[addIndex]) {
           if (side == 'back') {
-            this.frontCanvas.remove(this.otherSideObjects[addIndex])
+            this.frontCanvas.remove(otherSideObjects[addIndex])
           } else {
-            this.backCanvas.remove(this.otherSideObjects[addIndex])
+            this.backCanvas.remove(otherSideObjects[addIndex])
           }
-          this.otherSideObjects.splice(addIndex, 1)
+          otherSideObjects.splice(addIndex, 1)
         }
       }
     }
@@ -1087,25 +1106,30 @@ export default class Scene extends Vue {
             mt: false,
             mtr: false
           })
+
+          Object.assign(img, {
+            logoIndex: this.logoIndex,
+            side: logo.side
+          })
           canvas.add(img)
           model.bringToFront()
           canvas.renderAll()
 
-          if (this.mainPreview) {
-            const width = Math.floor(img.width * img.scaleX * this.measurementRatio)
-            const height = Math.floor(img.height * img.scaleY * this.measurementRatio)
-            self.$store.dispatch('updateCustomLogoWithoutTrigger', {
-              index: index,
-              data: {
-                originalWidth: width,
-                originalHeight: height
-              }
-            })
-          }
-
           if (logo.customLogo) {
-            img.side = logo.side
-            self.customLogoObjects.push(img)
+            if (this.mainPreview) {
+              const width = Math.floor(img.width * img.scaleX * this.measurementRatio)
+              const height = Math.floor(img.height * img.scaleY * this.measurementRatio)
+              self.$store.dispatch('updateCustomLogoWithoutTrigger', {
+                index: index,
+                data: {
+                  originalWidth: width,
+                  originalHeight: height,
+                  logoIndex: this.logoIndex,
+                }
+              })
+            }
+            self.customLogoObjects[this.logoIndex] = img
+            this.logoIndex++
           } else {
             self.logoObjects.push(img)
           }
@@ -1119,6 +1143,8 @@ export default class Scene extends Vue {
             })
           })
         }, { crossOrigin: 'Anonymous'})
+      } else {
+        this.logoIndex++
       }
     })
   }
@@ -1133,9 +1159,22 @@ export default class Scene extends Vue {
     }).bringToFront()
   }
 
-  public async addTexts(texts: [Record<any, any>], addIndex: number|null = null) {
+  public async addTexts(texts: [Record<any, any>]) {
     const self = this
     texts.forEach((text: Record<any, any>, index: number) => {
+      let textIndex = JSON.parse(JSON.stringify(this.textIndex))
+      if('textIndex' in text) {
+        textIndex = text.textIndex
+      } else if(this.mainPreview) {
+        self.$store.dispatch('updateCustomTextWithoutTrigger', {
+          index: index,
+          data: {
+            textIndex: textIndex,
+          }
+        })
+        this.textIndex++
+      }
+      console.log(textIndex)
       if(text.text && (text.side == 'front' || (text.side == 'back' && self.back))) {
         let textBox = new fabric.Text(text.text, {
           left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
@@ -1160,14 +1199,6 @@ export default class Scene extends Vue {
           textBox.scaleX = self.canvasWidth / self.mainCanvasWidth * text.scaleX
           textBox.scaleY = self.canvasHeight / self.mainCanvasHeight * text.scaleY
         }
-        let finalIndex = index
-        if (addIndex !== null) {
-          finalIndex = addIndex
-        }
-        Object.assign(textBox, {
-          textIndex: finalIndex,
-          side: text.side
-        })
 
         let canvas = self.frontCanvas
         let model = self.frontModel
@@ -1189,7 +1220,11 @@ export default class Scene extends Vue {
           mtr: false
         })
 
-        self.customTextObjects[finalIndex] = textBox
+        Object.assign(textBox, {
+          textIndex: textIndex,
+          side: text.side
+        })
+        self.customTextObjects[textIndex] = textBox
         canvas.add(textBox)
         model.bringToFront()
         canvas.renderAll()
@@ -1205,10 +1240,12 @@ export default class Scene extends Vue {
             data: {
               originalWidth: width,
               originalHeight: height,
-              originalOutLineWidth: outLineWidth
+              originalOutLineWidth: outLineWidth,
+              textIndex: textIndex,
             }
           })
         }
+
         textBox.on('selected', (e: Record<any, any>) => {
           this.showDimensions(e, dimText, 1.3)
         })
@@ -1217,13 +1254,8 @@ export default class Scene extends Vue {
             visible: false
           })
         })
-
       } else {
-        let finalIndex = index
-        if (addIndex !== null) {
-          finalIndex = addIndex
-        }
-        this.customTextObjects[finalIndex] = {textIndex: finalIndex, side: text.side}
+        this.customTextObjects[textIndex] = {textIndex: textIndex, side: text.side}
       }
     })
   }

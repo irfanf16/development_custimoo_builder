@@ -28,22 +28,22 @@
                                                 <li>
                                                     <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                                                 </li>
-                                                <li class="d-none d-lg-block">
-                                                    <a :id="'share'+ind"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                                                    <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom">
-                                                        <div class="share-holder">
-                                                            <h3>Copy link and Share</h3>
-                                                            <div class="share-form">
-                                                                <b-form inline>
-                                                                    <b-form-input
-                                                                    placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
-                                                                    ></b-form-input>
-                                                                    <b-button variant="primary">Copy Link</b-button>
-                                                                </b-form>
-                                                            </div>
-                                                        </div>
-                                                    </b-tooltip>
-                                                </li>
+<!--                                                <li class="d-none d-lg-block">-->
+<!--                                                    <a :id="'share'+ind"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
+<!--                                                    <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom">-->
+<!--                                                        <div class="share-holder">-->
+<!--                                                            <h3>Copy link and Share</h3>-->
+<!--                                                            <div class="share-form">-->
+<!--                                                                <b-form inline>-->
+<!--                                                                    <b-form-input-->
+<!--                                                                    placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"-->
+<!--                                                                    ></b-form-input>-->
+<!--                                                                    <b-button variant="primary">Copy Link</b-button>-->
+<!--                                                                </b-form>-->
+<!--                                                            </div>-->
+<!--                                                        </div>-->
+<!--                                                    </b-tooltip>-->
+<!--                                                </li>-->
                                                 <li class="d-none d-lg-block">
                                                     <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                                                 </li>
@@ -83,6 +83,7 @@
                                                 <div class="color-box"
                                                     :style="{backgroundColor: item.value}" :key="`${ix}`">
                                                 </div>
+                                              <span :key="`item_${ix}`"> {{ item.name }} </span>
                                             </template>
                                             </div>
                                         </div>
