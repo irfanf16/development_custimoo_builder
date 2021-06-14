@@ -374,8 +374,28 @@ export default class Scene extends Vue {
   }
 
   public changeGroupColor (groupColors: Record<any, any>): void {
-    if(this.mounted) {
-      this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+    this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+      item.id = item.id.toLowerCase()
+      if (groupColors[item.id]) {
+        item.set('fill', groupColors[item.id].color);
+        if (this.mainPreview) {
+          let svgIndex = 0
+          this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+            if (svgGroup.id == item.id) {
+              svgIndex = index
+            }
+          })
+          this.$store.dispatch('updateSvgGroups', {
+            index: svgIndex,
+            color: groupColors[item.id].color,
+            pantone: groupColors[item.id].pantone
+          })
+        }
+      }
+    })
+    this.frontCanvas.renderAll()
+    if (this.back) {
+      this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
         if (groupColors[item.id]) {
           item.set('fill', groupColors[item.id].color);
@@ -394,30 +414,7 @@ export default class Scene extends Vue {
           }
         }
       })
-      this.frontCanvas.renderAll()
-
-      if (this.back) {
-        this.backTexture.getObjects().forEach((item: Record<any, any>) => {
-          item.id = item.id.toLowerCase()
-          if (groupColors[item.id]) {
-            item.set('fill', groupColors[item.id].color);
-            if (this.mainPreview) {
-              let svgIndex = 0
-              this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-                if (svgGroup.id == item.id) {
-                  svgIndex = index
-                }
-              })
-              this.$store.dispatch('updateSvgGroups', {
-                index: svgIndex,
-                color: groupColors[item.id].color,
-                pantone: groupColors[item.id].pantone
-              })
-            }
-          }
-        })
-        this.backCanvas.renderAll()
-      }
+      this.backCanvas.renderAll()
     }
   }
 
