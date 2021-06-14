@@ -363,14 +363,18 @@ export default class Scene extends Vue {
     deep: true
   })
   defaultColorsChanged(newVal: [Record<any, any>]) {
+    if(this.mounted) {
       this.changeDefaultColors(this.defaultColors)
+    }
   }
 
   @Watch('groupColors', {
     deep: true, immediate: false
   })
   groupColorsChanged(newVal: Record<any, any>) {
-    this.changeGroupColor(newVal)
+    if(this.mounted) {
+      this.changeGroupColor(newVal)
+    }
   }
 
   public changeGroupColor (groupColors: Record<any, any>): void {
