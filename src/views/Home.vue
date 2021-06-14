@@ -4,17 +4,17 @@
       <b-row>
         <template v-if="manageComponents.BasicCustomization">
           <b-col cols="12" lg="3" class="text-left home-color-area">
-            <div v-if="manageComponents.ChooseColor" class="py-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
+            <div v-if="manageComponents.ChooseColor" class="py-2 py-md-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
               <ChooseColor :colors="colors"/>
             </div>
             <template v-if="manageComponents.ExtractedColors">
-              <div class="mb-4 mb-lg-0" v-if="customLogos.length && customLogos[0].url" :class="extractedcolorclass">
+              <div class="mb-3 mb-lg-0" v-if="customLogos.length && customLogos[0].url" :class="extractedcolorclass">
                 <ExtractedColors />
               </div>
             </template>
 
             <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
-              <template>
+              <template v-if="manageComponents.LogoArea">
                 <UploadLogo :customLogoIndex="0"/>
               </template>
             </template>
