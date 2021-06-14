@@ -6,7 +6,8 @@ const Product:Module<any, any> = {
     locker_products:[],
     lockers:[],
     logoColors:[],
-    logoUrl:''
+    logoUrl:'',
+    eyeIndex: -1
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -23,6 +24,9 @@ const Product:Module<any, any> = {
     },
     getLogoUrl(state:Record<any, any>){
       return state.logoUrl;
+    },
+    getEyeIndex(state:Record<any, any>){
+      return state.eyeIndex
     }
   },
   mutations:{
@@ -51,6 +55,9 @@ const Product:Module<any, any> = {
     },
     DELETE_ROOM_PRODUCT(state:Record<any, any>, payload){
       state.locker_products[payload.room_index].product.splice(payload.product_index, 1);
+    },
+    CHANGE_EYE_INDEX(state:Record<any, any>, payload){
+      state.eyeIndex = payload
     }
 
 

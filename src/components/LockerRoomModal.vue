@@ -83,6 +83,7 @@
                                                 <div class="color-box"
                                                     :style="{backgroundColor: item.value}" :key="`${ix}`">
                                                 </div>
+                                              <span :key="`item_${ix}`"> {{ item.name }} </span>
                                             </template>
                                             </div>
                                         </div>
