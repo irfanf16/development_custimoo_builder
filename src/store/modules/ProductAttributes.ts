@@ -295,9 +295,9 @@ const ProductAttributes:Module<any, any> = {
     async updateRoster({commit}, payload:Record<any, any>){
      await commit('UPDATE_ROSTER', payload);
     },
-    getLockerRoomColors({commit}){
-      http.get('folder/colors').then((res) =>{
-        commit('ADD_LOCKER_ROOM_COLORS', res.data)
+    async getLockerRoomColors({commit}){
+      await http.get('folder/colors').then(async (res) =>{
+       await commit('ADD_LOCKER_ROOM_COLORS', res.data)
       })
     }
   }

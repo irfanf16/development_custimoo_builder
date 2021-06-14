@@ -22,7 +22,7 @@
                                             <Scene :measurement-ratio="product.design.measurement_ratio"
                                               :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
                                                 :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
-                                                 :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames"  />
+                                                 :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />
                                           </a>
                                           <ul class="product-icons">
                                                 <li>
@@ -60,7 +60,7 @@
                                 <b-tab title="Assets" class="assets-file">
                                   <template v-for="(logo, inda) in room.logos">
                                     <div :key="inda">
-                                      <img :src="apiBaseUrl+'/'+logo.logo_url "/>
+                                      <img @click="addToCustomLogos(logo)"  :src="apiBaseUrl+'/'+logo.logo_url "/>
                                     </div>
                                   </template>
                                 </b-tab>
@@ -137,6 +137,9 @@
       get products():[Record<any, any>]{
         return this.$store.getters.getProducts
       }
+      get customLogos():[Record<any, any>] {
+        return this.$store.getters.getCustomLogos
+      }
       get lockers():Record<any, any>{
         return  this.$store.getters.getLockers;
       }
@@ -181,6 +184,27 @@
       public changeColor(){
         this.colors = []
       }
+      public addToCustomLogos(currentLogo:Record<any, any>){
+        if (this.customLogos.length  < this.selectedProduct.allowed_logos_count){
+          let index = this.customLogos.length
+          let logo = {
+            id: currentLogo.id,
+            url: currentLogo.logo_url,
+            width: this.selectedProduct.logos_setting[index].width,
+            height: this.selectedProduct.logos_setting[index].height,
+            x_axis: this.selectedProduct.logos_setting[index].x_axis,
+            y_axis: this.selectedProduct.logos_setting[index].y_axis,
+            rotation: this.selectedProduct.logos_setting[index].rotation as number,
+            haveControls: Boolean(!this.selectedProduct.logos_setting[index].is_locked),
+            side: this.selectedProduct.logos_setting[index].side,
+            customLogo: true
+          }
+          this.$store.dispatch('setCustomLogos', logo)
+        }else{
+          alert("logo upload limit exceed")
+        }
+      }
+
     }
 
 
