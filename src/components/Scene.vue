@@ -349,6 +349,7 @@ export default class Scene extends Vue {
               finalText.y_axis = self.productNamesSetting[index].y_axis
               finalText.rotation = self.productNamesSetting[index].rotation
             }
+            console.log('call from change', finalText)
             self.addTexts([finalText], index)
           }
         }
@@ -683,17 +684,15 @@ export default class Scene extends Vue {
               }
             })
             texts = texts.concat(self.customTexts) as [Record<any, any>]
-            setTimeout(() => {
-              self.addTexts(texts)
-            }, 100)
+            self.addTexts(texts)
           }
           this.showLoader = false
+          self.mounted = true
         }
 
         if (self.mainPreview) {
           self.setProductionSVG()
         }
-        self.mounted = true
         clearInterval(timer)
       }
     }, 1000)
@@ -1059,25 +1058,23 @@ export default class Scene extends Vue {
     })
   }
 
-  public addLogos(logos: [Record<any, any>], relatedIndex: null|number = null) {
+  public addLogos(logos: [Record<any, any>], logoIndex: null|number = null) {
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
-      let logoIndex = JSON.parse(JSON.stringify(this.logoIndex))
-      if(relatedIndex == null) {
-        relatedIndex = index
+      if(logoIndex == null) {
+        logoIndex = index
       }
       if('logoIndex' in logo) {
         logoIndex = logo.logoIndex
       } else {
         if(this.mainPreview) {
           self.$store.dispatch('updateCustomLogoWithoutTrigger', {
-            index: relatedIndex,
+            index: logoIndex,
             data: {
-              textIndex: relatedIndex,
+              logoIndex: logoIndex,
             }
           })
         }
-        this.logoIndex++
       }
       if(logo.side == 'front' || (logo.side == 'back' && self.back)) {
         logo.haveControls = Boolean(logo.haveControls)
@@ -1144,7 +1141,7 @@ export default class Scene extends Vue {
                 }
               })
             }
-            self.customLogoObjects[logoIndex] = img
+            self.customLogoObjects[logoIndex as number] = img
           } else {
             self.logoObjects.push(img)
           }
