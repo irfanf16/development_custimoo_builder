@@ -87,6 +87,7 @@
         </b-col>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
           <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
+          <button class="backtohome-btn d-lg-none" @click="showHomeLanding()"><font-awesome-icon :icon="['fas', 'arrow-left']"/></button>
         </b-col>
       </b-row>
     </b-container>
@@ -222,16 +223,22 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
   }
   public showDesign() {
-          if(this.manageComponents.mobileScreen){
-              this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
-              this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
-              this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
-              this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
-              this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
-          }
-
-
+    if(this.manageComponents.mobileScreen){
+        this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
+        this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
+        this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
+        this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
+        this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
     }
+  }
+
+  public showHomeLanding() {
+    this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
+    this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: true})
+    this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
+    this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: true})
+    this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: true})
+  }
 
     public additionalClass(additionalClassTrigger: string) {
       console.log(additionalClassTrigger)
@@ -649,6 +656,22 @@ export default class Home extends Vue {
     }
   }
 
+}
+.backtohome-btn{
+  position: fixed;
+  left: 30px;
+  bottom: 26px;
+  background: rgba(33,159,132,0.8);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
 }
 
 
