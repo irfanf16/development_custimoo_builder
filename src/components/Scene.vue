@@ -283,67 +283,64 @@ export default class Scene extends Vue {
   }
 
   @Watch('customTexts', {
-    deep: true, immediate: false
+    deep: true, immediate: true
   })
   customTextsChanged(newVal: [Record<any, any>]) {
     if (this.mounted) {
       const self = this
       newVal.forEach((text: Record<any, any>) => {
         if((this.customTextObjects[text.textIndex] && text.side != this.customTextObjects[text.textIndex].side) || (this.customTextObjects[text.textIndex] && !text.text)){
-          console.log('remove call')
           self.frontCanvas.remove(this.customTextObjects[text.textIndex])
           if (self.backCanvas) {
             self.backCanvas.remove(this.customTextObjects[text.textIndex])
           }
-          self.customTextObjects.splice(text.textIndex, 1)
+          this.customTextObjects[text.textIndex] = null
         }
       })
 
       newVal.forEach((text, index) => {
         if ((text.side == 'back' && self.backCanvas) || text.side == 'front') {
           let addText = true
-          self.customTextObjects.forEach((textObject) => {
-            if ('textIndex' in textObject && textObject.text) {
-              if(textObject.textIndex == index) {
-                let canvas = this.frontCanvas
-                if (text.side == 'back') {
-                  canvas = this.backCanvas
-                }
-                textObject.text = text.text
-                textObject.fontFamily = text.fontFamily
-                textObject.set('fill', text.fillColor)
-                textObject.set('stroke', text.outLineColor)
-                textObject.set('strokeWidth', parseInt(text.outLineWidth))
-                canvas.renderAll()
-
-                if (text.action == 'drag') {
-                  textObject.center() //add center because all events only trigger if use it in fabric js.
-                  textObject.set({
-                    left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
-                    top: self.canvasHeight / self.mainCanvasHeight * text.y_axis
-                  })
-                } else if (text.action == 'scale' || text.action == 'scaleX' || text.action == 'scaleY') {
-                  textObject.center()
-                  textObject.set({
-                    left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
-                    top: self.canvasHeight / self.mainCanvasHeight * text.y_axis
-                  })
-                  textObject.scaleX = self.canvasWidth / self.mainCanvasWidth * text.scaleX
-                  textObject.scaleY = self.canvasHeight / self.mainCanvasHeight * text.scaleY
-                } else if (text.action == 'rotate') {
-                  textObject.center()
-                  textObject.set({
-                    left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
-                    top: self.canvasHeight / self.mainCanvasHeight * text.y_axis
-                  })
-                  textObject.rotate(text.rotation as number)
-                }
-                textObject.setCoords()
-                addText = false
-              }
+          if (this.customTextObjects[index] && this.customTextObjects[text.textIndex].text != '') {
+            let textObject = this.customTextObjects[text.textIndex]
+            let canvas = this.frontCanvas
+            if (text.side == 'back') {
+              canvas = this.backCanvas
             }
-          })
-          if (addText && text.text) {
+            textObject.text = text.text
+            textObject.fontFamily = text.fontFamily
+            textObject.set('fill', text.fillColor)
+            textObject.set('stroke', text.outLineColor)
+            textObject.set('strokeWidth', parseInt(text.outLineWidth))
+            canvas.renderAll()
+
+            if (text.action == 'drag') {
+              textObject.center() //add center because all events only trigger if use it in fabric js.
+              textObject.set({
+                left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
+                top: self.canvasHeight / self.mainCanvasHeight * text.y_axis
+              })
+            } else if (text.action == 'scale' || text.action == 'scaleX' || text.action == 'scaleY') {
+              textObject.center()
+              textObject.set({
+                left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
+                top: self.canvasHeight / self.mainCanvasHeight * text.y_axis
+              })
+              textObject.scaleX = self.canvasWidth / self.mainCanvasWidth * text.scaleX
+              textObject.scaleY = self.canvasHeight / self.mainCanvasHeight * text.scaleY
+            } else if (text.action == 'rotate') {
+              textObject.center()
+              textObject.set({
+                left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
+                top: self.canvasHeight / self.mainCanvasHeight * text.y_axis
+              })
+              textObject.rotate(text.rotation as number)
+            }
+            textObject.setCoords()
+            addText = false
+          }
+
+          if (addText && text.text != '') {
             let finalText = JSON.parse(JSON.stringify(text))
             if (!text.action && self.productNamesSetting[index]) {
               finalText.width = self.productNamesSetting[index].width
@@ -352,7 +349,7 @@ export default class Scene extends Vue {
               finalText.y_axis = self.productNamesSetting[index].y_axis
               finalText.rotation = self.productNamesSetting[index].rotation
             }
-            self.addTexts([finalText])
+            self.addTexts([finalText], index)
           }
         }
       })
@@ -1162,23 +1159,27 @@ export default class Scene extends Vue {
     }).bringToFront()
   }
 
-  public async addTexts(texts: [Record<any, any>]) {
+  public async addTexts(texts: [Record<any, any>], relatedIndex: null | number = null) {
     const self = this
     texts.forEach((text: Record<any, any>, index: number) => {
       let textIndex = JSON.parse(JSON.stringify(this.textIndex))
+      if(relatedIndex == null) {
+        relatedIndex = index
+      }
       if('textIndex' in text) {
         textIndex = text.textIndex
-      } else if(this.mainPreview) {
-        self.$store.dispatch('updateCustomTextWithoutTrigger', {
-          index: index,
-          data: {
-            textIndex: textIndex,
-          }
-        })
+      } else {
+        if(this.mainPreview) {
+          self.$store.dispatch('updateCustomTextWithoutTrigger', {
+            index: relatedIndex,
+            data: {
+              textIndex: relatedIndex,
+            }
+          })
+        }
         this.textIndex++
       }
-      console.log(textIndex)
-      if(text.text && (text.side == 'front' || (text.side == 'back' && self.back))) {
+      if(text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back))) {
         let textBox = new fabric.Text(text.text, {
           left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
           top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
@@ -1239,12 +1240,11 @@ export default class Scene extends Vue {
           const height = Math.floor(textBox.height as number * scaleY * this.measurementRatio)
           const outLineWidth = textBox.strokeWidth as number * this.measurementRatio
           self.$store.dispatch('updateCustomTextWithoutTrigger', {
-            index: index,
+            index: relatedIndex,
             data: {
               originalWidth: width,
               originalHeight: height,
               originalOutLineWidth: outLineWidth,
-              textIndex: textIndex,
             }
           })
         }
@@ -1257,8 +1257,6 @@ export default class Scene extends Vue {
             visible: false
           })
         })
-      } else {
-        this.customTextObjects[textIndex] = {textIndex: textIndex, side: text.side}
       }
     })
   }
