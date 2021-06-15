@@ -301,8 +301,8 @@ export default class Scene extends Vue {
       newVal.forEach((text, index) => {
         if ((text.side == 'back' && self.backCanvas) || text.side == 'front') {
           let addText = true
-          if (this.customTextObjects[index] && this.customTextObjects[index].text != '') {
-            let textObject = this.customTextObjects[index]
+          if (this.customTextObjects[text.textIndex] && this.customTextObjects[text.textIndex].text != '') {
+            let textObject = this.customTextObjects[text.textIndex]
             let canvas = this.frontCanvas
             if (text.side == 'back') {
               canvas = this.backCanvas
@@ -1172,25 +1172,23 @@ export default class Scene extends Vue {
     }).bringToFront()
   }
 
-  public addTexts(texts: [Record<any, any>], relatedIndex: null | number = null) {
+  public addTexts(texts: [Record<any, any>], textIndex: null | number = null) {
     const self = this
     texts.forEach((text: Record<any, any>, index: number) => {
-      let textIndex = JSON.parse(JSON.stringify(this.textIndex))
-      if(relatedIndex == null) {
-        relatedIndex = index
+      if(textIndex == null) {
+        textIndex = index
       }
       if('textIndex' in text) {
         textIndex = text.textIndex
       } else {
         if(this.mainPreview) {
           self.$store.dispatch('updateCustomTextWithoutTrigger', {
-            index: relatedIndex,
+            index: textIndex,
             data: {
-              textIndex: relatedIndex,
+              textIndex: textIndex,
             }
           })
         }
-        this.textIndex++
       }
       if(text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back))) {
         let textBox = new fabric.Text(text.text, {
@@ -1241,7 +1239,7 @@ export default class Scene extends Vue {
           textIndex: textIndex,
           side: text.side
         })
-        self.customTextObjects[textIndex] = textBox
+        self.customTextObjects[textIndex as number] = textBox
         canvas.add(textBox)
         model.bringToFront()
         canvas.renderAll()
@@ -1253,7 +1251,7 @@ export default class Scene extends Vue {
           const height = Math.floor(textBox.height as number * scaleY * this.measurementRatio)
           const outLineWidth = textBox.strokeWidth as number * this.measurementRatio
           self.$store.dispatch('updateCustomTextWithoutTrigger', {
-            index: relatedIndex,
+            index: textIndex,
             data: {
               originalWidth: width,
               originalHeight: height,
