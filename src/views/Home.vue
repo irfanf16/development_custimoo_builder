@@ -244,9 +244,7 @@ export default class Home extends Vue {
       console.log(additionalClassTrigger)
       if(additionalClassTrigger){
         this.extractedcolorclass = "additional-class"
-        console.log("if mango")
       }
-      console.log("mango")
     }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {

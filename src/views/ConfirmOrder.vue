@@ -7,8 +7,8 @@
                 </b-col>
                 <b-col cols="12" lg="6" class="text-left text-lg-right">
                     <div class="header-buttons">
-                        <b-button variant="outline-secondary" v-b-modal.modal-center-design>Edit Your Design</b-button>
-                        <SaveDesignModal />
+                        <b-button to="/" variant="outline-secondary">Edit Your Design</b-button>
+<!--                        <SaveDesignModal />-->
                         <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
                         <AddLockerRoomModal />
                         <a href="#"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
@@ -104,11 +104,12 @@
         }
         .header-buttons{
             .btn{
-                margin-right: 15px;
+                margin-right: 10px;
                 color: #000;
                 font-size: 0.8rem;
                 @media only screen and (min-width: 768px){
                     font-size: 1rem;
+                  margin-right: 15px;
                 }
                 &:hover{
                     background: #219F84;
