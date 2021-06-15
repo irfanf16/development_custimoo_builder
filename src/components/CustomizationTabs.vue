@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <div class="customization-tabs">
       <b-tabs v-model="tabIndex">
         <b-tab v-if="selectedProduct.is_logo_allowed == 1">
@@ -142,6 +143,7 @@ import {default as $} from 'jquery';
   },
 })
 export default class CustomizationProcess extends Vue {
+  public showLoader = false
   @Prop({required: false, default:0}) tabIndexNew!: number
   public fontOptions: Record<any, any>[] = []
 
@@ -314,14 +316,16 @@ export default class CustomizationProcess extends Vue {
         text: fontName as string
       }
       this.fontOptions = this.fontOptions.concat([font])
+      let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
+      const headElement = document.querySelector('head') as HTMLHeadElement
+      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}</style>";
+      $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
       setTimeout(() => {
-        let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
-        const headElement = document.querySelector('head') as HTMLHeadElement
-        headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}</style>";
-        $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
-        setTimeout(() => {
-          $("#delete_after_load").remove()
-        }, 1000)
+        $("#delete_after_load").remove()
+      }, 1000)
+      this.showLoader = true
+      setTimeout(() => {
+        this.showLoader = false
       }, 2000)
     })
   }
@@ -361,5 +365,26 @@ export default class CustomizationProcess extends Vue {
   background: #DFE5E8;
   border-radius: 10px;
   border: none;
+}
+.loader{
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,1);
+  z-index: 9999;
+  img{
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
 }
 </style>
