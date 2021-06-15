@@ -272,9 +272,9 @@ export default class Scene extends Vue {
             }
 
             if(self.logosLimit && self.customLogoObjects.length < self.logosLimit - backLogosCount) {
-              self.addLogos([finalLogo])
+              self.addLogos([finalLogo], index)
             }else if(!self.logosLimit) {
-              self.addLogos([finalLogo])
+              self.addLogos([finalLogo], index)
             }
           }
         }
@@ -301,8 +301,8 @@ export default class Scene extends Vue {
       newVal.forEach((text, index) => {
         if ((text.side == 'back' && self.backCanvas) || text.side == 'front') {
           let addText = true
-          if (this.customTextObjects[index] && this.customTextObjects[text.textIndex].text != '') {
-            let textObject = this.customTextObjects[text.textIndex]
+          if (this.customTextObjects[index] && this.customTextObjects[index].text != '') {
+            let textObject = this.customTextObjects[index]
             let canvas = this.frontCanvas
             if (text.side == 'back') {
               canvas = this.backCanvas
@@ -1059,9 +1059,26 @@ export default class Scene extends Vue {
     })
   }
 
-  public addLogos(logos: [Record<any, any>]) {
+  public addLogos(logos: [Record<any, any>], relatedIndex: null|number = null) {
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
+      let logoIndex = JSON.parse(JSON.stringify(this.logoIndex))
+      if(relatedIndex == null) {
+        relatedIndex = index
+      }
+      if('logoIndex' in logo) {
+        logoIndex = logo.logoIndex
+      } else {
+        if(this.mainPreview) {
+          self.$store.dispatch('updateCustomLogoWithoutTrigger', {
+            index: relatedIndex,
+            data: {
+              textIndex: relatedIndex,
+            }
+          })
+        }
+        this.logoIndex++
+      }
       if(logo.side == 'front' || (logo.side == 'back' && self.back)) {
         logo.haveControls = Boolean(logo.haveControls)
         let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
@@ -1108,7 +1125,7 @@ export default class Scene extends Vue {
           })
 
           Object.assign(img, {
-            logoIndex: this.logoIndex,
+            logoIndex: logoIndex,
             side: logo.side
           })
           canvas.add(img)
@@ -1123,13 +1140,11 @@ export default class Scene extends Vue {
                 index: index,
                 data: {
                   originalWidth: width,
-                  originalHeight: height,
-                  logoIndex: this.logoIndex,
+                  originalHeight: height
                 }
               })
             }
-            self.customLogoObjects[this.logoIndex] = img
-            this.logoIndex++
+            self.customLogoObjects[logoIndex] = img
           } else {
             self.logoObjects.push(img)
           }
@@ -1143,8 +1158,6 @@ export default class Scene extends Vue {
             })
           })
         }, { crossOrigin: 'Anonymous'})
-      } else {
-        this.logoIndex++
       }
     })
   }
@@ -1159,7 +1172,7 @@ export default class Scene extends Vue {
     }).bringToFront()
   }
 
-  public async addTexts(texts: [Record<any, any>], relatedIndex: null | number = null) {
+  public addTexts(texts: [Record<any, any>], relatedIndex: null | number = null) {
     const self = this
     texts.forEach((text: Record<any, any>, index: number) => {
       let textIndex = JSON.parse(JSON.stringify(this.textIndex))
