@@ -20,7 +20,7 @@
                     v-model="svgGroups[selectAccordionIndex].pantone"
                     class="mb-2 mr-sm-2 mb-sm-0"
                     placeholder="XX-XXXX"
-                    @change="changePantoneColor"
+                    @input="changePantoneColor"
                   ></b-form-input>
                   <div class="pantone-message">
                     {{ pantoneMessage}}
@@ -98,6 +98,7 @@ export default class ColorAccordion extends Vue {
   }
 
   public changePantoneColor() {
+    console.log('here it is issue')
     let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), name: pantoneColor.pantone})
@@ -106,13 +107,6 @@ export default class ColorAccordion extends Vue {
     else {
       this.pantoneMessage = 'Color Not in List.'
     }
-  }
-
-  @Watch('svgGroups', {
-    deep: true
-  })
-  svgGroupsChanged(newVal: [Record<any, any>]) {
-    this.changePantoneColor()
   }
 }
 </script>
