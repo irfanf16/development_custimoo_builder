@@ -2,7 +2,7 @@
     <b-modal ref="locker-modal" id="modal-center-lockerroom" scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
         <b-tabs content-class="mt-3">
           <template v-for="(room, i) in getLockerProducts">
-            <b-tab :key="i">
+            <b-tab  :key="i" :active="tabIndex === i">
                 <template #title>
                     <span @click="changeColor">{{room.room_name}}</span>
                     <a class="remove-tab" @click="deleteRoom(room.id, i)">
@@ -118,7 +118,7 @@
 
 <script lang="ts">
 
-    import { Component, Vue } from 'vue-property-decorator'
+import {Component, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     import Scene from "@/components/Scene.vue"
@@ -133,8 +133,15 @@
       public apiBaseUrl = process.env.VUE_APP_API_BASE_URL
       public ref = this.$refs as Record<any, any>
       public colors : [] = []
+      public tabIndex = 0
       get getLockerProducts():Record<any, any>{
         return this.$store.getters.getLockerProducts;
+      }
+      @Watch('getLockerProducts', {
+        deep: true
+      })
+      getLockerProductsChanged():void{
+        this.tabIndex = this.getLockerProducts.length -1
       }
       get products():[Record<any, any>]{
         return this.$store.getters.getProducts
@@ -148,6 +155,7 @@
       get selectedProduct(): Record<any, any>{
         return this.$store.getters.getSelectedProduct
       }
+
 
       public async editProduct(lockerIndex: number, productIndex: number){
         const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
@@ -178,6 +186,7 @@
       public async deleteRoom(id:number, index:number){
         if (confirm('You are going to delete associated product')) {
           await this.$store.dispatch('deleteRoom', {id: id, index: index});
+          this.tabIndex = 0
         }
       }
       public fetchColors(i:number, ind:number){

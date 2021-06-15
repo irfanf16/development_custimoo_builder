@@ -30,6 +30,7 @@
          this.name = ''
          await this.$store.dispatch('GET_LOCKER_PRODUCTS');
          this.ref['create-modal'].hide();
+         this.$emit('lockerAdded')
        }else{
          alert(res);
        }

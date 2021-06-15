@@ -6,7 +6,7 @@
                </div>
             <div class="create-lockerroom">
                 <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
-                <CreateLockerRoomModal />
+                <CreateLockerRoomModal @lockerAdded="lockerAdded" />
             </div>
         </div>
         <div class="pt-4 design-name-form" v-if="lockers.length > 0">
@@ -84,6 +84,13 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
         this.room_id = id;
         this.tabIndex = index
       }
+      public lockerAdded(){
+        let index = this.lockers.length -1
+        this.tabIndex = index
+        if (this.lockers[index]){
+          this.room_id = this.lockers[index].id
+        }
+      }
       public async saveToLocker(){
         if (this.isCustomerAuthenticated) {
           const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
@@ -120,6 +127,10 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       public async deleteRoom(id:number, index:number){
         if (confirm('You are going to delete associated product')){
           await this.$store.dispatch('deleteRoom', {id: id, index: index});
+          this.tabIndex = 0
+          if (this.lockers[0]){
+            this.room_id = this.lockers[0].id
+          }
         }
       }
     }
