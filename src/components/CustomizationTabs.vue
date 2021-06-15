@@ -318,11 +318,11 @@ export default class CustomizationProcess extends Vue {
         let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
         const headElement = document.querySelector('head') as HTMLHeadElement
         headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}</style>";
+        $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
+        setTimeout(() => {
+          $("#delete_after_load").remove()
+        }, 1000)
       }, 2000)
-      $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
-      setTimeout(() => {
-        $("#delete_after_load").remove()
-      }, 1000)
     })
   }
 
