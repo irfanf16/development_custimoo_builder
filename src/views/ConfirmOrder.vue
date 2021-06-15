@@ -9,7 +9,8 @@
                     <div class="header-buttons">
                         <b-button variant="outline-secondary" v-b-modal.modal-center-design>Edit Your Design</b-button>
                         <SaveDesignModal />
-                        <b-button variant="outline-secondary">Save to locker room</b-button>
+                        <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
+                        <AddLockerRoomModal />
                         <a href="#"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                     </div>
                 </b-col>
@@ -36,10 +37,12 @@
     import OrderDetails from '@/components/OrderDetails.vue'
     import SaveDesignModal from '@/components/SaveDesignModal.vue'
     import {http} from "@/httpCommon";
+    import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 
 
     @Component<ConfirmOrder>({
         components: {
+          AddLockerRoomModal,
             OrderAccordion,
             CustomizationPreview,
             OrderDetails,
@@ -83,6 +86,10 @@
         public changeProduct(designsIndex :number){
             this.designsIndex = designsIndex
         }
+
+      public async getLockers(){
+        await this.$store.dispatch("getLockers");
+      }
     }
 </script>
 

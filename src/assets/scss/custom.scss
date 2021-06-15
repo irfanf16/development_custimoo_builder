@@ -1624,6 +1624,15 @@ button{
                 border-radius: 50%;
             }
         }
+        &::-webkit-scrollbar{
+            height: 5px;
+        }
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: #219F84;
+        }
     }
     .nav-tabs{
         border: none;
@@ -1985,7 +1994,7 @@ button{
         bottom: -2px;
         left: 0;
         max-width: 100%;
-        z-index: 99;
+        z-index: 9;
         margin: 0 !important;
         padding: 20px;
         background: #fff;
