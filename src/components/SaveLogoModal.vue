@@ -25,13 +25,15 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     @Component<SaveLogoModal>({
-        components: {
-            LockerRoomProducts,
-            CreateLockerRoomModal
-        },
+      components: {
+        LockerRoomProducts,
+        CreateLockerRoomModal
+      },
       mounted() {
+        if(this.lockers[0]) {
           this.room_id = this.lockers[0].id;
           this.locker_selected = false
+        }
       }
     })
     export default class SaveLogoModal extends Vue {
