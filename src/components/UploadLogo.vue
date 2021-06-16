@@ -1,14 +1,13 @@
 <template>
   <div class="upload-logo-opener">
-    <div class="position-relative"
-         v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
+    <div class="position-relative" v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
       <a class="remove-img" @click="deleteFirstLogo">
         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
       </a>
     </div>
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
-        <div v-if="customLogos.length && customLogos[0].url && manageComponents.BasicCustomization">
+        <div v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
           <img ref="logoImageExtract" crossorigin="anonymous" :src="apiBaseUrl+'/'+customLogos[0].url" width="100%"/>
         </div>
         <div v-else>
@@ -71,7 +70,7 @@ import rgbHex from 'rgb-hex'
     this.$store.dispatch('setBrowserToken')
 
     if (this.customLogos.length) {
-      if (this.customLogos[this.customLogoIndex].url == '') {
+      if (this.customLogos[this.customLogoIndex] && this.customLogos[this.customLogoIndex].url == '') {
         this.modalHandler()
       }
     }
@@ -96,11 +95,11 @@ export default class UploadLogo extends Vue {
     deep: true
   })
   customLogosChanged(newVal: [Record<any, any>]) {
-    if (!this.customLogos[0].url) {
+    if (this.customLogos[0] && !this.customLogos[0].url) {
       let inputRef = this.$refs.fileInput as Record<any, any>
       inputRef.value = null;
     }
-    if (this.logoUrl != this.customLogos[0].url) {
+    if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
       this.getLogoColors()
     }
   }

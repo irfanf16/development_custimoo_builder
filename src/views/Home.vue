@@ -8,7 +8,7 @@
               <ChooseColor :colors="colors"/>
             </div>
             <template v-if="manageComponents.ExtractedColors">
-              <div class="mb-3 mb-lg-0" v-if="customLogos.length && customLogos[0].url" :class="extractedcolorclass">
+              <div class="mb-3 mb-lg-0" v-if="customLogos[0] && customLogos[0].url" :class="extractedcolorclass">
                 <ExtractedColors />
               </div>
             </template>

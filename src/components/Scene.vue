@@ -201,68 +201,80 @@ export default class Scene extends Vue {
   customLogosChanged(newVal: [Record<any, any>]) {
     if(this.mounted && this.logoAllowed) {
       const self = this
-      newVal.forEach((logo: Record<any, any>) => {
-        if((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url)){
+      newVal.forEach((logo: Record<any, any>, index: number) => {
+        if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url))){
           self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
           if (self.backCanvas) {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
           }
           this.customLogoObjects[logo.logoIndex] = null
+        } else {
+          if(!logo && this.customLogoObjects[index]) {
+            this.frontCanvas.remove(this.customLogoObjects[index])
+            if (this.backCanvas) {
+              this.backCanvas.remove(this.customLogoObjects[index])
+            }
+            this.customLogoObjects[index] = null
+          }
         }
       })
 
       newVal.forEach((logo: Record<any, any>, index: number) => {
-        if((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
-          let addLogo = true
-          if (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element) {
-            let logoObject = this.customLogoObjects[logo.logoIndex]
+        if(logo) {
+          if ((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
+            let addLogo = true
+            if (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element) {
+              let logoObject = this.customLogoObjects[logo.logoIndex]
 
-            if (logo.action == 'drag') {
-              logoObject.center() //add center because all events only trigger if use it in fabric js.
-              logoObject.set({
-                left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-                top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
-              })
-            }else if(logo.action == 'scale' || logo.action == 'scaleX' || logo.action == 'scaleY'){
-              logoObject.center()
-              logoObject.set({
-                left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-                top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
-              })
-              logoObject.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
-              logoObject.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
-            } else if(logo.action == 'rotate') {
-              logoObject.center()
-              logoObject.set({
-                left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-                top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
-              })
-              logoObject.rotate(logo.rotation as number)
-            }
-            logoObject.setCoords()
-            addLogo = false
-          }
-
-          if (addLogo && logo.url) {
-            const finalLogo = JSON.parse(JSON.stringify(logo))
-
-            if (!logo.action && self.logosSettings[index]) {
-              finalLogo.width = self.logosSettings[index].width
-              finalLogo.height = self.logosSettings[index].height
-              finalLogo.x_axis = self.logosSettings[index].x_axis
-              finalLogo.y_axis = self.logosSettings[index].y_axis
-              finalLogo.rotation = self.logosSettings[index].rotation
+              if (logo.action == 'drag') {
+                logoObject.center() //add center because all events only trigger if use it in fabric js.
+                logoObject.set({
+                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
+                })
+              } else if (logo.action == 'scale' || logo.action == 'scaleX' || logo.action == 'scaleY') {
+                logoObject.center()
+                logoObject.set({
+                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
+                })
+                logoObject.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
+                logoObject.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
+              } else if (logo.action == 'rotate') {
+                logoObject.center()
+                logoObject.set({
+                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
+                })
+                logoObject.rotate(logo.rotation as number)
+              }
+              logoObject.setCoords()
+              addLogo = false
             }
 
-            let backLogosCount = 0
-            if(!this.backCanvas) {
-              backLogosCount = self.customLogos.filter((item: Record<any, any>) => { return item.side == 'back'}).length
-            }
+            if (addLogo && logo.url) {
+              const finalLogo = JSON.parse(JSON.stringify(logo))
 
-            if(self.logosLimit && self.customLogoObjects.filter((item: Record<any, any>) => item).length < self.logosLimit - backLogosCount) {
-              self.addLogos([finalLogo], index)
-            }else if(!self.logosLimit) {
-              self.addLogos([finalLogo], index)
+              if (!logo.action && self.logosSettings[index]) {
+                finalLogo.width = self.logosSettings[index].width
+                finalLogo.height = self.logosSettings[index].height
+                finalLogo.x_axis = self.logosSettings[index].x_axis
+                finalLogo.y_axis = self.logosSettings[index].y_axis
+                finalLogo.rotation = self.logosSettings[index].rotation
+              }
+
+              let backLogosCount = 0
+              if (!this.backCanvas) {
+                backLogosCount = self.customLogos.filter((item: Record<any, any>) => {
+                  return item.side == 'back'
+                }).length
+              }
+
+              if (self.logosLimit && self.customLogoObjects.filter((item: Record<any, any>) => item).length < self.logosLimit - backLogosCount) {
+                self.addLogos([finalLogo], index)
+              } else if (!self.logosLimit) {
+                self.addLogos([finalLogo], index)
+              }
             }
           }
         }
@@ -614,7 +626,7 @@ export default class Scene extends Vue {
               customLogos = self.customLogos.slice(0, self.logosLimit) as [Record<any, any>]
             }
             customLogos.forEach((item: Record<any, any>, index: number) => {
-              if (!item.action && self.logosSettings[index]) {
+              if (item && (!item.action && self.logosSettings[index])) {
                 item.width = self.logosSettings[index].width
                 item.height = self.logosSettings[index].height
                 item.x_axis = self.logosSettings[index].x_axis
@@ -638,12 +650,7 @@ export default class Scene extends Vue {
             logos = logos.concat(customLogos) as [Record<any, any>]
           }
           if (logos.length) {
-            logos = logos.filter((logo: Record<any, any>) => logo.url) as [Record<any, any>]
-            if (logos.length) {
-              setTimeout(() => {
-                self.addLogos(logos as [Record<any, any>])
-              }, 200)
-            }
+            self.addLogos(logos as [Record<any, any>])
           }
 
           if (self.customTexts.length || self.texts.length) {
@@ -1048,100 +1055,102 @@ export default class Scene extends Vue {
   public addLogos(logos: [Record<any, any>], logoIndex: null|number = null) {
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
-      if(logoIndex == null) {
-        logoIndex = index
-      }
-      if('logoIndex' in logo) {
-        logoIndex = logo.logoIndex
-      } else {
-        if(this.mainPreview) {
-          self.$store.dispatch('updateCustomLogoWithoutTrigger', {
-            index: logoIndex,
-            data: {
-              logoIndex: logoIndex,
-            }
-          })
+      if(logo && logo.url) {
+        if (logoIndex == null) {
+          logoIndex = index
         }
-      }
-      if(logo.side == 'front' || (logo.side == 'back' && self.back)) {
-        logo.haveControls = Boolean(logo.haveControls)
-        let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
-        fabric.Image.fromURL(logoUrl, (img: any) => {
-          img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
-          img.set({
-            left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-            top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
-            angle: logo.rotation as number,
-            centeredScaling: true,
-            selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
-            hasControls: logo.haveControls,
-            hasBorders: logo.haveControls,
-            evented: logo.haveControls,
-            crossOrigin: 'Anonymous',
-            globalCompositeOperation: 'source-atop',
-            lockScalingFlip: true
-          })
-
-          if (logo.scaleX && logo.scaleY) {
-            img.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
-            img.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
-          }
-
-          let model = self.frontModel
-          let canvas = self.frontCanvas
-          let dimText = this.dimTextFront
-          if (logo.side == 'back') {
-            canvas = self.backCanvas
-            model = self.backModel
-            dimText = self.dimTextBack
-          }
-
-          img.setControlsVisibility({
-            tl: false,
-            bl: false,
-            tr: true,
-            br: true,
-            ml: false,
-            mb: false,
-            mr: false,
-            mt: false,
-            mtr: false
-          })
-
-          Object.assign(img, {
-            logoIndex: logoIndex,
-            side: logo.side
-          })
-          canvas.add(img)
-          model.bringToFront()
-          canvas.renderAll()
-
-          if (logo.customLogo) {
-            if (this.mainPreview) {
-              const width = Math.floor(img.width * img.scaleX * this.measurementRatio)
-              const height = Math.floor(img.height * img.scaleY * this.measurementRatio)
-              self.$store.dispatch('updateCustomLogoWithoutTrigger', {
-                index: index,
-                data: {
-                  originalWidth: width,
-                  originalHeight: height
-                }
-              })
-            }
-            self.customLogoObjects[logoIndex as number] = img
-          } else {
-            self.logoObjects.push(img)
-          }
-
-          img.on('selected', (e: Record<any, any>) => {
-            this.showDimensions(e, dimText, 1.6)
-          })
-          canvas.on('selection:cleared', () => {
-            dimText.set({
-              visible: false
+        if ('logoIndex' in logo) {
+          logoIndex = logo.logoIndex
+        } else {
+          if (this.mainPreview) {
+            self.$store.dispatch('updateCustomLogoWithoutTrigger', {
+              index: logoIndex,
+              data: {
+                logoIndex: logoIndex,
+              }
             })
-          })
-        }, { crossOrigin: 'Anonymous'})
+          }
+        }
+        if (logo.side == 'front' || (logo.side == 'back' && self.back)) {
+          logo.haveControls = Boolean(logo.haveControls)
+          let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+          fabric.Image.fromURL(logoUrl, (img: any) => {
+            img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
+            img.set({
+              left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+              top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
+              angle: logo.rotation as number,
+              centeredScaling: true,
+              selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
+              hasControls: logo.haveControls,
+              hasBorders: logo.haveControls,
+              evented: logo.haveControls,
+              crossOrigin: 'Anonymous',
+              globalCompositeOperation: 'source-atop',
+              lockScalingFlip: true
+            })
+
+            if (logo.scaleX && logo.scaleY) {
+              img.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
+              img.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
+            }
+
+            let model = self.frontModel
+            let canvas = self.frontCanvas
+            let dimText = this.dimTextFront
+            if (logo.side == 'back') {
+              canvas = self.backCanvas
+              model = self.backModel
+              dimText = self.dimTextBack
+            }
+
+            img.setControlsVisibility({
+              tl: false,
+              bl: false,
+              tr: true,
+              br: true,
+              ml: false,
+              mb: false,
+              mr: false,
+              mt: false,
+              mtr: false
+            })
+
+            Object.assign(img, {
+              logoIndex: logoIndex,
+              side: logo.side
+            })
+            canvas.add(img)
+            model.bringToFront()
+            canvas.renderAll()
+
+            if (logo.customLogo) {
+              if (this.mainPreview) {
+                const width = Math.floor(img.width * img.scaleX * this.measurementRatio)
+                const height = Math.floor(img.height * img.scaleY * this.measurementRatio)
+                self.$store.dispatch('updateCustomLogoWithoutTrigger', {
+                  index: index,
+                  data: {
+                    originalWidth: width,
+                    originalHeight: height
+                  }
+                })
+              }
+              self.customLogoObjects[logoIndex as number] = img
+            } else {
+              self.logoObjects.push(img)
+            }
+
+            img.on('selected', (e: Record<any, any>) => {
+              this.showDimensions(e, dimText, 1.6)
+            })
+            canvas.on('selection:cleared', () => {
+              dimText.set({
+                visible: false
+              })
+            })
+          }, { crossOrigin: 'Anonymous' })
+        }
       }
     })
   }
