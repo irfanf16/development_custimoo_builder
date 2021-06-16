@@ -771,12 +771,7 @@ export default class Scene extends Vue {
       if (target.text) {
         addIndex = target.textIndex
       } else {
-        this.customLogos.forEach((logo: Record<any, any>, index: number) => {
-          let logoUrl = (this.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
-          if (logoUrl == target._element.src) {
-            addIndex = index
-          }
-        })
+        addIndex = target.logoIndex
       }
 
       const modelBoundingRect = model.getBoundingRect()
