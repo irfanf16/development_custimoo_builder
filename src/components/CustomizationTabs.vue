@@ -308,6 +308,7 @@ export default class CustomizationProcess extends Vue {
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
     productFonts.forEach((fonts: any, key: number) => {
+      this.showLoader = true
       let fontNameParam = fonts.file_url.split('/').reverse()
       fontNameParam = fontNameParam[0].split('.')
       let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
@@ -323,7 +324,6 @@ export default class CustomizationProcess extends Vue {
       setTimeout(() => {
         $("#delete_after_load").remove()
       }, 1000)
-      this.showLoader = true
       setTimeout(() => {
         this.showLoader = false
       }, 2000)
