@@ -1562,16 +1562,37 @@ button{
     .lockerroom-header{
         .locker-opener{
             padding: 10px 0;
+            @media only screen and (min-width: 1024px){
+                max-height: 110px;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
             .btn{
                 padding: 0.5rem 1rem;
-                margin: 0 15px 0 0;
-                font-size: 14px;
+                font-size: 12px;
+                @media only screen and (min-width: 1024px){
+                    font-size: 14px;
+                    margin: 0 15px 15px 0;
+                }
                 .remove{
                     width: 20px;
                     height: 20px;
                     font-size: 9px;
                     top: -8px;
                 }
+            }
+            &::-webkit-scrollbar{
+                height: 5px;
+                @media only screen and (min-width: 1024px){
+                    height: auto;
+                    width: 5px;
+                }
+            }
+            &::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            &::-webkit-scrollbar-thumb {
+                background: #219F84;
             }
         }
     }
@@ -1583,10 +1604,18 @@ button{
         overflow-x: auto;
         padding: 10px 0;
         max-width: 85%;
+        @media only screen and (min-width: 1024px){
+            max-width: 80%;
+            white-space: normal;
+            flex-wrap: wrap;
+            overflow-x: hidden;
+            overflow-y: auto;
+            max-height: 100px;
+        }
         .nav-item{
             margin: 0 8px 0 0;
             @media only screen and (min-width: 992px){
-                margin: 0 15px 0 0;
+                margin: 0 15px 15px 0;
             }
         }
         .nav-link{
@@ -1626,6 +1655,10 @@ button{
         }
         &::-webkit-scrollbar{
             height: 5px;
+            @media only screen and (min-width: 1024px){
+                height: auto;
+                width: 5px;
+            }
         }
         &::-webkit-scrollbar-track {
             background: transparent;
@@ -1739,7 +1772,7 @@ button{
         }
         @media only screen and (min-width: 992px){
             right: 2rem;
-            top: 2rem;
+            top: 2.8rem;
         }
         .btn{
             @media only screen and (max-width: 767px){
@@ -1749,6 +1782,11 @@ button{
             }
             @media only screen and (max-width: 1023px){
                 top: 0;
+                border-radius: 50%;
+                width: 28px;
+                height: 28px;
+                padding: 0;
+                font-size: 1rem;
             }
             span{
                 @media only screen and (max-width: 1023px){
@@ -1948,8 +1986,19 @@ button{
         white-space: nowrap;
         flex-wrap: nowrap;
         cursor: grab;
+        @media only screen and (min-width: 1024px){
+            overflow-x: hidden;
+            overflow-y: auto;
+            white-space: normal;
+            flex-wrap: wrap;
+            max-height: 110px;
+        }
         &::-webkit-scrollbar{
             height: 5px;
+            @media only screen and (min-width: 1024px){
+                height: auto;
+                width: 5px;
+            }
         }
         &::-webkit-scrollbar-track {
             background: transparent;
@@ -2028,6 +2077,110 @@ button{
                 }
             }
             .logo-placement-holder{justify-content: center;}
+        }
+    }
+}
+
+.login-modal{
+    .modal-title{
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    .form-holder{
+        display: grid;
+        gap: 0;
+        grid-template-columns: 2fr 1fr;
+        h2{
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #219F84;
+            margin: 0 0 1rem;
+            cursor: pointer;
+        }
+    }
+    .form-area{
+        background: #fff;
+        h2{
+            font-size: 1.5rem;
+        }
+        label{
+            margin-bottom: 10px;
+        }
+        .custom-checkbox{
+            .custom-control-label{
+                margin-bottom: 0;
+                &:after,
+                &:before{top: 0.08rem;}
+            }
+        }
+        .custom-control-input:checked{
+            ~.custom-control-label{
+                &:before{
+                    background: #219F84;
+                    border-color: #219F84;
+                }
+            }
+        }
+        .btn{
+            background: #219F84;
+            border-color: #219F84;
+        }
+    }
+    .signup-section{
+        background: #f7f7f7;
+        display: flex;
+        align-items: center;
+        .social-signup{
+            overflow: hidden;
+        }
+        ul{
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            li{margin: 0 0.5rem 0 0;}
+            a{
+                display: block;
+                width: 40px;
+                height: 40px;
+                border-radius: 5px;
+                background: #107BB7;
+                color: #fff;
+                font-size: 1.2rem;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: center;
+                &.icon-google{background: #DF4B37;}
+                &.icon-facebook{background: #3E5C9A;}
+            }
+        }
+    }
+    .modal-body{
+        padding: 0;
+    }
+    .modal-header{
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        .close{
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: #219F84;
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            z-index: 1;
+            padding: 0;
+            opacity: 1;
         }
     }
 }

@@ -39,9 +39,13 @@
                   <LockerRoomModal v-if="isCustomerAuthenticated"/>
                   <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
                   <AddLockerRoomModal />
-                  <b-button variant="outline-secondary" @click="buyNow">Buy Now</b-button>
+                  <b-button variant="outline-secondary" @click="buyNow">Summary</b-button>
                 </div>
                 <ul class="preview-header-icons">
+                  <li>
+                    <b-button v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
+                    <LoginForm />
+                  </li>
                   <li><a>
                     <font-awesome-icon :icon="['fas', 'share-alt']"/>
                   </a></li>
@@ -79,7 +83,8 @@
                 <div class="d-none d-lg-block continue-btn-holder pt-5">
                   <b-button v-if="tabIndex == 0" @click="showBasicCustomization()" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                   <b-button v-else @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                  <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary">Next</b-button>
+                  <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="tabIndex <= 3">Next</b-button>
+                  <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="tabIndex > 3">Summary</b-button>
                 </div>
               </template>
             </div>
@@ -108,6 +113,7 @@ import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import CustomizationPreviewThreeD from '@/components/CustomizationPreviewThreeD.vue'
 import ExtractedColors from '@/components/ExtractedColors.vue'
+import LoginForm from '@/components/LoginForm.vue'
 import {http} from "@/httpCommon"
 
 @Component<Home>({
@@ -122,7 +128,8 @@ import {http} from "@/httpCommon"
     AddLockerRoomModal,
     SaveColorModal,
     CustomizationPreviewThreeD,
-    ExtractedColors
+    ExtractedColors,
+    LoginForm
   },
   mounted() {
     if (this.isAuthenticated) {
@@ -568,6 +575,14 @@ export default class Home extends Vue {
     li {
       margin: 0 0 0 6px;
       @media only screen and (min-width: 992px){margin: 0 0 0 12px;}
+      .btn{
+        margin: 0;
+        background: none;
+        padding: 0;
+        border: none;
+        color: #03142e;
+        font-size: 18px;
+      }
     }
   }
 }

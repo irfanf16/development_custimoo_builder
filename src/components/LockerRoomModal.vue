@@ -321,8 +321,6 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
         border: none;
         @media only screen and (min-width: 992px){
             padding: 10px 30px;
-            color: #219f84;
-            background: #E7F4F1;
             border: 1px solid #E7F4F1;
             border-radius: 0.25rem;
             width: auto;

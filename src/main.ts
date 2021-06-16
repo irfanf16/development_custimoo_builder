@@ -22,6 +22,7 @@ import {
   faRedoAlt,
   faSearch,
   faShareAlt,
+  faUser,
   faSwatchbook,
   faTextHeight,
   faTimes,
@@ -35,6 +36,7 @@ import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import App from './App.vue'
+import {faFacebookF, faGooglePlusG, faLinkedinIn} from "@fortawesome/free-brands-svg-icons";
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 library.add(faUserSecret)
@@ -59,6 +61,10 @@ library.add(faHockeyPuck)
 library.add(faBaseballBall)
 library.add(faTshirt)
 library.add(faFolder)
+library.add(faUser)
+library.add(faFacebookF)
+library.add(faLinkedinIn)
+library.add(faGooglePlusG)
 library.add(faCube)
 library.add(faDiceTwo)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
