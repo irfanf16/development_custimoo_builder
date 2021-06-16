@@ -98,7 +98,7 @@
               </template>
           <div class="create-lockerroom">
             <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
-            <CreateLockerRoomModal />
+            <CreateLockerRoomModal @lockerAdded="lockerAdded" />
           </div>
         </b-tabs>
         <!-- <div class="lockerroom-header">
@@ -137,12 +137,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       get getLockerProducts():Record<any, any>{
         return this.$store.getters.getLockerProducts;
       }
-      @Watch('getLockerProducts', {
-        deep: true
-      })
-      getLockerProductsChanged():void{
-        this.tabIndex = this.getLockerProducts.length -1
-      }
+
       get products():[Record<any, any>]{
         return this.$store.getters.getProducts
       }
@@ -154,6 +149,12 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       }
       get selectedProduct(): Record<any, any>{
         return this.$store.getters.getSelectedProduct
+      }
+      public lockerAdded(){
+        setTimeout(() => {
+          let index = this.getLockerProducts.length -1
+          this.tabIndex = index
+        }, 1000)
       }
 
 

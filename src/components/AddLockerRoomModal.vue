@@ -115,7 +115,6 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res == ''){
             this.ref['my-modal'].hide();
-            this.locker_selected = true
             this.product_name = ''
           }else{
             alert(res);
