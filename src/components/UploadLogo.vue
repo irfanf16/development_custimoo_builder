@@ -22,7 +22,7 @@
         </div>
       </div>
       <div class="upload-logo-content">
-        <h3>{{  customLogos.length < 2 ? 'Upload Team Logo' : 'Upload logo'  }}</h3>
+        <h3>{{ customLogos.length == 1? 'Upload Team Logo' : 'Upload logo' }}</h3>
         <h4>Image Requirements</h4>
         <p>Need High Res Image</p>
       </div>
