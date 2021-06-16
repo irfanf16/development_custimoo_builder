@@ -14,7 +14,7 @@
                         <b-card no-body>
                             <b-tabs card changed="currentTabs">
                               <b-tab title="Products">
-                                <div class="products-holder d-lg-flex flex-wrap">
+                                <div class="products-holder d-lg-flex flex-lg-wrap">
                                     <template v-for="(product, ind) in room.product">
                                         <div :key="ind" class="products-block">
                                             <div class="image-holder">
@@ -339,6 +339,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
         width: 100%;
         overflow-x: auto;
         white-space: nowrap;
+        flex-wrap: nowrap;
         padding-top: 7px;
         @media only screen and (min-width: 992px){
             width: 100%;
