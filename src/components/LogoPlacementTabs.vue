@@ -15,7 +15,7 @@
         </template>
 
         <div class="tabs-logo-container">
-          <template v-if="customLogos[index].url != ''">
+          <template v-if="customLogos[index]">
             <div class="logo-placement-area mb-3 mb-lg-4 pt-2">
               <div class="logo-placement-holder mb-lg-3">
                 <div class="logo-holder">

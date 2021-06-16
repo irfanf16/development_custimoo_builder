@@ -109,12 +109,7 @@ import rgbHex from 'rgb-hex'
       if('textIndex' in target) {
         self.$store.dispatch('updateCustomTextAttribute', {index: target.textIndex, attribute: 'text', value: ''})
       }else {
-        self.customLogos.forEach((logo, index) => {
-          let logoUrl = (self.apiBaseUrl+'/'+logo.url).trim().split(' ').join('%20')
-          if(logoUrl == target._element.src){
-            self.$store.dispatch('deleteCustomLogo', {index: index})
-          }
-        })
+        self.$store.dispatch('deleteCustomLogo', {index: target.logoIndex})
       }
       canvas.remove(target);
       canvas.requestRenderAll();
@@ -206,55 +201,48 @@ export default class Scene extends Vue {
   customLogosChanged(newVal: [Record<any, any>]) {
     if(this.mounted && this.logoAllowed) {
       const self = this
-      this.customLogoObjects.forEach((logoObject, index) => {
-        let deleteLogo = true
-        newVal.forEach((logo: Record<any, any>) => {
-          if(logo.logoIndex == logoObject.logoIndex && logo.side == logoObject.side){
-            deleteLogo = false
-          }
-        })
-        if(deleteLogo) {
-          this.customLogoObjects.splice(index, 1)
-          self.frontCanvas.remove(logoObject)
+      newVal.forEach((logo: Record<any, any>) => {
+        if((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url)){
+          self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
           if (self.backCanvas) {
-            self.backCanvas.remove(logoObject)
+            self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
           }
+          this.customLogoObjects[logo.logoIndex] = null
         }
       })
 
       newVal.forEach((logo: Record<any, any>, index: number) => {
         if((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
           let addLogo = true
-          this.customLogoObjects.forEach((logoObject) => {
-            let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
-            if (logoUrl == logoObject._element.src) {
-              addLogo = false
+          if (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element) {
+            let logoObject = this.customLogoObjects[logo.logoIndex]
 
-              if (logo.action == 'drag') {
-                logoObject.center() //add center because all events only trigger if use it in fabric js.
-                logoObject.set({
-                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
-                })
-              }else if(logo.action == 'scale' || logo.action == 'scaleX' || logo.action == 'scaleY'){
-                logoObject.center()
-                logoObject.set({
-                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
-                })
-                logoObject.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
-                logoObject.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
-              } else if(logo.action == 'rotate') {
-                logoObject.center()
-                logoObject.set({
-                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
-                })
-                logoObject.rotate(logo.rotation as number)
-              }
-              logoObject.setCoords()
+            if (logo.action == 'drag') {
+              logoObject.center() //add center because all events only trigger if use it in fabric js.
+              logoObject.set({
+                left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
+              })
+            }else if(logo.action == 'scale' || logo.action == 'scaleX' || logo.action == 'scaleY'){
+              logoObject.center()
+              logoObject.set({
+                left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
+              })
+              logoObject.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
+              logoObject.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
+            } else if(logo.action == 'rotate') {
+              logoObject.center()
+              logoObject.set({
+                left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
+                top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
+              })
+              logoObject.rotate(logo.rotation as number)
             }
-          })
+            logoObject.setCoords()
+            addLogo = false
+          }
+
           if (addLogo && logo.url) {
             const finalLogo = JSON.parse(JSON.stringify(logo))
 
@@ -268,10 +256,10 @@ export default class Scene extends Vue {
 
             let backLogosCount = 0
             if(!this.backCanvas) {
-              backLogosCount = self.customLogos.filter((item) => { return item.side == 'back'}).length
+              backLogosCount = self.customLogos.filter((item: Record<any, any>) => { return item.side == 'back'}).length
             }
 
-            if(self.logosLimit && self.customLogoObjects.length < self.logosLimit - backLogosCount) {
+            if(self.logosLimit && self.customLogoObjects.filter((item: Record<any, any>) => item).length < self.logosLimit - backLogosCount) {
               self.addLogos([finalLogo], index)
             }else if(!self.logosLimit) {
               self.addLogos([finalLogo], index)
@@ -349,7 +337,6 @@ export default class Scene extends Vue {
               finalText.y_axis = self.productNamesSetting[index].y_axis
               finalText.rotation = self.productNamesSetting[index].rotation
             }
-            console.log('call from change', finalText)
             self.addTexts([finalText], index)
           }
         }

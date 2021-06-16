@@ -187,7 +187,6 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       public async deleteRoom(id:number, index:number){
         if (confirm('You are going to delete associated product')) {
           await this.$store.dispatch('deleteRoom', {id: id, index: index});
-          this.tabIndex = 0
         }
       }
       public fetchColors(i:number, ind:number){

@@ -51,7 +51,7 @@ const ProductAttributes:Module<any, any> = {
     },
     customLogoDelete(state: Record<any, any>, delCustomLogo: Record<any, any>) {
       if(delCustomLogo){
-        state.customLogos.splice(delCustomLogo.index, 1)
+        Vue.set(state.customLogos, delCustomLogo.index, null)
       }
     },
     isAssociation(state: Record<any, any>, isAssociation: Record<any, any>) {
