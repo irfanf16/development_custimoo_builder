@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="my-modal" id="modal-center-savelogomodal" size="lg" centered scrollable title="Save Logo" content-class="lockerroom-modal">
+    <b-modal ref="my-modal" id="modal-center-savelogomodal" size="xl" centered scrollable title="Save Logo" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener">
                 <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"   v-bind:class="tabIndex === index ? 'active' : '' ">{{locker.room_name}}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
@@ -101,14 +101,20 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
         align-items: center;
         .locker-opener{
             max-width: 90%;
-            padding: 15px;
+            padding: 15px 0 0;
             font-size: 18px;
             position: relative;
+            overflow: hidden;
             overflow-x: auto;
             white-space: nowrap;
             @media only screen and (min-width: 992px){
                 padding: 14px 0 0;
                 max-width: 80%;
+                overflow-x: hidden;
+                overflow-y: auto;
+                white-space: normal;
+                max-height: 110px;
+                padding: 15px;
             }
             .btn{
                 padding: 0.5rem 1rem;
@@ -119,7 +125,7 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
                 color: #03142E;
                 font-size: 0.8rem;
                 @media only screen and (min-width: 992px){
-                    margin: 0 10px 10px;
+                    margin: 0 10px 15px;
                     font-size: 14px;
                 }
                 &.active,
@@ -168,6 +174,10 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
             }
             &::-webkit-scrollbar{
               height: 5px;
+              @media only screen and (min-width: 1024px){
+                height: auto;
+                width: 5px;
+              }
             }
             &::-webkit-scrollbar-track {
               background: transparent;
@@ -194,8 +204,8 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
                 border: none;
                 @media only screen and (min-width: 992px){
                     padding: 10px 30px;
-                    color: #219f84;
-                    background: #E7F4F1;
+                    color: #fff;
+                  background: #219f84;
                     border: 1px solid #E7F4F1;
                     border-radius: 0.25rem;
                     width: auto;

@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="my-modal" id="modal-center-savecolormodal" centered scrollable size="lg" title="Add Color to Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="my-modal" id="modal-center-savecolormodal" centered scrollable size="xl" title="Add Color to Locker Room" content-class="lockerroom-modal">
       <b-tabs content-class="mt-3">
         <template v-for="(room, i) in getLockerProducts">
         <b-tab :key="i">
@@ -233,12 +233,20 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
         .input-group{
             flex: 0 0 55%;
             max-width: 55%;
+          @media only screen and (min-width: 992px){
+            flex: 0 0 78%;
+            max-width: 78%;
+          }
         }
         .btn{
-            flex: 0 0 44%;
-            max-width: 44%;
+            flex: 0 0 40%;
+            max-width: 40%;
             background: #219f84;
             border-color: #219f84;
+          @media only screen and (min-width: 992px){
+            flex: 0 0 20%;
+            max-width: 20%;
+          }
         }
     }
 

@@ -3,7 +3,7 @@
         <b-container class="order-details-holder my-lg-5 bg-white border">
             <b-row class="align-items-center p-3 order-details-header border-bottom">
                 <b-col cols="12" lg="6" class="text-left mb-3 mb-lg-0">
-                    <h1>Confirm Your Order</h1>
+                    <h1>Confirm Your Design</h1>
                 </b-col>
                 <b-col cols="12" lg="6" class="text-left text-lg-right">
                     <div class="header-buttons">

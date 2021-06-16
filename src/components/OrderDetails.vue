@@ -164,7 +164,7 @@
       <div class="pricing-are">
         <div class="order-details">
           <div class="order-row">
-            <button class="btn btn-secondary fw-bold w-100 mb-2" @click="buyNow">Buy Now</button>
+            <button class="btn btn-secondary fw-bold w-100 mb-2" @click="buyNow">Summary</button>
           </div>
           <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>
         </div>

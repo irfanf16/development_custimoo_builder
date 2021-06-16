@@ -231,9 +231,6 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
                 border: none;
                 @media only screen and (min-width: 992px){
                     padding: 10px 30px;
-                    color: #219f84;
-                    background: #E7F4F1;
-                    border: 1px solid #E7F4F1;
                     border-radius: 0.25rem;
                     width: auto;
                     height: auto;
@@ -256,12 +253,20 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
         .input-group{
             flex: 0 0 55%;
             max-width: 55%;
+          @media only screen and (min-width: 1024px){
+            flex: 0 0 78%;
+            max-width: 78%;
+          }
         }
         .btn{
-            flex: 0 0 44%;
-            max-width: 44%;
+            flex: 0 0 40%;
+            max-width: 40%;
             background: #219f84;
             border-color: #219f84;
+          @media only screen and (min-width: 1024px){
+            flex: 0 0 20%;
+            max-width: 20%;
+          }
         }
     }
 
