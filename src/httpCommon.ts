@@ -41,10 +41,12 @@ http.interceptors.response.use(function (response) {
   if (401 === error.response.status) {
     localStorage.setItem('access_token', '');
     localStorage.setItem('browserToken', '');
+    localStorage.setItem('jwtToken', '');
     location.reload()
   } else {
     return Promise.reject(error);
   }
 });
+
 
 export {http, noTokenRequest}

@@ -131,7 +131,7 @@ import {http} from "@/httpCommon"
     ExtractedColors,
     LoginForm
   },
-  mounted() {
+  async mounted() {
     if (this.isAuthenticated) {
       this.retrieveProducts()
       this.getFillColors()
@@ -141,12 +141,12 @@ import {http} from "@/httpCommon"
     if (isAssociation && this.jwtToken) {
       this.getLogoAssociation()
     }
+    await this.$store.dispatch('setCategories')
+    await this.$store.dispatch('setJwtToken')
+    await this.$store.dispatch('setBrowserToken')
+    await this.$store.dispatch('setIsAssociation', {associate: false})
+    await this.$store.dispatch('getLockerRoomColors')
 
-    this.$store.dispatch('getLockerRoomColors')
-    this.$store.dispatch('setCategories')
-    this.$store.dispatch('setJwtToken')
-    this.$store.dispatch('setBrowserToken')
-    this.$store.dispatch('setIsAssociation', {associate: false})
   }
 })
 
