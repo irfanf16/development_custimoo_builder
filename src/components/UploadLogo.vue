@@ -151,9 +151,23 @@ export default class UploadLogo extends Vue {
   }
 
 
-  public customLogoInit() {
+  public customLogoInit(customLogoIndex: number | null = null) {
     if (this.selectedProduct && this.selectedProduct.is_logo_allowed == 1) {
       let logoSetting = this.selectedProduct.logos_setting[0]
+      if(customLogoIndex) {
+        logoSetting = this.selectedProduct.logos_setting[customLogoIndex]
+      }
+      if(!logoSetting) {
+        logoSetting = {
+          width: 200,
+          x_axis: 150,
+          y_axis: 190,
+          rotation: 0,
+          haveControls: true,
+          side: 'front'
+        }
+      }
+
       let logo = {
         url: '',
         width: logoSetting.width,
@@ -163,15 +177,16 @@ export default class UploadLogo extends Vue {
         rotation: logoSetting.rotation,
         haveControls: Boolean(!logoSetting.is_locked),
         side: logoSetting.side,
-        customLogo: true
+        customLogo: true,
+        logoIndex: customLogoIndex
       }
       this.$store.dispatch('setCustomLogos', logo)
     }
   }
 
   public uploadLogoImage(e: any) {
-    if (this.customLogos.length === 0) {
-      this.customLogoInit()
+    if (!this.customLogos[this.customLogoIndex]) {
+      this.customLogoInit(this.customLogoIndex)
     }
     let img = e.target.files[0]
     let fd = new FormData()
@@ -184,6 +199,8 @@ export default class UploadLogo extends Vue {
     fd.append('product_id', this.selectedProduct.product_id)
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
+        const inputRef = this.$refs.fileInput as Record<any, any>
+        inputRef.value = null;
         let payload = [{
           index: this.customLogoIndex,
           attribute: 'url',
