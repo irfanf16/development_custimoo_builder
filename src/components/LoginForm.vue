@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="modal-login" size="lg" hide-title="true" content-class="login-modal" hide-footer="true">
+  <b-modal id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
     <div class="form-holder" :class="{active: isActive}">
       <div class="form-area form-signin p-4">
         <h2>Hummel Login</h2>
@@ -26,7 +26,6 @@
           <b-form-group>
             <b-form-checkbox
               id="checkbox-1"
-              v-model="status"
               name="checkbox-1"
               value="accepted"
               unchecked-value="not_accepted"
@@ -98,7 +97,6 @@
           <b-form-group>
             <b-form-checkbox
               id="checkbox-2"
-              v-model="status"
               name="checkbox-2"
               value="accepted"
               unchecked-value="not_accepted"
