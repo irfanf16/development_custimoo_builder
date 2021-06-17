@@ -5,27 +5,27 @@
         <h2>Hummel Login</h2>
         <b-form>
           <b-form-group
-            id="input-group-1"
             label="Email address:"
             label-for="input-1"
           >
             <b-form-input
-              id="input-1"
               type="email"
+              v-model="email"
+              placeholder="Enter email"
               required
             ></b-form-input>
           </b-form-group>
 
           <b-form-group id="input-group-2" label="Password:" label-for="input-2">
             <b-form-input
-              id="input-2"
               type="password"
+              v-model="password"
+              placeholder="Password"
               required
             ></b-form-input>
           </b-form-group>
           <b-form-group>
             <b-form-checkbox
-              id="checkbox-1"
               name="checkbox-1"
               value="accepted"
               unchecked-value="not_accepted"
@@ -34,7 +34,7 @@
             </b-form-checkbox>
           </b-form-group>
 
-          <b-button type="submit" variant="primary">Submit</b-button>
+          <b-button @click="submitForm" variant="primary">Submit</b-button>
 
           <div class="pt-3"><a href="/" class="login-remember">Remember me?</a></div>
 
@@ -44,35 +44,33 @@
         <h2>Join Customizer!</h2>
         <b-form>
           <b-form-group
-            id="input-group-1"
             label="First Name"
             label-for="input-1"
           >
             <b-form-input
-              id="input-1"
               type="text"
+              v-model="form.first_name"
               required
             ></b-form-input>
           </b-form-group>
           <b-form-group
-            id="input-group-2"
             label="Last Name"
             label-for="input-2"
           >
             <b-form-input
-              id="input-2"
+
+              v-model="form.last_name"
               type="text"
               required
             ></b-form-input>
           </b-form-group>
 
           <b-form-group
-            id="input-group-3"
             label="Email Address"
             label-for="input-3"
           >
             <b-form-input
-              id="input-3"
+              v-model="form.email"
               type="email"
               required
             ></b-form-input>
@@ -80,6 +78,7 @@
 
           <b-form-group id="input-group-4" label="Password" label-for="input-4">
             <b-form-input
+              v-model="form.password"
               id="input-4"
               type="password"
               required
@@ -88,15 +87,14 @@
 
           <b-form-group id="input-group-5" label="Confirm Password" label-for="input-5">
             <b-form-input
-              id="input-5"
-              type="password"
+              v-model="form.password_confirmation"
+               type="password"
               required
             ></b-form-input>
           </b-form-group>
 
           <b-form-group>
             <b-form-checkbox
-              id="checkbox-2"
               name="checkbox-2"
               value="accepted"
               unchecked-value="not_accepted"
@@ -107,7 +105,7 @@
 
           <div class="pb-3">By creating an account, I acknowledge that I have read and agree with the <a href="/" class="login-remember" style="color: #219F84;">Terms of Use.</a></div>
 
-          <b-button type="submit" variant="primary">Create Account and Login</b-button>
+          <b-button @click="signUp" variant="primary">Create Account and Login</b-button>
 
         </b-form>
       </div>
@@ -140,14 +138,52 @@
 </template>
 
 <script lang="ts">
-  import {Component, Prop, Vue} from 'vue-property-decorator'
+  import {Component, Mixins } from 'vue-property-decorator'
+  import ErrorMessages from "@/mixins/ErrorMessages";
 
   @Component<LoginForm>({})
-  export default class LoginForm extends Vue {
-
+  export default class LoginForm extends Mixins(ErrorMessages) {
+    public email  = ''
+    public password  = ''
+    public form = {
+      first_name: '',
+      last_name: '',
+      email: '',
+      password: '',
+      password_confirmation: ''
+    }
     public isActive = false
     public additionClass() {
       this.isActive = !this.isActive
+    }
+    public async submitForm():void{
+      try {
+        let payload = {
+          email: this.email, password: this.password
+        }
+        let res = await this.$store.dispatch('loginCustomer', payload)
+        if (res.status == 200){
+          this.email = ''
+          this.password = ''
+          console.log('logged')
+        }
+      }catch (error){
+        this.showError(error)
+      }
+    }
+    public async signUp():void{
+      try {
+       let res = await this.$store.dispatch('signUpCustomer', this.form)
+        if (res.status == 201){
+          this.showToast(res.data.message, 'SUCCESS')
+          for (let key in this.form) {
+            this.form[key] = ''
+          }
+          console.log(this.form)
+        }
+      }catch (error){
+        this.showError(error)
+      }
     }
 
   }

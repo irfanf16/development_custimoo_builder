@@ -202,7 +202,7 @@ export default class Scene extends Vue {
     if(this.mounted && this.logoAllowed) {
       const self = this
       newVal.forEach((logo: Record<any, any>, index: number) => {
-        if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url))){
+        if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element.src != logo.url))){
           self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
           if (self.backCanvas) {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
@@ -224,31 +224,10 @@ export default class Scene extends Vue {
           if ((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
             let addLogo = true
             if (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element) {
-              let logoObject = this.customLogoObjects[logo.logoIndex]
+              const logoObject = this.customLogoObjects[logo.logoIndex]
+              const otherSideObject = this.otherSideLogos[logo.logoIndex]
 
-              if (logo.action == 'drag') {
-                logoObject.center() //add center because all events only trigger if use it in fabric js.
-                logoObject.set({
-                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
-                })
-              } else if (logo.action == 'scale' || logo.action == 'scaleX' || logo.action == 'scaleY') {
-                logoObject.center()
-                logoObject.set({
-                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
-                })
-                logoObject.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
-                logoObject.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
-              } else if (logo.action == 'rotate') {
-                logoObject.center()
-                logoObject.set({
-                  left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
-                  top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis
-                })
-                logoObject.rotate(logo.rotation as number)
-              }
-              logoObject.setCoords()
+              this.eventAction(logo, logoObject, otherSideObject)
               addLogo = false
             }
 
@@ -266,7 +245,7 @@ export default class Scene extends Vue {
               let backLogosCount = 0
               if (!this.backCanvas) {
                 backLogosCount = self.customLogos.filter((item: Record<any, any>) => {
-                  return item.side == 'back'
+                  return item && item.side == 'back'
                 }).length
               }
 
@@ -303,6 +282,7 @@ export default class Scene extends Vue {
           let addText = true
           if (this.customTextObjects[text.textIndex] && this.customTextObjects[text.textIndex].text != '') {
             let textObject = this.customTextObjects[text.textIndex]
+            const otherSideObject = this.otherSideLogos[text.textIndex]
             let canvas = this.frontCanvas
             if (text.side == 'back') {
               canvas = this.backCanvas
@@ -314,29 +294,7 @@ export default class Scene extends Vue {
             textObject.set('strokeWidth', parseInt(text.outLineWidth))
             canvas.renderAll()
 
-            if (text.action == 'drag') {
-              textObject.center() //add center because all events only trigger if use it in fabric js.
-              textObject.set({
-                left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
-                top: self.canvasHeight / self.mainCanvasHeight * text.y_axis
-              })
-            } else if (text.action == 'scale' || text.action == 'scaleX' || text.action == 'scaleY') {
-              textObject.center()
-              textObject.set({
-                left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
-                top: self.canvasHeight / self.mainCanvasHeight * text.y_axis
-              })
-              textObject.scaleX = self.canvasWidth / self.mainCanvasWidth * text.scaleX
-              textObject.scaleY = self.canvasHeight / self.mainCanvasHeight * text.scaleY
-            } else if (text.action == 'rotate') {
-              textObject.center()
-              textObject.set({
-                left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
-                top: self.canvasHeight / self.mainCanvasHeight * text.y_axis
-              })
-              textObject.rotate(text.rotation as number)
-            }
-            textObject.setCoords()
+            this.eventAction(text, textObject, otherSideObject)
             addText = false
           }
 
@@ -375,6 +333,32 @@ export default class Scene extends Vue {
     if(this.mounted) {
       this.changeGroupColor(newVal)
     }
+  }
+
+  public eventAction(item: Record<any, any>, object: Record<any, any>, otherSideObject: Record<any, any>) {
+    if (item.action == 'drag') {
+      object.center() //add center because all events only trigger if use it in fabric js.
+      object.set({
+        left: this.canvasWidth / this.mainCanvasWidth * item.x_axis,
+        top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
+      })
+    } else if (item.action == 'scale' || item.action == 'scaleX' || item.action == 'scaleY') {
+      object.center()
+      object.set({
+        left: this.canvasWidth / this.mainCanvasWidth * item.x_axis,
+        top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
+      })
+      object.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
+      object.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
+    } else if (item.action == 'rotate') {
+      object.center()
+      object.set({
+        left: this.canvasWidth / this.mainCanvasWidth * item.x_axis,
+        top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
+      })
+      object.rotate(item.rotation as number)
+    }
+    object.setCoords()
   }
 
   public changeGroupColor (groupColors: Record<any, any>): void {

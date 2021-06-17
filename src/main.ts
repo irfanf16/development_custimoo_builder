@@ -2,6 +2,9 @@ import Vue from 'vue'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
+import VueToast from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
+Vue.use(VueToast);
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
   faArrowLeft,

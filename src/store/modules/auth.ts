@@ -1,5 +1,5 @@
 const provider_id = process.env.VUE_APP_PROVIDER_ID
-import {noTokenRequest} from "@/httpCommon";
+import {http, noTokenRequest} from "@/httpCommon";
 import { Module } from "vuex";
 const Auth:Module<any, any> = {
   state:{
@@ -22,7 +22,18 @@ const Auth:Module<any, any> = {
         commit('AUTH_SUCCESS', res.data.accessToken);
         return true;
       })
+    },
+    async loginCustomer({commit}, payload){
+      console.log(commit)
+      const res = await http.post('customer/login', payload);
+      return res
+    },
+    async signUpCustomer({commit}, payload){
+      console.log(commit)
+      const res = await http.post('customer/signup', payload);
+      return res
     }
+
   }
 }
 export default Auth;
