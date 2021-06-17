@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
+  <b-modal ref="loginModal" id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
     <div class="form-holder" :class="{active: isActive}">
       <div class="form-area form-signin p-4">
         <h2>Hummel Login</h2>
@@ -143,6 +143,9 @@
 
   @Component<LoginForm>({})
   export default class LoginForm extends Mixins(ErrorMessages) {
+
+    public ref = this.$refs as Record<any, any>
+
     public email  = ''
     public password  = ''
     public form = {
@@ -165,7 +168,7 @@
         if (res.status == 200){
           this.email = ''
           this.password = ''
-          console.log('logged')
+          this.ref['loginModal'].hide();
         }
       }catch (error){
         this.showError(error)
@@ -179,7 +182,7 @@
           for (let key in this.form) {
             this.form[key] = ''
           }
-          console.log(this.form)
+          this.ref['loginModal'].hide();
         }
       }catch (error){
         this.showError(error)
