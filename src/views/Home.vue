@@ -58,10 +58,10 @@
                   <b-button @click="showDesign()" class="change-product-opener" variant="secondary"></b-button>
                 </div>
               </header>
-              <div class="undo-btn-area text-left pt-3">
-                <b-button variant="outline-secondary mr-2">Undo</b-button>
-                <b-button variant="outline-secondary">Redo</b-button>
-              </div>
+<!--              <div class="undo-btn-area text-left pt-3">-->
+<!--                <b-button variant="outline-secondary mr-2">Undo</b-button>-->
+<!--                <b-button variant="outline-secondary">Redo</b-button>-->
+<!--              </div>-->
             </div>
           </template>
           <div class="customization-area d-flex flex-wrap justify-content-center align-items-center" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
@@ -533,13 +533,14 @@ export default class Home extends Vue {
 }
 .preview-area-header {
   margin: 0 -15px;
-  padding: 26px 15px;
+  padding: 26px 10px;
   border-bottom: 1px solid #EDF2F6;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   background: #fff;
+  @media only screen and (min-width: 768px){padding: 26px 15px;}
   @media only screen and (min-width: 992px){
     min-height: 91px;
     background: none;
@@ -550,13 +551,17 @@ export default class Home extends Vue {
     color: #000;
     border-color: #DDDFE3;
     border-radius: 5px;
-    padding: 5px 8px;
+    padding: 5px 7px;
+    @media only screen and (min-width: 768px){
+      padding: 5px 8px;
+    }
     @media only screen and (min-width: 992px){
       font-size: 14px;
       font-weight: 600;
       margin: 0 15px 0 0;
       padding: 0.375rem 0.75rem;
     }
+    &:last-child{margin: 0;}
     &:hover {
       color: #fff;
     }
@@ -574,15 +579,17 @@ export default class Home extends Vue {
     }
     li {
       margin: 0 0 0 6px;
-      @media only screen and (min-width: 992px){margin: 0 0 0 12px;}
+      @media only screen and (min-width: 768px){margin: 0 0 0 12px;}
       .btn{
         margin: 0;
         background: none;
         padding: 0;
         border: none;
         color: #03142e;
-        font-size: 18px;
+        font-size: 14px;
+        @media only screen and (min-width: 768px){font-size: 18px;}
       }
+      &:first-child{margin: 0;}
     }
   }
 }
