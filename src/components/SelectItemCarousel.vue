@@ -11,6 +11,7 @@
                    :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"/>
           </div>
         </template>
+        <h3>{{ products[0].product_name }}</h3>
       </a>
     </template>
   </slither-slider>
@@ -53,5 +54,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+.select-item-slider{
+  h3{
+    overflow: hidden;
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 </style>
