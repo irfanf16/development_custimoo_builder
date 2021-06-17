@@ -202,7 +202,8 @@ export default class Scene extends Vue {
     if(this.mounted && this.logoAllowed) {
       const self = this
       newVal.forEach((logo: Record<any, any>, index: number) => {
-        if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element.src != logo.url))){
+        const logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+        if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element.src != logoUrl))){
           self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
           if (self.backCanvas) {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
@@ -350,6 +351,11 @@ export default class Scene extends Vue {
       })
       object.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
       object.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
+      if(otherSideObject) {
+        otherSideObject.center()
+        otherSideObject.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
+        otherSideObject.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
+      }
     } else if (item.action == 'rotate') {
       object.center()
       object.set({
@@ -357,6 +363,10 @@ export default class Scene extends Vue {
         top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
       })
       object.rotate(item.rotation as number)
+      if(otherSideObject) {
+        otherSideObject.center()
+        otherSideObject.rotate(item.rotation as number)
+      }
     }
     object.setCoords()
   }
