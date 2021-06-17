@@ -1985,7 +1985,7 @@ button{
         overflow-x: auto;
         white-space: nowrap;
         flex-wrap: nowrap;
-        cursor: grab;
+        //cursor: grab;
         @media only screen and (min-width: 1024px){
             overflow-x: hidden;
             overflow-y: auto;
@@ -2089,14 +2089,28 @@ button{
     .form-holder{
         display: grid;
         gap: 0;
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: 1fr;
+        @media only screen and (min-width: 768px){
+            grid-template-columns: 2fr 1fr;
+        }
         h2{
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: #219F84;
             margin: 0 0 1rem;
             cursor: pointer;
+            @media only screen and (min-width: 1024px){
+                font-size: 1.2rem;
+            }
         }
+        &.active{
+            .text-join,
+            .form-signin{display: none;}
+            .text-signin,
+            .form-signup{display: block;}
+        }
+        .text-signin,
+        .form-signup{display: none;}
     }
     .form-area{
         background: #fff;
@@ -2128,8 +2142,6 @@ button{
     }
     .signup-section{
         background: #f7f7f7;
-        display: flex;
-        align-items: center;
         .social-signup{
             overflow: hidden;
         }
@@ -2143,16 +2155,21 @@ button{
             li{margin: 0 0.5rem 0 0;}
             a{
                 display: block;
-                width: 40px;
-                height: 40px;
+                width: 30px;
+                height: 30px;
                 border-radius: 5px;
                 background: #107BB7;
                 color: #fff;
-                font-size: 1.2rem;
+                font-size: 1rem;
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: center;
                 align-items: center;
+                @media only screen and (min-width: 1024px){
+                    width: 40px;
+                    height: 40px;
+                    font-size: 1.2rem;
+                }
                 &.icon-google{background: #DF4B37;}
                 &.icon-facebook{background: #3E5C9A;}
             }

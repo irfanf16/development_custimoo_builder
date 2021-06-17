@@ -1,8 +1,8 @@
 <template>
-  <b-modal id="modal-login" size="lg" hide-title="true" content-class="login-modal" hide-footer="true">
+  <b-modal id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
     <div class="form-holder" :class="{active: isActive}">
-      <div class="form-area p-4">
-        <h2>Sports Excellence Login</h2>
+      <div class="form-area form-signin p-4">
+        <h2>Hummel Login</h2>
         <b-form>
           <b-form-group
             id="input-group-1"
@@ -12,7 +12,6 @@
             <b-form-input
               id="input-1"
               type="email"
-              placeholder="Enter email"
               required
             ></b-form-input>
           </b-form-group>
@@ -21,14 +20,12 @@
             <b-form-input
               id="input-2"
               type="password"
-              placeholder="Password"
               required
             ></b-form-input>
           </b-form-group>
           <b-form-group>
             <b-form-checkbox
               id="checkbox-1"
-              v-model="status"
               name="checkbox-1"
               value="accepted"
               unchecked-value="not_accepted"
@@ -43,11 +40,85 @@
 
         </b-form>
       </div>
-      <div class="signup-section p-4">
+      <div class="form-area form-signup p-4">
+        <h2>Join Customizer!</h2>
+        <b-form>
+          <b-form-group
+            id="input-group-1"
+            label="First Name"
+            label-for="input-1"
+          >
+            <b-form-input
+              id="input-1"
+              type="text"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <b-form-group
+            id="input-group-2"
+            label="Last Name"
+            label-for="input-2"
+          >
+            <b-form-input
+              id="input-2"
+              type="text"
+              required
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            id="input-group-3"
+            label="Email Address"
+            label-for="input-3"
+          >
+            <b-form-input
+              id="input-3"
+              type="email"
+              required
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group id="input-group-4" label="Password" label-for="input-4">
+            <b-form-input
+              id="input-4"
+              type="password"
+              required
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group id="input-group-5" label="Confirm Password" label-for="input-5">
+            <b-form-input
+              id="input-5"
+              type="password"
+              required
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group>
+            <b-form-checkbox
+              id="checkbox-2"
+              name="checkbox-2"
+              value="accepted"
+              unchecked-value="not_accepted"
+            >
+              Subscribe to newsletter
+            </b-form-checkbox>
+          </b-form-group>
+
+          <div class="pb-3">By creating an account, I acknowledge that I have read and agree with the <a href="/" class="login-remember" style="color: #219F84;">Terms of Use.</a></div>
+
+          <b-button type="submit" variant="primary">Create Account and Login</b-button>
+
+        </b-form>
+      </div>
+      <div class="signup-section p-4 pt-lg-5">
         <div>
           <div class="signup-text-header">
             <span>Need an account?</span>
-            <h2 @click="additionClass()">Join Customize Ninja!</h2>
+            <h2 @click="additionClass()">
+              <span class="text-join">Join Customizer!</span>
+              <span class="text-signin">Login Now!</span>
+            </h2>
           </div>
           <div class="social-signup">
             <ul>
