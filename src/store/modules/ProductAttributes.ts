@@ -108,8 +108,12 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
-        Vue.set(state.svgGroups[color.index], 'color', color.color)
-        Vue.set(state.svgGroups[color.index], 'pantone', color.pantone)
+        if ('pantoneName' in color){
+          Vue.set(state.svgGroups[color.index], 'pantoneName', color.pantoneName)
+        }else {
+          Vue.set(state.svgGroups[color.index], 'color', color.color)
+          Vue.set(state.svgGroups[color.index], 'pantone', color.pantone)
+        }
       }
     },
     rosterDetails(state: Record<any, any>, rosterDetail: Record<any, any>) {

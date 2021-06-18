@@ -596,7 +596,21 @@ export default class Home extends Vue {
         border: none;
         color: #03142e;
         font-size: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
         @media only screen and (min-width: 768px){font-size: 18px;}
+        .user-text{
+          font-size: 12px;
+          line-height: 16px;
+          max-width: 62px;
+          display: inline-block;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+          margin: 0 5px 0 0;
+        }
       }
       &:first-child{margin: 0;}
     }

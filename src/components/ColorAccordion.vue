@@ -2,8 +2,13 @@
   <div class="accordion" role="tablist">
     <b-card no-body v-for="(svgElement, index) in svgGroups" :key="index">
       <b-card-header header-tag="header" class="p-0" role="tab">
-        <b-button block v-b-toggle="'accordion-'+(index+1)" class="p-3" @click="showColor(index)"><span class="text">{{ svgElement.id | capitalize }}</span> <span class="color"><span
-          class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span> <span class="color-pantone-name">{{ svgElement.pantone }}</span></span> <span class="accordion-icon"></span></b-button>
+        <b-button block v-b-toggle="'accordion-'+(index+1)" class="p-3" @click="showColor(index)">
+          <span class="text">{{ svgElement.id | capitalize }}</span>
+          <span class="color">
+            <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
+            <span class="color-pantone-name">{{ svgElement.pantone }}<br><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
+          </span>
+          <span class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
         <b-card-body>
@@ -15,7 +20,7 @@
             <div class="color-container">
               <div v-if="showOther" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
-                  <label class="mb-2" for="inline-form-input-pantone-color">Pantone:</label>
+                  <label class="mb-2" for="inline-form-input-pantone-color">Pantone: (TCX Colors)</label>
                   <b-form-input
                     v-model="svgGroups[selectAccordionIndex].pantone"
                     class="mb-2 mr-sm-2 mb-sm-0"
@@ -89,16 +94,20 @@ export default class ColorAccordion extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
-    this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectAccordionIndex].id, color: color.value, pantone: color.name })
+    this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectAccordionIndex].id, color: color.value, pantone: color.name  })
+    if(color.colorName) {
+      this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: color.colorName })
+    } else {
+      this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: '' })
+    }
   }
 
   public changeColor(color: Record<any, any>) {
     let pantoneColor = getClosestColor(color.hex)
-    this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone})
+    this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone, colorName: pantoneColor.name})
   }
 
   public changePantoneColor() {
-    console.log('here it is issue')
     let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), name: pantoneColor.pantone})

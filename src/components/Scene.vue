@@ -202,12 +202,20 @@ export default class Scene extends Vue {
     if(this.mounted && this.logoAllowed) {
       const self = this
       newVal.forEach((logo: Record<any, any>, index: number) => {
-        if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element.src != logo.url))){
+        let logoUrl = logo? (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20') : ''
+        if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element.src != logoUrl))){
           self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
           if (self.backCanvas) {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
           }
           this.customLogoObjects[logo.logoIndex] = null
+          if(this.otherSideLogos[index]) {
+            this.frontCanvas.remove(this.otherSideLogos[index])
+            if (this.backCanvas) {
+              this.backCanvas.remove(this.otherSideLogos[index])
+            }
+            this.otherSideLogos[index] = null
+          }
         } else {
           if(!logo && this.customLogoObjects[index]) {
             this.frontCanvas.remove(this.customLogoObjects[index])
@@ -215,6 +223,13 @@ export default class Scene extends Vue {
               this.backCanvas.remove(this.customLogoObjects[index])
             }
             this.customLogoObjects[index] = null
+            if(this.otherSideLogos[index]) {
+              this.frontCanvas.remove(this.otherSideLogos[index])
+              if (this.backCanvas) {
+                this.backCanvas.remove(this.otherSideLogos[index])
+              }
+              this.otherSideLogos[index] = null
+            }
           }
         }
       })
@@ -274,6 +289,13 @@ export default class Scene extends Vue {
             self.backCanvas.remove(this.customTextObjects[text.textIndex])
           }
           this.customTextObjects[text.textIndex] = null
+          if(this.otherSideTexts[text.textIndex]) {
+            self.frontCanvas.remove(this.otherSideTexts[text.textIndex])
+            if (self.backCanvas) {
+              self.backCanvas.remove(this.otherSideTexts[text.textIndex])
+            }
+            this.otherSideTexts[text.textIndex] = null
+          }
         }
       })
 
@@ -282,7 +304,7 @@ export default class Scene extends Vue {
           let addText = true
           if (this.customTextObjects[text.textIndex] && this.customTextObjects[text.textIndex].text != '') {
             let textObject = this.customTextObjects[text.textIndex]
-            const otherSideObject = this.otherSideLogos[text.textIndex]
+            const otherSideObject = this.otherSideTexts[text.textIndex]
             let canvas = this.frontCanvas
             if (text.side == 'back') {
               canvas = this.backCanvas
@@ -350,6 +372,17 @@ export default class Scene extends Vue {
       })
       object.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
       object.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
+      if(otherSideObject) {
+        const left = otherSideObject.left
+        const top = otherSideObject.top
+        otherSideObject.center()
+        otherSideObject.set({
+          left: left,
+          top: top
+        })
+        otherSideObject.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
+        otherSideObject.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
+      }
     } else if (item.action == 'rotate') {
       object.center()
       object.set({
@@ -357,6 +390,16 @@ export default class Scene extends Vue {
         top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
       })
       object.rotate(item.rotation as number)
+      if(otherSideObject) {
+        const left = otherSideObject.left
+        const top = otherSideObject.top
+        otherSideObject.center()
+        otherSideObject.set({
+          left: left,
+          top: top
+        })
+        otherSideObject.rotate(item.rotation as number)
+      }
     }
     object.setCoords()
   }
@@ -512,6 +555,7 @@ export default class Scene extends Vue {
       this.changeGroupColor(this.lockerGroupColors)
     }
     else if(Object.keys(this.groupColors).length) {
+      console.log(this.groupColors)
       this.changeGroupColor(this.groupColors)
     }
   }
@@ -1103,6 +1147,8 @@ export default class Scene extends Vue {
             model.bringToFront()
             canvas.renderAll()
 
+            this.addToOtherSide(img, logo.side)
+
             if (logo.customLogo) {
               if (this.mainPreview) {
                 const width = Math.floor(img.width * img.scaleX * this.measurementRatio)
@@ -1215,6 +1261,8 @@ export default class Scene extends Vue {
         canvas.add(textBox)
         model.bringToFront()
         canvas.renderAll()
+
+        this.addToOtherSide(textBox, text.side)
 
         if(this.mainPreview) {
           const scaleX = textBox.scaleX as number
