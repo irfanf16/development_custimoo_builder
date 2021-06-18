@@ -93,15 +93,15 @@
             ></b-form-input>
           </b-form-group>
 
-          <b-form-group>
-            <b-form-checkbox
-              name="checkbox-2"
-              value="accepted"
-              unchecked-value="not_accepted"
-            >
-              Subscribe to newsletter
-            </b-form-checkbox>
-          </b-form-group>
+<!--          <b-form-group>-->
+<!--            <b-form-checkbox-->
+<!--              name="checkbox-2"-->
+<!--              value="accepted"-->
+<!--              unchecked-value="not_accepted"-->
+<!--            >-->
+<!--              Subscribe to newsletter-->
+<!--            </b-form-checkbox>-->
+<!--          </b-form-group>-->
 
           <div class="pb-3">By creating an account, I acknowledge that I have read and agree with the <a href="/" class="login-remember" style="color: #219F84;">Terms of Use.</a></div>
 
@@ -118,19 +118,19 @@
               <span class="text-signin">Login Now!</span>
             </h2>
           </div>
-          <div class="social-signup">
-            <ul>
-              <li>
-                <a href="/"><font-awesome-icon :icon="['fab', 'linkedin-in']"/></a>
-              </li>
-              <li>
-                <a class="icon-google" href="/"><font-awesome-icon :icon="['fab', 'google-plus-g']"/></a>
-              </li>
-              <li>
-                <a class="icon-facebook" href="/"><font-awesome-icon :icon="['fab', 'facebook-f']"/></a>
-              </li>
-            </ul>
-          </div>
+<!--          <div class="social-signup">-->
+<!--            <ul>-->
+<!--              <li>-->
+<!--                <a href="/"><font-awesome-icon :icon="['fab', 'linkedin-in']"/></a>-->
+<!--              </li>-->
+<!--              <li>-->
+<!--                <a class="icon-google" href="/"><font-awesome-icon :icon="['fab', 'google-plus-g']"/></a>-->
+<!--              </li>-->
+<!--              <li>-->
+<!--                <a class="icon-facebook" href="/"><font-awesome-icon :icon="['fab', 'facebook-f']"/></a>-->
+<!--              </li>-->
+<!--            </ul>-->
+<!--          </div>-->
         </div>
       </div>
     </div>
@@ -159,7 +159,7 @@
     public additionClass() {
       this.isActive = !this.isActive
     }
-    public async submitForm():void{
+    public async submitForm(){
       try {
         let payload = {
           email: this.email, password: this.password
@@ -174,7 +174,7 @@
         this.showError(error)
       }
     }
-    public async signUp():void{
+    public async signUp(){
       try {
        let res = await this.$store.dispatch('signUpCustomer', this.form)
         if (res.status == 201){
