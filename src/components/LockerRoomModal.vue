@@ -120,9 +120,10 @@
 
 <script lang="ts">
 
-import {Component, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+    import ErrorMessages from "@/mixins/ErrorMessages";
     import Scene from "@/components/Scene.vue"
     @Component<CustomizationPreviewProcess>({
         components: {
@@ -131,7 +132,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
           CreateLockerRoomModal
         }
     })
-    export default class CustomizationPreviewProcess extends Vue {
+    export default class CustomizationPreviewProcess extends Mixins(ErrorMessages) {
       public apiBaseUrl = process.env.VUE_APP_API_BASE_URL
       public ref = this.$refs as Record<any, any>
       public colors : [] = []
@@ -189,6 +190,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       public async deleteRoom(id:number, index:number){
         if (confirm('You are going to delete associated product')) {
           await this.$store.dispatch('deleteRoom', {id: id, index: index});
+          this.showToast('Room Deleted', 'SUCCESS');
         }
       }
       public fetchColors(i:number, ind:number){
