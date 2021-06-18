@@ -6,7 +6,7 @@
           <span class="text">{{ svgElement.id | capitalize }}</span>
           <span class="color">
             <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
-            <span class="color-pantone-name">{{ svgElement.pantone }}<br>{{ svgElement.pantoneName }}</span>
+            <span class="color-pantone-name">{{ svgElement.pantone }}<br><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
           </span>
           <span class="accordion-icon"></span></b-button>
       </b-card-header>
