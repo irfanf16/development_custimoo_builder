@@ -228,7 +228,7 @@ export default class CustomizationProcess extends Vue {
     this.productColors = this.productColors.concat(this.lockerColors)
 
     if(this.logoColors.length){
-      let logoColorsNew = []
+      let logoColorsNew: any[] = []
       this.logoColors.forEach((color: any, index: number) => {
         logoColorsNew = logoColorsNew.concat([{name: color.pantone, value: color.hex, position: index+1}])
       })

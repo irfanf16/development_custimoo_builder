@@ -159,7 +159,7 @@
     public additionClass() {
       this.isActive = !this.isActive
     }
-    public async submitForm():void{
+    public async submitForm(){
       try {
         let payload = {
           email: this.email, password: this.password
@@ -174,7 +174,7 @@
         this.showError(error)
       }
     }
-    public async signUp():void{
+    public async signUp(){
       try {
        let res = await this.$store.dispatch('signUpCustomer', this.form)
         if (res.status == 201){
