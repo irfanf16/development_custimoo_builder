@@ -42,10 +42,10 @@
                   <b-button variant="outline-secondary" @click="buyNow">Summary</b-button>
                 </div>
                 <ul class="preview-header-icons">
-                  <li>
+                  <li class="d-flex flex-wrap align-items-center">
                     <b-button v-if="!checkCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
-                    {{  checkCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}
-                    <b-button @click="logoutCustomer" v-if="checkCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'user']"/>logout</b-button>
+                    <strong class="user-name">{{  checkCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
+                    <b-button @click="logoutCustomer" v-if="checkCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     <LoginForm />
                   </li>
                   <li><a>
@@ -581,13 +581,11 @@ export default class Home extends Vue {
     flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
-    font-size: 14px;
+    font-size: 18px;
     list-style: none;
-    @media only screen and (min-width: 992px){
-      font-size: 18px;
-    }
+    //@media only screen and (min-width: 992px){font-size: 18px;}
     li {
-      margin: 0 0 0 6px;
+      margin: 0 0 0 15px;
       @media only screen and (min-width: 768px){margin: 0 0 0 12px;}
       .btn{
         margin: 0;
@@ -595,12 +593,12 @@ export default class Home extends Vue {
         padding: 0;
         border: none;
         color: #03142e;
-        font-size: 14px;
+        font-size: 18px;
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
-        @media only screen and (min-width: 768px){font-size: 18px;}
+        //@media only screen and (min-width: 768px){font-size: 18px;}
         .user-text{
           font-size: 12px;
           line-height: 16px;
@@ -613,6 +611,21 @@ export default class Home extends Vue {
         }
       }
       &:first-child{margin: 0;}
+    }
+    .user-name{
+      margin: 0 15px 0 0;
+      font-size: 0.8rem;
+      font-weight: 600;
+      @media only screen and (min-width: 768px){
+        margin: 0 10px 0 0;
+      }
+    }
+  }
+  .buttons-preview{
+    @media only screen and (max-width: 767px){
+      flex: 0 0 100%;
+      max-width: 100%;
+      margin: 0 0 15px;
     }
   }
 }

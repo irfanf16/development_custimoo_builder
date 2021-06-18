@@ -32,7 +32,7 @@ import {
   faTrashAlt,
   faTshirt,
   faUserFriends,
-  faUserSecret
+  faUserSecret, faSignOutAlt
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
@@ -69,6 +69,7 @@ library.add(faFacebookF)
 library.add(faLinkedinIn)
 library.add(faGooglePlusG)
 library.add(faCube)
+library.add(faSignOutAlt)
 library.add(faDiceTwo)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
