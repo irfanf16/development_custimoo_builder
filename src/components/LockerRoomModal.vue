@@ -81,10 +81,12 @@
                                         <div class="color-holder" v-if="colors">
                                             <div class="color-container">
                                             <template v-for="(item, ix) in colors">
+                                              <div :key="`item_${ix}`">
                                                 <div class="color-box"
                                                     :style="{backgroundColor: item.value}" :key="`${ix}`">
                                                 </div>
-                                              <span :key="`item_${ix}`"> {{ item.name }} </span>
+                                                <span> {{ item.name }} </span>
+                                              </div>
                                             </template>
                                             </div>
                                         </div>
@@ -551,23 +553,20 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
             .color-container{
                 gap: 7px;
                 @media only screen and (min-width: 410px){
-                    gap: 16px;
+                    gap: 35px;
                 }
                 @media only screen and (min-width: 768px){
-                    gap: 5px;
-                }
-                @media only screen and (min-width: 1024px){
-                    gap: 9px;
+                    gap: 25px;
                 }
                 @media only screen and (min-width: 1200px){
                     gap: 7px;
                 }
                 @media only screen and (min-width: 1274px){
-                    gap: 16px;
+                    gap: 7px;
                 }
-                @media only screen and (min-width: 1274px){
-                    gap: 16px;
-                }
+              .color-box{
+                margin: 0 auto 5px;
+              }
             }
         }
         .color-folder-holder{
