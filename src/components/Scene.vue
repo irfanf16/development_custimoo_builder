@@ -42,8 +42,8 @@ import rgbHex from 'rgb-hex'
     scaleImg.src = "./img/images/scale.png";
     let fabricObj: Record<any, any> = fabric
     fabricObj.Object.prototype.controls.br = new fabricObj.Control({
-      x: 0.6,
-      y: 0.6,
+      x: 0.5,
+      y: 0.5,
       cursorStyle: 'nw-resize',
       actionHandler: fabricObj.controlsUtils.scalingEqually,
       actionName: 'scale',
@@ -63,8 +63,8 @@ import rgbHex from 'rgb-hex'
     let rotationImg = document.createElement('img');
     rotationImg.src = "./img/images/rotate.png";
     fabricObj.Object.prototype.controls.tr = new fabricObj.Control({
-      x: 0.6,
-      y: -0.6,
+      x: 0.5,
+      y: -0.5,
       cursorStyle: 'crosshair',
       actionHandler: fabricObj.controlsUtils.rotationWithSnapping,
       actionName: 'rotate',
@@ -85,8 +85,8 @@ import rgbHex from 'rgb-hex'
     deleteImg.src = "./img/images/remove.png";
 
     fabricObj.Object.prototype.controls.deleteControl = new fabricObj.Control({
-      x: -0.6,
-      y: -0.6,
+      x: -0.5,
+      y: -0.5,
       cursorStyle: 'pointer',
       mouseUpHandler: deleteObject,
       actionName: 'remove',
@@ -779,11 +779,7 @@ export default class Scene extends Vue {
     if(e.target.side == 'back') {
       dimText = this.dimTextBack
     }
-    let scale = 1.6
-    if(e.target.text) {
-      scale = 1.3
-    }
-    this.showDimensions(e, dimText, scale)
+    this.showDimensions(e, dimText)
   }
 
   public addToOtherSide(target: any, side: string) {
@@ -984,7 +980,7 @@ export default class Scene extends Vue {
           if(e.target.side == 'back') {
             dimText = this.dimTextBack
           }
-          this.showDimensions(e, dimText, 1.3)
+          this.showDimensions(e, dimText)
         }
       })
     } else {
@@ -1041,7 +1037,7 @@ export default class Scene extends Vue {
           if(e.target.side == 'back') {
             dimText = this.dimTextBack
           }
-          this.showDimensions(e, dimText, 1.6)
+          this.showDimensions(e, dimText)
         }
       })
     }
@@ -1106,11 +1102,13 @@ export default class Scene extends Vue {
               centeredScaling: true,
               selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
               hasControls: logo.haveControls,
-              hasBorders: logo.haveControls,
+              hasBorders: false,
               evented: logo.haveControls,
               crossOrigin: 'Anonymous',
               globalCompositeOperation: 'source-atop',
-              lockScalingFlip: true
+              lockScalingFlip: true,
+              padding: 15,
+              cornerSize: 30
             })
 
             if (logo.scaleX && logo.scaleY) {
@@ -1167,7 +1165,7 @@ export default class Scene extends Vue {
             }
 
             img.on('selected', (e: Record<any, any>) => {
-              this.showDimensions(e, dimText, 1.6)
+              this.showDimensions(e, dimText)
             })
             canvas.on('selection:cleared', () => {
               dimText.set({
@@ -1180,11 +1178,12 @@ export default class Scene extends Vue {
     })
   }
 
-  public showDimensions(e: any, dimText: fabric.Text, scale: number) {
+  public showDimensions(e: any, dimText: fabric.Text) {
     let object = e.target;
     dimText.set({
       left: object.left,
-      top: object.top + object.height * object.scaleY / scale,
+      top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
+      angle: object.angle,
       text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
       visible: true
     }).bringToFront()
@@ -1216,7 +1215,7 @@ export default class Scene extends Vue {
           centeredScaling: true,
           selectable: this.canvasSelection,
           hasControls: true,
-          hasBorders: true,
+          hasBorders: false,
           evented: true,
           globalCompositeOperation: 'source-atop',
           fontFamily: text.fontFamily,
@@ -1224,7 +1223,9 @@ export default class Scene extends Vue {
           stroke: text.outLineColor,
           strokeWidth: parseInt(text.outLineWidth),
           paintFirst: 'stroke',
-          lockScalingFlip: true
+          lockScalingFlip: true,
+          padding: 15,
+          cornerSize: 30
         })
 
         textBox.scaleToHeight(self.canvasWidth / self.mainCanvasWidth * text.width)
@@ -1281,7 +1282,7 @@ export default class Scene extends Vue {
         }
 
         textBox.on('selected', (e: Record<any, any>) => {
-          this.showDimensions(e, dimText, 1.3)
+          this.showDimensions(e, dimText)
         })
         canvas.on('selection:cleared', () => {
           dimText.set({
