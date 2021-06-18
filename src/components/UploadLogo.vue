@@ -27,7 +27,7 @@
       </div>
     </div>
     <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
-           accept="image/*">
+           accept="image/*,application/postscript,application/pdf">
     <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
       <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or
         laws. You may
@@ -53,11 +53,12 @@
 
 <script lang="ts">
 
-import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
+import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon"
 import ColorThief from 'colorthief'
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<UploadLogo>({
   mounted() {
@@ -76,7 +77,7 @@ import rgbHex from 'rgb-hex'
     }
   }
 })
-export default class UploadLogo extends Vue {
+export default class UploadLogo extends Mixins(ErrorMessages) {
   public status = 'accepted'
   public open_modal !: boolean
   public mounted !: boolean
@@ -189,6 +190,12 @@ export default class UploadLogo extends Vue {
       this.customLogoInit(this.customLogoIndex)
     }
     let img = e.target.files[0]
+
+    if (!this.hasExtension(img.name, ['.jpg','.gif','.png','jpeg','pdf','eps','ai'])) {
+      this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','Error');
+      return false;
+    }
+
     let fd = new FormData()
     let header = {
       headers: {
@@ -220,9 +227,15 @@ export default class UploadLogo extends Vue {
         this.hideModal()
         this.getLogoColors()
       })
-      .catch((e: any) => {
-        console.log(e)
+      .catch((error: any) => {
+        console.log(error)
+        this.showError(error);
       })
+  }
+
+  public hasExtension(fileName : string, exts: any) : boolean {
+
+    return (new RegExp('(' + exts.join('|').replace(/\./g, '\\.') + ')$')).test(fileName);
   }
 
   public getLogoColors() {
