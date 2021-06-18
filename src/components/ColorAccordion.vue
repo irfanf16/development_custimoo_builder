@@ -8,7 +8,8 @@
             <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
             <span class="color-pantone-name">{{ svgElement.pantone }}<br><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
           </span>
-          <span class="accordion-icon"></span></b-button>
+          <span class="accordion-icon"></span>
+        </b-button>
       </b-card-header>
       <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
         <b-card-body>
