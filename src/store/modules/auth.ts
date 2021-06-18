@@ -4,16 +4,34 @@ import { Module } from "vuex";
 const Auth:Module<any, any> = {
   state:{
     token:'',
-    jwtToken:true
+    jwtToken:true,
+    customerToken:'',
+    customer:''
   },
   getters:{
     isAuthenticated: (state: any) => state.token || localStorage.getItem("access_token"),
-    isCustomerAuthenticated: (state: any) => state.jwtToken
+    isCustomerAuthenticated: (state: any) => state.jwtToken,
+    checkCustomerAuthenticated:(state:any) => !!state.customerToken || localStorage.getItem("cToken"),
+    getCustomer:(state:any) => {
+      return state.customer || localStorage.getItem("customer")? JSON.parse(localStorage.getItem("customer") as string) : ''
+    }
   },
   mutations:{
     AUTH_SUCCESS(state: any, payload){
       state.token = payload;
     },
+    SET_CUSTOMER(state:Record<any, any>, payload){
+      localStorage.setItem('cToken', payload.access_token)
+      localStorage.setItem('customer', JSON.stringify(payload.user))
+      state.customerToken = payload.access_token
+      state.customer = payload.user
+    },
+    REMOVE_CUSTOMER(state:any){
+      localStorage.setItem('customer', '')
+      localStorage.setItem('cToken', '')
+      state.customer = ''
+      state.customerToken = ''
+    }
   },
   actions:{
     async AUTH_LOGIN({commit}){
@@ -24,14 +42,16 @@ const Auth:Module<any, any> = {
       })
     },
     async loginCustomer({commit}, payload){
-      console.log(commit)
       const res = await http.post('customer/login', payload);
+      commit('SET_CUSTOMER', res.data)
       return res
     },
     async signUpCustomer({commit}, payload){
-      console.log(commit)
       const res = await http.post('customer/signup', payload);
       return res
+    },
+    async logoutCustomer({commit}){
+      commit('REMOVE_CUSTOMER')
     }
 
   }

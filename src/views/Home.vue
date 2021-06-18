@@ -43,7 +43,9 @@
                 </div>
                 <ul class="preview-header-icons">
                   <li>
-                    <b-button v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
+                    <b-button v-if="!checkCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
+                    {{  checkCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}
+                    <b-button @click="logoutCustomer" v-if="checkCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'user']"/>logout</b-button>
                     <LoginForm />
                   </li>
                   <li><a>
@@ -182,6 +184,12 @@ export default class Home extends Vue {
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
+  get checkCustomerAuthenticated():boolean{
+    return  this.$store.getters.checkCustomerAuthenticated
+  }
+  get customer():Record<any, any>{
+    return  this.$store.getters.getCustomer
+  }
 
   get categories(): [] {
     return this.$store.getters.getCategories
@@ -246,13 +254,14 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: true})
     this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: true})
   }
-
-    public additionalClass(additionalClassTrigger: string) {
-      console.log(additionalClassTrigger)
-      if(additionalClassTrigger){
-        this.extractedcolorclass = "additional-class"
-      }
+  public additionalClass(additionalClassTrigger: string) {
+    if(additionalClassTrigger){
+      this.extractedcolorclass = "additional-class"
     }
+  }
+  public logoutCustomer(){
+    this.$store.dispatch('logoutCustomer');
+  }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {
     if (this.nextPageUrl && !searchCall) {
