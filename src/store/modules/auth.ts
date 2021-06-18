@@ -4,16 +4,14 @@ import { Module } from "vuex";
 const Auth:Module<any, any> = {
   state:{
     token:'',
-    jwtToken:true,
-    customerToken:'',
+    jwtToken:'',
     customer:''
   },
   getters:{
     isAuthenticated: (state: any) => state.token || localStorage.getItem("access_token"),
-    isCustomerAuthenticated: (state: any) => state.jwtToken,
-    checkCustomerAuthenticated:(state:any) => !!state.customerToken || localStorage.getItem("cToken"),
+    isCustomerAuthenticated: (state: any) => !!state.jwtToken || !!localStorage.getItem("jwtToken"),
     getCustomer:(state:any) => {
-      return state.customer || localStorage.getItem("customer")? JSON.parse(localStorage.getItem("customer") as string) : ''
+      return state.customer || localStorage.getItem("customer") ? JSON.parse(localStorage.getItem("customer") as string) : ''
     }
   },
   mutations:{
@@ -21,16 +19,16 @@ const Auth:Module<any, any> = {
       state.token = payload;
     },
     SET_CUSTOMER(state:Record<any, any>, payload){
-      localStorage.setItem('cToken', payload.access_token)
+      localStorage.setItem('jwtToken', payload.access_token)
       localStorage.setItem('customer', JSON.stringify(payload.user))
-      state.customerToken = payload.access_token
+      state.jwtToken = payload.access_token
       state.customer = payload.user
     },
     REMOVE_CUSTOMER(state:any){
       localStorage.setItem('customer', '')
-      localStorage.setItem('cToken', '')
+      localStorage.setItem('jwtToken', '')
       state.customer = ''
-      state.customerToken = ''
+      state.jwtToken = ''
     }
   },
   actions:{

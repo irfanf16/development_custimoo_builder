@@ -166,6 +166,7 @@
         }
         let res = await this.$store.dispatch('loginCustomer', payload)
         if (res.status == 200){
+          await this.$store.dispatch('getLockerRoomColors')
           this.email = ''
           this.password = ''
           this.ref['loginModal'].hide();

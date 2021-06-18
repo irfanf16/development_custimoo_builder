@@ -34,18 +34,18 @@
             <template>
             <div class="customization-preview-process w-100">
               <header class="preview-area-header py-2 py-lg-4">
-                <div class="buttons-preview text-left">
+                <div class="buttons-preview text-left" v-if="isCustomerAuthenticated">
                   <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom @click="getLockerRoomProducts">Locker room</b-button>
-                  <LockerRoomModal v-if="isCustomerAuthenticated"/>
+                  <LockerRoomModal/>
                   <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
                   <AddLockerRoomModal />
                   <b-button variant="outline-secondary" @click="buyNow">Summary</b-button>
                 </div>
                 <ul class="preview-header-icons">
                   <li class="d-flex flex-wrap align-items-center">
-                    <b-button v-if="!checkCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
-                    <strong class="user-name">{{  checkCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                    <b-button @click="logoutCustomer" v-if="checkCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
+                    <b-button v-if="!isCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
+                    <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
+                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     <LoginForm />
                   </li>
                   <li><a>
@@ -144,11 +144,12 @@ import {http} from "@/httpCommon"
       this.getLogoAssociation()
     }
     await this.$store.dispatch('setCategories')
-    await this.$store.dispatch('setJwtToken')
+    // await this.$store.dispatch('setJwtToken')
     await this.$store.dispatch('setBrowserToken')
     await this.$store.dispatch('setIsAssociation', {associate: false})
-    await this.$store.dispatch('getLockerRoomColors')
-
+    if (this.isCustomerAuthenticated){
+      await this.$store.dispatch('getLockerRoomColors')
+    }
   }
 })
 
@@ -184,9 +185,7 @@ export default class Home extends Vue {
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
-  get checkCustomerAuthenticated():boolean{
-    return  this.$store.getters.checkCustomerAuthenticated
-  }
+
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
   }
@@ -228,7 +227,9 @@ export default class Home extends Vue {
     await this.$store.dispatch("getLockers");
 }
   public showAdvanceCustomization() {
-    this.$store.dispatch("getLockers");
+    if (this.isCustomerAuthenticated){
+      this.$store.dispatch("getLockers");
+    }
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
   }
