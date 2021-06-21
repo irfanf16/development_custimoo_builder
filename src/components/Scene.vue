@@ -844,14 +844,14 @@ export default class Scene extends Vue {
           const directionFromRight = this.targetNonTransparent(canvas, model, model_end, centerPoint.y, 'left')
           const outside = direction.left - checkPointX
           const modelSpaceLeft = directionFromRight.left + (width / 2) + 10
-          addLeft = Math.abs(modelSpaceLeft - outside)
+          addLeft = modelSpaceLeft - outside
           addTop = target.top
         } else {
           const direction = this.targetNonTransparent(canvas, model, target.left + width, target.top, 'left')
           const directionFromRight = this.targetNonTransparent(canvas, model, model_start, centerPoint.y, 'right')
           const outside = checkPointX - direction.left
           const modelSpaceRight = directionFromRight.left - (width / 2) - 10
-          addLeft = Math.abs(modelSpaceRight + outside)
+          addLeft = modelSpaceRight + outside
           addTop = target.top
         }
 
@@ -1178,7 +1178,7 @@ export default class Scene extends Vue {
     })
   }
 
-  public showDimensions(e: any, dimText: fabric.Text) {
+  public showDimensions(e: any, dimText: Record<any, any>) {
     let object = e.target;
     dimText.set({
       left: object.left,
