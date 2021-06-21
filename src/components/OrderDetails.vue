@@ -264,7 +264,13 @@ export default class OrderDetails extends Vue {
       $(back2D).removeAttr("data-" + i)
     })
 
-    $("#front-svg").html(front2D.get(0))
+    console.log(front2D.get(0))
+
+    let frontViewPdf = front2D.get(0)
+
+    let frontViewCode = frontViewPdf
+
+    $("#front-svg").html(frontViewCode)
     $("#back-svg").html(back2D.get(0))
     this.logosConversionToBase64()
   }

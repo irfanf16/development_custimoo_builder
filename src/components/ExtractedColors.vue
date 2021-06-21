@@ -159,24 +159,24 @@
         flex: none;
         color: #03142E;
         &.use-btn{
-          background: none;
-          padding: 0 0 2px;
           margin: 0;
           border: none;
-          border-bottom: 2px solid #F7FAFC;
-          color: #808895;
+          color: #fff;
           font-size: 14px;
-          max-width: 35%;
+          max-width: 50%;
+          width: 100%;
           @media only screen and (min-width: 1024px){
             font-size: 13px;
+            max-width: 35%;
           }
           @media only screen and (min-width: 1367px){
-            max-width: 30%;
-            font-size: 14px;
+            max-width: 40%;
+            font-size: 12px;
           }
           &:focus{
             box-shadow: none;
           }
+          &:hover{background: #219F84;}
         }
         &.reset{
           background: none;
