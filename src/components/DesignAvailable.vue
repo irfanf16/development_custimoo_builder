@@ -128,6 +128,9 @@ export default class DesignAvailable extends Vue {
         }
         @media only screen and (min-width: 1024px){
           font-size: 0.6rem;
+          min-height: 40px;
+        }
+        @media only screen and (min-width: 1360px){
           min-height: 50px;
         }
         @media only screen and (min-width: 1700px){
