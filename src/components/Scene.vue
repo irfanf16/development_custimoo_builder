@@ -139,7 +139,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 600}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly mainPreview!: boolean;
   @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
-  @Prop({required: false}) readonly colorGrouping!: boolean;
+  @Prop({required: false}) readonly colorGrouping!: Record<any, any>;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -499,7 +499,7 @@ export default class Scene extends Vue {
         this.colorGrouping[key].forEach((comparePartId: string) => {
           const comparePart = this.svgGroups.filter((svgGroup: Record<any, any>) => { return svgGroup.id == comparePartId.toLowerCase() })
           if(distinguishPart.length && comparePart.length && distinguishPart[0].color == comparePart[0].color) {
-            let changeColor = null
+            let changeColor: Record<any, any> = null
             for(let index in this.productColors) {
               let colors = JSON.parse(this.productColors[index].color_text)
               for (let i in colors) {
