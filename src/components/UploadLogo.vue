@@ -190,8 +190,8 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       this.customLogoInit(this.customLogoIndex)
     }
     let img = e.target.files[0]
-
-    if (!this.hasExtension(img.name, ['.jpg','.gif','.png','jpeg','pdf','eps','ai'])) {
+    let file_extension = img.name.toLowerCase();
+    if (!this.hasExtension(file_extension, ['.jpg','.gif','.png','jpeg','pdf','eps','ai'])) {
       this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','Error');
       return false;
     }
