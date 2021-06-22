@@ -34,9 +34,14 @@
             <template>
             <div class="customization-preview-process w-100">
               <header class="preview-area-header py-2 py-lg-4">
-                <div class="buttons-preview text-left" v-if="isCustomerAuthenticated">
-                  <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom @click="getLockerRoomProducts">Locker room</b-button>
-                  <LockerRoomModal/>
+                <div class="buttons-preview text-left">
+                  <template v-if="isCustomerAuthenticated">
+                    <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
+                  </template>
+                  <template v-else>
+                    <b-button variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                  </template>
+                  <LockerRoomModal />
                   <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
                   <AddLockerRoomModal />
                   <b-button variant="outline-secondary" @click="buyNow">Summary</b-button>

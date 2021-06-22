@@ -164,7 +164,7 @@ export default class LogoPlacementTabs extends Vue {
     let payload = {
       index: index
     }
-    this.tabIndex = this.tabIndex = 1;
+    this.tabIndex = this.tabIndex - 1;
     this.$store.dispatch('deleteCustomLogo', payload)
   }
 
