@@ -146,7 +146,8 @@ const Product:Module<any, any> = {
       console.log(commit)
       await http.post("save/locker/asset", payload).then((res) => {
         if (res.status == 201){
-          alert('logo saved');
+          // alert('logo saved');
+          console.log(commit)
         }
       })
     }

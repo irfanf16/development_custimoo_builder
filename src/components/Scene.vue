@@ -3,9 +3,11 @@
     <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
         <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+        <h2>Front</h2>
       </a>
       <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}">
         <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+        <h2>Back</h2>
       </a>
     </div>
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
@@ -137,6 +139,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 600}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly mainPreview!: boolean;
   @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
+  @Prop({required: false}) readonly colorGrouping!: Record<any, any>;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -409,13 +412,15 @@ export default class Scene extends Vue {
       item.id = item.id.toLowerCase()
       if (groupColors[item.id]) {
         item.set('fill', groupColors[item.id].color);
+        let svgIndex = 0
+        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+          if (svgGroup.id == item.id) {
+            svgIndex = index
+            svgGroup.color = groupColors[item.id].color
+            svgGroup.pantone = groupColors[item.id].pantone
+          }
+        })
         if (this.mainPreview) {
-          let svgIndex = 0
-          this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-            if (svgGroup.id == item.id) {
-              svgIndex = index
-            }
-          })
           this.$store.dispatch('updateSvgGroups', {
             index: svgIndex,
             color: groupColors[item.id].color,
@@ -447,6 +452,7 @@ export default class Scene extends Vue {
       })
       this.backCanvas.renderAll()
     }
+    this.unHideColorGrouping()
   }
 
   public changeDefaultColors (defaultColors: [Record<any, any>]): void {
@@ -483,7 +489,70 @@ export default class Scene extends Vue {
       })
       this.backCanvas.renderAll()
     }
+    this.unHideColorGrouping()
   }
+
+  public unHideColorGrouping() {
+    if(this.colorGrouping) {
+      for(let key in this.colorGrouping) {
+        const distinguishPart = this.svgGroups.filter((svgGroup: Record<any, any>) => { return svgGroup.id == key.toLowerCase() })
+        this.colorGrouping[key].forEach((comparePartId: string) => {
+          const comparePart = this.svgGroups.filter((svgGroup: Record<any, any>) => { return svgGroup.id == comparePartId.toLowerCase() })
+          if(distinguishPart.length && comparePart.length && distinguishPart[0].color == comparePart[0].color) {
+            let changeColor: Record<any, any> = null
+            for(let index in this.productColors) {
+              let colors = JSON.parse(this.productColors[index].color_text)
+              for (let i in colors) {
+                if(colors[i].value != comparePart[0].color) {
+                  changeColor = colors[i]
+                  break
+                }
+              }
+              if(changeColor) {
+                break
+              }
+            }
+            if(!changeColor) {
+              const closestColor = getClosestColor('#000000')
+              changeColor = {value: closestColor.hex, name: closestColor.pantone}
+            }
+            this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+              item.id = item.id.toLowerCase()
+              if (key.toLowerCase() == item.id) {
+                item.set('fill', changeColor.value);
+              }
+            })
+            this.frontCanvas.renderAll()
+            if(this.back) {
+              this.backTexture.getObjects().forEach((item: Record<any, any>) => {
+                item.id = item.id.toLowerCase()
+                if (key.toLowerCase() == item.id) {
+                  item.set('fill', changeColor.value);
+                }
+              })
+              this.backCanvas.renderAll()
+            }
+            let svgIndex = 0
+            this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+              if (svgGroup.id == key.toLowerCase()) {
+                svgIndex = index
+                svgGroup.color = changeColor.value
+                svgGroup.pantone = changeColor.name
+              }
+            })
+            if (this.mainPreview) {
+              this.$store.dispatch('updateSvgGroups', {
+                index: svgIndex,
+                color: changeColor.value,
+                pantone: changeColor.name
+              })
+            }
+          }
+        })
+      }
+    }
+  }
+
 
   public getSvgGroups(): void {
     this.svgGroups = []
@@ -501,12 +570,6 @@ export default class Scene extends Vue {
           const pantoneColor = getClosestColor(item.fill)
           this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone })
         }
-      }else {
-        this.svgGroups.map((existingItem: Record<any, any>) => {
-          if(existingItem.id == item.id){
-            existingItem.count++
-          }
-        })
       }
     })
 
@@ -525,12 +588,6 @@ export default class Scene extends Vue {
             const pantoneColor = getClosestColor(item.fill)
             this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone })
           }
-        }else {
-          this.svgGroups.map((existingItem: Record<any, any>) => {
-            if(existingItem.id == item.id){
-              existingItem.count++
-            }
-          })
         }
       })
     }
@@ -555,7 +612,6 @@ export default class Scene extends Vue {
       this.changeGroupColor(this.lockerGroupColors)
     }
     else if(Object.keys(this.groupColors).length) {
-      console.log(this.groupColors)
       this.changeGroupColor(this.groupColors)
     }
   }
@@ -844,14 +900,14 @@ export default class Scene extends Vue {
           const directionFromRight = this.targetNonTransparent(canvas, model, model_end, centerPoint.y, 'left')
           const outside = direction.left - checkPointX
           const modelSpaceLeft = directionFromRight.left + (width / 2) + 10
-          addLeft = Math.abs(modelSpaceLeft - outside)
+          addLeft = modelSpaceLeft - outside
           addTop = target.top
         } else {
           const direction = this.targetNonTransparent(canvas, model, target.left + width, target.top, 'left')
           const directionFromRight = this.targetNonTransparent(canvas, model, model_start, centerPoint.y, 'right')
           const outside = checkPointX - direction.left
           const modelSpaceRight = directionFromRight.left - (width / 2) - 10
-          addLeft = Math.abs(modelSpaceRight + outside)
+          addLeft = modelSpaceRight + outside
           addTop = target.top
         }
 
@@ -906,7 +962,6 @@ export default class Scene extends Vue {
   }
 
   public targetTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
-    console.log(pointX)
     if(canvas.isTargetTransparent(model, pointX, pointY)) {
       if(moveTo == 'left') {
         pointX = pointX - 1
@@ -1178,7 +1233,7 @@ export default class Scene extends Vue {
     })
   }
 
-  public showDimensions(e: any, dimText: fabric.Text) {
+  public showDimensions(e: any, dimText: Record<any, any>) {
     let object = e.target;
     dimText.set({
       left: object.left,
@@ -1324,6 +1379,13 @@ export default class Scene extends Vue {
       flex: 0 0 100%;
       max-width: 100%;
       &:last-child{display: none;}
+    }
+  }
+}
+.canvas-area-holder{
+  a{
+    h2{
+      display: none;
     }
   }
 }

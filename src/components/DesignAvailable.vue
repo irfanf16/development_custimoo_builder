@@ -1,14 +1,13 @@
 <template>
   <div class="available-designs-section px-3 px-lg-0" v-if="selectedProduct">
-    <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns"
-         :key="design.id">
+    <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id">
       <a @click="changeDesign(index); showDesign()">
         <Scene canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
           :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
            :backTextureUrl="design.back_design? design.back_design.file_url: ''"
            :logos="selectedProduct.productstyles[styleIndex].logo"
            :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
-           :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" />
+           :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)" />
       </a>
       <h3>{{ design.design_name }}</h3>
     </div>
@@ -128,6 +127,9 @@ export default class DesignAvailable extends Vue {
         }
         @media only screen and (min-width: 1024px){
           font-size: 0.6rem;
+          min-height: 40px;
+        }
+        @media only screen and (min-width: 1360px){
           min-height: 50px;
         }
         @media only screen and (min-width: 1700px){

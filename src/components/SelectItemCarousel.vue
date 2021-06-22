@@ -8,10 +8,11 @@
               :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.productstyles[0].front.file_url}"
                    :backTextureUrl="design.back_design? design.back_design.file_url: ''"
                    :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
-                   :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"/>
+                   :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
+                   :colorGrouping="JSON.parse(design.front_design.color_group)"/>
           </div>
         </template>
-        <h3>{{ products[0].product_name }}</h3>
+        <h3 class="text-center">{{ product.display_name }}</h3>
       </a>
     </template>
   </slither-slider>

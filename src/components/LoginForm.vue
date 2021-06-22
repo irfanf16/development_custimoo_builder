@@ -50,6 +50,7 @@
             <b-form-input
               type="text"
               v-model="form.first_name"
+              placeholder="Enter First Name"
               required
             ></b-form-input>
           </b-form-group>
@@ -61,6 +62,7 @@
 
               v-model="form.last_name"
               type="text"
+              placeholder="Enter Last Name"
               required
             ></b-form-input>
           </b-form-group>
@@ -72,6 +74,7 @@
             <b-form-input
               v-model="form.email"
               type="email"
+              placeholder="Enter Email Address"
               required
             ></b-form-input>
           </b-form-group>
@@ -81,6 +84,7 @@
               v-model="form.password"
               id="input-4"
               type="password"
+              placeholder="Enter Password"
               required
             ></b-form-input>
           </b-form-group>
@@ -89,6 +93,7 @@
             <b-form-input
               v-model="form.password_confirmation"
                type="password"
+              placeholder="Confirm Password"
               required
             ></b-form-input>
           </b-form-group>

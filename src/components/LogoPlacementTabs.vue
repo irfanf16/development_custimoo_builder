@@ -8,9 +8,9 @@
         <template #title>
           <span> {{  index == 0 ? 'Team Logo' : 'logo ' + index  }}</span>
           <div v-if="index != 0">
-            <a href="#" class="remove-logo" @click="removeLogoTab(index)">
+            <span class="remove-logo" @click="removeLogoTab(index)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-            </a>
+            </span>
           </div>
         </template>
 
@@ -297,21 +297,23 @@ export default class LogoPlacementTabs extends Vue {
         flex: none;
         color: #03142E;
         &.use-btn{
-          background: none;
-          padding: 0 0 2px;
           margin: 0;
           border: none;
-          border-bottom: 2px solid #F7FAFC;
-          color: #808895;
+          color: #fff;
           font-size: 14px;
-          max-width: 35%;
+          max-width: 50%;
+          width: 100%;
           @media only screen and (min-width: 1024px){
-            font-size: 13px;
+            font-size: 12px;
+            max-width: 35%;
           }
           @media only screen and (min-width: 1367px){
-            max-width: 30%;
-            font-size: 14px;
+            max-width: 40%;
           }
+          &:focus{
+            box-shadow: none;
+          }
+          &:hover{background: #219F84;}
         }
         &.reset{
           background: none;
