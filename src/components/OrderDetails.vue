@@ -164,7 +164,12 @@
       <div class="pricing-are">
         <div class="order-details">
           <div class="order-row">
-            <button class="btn btn-secondary fw-bold w-100 mb-2" @click="buyNow">Summary</button>
+            <template v-if="isCustomerAuthenticated">
+              <button class="btn btn-secondary fw-bold w-100 mb-2" @click="buyNow">Summary</button>
+            </template>
+            <template v-else>
+              <b-button class="btn btn-secondary fw-bold w-100 mb-2" v-b-modal.modal-login>Summary</b-button>
+            </template>
           </div>
           <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>
         </div>
@@ -178,7 +183,8 @@ import {Component, Vue} from 'vue-property-decorator'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 
-@Component<OrderDetails>({})
+@Component<OrderDetails>({
+})
 
 export default class OrderDetails extends Vue {
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL + '/'
@@ -198,6 +204,13 @@ export default class OrderDetails extends Vue {
       sum += parseInt(item.quantity);
     })
     return sum;
+  }
+
+  get isAuthenticated(): boolean {
+    return this.$store.getters.isAuthenticated
+  }
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
   }
 
   public buyNow() {

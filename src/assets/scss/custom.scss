@@ -1213,6 +1213,24 @@ button{
           }
         }
     }
+    .canvas-area-holder{
+        a{
+            &:hover{
+                text-decoration: none;
+                color: #03142E;
+            }
+            h2{
+                display: block;
+                font-weight: 600;
+                font-size: 0.8rem;
+                margin-top: 15px;
+                @media only screen and (min-width: 768px){
+                    font-size: 1rem;
+                    margin-top: 20px;
+                }
+            }
+        }
+    }
 }
 .upload-logo-disclaimer{
     .modal-header{

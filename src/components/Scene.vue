@@ -3,9 +3,11 @@
     <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
         <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+        <h2>Front</h2>
       </a>
       <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}">
         <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+        <h2>Back</h2>
       </a>
     </div>
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
@@ -1324,6 +1326,13 @@ export default class Scene extends Vue {
       flex: 0 0 100%;
       max-width: 100%;
       &:last-child{display: none;}
+    }
+  }
+}
+.canvas-area-holder{
+  a{
+    h2{
+      display: none;
     }
   }
 }
