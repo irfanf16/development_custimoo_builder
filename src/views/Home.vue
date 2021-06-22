@@ -36,15 +36,25 @@
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
                   <template v-if="isCustomerAuthenticated">
-                    <b-button variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
+                    <b-button :key="'lockerRoom'" variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
                   </template>
                   <template v-else>
-                    <b-button variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                    <b-button :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                   </template>
                   <LockerRoomModal />
-                  <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
+                  <template v-if="isCustomerAuthenticated">
+                    <b-button :key="'savetolocker'" variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
+                  </template>
+                  <template v-else>
+                    <b-button :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
+                  </template>
                   <AddLockerRoomModal />
-                  <b-button variant="outline-secondary" @click="buyNow">Summary</b-button>
+                  <template v-if="isCustomerAuthenticated">
+                    <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
+                  </template>
+                  <template v-else>
+                    <b-button :key="'loginmodalsummary'" variant="outline-secondary" v-b-modal.modal-login>Summary</b-button>
+                  </template>
                 </div>
                 <ul class="preview-header-icons">
                   <li class="d-flex flex-wrap align-items-center">
@@ -91,7 +101,12 @@
                   <b-button v-if="tabIndex == 0" @click="showBasicCustomization()" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                   <b-button v-else @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                   <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="tabIndex <= 3">Next</b-button>
-                  <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="tabIndex > 3">Summary</b-button>
+                  <template v-if="isCustomerAuthenticated">
+                    <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="tabIndex > 3">Summary</b-button>
+                  </template>
+                  <template v-else>
+                    <b-button v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="tabIndex > 3">Summary</b-button>
+                  </template>
                 </div>
               </template>
             </div>
@@ -259,6 +274,7 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
     this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: true})
     this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: true})
+    this.extractedcolorclass = ""
   }
   public additionalClass(additionalClassTrigger: string) {
     if(additionalClassTrigger){
@@ -594,7 +610,7 @@ export default class Home extends Vue {
       margin: 0 0 0 15px;
       @media only screen and (min-width: 768px){margin: 0 0 0 12px;}
       .btn{
-        margin: 0;
+        margin: 0 0 0 10px;
         background: none;
         padding: 0;
         border: none;
@@ -619,12 +635,8 @@ export default class Home extends Vue {
       &:first-child{margin: 0;}
     }
     .user-name{
-      margin: 0 15px 0 0;
       font-size: 0.8rem;
       font-weight: 600;
-      @media only screen and (min-width: 768px){
-        margin: 0 10px 0 0;
-      }
     }
   }
   .buttons-preview{
