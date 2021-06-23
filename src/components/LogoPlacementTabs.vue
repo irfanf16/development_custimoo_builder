@@ -223,6 +223,7 @@ export default class LogoPlacementTabs extends Vue {
         })
       })
     }
+    console.log(this.imageColors);
   }
 
   public rollbackPreviousColors (): void {

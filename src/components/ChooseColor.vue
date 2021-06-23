@@ -90,13 +90,14 @@ export default class ChooseColor extends Vue {
       defaultColors.reduce(shuffle)
     }
     defaultColors.forEach((defaultColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.name })
+      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.pantone })
     })
+    console.log(defaultColors);
   }
 
   public rollbackPreviousColors (): void {
     this.previousDefaultColors.forEach((defaultColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.name })
+      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.pantone })
     })
     this.previousDefaultColors = []
   }
