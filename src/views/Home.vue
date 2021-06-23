@@ -36,7 +36,7 @@
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
                   <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'lockerRoom'" variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
+                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts" variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
                   </template>
                   <template v-else>
                     <b-button :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
