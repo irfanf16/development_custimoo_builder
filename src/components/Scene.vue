@@ -499,7 +499,7 @@ export default class Scene extends Vue {
         this.colorGrouping[key].forEach((comparePartId: string) => {
           const comparePart = this.svgGroups.filter((svgGroup: Record<any, any>) => { return svgGroup.id == comparePartId.toLowerCase() })
           if(distinguishPart.length && comparePart.length && distinguishPart[0].color == comparePart[0].color) {
-            let changeColor: Record<any, any> = null
+            let changeColor: Record<any, any> = {}
             for(let index in this.productColors) {
               let colors = JSON.parse(this.productColors[index].color_text)
               for (let i in colors) {
@@ -508,11 +508,11 @@ export default class Scene extends Vue {
                   break
                 }
               }
-              if(changeColor) {
+              if(Object.keys(changeColor).length) {
                 break
               }
             }
-            if(!changeColor) {
+            if(!Object.keys(changeColor).length) {
               const closestColor = getClosestColor('#000000')
               changeColor = {value: closestColor.hex, name: closestColor.pantone}
             }
@@ -992,7 +992,7 @@ export default class Scene extends Vue {
             })
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
             const width = e.target.width * e.target.scaleX;
-            const height = e.target.width * e.target.scaleY;
+            const height = e.target.height * e.target.scaleY;
             const outLineWidth = e.target.strokeWidth * e.target.scaleX
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
@@ -1055,7 +1055,7 @@ export default class Scene extends Vue {
             })
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
             const width = e.target.width * e.target.scaleX;
-            const height = e.target.width * e.target.scaleY;
+            const height = e.target.height * e.target.scaleY;
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'scaleX',
@@ -1280,10 +1280,11 @@ export default class Scene extends Vue {
           paintFirst: 'stroke',
           lockScalingFlip: true,
           padding: 15,
-          cornerSize: 30
+          cornerSize: 30,
+          fontSize: self.canvasHeight / self.mainCanvasHeight * text.width
         })
 
-        textBox.scaleToHeight(self.canvasWidth / self.mainCanvasWidth * text.width)
+        textBox.set('height', self.canvasHeight / self.mainCanvasHeight * text.width)
         if(text.scaleX && text.scaleY) {
           textBox.scaleX = self.canvasWidth / self.mainCanvasWidth * text.scaleX
           textBox.scaleY = self.canvasHeight / self.mainCanvasHeight * text.scaleY
