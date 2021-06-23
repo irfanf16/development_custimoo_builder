@@ -10,7 +10,7 @@
         </div>
       </a>
     </div>
-    <div id="color-picker" v-if="colorPickerActive" >
+    <div id="color-picker" v-if="colorPickerActive">
       <transition name="list">
         <div class="color-holder">
           <div class="color-header">
@@ -139,7 +139,6 @@ export default class ChooseColor extends Vue {
 
 .choose-color {
   a {
-    display: block;
     width: 130px;
     height: 90px;
     display: flex;
