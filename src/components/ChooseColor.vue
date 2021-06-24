@@ -10,7 +10,7 @@
         </div>
       </a>
     </div>
-    <div id="color-picker" v-if="colorPickerActive" >
+    <div id="color-picker" v-if="colorPickerActive">
       <transition name="list">
         <div class="color-holder">
           <div class="color-header">
@@ -90,13 +90,14 @@ export default class ChooseColor extends Vue {
       defaultColors.reduce(shuffle)
     }
     defaultColors.forEach((defaultColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.name })
+      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.pantone })
     })
+    console.log(defaultColors);
   }
 
   public rollbackPreviousColors (): void {
     this.previousDefaultColors.forEach((defaultColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.name })
+      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.pantone })
     })
     this.previousDefaultColors = []
   }
@@ -138,7 +139,6 @@ export default class ChooseColor extends Vue {
 
 .choose-color {
   a {
-    display: block;
     width: 130px;
     height: 90px;
     display: flex;

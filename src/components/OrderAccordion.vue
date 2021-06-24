@@ -83,7 +83,7 @@
             <div class="logo-area d-flex flex-wrap align-items-center border p-3" v-for="(logo, index) in customLogos"
                  :key="index">
               <div class="image-holder border mr-3">
-                <img :src="apiBaseUrl + logo.url" alt="logo" width="80px" height="80px"/>
+                <img :src="apiBaseUrl + logo.url" alt="logo" width="80px" />
               </div>
               <div class="text-left">
                 <span class="d-block mb-1">Logo Placement</span>

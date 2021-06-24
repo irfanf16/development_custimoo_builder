@@ -61,6 +61,8 @@ export default {
     width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 0.8rem;
+    margin-top: 5px;
   }
 }
 </style>
