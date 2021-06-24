@@ -281,8 +281,9 @@ export default class Home extends Vue {
       this.extractedcolorclass = "additional-class"
     }
   }
-  public logoutCustomer(){
-    this.$store.dispatch('logoutCustomer');
+  public async logoutCustomer(){
+    await this.$store.dispatch('logoutCustomer');
+    console.log(this.isCustomerAuthenticated)
   }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {
