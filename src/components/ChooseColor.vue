@@ -26,12 +26,20 @@
         </div>
       </transition>
     </div>
-    <div class="shuffle-colors d-none d-lg-flex flex-wrap justify-content-between align-items-center">
-      <button v-if="defaultColors.filter((color) => { return color.color }).length > 1" @click="shuffleColors()" class="btn btn-secondary">Shuffle</button>
-      <button v-if="previousDefaultColors.length" @click="rollbackPreviousColors()" class="redo-btn">
-        <font-awesome-icon :icon="['fas', 'redo-alt']"/>
-      </button>
-    </div>
+    <template v-if="manageComponents.DefaultColorShuffleBtn">
+      <div class="shuffle-colors d-flex flex-wrap justify-content-center justify-content-lg-between align-items-center">
+        <div class="d-lg-none">
+          <div v-if="defaultColors.length == 1" class="color-box" :style="{background: defaultColors[0].color}"></div>
+          <div v-if="defaultColors.length == 2" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[0].color +' 0% 50%, ' + defaultColors[1].color +' 50% 100%)'}"></div>
+          <div v-if="defaultColors.length == 3" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[0].color +' 0% 33.33%, ' + defaultColors[1].color +' 33.33% 66.66%, ' + defaultColors[2].color +' 66.66% 100%)'}"></div>
+          <div v-if="defaultColors.length == 4" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[1].color +' 0% 25%, ' + defaultColors[2].color +' 25% 50%, ' + defaultColors[3].color +' 50% 75%, ' + defaultColors[0].color +' 75% 100%)'}"></div>
+        </div>
+        <button v-if="defaultColors.filter((color) => { return color.color }).length > 1" @click="shuffleColors()" class="btn btn-secondary">Shuffle</button>
+        <button v-if="previousDefaultColors.length" @click="rollbackPreviousColors()" class="redo-btn d-none d-lg-block">
+          <font-awesome-icon :icon="['fas', 'redo-alt']"/>
+        </button>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -59,6 +67,10 @@ export default class ChooseColor extends Vue {
 
   get defaultColors() : [Record<any, any>] {
     return this.$store.getters.getDefaultColors
+  }
+
+  get manageComponents(): Record<any, any> {
+    return this.$store.getters.getManageComponents
   }
 
   public showColor(index: number): void {
@@ -120,9 +132,13 @@ export default class ChooseColor extends Vue {
 
   .shuffle-colors {
     .btn {
-      flex: 0 0 82%;
-      max-width: 82%;
+      flex: 0 0 36%;
+      max-width: 36%;
       width: 100%;
+      @media only screen and (min-width: 992px){
+        flex: 0 0 82%;
+        max-width: 82%;
+      }
       @media only screen and (min-width: 1170px) {
         flex: 0 0 86%;
         max-width: 86%;

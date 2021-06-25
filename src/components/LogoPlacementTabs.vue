@@ -37,7 +37,12 @@
                   <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
                 </div>
               </div>
-              <b-button v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold" v-b-modal.modal-center-savelogomodal>Save Logo</b-button>
+              <template v-if="isCustomerAuthenticated">
+                <b-button :key="'saveLogoModal'" v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold" v-b-modal.modal-center-savelogomodal>Save Logo</b-button>
+              </template>
+              <template v-else>
+                <b-button :key="'saveLogoLogin'" class="btn btn-secondary w-100 fw-bold" v-b-modal.modal-login>Save Logo</b-button>
+              </template>
               <SaveLogoModal :logoIndex="index" />
             </div>
             <div class="logo-placement-area extracted-color-area" v-if="index == 0">
@@ -55,7 +60,12 @@
                 <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
                 <b-button @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
               </div>
-              <button v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal @click="callRooms">Save Color</button>
+              <template v-if="isCustomerAuthenticated">
+                <button :key="'saveLogoColorModal'" v-if="customLogos[0] && customLogos[0].url" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal @click="callRooms">Save Color</button>
+              </template>
+              <template v-else>
+                <b-button :key="'saveLogoColorLogin'" class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-login>Save Color</b-button>
+              </template>
               <SaveColorModal />
             </div>
           </template>
