@@ -9,7 +9,7 @@ const Auth:Module<any, any> = {
   },
   getters:{
     isAuthenticated: (state: any) => state.token || localStorage.getItem("access_token"),
-    isCustomerAuthenticated: (state: any) => state.jwtToken || localStorage.getItem("jwtToken"),
+    isCustomerAuthenticated: (state: any) => !!state.jwtToken || !!localStorage.getItem("jwtToken"),
     getCustomer:(state:any) => {
       return state.customer || localStorage.getItem("customer") ? JSON.parse(localStorage.getItem("customer") as string) : ''
     }
@@ -27,7 +27,6 @@ const Auth:Module<any, any> = {
     REMOVE_CUSTOMER(state:any){
       localStorage.setItem('customer', '')
       localStorage.setItem('jwtToken', '')
-      console.log(localStorage.getItem("jwtToken"))
       state.customer = ''
       state.jwtToken = ''
     }
