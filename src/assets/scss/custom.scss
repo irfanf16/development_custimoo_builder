@@ -951,6 +951,7 @@ button{
                 font-size: 12px;
                 font-weight: 600;
                 padding: 0.5rem 1rem;
+                white-space: nowrap;
                 &.active{
                     background: #219F84;
                     border-color: #219F84;
