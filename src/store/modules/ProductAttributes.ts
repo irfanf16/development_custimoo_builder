@@ -91,6 +91,12 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.defaultColors[color.index], 'pantone', color.pantone)
       }
     },
+
+    removeDefaultColor (state: Record<any, any>, removeIndex: number) {
+      Vue.set(state.defaultColors[removeIndex], 'color', '')
+      Vue.set(state.defaultColors[removeIndex], 'pantone', '')
+    },
+
     SET_GROUP_COLORS (state: Record<any, any>, groupColors: Record<any, any>) {
       if(groupColors) {
         state.groupColors = groupColors
@@ -253,6 +259,10 @@ const ProductAttributes:Module<any, any> = {
     },
     setDefaultColor ({commit}, payload) {
       commit('defaultColor', payload)
+    },
+    removeDefaultColor ({commit}, payload) {
+      console.log("payload",payload);
+      commit('removeDefaultColor', payload)
     },
     setGroupColors ({commit}, payload) {
       commit('SET_GROUP_COLORS', payload)

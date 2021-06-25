@@ -7,6 +7,7 @@
           <div class="color-circle chosen-colors-section"
                :style="{ background : chooseColor.color? chooseColor.color : ' url(' + colorImage + ') no-repeat 50% 50% / 14px' }"></div>
           <strong class="chosen-colors-section">{{ chooseColor.name }}</strong>
+          <span v-if="chooseColor.color" class="remove-default-color" @click="removeSingleColor(index)"><font-awesome-icon :icon="['fas', 'times']"/></span>
         </div>
       </a>
     </div>
@@ -29,10 +30,10 @@
     <template v-if="manageComponents.DefaultColorShuffleBtn">
       <div class="shuffle-colors d-flex flex-wrap justify-content-center justify-content-lg-between align-items-center">
         <div class="d-lg-none">
-          <div v-if="defaultColors.length == 1" class="color-box" :style="{background: defaultColors[0].color}"></div>
-          <div v-if="defaultColors.length == 2" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[0].color +' 0% 50%, ' + defaultColors[1].color +' 50% 100%)'}"></div>
-          <div v-if="defaultColors.length == 3" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[0].color +' 0% 33.33%, ' + defaultColors[1].color +' 33.33% 66.66%, ' + defaultColors[2].color +' 66.66% 100%)'}"></div>
-          <div v-if="defaultColors.length == 4" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[1].color +' 0% 25%, ' + defaultColors[2].color +' 25% 50%, ' + defaultColors[3].color +' 50% 75%, ' + defaultColors[0].color +' 75% 100%)'}"></div>
+          <div v-if="defaultColors.filter((color) => { return color.color }).length == 1" class="color-box" :style="{background: defaultColors[0].color}"></div>
+          <div v-if="defaultColors.filter((color) => { return color.color }).length == 2" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[0].color +' 0% 50%, ' + defaultColors[1].color +' 50% 100%)'}"></div>
+          <div v-if="defaultColors.filter((color) => { return color.color }).length == 3" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[0].color +' 0% 33.33%, ' + defaultColors[1].color +' 33.33% 66.66%, ' + defaultColors[2].color +' 66.66% 100%)'}"></div>
+          <div v-if="defaultColors.filter((color) => { return color.color }).length == 4" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[1].color +' 0% 25%, ' + defaultColors[2].color +' 25% 50%, ' + defaultColors[3].color +' 50% 75%, ' + defaultColors[0].color +' 75% 100%)'}"></div>
         </div>
         <button v-if="defaultColors.filter((color) => { return color.color }).length > 1" @click="shuffleColors()" class="btn btn-secondary">Shuffle</button>
         <button v-if="previousDefaultColors.length" @click="rollbackPreviousColors()" class="redo-btn d-none d-lg-block">
@@ -87,11 +88,19 @@ export default class ChooseColor extends Vue {
     this.$store.dispatch('setDefaultColor', { index: this.selectColorIndex, color: color.value, pantone: color.name })
   }
 
+  public removeSingleColor(index: Record<any, any>): void {
+    this.$store.dispatch('setGroupColors', {})
+    this.$store.dispatch('removeDefaultColor', index )
+  }
+
   public shuffleColors(): void {
     this.previousDefaultColors = JSON.parse(JSON.stringify(this.defaultColors)).filter((defaultColor: Record<any, any>) => {return defaultColor.color})
     let defaultColors = JSON.parse(JSON.stringify(this.defaultColors)).filter((defaultColor: Record<any, any>) => {return defaultColor.color})
+    console.log(defaultColors)
     let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
       if (currentIndex !== 1) return previousValue;
+
+      console.log(currentIndex)
 
       array.sort(() => Math.random() - 0.5)
 
@@ -104,7 +113,6 @@ export default class ChooseColor extends Vue {
     defaultColors.forEach((defaultColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.color, pantone: defaultColor.pantone })
     })
-    console.log(defaultColors);
   }
 
   public rollbackPreviousColors (): void {
@@ -167,6 +175,7 @@ export default class ChooseColor extends Vue {
     font-weight: 700;
     font-size: 12px;
     background: #fff;
+    position: relative;
     @media only screen and (min-width: 375px){
       width: 140px;
     }
@@ -221,6 +230,23 @@ export default class ChooseColor extends Vue {
         border: 6px solid #fff;
       }
     }
+  }
+  .remove-default-color{
+    position: absolute;
+    right: -1px;
+    top: -1px;
+    background: #f00;
+    color: #fff;
+    width: 18px;
+    height: 18px;
+    border-radius: 0 6px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7rem;
+    z-index: 1;
+    cursor: pointer;
   }
 }
 
