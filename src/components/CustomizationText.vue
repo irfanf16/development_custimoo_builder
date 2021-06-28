@@ -5,7 +5,7 @@
       <b-form>
         <b-form-input
         @click="isHidden = !isHidden"
-          class="mb-2 mr-sm-2 mb-sm- 0"
+          class="mb-2 mr-sm-2 mb-sm-0"
           placeholder="Type Here"
           v-model="customTexts[customTextIndex].text"
         ></b-form-input>

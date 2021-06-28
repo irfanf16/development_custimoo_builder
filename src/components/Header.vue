@@ -4,7 +4,7 @@
             <b-row class="align-items-center py-4">
                 <b-col cols="6" lg="2">
                     <div class="logo">
-                        <a href="/"><img src="@/assets/images/logo.svg" alt="Shirt Customizer" /></a>
+                        <img src="@/assets/images/logo.svg" alt="Shirt Customizer" />
                     </div>
                 </b-col>
                 <b-col cols="6" lg="10">
