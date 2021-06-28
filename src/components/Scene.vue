@@ -842,7 +842,7 @@ export default class Scene extends Vue {
     if(side == 'front' || (this.back && side == 'back')) {
       let model = this.frontModel
       let canvas = this.frontCanvas
-      if (side == 'back') {
+      if (side == 'back' && this.back) {
         model = this.backModel
         canvas = this.backCanvas
       }
@@ -917,7 +917,9 @@ export default class Scene extends Vue {
           if (side == 'back') {
             this.frontCanvas.renderAll()
           } else {
-            this.backCanvas.renderAll()
+            if(this.back) {
+              this.backCanvas.renderAll()
+            }
           }
         } else {
           let objectAdd = fabric.util.object.clone(target)
@@ -931,8 +933,10 @@ export default class Scene extends Vue {
             this.frontCanvas.add(objectAdd)
             this.frontModel.bringToFront()
           } else {
-            this.backCanvas.add(objectAdd)
-            this.backModel.bringToFront()
+            if(this.back) {
+              this.backCanvas.add(objectAdd)
+              this.backModel.bringToFront()
+            }
           }
         }
       } else {
@@ -940,7 +944,9 @@ export default class Scene extends Vue {
           if (side == 'back') {
             this.frontCanvas.remove(otherSideObjects[addIndex])
           } else {
-            this.backCanvas.remove(otherSideObjects[addIndex])
+            if(this.back) {
+              this.backCanvas.remove(otherSideObjects[addIndex])
+            }
           }
           otherSideObjects.splice(addIndex, 1)
         }
