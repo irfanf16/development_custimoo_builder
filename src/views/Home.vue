@@ -3,8 +3,8 @@
     <b-container fluid>
       <b-row>
         <template v-if="manageComponents.BasicCustomization">
-          <b-col cols="12" lg="3" class="text-left home-color-area">
-            <div v-if="manageComponents.ChooseColor" class="py-2 py-md-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
+          <b-col cols="12" lg="3" class="text-left home-color-area" :class="extractedcolorclass">
+            <div class="py-2 py-md-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
               <ChooseColor :colors="colors"/>
             </div>
             <template v-if="manageComponents.ExtractedColors">
@@ -300,6 +300,7 @@ export default class Home extends Vue {
         this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
         this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
         this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'DefaultColorShuffleBtn', value: true})
     }
   }
 
@@ -308,6 +309,7 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: true})
     this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
     this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: true})
+    this.$store.dispatch('setManageComponents', {index: 'DefaultColorShuffleBtn', value: false})
     this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: true})
     this.extractedcolorclass = ""
   }
@@ -472,6 +474,7 @@ export default class Home extends Vue {
   }
 
   public isActive = false;
+
   public myFilter() {
     this.isActive = !this.isActive
   }

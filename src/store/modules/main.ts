@@ -10,6 +10,7 @@ const Main:Module<any, any> = {
       ChooseInterest: mobileScreen,
       CustomizationPreview: !mobileScreen,
       ItemToCustomize: !mobileScreen,
+      DefaultColorShuffleBtn: !mobileScreen,
       BasicCustomization: true,
       AdvanceCustomization: false,
       ExtractedColors: true,

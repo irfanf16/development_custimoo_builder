@@ -951,6 +951,7 @@ button{
                 font-size: 12px;
                 font-weight: 600;
                 padding: 0.5rem 1rem;
+                white-space: nowrap;
                 &.active{
                     background: #219F84;
                     border-color: #219F84;
@@ -2096,6 +2097,32 @@ button{
             }
             .logo-placement-holder{justify-content: center;}
         }
+    }
+    &.additional-class{
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        z-index: 3;
+        h2{
+            @media only screen and (max-width: 1023px){display: none;}
+        }
+        .choose-color{
+            @media only screen and (max-width: 1023px){display: none !important;}
+        }
+        .choose-color-holder{
+            @media only screen and (max-width: 1023px){padding-block: 1rem;}
+            .color-box{
+                @media only screen and (max-width: 1023px){
+                    width: 46px;
+                    height: 46px;
+                    margin: 0 15px 0 0;
+                    border-radius: 50%;
+                }
+            }
+        }
+        .mt-4{margin-top: 0 !important;}
     }
 }
 

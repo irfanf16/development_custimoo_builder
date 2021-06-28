@@ -43,7 +43,8 @@ export default class ChooseInterest extends Vue {
       this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: false})
       this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
       this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
-      this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: true})
+      this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'DefaultColorShuffleBtn', value: true})
     }
   }
 }
@@ -92,4 +93,5 @@ export default class ChooseInterest extends Vue {
     }
   }
 }
+
 </style>
