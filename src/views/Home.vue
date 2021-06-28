@@ -63,7 +63,7 @@
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     <LoginForm />
                   </li>
-                  <li><a>
+                  <li><a @click="shareProduct">
                     <font-awesome-icon :icon="['fas', 'share-alt']"/>
                   </a></li>
                   <li><a href="#">
@@ -155,8 +155,31 @@ import {http} from "@/httpCommon"
   },
   async mounted() {
     if (this.isAuthenticated) {
-      this.retrieveProducts()
-      this.getFillColors()
+      await this.retrieveProducts()
+      await this.getFillColors()
+    }
+    if (this.$route.params.name) {
+      setTimeout(async () => {
+        let url = 'share/' + this.$route.params.product + '/' + this.$route.params.name
+        let res = await this.$store.dispatch('getShareProductDetails', url)
+        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.product_id);
+        // let ind = this.products.findIndex(x => x.product_id == res.product_id)
+        let ind = this.products.length -1
+        await this.$store.dispatch('setSelectedIndex', { selectedIndex: ind});
+        let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.style_id);
+        await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+        await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(res.custom_logos));
+        await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(res.text));
+        await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.defaultcolors));
+        await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.groupcolors));
+        this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
+          if (item.id == res.design_id){
+            Vue.set(item, 'design_show', 1)
+          }else{
+            Vue.set(item, 'design_show', 0)
+          }
+        });
+        }, 5000)
     }
     let isAssociation = JSON.parse(localStorage.getItem('isAssociation') as string) as boolean
     this.jwtToken = localStorage.getItem('jwtToken') as string
@@ -234,6 +257,18 @@ export default class Home extends Vue {
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
   }
+  get customTexts(): [Record<any, any>] {
+    return this.$store.getters.getCustomTexts
+  }
+  get logoColors():[]{
+    return  this.$store.getters.getLogosColors;
+  }
+  get defaultColors() : [Record<any, any>] {
+    return this.$store.getters.getDefaultColors
+  }
+  get groupColors() : [Record<any, any>] {
+    return this.$store.getters.getGroupColors
+  }
 
   getFillColors() {
     const url = '/product/colors?default_color=1'
@@ -309,6 +344,25 @@ export default class Home extends Vue {
         console.log(e)
       });
     }
+  }
+  public shareProduct(){
+    const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+      return item.design_show
+    })
+    let locker = {
+      customer_id: this.customer ? this.customer.id : '',
+      type: 'product',
+      product_id: this.selectedProduct.product_id,
+      style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+      design_id: currentDesign[0].id,
+      custom_logos: this.customLogos,
+      text: this.customTexts,
+      colors: this.logoColors,
+      defaultcolors: this.defaultColors,
+      groupcolors: this.groupColors
+    }
+    let res = this.$store.dispatch('shareProduct', locker)
+    console.log(res)
   }
 
   public searchProducts() {
