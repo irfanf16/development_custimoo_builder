@@ -150,6 +150,16 @@ const Product:Module<any, any> = {
           console.log(commit)
         }
       })
+    },
+    async shareProduct({commit}, payload){
+      const res = await http.post('share/product', payload)
+      return res
+    },
+    async getShareProductDetails({commit}, payload){
+     const res =  await http.post('shared/details', {url: payload}).then((res) =>{
+        return res.data;
+      })
+      return res
     }
 
   }
