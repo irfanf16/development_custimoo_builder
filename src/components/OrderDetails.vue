@@ -261,11 +261,12 @@ export default class OrderDetails extends Vue {
 
     let front = new fabric.Canvas(this.$refs.pdfFront as HTMLCanvasElement)
     let back = new fabric.Canvas(this.$refs.pdfBack as HTMLCanvasElement)
-    front.loadFromJSON(JSON.stringify(frontCanvas))
-    back.loadFromJSON(JSON.stringify(backCanvas))
+    let emptyCallback = () => { console }
+    front.loadFromJSON(JSON.stringify(frontCanvas), emptyCallback, emptyCallback)
+    back.loadFromJSON(JSON.stringify(backCanvas), emptyCallback, emptyCallback)
 
-    let front2dCtx = front.getContext("2d")
-    let back2dCtx = back.getContext("2d")
+    let front2dCtx = front.getContext()
+    let back2dCtx = back.getContext()
     let front2D = $(front2dCtx.canvas)
     let back2D = $(back2dCtx.canvas)
 
