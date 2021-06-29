@@ -21,7 +21,7 @@
                                           <a>
                                             <Scene :measurement-ratio="product.design.measurement_ratio"
                                               :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
-                                                :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
+                                                :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
                                                  :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />
                                           </a>
                                           <ul class="product-icons">
@@ -29,16 +29,16 @@
                                                     <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                                                 </li>
                                                 <li class="d-none d-lg-block">
-                                                    <a @click="shareProduct(product.id)" :id="'share'+ind"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
+                                                    <a  :id="'share'+ind"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                                                     <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom">
                                                         <div class="share-holder">
                                                             <h3>Copy link and Share</h3>
                                                             <div class="share-form">
-                                                                <b-form inline>
-                                                                    <b-form-input
-                                                                    placeholder="https://www.aha.io/roadmapping/guide/product-management/what-is-a-product"
+                                                              <b-form inline>
+                                                                    <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ? product.shared_url : ''"
+
                                                                     ></b-form-input>
-                                                                    <b-button variant="primary">Copy Link</b-button>
+                                                                    <b-button variant="primary" @click="shareProduct(product, ind, i) ">Copy Link</b-button>
                                                                 </b-form>
                                                             </div>
                                                         </div>
@@ -136,6 +136,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
       public ref = this.$refs as Record<any, any>
       public colors : [] = []
       public tabIndex = 0
+      public url = ''
       get getLockerProducts():Record<any, any>{
         return this.$store.getters.getLockerProducts;
       }
@@ -186,15 +187,36 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
           this.ref['locker-modal'].hide();
        }
       }
-      public async shareProduct(id:number){
+      public async shareProduct(product:Record<any, any>, ind:number, lockerIndex:number){
         try {
-          let payload = { type: 'locker', id:id , customer_id :  this.customer ? this.customer.id : '', product_id: this.selectedProduct.product_id}
-          let res = await this.$store.dispatch('shareProduct', payload);
-          console.log(res)
+          let payload = { type: 'locker', id: product.id , customer_id :  this.customer ? this.customer.id : '', product_id: this.selectedProduct.product_id}
+          let shared_url = "";
+          if (product.shared_url){
+            shared_url = product.shared_url;
+          }else{
+            let res = await this.$store.dispatch('shareProduct', payload);
+            shared_url = res.data.url;
+            Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url',  shared_url)
+          }
+
+          let testingCodeToCopy = document.querySelector('#copy-'+ind)  as Record<any, any>
+          testingCodeToCopy.setAttribute('value', shared_url)
+          testingCodeToCopy.select()
+          try {
+            let successful = document.execCommand('copy');
+            let msg = successful ? 'successful' : 'unsuccessful';
+            alert('Testing code was copied ' + msg);
+          } catch (err) {
+            alert('Oops, unable to copy');
+          }
+          // testingCodeToCopy.setAttribute('type', 'hidden')
+          window.getSelection().removeAllRanges()
         }catch (error){
           console.log(error)
         }
       }
+
+
       public async deleteProduct(i:number, ind:number, id:number){
         await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
       }
@@ -203,6 +225,20 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
           await this.$store.dispatch('deleteRoom', {id: id, index: index});
           this.showToast('Room Deleted', 'SUCCESS');
         }
+      }
+      public copyUrl(ind:number){
+        let testingCodeToCopy = document.querySelector('#copy-'+ind)  as Record<any, any>
+          testingCodeToCopy.setAttribute('type', 'text')
+          testingCodeToCopy.select()
+          try {
+            let successful = document.execCommand('copy');
+            let msg = successful ? 'successful' : 'unsuccessful';
+            alert('Testing code was copied ' + msg);
+          } catch (err) {
+            alert('Oops, unable to copy');
+          }
+          testingCodeToCopy.setAttribute('type', 'hidden')
+          window.getSelection().removeAllRanges()
       }
       public fetchColors(i:number, ind:number){
         this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
