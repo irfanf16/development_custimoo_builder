@@ -1046,59 +1046,61 @@ export default class Scene extends Vue {
       })
     } else {
       this.customLogos.forEach((logo, index) => {
-        let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
-        if (logoUrl == e.target._element.src) {
-          if (e.action == 'drag') {
+        if(logo) {
+          let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+          if (logoUrl == e.target._element.src) {
+            if (e.action == 'drag') {
+              self.$store.dispatch('updateCustomLogoAttribute', {
+                index: index,
+                attribute: 'x_axis',
+                value: e.target.left
+              })
+              self.$store.dispatch('updateCustomLogoAttribute', {
+                index: index,
+                attribute: 'y_axis',
+                value: e.target.top
+              })
+            } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
+              const width = e.target.width * e.target.scaleX;
+              const height = e.target.height * e.target.scaleY;
+              self.$store.dispatch('updateCustomLogoAttribute', {
+                index: index,
+                attribute: 'scaleX',
+                value: e.target.scaleX
+              })
+              self.$store.dispatch('updateCustomLogoAttribute', {
+                index: index,
+                attribute: 'originalWidth',
+                value: Math.floor(width * this.measurementRatio)
+              })
+              self.$store.dispatch('updateCustomLogoAttribute', {
+                index: index,
+                attribute: 'scaleY',
+                value: e.target.scaleY
+              })
+              self.$store.dispatch('updateCustomLogoAttribute', {
+                index: index,
+                attribute: 'originalHeight',
+                value: Math.floor(height * this.measurementRatio)
+              })
+            } else if (e.action == 'rotate') {
+              self.$store.dispatch('updateCustomLogoAttribute', {
+                index: index,
+                attribute: 'rotation',
+                value: e.target.angle
+              })
+            }
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
-              attribute: 'x_axis',
-              value: e.target.left
+              attribute: 'action',
+              value: e.action
             })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'y_axis',
-              value: e.target.top
-            })
-          } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-            const width = e.target.width * e.target.scaleX;
-            const height = e.target.height * e.target.scaleY;
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'scaleX',
-              value: e.target.scaleX
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'originalWidth',
-              value: Math.floor(width * this.measurementRatio)
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'scaleY',
-              value: e.target.scaleY
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'originalHeight',
-              value: Math.floor(height * this.measurementRatio)
-            })
-          } else if (e.action == 'rotate') {
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'rotation',
-              value: e.target.angle
-            })
+            let dimText = this.dimTextFront
+            if (e.target.side == 'back') {
+              dimText = this.dimTextBack
+            }
+            this.showDimensions(e, dimText)
           }
-          self.$store.dispatch('updateCustomLogoAttribute', {
-            index: index,
-            attribute: 'action',
-            value: e.action
-          })
-          let dimText = this.dimTextFront
-          if(e.target.side == 'back') {
-            dimText = this.dimTextBack
-          }
-          this.showDimensions(e, dimText)
         }
       })
     }
