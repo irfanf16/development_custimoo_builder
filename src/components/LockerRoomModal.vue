@@ -35,10 +35,10 @@
                                                             <h3>Copy link and Share</h3>
                                                             <div class="share-form">
                                                               <b-form inline>
-                                                                    <b-form-input :id="'copy-'+ind" :value="product.url && product.url.shared_url !== 'undefined'  ? product.url.shared_url : ''"
+                                                                    <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ? product.shared_url : ''"
 
                                                                     ></b-form-input>
-                                                                    <b-button variant="primary" @click="shareProduct(product, ind) ">Copy Link</b-button>
+                                                                    <b-button variant="primary" @click="shareProduct(product, ind, i) ">Copy Link</b-button>
                                                                 </b-form>
                                                             </div>
                                                         </div>
@@ -187,16 +187,18 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
           this.ref['locker-modal'].hide();
        }
       }
-      public async shareProduct(product:Record<any, any>, ind:number){
+      public async shareProduct(product:Record<any, any>, ind:number, lockerIndex:number){
         try {
           let payload = { type: 'locker', id: product.id , customer_id :  this.customer ? this.customer.id : '', product_id: this.selectedProduct.product_id}
           let shared_url = "";
-          if (product.url && product.url.shared_url){
-            shared_url = product.url.shared_url;
+          if (product.shared_url){
+            shared_url = product.shared_url;
           }else{
             let res = await this.$store.dispatch('shareProduct', payload);
             shared_url = res.data.url;
+            Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url',  shared_url)
           }
+
           let testingCodeToCopy = document.querySelector('#copy-'+ind)  as Record<any, any>
           testingCodeToCopy.setAttribute('value', shared_url)
           testingCodeToCopy.select()
