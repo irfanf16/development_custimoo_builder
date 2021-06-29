@@ -605,7 +605,10 @@ export default class Scene extends Vue {
       }
     }
     else if(this.defaultColors.length) {
-      this.changeDefaultColors(this.defaultColors)
+      let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
+      if(defaultColors.length) {
+        this.changeDefaultColors(defaultColors)
+      }
     }
 
     if(Object.keys(this.lockerGroupColors).length) {
