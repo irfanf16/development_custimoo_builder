@@ -21,7 +21,7 @@
                                           <a>
                                             <Scene :measurement-ratio="product.design.measurement_ratio"
                                               :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
-                                                :backTextureUrl="product.design.back_design? product.design.front_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
+                                                :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
                                                  :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />
                                           </a>
                                           <ul class="product-icons">
