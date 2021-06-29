@@ -2,15 +2,6 @@
   <div>
     <div class="d-none">
       <div id="production-pdf-html">
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=1000">
-          <meta name="viewport"
-                content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui"/>
-          <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        </head>
-        <body style="background: #fff;">
         <div id="wrapper">
           <div id="header">
             <div class="year">2021</div>
@@ -140,8 +131,6 @@
             </div>
           </div>
         </div>
-        </body>
-        </html>
       </div>
     </div>
 
@@ -175,11 +164,19 @@
         </div>
       </div>
     </div>
+
+    <div class="d-none">
+      <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
+      </canvas>
+      <canvas width="600" height="600" ref="pdfBack" style="text-align: center; display: block">
+      </canvas>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import {Component, Vue} from 'vue-property-decorator'
+import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 
@@ -260,11 +257,19 @@ export default class OrderDetails extends Vue {
 
   public generateProductionPdf(e: any) {
     let frontCanvas = this.productionSVGs.front
-    let front2dCtx = frontCanvas.getContext("2d")
     let backCanvas = this.productionSVGs.back
-    let back2dCtx = backCanvas.getContext("2d")
+
+    let front = new fabric.Canvas(this.$refs.pdfFront as HTMLCanvasElement)
+    let back = new fabric.Canvas(this.$refs.pdfBack as HTMLCanvasElement)
+    let emptyCallback = () => { console }
+    front.loadFromJSON(JSON.stringify(frontCanvas), emptyCallback, emptyCallback)
+    back.loadFromJSON(JSON.stringify(backCanvas), emptyCallback, emptyCallback)
+
+    let front2dCtx = front.getContext()
+    let back2dCtx = back.getContext()
     let front2D = $(front2dCtx.canvas)
     let back2D = $(back2dCtx.canvas)
+
     $(front2D).attr("id", "front-pdf")
     $(back2D).attr("id", "back-pdf")
     $(front2D).attr("class", "canvas")
@@ -277,14 +282,12 @@ export default class OrderDetails extends Vue {
       $(back2D).removeAttr("data-" + i)
     })
 
-    console.log(front2D.get(0))
-
     let frontViewPdf = front2D.get(0)
+    let backViewPdf = back2D.get(0)
 
-    let frontViewCode = frontViewPdf
-
-    $("#front-svg").html(frontViewCode)
-    $("#back-svg").html(back2D.get(0))
+    console.log(frontViewPdf)
+    $("#front-svg").html(frontViewPdf)
+    $("#back-svg").html(backViewPdf)
     this.logosConversionToBase64()
   }
 

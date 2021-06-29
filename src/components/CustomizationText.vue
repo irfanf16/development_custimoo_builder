@@ -2,23 +2,21 @@
   <div class="customization-text-area">
     <div class="px-3 pt-3 p-lg-4">
       <h2 class="fw-bold mb-2 fz-18">Player {{ customTexts[customTextIndex].type | capitalize }}</h2>
-      <b-form>
-        <b-form-input
+      <b-form-input
         @click="isHidden = !isHidden"
-          class="mb-2 mr-sm-2 mb-sm- 0"
-          placeholder="Type Here"
-          v-model="customTexts[customTextIndex].text"
-        ></b-form-input>
-        <h4 class="mt-3 mb-2 fz-16">Font Type</h4>
-        <div class="font-type-area">
-          <div class="type-block">
-            <b-form-select v-model="customTexts[customTextIndex].fontFamily" :options="fontOptions" ></b-form-select>
-          </div>
-          <div class="arc-block">
-            <b-form-select v-model="customTexts[customTextIndex].side" :options="['front', 'back']"></b-form-select>
-          </div>
+        class="mb-2 mr-sm-2 mb-sm-0"
+        placeholder="Type Here"
+        v-model="customTexts[customTextIndex].text"
+      ></b-form-input>
+      <h4 class="mt-3 mb-2 fz-16">Font Type</h4>
+      <div class="font-type-area">
+        <div class="type-block">
+          <b-form-select v-model="customTexts[customTextIndex].fontFamily" :options="fontOptions" ></b-form-select>
         </div>
-      </b-form>
+        <div class="arc-block">
+          <b-form-select v-model="customTexts[customTextIndex].side" :options="['front', 'back']"></b-form-select>
+        </div>
+      </div>
       <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
       <div class="text-color-holder" :class="{ active: customTexts[customTextIndex].selectColor }">
         <a @click="showColor('fill', customTextIndex)">
@@ -140,11 +138,11 @@ export default class CustomizationText extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .outline-slider-area{
-    #range-2{
-      &::-webkit-slider-thumb{
-        background: #189076;
-      }
+.outline-slider-area{
+  #range-2{
+    &::-webkit-slider-thumb{
+      background: #189076;
     }
   }
+}
 </style>
