@@ -95,6 +95,10 @@ import SaveColorModal from "@/components/SaveColorModal.vue"
     if(this.numberOfLogosAllowed > 0) {
       this.allowedLogosLimit = this.numberOfLogosAllowed
     }
+    this.$root.$on('changeLogoTabIndex', (index:number) => {
+      // here you need to use the arrow function
+      this.tabIndex = index;
+    })
   }
 })
 export default class LogoPlacementTabs extends Vue {
@@ -138,6 +142,9 @@ export default class LogoPlacementTabs extends Vue {
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
+
+
+
 
   public addTab(index: number){
     if(this.numberOfLogos < this.allowedLogosLimit) {

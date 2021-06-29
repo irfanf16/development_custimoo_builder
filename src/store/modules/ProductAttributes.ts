@@ -16,7 +16,8 @@ const ProductAttributes:Module<any, any> = {
     currentColorApplied: 'group',
     rosterDetails: [],
     productionSVGs: {},
-    lockerColors:[]
+    lockerColors:[],
+    logoTabIndex: 0
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
@@ -57,6 +58,11 @@ const ProductAttributes:Module<any, any> = {
       if(delCustomLogo){
         Vue.set(state.customLogos, delCustomLogo.index, null)
       }
+    },
+    setLogoTabMutation(state: Record<any, any>, logoIndex:number) {
+      console.log('logoIndex',logoIndex);
+      state.logoTabIndex = logoIndex;
+      // Vue.set(state.logoTabIndex, logoIndex, logoIndex)
     },
     isAssociation(state: Record<any, any>, isAssociation: Record<any, any>) {
       state.isAssociation = isAssociation.associate
@@ -193,6 +199,8 @@ const ProductAttributes:Module<any, any> = {
     getCustomLogos: state => {
       return state.customLogos
     },
+    getActiveLogoIndex: (state: any) => state.logoTabIndex,
+
     getIsAssociation: state => {
       return state.isAssociation
     },
@@ -245,6 +253,11 @@ const ProductAttributes:Module<any, any> = {
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
     },
+
+    setLogoTab({commit}, payload){
+      commit('setLogoTabMutation', payload)
+    },
+
     setIsAssociation({commit}, payload){
         commit('isAssociation', payload)
     },
