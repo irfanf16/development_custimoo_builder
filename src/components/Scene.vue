@@ -31,7 +31,8 @@ import rgbHex from 'rgb-hex'
         evented: false,
         lockMovementX: true,
         lockMovementY: true,
-        visible: false
+        visible: false,
+        fontFamily: 'Avenir, Helvetica, Arial, sans-serif'
       })
     }
     const self = this
@@ -86,6 +87,7 @@ import rgbHex from 'rgb-hex'
     let deleteImg = document.createElement('img');
     deleteImg.src = "./img/images/remove.png";
 
+    //custom
     fabricObj.Object.prototype.controls.deleteControl = new fabricObj.Control({
       x: -0.5,
       y: -0.5,
@@ -95,6 +97,8 @@ import rgbHex from 'rgb-hex'
       render: renderIconDelete,
       withConnection: true
     })
+
+
 
     function renderIconDelete(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
       let size = 30;
@@ -106,6 +110,7 @@ import rgbHex from 'rgb-hex'
     }
 
     function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
+      alert();
       let target = transform.target;
       let canvas = target.canvas;
       if('textIndex' in target) {
@@ -161,7 +166,8 @@ export default class Scene extends Vue {
     evented: false,
     lockMovementX: true,
     lockMovementY: true,
-    visible: false
+    visible: false,
+    fontFamily: 'Avenir, Helvetica, Arial, sans-serif'
   })
   public dimTextBack!: fabric.Text
   public showLoader = true
@@ -553,7 +559,6 @@ export default class Scene extends Vue {
     }
   }
 
-
   public getSvgGroups(): void {
     this.svgGroups = []
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
@@ -568,7 +573,7 @@ export default class Scene extends Vue {
             item.fill = rgbHex(item.fill)
           }
           const pantoneColor = getClosestColor(item.fill)
-          this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone })
+          this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
         }
       }
     })
@@ -1138,6 +1143,7 @@ export default class Scene extends Vue {
   }
 
   public addLogos(logos: [Record<any, any>], logoIndex: null|number = null) {
+    //custom debug
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
       if(logo && logo.url) {
@@ -1208,6 +1214,7 @@ export default class Scene extends Vue {
               side: logo.side
             })
             canvas.add(img)
+            console.log('img',img);
             model.bringToFront()
             canvas.renderAll()
 
@@ -1231,6 +1238,10 @@ export default class Scene extends Vue {
             }
 
             img.on('selected', (e: Record<any, any>) => {
+              console.log("event",e);
+              console.log("logoIndex",logoIndex)
+              //this.$store.dispatch('setLogoTab', logoIndex)
+              this.$root.$emit('changeLogoTabIndex', logoIndex);
               this.showDimensions(e, dimText)
             })
             canvas.on('selection:cleared', () => {

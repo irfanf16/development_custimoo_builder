@@ -16,7 +16,8 @@ const ProductAttributes:Module<any, any> = {
     currentColorApplied: 'group',
     rosterDetails: [],
     productionSVGs: {},
-    lockerColors:[]
+    lockerColors:[],
+    logoTabIndex: 0
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
@@ -58,6 +59,10 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.customLogos, delCustomLogo.index, null)
       }
     },
+    setLogoTabMutation(state: Record<any, any>, logoIndex:number) {
+      state.logoTabIndex = logoIndex;
+      // Vue.set(state.logoTabIndex, logoIndex, logoIndex)
+    },
     isAssociation(state: Record<any, any>, isAssociation: Record<any, any>) {
       state.isAssociation = isAssociation.associate
       localStorage.setItem('isAssociation', isAssociation.associate)
@@ -89,12 +94,14 @@ const ProductAttributes:Module<any, any> = {
       if(color) {
         Vue.set(state.defaultColors[color.index], 'color', color.color)
         Vue.set(state.defaultColors[color.index], 'pantone', color.pantone)
+        Vue.set(state.defaultColors[color.index], 'name', color.name)
       }
     },
 
     removeDefaultColor (state: Record<any, any>, removeIndex: number) {
       Vue.set(state.defaultColors[removeIndex], 'color', '')
       Vue.set(state.defaultColors[removeIndex], 'pantone', '')
+      Vue.set(state.defaultColors[removeIndex], 'name', '')
     },
 
     SET_GROUP_COLORS (state: Record<any, any>, groupColors: Record<any, any>) {
@@ -104,7 +111,7 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_GROUP_COLORS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
-        Vue.set(state.groupColors, color.index, { color: color.color, pantone: color.pantone })
+        Vue.set(state.groupColors, color.index, { color: color.color, pantone: color.pantone, name: '' })
       }
     },
     SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
@@ -119,6 +126,7 @@ const ProductAttributes:Module<any, any> = {
         }else {
           Vue.set(state.svgGroups[color.index], 'color', color.color)
           Vue.set(state.svgGroups[color.index], 'pantone', color.pantone)
+          Vue.set(state.svgGroups[color.index], 'name', '')
         }
       }
     },
@@ -193,6 +201,8 @@ const ProductAttributes:Module<any, any> = {
     getCustomLogos: state => {
       return state.customLogos
     },
+    getActiveLogoIndex: (state: any) => state.logoTabIndex,
+
     getIsAssociation: state => {
       return state.isAssociation
     },
@@ -245,6 +255,11 @@ const ProductAttributes:Module<any, any> = {
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
     },
+
+    setLogoTab({commit}, payload){
+      commit('setLogoTabMutation', payload)
+    },
+
     setIsAssociation({commit}, payload){
         commit('isAssociation', payload)
     },
