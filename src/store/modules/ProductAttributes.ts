@@ -95,12 +95,14 @@ const ProductAttributes:Module<any, any> = {
       if(color) {
         Vue.set(state.defaultColors[color.index], 'color', color.color)
         Vue.set(state.defaultColors[color.index], 'pantone', color.pantone)
+        Vue.set(state.defaultColors[color.index], 'name', color.name)
       }
     },
 
     removeDefaultColor (state: Record<any, any>, removeIndex: number) {
       Vue.set(state.defaultColors[removeIndex], 'color', '')
       Vue.set(state.defaultColors[removeIndex], 'pantone', '')
+      Vue.set(state.defaultColors[removeIndex], 'name', '')
     },
 
     SET_GROUP_COLORS (state: Record<any, any>, groupColors: Record<any, any>) {
@@ -110,7 +112,7 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_GROUP_COLORS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
-        Vue.set(state.groupColors, color.index, { color: color.color, pantone: color.pantone })
+        Vue.set(state.groupColors, color.index, { color: color.color, pantone: color.pantone, name: '' })
       }
     },
     SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
@@ -125,6 +127,7 @@ const ProductAttributes:Module<any, any> = {
         }else {
           Vue.set(state.svgGroups[color.index], 'color', color.color)
           Vue.set(state.svgGroups[color.index], 'pantone', color.pantone)
+          Vue.set(state.svgGroups[color.index], 'name', '')
         }
       }
     },

@@ -1,9 +1,9 @@
 <template>
   <div class="item-to-customize text-left py-lg-5">
     <h2 class="fw-bold p-3 p-lg-0 mb-lg-4 fz-18">Select Item to Customize</h2>
-    <div class="customization-nav-area px-3 px-lg-0">
-      <Search :categoryListing="categories" @search="searchProduct"/>
-    </div>
+<!--    <div class="customization-nav-area px-3 px-lg-0">-->
+<!--      <Search :categoryListing="categories" @search="searchProduct"/>-->
+<!--    </div>-->
     <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>
     <DesignAvailable />
