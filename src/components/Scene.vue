@@ -31,7 +31,8 @@ import rgbHex from 'rgb-hex'
         evented: false,
         lockMovementX: true,
         lockMovementY: true,
-        visible: false
+        visible: false,
+        fontFamily: 'Avenir, Helvetica, Arial, sans-serif'
       })
     }
     const self = this
@@ -165,7 +166,8 @@ export default class Scene extends Vue {
     evented: false,
     lockMovementX: true,
     lockMovementY: true,
-    visible: false
+    visible: false,
+    fontFamily: 'Avenir, Helvetica, Arial, sans-serif'
   })
   public dimTextBack!: fabric.Text
   public showLoader = true
@@ -556,7 +558,6 @@ export default class Scene extends Vue {
       }
     }
   }
-
 
   public getSvgGroups(): void {
     this.svgGroups = []
