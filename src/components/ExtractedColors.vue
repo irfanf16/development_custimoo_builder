@@ -53,7 +53,6 @@
                 this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
             }
             }
-            console.log(this.imageColors)
         }
 
         shuffleLogoColors() {

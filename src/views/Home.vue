@@ -66,7 +66,7 @@
                   <li><a @click="shareProduct">
                     <font-awesome-icon :icon="['fas', 'share-alt']"/>
                   </a></li>
-                  <li><a href="#" @click="this.resetPreview()">
+                  <li><a>
                     <font-awesome-icon :icon="['fas', 'redo-alt']"/>
                   </a></li>
                 </ul>
@@ -479,9 +479,9 @@ export default class Home extends Vue {
     this.isActive = !this.isActive
   }
 
-  public resetPreview() {
-    this.$store.dispatch('setDefaultColor', [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}])
-  }
+  // public resetPreview() {
+  //   this.$store.dispatch('defaultColors', [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}])
+  // }
 
 }
 </script>
