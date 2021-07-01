@@ -60,7 +60,6 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     setLogoTabMutation(state: Record<any, any>, logoIndex:number) {
-      console.log('logoIndex',logoIndex);
       state.logoTabIndex = logoIndex;
       // Vue.set(state.logoTabIndex, logoIndex, logoIndex)
     },
