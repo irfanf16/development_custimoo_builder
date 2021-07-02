@@ -276,7 +276,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       console.log(color)
       let pantoneColor = getClosestColor(color)
       console.log(JSON.parse(JSON.stringify(pantoneColor)))
-      this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone})
+      this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
     this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
   }

@@ -32,7 +32,7 @@ import rgbHex from 'rgb-hex'
         lockMovementX: true,
         lockMovementY: true,
         visible: false,
-        fontFamily: 'Avenir, Helvetica, Arial, sans-serif'
+        fontFamily: 'Ubuntu'
       })
     }
     const self = this
@@ -166,7 +166,7 @@ export default class Scene extends Vue {
     lockMovementX: true,
     lockMovementY: true,
     visible: false,
-    fontFamily: 'Avenir, Helvetica, Arial, sans-serif'
+    fontFamily: 'Ubuntu'
   })
   public dimTextBack!: fabric.Text
   public showLoader = true
@@ -572,7 +572,7 @@ export default class Scene extends Vue {
             item.fill = rgbHex(item.fill)
           }
           const pantoneColor = getClosestColor(item.fill)
-          this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone })
+          this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
         }
       }
     })
