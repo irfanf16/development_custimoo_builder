@@ -179,6 +179,8 @@ import {Component, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
+import {httpl} from "@/httpCommonLocal"
+
 
 @Component<OrderDetails>({
 })
@@ -292,6 +294,22 @@ export default class OrderDetails extends Vue {
   }
 
   public htmlPdfGenerator() {
+
+
+    let style_index = this.$store.getters.getCurrentStyleIndex;
+    let selected_product = this.$store.getters.getSelectedProduct;
+    const product_id = selected_product.product_id;
+    let product_style = selected_product.productstyles[style_index];
+    const product_style_id = product_style.id;
+    let selectedDesign = product_style.productdesigns.filter(design => design.design_show == 1);
+    const product_design_id = selectedDesign[0].id;
+
+    var order_payload = {
+      product_id,
+      product_style_id,
+      product_design_id
+    }
+
     setTimeout(() => {
       const element = document.getElementById("production-pdf-html")
       const opt = {
@@ -315,9 +333,11 @@ export default class OrderDetails extends Vue {
         .from(element)
         .toPdf()
         .get("pdf")
-        .then()
-        .catch((e: any) => {
-          console.error("PDF Generation Error", e)
+        .output('datauristring')
+        .then(function(pdfAsString) {
+          order_payload['order_file'] = pdfAsString;
+          const res = httpl.post('orders/create', order_payload);
+          console.log(res);
         })
         .save()
     }, 1000)
