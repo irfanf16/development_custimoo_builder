@@ -48,9 +48,9 @@
             this.$store.dispatch('setGroupColors', {})
             for (let i = 0; i < 4; i++) {
             if(this.imageColors[i]) {
-                this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone })
+                this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone, name: this.imageColors[i].name })
             } else {
-                this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '' })
+                this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
             }
             }
         }

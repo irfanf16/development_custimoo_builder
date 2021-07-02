@@ -20,7 +20,7 @@
                                             <div class="image-holder">
                                           <a>
                                             <Scene :measurement-ratio="product.design.measurement_ratio"
-                                              :front="{textureUrl: apiBaseUrl+'/'+ product.design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ product.style.front.file_url}"
+                                              :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: storageUrl+product.style.front.file_url}"
                                                 :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
                                                  :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />
                                           </a>
@@ -59,7 +59,7 @@
                                 <b-tab title="Assets" class="assets-file">
                                   <template v-for="(logo, inda) in room.logos">
                                     <div :key="inda" class="assets-logo-block">
-                                      <img :src="apiBaseUrl+'/'+logo.logo_url "/>
+                                      <img :src="storageUrl+logo.logo_url "/>
                                       <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
                                     </div>
                                   </template>
@@ -132,7 +132,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
         }
     })
     export default class CustomizationPreviewProcess extends Mixins(ErrorMessages) {
-      public apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+      private storageUrl = process.env.VUE_APP_STORAGE_URL
       public ref = this.$refs as Record<any, any>
       public colors : [] = []
       public tabIndex = 0

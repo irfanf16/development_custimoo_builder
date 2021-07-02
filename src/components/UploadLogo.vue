@@ -8,7 +8,7 @@
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
         <div v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
-          <img ref="logoImageExtract" crossorigin="anonymous" :src="apiBaseUrl+'/'+customLogos[0].url" width="100%"/>
+          <img ref="logoImageExtract" crossorigin="anonymous" :src="storageUrl+customLogos[0].url" width="100%"/>
         </div>
         <div v-else>
           <div class="icon-holder">
@@ -17,7 +17,7 @@
           Upload Logo
           <img ref="logoImageExtract" v-if="customLogos[0] && customLogos[0].url"
                :style="{visibility : manageComponents.BasicCustomization? 'visible' : 'hidden'}"
-               crossorigin="anonymous" :src="apiBaseUrl+'/'+customLogos[0].url" width="0" height="0"/>
+               crossorigin="anonymous" :src="storageUrl+customLogos[0].url" width="0" height="0"/>
         </div>
       </div>
       <div class="upload-logo-content">
@@ -88,7 +88,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   private jwtToken !: string
-  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
 
@@ -276,7 +276,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       console.log(color)
       let pantoneColor = getClosestColor(color)
       console.log(JSON.parse(JSON.stringify(pantoneColor)))
-      this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone})
+      this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
     this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
   }

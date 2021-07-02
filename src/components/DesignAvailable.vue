@@ -3,7 +3,7 @@
     <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id">
       <a @click="changeDesign(index); showDesign()">
         <Scene canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
-          :front="{textureUrl: apiBaseUrl+'/'+ design.front_design.file_url, modelUrl: apiBaseUrl+'/'+ selectedProduct.productstyles[styleIndex].front.file_url}"
+          :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].front.file_url}"
            :backTextureUrl="design.back_design? design.back_design.file_url: ''"
            :logos="selectedProduct.productstyles[styleIndex].logo"
            :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
@@ -25,7 +25,7 @@ import Scene from '@/components/Scene.vue'
 })
 
 export default class DesignAvailable extends Vue {
-  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
   }

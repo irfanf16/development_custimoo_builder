@@ -6,7 +6,7 @@
           <span class="text">{{ svgElement.id | capitalize }}</span>
           <span class="color">
             <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
-            <span class="color-pantone-name">{{ svgElement.pantone }}<br><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
+            <span class="color-pantone-name">{{ svgElement.pantone }}<br><span style="text-transform: uppercase;">{{ svgElement.name }}</span><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
           </span>
           <span class="accordion-icon"></span>
         </b-button>
@@ -95,12 +95,13 @@ export default class ColorAccordion extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
-    this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectAccordionIndex].id, color: color.value, pantone: color.name  })
+    this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectAccordionIndex].id, color: color.value, pantone: color.name })
     if(color.colorName) {
-      this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: color.colorName })
+      this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: color.colorName, name: '' })
     } else {
-      this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: '' })
+      this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: '', name: '' })
     }
+    console.log(this.svgGroups)
   }
 
   public changeColor(color: Record<any, any>) {

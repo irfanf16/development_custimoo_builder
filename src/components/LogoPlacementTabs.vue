@@ -21,7 +21,7 @@
                 <div class="logo-holder">
                   <template v-if="customLogos[index].url != ''">
                     <div class="additional-holder">
-                      <img ref="logoImg" :src="apiBaseUrl+'/'+customLogos[index].url" alt="logo Shirt"/>
+                      <img ref="logoImg" :src="storageUrl+customLogos[index].url" alt="logo Shirt"/>
                     </div>
                     <a href="#" class="remove-img" @click="deleteLogo(index)">
                       <font-awesome-icon :icon="['fas', 'trash-alt']"/>
@@ -117,7 +117,7 @@ export default class LogoPlacementTabs extends Vue {
 
   public numberOfLogos = 1
 
-  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
   public selected = 'front'
   public tabIndex = 0
   public options = [
