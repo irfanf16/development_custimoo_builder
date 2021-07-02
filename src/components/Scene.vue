@@ -110,7 +110,6 @@ import rgbHex from 'rgb-hex'
     }
 
     function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
-      alert();
       let target = transform.target;
       let canvas = target.canvas;
       if('textIndex' in target) {
@@ -149,7 +148,7 @@ export default class Scene extends Vue {
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
   private backTexture !: any
-  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
   private logoObjects: any[] = []
   private customLogoObjects: any[] = []
   private customTextObjects: any[] = []
@@ -211,7 +210,7 @@ export default class Scene extends Vue {
     if(this.mounted && this.logoAllowed) {
       const self = this
       newVal.forEach((logo: Record<any, any>, index: number) => {
-        let logoUrl = logo? (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20') : ''
+        let logoUrl = logo? (this.storageUrl + logo.url).trim().split(' ').join('%20') : ''
         if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element.src != logoUrl))){
           self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
           if (self.backCanvas) {
@@ -669,7 +668,7 @@ export default class Scene extends Vue {
     this.addTexture(ImageData.textureUrl, side)
 
     if(this.backTextureUrl) {
-      this.addTexture(this.apiBaseUrl + '/' + this.backTextureUrl, 'back')
+      this.addTexture(this.storageUrl + this.backTextureUrl, 'back')
     }
 
     const self = this
@@ -936,6 +935,8 @@ export default class Scene extends Vue {
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
+          let angle = objectAdd.angle + 180
+          objectAdd.angle = ((angle % 360) + 360) % 360
           otherSideObjects[addIndex] = objectAdd
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)
@@ -1055,7 +1056,7 @@ export default class Scene extends Vue {
     } else {
       this.customLogos.forEach((logo, index) => {
         if(logo) {
-          let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+          let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
           if (logoUrl == e.target._element.src) {
             if (e.action == 'drag') {
               self.$store.dispatch('updateCustomLogoAttribute', {
@@ -1164,7 +1165,7 @@ export default class Scene extends Vue {
         }
         if (logo.side == 'front' || (logo.side == 'back' && self.back)) {
           logo.haveControls = Boolean(logo.haveControls)
-          let logoUrl = (self.apiBaseUrl + '/' + logo.url).trim().split(' ').join('%20')
+          let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
           fabric.Image.fromURL(logoUrl, (img: any) => {
             img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
             img.set({
@@ -1260,7 +1261,6 @@ export default class Scene extends Vue {
     dimText.set({
       left: object.left,
       top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-      angle: object.angle,
       text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
       visible: true
     }).bringToFront()

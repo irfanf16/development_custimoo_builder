@@ -13,7 +13,7 @@
                     <div class="collar-designs">
                       <template v-for="(style, i) in selectedProduct.productstyles">
                         <template v-if="selectedProduct.productstyles > 1">
-                          <b-button :key="i"  v-if="model.model_styles.includes(style.id)" variant="outline-light" @click="changeStyleIndex(i)"><img :src="apiBaseUrl+'/'+style.front.file_url " /></b-button>
+                          <b-button :key="i"  v-if="model.model_styles.includes(style.id)" variant="outline-light" @click="changeStyleIndex(i)"><img :src="storageUrl+style.front.file_url " /></b-button>
                         </template>
                       </template>
                     </div>
@@ -39,7 +39,7 @@ import {http} from "@/httpCommon";
     })
 
     export default class CollarStyle extends Vue {
-      private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+      private storageUrl = process.env.VUE_APP_STORAGE_URL
       @Prop({required: true}) productModels!: any
 
       get selectedProduct(): Record<any, any>{

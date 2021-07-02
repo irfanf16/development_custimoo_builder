@@ -9,7 +9,7 @@
         <strong>All</strong></b-button>
       <b-button v-for="(category, index) in categories" :key="index"
                 @click="searchProducts(category.id, 'category_id')">
-        <div class="icon-holder"><img :src="apiBaseUrl+'/'+category.image_url" width="22px"></div>
+        <div class="icon-holder"><img :src="storageUrl+category.image_url" width="22px"></div>
         <strong>{{ category.category_name.toUpperCase() }}</strong></b-button>
     </div> -->
     <button @click="showDesign()" class="btn btn-secondary w-100 fw-bold">Show Me Design</button>
@@ -24,7 +24,7 @@ import manageComponents from '@/store/modules/main'
 export default class ChooseInterest extends Vue {
   @Prop({required: true}) categories!: any
 
-  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   public extractedcolorclass = ""
 

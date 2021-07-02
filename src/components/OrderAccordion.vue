@@ -57,7 +57,7 @@
                  v-for="(model, index)  in productModels" :key="index">
               <div class="image-holder"
                    v-if="model.model_styles.includes(selectedProduct.productstyles[styleIndex].id)">
-                <img :src="apiBaseUrl+selectedProduct.productstyles[styleIndex].front.file_url " alt="Collar"/>
+                <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front.file_url " alt="Collar"/>
               </div>
               <div class="collar-details">
                 <strong>{{ model.model_name }}</strong>
@@ -83,7 +83,7 @@
             <div class="logo-area d-flex flex-wrap align-items-center border p-3" v-for="(logo, index) in customLogos"
                  :key="index">
               <div class="image-holder border mr-3">
-                <img :src="apiBaseUrl + logo.url" alt="logo" width="80px" />
+                <img :src="storageUrl+logo.url" alt="logo" width="80px" />
               </div>
               <div class="text-left">
                 <span class="d-block mb-1">Logo Placement</span>
@@ -102,7 +102,7 @@ import {Component, Vue} from 'vue-property-decorator'
 
 @Component<OrderAccordion>({})
 export default class OrderAccordion extends Vue {
-  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL + '/'
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails

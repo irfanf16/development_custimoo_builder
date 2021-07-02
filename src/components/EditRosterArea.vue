@@ -72,7 +72,6 @@ export default class EditRosterArea extends Vue {
   public designsIndex = 0
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
-  public apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public ref = this.$refs as Record<any, any>
 
   get rosterDetails(): [Record<any, any>] {
