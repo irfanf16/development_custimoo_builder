@@ -177,7 +177,7 @@ export default class CustomizationProcess extends Vue {
   public fontsColors: any[] = []
   public firstColor!: Record<any, any>
   public secondColor!: Record<any, any>
-  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab
@@ -317,7 +317,7 @@ export default class CustomizationProcess extends Vue {
         text: fontName as string
       }
       this.fontOptions = this.fontOptions.concat([font])
-      let fontUrl = this.apiBaseUrl + '/' + fonts.file_url
+      let fontUrl = this.storageUrl + fonts.file_url
       const headElement = document.querySelector('head') as HTMLHeadElement
       headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}</style>";
       $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')

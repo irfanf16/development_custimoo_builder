@@ -184,7 +184,7 @@ import {default as $} from 'jquery';
 })
 
 export default class OrderDetails extends Vue {
-  private apiBaseUrl = process.env.VUE_APP_API_BASE_URL + '/'
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
 
   get selectedProduct(): Record<any, any> {
@@ -244,7 +244,7 @@ export default class OrderDetails extends Vue {
     }
     self.customLogos.forEach((logos: Record<any, any>, index: number) => {
       let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
-      self.toDataURLCustom(self.apiBaseUrl + logos.url, (dataUrl: any) => {
+      self.toDataURLCustom(this.storageUrl+logos.url, (dataUrl: any) => {
         if (dataUrl) {
           self.base64Logos.push({'b64logo': dataUrl, 'logoSize': logoDimension})
           if (index == self.customLogos.length - 1) {
