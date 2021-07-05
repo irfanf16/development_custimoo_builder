@@ -29,8 +29,8 @@
                                                     <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                                                 </li>
                                                 <li class="d-none d-lg-block">
-                                                    <a  :id="'share'+ind"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                                                    <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom">
+                                                    <a :id="'share'+ind"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
+                                                    <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="click">
                                                         <div class="share-holder">
                                                             <h3>Copy link and Share</h3>
                                                             <div class="share-form">
