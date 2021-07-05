@@ -29,16 +29,16 @@
                                                     <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                                                 </li>
                                                 <li class="d-none d-lg-block">
-                                                    <a :id="'share'+ind"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
+                                                    <a :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                                                     <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="click">
                                                         <div class="share-holder">
                                                             <h3>Copy link and Share</h3>
                                                             <div class="share-form">
                                                               <b-form inline>
-                                                                    <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ? product.shared_url : ''"
+                                                                    <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
 
                                                                     ></b-form-input>
-                                                                    <b-button variant="primary" @click="shareProduct(product, ind, i) ">Copy Link</b-button>
+                                                                    <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
                                                                 </b-form>
                                                             </div>
                                                         </div>
@@ -133,6 +133,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
     })
     export default class CustomizationPreviewProcess extends Mixins(ErrorMessages) {
       private storageUrl = process.env.VUE_APP_STORAGE_URL
+      private baseUrl = location.host+"/#/"
       public ref = this.$refs as Record<any, any>
       public colors : [] = []
       public tabIndex = 0
@@ -192,31 +193,26 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
           let payload = { type: 'locker', id: product.id , customer_id :  this.customer ? this.customer.id : '', product_id: this.selectedProduct.product_id}
           let shared_url = "";
           if (product.shared_url){
-            shared_url = product.shared_url;
+            shared_url += product.shared_url;
           }else{
             let res = await this.$store.dispatch('shareProduct', payload);
-            shared_url = res.data.url;
+            shared_url += res.data.url;
             Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url',  shared_url)
           }
-
-          let testingCodeToCopy = document.querySelector('#copy-'+ind)  as Record<any, any>
-          testingCodeToCopy.setAttribute('value', shared_url)
-          testingCodeToCopy.select()
-          try {
-            let successful = document.execCommand('copy');
-            let msg = successful ? 'successful' : 'unsuccessful';
-            alert('Testing code was copied ' + msg);
-          } catch (err) {
-            alert('Oops, unable to copy');
-          }
-          // testingCodeToCopy.setAttribute('type', 'hidden')
-          window.getSelection().removeAllRanges()
         }catch (error){
           console.log(error)
         }
       }
-
-
+      public copyLink(product:Record<any, any>, ind:number){
+        let testingCodeToCopy = document.querySelector('#copy-'+ind)  as Record<any, any>
+        testingCodeToCopy.select()
+        try {
+          document.execCommand('copy');
+          this.showToast('Testing code was copied successfully', 'SUCCESS');
+        } catch (err) {
+          alert('Oops, unable to copy');
+        }
+      }
       public async deleteProduct(i:number, ind:number, id:number){
         await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
       }
@@ -226,20 +222,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
           this.showToast('Room Deleted', 'SUCCESS');
         }
       }
-      public copyUrl(ind:number){
-        let testingCodeToCopy = document.querySelector('#copy-'+ind)  as Record<any, any>
-          testingCodeToCopy.setAttribute('type', 'text')
-          testingCodeToCopy.select()
-          try {
-            let successful = document.execCommand('copy');
-            let msg = successful ? 'successful' : 'unsuccessful';
-            alert('Testing code was copied ' + msg);
-          } catch (err) {
-            alert('Oops, unable to copy');
-          }
-          testingCodeToCopy.setAttribute('type', 'hidden')
-          window.getSelection().removeAllRanges()
-      }
+
       public fetchColors(i:number, ind:number){
         this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
       }
