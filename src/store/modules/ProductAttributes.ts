@@ -57,6 +57,7 @@ const ProductAttributes:Module<any, any> = {
     customLogoDelete(state: Record<any, any>, delCustomLogo: Record<any, any>) {
       if(delCustomLogo){
         Vue.set(state.customLogos, delCustomLogo.index, null)
+        // state.customLogos.splice(delCustomLogo.index, 1)
       }
     },
     setLogoTabMutation(state: Record<any, any>, logoIndex:number) {
