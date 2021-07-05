@@ -220,10 +220,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         payload.forEach((data) => {
           this.$store.dispatch('updateCustomLogoAttribute', data)
         })
-
-        if (!this.jwtToken) {
-          localStorage.setItem('isAssociation', 'true')
-        }
         this.hideModal()
         this.getLogoColors()
       })

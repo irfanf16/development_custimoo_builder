@@ -181,15 +181,10 @@ import {http} from "@/httpCommon"
         });
         }, 2000)
     }
-    let isAssociation = JSON.parse(localStorage.getItem('isAssociation') as string) as boolean
     this.jwtToken = localStorage.getItem('jwtToken') as string
-    if (isAssociation && this.jwtToken) {
-      this.getLogoAssociation()
-    }
     await this.$store.dispatch('setCategories')
     await this.$store.dispatch('setJwtToken')
     await this.$store.dispatch('setBrowserToken')
-    await this.$store.dispatch('setIsAssociation', {associate: false})
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getLockerRoomColors')
     }
@@ -388,17 +383,6 @@ export default class Home extends Vue {
     }
     this.searchProducts()
   }
-
-  public getLogoAssociation() {
-    const url = '/customer/associateresource'
-    http.get(url).then((response: any) => {
-      console.log(response)
-      this.$store.dispatch('setIsAssociation', {associate: false})
-    }).catch((e: any) => {
-      console.log(e)
-    });
-  }
-
   public async getLockerRoomProducts(){
     if(this.isCustomerAuthenticated){
       await this.$store.dispatch('GET_LOCKER_PRODUCTS');
