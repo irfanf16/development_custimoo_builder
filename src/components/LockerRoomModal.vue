@@ -205,18 +205,14 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
       }
       public copyLink(product:Record<any, any>, ind:number){
         let testingCodeToCopy = document.querySelector('#copy-'+ind)  as Record<any, any>
-        // testingCodeToCopy.getAttribute('value')
         testingCodeToCopy.select()
         try {
-          let successful = document.execCommand('copy');
-          let msg = successful ? 'successful' : 'unsuccessful';
-          alert('Testing code was copied ' + msg);
+          document.execCommand('copy');
+          this.showToast('Testing code was copied successfully', 'SUCCESS');
         } catch (err) {
           alert('Oops, unable to copy');
         }
       }
-
-
       public async deleteProduct(i:number, ind:number, id:number){
         await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
       }

@@ -179,7 +179,7 @@ import {http} from "@/httpCommon"
             Vue.set(item, 'design_show', 0)
           }
         });
-        }, 1000)
+        }, 2000)
     }
     let isAssociation = JSON.parse(localStorage.getItem('isAssociation') as string) as boolean
     this.jwtToken = localStorage.getItem('jwtToken') as string
