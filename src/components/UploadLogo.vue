@@ -1,10 +1,18 @@
 <template>
+
   <div class="upload-logo-opener">
+    <div style="margin-bottom: 20px;" v-if="transParentLogoUrl">
+      <input type="radio" checked name="logo_image"  @change="setLogoImage($event)" value="original"> Original
+      <input type="radio" name="logo_image" @change="setLogoImage($event)" value="transparent"> Transparent
+
+    </div>
+
     <div class="position-relative" v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
       <a class="remove-img" @click="deleteFirstLogo">
         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
       </a>
     </div>
+
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
         <div v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
@@ -20,6 +28,7 @@
                crossorigin="anonymous" :src="storageUrl+customLogos[0].url" width="0" height="0"/>
         </div>
       </div>
+
       <div class="upload-logo-content">
         <h3>{{ customLogos.length == 0 ? 'Upload Team Logo' : 'Upload logo' }}</h3>
         <h4>Image Requirements</h4>
@@ -91,6 +100,10 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
+
+  public originalLogoUrl !: string
+  public transParentLogoUrl !: string
+  public logoFileId:bigint = 0
 
   @Watch('customLogos', {
     deep: true
@@ -208,6 +221,11 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       .then(resp => {
         const inputRef = this.$refs.fileInput as Record<any, any>
         inputRef.value = null;
+
+        this.originalLogoUrl = resp.data.file.logo_url
+        this.transParentLogoUrl = resp.data.file.transparent_logo_url
+        this.logoFileId = resp.data.file.id
+
         let payload = [{
           index: this.customLogoIndex,
           attribute: 'url',
@@ -280,11 +298,47 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public deleteFirstLogo() {
     let inputRef = this.$refs.fileInput as Record<any, any>
     inputRef.value = null;
+    this.originalLogoUrl = '';
+    this.transParentLogoUrl = '';
+    this.logoFileId = '';
     let payload = {
       index: 0
     }
     this.$store.dispatch('deleteCustomLogo', payload)
   }
+
+  public setLogoImage(event) {
+    var data = event.target.value;
+    let payload = []
+    if(data==='transparent'){
+      payload  = [{
+        index: this.customLogoIndex,
+        attribute: 'url',
+        value: this.transParentLogoUrl
+      }, {
+        index: this.customLogoIndex,
+        attribute: 'id',
+        value: this.logoFileId
+      }];
+    }else{
+      console.log('here')
+      payload  = [{
+        index: this.customLogoIndex,
+        attribute: 'url',
+        value: this.originalLogoUrl
+      }, {
+        index: this.customLogoIndex,
+        attribute: 'id',
+        value: this.logoFileId
+      }];
+    }
+  console.log(payload);
+    payload.forEach((data) => {
+      this.$store.dispatch('updateCustomLogoAttribute', data)
+    })
+
+  }
+
 }
 
 </script>
