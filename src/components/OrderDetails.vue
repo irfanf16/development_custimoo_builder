@@ -179,8 +179,7 @@ import {Component, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
-import {httpl} from "@/httpCommonLocal"
-
+import {http} from "@/httpCommon";
 
 @Component<OrderDetails>({
 })
@@ -336,7 +335,7 @@ export default class OrderDetails extends Vue {
         .output('datauristring')
         .then(function(pdfAsString) {
           order_payload['order_file'] = pdfAsString;
-          const res = httpl.post('orders/create', order_payload);
+          const res = http.post('orders/create', order_payload);
           console.log(res);
         })
         .save()
