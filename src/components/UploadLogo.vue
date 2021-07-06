@@ -81,6 +81,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public status = 'accepted'
   public open_modal !: boolean
   public mounted !: boolean
+  public colors:any = [];
   @Prop({required: true}) customLogoIndex!: any
 
   get selectedProduct(): Record<any, any> {
@@ -206,6 +207,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     fd.append('product_id', this.selectedProduct.product_id)
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
+        this.colors = resp.data.colors;
         const inputRef = this.$refs.fileInput as Record<any, any>
         inputRef.value = null;
         let payload = [{
@@ -235,6 +237,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   public getLogoColors() {
+    console.log('getLogoColors');
     if (this.customLogos.length) {
       if (this.customLogos[0] && this.customLogos[0].url) {
         this.$store.dispatch("SET_LOGO_URL", {logoUrl: this.customLogos[0].url})
@@ -242,12 +245,25 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
           const colorThief = new ColorThief();
           const img = this.$refs.logoImageExtract as HTMLImageElement
           if (img.complete) {
-            let colors = colorThief.getPalette(img)
+            // let colors = colorThief.getPalette(img,4)
+            // console.log('if colors',colors);
+            // this.processColors(colors)
+
+
+            console.log('this.colors',this.colors);
+            let colors = this.colors;
             this.processColors(colors)
+
           } else {
             img.addEventListener('load', () => {
-              let colors = colorThief.getPalette(img)
+              // let colors = colorThief.getPalette(img,4)
+              // console.log('else colors',colors);
+              // this.processColors(colors)
+
+              console.log('this.colors',this.colors);
+              let colors = this.colors;
               this.processColors(colors)
+
             });
           }
 
@@ -257,6 +273,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   processColors(colors: []) {
+    console.log("processColors");
     this.imageColors = []
     let uniqueColors: string[] = []
     colors.forEach((color: number[]) => {
@@ -269,9 +286,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     uniqueColors.splice(4, deletedCount)
 
     uniqueColors.forEach((color: string) => {
-      console.log(color)
+     // console.log(color)
       let pantoneColor = getClosestColor(color)
-      console.log(JSON.parse(JSON.stringify(pantoneColor)))
+      //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
     this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
