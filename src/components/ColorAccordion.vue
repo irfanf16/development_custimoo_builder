@@ -14,7 +14,7 @@
       <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center">
-            <b-nav-item class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
+            <b-nav-item :class="{ active: isActive }" class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
             <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
@@ -79,6 +79,9 @@ export default class ColorAccordion extends Vue {
   public productColor: any[] = []
   public colorImage = '/img/images/color-placeholder.png'
   public pantoneMessage = ''
+  public isActive = false
+  public othersActive = false
+  public currentIndex = 0
 
   get svgGroups() {
     return this.$store.getters.getSvgGroups
@@ -92,6 +95,19 @@ export default class ColorAccordion extends Vue {
     this.selectTypeIndex = index
     this.showOther = showOther
     this.productColor = this.productColors[this.selectTypeIndex].color_text
+    this.isActive = true
+
+    if (this.showOther){
+      this.othersActive = !this.othersActive
+    }
+    else {
+      this.othersActive = false
+    }
+    console.log(this.productColors)
+    // else if (this.productColors[this.selectTypeIndex]){
+    //   this.isActive = !this.isActive
+    //   console.log(this.isActive)
+    // }
   }
 
   public setColor(color: Record<any, any>) {

@@ -8,7 +8,6 @@ const ProductAttributes:Module<any, any> = {
     categories: [],
     customLogos: [],
     customTexts: [],
-    isAssociation: false,
     styleIndex: 0,
     defaultColors: [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}],
     groupColors: {},
@@ -57,15 +56,12 @@ const ProductAttributes:Module<any, any> = {
     customLogoDelete(state: Record<any, any>, delCustomLogo: Record<any, any>) {
       if(delCustomLogo){
         Vue.set(state.customLogos, delCustomLogo.index, null)
+        // state.customLogos.splice(delCustomLogo.index, 1)
       }
     },
     setLogoTabMutation(state: Record<any, any>, logoIndex:number) {
       state.logoTabIndex = logoIndex;
       // Vue.set(state.logoTabIndex, logoIndex, logoIndex)
-    },
-    isAssociation(state: Record<any, any>, isAssociation: Record<any, any>) {
-      state.isAssociation = isAssociation.associate
-      localStorage.setItem('isAssociation', isAssociation.associate)
     },
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
@@ -200,10 +196,6 @@ const ProductAttributes:Module<any, any> = {
       return state.customLogos
     },
     getActiveLogoIndex: (state: any) => state.logoTabIndex,
-
-    getIsAssociation: state => {
-      return state.isAssociation
-    },
     getCurrentStyleIndex: state => {
       return state.styleIndex
     },
@@ -253,13 +245,8 @@ const ProductAttributes:Module<any, any> = {
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
     },
-
     setLogoTab({commit}, payload){
       commit('setLogoTabMutation', payload)
-    },
-
-    setIsAssociation({commit}, payload){
-        commit('isAssociation', payload)
     },
     setCustomTexts({commit}, payload){
       commit('customTexts', payload)

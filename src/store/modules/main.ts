@@ -72,7 +72,6 @@ const Main:Module<any, any> = {
           browserTokenString += Math.random().toString(16).slice(-4)
         }
         localStorage.setItem('browserToken', browserTokenString)
-        // localStorage.setItem('isAssociation', 'false')
       }
     }
   }

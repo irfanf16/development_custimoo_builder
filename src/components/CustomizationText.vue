@@ -1,7 +1,7 @@
 <template>
   <div class="customization-text-area">
     <div class="px-3 pt-3 p-lg-4">
-      <h2 class="fw-bold mb-2 fz-18">Player {{ customTexts[customTextIndex].type | capitalize }}</h2>
+      <h2 class="fw-bold mb-2 fz-18">Player {{ customTexts[customTextIndex].type | capitalize }} {{ customTexts[customTextIndex].side }}</h2>
       <b-form-input
         @click="isHidden = !isHidden"
         class="mb-2 mr-sm-2 mb-sm-0"
