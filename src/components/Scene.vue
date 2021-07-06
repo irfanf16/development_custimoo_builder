@@ -1215,7 +1215,7 @@ export default class Scene extends Vue {
               side: logo.side
             })
             canvas.add(img)
-            console.log('img',img);
+           // console.log('img',img);
             model.bringToFront()
             canvas.renderAll()
 

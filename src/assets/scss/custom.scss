@@ -447,6 +447,14 @@ button{
                 border-bottom: 1px solid #219F84;
             }
         }
+        .nav-item{
+            &.active{
+                .nav-link{
+                    color: #219F84;
+                    border-bottom: 1px solid #219F84;
+                }
+            }
+        }
     }
     .logo-placement-tabs{
         margin: 0 auto;
