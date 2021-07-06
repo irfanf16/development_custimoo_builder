@@ -55,8 +55,16 @@ const ProductAttributes:Module<any, any> = {
     },
     customLogoDelete(state: Record<any, any>, delCustomLogo: Record<any, any>) {
       if(delCustomLogo){
-        Vue.set(state.customLogos, delCustomLogo.index, null)
+         Vue.set(state.customLogos, delCustomLogo.index, null)
         // state.customLogos.splice(delCustomLogo.index, 1)
+        // Vue.delete(state.customLogos, delCustomLogo.index)
+      }
+    },
+    customLogoTabDelete(state: Record<any, any>, delCustomTabLogo: Record<any, any>) {
+      if(delCustomTabLogo){
+        // Vue.set(state.customLogos, delCustomTabLogo.index, null)
+        // state.customLogos.splice(delCustomLogo.index, 1)
+        Vue.delete(state.customLogos, delCustomTabLogo.index)
       }
     },
     setLogoTabMutation(state: Record<any, any>, logoIndex:number) {
@@ -245,6 +253,11 @@ const ProductAttributes:Module<any, any> = {
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
     },
+
+    deleteCustomLogoTab({commit}, payload){
+      commit('customLogoTabDelete', payload)
+    },
+
     setLogoTab({commit}, payload){
       commit('setLogoTabMutation', payload)
     },
