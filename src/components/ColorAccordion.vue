@@ -15,7 +15,7 @@
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center">
             <b-nav-item :class="{ active: isActive }" class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
-            <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
+            <b-nav-item :class="{ active: othersActive }" @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
@@ -81,7 +81,6 @@ export default class ColorAccordion extends Vue {
   public pantoneMessage = ''
   public isActive = false
   public othersActive = false
-  public currentIndex = 0
 
   get svgGroups() {
     return this.$store.getters.getSvgGroups
@@ -95,7 +94,12 @@ export default class ColorAccordion extends Vue {
     this.selectTypeIndex = index
     this.showOther = showOther
     this.productColor = this.productColors[this.selectTypeIndex].color_text
-    this.isActive = true
+    if(this.productColors[index]){
+      this.isActive = !this.isActive
+    }
+    else {
+      this.isActive = false
+    }
 
     if (this.showOther){
       this.othersActive = !this.othersActive
