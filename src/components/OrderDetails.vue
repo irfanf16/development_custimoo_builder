@@ -300,13 +300,23 @@ export default class OrderDetails extends Vue {
     const product_id = selected_product.product_id;
     let product_style = selected_product.productstyles[style_index];
     const product_style_id = product_style.id;
-    let selectedDesign = product_style.productdesigns.filter(design => design.design_show == 1);
+    let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
     const product_design_id = selectedDesign[0].id;
 
-    var order_payload = {
+    let product_models = this.$store.getters.getProductModels;
+    let selected_model_index = this.$store.getters.getSelectedModelIndex;
+
+    let product_model_id = 0;
+    if(product_models.length > 0) {
+      const selected_model = product_models[selected_model_index];
+      product_model_id = selected_model.id;
+    }
+    let order_payload = {
       product_id,
       product_style_id,
-      product_design_id
+      product_design_id,
+      product_model_id,
+      order_file: ''
     }
 
     setTimeout(() => {
@@ -333,8 +343,8 @@ export default class OrderDetails extends Vue {
         .toPdf()
         .get("pdf")
         .output('datauristring')
-        .then(function(pdfAsString) {
-          order_payload['order_file'] = pdfAsString;
+        .then(function(pdfAsString: string) {
+          order_payload.order_file = pdfAsString;
           const res = http.post('orders/create', order_payload);
           console.log(res);
         })
