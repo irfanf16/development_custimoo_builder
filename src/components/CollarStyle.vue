@@ -49,6 +49,7 @@ import {http} from "@/httpCommon";
         return  this.$store.getters.getCurrentStyleIndex;
       }
       public selectModelStyle(modelIndex: number) {
+        this.$store.commit('SET_SELECTED_MODEL_INDEX', modelIndex)
         for (let styleIndex = 0; styleIndex < this.selectedProduct.productstyles.length; styleIndex++) {
           if (this.productModels[modelIndex].model_styles.includes(this.selectedProduct.productstyles[styleIndex].id)) {
             if(styleIndex != this.styleIndex) {

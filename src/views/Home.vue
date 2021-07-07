@@ -481,7 +481,7 @@ export default class Home extends Vue {
 
 .home-color-area {
   @media only screen and (min-width: 992px) {
-    padding-bottom: 10rem !important;
+    padding-bottom: 12rem !important;
     border-right: 1px solid #dee2e6;
   }
 }

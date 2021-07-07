@@ -447,6 +447,14 @@ button{
                 border-bottom: 1px solid #219F84;
             }
         }
+        .nav-item{
+            &.active{
+                .nav-link{
+                    color: #219F84;
+                    border-bottom: 1px solid #219F84;
+                }
+            }
+        }
     }
     .logo-placement-tabs{
         margin: 0 auto;
@@ -2244,6 +2252,32 @@ button{
             z-index: 1;
             padding: 0;
             opacity: 1;
+        }
+    }
+}
+.logo-option-area{
+    .custom-control{
+        .custom-control-label{
+            color: #03142E;
+            font-size: 14px;
+            font-weight: 600;
+            &:after,
+            &:before{
+                top: 50%;
+                transform: translateY(-50%);
+                width: 1.3rem;
+                height: 1.3rem;
+                left: -1.8rem;
+            }
+        }
+        .custom-control-input{
+            &:checked{
+                ~ .custom-control-label{
+                    &:before{
+                        background: #219F84;
+                    }
+                }
+            }
         }
     }
 }

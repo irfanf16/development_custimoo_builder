@@ -54,7 +54,7 @@ export default class ChooseInterest extends Vue {
 .interest-area {
   max-width: 300px;
   margin: 0 auto;
-  padding-bottom: 8rem;
+  padding-bottom: 10rem;
   @media only screen and (min-width: 1024px){padding-bottom: 0;}
 }
 

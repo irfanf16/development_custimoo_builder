@@ -1,10 +1,22 @@
 <template>
-  <div class="upload-logo-opener">
+
+  <div class="upload-logo-opener" >
+    <div class="logo-option-area mb-3" v-if="customLogos[0] && manageComponents.BasicCustomization" >
+      <b-form-checkbox
+        name="transparent-logo-background"
+        v-model="customLogos[0].is_transparent"
+        @change="toggleLogoBackground"
+      >
+        Remove Logo Background
+      </b-form-checkbox>
+    </div>
+
     <div class="position-relative" v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
       <a class="remove-img" @click="deleteFirstLogo">
         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
       </a>
     </div>
+
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
         <div v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
@@ -20,6 +32,7 @@
                crossorigin="anonymous" :src="storageUrl+customLogos[0].url" width="0" height="0"/>
         </div>
       </div>
+
       <div class="upload-logo-content">
         <h3>{{ customLogos.length == 0 ? 'Upload Team Logo' : 'Upload logo' }}</h3>
         <h4>Image Requirements</h4>
@@ -80,6 +93,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public status = 'accepted'
   public open_modal !: boolean
   public mounted !: boolean
+  public colors:any = [];
   @Prop({required: true}) customLogoIndex!: any
 
   get selectedProduct(): Record<any, any> {
@@ -178,7 +192,8 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         haveControls: Boolean(!logoSetting.is_locked),
         side: logoSetting.side,
         customLogo: true,
-        logoIndex: customLogoIndex
+        logoIndex: customLogoIndex,
+        is_transparent: false
       }
       this.$store.dispatch('setCustomLogos', logo)
     }
@@ -205,17 +220,48 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     fd.append('product_id', this.selectedProduct.product_id)
     http.post('/customer/upload/logo', fd, header)
       .then(resp => {
+        this.colors = resp.data.colors;
         const inputRef = this.$refs.fileInput as Record<any, any>
         inputRef.value = null;
+
+        const original_logo = resp.data.file.logo_url;
+        const transparent_logo = resp.data.file.transparent_logo_url;
+        let logo_url = '';
+        let is_transparent = false;
+
+        if(this.customLogos[this.customLogoIndex].is_transparent===true){
+          logo_url = transparent_logo;
+          is_transparent = true;
+        }else{
+          logo_url = original_logo;
+        }
+
+
         let payload = [{
           index: this.customLogoIndex,
           attribute: 'url',
-          value: resp.data.file.logo_url
-        }, {
+          value: logo_url
+        },{
           index: this.customLogoIndex,
           attribute: 'id',
           value: resp.data.file.id
-        }];
+        },{
+            index: this.customLogoIndex,
+            attribute: 'is_transparent',
+            value: is_transparent
+          },
+          {
+            index: this.customLogoIndex,
+            attribute: 'original_logo',
+            value: original_logo
+          },
+          {
+            index: this.customLogoIndex,
+            attribute: 'transparent_logo',
+            value: transparent_logo
+          }
+
+        ];
         payload.forEach((data) => {
           this.$store.dispatch('updateCustomLogoAttribute', data)
         })
@@ -234,19 +280,32 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   public getLogoColors() {
-    if (this.customLogos.length) {
+      if (this.customLogos.length) {
       if (this.customLogos[0] && this.customLogos[0].url) {
         this.$store.dispatch("SET_LOGO_URL", {logoUrl: this.customLogos[0].url})
         this.$nextTick(() => {
           const colorThief = new ColorThief();
           const img = this.$refs.logoImageExtract as HTMLImageElement
           if (img.complete) {
-            let colors = colorThief.getPalette(img)
+            // let colors = colorThief.getPalette(img,4)
+            // console.log('if colors',colors);
+            // this.processColors(colors)
+
+
+            console.log('this.colors',this.colors);
+            let colors = this.colors;
             this.processColors(colors)
+
           } else {
             img.addEventListener('load', () => {
-              let colors = colorThief.getPalette(img)
+              // let colors = colorThief.getPalette(img,4)
+              // console.log('else colors',colors);
+              // this.processColors(colors)
+
+              console.log('this.colors',this.colors);
+              let colors = this.colors;
               this.processColors(colors)
+
             });
           }
 
@@ -268,9 +327,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     uniqueColors.splice(4, deletedCount)
 
     uniqueColors.forEach((color: string) => {
-      console.log(color)
+     // console.log(color)
       let pantoneColor = getClosestColor(color)
-      console.log(JSON.parse(JSON.stringify(pantoneColor)))
+      //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
     this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
@@ -279,11 +338,21 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public deleteFirstLogo() {
     let inputRef = this.$refs.fileInput as Record<any, any>
     inputRef.value = null;
+
     let payload = {
       index: 0
     }
     this.$store.dispatch('deleteCustomLogo', payload)
   }
+
+  public toggleLogoBackground() {
+
+      if(this.customLogos[this.customLogoIndex]){
+        this.$store.dispatch('toggleLogoBackgroud', this.customLogoIndex)
+      }
+
+  }
+
 }
 
 </script>
@@ -311,6 +380,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
   @media only screen and (min-width: 1200px) {
     padding: 30px;
+    background: #fff;
   }
 
   .btn {
@@ -323,11 +393,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     padding: 0;
     font-size: 10px;
     max-width: 100%;
-    @media only screen and (min-width: 992px) {
-      margin: 0 auto;
-    }
-    @media only screen and (min-width: 1200px) {
+    @media only screen and (min-width: 768px){
       max-width: 300px;
+      margin: 0 auto;
     }
 
     &.btn-secondary {
@@ -512,5 +580,10 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
 
 .fileLoader {
   display: none;
+}
+.logo-option-area{
+  max-width: 285px;
+  margin: 0 auto;
+  text-align: left;
 }
 </style>

@@ -14,8 +14,8 @@
       <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center">
-            <b-nav-item :class="{ active: isActive }" class="mr-2" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
-            <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
+            <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
+            <b-nav-item :class="{ active: othersActive }" @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
@@ -29,7 +29,7 @@
                     @input="changePantoneColor"
                   ></b-form-input>
                   <div class="pantone-message">
-                    {{ pantoneMessage}}
+                    {{ pantoneMessage }}
                   </div>
                 </b-form>
                 <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />
@@ -77,11 +77,11 @@ export default class ColorAccordion extends Vue {
   public selectAccordionIndex = 0
   public selectTypeIndex = 0
   public productColor: any[] = []
+  public selectedColorTab = 0;
   public colorImage = '/img/images/color-placeholder.png'
   public pantoneMessage = ''
   public isActive = false
   public othersActive = false
-  public currentIndex = 0
 
   get svgGroups() {
     return this.$store.getters.getSvgGroups
@@ -92,22 +92,30 @@ export default class ColorAccordion extends Vue {
   }
 
   public selectType(index: number, showOther = false) {
+
+    console.log('showOther',showOther);
+    console.log('index',index);
+
+    if (showOther){
+      this.othersActive = true;
+    }
+    else {
+      this.othersActive = false;
+    }
+
+
+    console.log('this.productColors',this.productColors);
+
     this.selectTypeIndex = index
     this.showOther = showOther
     this.productColor = this.productColors[this.selectTypeIndex].color_text
-    this.isActive = true
 
-    if (this.showOther){
-      this.othersActive = !this.othersActive
+    if(this.selectTypeIndex){
+      this.isActive = !this.isActive
     }
     else {
-      this.othersActive = false
+      this.isActive = false
     }
-    console.log(this.productColors)
-    // else if (this.productColors[this.selectTypeIndex]){
-    //   this.isActive = !this.isActive
-    //   console.log(this.isActive)
-    // }
   }
 
   public setColor(color: Record<any, any>) {

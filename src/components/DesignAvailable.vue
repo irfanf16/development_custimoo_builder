@@ -124,10 +124,12 @@ export default class DesignAvailable extends Vue {
         align-items: center;
         @media only screen and (min-width: 768px){
           font-size: 0.85rem;
+          min-height: 40px;
+          padding: 10px 0 0;
         }
         @media only screen and (min-width: 1024px){
           font-size: 0.6rem;
-          min-height: 40px;
+          padding: 0;
         }
         @media only screen and (min-width: 1360px){
           min-height: 50px;

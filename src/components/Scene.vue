@@ -406,7 +406,7 @@ export default class Scene extends Vue {
           left: left,
           top: top
         })
-        otherSideObject.rotate(item.rotation as number)
+        otherSideObject.rotate(360 - item.rotation as number)
       }
     }
     object.setCoords()
@@ -618,7 +618,7 @@ export default class Scene extends Vue {
     if(Object.keys(this.lockerGroupColors).length) {
       this.changeGroupColor(this.lockerGroupColors)
     }
-    else if(Object.keys(this.groupColors).length) {
+    else if(Object.keys(this.groupColors).length && !this.lockerDefaultColors) {
       this.changeGroupColor(this.groupColors)
     }
   }
@@ -889,14 +889,12 @@ export default class Scene extends Vue {
       if (nearTo == 'left') {
         checkPointX = target.left - width / 2
       }
-      console.log(nearTo)
 
       let otherSideObjects = this.otherSideLogos
       if(target.text) {
         otherSideObjects = this.otherSideTexts
       }
       if (canvas.isTargetTransparent(model, checkPointX, centerPoint.y)) {
-        console.log('comes here')
         let addLeft = 0
         let addTop = 0
         const model_start = (model.left - ((model.width * model.scaleX) / 2)) - 1
@@ -921,6 +919,9 @@ export default class Scene extends Vue {
         if (otherSideObjects[addIndex]) {
           otherSideObjects[addIndex].left = addLeft
           otherSideObjects[addIndex].top = addTop
+          console.log(target.angle)
+          otherSideObjects[addIndex].angle = 360 - target.angle
+          console.log(otherSideObjects[addIndex].angle)
           if (side == 'back') {
             this.frontCanvas.renderAll()
           } else {
@@ -935,8 +936,7 @@ export default class Scene extends Vue {
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
-          let angle = objectAdd.angle + 180
-          objectAdd.angle = ((angle % 360) + 360) % 360
+          objectAdd.angle = 360 - objectAdd.angle
           otherSideObjects[addIndex] = objectAdd
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)
@@ -1215,7 +1215,7 @@ export default class Scene extends Vue {
               side: logo.side
             })
             canvas.add(img)
-            console.log('img',img);
+           // console.log('img',img);
             model.bringToFront()
             canvas.renderAll()
 
@@ -1284,7 +1284,7 @@ export default class Scene extends Vue {
           })
         }
       }
-      if(text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back))) {
+      if(text.text && text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back))) {
         let textBox = new fabric.Text(text.text, {
           left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
           top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,

@@ -242,7 +242,8 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
             rotation: this.selectedProduct.logos_setting[index].rotation as number,
             haveControls: Boolean(!this.selectedProduct.logos_setting[index].is_locked),
             side: this.selectedProduct.logos_setting[index].side,
-            customLogo: true
+            customLogo: true,
+            is_transparent: false
           }
           this.$store.dispatch('setCustomLogos', logo)
         }else{

@@ -7,11 +7,15 @@ const Product:Module<any, any> = {
     lockers:[],
     logoColors:[],
     logoUrl:'',
-    eyeIndex: -1
+    eyeIndex: -1,
+    selectedModelIndex: 0
   },
   getters:{
     getProductModels(state:Record<any, any>){
       return state.Product_Models;
+    },
+    getSelectedModelIndex(state:Record<any, any>) {
+      return state.selectedModelIndex
     },
     getLockerProducts(state:Record<any, any>){
       return state.locker_products
@@ -32,6 +36,9 @@ const Product:Module<any, any> = {
   mutations:{
     SET_MODELS(state:Record<any, any>, paylod:Record<any, any>){
       state.Product_Models = paylod;
+    },
+    SET_SELECTED_MODEL_INDEX(state:Record<any, any>, selectedModelIndex: number) {
+      state.selectedModelIndex = selectedModelIndex;
     },
     SET_LOCKER_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
       state.locker_products = payload;
