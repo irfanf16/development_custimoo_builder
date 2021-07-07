@@ -38,10 +38,10 @@
                 </div>
               </div>
               <div class="logo-option-area text-center my-3 mb-lg-3">
-                <b-form-checkbox
-                  id="transparent-logo-background"
+                <b-form-checkbox :key="index"
                   v-model="customLogos[index].is_transparent"
                   name="transparent-logo-background"
+                  @change="toggleLogoBackground(index)"
                 >
                   Remove Logo Background
                 </b-form-checkbox>
@@ -185,8 +185,10 @@ export default class LogoPlacementTabs extends Vue {
       }
       this.tabIndex = this.tabIndex + 1;
       this.$store.dispatch('setCustomLogos', logo)
-    }
+      this.$store.dispatch('setLogoTab', this.tabIndex)
+     }
   }
+
   public removeLogoTab(index: number){
     let payload = {
       index: index
@@ -266,6 +268,12 @@ export default class LogoPlacementTabs extends Vue {
       await this.$store.dispatch('GET_LOCKER_PRODUCTS');
     }
   }
+
+  public toggleLogoBackground(index: number){
+    console.log(index);
+    this.$store.dispatch('toggleLogoBackgroud', index)
+   }
+
 }
 </script>
 

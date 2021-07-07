@@ -1,21 +1,15 @@
 <template>
 
-  <div class="upload-logo-opener">
-    <div class="logo-option-area mb-3" v-if="transParentLogoUrl">
+  <div class="upload-logo-opener" >
+    <div class="logo-option-area mb-3" v-if="customLogos[0] && manageComponents.BasicCustomization" >
       <b-form-checkbox
-        id="transparent-logo-background"
-
         name="transparent-logo-background"
+        v-model="customLogos[0].is_transparent"
+        @change="toggleLogoBackground"
       >
         Remove Logo Background
       </b-form-checkbox>
     </div>
-
-<!--    <div style="margin-bottom: 20px;" v-if="transParentLogoUrl">-->
-<!--      <input type="radio" checked name="logo_image"  @change="setLogoImage($event)" value="original"> Original-->
-<!--      <input type="radio" name="logo_image" @change="setLogoImage($event)" value="transparent"> Transparent-->
-
-<!--    </div>-->
 
     <div class="position-relative" v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
       <a class="remove-img" @click="deleteFirstLogo">
@@ -111,10 +105,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
-
-  public originalLogoUrl !: string
-  public transParentLogoUrl !: string
-  public logoFileId: number|string = 0
 
   @Watch('customLogos', {
     deep: true
@@ -235,19 +225,44 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         const inputRef = this.$refs.fileInput as Record<any, any>
         inputRef.value = null;
 
-        this.originalLogoUrl = resp.data.file.logo_url
-        this.transParentLogoUrl = resp.data.file.transparent_logo_url
-        this.logoFileId = resp.data.file.id
+        const original_logo = resp.data.file.logo_url;
+        const transparent_logo = resp.data.file.transparent_logo_url;
+        let logo_url = '';
+        let is_transparent = false;
+
+        if(this.customLogos[this.customLogoIndex].is_transparent===true){
+          logo_url = transparent_logo;
+          is_transparent = true;
+        }else{
+          logo_url = original_logo;
+        }
+
 
         let payload = [{
           index: this.customLogoIndex,
           attribute: 'url',
-          value: resp.data.file.logo_url
-        }, {
+          value: logo_url
+        },{
           index: this.customLogoIndex,
           attribute: 'id',
           value: resp.data.file.id
-        }];
+        },{
+            index: this.customLogoIndex,
+            attribute: 'is_transparent',
+            value: is_transparent
+          },
+          {
+            index: this.customLogoIndex,
+            attribute: 'original_logo',
+            value: original_logo
+          },
+          {
+            index: this.customLogoIndex,
+            attribute: 'transparent_logo',
+            value: transparent_logo
+          }
+
+        ];
         payload.forEach((data) => {
           this.$store.dispatch('updateCustomLogoAttribute', data)
         })
@@ -266,8 +281,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   public getLogoColors() {
-    console.log('getLogoColors');
-    if (this.customLogos.length) {
+      if (this.customLogos.length) {
       if (this.customLogos[0] && this.customLogos[0].url) {
         this.$store.dispatch("SET_LOGO_URL", {logoUrl: this.customLogos[0].url})
         this.$nextTick(() => {
@@ -302,7 +316,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   processColors(colors: []) {
-    console.log("processColors");
     this.imageColors = []
     let uniqueColors: string[] = []
     colors.forEach((color: number[]) => {
@@ -326,44 +339,18 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public deleteFirstLogo() {
     let inputRef = this.$refs.fileInput as Record<any, any>
     inputRef.value = null;
-    this.originalLogoUrl = '';
-    this.transParentLogoUrl = '';
-    this.logoFileId = '';
+
     let payload = {
       index: 0
     }
     this.$store.dispatch('deleteCustomLogo', payload)
   }
 
-  public setLogoImage(event: Record<any, any>) {
-    var data = event.target.value;
-    let payload = []
-    if(data==='transparent'){
-      payload  = [{
-        index: this.customLogoIndex,
-        attribute: 'url',
-        value: this.transParentLogoUrl
-      }, {
-        index: this.customLogoIndex,
-        attribute: 'id',
-        value: this.logoFileId
-      }];
-    }else{
-      console.log('here')
-      payload  = [{
-        index: this.customLogoIndex,
-        attribute: 'url',
-        value: this.originalLogoUrl
-      }, {
-        index: this.customLogoIndex,
-        attribute: 'id',
-        value: this.logoFileId
-      }];
-    }
-  console.log(payload);
-    payload.forEach((data) => {
-      this.$store.dispatch('updateCustomLogoAttribute', data)
-    })
+  public toggleLogoBackground() {
+
+      if(this.customLogos[this.customLogoIndex]){
+        this.$store.dispatch('toggleLogoBackgroud', this.customLogoIndex)
+      }
 
   }
 
