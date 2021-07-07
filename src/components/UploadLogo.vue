@@ -104,7 +104,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
 
   public originalLogoUrl !: string
   public transParentLogoUrl !: string
-  public logoFileId:bigint = 0
+  public logoFileId: number|string = 0
 
   @Watch('customLogos', {
     deep: true
@@ -324,7 +324,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     this.$store.dispatch('deleteCustomLogo', payload)
   }
 
-  public setLogoImage(event) {
+  public setLogoImage(event: Record<any, any>) {
     var data = event.target.value;
     let payload = []
     if(data==='transparent'){
