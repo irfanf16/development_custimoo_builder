@@ -303,10 +303,19 @@ export default class OrderDetails extends Vue {
     let selectedDesign = product_style.productdesigns.filter(design => design.design_show == 1);
     const product_design_id = selectedDesign[0].id;
 
+    let product_models = this.$store.getters.getProductModels;
+    let selected_model_index = this.$store.getters.getSelectedModelIndex;
+
+    let product_model_id = 0;
+    if(product_models.length > 0) {
+      const selected_model = product_models[selected_model_index];
+      product_model_id = selected_model.id;
+    }
     var order_payload = {
       product_id,
       product_style_id,
-      product_design_id
+      product_design_id,
+      product_model_id
     }
 
     setTimeout(() => {
