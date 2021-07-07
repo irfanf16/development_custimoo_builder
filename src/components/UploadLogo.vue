@@ -1,11 +1,21 @@
 <template>
 
   <div class="upload-logo-opener">
-    <div style="margin-bottom: 20px;" v-if="transParentLogoUrl">
-      <input type="radio" checked name="logo_image"  @change="setLogoImage($event)" value="original"> Original
-      <input type="radio" name="logo_image" @change="setLogoImage($event)" value="transparent"> Transparent
+    <div class="logo-option-area mb-3" v-if="transParentLogoUrl">
+      <b-form-checkbox
+        id="transparent-logo-background"
 
+        name="transparent-logo-background"
+      >
+        Remove Logo Background
+      </b-form-checkbox>
     </div>
+
+<!--    <div style="margin-bottom: 20px;" v-if="transParentLogoUrl">-->
+<!--      <input type="radio" checked name="logo_image"  @change="setLogoImage($event)" value="original"> Original-->
+<!--      <input type="radio" name="logo_image" @change="setLogoImage($event)" value="transparent"> Transparent-->
+
+<!--    </div>-->
 
     <div class="position-relative" v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
       <a class="remove-img" @click="deleteFirstLogo">
@@ -384,6 +394,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
   @media only screen and (min-width: 1200px) {
     padding: 30px;
+    background: #fff;
   }
 
   .btn {
@@ -585,5 +596,10 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
 
 .fileLoader {
   display: none;
+}
+.logo-option-area{
+  max-width: 285px;
+  margin: 0 auto;
+  text-align: left;
 }
 </style>
