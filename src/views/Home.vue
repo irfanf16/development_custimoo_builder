@@ -162,9 +162,9 @@ import {http} from "@/httpCommon"
       setTimeout(async () => {
         let url = 'share/' + this.$route.params.product + '/' + this.$route.params.name
         let res = await this.$store.dispatch('getShareProductDetails', url)
-        // await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.product_id);
-        let ind = this.products.findIndex(x => x.product_id == res.product_id)
-        // let ind = this.products.length -1
+        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.product_id);
+        // let ind = this.products.findIndex(x => x.product_id == res.product_id)
+        let ind = this.products.length -1
         await this.$store.dispatch('setSelectedIndex', { selectedIndex: ind});
         let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.style_id);
         await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
@@ -183,8 +183,7 @@ import {http} from "@/httpCommon"
     }
     this.jwtToken = localStorage.getItem('jwtToken') as string
     await this.$store.dispatch('setCategories')
-    await this.$store.dispatch('setJwtToken')
-    await this.$store.dispatch('setBrowserToken')
+    // await this.$store.dispatch('setJwtToken')
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getLockerRoomColors')
     }
