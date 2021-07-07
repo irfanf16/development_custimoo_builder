@@ -193,7 +193,8 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         haveControls: Boolean(!logoSetting.is_locked),
         side: logoSetting.side,
         customLogo: true,
-        logoIndex: customLogoIndex
+        logoIndex: customLogoIndex,
+        is_transparent: false
       }
       this.$store.dispatch('setCustomLogos', logo)
     }
