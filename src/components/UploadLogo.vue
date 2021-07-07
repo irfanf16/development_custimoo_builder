@@ -407,11 +407,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     padding: 0;
     font-size: 10px;
     max-width: 100%;
-    @media only screen and (min-width: 992px) {
-      margin: 0 auto;
-    }
-    @media only screen and (min-width: 1200px) {
+    @media only screen and (min-width: 768px){
       max-width: 300px;
+      margin: 0 auto;
     }
 
     &.btn-secondary {
