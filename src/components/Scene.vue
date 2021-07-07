@@ -618,7 +618,7 @@ export default class Scene extends Vue {
     if(Object.keys(this.lockerGroupColors).length) {
       this.changeGroupColor(this.lockerGroupColors)
     }
-    else if(Object.keys(this.groupColors).length) {
+    else if(Object.keys(this.groupColors).length && !this.lockerDefaultColors) {
       this.changeGroupColor(this.groupColors)
     }
   }
@@ -1284,7 +1284,7 @@ export default class Scene extends Vue {
           })
         }
       }
-      if(text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back))) {
+      if(text.text && text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back))) {
         let textBox = new fabric.Text(text.text, {
           left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
           top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
