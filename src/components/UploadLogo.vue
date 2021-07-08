@@ -81,7 +81,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       this.open_modal = false
     }
     // this.$store.dispatch('setJwtToken')
-    this.$store.dispatch('setBrowserToken')
 
     if (this.customLogos.length) {
       if (this.customLogos[this.customLogoIndex] && this.customLogos[this.customLogoIndex].url == '') {

@@ -65,15 +65,6 @@ const Main:Module<any, any> = {
         });
       }
     },
-    setBrowserToken(){
-      if(!localStorage.getItem('browserToken')) {
-        let browserTokenString = ''
-        for (let i = 0; i < 8; i++) {
-          browserTokenString += Math.random().toString(16).slice(-4)
-        }
-        localStorage.setItem('browserToken', browserTokenString)
-      }
-    }
   }
 }
 export default Main;
