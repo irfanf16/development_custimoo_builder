@@ -39,7 +39,7 @@
                     <b-button :key="'lockerRoom'" @click="getLockerRoomProducts" variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
                   </template>
                   <template v-else>
-                    <b-button :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                    <b-button @click="this.lockerRoomModalOpener()" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                   </template>
                   <LockerRoomModal />
                   <template v-if="isCustomerAuthenticated">
@@ -272,6 +272,16 @@ export default class Home extends Vue {
       console.log(e)
     });
   }
+
+  public lockerRoomModalOpener() {
+    if (this.isCustomerAuthenticated){
+      this.ref['locker-modal'].show();
+    }
+    else {
+      this.ref['locker-modal'].hide();
+    }
+  }
+
   public async getLockers(){
     await this.$store.dispatch("getLockers");
 }
