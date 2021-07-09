@@ -175,6 +175,7 @@
           this.email = ''
           this.password = ''
           this.ref['loginModal'].hide();
+          this.$emit('actionAfterLogin')
         }
       }catch (error){
         this.showError(error)

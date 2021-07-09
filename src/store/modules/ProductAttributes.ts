@@ -16,7 +16,8 @@ const ProductAttributes:Module<any, any> = {
     rosterDetails: [],
     productionSVGs: {},
     lockerColors:[],
-    logoTabIndex: 0
+    logoTabIndex: 0,
+    actionBeforeLogin: ''
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
@@ -203,6 +204,9 @@ const ProductAttributes:Module<any, any> = {
         return item
       })
       state.lockerColors = payload
+    },
+    ACTION_BEFORE_LOGIN(state: Record<any, any>, action: string){
+      state.actionBeforeLogin = action
     }
   },
   getters: {
@@ -241,6 +245,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getLockerColors: state => {
       return state.lockerColors
+    },
+    getActionBeforeLogin: state => {
+      return state.actionBeforeLogin
     }
   },
   actions: {
