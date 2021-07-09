@@ -179,6 +179,7 @@ import {Component, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
+import {http} from "@/httpCommon";
 
 @Component<OrderDetails>({
 })
@@ -292,6 +293,32 @@ export default class OrderDetails extends Vue {
   }
 
   public htmlPdfGenerator() {
+
+
+    let style_index = this.$store.getters.getCurrentStyleIndex;
+    let selected_product = this.$store.getters.getSelectedProduct;
+    const product_id = selected_product.product_id;
+    let product_style = selected_product.productstyles[style_index];
+    const product_style_id = product_style.id;
+    let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
+    const product_design_id = selectedDesign[0].id;
+
+    let product_models = this.$store.getters.getProductModels;
+    let selected_model_index = this.$store.getters.getSelectedModelIndex;
+
+    let product_model_id = 0;
+    if(product_models.length > 0) {
+      const selected_model = product_models[selected_model_index];
+      product_model_id = selected_model.id;
+    }
+    let order_payload = {
+      product_id,
+      product_style_id,
+      product_design_id,
+      product_model_id,
+      order_file: ''
+    }
+
     setTimeout(() => {
       const element = document.getElementById("production-pdf-html")
       const opt = {
@@ -315,9 +342,11 @@ export default class OrderDetails extends Vue {
         .from(element)
         .toPdf()
         .get("pdf")
-        .then()
-        .catch((e: any) => {
-          console.error("PDF Generation Error", e)
+        .output('datauristring')
+        .then(function(pdfAsString: string) {
+          order_payload.order_file = pdfAsString;
+          const res = http.post('orders/create', order_payload);
+          console.log(res);
         })
         .save()
     }, 1000)

@@ -143,7 +143,7 @@
 </template>
 
 <script lang="ts">
-  import {Component, Mixins } from 'vue-property-decorator'
+  import {Vue, Component, Mixins } from 'vue-property-decorator'
   import ErrorMessages from "@/mixins/ErrorMessages";
 
   @Component<LoginForm>({})
@@ -186,7 +186,7 @@
         if (res.status == 201){
           this.showToast(res.data.message, 'SUCCESS')
           for (let key in this.form) {
-            this.form[key] = ''
+            Vue.set(this.form, key, '')
           }
           this.ref['loginModal'].hide();
         }

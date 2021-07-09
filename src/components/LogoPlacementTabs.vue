@@ -37,11 +37,20 @@
                   <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
                 </div>
               </div>
+              <div class="logo-option-area text-center my-3 mb-lg-3">
+                <b-form-checkbox :key="index"
+                  v-model="customLogos[index].is_transparent"
+                  name="transparent-logo-background"
+                  @change="toggleLogoBackground(index)"
+                >
+                  Remove Logo Background
+                </b-form-checkbox>
+              </div>
               <template v-if="isCustomerAuthenticated">
-                <b-button :key="'saveLogoModal'" v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold" v-b-modal.modal-center-savelogomodal>Save Logo</b-button>
+                <b-button :key="'saveLogoModal'" v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold save-logo-btn" v-b-modal.modal-center-savelogomodal>Save Logo</b-button>
               </template>
               <template v-else>
-                <b-button :key="'saveLogoLogin'" class="btn btn-secondary w-100 fw-bold" v-b-modal.modal-login>Save Logo</b-button>
+                <b-button :key="'saveLogoLogin'" class="btn btn-secondary w-100 fw-bold save-logo-btn" v-b-modal.modal-login>Save Logo</b-button>
               </template>
               <SaveLogoModal :logoIndex="index" />
             </div>
@@ -171,12 +180,15 @@ export default class LogoPlacementTabs extends Vue {
         rotation: logoSetting.rotation as number,
         haveControls: Boolean(!logoSetting.is_locked),
         side: logoSetting.side,
-        customLogo: true
+        customLogo: true,
+        status: 'not acc'
       }
       this.tabIndex = this.tabIndex + 1;
       this.$store.dispatch('setCustomLogos', logo)
-    }
+      this.$store.dispatch('setLogoTab', this.tabIndex)
+     }
   }
+
   public removeLogoTab(index: number){
     let payload = {
       index: index
@@ -256,6 +268,12 @@ export default class LogoPlacementTabs extends Vue {
       await this.$store.dispatch('GET_LOCKER_PRODUCTS');
     }
   }
+
+  public toggleLogoBackground(index: number){
+    console.log(index);
+    this.$store.dispatch('toggleLogoBackgroud', index)
+   }
+
 }
 </script>
 
@@ -284,6 +302,7 @@ export default class LogoPlacementTabs extends Vue {
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
+    position: relative;
     .logo-placement-holder{
       flex: 0 0 67%;
       max-width: 67%;
@@ -302,6 +321,14 @@ export default class LogoPlacementTabs extends Vue {
         max-width: 100%;
         font-size: 14px;
         padding: 0.50rem 0.75rem;
+      }
+      &.save-logo-btn{
+        position: absolute;
+        right: 0;
+        top: 20px;
+        @media only screen and (min-width: 992px){
+          position: static;
+        }
       }
     }
     &.extracted-color-area{
@@ -375,5 +402,9 @@ export default class LogoPlacementTabs extends Vue {
       }
     }
   }
+}
+.logo-option-area{
+  display: block;
+  width: 100%;
 }
 </style>

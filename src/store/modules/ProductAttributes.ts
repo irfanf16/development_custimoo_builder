@@ -71,6 +71,20 @@ const ProductAttributes:Module<any, any> = {
       state.logoTabIndex = logoIndex;
       // Vue.set(state.logoTabIndex, logoIndex, logoIndex)
     },
+    toggleLogoBackgroudMutation(state: Record<any, any>, logoIndex:number) {
+     const logo = state.customLogos[logoIndex];
+      const original_logo = logo.original_logo;
+      const transparent_logo = logo.transparent_logo;
+      let logo_url = '';
+
+     if(logo.is_transparent===true){
+        logo_url = transparent_logo;
+      }else{
+        logo_url = original_logo;
+      }
+      Vue.set(state.customLogos[logoIndex], 'url', logo_url )
+
+    },
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
     },
@@ -253,13 +267,16 @@ const ProductAttributes:Module<any, any> = {
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
     },
-
     deleteCustomLogoTab({commit}, payload){
       commit('customLogoTabDelete', payload)
     },
 
     setLogoTab({commit}, payload){
+      console.log('setLogoTab',payload)
       commit('setLogoTabMutation', payload)
+    },
+    toggleLogoBackgroud({commit}, index){
+      commit('toggleLogoBackgroudMutation', index)
     },
     setCustomTexts({commit}, payload){
       commit('customTexts', payload)

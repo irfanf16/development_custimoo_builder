@@ -208,7 +208,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
         testingCodeToCopy.select()
         try {
           document.execCommand('copy');
-          this.showToast('Testing code was copied successfully', 'SUCCESS');
+          this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
         } catch (err) {
           alert('Oops, unable to copy');
         }
@@ -242,7 +242,8 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
             rotation: this.selectedProduct.logos_setting[index].rotation as number,
             haveControls: Boolean(!this.selectedProduct.logos_setting[index].is_locked),
             side: this.selectedProduct.logos_setting[index].side,
-            customLogo: true
+            customLogo: true,
+            is_transparent: false
           }
           this.$store.dispatch('setCustomLogos', logo)
         }else{

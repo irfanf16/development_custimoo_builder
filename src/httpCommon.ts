@@ -25,11 +25,9 @@ http.interceptors.request.use((request: AxiosRequestConfig ) => {
   const jwtToken = localStorage.getItem('jwtToken')
   if (jwtToken) {
     request.headers.CustomerToken = `${jwtToken}`
-    request.headers.BrowserToken = localStorage.getItem('browserToken')
   }
   else{
     request.headers.CustomerToken = ''
-    request.headers.BrowserToken = localStorage.getItem('browserToken')
   }
 
   return request
@@ -40,7 +38,6 @@ http.interceptors.response.use(function (response) {
 }, function (error) {
   if (401 === error.response.status) {
     localStorage.setItem('access_token', '');
-    localStorage.setItem('browserToken', '');
     localStorage.setItem('jwtToken', '');
     location.reload()
   } else {
