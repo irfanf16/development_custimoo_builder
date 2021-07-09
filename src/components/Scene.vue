@@ -98,8 +98,6 @@ import rgbHex from 'rgb-hex'
       withConnection: true
     })
 
-
-
     function renderIconDelete(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
       let size = 30;
       ctx.save();
@@ -409,7 +407,7 @@ export default class Scene extends Vue {
           left: left,
           top: top
         })
-        otherSideObject.rotate(360 - item.rotation as number)
+        otherSideObject.rotate(item.rotation as number)
       }
     }
     object.setCoords()
@@ -964,9 +962,6 @@ export default class Scene extends Vue {
         if (otherSideObjects[addIndex]) {
           otherSideObjects[addIndex].left = addLeft
           otherSideObjects[addIndex].top = addTop
-          console.log(target.angle)
-          otherSideObjects[addIndex].angle = 360 - target.angle
-          console.log(otherSideObjects[addIndex].angle)
           if (side == 'back') {
             this.frontCanvas.renderAll()
           } else {
@@ -981,7 +976,6 @@ export default class Scene extends Vue {
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
-          objectAdd.angle = 360 - objectAdd.angle
           otherSideObjects[addIndex] = objectAdd
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)

@@ -332,7 +332,12 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
-    this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
+    //only set logo colors if index is 0
+    if(this.customLogoIndex == 0) {
+      this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
+    }
+
+
   }
 
   public deleteFirstLogo() {
