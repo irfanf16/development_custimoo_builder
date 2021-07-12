@@ -208,6 +208,22 @@ export default class Scene extends Vue {
   customLogosChanged(newVal: [Record<any, any>]) {
     if(this.mounted && this.logoAllowed) {
       const self = this
+      if(this.customLogoObjects.length != this.customLogos.length) {
+        let deleteIndex: number[] = []
+        this.customLogoObjects.forEach((item: Record<any, any>, index: number) => {
+          if(item && !this.customLogos[item.logoIndex]) {
+            this.frontCanvas.remove(this.customLogoObjects[item.logoIndex])
+            if (this.backCanvas) {
+              this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
+            }
+            this.otherSideLogos[item.logoIndex] = null
+            deleteIndex.push(index)
+          }
+        })
+        deleteIndex.forEach((item: number) => {
+          Vue.delete(this.customLogoObjects, item)
+        })
+      }
       newVal.forEach((logo: Record<any, any>, index: number) => {
         let logoUrl = logo? (this.storageUrl + logo.url).trim().split(' ').join('%20') : ''
         if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element.src != logoUrl))){
@@ -632,7 +648,7 @@ export default class Scene extends Vue {
               item.fill = rgbHex(item.fill)
             }
             const pantoneColor = getClosestColor(item.fill)
-            this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone })
+            this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
           }
         }
       })
