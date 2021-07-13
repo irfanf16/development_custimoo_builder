@@ -154,6 +154,8 @@ import {http} from "@/httpCommon"
     LoginForm
   },
   async mounted() {
+    //set jwtToken
+    await this.$store.dispatch('setCustomToken');
     if (this.isAuthenticated) {
       await this.retrieveProducts()
       await this.getFillColors()
@@ -324,7 +326,7 @@ export default class Home extends Vue {
   }
   public async logoutCustomer(){
     await this.$store.dispatch('logoutCustomer');
-    console.log(this.isCustomerAuthenticated)
+    console.log('isCustomerAuthenticated',this.isCustomerAuthenticated)
   }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {
@@ -344,7 +346,7 @@ export default class Home extends Vue {
           this.hasProducts = false
         }
         if(!this.mounted){
-          this.mounted = true
+          this.mounted = true;
         }
       }).catch((e: any) => {
         console.log(e)
