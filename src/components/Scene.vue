@@ -919,7 +919,7 @@ export default class Scene extends Vue {
   }
 
   public addToOtherSide(target: any, side: string) {
-    if(side == 'front' || (this.back && side == 'back')) {
+    if(side == 'back' || (this.back && side == 'front')) {
       let model = this.frontModel
       let canvas = this.frontCanvas
       if (side == 'back' && this.back) {
