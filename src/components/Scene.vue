@@ -1468,7 +1468,7 @@ export default class Scene extends Vue {
     a{
       flex: 0 0 100%;
       max-width: 100%;
-      &:last-child{display: none;}
+      //&:last-child{display: none;}
     }
   }
 }
