@@ -132,6 +132,9 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
           }
         }
       }
+      public showSaveToLockerRoomModal() {
+        this.ref['my-modal'].show()
+      }
     }
 
 </script>

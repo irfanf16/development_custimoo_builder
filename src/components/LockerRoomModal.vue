@@ -164,6 +164,10 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
         }, 1000)
       }
 
+      public showLockerRoomModal() {
+        this.ref['locker-modal'].show()
+      }
+
 
       public async editProduct(lockerIndex: number, productIndex: number){
         const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;

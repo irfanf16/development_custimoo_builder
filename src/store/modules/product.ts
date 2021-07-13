@@ -8,7 +8,7 @@ const Product:Module<any, any> = {
     logoColors:[],
     logoUrl:'',
     eyeIndex: -1,
-    selectedModelIndex: 0
+    selectedModelIndex: 0,
   },
   getters:{
     getProductModels(state:Record<any, any>){
