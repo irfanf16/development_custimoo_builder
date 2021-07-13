@@ -51,7 +51,9 @@ const ProductAttributes:Module<any, any> = {
     },
     CUSTOM_LOGO_WITHOUT_TRIGGER(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
-        Object.assign(state.customLogos[customLogoAttribute.index], customLogoAttribute.data)
+        if(state.customLogos[customLogoAttribute.index]) {
+          Object.assign(state.customLogos[customLogoAttribute.index], customLogoAttribute.data)
+        }
       }
     },
     customLogoDelete(state: Record<any, any>, delCustomLogo: Record<any, any>) {

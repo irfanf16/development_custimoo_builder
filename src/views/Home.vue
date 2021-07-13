@@ -75,10 +75,10 @@
                   <b-button @click="showDesign()" class="change-product-opener" variant="secondary"></b-button>
                 </div>
               </header>
-<!--              <div class="undo-btn-area text-left pt-3">-->
-<!--                <b-button variant="outline-secondary mr-2">Undo</b-button>-->
-<!--                <b-button variant="outline-secondary">Redo</b-button>-->
-<!--              </div>-->
+              <div class="undo-btn-area text-left pt-3">
+                <b-button variant="outline-secondary mr-2" @click="undoAction">Undo</b-button>
+                <b-button variant="outline-secondary">Redo</b-button>
+              </div>
             </div>
           </template>
           <div class="customization-area d-flex flex-wrap justify-content-center align-items-center" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
@@ -302,7 +302,28 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
   }
+  public  undoAction(){
 
+   const redo =  this.$store.getters.getRedoItems;
+    const undo =  this.$store.getters.getUndoItems;
+
+   //first dispatch from redo array
+    if(undo.length > 0) {
+
+      if(redo.length > 0){
+        let redo_item = redo.pop();
+        console.log('redo_item', redo_item);
+        redo_item.value.forEach((data:any, index:number) => {
+          this.$store.dispatch(redo_item.action, { index: index, color: data.value, pantone: data.name, name: data.pantone })
+        })
+      }
+    }
+    console.log('undo',undo)
+  }
+  // public redoAction(){
+  //     // let commit = this.undone.pop();
+  //     this.$store.commit(`${commit.type}`, commit.payload);
+  // }
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
