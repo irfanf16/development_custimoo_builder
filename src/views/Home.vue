@@ -302,22 +302,10 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
   }
-  public  undoAction(){
+  public undoAction(){
+   const redo =  this.$store.getters.getRedoItems
+   const undo =  this.$store.getters.getUndoItems
 
-   const redo =  this.$store.getters.getRedoItems;
-    const undo =  this.$store.getters.getUndoItems;
-
-   //first dispatch from redo array
-    if(undo.length > 0) {
-
-      if(redo.length > 0){
-        let redo_item = redo.pop();
-        console.log('redo_item', redo_item);
-        redo_item.value.forEach((data:any, index:number) => {
-          this.$store.dispatch(redo_item.action, { index: index, color: data.value, pantone: data.name, name: data.pantone })
-        })
-      }
-    }
     console.log('undo',undo)
   }
   // public redoAction(){
