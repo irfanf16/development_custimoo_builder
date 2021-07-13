@@ -39,21 +39,21 @@
                     <b-button :key="'lockerRoom'" @click="getLockerRoomProducts" variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
                   </template>
                   <template v-else>
-                    <b-button :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                    <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                   </template>
-                  <LockerRoomModal />
+                  <LockerRoomModal ref="lockerModal" />
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'savetolocker'" variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
                   </template>
                   <template v-else>
-                    <b-button :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
+                    <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
                   </template>
-                  <AddLockerRoomModal />
+                  <AddLockerRoomModal ref="saveToLockerModal" />
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
                   </template>
                   <template v-else>
-                    <b-button :key="'loginmodalsummary'" variant="outline-secondary" v-b-modal.modal-login>Summary</b-button>
+                    <b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'" variant="outline-secondary" v-b-modal.modal-login>Summary</b-button>
                   </template>
                 </div>
                 <ul class="preview-header-icons">
@@ -61,7 +61,7 @@
                     <b-button v-if="!isCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                     <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
-                    <LoginForm />
+                    <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
                   <li><a @click="shareProduct">
                     <font-awesome-icon :icon="['fas', 'share-alt']"/>
@@ -105,7 +105,7 @@
                     <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="tabIndex > 3">Summary</b-button>
                   </template>
                   <template v-else>
-                    <b-button v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="tabIndex > 3">Summary</b-button>
+                    <b-button @click="setActionBeforeLogin('summary')" v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="tabIndex > 3">Summary</b-button>
                   </template>
                 </div>
               </template>
@@ -154,6 +154,8 @@ import {http} from "@/httpCommon"
     LoginForm
   },
   async mounted() {
+    //set jwtToken
+    await this.$store.dispatch('setCustomToken');
     if (this.isAuthenticated) {
       await this.retrieveProducts()
       await this.getFillColors()
@@ -254,16 +256,29 @@ export default class Home extends Vue {
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts
   }
-  get logoColors():[]{
+  get logoColors(): [] {
     return  this.$store.getters.getLogosColors;
   }
-  get defaultColors() : [Record<any, any>] {
+  get defaultColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultColors
   }
-  get groupColors() : [Record<any, any>] {
+  get groupColors(): [Record<any, any>] {
     return this.$store.getters.getGroupColors
   }
-
+  get actionBeforeLogin(): string {
+    return this.$store.getters.getActionBeforeLogin
+  }
+  public actionAfterLogin() {
+    if(this.actionBeforeLogin == 'lockerRoom') {
+      this.getLockerRoomProducts()
+      this.ref['lockerModal'].showLockerRoomModal()
+    } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
+      this.getLockers()
+      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+    } else {
+      this.buyNow()
+    }
+  }
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
@@ -272,6 +287,11 @@ export default class Home extends Vue {
       console.log(e)
     });
   }
+
+  public setActionBeforeLogin(type: string) {
+    this.$store.commit("ACTION_BEFORE_LOGIN", type);
+  }
+
   public async getLockers(){
     await this.$store.dispatch("getLockers");
   }
@@ -327,7 +347,7 @@ export default class Home extends Vue {
   }
   public async logoutCustomer(){
     await this.$store.dispatch('logoutCustomer');
-    console.log(this.isCustomerAuthenticated)
+    console.log('isCustomerAuthenticated',this.isCustomerAuthenticated)
   }
 
   public retrieveProducts(url = '/list/products', searchCall = false): void {
@@ -347,7 +367,7 @@ export default class Home extends Vue {
           this.hasProducts = false
         }
         if(!this.mounted){
-          this.mounted = true
+          this.mounted = true;
         }
       }).catch((e: any) => {
         console.log(e)

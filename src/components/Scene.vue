@@ -98,8 +98,6 @@ import rgbHex from 'rgb-hex'
       withConnection: true
     })
 
-
-
     function renderIconDelete(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: Record<any, any>, fabricObject: Record<any, any>) {
       let size = 30;
       ctx.save();
@@ -157,6 +155,7 @@ export default class Scene extends Vue {
   private backModel: any
   private showSmall = { front: false, back: this.manageComponents.mobileScreen }
   private svgGroups: any[] = []
+  private initialSvgGroups: any[] = []
   public dimTextFront = new fabric.Text('', {
     fontSize: 20,
     backgroundColor: '#fff',
@@ -209,6 +208,22 @@ export default class Scene extends Vue {
   customLogosChanged(newVal: [Record<any, any>]) {
     if(this.mounted && this.logoAllowed) {
       const self = this
+      if(this.customLogoObjects.length != this.customLogos.length) {
+        let deleteIndex: number[] = []
+        this.customLogoObjects.forEach((item: Record<any, any>, index: number) => {
+          if(item && !this.customLogos[item.logoIndex]) {
+            this.frontCanvas.remove(this.customLogoObjects[item.logoIndex])
+            if (this.backCanvas) {
+              this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
+            }
+            this.otherSideLogos[item.logoIndex] = null
+            deleteIndex.push(index)
+          }
+        })
+        deleteIndex.forEach((item: number) => {
+          Vue.delete(this.customLogoObjects, item)
+        })
+      }
       newVal.forEach((logo: Record<any, any>, index: number) => {
         let logoUrl = logo? (this.storageUrl + logo.url).trim().split(' ').join('%20') : ''
         if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element.src != logoUrl))){
@@ -352,6 +367,8 @@ export default class Scene extends Vue {
       let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
       if(defaultColors.length) {
         this.changeDefaultColors(defaultColors)
+      }else{
+        this.setInitialColors();
       }
     }
   }
@@ -406,7 +423,7 @@ export default class Scene extends Vue {
           left: left,
           top: top
         })
-        otherSideObject.rotate(360 - item.rotation as number)
+        otherSideObject.rotate(item.rotation as number)
       }
     }
     object.setCoords()
@@ -461,6 +478,7 @@ export default class Scene extends Vue {
   }
 
   public changeDefaultColors (defaultColors: [Record<any, any>]): void {
+
     let appliedDefaultColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
@@ -496,6 +514,45 @@ export default class Scene extends Vue {
     }
     this.unHideColorGrouping()
   }
+
+  public setInitialColors (): void {
+
+    let defaultSvgGroups: Record<any, any> = {}
+    this.initialSvgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+        defaultSvgGroups[svgGroup.id] = svgGroup
+    })
+
+    let appliedDefaultColors: string[] = []
+    this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+      appliedDefaultColors[svgGroup.id] = defaultSvgGroups[svgGroup.id].color
+      if (this.mainPreview) {
+          this.$store.dispatch('updateSvgGroups', { index: index, color: defaultSvgGroups[svgGroup.id].color, pantone: defaultSvgGroups[svgGroup.id].pantone })
+      }
+      svgGroup.color = defaultSvgGroups[svgGroup.id].color
+      svgGroup.pantone = defaultSvgGroups[svgGroup.id].pantone
+
+    })
+
+    this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+      item.id = item.id.toLowerCase()
+      if (appliedDefaultColors[item.id]) {
+        item.set('fill', appliedDefaultColors[item.id]);
+      }
+    })
+    this.frontCanvas.renderAll()
+
+    if(this.back) {
+      this.backTexture.getObjects().forEach((item: Record<any, any>) => {
+        item.id = item.id.toLowerCase()
+        if (appliedDefaultColors[item.id]) {
+          item.set('fill', appliedDefaultColors[item.id]);
+        }
+      })
+      this.backCanvas.renderAll()
+    }
+    this.unHideColorGrouping()
+  }
+
 
   public unHideColorGrouping() {
     if(this.colorGrouping) {
@@ -560,6 +617,7 @@ export default class Scene extends Vue {
 
   public getSvgGroups(): void {
     this.svgGroups = []
+    this.initialSvgGroups = []
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
       if(!this.containsObject({ id: item.id })) {
@@ -590,13 +648,14 @@ export default class Scene extends Vue {
               item.fill = rgbHex(item.fill)
             }
             const pantoneColor = getClosestColor(item.fill)
-            this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone })
+            this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
           }
         }
       })
     }
 
     this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
+    this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
 
     if (this.mainPreview) {
       this.$store.dispatch('setSvgGroups', this.svgGroups)
@@ -919,9 +978,6 @@ export default class Scene extends Vue {
         if (otherSideObjects[addIndex]) {
           otherSideObjects[addIndex].left = addLeft
           otherSideObjects[addIndex].top = addTop
-          console.log(target.angle)
-          otherSideObjects[addIndex].angle = 360 - target.angle
-          console.log(otherSideObjects[addIndex].angle)
           if (side == 'back') {
             this.frontCanvas.renderAll()
           } else {
@@ -936,7 +992,6 @@ export default class Scene extends Vue {
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
-          objectAdd.angle = 360 - objectAdd.angle
           otherSideObjects[addIndex] = objectAdd
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)

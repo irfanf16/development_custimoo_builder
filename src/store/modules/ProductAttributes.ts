@@ -16,7 +16,8 @@ const ProductAttributes:Module<any, any> = {
     rosterDetails: [],
     productionSVGs: {},
     lockerColors:[],
-    logoTabIndex: 0
+    logoTabIndex: 0,
+    actionBeforeLogin: ''
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
@@ -56,13 +57,10 @@ const ProductAttributes:Module<any, any> = {
     customLogoDelete(state: Record<any, any>, delCustomLogo: Record<any, any>) {
       if(delCustomLogo){
          Vue.set(state.customLogos, delCustomLogo.index, null)
-        // state.customLogos.splice(delCustomLogo.index, 1)
-        // Vue.delete(state.customLogos, delCustomLogo.index)
       }
     },
     customLogoTabDelete(state: Record<any, any>, delCustomTabLogo: Record<any, any>) {
       if(delCustomTabLogo){
-        // Vue.set(state.customLogos, delCustomTabLogo.index, null)
         // state.customLogos.splice(delCustomLogo.index, 1)
         Vue.delete(state.customLogos, delCustomTabLogo.index)
       }
@@ -203,6 +201,9 @@ const ProductAttributes:Module<any, any> = {
         return item
       })
       state.lockerColors = payload
+    },
+    ACTION_BEFORE_LOGIN(state: Record<any, any>, action: string){
+      state.actionBeforeLogin = action
     }
   },
   getters: {
@@ -241,6 +242,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getLockerColors: state => {
       return state.lockerColors
+    },
+    getActionBeforeLogin: state => {
+      return state.actionBeforeLogin
     }
   },
   actions: {

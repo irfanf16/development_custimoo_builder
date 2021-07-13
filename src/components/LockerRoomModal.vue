@@ -164,6 +164,10 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
         }, 1000)
       }
 
+      public showLockerRoomModal() {
+        this.ref['locker-modal'].show()
+      }
+
 
       public async editProduct(lockerIndex: number, productIndex: number){
         const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
@@ -208,7 +212,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
         testingCodeToCopy.select()
         try {
           document.execCommand('copy');
-          this.showToast('Testing code was copied successfully', 'SUCCESS');
+          this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
         } catch (err) {
           alert('Oops, unable to copy');
         }

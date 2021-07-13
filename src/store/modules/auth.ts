@@ -1,4 +1,5 @@
 const provider_id = process.env.VUE_APP_PROVIDER_ID
+import Vue from "vue";
 import {http, noTokenRequest} from "@/httpCommon";
 import { Module } from "vuex";
 const Auth:Module<any, any> = {
@@ -9,7 +10,7 @@ const Auth:Module<any, any> = {
   },
   getters:{
     isAuthenticated: (state: any) => state.token || localStorage.getItem("access_token"),
-    isCustomerAuthenticated: (state: any) => !!state.jwtToken || !!localStorage.getItem("jwtToken"),
+    isCustomerAuthenticated: (state: any) => !!state.jwtToken,
     getCustomer:(state:any) => {
       return state.customer || localStorage.getItem("customer") ? JSON.parse(localStorage.getItem("customer") as string) : ''
     }
@@ -29,6 +30,9 @@ const Auth:Module<any, any> = {
       localStorage.setItem('jwtToken', '')
       state.customer = ''
       state.jwtToken = ''
+    },
+    SET_CUSTOMER_TOKEN(state:any){
+      state.jwtToken = localStorage.getItem('jwtToken') ? localStorage.getItem('jwtToken') : ''
     }
   },
   actions:{
@@ -50,6 +54,9 @@ const Auth:Module<any, any> = {
     },
     async logoutCustomer({commit}){
       commit('REMOVE_CUSTOMER')
+    },
+    async setCustomToken({commit}){
+      commit('SET_CUSTOMER_TOKEN')
     }
 
   }
