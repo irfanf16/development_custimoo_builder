@@ -1278,8 +1278,8 @@ export default class Scene extends Vue {
             }
 
             img.on('selected', (e: Record<any, any>) => {
-              console.log("event",e);
-              console.log("logoIndex",logoIndex)
+              //console.log("event",e);
+              //console.log("logoIndex",logoIndex)
               //this.$store.dispatch('setLogoTab', logoIndex)
               this.$root.$emit('changeLogoTabIndex', logoIndex);
               this.showDimensions(e, dimText)
