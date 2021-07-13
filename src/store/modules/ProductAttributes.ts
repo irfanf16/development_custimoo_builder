@@ -17,7 +17,9 @@ const ProductAttributes:Module<any, any> = {
     productionSVGs: {},
     lockerColors:[],
     logoTabIndex: 0,
-    actionBeforeLogin: ''
+    actionBeforeLogin: '',
+    undoItems : [],
+    redoItems:[]
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
@@ -245,7 +247,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getActionBeforeLogin: state => {
       return state.actionBeforeLogin
-    }
+    },
+    getUndoItems:(state)=> state.undoItems,
+    getRedoItems:(state)=> state.redoItems
   },
   actions: {
     setSelectedIndex({commit}, payload) {

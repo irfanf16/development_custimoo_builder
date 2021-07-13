@@ -2,22 +2,14 @@ import { Module } from "vuex";
 const Useage:Module<any, any> = {
   state:{
     undoItems : [],
-    redo:[
-      {"value":[{"name":"Color One","color":null,"pantone":null},
-          {"name":"Color Two","color":null,"pantone":null},
-          {"name":"Color Three","color":null,"pantone":null},
-          {"name":"Color Four","color":null,"pantone":null}], "action":"setDefaultColor"}
-      // {value:[], action: 'overRideGroupColors'}
-      ]
+    redoItems:[]
   },
   getters:{
     getUndoItems:(state)=> state.undoItems,
-    getRedoItems:(state)=> state.redo
+    getRedoItems:(state)=> state.redoItems
   },
   actions:{
-
     updateUndo({commit}, payload){
-      console.log(payload)
       commit('UPDATE_UNDO', payload);
     },
     updateRedo({commit}, payload){
@@ -26,9 +18,7 @@ const Useage:Module<any, any> = {
   },
   mutations:{
     UPDATE_UNDO:(state, payload)=> state.undoItems.push(payload),
-    UPDATE_REDO:(state, payload) => state.redo.push(payload)
+    UPDATE_REDO:(state, payload) => state.redoItems.push(payload)
   }
 }
-
-
 export default Useage
