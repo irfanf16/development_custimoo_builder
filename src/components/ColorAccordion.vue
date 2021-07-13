@@ -93,8 +93,8 @@ export default class ColorAccordion extends Vue {
 
   public selectType(index: number, showOther = false) {
 
-    console.log('showOther',showOther);
-    console.log('index',index);
+    //console.log('showOther',showOther);
+    //console.log('index',index);
 
     if (showOther){
       this.othersActive = true;
@@ -104,7 +104,7 @@ export default class ColorAccordion extends Vue {
     }
 
 
-    console.log('this.productColors',this.productColors);
+    //console.log('this.productColors',this.productColors);
 
     this.selectTypeIndex = index
     this.showOther = showOther
@@ -120,6 +120,7 @@ export default class ColorAccordion extends Vue {
 
   public setColor(color: Record<any, any>) {
     this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectAccordionIndex].id, color: color.value, pantone: color.name })
+
     this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: color.colorName, name: '' })
     // if(color.colorName) {
     //   this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: color.colorName, name: '' })

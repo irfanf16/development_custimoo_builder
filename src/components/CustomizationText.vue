@@ -48,7 +48,7 @@
         </div>
       </div>
       <div class="outline-slider-area pt-4">
-        <template>
+        <template v-if="customTexts[customTextIndex].outlineEnabled">
           <div>
             <label for="range-2 fz-16">Outline Width</label>
             <b-form-input class="mt-2" id="range-2" v-model="outLineWidthValue" @change="outLineWidthValueChanged" type="range" min="0" max="10" step="1"></b-form-input>

@@ -302,7 +302,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
               // console.log('else colors',colors);
               // this.processColors(colors)
 
-              console.log('this.colors',this.colors);
               let colors = this.colors;
               this.processColors(colors)
 
