@@ -283,33 +283,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       if (this.customLogos.length) {
       if (this.customLogos[0] && this.customLogos[0].url) {
         this.$store.dispatch("SET_LOGO_URL", {logoUrl: this.customLogos[0].url})
-        this.$nextTick(() => {
-          const colorThief = new ColorThief();
-          const img = this.$refs.logoImageExtract as HTMLImageElement
-          if (img.complete) {
-            // let colors = colorThief.getPalette(img,4)
-            // console.log('if colors',colors);
-            // this.processColors(colors)
-
-
-            console.log('this.colors',this.colors);
-            let colors = this.colors;
-            this.processColors(colors)
-
-          } else {
-            img.addEventListener('load', () => {
-              // let colors = colorThief.getPalette(img,4)
-              // console.log('else colors',colors);
-              // this.processColors(colors)
-
-              console.log('this.colors',this.colors);
-              let colors = this.colors;
-              this.processColors(colors)
-
-            });
-          }
-
-        })
+        this.processColors(this.colors)
       }
     }
   }
@@ -336,8 +310,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     if(this.customLogoIndex == 0) {
       this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
     }
-
-
   }
 
   public deleteFirstLogo() {

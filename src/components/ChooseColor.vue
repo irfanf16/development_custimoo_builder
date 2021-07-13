@@ -6,7 +6,7 @@
         <div>
           <div class="color-circle chosen-colors-section"
                :style="{ background : chooseColor.color? chooseColor.color : ' url(' + colorImage + ') no-repeat 50% 50% / 14px' }"></div>
-          <strong class="chosen-colors-section">{{ chooseColor.name }}</strong>
+          <strong class="chosen-colors-section">{{ chooseColor.title }}</strong>
           <span v-if="chooseColor.color" class="remove-default-color" @click="removeSingleColor(index)"><font-awesome-icon :icon="['fas', 'times']"/></span>
         </div>
       </a>

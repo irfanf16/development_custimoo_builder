@@ -5,7 +5,7 @@
         <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         <h2>Front</h2>
       </a>
-      <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}">
+      <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}" v-if="back">
         <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         <h2>Back</h2>
       </a>
@@ -446,7 +446,8 @@ export default class Scene extends Vue {
           this.$store.dispatch('updateSvgGroups', {
             index: svgIndex,
             color: groupColors[item.id].color,
-            pantone: groupColors[item.id].pantone
+            pantone: groupColors[item.id].pantone,
+            name: groupColors[item.id].name
           })
         }
       }
@@ -467,7 +468,8 @@ export default class Scene extends Vue {
             this.$store.dispatch('updateSvgGroups', {
               index: svgIndex,
               color: groupColors[item.id].color,
-              pantone: groupColors[item.id].pantone
+              pantone: groupColors[item.id].pantone,
+              name: groupColors[item.id].name
             })
           }
         }
@@ -478,16 +480,22 @@ export default class Scene extends Vue {
   }
 
   public changeDefaultColors (defaultColors: [Record<any, any>]): void {
-
     let appliedDefaultColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
       appliedDefaultColors[svgGroup.id] = defaultColors[useColorIndex].color
       if (this.mainPreview) {
-        this.$store.dispatch('updateSvgGroups', { index: index, color: defaultColors[useColorIndex].color, pantone: defaultColors[useColorIndex].pantone })
+        this.$store.dispatch('updateSvgGroups',
+          {
+            index: index,
+            color: defaultColors[useColorIndex].color,
+            pantone: defaultColors[useColorIndex].pantone,
+            name: defaultColors[useColorIndex].name
+          })
       }
       svgGroup.color = defaultColors[useColorIndex].color
       svgGroup.pantone = defaultColors[useColorIndex].pantone
+      svgGroup.name = defaultColors[useColorIndex].name
 
       useColorIndex++
       if(useColorIndex >= defaultColors.length) {
@@ -516,7 +524,6 @@ export default class Scene extends Vue {
   }
 
   public setInitialColors (): void {
-
     let defaultSvgGroups: Record<any, any> = {}
     this.initialSvgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
         defaultSvgGroups[svgGroup.id] = svgGroup
@@ -526,11 +533,17 @@ export default class Scene extends Vue {
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
       appliedDefaultColors[svgGroup.id] = defaultSvgGroups[svgGroup.id].color
       if (this.mainPreview) {
-          this.$store.dispatch('updateSvgGroups', { index: index, color: defaultSvgGroups[svgGroup.id].color, pantone: defaultSvgGroups[svgGroup.id].pantone })
+        this.$store.dispatch('updateSvgGroups',
+          {
+            index: index,
+            color: defaultSvgGroups[svgGroup.id].color,
+            pantone: defaultSvgGroups[svgGroup.id].pantone,
+            name: defaultSvgGroups[svgGroup.id].name
+          })
       }
       svgGroup.color = defaultSvgGroups[svgGroup.id].color
       svgGroup.pantone = defaultSvgGroups[svgGroup.id].pantone
-
+      svgGroup.name = defaultSvgGroups[svgGroup.id].name
     })
 
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
@@ -552,7 +565,6 @@ export default class Scene extends Vue {
     }
     this.unHideColorGrouping()
   }
-
 
   public unHideColorGrouping() {
     if(this.colorGrouping) {
@@ -576,7 +588,7 @@ export default class Scene extends Vue {
             }
             if(!Object.keys(changeColor).length) {
               const closestColor = getClosestColor('#000000')
-              changeColor = {value: closestColor.hex, name: closestColor.pantone}
+              changeColor = {value: closestColor.hex, name: closestColor.name, pantone: closestColor.pantone}
             }
             this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
               item.id = item.id.toLowerCase()
@@ -599,14 +611,16 @@ export default class Scene extends Vue {
               if (svgGroup.id == key.toLowerCase()) {
                 svgIndex = index
                 svgGroup.color = changeColor.value
-                svgGroup.pantone = changeColor.name
+                svgGroup.name = changeColor.name
+                svgGroup.pantone = changeColor.pantone
               }
             })
             if (this.mainPreview) {
               this.$store.dispatch('updateSvgGroups', {
                 index: svgIndex,
                 color: changeColor.value,
-                pantone: changeColor.name
+                name: changeColor.name,
+                pantone: changeColor.pantone
               })
             }
           }
@@ -1294,8 +1308,6 @@ export default class Scene extends Vue {
             }
 
             img.on('selected', (e: Record<any, any>) => {
-              console.log("event",e);
-              console.log("logoIndex",logoIndex)
               //this.$store.dispatch('setLogoTab', logoIndex)
               this.$root.$emit('changeLogoTabIndex', logoIndex);
               this.showDimensions(e, dimText)

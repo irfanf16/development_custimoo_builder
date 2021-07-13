@@ -34,25 +34,24 @@
 
         public logoColorUsed = false
         public previousImageColors = []
-            get imageColors(): any[] {
-            return this.$store.getters.getLogosColors
+        get imageColors(): any[] {
+          return this.$store.getters.getLogosColors
         }
 
         get customLogos(): [Record<any, any>] {
             return this.$store.getters.getCustomLogos
         }
 
-
-        useLogoColors() {
-            this.logoColorUsed = true
-            this.$store.dispatch('setGroupColors', {})
-            for (let i = 0; i < 4; i++) {
+        public useLogoColors() {
+          this.logoColorUsed = true
+          this.$store.dispatch('setGroupColors', {})
+          for (let i = 0; i < 4; i++) {
             if(this.imageColors[i]) {
                 this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone, name: this.imageColors[i].name })
             } else {
                 this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
             }
-            }
+          }
         }
 
         shuffleLogoColors() {
@@ -78,8 +77,9 @@
                 this.$store.dispatch('setDefaultColor', {
                 index: index,
                 color: imageColor.hex,
-                pantone: imageColor.pantone
-                })
+                pantone: imageColor.pantone,
+                name: imageColor.name
+              })
             })
             }
         }

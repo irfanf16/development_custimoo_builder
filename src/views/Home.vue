@@ -452,7 +452,8 @@ export default class Home extends Vue {
         this.$store.dispatch('setDefaultColor', {
           index: index,
           color: imageColor.hex,
-          pantone: imageColor.pantone
+          pantone: imageColor.pantone,
+          name: imageColor.name
         })
       })
     }

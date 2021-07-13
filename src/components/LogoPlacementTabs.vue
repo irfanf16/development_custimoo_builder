@@ -218,9 +218,9 @@ export default class LogoPlacementTabs extends Vue {
     this.$store.dispatch('setGroupColors', {})
     for (let i = 0; i < 4; i++) {
       if(this.imageColors[i]) {
-        this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone })
+        this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone, name: this.imageColors[i].name})
       } else {
-        this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '' })
+        this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
       }
     }
   }
@@ -248,11 +248,11 @@ export default class LogoPlacementTabs extends Vue {
         this.$store.dispatch('setDefaultColor', {
           index: index,
           color: imageColor.hex,
-          pantone: imageColor.pantone
+          pantone: imageColor.pantone,
+          name: imageColor.name
         })
       })
     }
-    console.log(this.imageColors);
   }
 
   public rollbackPreviousColors (): void {
@@ -270,7 +270,6 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public toggleLogoBackground(index: number){
-    console.log(index);
     this.$store.dispatch('toggleLogoBackgroud', index)
    }
 

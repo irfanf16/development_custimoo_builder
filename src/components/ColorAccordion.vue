@@ -119,25 +119,24 @@ export default class ColorAccordion extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
-    this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectAccordionIndex].id, color: color.value, pantone: color.name })
-    this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: color.colorName, name: '' })
-    // if(color.colorName) {
-    //   this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: color.colorName, name: '' })
-    // } else {
-    //   this.$store.dispatch('updateSvgGroups', { index: this.selectAccordionIndex, pantoneName: '', name: '' })
-    // }
-    console.log(this.svgGroups)
+    this.$store.dispatch('updateGroupColors',
+      {
+        index: this.svgGroups[this.selectAccordionIndex].id,
+        color: color.value,
+        pantone: color.pantone,
+        name: color.name
+      })
   }
 
   public changeColor(color: Record<any, any>) {
     let pantoneColor = getClosestColor(color.hex)
-    this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone, colorName: pantoneColor.name})
+    this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
   }
 
   public changePantoneColor() {
     let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
     if (pantoneColor) {
-      this.setColor({value: pantoneColor.hex.toUpperCase(), name: pantoneColor.pantone})
+      this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
       this.pantoneMessage = ''
     }
     else {
