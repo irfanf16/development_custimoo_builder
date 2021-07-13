@@ -75,10 +75,10 @@
                   <b-button @click="showDesign()" class="change-product-opener" variant="secondary"></b-button>
                 </div>
               </header>
-<!--              <div class="undo-btn-area text-left pt-3">-->
-<!--                <b-button variant="outline-secondary mr-2">Undo</b-button>-->
-<!--                <b-button variant="outline-secondary">Redo</b-button>-->
-<!--              </div>-->
+              <div class="undo-btn-area text-left pt-3">
+                <b-button variant="outline-secondary mr-2" @click="undoAction">Undo</b-button>
+                <b-button variant="outline-secondary">Redo</b-button>
+              </div>
             </div>
           </template>
           <div class="customization-area d-flex flex-wrap justify-content-center align-items-center" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
@@ -274,7 +274,7 @@ export default class Home extends Vue {
   }
   public async getLockers(){
     await this.$store.dispatch("getLockers");
-}
+  }
   public showAdvanceCustomization() {
     if (this.isCustomerAuthenticated){
       this.$store.dispatch("getLockers");
@@ -282,6 +282,19 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
   }
+  public undoAction(){
+   let undo =  this.$store.getters.getUndoItems;
+   if (undo.length > 0){
+      let item = undo.pop()
+     if (item.action == 'setDefaultColor')
+     this.$store.dispatch(item.action, item.value)
+     this.$store.dispatch('updateRedo', item)
+   }
+  }
+  // public redoAction(){
+  //     // let commit = this.undone.pop();
+  //     this.$store.commit(`${commit.type}`, commit.payload);
+  // }
 
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
