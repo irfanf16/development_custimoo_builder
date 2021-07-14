@@ -2,7 +2,7 @@
   <div class="accordion my-3" role="tablist">
     <b-card no-body>
       <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-1 class="p-3" @click="pantoneNameFun"><span class="text">Colors</span> <span
+        <b-button block v-b-toggle.accordion-1 class="p-3"><span class="text">Colors</span> <span
           class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-1" visible accordion="my-accordion" role="tabpanel">
@@ -11,8 +11,10 @@
             <button v-for="(svgColor, index) in svgGroups" :key="index">
               <span class="text-uppercase">{{ svgColor.id }}</span>
               <span class="color-circle" :style="{background: svgColor.color}"></span>
-              <span class="text-uppercase">{{ svgColor.pantone }}</span>
-              <span class="text-uppercase">{{ svgColor.name }}</span>
+              <span class="text-left">
+                <span class="text-uppercase d-block">{{ svgColor.pantone }}</span>
+                <span class="text-uppercase d-block">{{ svgColor.name }}</span>
+              </span>
             </button>
           </div>
         </b-card-body>
@@ -129,9 +131,6 @@ export default class OrderAccordion extends Vue {
     return this.$store.getters.getProductModels
   }
 
-  public pantoneNameFun() {
-    console.log(this.svgGroups)
-  }
 }
 </script>
 
