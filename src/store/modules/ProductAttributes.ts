@@ -70,8 +70,8 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     setLogoTabMutation(state: Record<any, any>, logoIndex:number) {
-      state.logoTabIndex = logoIndex;
-      // Vue.set(state.logoTabIndex, logoIndex, logoIndex)
+      //state.logoTabIndex = logoIndex;
+       Vue.set(state.logoTabIndex, logoIndex, logoIndex)
     },
     toggleLogoBackgroudMutation(state: Record<any, any>, logoIndex:number) {
      const logo = state.customLogos[logoIndex];

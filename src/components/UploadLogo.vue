@@ -240,7 +240,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         }else{
           logo_url = original_logo;
         }
-        console.log(this.customLogos)
 
         let payload = [{
           index: this.customLogoIndex,
