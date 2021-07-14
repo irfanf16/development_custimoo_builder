@@ -64,10 +64,10 @@
                     <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
                   <li>
-                    <a :id="'share'+ind" @click="shareProduct">
+                    <a :id="'share'" @click="shareProduct">
                       <font-awesome-icon :icon="['fas', 'share-alt']"/>
                     </a>
-                    <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="click">
+                    <b-tooltip :target="'share'" custom-class="share-tooltip" placement="bottom" triggers="click">
                       <div class="share-holder">
                         <h3>Copy link and Share</h3>
                         <div class="share-form">
