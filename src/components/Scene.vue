@@ -861,6 +861,15 @@ export default class Scene extends Vue {
     canvas.on('object:moving', (e) => {
       self.objectScaling(e, side)
     });
+
+    canvas.on('object:scaling', (e) => {
+      let dimText = this.dimTextFront
+      if (e.target.side == 'back') {
+        dimText = this.dimTextBack
+      }
+      this.showDimensions(e, dimText)
+    });
+
   }
 
   public objectScaling(e: any, side: string) {
@@ -1328,7 +1337,7 @@ export default class Scene extends Vue {
     dimText.set({
       left: object.left,
       top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-      text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
+      text: 'Size '+ (object.width * object.scaleX * this.measurementRatio).toFixed(1) + 'cm x ' + (object.height * object.scaleY * this.measurementRatio).toFixed(1) + 'cm',
       visible: true
     }).bringToFront()
   }
