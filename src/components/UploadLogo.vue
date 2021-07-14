@@ -34,7 +34,12 @@
       </div>
 
       <div class="upload-logo-content">
-        <h3>{{ customLogos.length == 0 ? 'Upload Team Logo' : 'Upload logo' }}</h3>
+        <template v-if="customLogoIndex === 0">
+          <h3>{{ customLogos[0] && customLogos[0].url? 'Replace Team Logo' : 'Upload Team Logo' }}</h3>
+        </template>
+        <template v-else>
+          <h3>{{ customLogos[customLogoIndex] && customLogos[customLogoIndex].url? 'Replace Logo' : 'Upload Logo' }}</h3>
+        </template>
         <h4>Image Requirements</h4>
         <p>Need High Res Image</p>
       </div>
@@ -235,7 +240,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         }else{
           logo_url = original_logo;
         }
-
+        console.log(this.customLogos)
 
         let payload = [{
           index: this.customLogoIndex,
