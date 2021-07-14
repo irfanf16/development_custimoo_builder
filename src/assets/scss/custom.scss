@@ -1957,7 +1957,10 @@ button{
                 position: relative;
             }
             a{
-                max-width: 450px;
+                max-width: 400px;
+                @media only screen and (min-width: 1399px){
+                    max-width: 450px;
+                }
                 &.show-small{
                     max-width: 70px;
                     position: absolute;

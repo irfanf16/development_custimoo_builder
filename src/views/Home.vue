@@ -63,9 +63,24 @@
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
-                  <li><a @click="shareProduct">
-                    <font-awesome-icon :icon="['fas', 'share-alt']"/>
-                  </a></li>
+                  <li>
+                    <a :id="'share'+ind" @click="shareProduct">
+                      <font-awesome-icon :icon="['fas', 'share-alt']"/>
+                    </a>
+                    <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="click">
+                      <div class="share-holder">
+                        <h3>Copy link and Share</h3>
+                        <div class="share-form">
+                          <b-form inline>
+<!--                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>-->
+                            <b-form-input></b-form-input>
+                            <b-button variant="primary">Copy Link</b-button>
+<!--                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>-->
+                          </b-form>
+                        </div>
+                      </div>
+                    </b-tooltip>
+                  </li>
                   <li><a>
                     <font-awesome-icon :icon="['fas', 'redo-alt']"/>
                   </a></li>
@@ -684,6 +699,7 @@ export default class Home extends Vue {
     //@media only screen and (min-width: 992px){font-size: 18px;}
     li {
       margin: 0 0 0 15px;
+      position: relative;
       @media only screen and (min-width: 768px){margin: 0 0 0 12px;}
       .btn{
         margin: 0 0 0 10px;
@@ -707,6 +723,9 @@ export default class Home extends Vue {
           overflow: hidden;
           margin: 0 5px 0 0;
         }
+      }
+      a{
+        cursor: pointer;
       }
       &:first-child{margin: 0;}
     }
