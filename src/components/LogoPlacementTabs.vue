@@ -1,12 +1,12 @@
 <template>
   <div>
-    <b-button class="add-logo-btn"  v-if="customLogos.length < allowedLogosLimit" @click="addTab(customLogos.length)">
+    <b-button class="add-logo-btn" v-if="customLogos.length < allowedLogosLimit" @click="addTab(customLogos.length)">
       +
     </b-button>
     <b-tabs>
       <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
         <template #title>
-          <span> {{  index == 0 ? 'Team Logo' : 'logo ' + index  }}</span>
+          <span>{{  index == 0 ? 'Team Logo' : 'logo ' + index  }}</span>
           <div v-if="index === customLogos.length - 1 && index != 0">
             <span class="remove-logo" @click="removeLogoTab(index)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
@@ -183,7 +183,7 @@ export default class LogoPlacementTabs extends Vue {
         customLogo: true,
         status: 'not acc'
       }
-      this.tabIndex = this.tabIndex + 1;
+      this.tabIndex = index;
       this.$store.dispatch('setCustomLogos', logo)
       this.$store.dispatch('setLogoTab', this.tabIndex)
      }
@@ -193,7 +193,7 @@ export default class LogoPlacementTabs extends Vue {
     let payload = {
       index: index
     }
-    this.tabIndex = this.tabIndex - 1;
+    this.tabIndex = index;
     this.$store.dispatch('deleteCustomLogoTab', payload)
   }
 
