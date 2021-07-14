@@ -132,6 +132,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: () => { return [] }}) readonly logosSettings !: [Record<any, any>]
   @Prop({required: false, default: () => { return [] }}) readonly productNamesSetting !: [Record<any, any>]
   @Prop({required: false}) readonly logoAllowed !: boolean
+  @Prop({required: false}) readonly multipleLogo !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
   @Prop({required: true, default: 10}) readonly measurementRatio!: number;
@@ -1213,6 +1214,11 @@ export default class Scene extends Vue {
   }
 
   public addLogos(logos: [Record<any, any>], logoIndex: null|number = null) {
+    if (this.multipleLogo !== undefined && !this.multipleLogo) {
+      if (logoIndex > 0) {
+        return false;
+      }
+    }
     //custom debug
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
