@@ -692,7 +692,7 @@ export default class Scene extends Vue {
     if(Object.keys(this.lockerGroupColors).length) {
       this.changeGroupColor(this.lockerGroupColors)
     }
-    else if(Object.keys(this.groupColors).length && !this.lockerDefaultColors) {
+    else if(Object.keys(this.groupColors).length && !this.lockerDefaultColors.length) {
       this.changeGroupColor(this.groupColors)
     }
   }
