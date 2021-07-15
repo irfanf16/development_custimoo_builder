@@ -26,7 +26,7 @@
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs :tabIndexNew="tabIndex" @tabIndexChange="changeTabs"/>
+            <CustomizationTabs :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
@@ -228,6 +228,7 @@ export default class Home extends Vue {
   public showModal = false
 
   public extractedcolorclass = ""
+
 
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab
@@ -496,6 +497,8 @@ export default class Home extends Vue {
       index = 4
     }
     this.tabIndex = index
+    this.$store.dispatch('setTabMain',{value:index})
+    console.log('index',index)
   }
 
   public buyNow() {
@@ -507,6 +510,8 @@ export default class Home extends Vue {
   public myFilter() {
     this.isActive = !this.isActive
   }
+
+
 
   // public resetPreview() {
   //   this.$store.dispatch('defaultColors', [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}])

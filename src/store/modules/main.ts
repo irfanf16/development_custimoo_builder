@@ -21,7 +21,8 @@ const Main:Module<any, any> = {
       textHide: !mobileScreen,
       styleHide: !mobileScreen,
       teamHide: !mobileScreen
-    }
+    },
+    tabIndexMain: 0
   },
   mutations: {
     manageComponents(state: Record<any, any>, payload: Record<any, any>) {
@@ -29,6 +30,9 @@ const Main:Module<any, any> = {
     },
     SET_HIDE_TAB(state: Record<any, any>, payload: Record<any, any>) {
       state.hideTab[payload.index] = payload.value
+    },
+    SET_TAB_MAIN(state: Record<any, any>, payload: Record<any, any>) {
+      state.tabIndexMain = payload.value
     }
   },
   getters: {
@@ -37,6 +41,9 @@ const Main:Module<any, any> = {
     },
     getHideTab: state => {
       return state.hideTab
+    },
+    getMainTab: state => {
+      return state.tabIndexMain
     }
   },
   actions: {
@@ -45,6 +52,9 @@ const Main:Module<any, any> = {
     },
     setHideTab({ commit }, payload) {
       commit('SET_HIDE_TAB', payload)
+    },
+    setTabMain({ commit }, payload) {
+      commit('SET_TAB_MAIN', payload)
     },
     setJwtToken() {
       if(!localStorage.getItem('jwtToken')) {
