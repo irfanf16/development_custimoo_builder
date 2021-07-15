@@ -64,7 +64,7 @@
                     <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
                   <li>
-                    <a :id="'share'" @click="shareProduct">
+                    <a :id="'share'" @click="shareProduct(selectedProduct)">
                       <font-awesome-icon :icon="['fas', 'share-alt']"/>
                     </a>
                     <b-tooltip :target="'share'" custom-class="share-tooltip" placement="bottom" triggers="click">
@@ -73,8 +73,8 @@
                         <div class="share-form">
                           <b-form inline>
 <!--                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>-->
-                            <b-form-input></b-form-input>
-                            <b-button variant="primary">Copy Link</b-button>
+                            <b-form-input v-model="shared_link" id="copy-link"></b-form-input>
+                            <b-button variant="primary" @click="copyLink">Copy Link</b-button>
 <!--                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>-->
                           </b-form>
                         </div>
@@ -138,7 +138,7 @@
 
 <script lang="ts">
 
-import {Component, Vue} from 'vue-property-decorator'
+import {Component, Vue, Watch} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
@@ -152,6 +152,7 @@ import CustomizationPreviewThreeD from '@/components/CustomizationPreviewThreeD.
 import ExtractedColors from '@/components/ExtractedColors.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import {http} from "@/httpCommon"
+import set = Reflect.set;
 
 @Component<Home>({
   components: {
@@ -197,6 +198,9 @@ import {http} from "@/httpCommon"
           }
         });
         }, 2000)
+      setTimeout(() => {
+        this.productUpdated = true
+      }, 10000)
     }
     this.jwtToken = localStorage.getItem('jwtToken') as string
     await this.$store.dispatch('setCategories')
@@ -223,10 +227,11 @@ export default class Home extends Vue {
   private jwtToken !: string
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public mounted = false
+  public productUpdated = false
   public previousImageColors = []
   public logoColorUsed = false
   public showModal = false
-
+  public shared_link = ''
   public extractedcolorclass = ""
 
   get hideTab(): Record<any, any> {
@@ -255,6 +260,26 @@ export default class Home extends Vue {
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
   }
+  @Watch('customLogos', {
+    deep: true
+  })
+  async customLogosChanged(newValL: [Record<any, any>]){
+    try{
+      if (this.getUrlParams()){
+        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let param = {
+          case: 'custom_logos',
+          custom_logos: this.customLogos,
+          url: query
+        }
+        let res = await this.$store.dispatch('updateSharedProduct', param)
+        console.log(res)
+      }
+    }catch (error){
+      console.log(error)
+    }
+  }
+
   get products():[Record<any, any>]{
     return this.$store.getters.getProducts
   }
@@ -264,24 +289,106 @@ export default class Home extends Vue {
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
   }
-
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
   }
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts
   }
+  @Watch('customTexts', {
+    deep: true
+  })
+  async  customTextsChanged(newVal: [Record<any, any>]){
+    try{
+      if (this.getUrlParams()){
+        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let param = {
+          case: 'customtext',
+          customtext: this.customTexts,
+          url: query
+        }
+        let res = await this.$store.dispatch('updateSharedProduct', param)
+        console.log(res)
+      }
+    }catch (error){
+      console.log(error)
+    }
+  }
   get logoColors(): [] {
     return  this.$store.getters.getLogosColors;
+  }
+  @Watch('logoColors', {
+    deep: true
+  })
+  async logoColorsChanged(newVal: [Record<any, any>]) {
+    try{
+      if (this.getUrlParams()){
+        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let param = {
+          case: 'logo_colors',
+          logo_colors: this.logoColors,
+          url: query
+        }
+        let res = await this.$store.dispatch('updateSharedProduct', param)
+        console.log(res)
+      }
+    }catch (error){
+      console.log(error)
+    }
   }
   get defaultColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultColors
   }
+  @Watch('defaultColors', {
+    deep: true
+  })
+  async defaultColorsChanged(newVal: [Record<any, any>]) {
+    try{
+      if (this.getUrlParams()){
+        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let param = {
+          case: 'defaultcolors',
+          defaultcolors: this.defaultColors,
+          url: query
+        }
+       let res = await this.$store.dispatch('updateSharedProduct', param)
+        console.log(res)
+      }
+    }catch (error){
+      console.log(error)
+    }
+  }
   get groupColors(): [Record<any, any>] {
     return this.$store.getters.getGroupColors
   }
+  @Watch('groupColors', {
+    deep: true
+  })
+  async groupColorsChanged(newVal: [Record<any, any>]){
+    try{
+      if (this.getUrlParams()){
+        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let param = {
+          case: 'groupcolors',
+          groupcolors: this.groupColors,
+          url: query
+        }
+        let res = await this.$store.dispatch('updateSharedProduct', param)
+        console.log(res)
+      }
+    }catch (error){
+      console.log(error)
+    }
+  }
   get actionBeforeLogin(): string {
     return this.$store.getters.getActionBeforeLogin
+  }
+  public getUrlParams(){
+    if (this.$route.params.product && this.$route.params.name && this.productUpdated){
+      return true
+    }else{
+      return  false
+    }
   }
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
@@ -386,26 +493,40 @@ export default class Home extends Vue {
       });
     }
   }
-  public shareProduct(){
-    const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-      return item.design_show
-    })
-    let locker = {
-      customer_id: this.customer ? this.customer.id : '',
-      type: 'product',
-      product_id: this.selectedProduct.product_id,
-      style_id: this.selectedProduct.productstyles[this.styleIndex].id,
-      design_id: currentDesign[0].id,
-      custom_logos: this.customLogos,
-      text: this.customTexts,
-      colors: this.logoColors,
-      defaultcolors: this.defaultColors,
-      groupcolors: this.groupColors
-    }
-    let res = this.$store.dispatch('shareProduct', locker)
-    console.log(res)
-  }
 
+  public async shareProduct(){
+    try {
+      const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+        return item.design_show
+      })
+      let locker = {
+        customer_id: this.customer ? this.customer.id : '',
+        type: 'product',
+        product_id: this.selectedProduct.product_id,
+        style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+        design_id: currentDesign[0].id,
+        custom_logos: this.customLogos,
+        text: this.customTexts,
+        colors: this.logoColors,
+        defaultcolors: this.defaultColors,
+        groupcolors: this.groupColors
+      }
+      let res = await this.$store.dispatch('shareProduct', locker)
+      this.shared_link = location.host+"/#/"+res.data.url
+    }catch (error){
+      console.log(error)
+    }
+  }
+  public copyLink(){
+    let testingCodeToCopy = document.querySelector("#copy-link")  as Record<any, any>
+    testingCodeToCopy.select()
+    try {
+      document.execCommand('copy');
+      alert('Product link was copied to clipboard');
+    } catch (err) {
+      alert('Oops, unable to copy');
+    }
+  }
   public searchProducts() {
     this.hasProducts = true
     let url = '/list/products?';

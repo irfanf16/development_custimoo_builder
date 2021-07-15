@@ -86,6 +86,8 @@ export default class ChooseColor extends Vue {
     this.colorPickerActive = false
     this.$store.dispatch('setGroupColors', {})
     this.$store.dispatch('setDefaultColor', { index: this.selectColorIndex, color: color.value, pantone: color.name, pantoneName: '' })
+    this.$store.commit('UPDATE_UNDO', { data: this.defaultColors, action:'setDefaultColor' })
+    console.log(this.defaultColors)
   }
 
   public removeSingleColor(index: Record<any, any>): void {
