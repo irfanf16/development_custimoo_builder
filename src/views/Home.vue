@@ -1,6 +1,6 @@
 <template>
   <div class="page-wrapper m-lg-4">
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
         <template v-if="manageComponents.BasicCustomization">
@@ -178,6 +178,7 @@ import set = Reflect.set;
       await this.getFillColors()
     }
     if (this.$route.params.name) {
+      this.showLoader = true
       setTimeout(async () => {
         let url = 'share/' + this.$route.params.product + '/' + this.$route.params.name
         let res = await this.$store.dispatch('getShareProductDetails', url)
@@ -201,6 +202,7 @@ import set = Reflect.set;
         }, 2000)
       setTimeout(() => {
         this.showLoader = false
+        console.log(this.showLoader)
         this.productUpdated = true
       }, 10000)
     }
@@ -236,7 +238,7 @@ export default class Home extends Vue {
   public shared_link = ''
   public extractedcolorclass = ""
 
-  public showLoader = true
+  public showLoader = false
 
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab
@@ -987,7 +989,7 @@ export default class Home extends Vue {
   background: rgba(255,255,255,0.9);
   z-index: 9999;
   img{
-    max-width: 10%;
+    max-width: 7%;
     display: block;
     margin: 0 auto;
     height: auto;
