@@ -4,7 +4,7 @@
       <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">
           <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
-            <Scene canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
+            <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
               :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: storageUrl+product.productstyles[0].front.file_url}"
                    :backTextureUrl="design.back_design? design.back_design.file_url: ''"
                    :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
@@ -31,6 +31,7 @@ export default {
     return {
       storageUrl: process.env.VUE_APP_STORAGE_URL,
       renderComponent : true,
+      multipleLogo:false
     }
   },
   computed: {

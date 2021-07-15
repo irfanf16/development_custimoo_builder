@@ -82,7 +82,7 @@
                     </b-tooltip>
                   </li>
                   <li><a>
-                    <font-awesome-icon :icon="['fas', 'redo-alt']"/>
+                    <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
                   </a></li>
                 </ul>
                 <div class="change-product-area d-lg-none">
@@ -627,6 +627,10 @@ export default class Home extends Vue {
 
   public myFilter() {
     this.isActive = !this.isActive
+  }
+
+  public resetStore(){
+    this.$store.dispatch('resetStore');
   }
 
   // public resetPreview() {

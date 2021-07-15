@@ -132,6 +132,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: () => { return [] }}) readonly logosSettings !: [Record<any, any>]
   @Prop({required: false, default: () => { return [] }}) readonly productNamesSetting !: [Record<any, any>]
   @Prop({required: false}) readonly logoAllowed !: boolean
+  @Prop({required: false}) readonly multipleLogo !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
   @Prop({required: true, default: 10}) readonly measurementRatio!: number;
@@ -861,6 +862,15 @@ export default class Scene extends Vue {
     canvas.on('object:moving', (e) => {
       self.objectScaling(e, side)
     });
+
+    canvas.on('object:scaling', (e) => {
+      let dimText = this.dimTextFront
+      if (e.target.side == 'back') {
+        dimText = this.dimTextBack
+      }
+      this.showDimensions(e, dimText)
+    });
+
   }
 
   public objectScaling(e: any, side: string) {
@@ -1213,6 +1223,11 @@ export default class Scene extends Vue {
   }
 
   public addLogos(logos: [Record<any, any>], logoIndex: null|number = null) {
+    if (this.multipleLogo !== undefined && !this.multipleLogo) {
+      if (logoIndex > 0) {
+        return false;
+      }
+    }
     //custom debug
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
@@ -1328,7 +1343,7 @@ export default class Scene extends Vue {
     dimText.set({
       left: object.left,
       top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-      text: 'Size: '+ Math.floor(object.width * object.scaleX * this.measurementRatio) + 'cm x ' + Math.floor(object.height * object.scaleY * this.measurementRatio) + 'cm',
+      text: 'Size '+ (object.width * object.scaleX * this.measurementRatio).toFixed(1) + 'cm x ' + (object.height * object.scaleY * this.measurementRatio).toFixed(1) + 'cm',
       visible: true
     }).bringToFront()
   }

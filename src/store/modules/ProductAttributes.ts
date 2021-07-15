@@ -207,6 +207,12 @@ const ProductAttributes:Module<any, any> = {
     ACTION_BEFORE_LOGIN(state: Record<any, any>, action: string){
       state.actionBeforeLogin = action
     },
+    RESET_STORE(state: Record<any, any>){
+      state.customLogos = [];
+      state.customTexts.map(item => item.text = '' );
+      state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
+      state.groupColors = {};
+    },
     UPDATE_UNDO:(state, payload)=> state.undoItems.push(payload),
     UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
     DO_UNDO(state: Record<any, any>) {
@@ -383,6 +389,9 @@ const ProductAttributes:Module<any, any> = {
       await http.get('folder/colors').then(async (res) =>{
        await commit('ADD_LOCKER_ROOM_COLORS', res.data)
       })
+    },
+    resetStore({commit}){
+      commit('RESET_STORE')
     },
     undoAction({commit}, payload){
       commit('DO_UNDO', payload);
