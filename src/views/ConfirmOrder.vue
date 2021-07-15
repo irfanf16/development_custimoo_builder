@@ -7,7 +7,7 @@
                 </b-col>
                 <b-col cols="12" lg="6" class="text-left text-lg-right">
                     <div class="header-buttons">
-                        <b-button @click="homeScreen" variant="outline-secondary">Edit Your Design</b-button>
+                        <b-button @click="homeScreen" variant="outline-secondary">Back to Design</b-button>
 <!--                        <SaveDesignModal />-->
                         <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
                         <AddLockerRoomModal />

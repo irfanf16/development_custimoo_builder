@@ -18,7 +18,7 @@ const ProductAttributes:Module<any, any> = {
     lockerColors:[],
     logoTabIndex: 0,
     actionBeforeLogin: '',
-    undoItems : [],
+    undoItems : [{ action: '', data: null}],
     redoItems:[]
   },
   mutations: {
@@ -206,6 +206,40 @@ const ProductAttributes:Module<any, any> = {
     },
     ACTION_BEFORE_LOGIN(state: Record<any, any>, action: string){
       state.actionBeforeLogin = action
+    },
+    RESET_STORE(state: Record<any, any>){
+      state.customLogos = [];
+      state.customTexts.map((item:Record<any, any>) => item.text = '' );
+      state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
+      state.groupColors = {};
+    },
+    UPDATE_UNDO:(state, payload)=> state.undoItems.push(payload),
+    UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
+    DO_UNDO(state: Record<any, any>) {
+      const lastUndo = state.undoItems.pop()
+      state.redoItems.push(lastUndo)
+      if(lastUndo.action == 'customLogos') {
+        state.customLogos = lastUndo.data
+      }
+      else if (lastUndo.action == 'defaultColor'){
+        console.log('sah ley')
+      }else if (lastUndo.action == 'groupColor'){
+        console.log('sah ley')
+      }
+    },
+    DO_REDO(state:Record<any, any>){
+      if (state.redoItems.length){
+        const lastUndo = state.undoItems.pop()
+        state.redoItems.push(lastUndo)
+        if(lastUndo.action == 'customLogos') {
+          state.customLogos = lastUndo.data
+        }
+        else if (lastUndo.action == 'defaultColor'){
+          console.log('sah ley')
+        }else if (lastUndo.action == 'groupColor'){
+          console.log('sah ley')
+        }
+      }
     }
   },
   getters: {
@@ -355,6 +389,20 @@ const ProductAttributes:Module<any, any> = {
       await http.get('folder/colors').then(async (res) =>{
        await commit('ADD_LOCKER_ROOM_COLORS', res.data)
       })
+    },
+    resetStore({commit}){
+      commit('RESET_STORE')
+    },
+    undoAction({commit}, payload){
+      commit('DO_UNDO', payload);
+    },
+    redoAction({commit}, payload){
+      commit('DO_REDO', payload)
+    },
+    async updateSharedProduct({commit}, payload){
+      console.log(commit)
+      const res = await http.post('updatesharedproduct', payload);
+      return res
     }
   }
 }
