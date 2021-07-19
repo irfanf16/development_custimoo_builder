@@ -9,7 +9,7 @@
           <span>{{ index == 0 ? 'Team Logo' : 'logo ' + index  }}</span>
           <div v-if="index === customLogos.length - 1 && index != 0">
             <span class="remove-logo" @click="removeLogoTab(index)">
-              <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+              <font-awesome-icon :icon="['fas', 'trash-alt']" />
             </span>
           </div>
         </template>
