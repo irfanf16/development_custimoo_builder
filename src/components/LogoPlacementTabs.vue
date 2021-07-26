@@ -28,7 +28,7 @@
                     </a>
                   </template>
                   <template v-else>
-                    <div class="additional-holder">
+                    <div class="additional-holder" @click="addImageOpener()">
                     </div>
                   </template>
                 </div>
@@ -79,7 +79,7 @@
             </div>
           </template>
           <template v-if="manageComponents.LogoArea">
-            <UploadLogo :customLogoIndex="index"/>
+            <UploadLogo :customLogoIndex="index" @showFileInputHander="showFileInput = $event" :showFileInput="showFileInput" ref="logoUploadModalOpener" />
           </template>
         </div>
       </b-tab>
@@ -101,6 +101,7 @@ import SaveColorModal from "@/components/SaveColorModal.vue"
     SaveColorModal
   },
   mounted() {
+
     if(this.numberOfLogosAllowed > 0) {
       this.allowedLogosLimit = this.numberOfLogosAllowed
     }
@@ -108,6 +109,11 @@ import SaveColorModal from "@/components/SaveColorModal.vue"
       // here you need to use the arrow function
       this.tabIndex = index;
     })
+
+    this.$nextTick(function() {
+      this.initFirstLogoTab(0)
+    });
+
   }
 })
 export default class LogoPlacementTabs extends Vue {
@@ -124,7 +130,9 @@ export default class LogoPlacementTabs extends Vue {
       customLogo: true
     }]}}) logosSetting!: [Record<any, any>]
 
+  public ref = this.$refs as Record<any, any>
   public numberOfLogos = 1
+  public showFileInput  = true
 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public selected = 'front'
@@ -153,6 +161,50 @@ export default class LogoPlacementTabs extends Vue {
   }
 
 
+  public async initFirstLogoTab(index: number){
+
+    if(this.$store.getters.getCustomLogos.length < 1){
+      if(this.numberOfLogos < this.allowedLogosLimit) {
+        let logoSetting: Record<any, any>
+        if(this.logosSetting[index]) {
+          logoSetting = this.logosSetting[index] as Record<any, any>
+        }else {
+          logoSetting = {
+            width: 200,
+            x_axis: 150,
+            y_axis: 190,
+            rotation: 0,
+            haveControls: true,
+            side: 'front'
+          }
+        }
+        let logo = {
+          id:null,
+          url: '',
+          width: logoSetting.width,
+          height: logoSetting.height,
+          x_axis: logoSetting.x_axis,
+          y_axis: logoSetting.y_axis,
+          rotation: logoSetting.rotation as number,
+          haveControls: Boolean(!logoSetting.is_locked),
+          side: logoSetting.side,
+          customLogo: true,
+          status: 'not acc'
+        }
+        this.showFileInput = false;
+        await this.$store.dispatch('setCustomLogos', logo)
+        this.tabIndex = this.customLogos.length - 1
+        this.$store.dispatch('setLogoTab', this.tabIndex)
+
+      }
+    }
+
+  }
+
+  public addImageOpener() {
+    this.showFileInput = true;
+    console.log('here')
+  }
 
 
   public async addTab(index: number){

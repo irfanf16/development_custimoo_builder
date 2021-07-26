@@ -7,6 +7,7 @@ const ProductAttributes:Module<any, any> = {
     selectedIndex: 0,
     categories: [],
     customLogos: [],
+    defaultcustomLogos: false,
     customTexts: [],
     styleIndex: 0,
     defaultColors: [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}],
@@ -41,7 +42,7 @@ const ProductAttributes:Module<any, any> = {
       // Vue.set(state.customLogos, state.customLogos.length, customLogo)
       if(customLogo){
         if('logoIndex' in customLogo && customLogo.logoIndex != null) {
-          Vue.set(state.customLogos, customLogo.logoIndex, customLogo)
+         Vue.set(state.customLogos, customLogo.logoIndex, customLogo)
         } else {
           Vue.set(state.customLogos, state.customLogos.length, customLogo)
         }

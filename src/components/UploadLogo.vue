@@ -89,7 +89,11 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 
     if (this.customLogos.length) {
       if (this.customLogos[this.customLogoIndex] && this.customLogos[this.customLogoIndex].url == '') {
-        this.modalHandler()
+       if(this.showFileInput) {
+         this.modalHandler()
+       }else {
+         this.$emit('showFileInputHander',true);
+       }
       }
     }
   }
@@ -100,6 +104,8 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public mounted !: boolean
   public colors:any = [];
   @Prop({required: true}) customLogoIndex!: any
+  @Prop({required: false, default:true}) showFileInput!: boolean
+
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -130,6 +136,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
     this.ref.fileInput.click()
   }
+
 
   public showModal() {
     this.ref.myModal.show()

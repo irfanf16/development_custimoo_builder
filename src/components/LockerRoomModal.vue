@@ -96,7 +96,7 @@
                     </div>
                 </div>
             </b-tab>
-              </template>
+          </template>
           <div class="create-lockerroom">
             <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
             <CreateLockerRoomModal @lockerAdded="lockerAdded" />
