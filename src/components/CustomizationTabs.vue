@@ -53,11 +53,11 @@
               <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
                                  :fontsColors="fontsColors" :fontOptions="fontOptions"/>
             </div>
-            <!-- <div class="px-3 pt-3 p-lg-4 text-right">
+            <div class="px-3 pt-3 p-lg-4 text-right">
               <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
                 +
               </b-button>
-            </div> -->
+            </div>
           </div>
           <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
             <b-tabs>
