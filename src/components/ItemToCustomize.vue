@@ -44,7 +44,7 @@ export default class ItemToCustomize extends Vue {
       border-top: none;
     }
     h2{
-      background: #fff;
+      background: #ffffff;
       @media only screen and (min-width: 992px){
         background: none;
       }

@@ -195,6 +195,7 @@ import set = Reflect.set;
         this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
           if (item.id == res.design_id){
             Vue.set(item, 'design_show', 1)
+            this.$store.dispatch('setSelectedProductDesignID',item.id)
           }else{
             Vue.set(item, 'design_show', 0)
           }
@@ -295,6 +296,9 @@ export default class Home extends Vue {
   }
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
+  }
+  get selectedDesignId():number{
+    return  this.$store.getters.getSelectedDesignId;
   }
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
@@ -430,6 +434,7 @@ export default class Home extends Vue {
     }
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
+    this.$store.dispatch('setWindowView', 2)
   }
   public undoAction(){
    const redo =  this.$store.getters.getRedoItems
@@ -444,6 +449,7 @@ export default class Home extends Vue {
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
+    this.$store.dispatch('setWindowView', 1)
   }
   public showDesign() {
     if(this.manageComponents.mobileScreen){
@@ -493,6 +499,12 @@ export default class Home extends Vue {
         }
         if(!this.mounted){
           this.mounted = true;
+        }
+        this.$store.dispatch('setSelectedProductAndStyle')
+        this.$store.dispatch('setSelectedProductDesign')
+        let windowView = this.$store.getters.getWindowView;
+        if(windowView == 2){
+          this.showAdvanceCustomization();
         }
       }).catch((e: any) => {
         console.log(e)

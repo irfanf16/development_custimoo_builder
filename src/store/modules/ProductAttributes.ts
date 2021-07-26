@@ -19,7 +19,8 @@ const ProductAttributes:Module<any, any> = {
     logoTabIndex: 0,
     actionBeforeLogin: '',
     undoItems : [{ action: '', data: null}],
-    redoItems:[]
+    redoItems:[],
+    selectedDesignId:0
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
@@ -31,6 +32,46 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
+    },
+    SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
+      state.selectedDesignId = payload;
+    },
+    SET_SELECTED_PRODUCT_AND_STYLE(state: Record<any, any>) {
+        if(typeof state.products[state.selectedIndex] === 'undefined'){
+          state.selectedIndex = 0;
+          state.styleIndex=0;
+          state.selectedDesignId =0;
+        }else{
+          if(typeof state.products[state.selectedIndex].productstyles[state.styleIndex] === 'undefined'){
+            state.products[state.selectedIndex].productstyles[state.styleIndex] = 0;
+            state.selectedDesignId =0;
+          }
+        }
+    },
+    SET_SELECTED_PRODUCT_DESIGN(state: Record<any, any>) {
+      if (state.selectedDesignId > 0) {
+      const style_index = state.styleIndex;
+      const product_index = state.selectedIndex
+      if (typeof state.products[product_index].productstyles[style_index] !== 'undefined') {
+        let checkDesignFound = false;
+        let defaultDesignShow = 0;
+        state.products[product_index].productstyles[style_index].productdesigns.map((design: Record<any, any>,index) => {
+          if(design.design_show){
+            defaultDesignShow = index
+          }
+          if (design.id == state.selectedDesignId) {
+            checkDesignFound = true;
+            design.design_show = 1
+          } else {
+            design.design_show = 0
+          }
+        });
+        if(!checkDesignFound){
+          Vue.set(state.products[product_index].productstyles[style_index].productdesigns[defaultDesignShow], 'design_show', 1)
+          state.selectedDesignId = state.products[product_index].productstyles[style_index].productdesigns[defaultDesignShow].id
+        }
+      }
+    }
     },
     categories(state: Record<any, any>, categories: Record<any, any>) {
       if(categories){
@@ -259,6 +300,9 @@ const ProductAttributes:Module<any, any> = {
     getCurrentStyleIndex: state => {
       return state.styleIndex
     },
+    getSelectedDesignId: state => {
+      return state.selectedDesignId
+    },
     getCustomTexts: state => {
       return state.customTexts
     },
@@ -356,6 +400,15 @@ const ProductAttributes:Module<any, any> = {
     },
     setProductionSVGs({commit}, payload){
       commit('productionSVGs', payload)
+    },
+    setSelectedProductDesignID({commit}, payload){
+      commit('SET_SELECTED_PRODUCT_DESIGN_ID', payload);
+    },
+    async setSelectedProductAndStyle({commit}){
+      await commit('SET_SELECTED_PRODUCT_AND_STYLE');
+    },
+    async setSelectedProductDesign({commit}){
+      await commit('SET_SELECTED_PRODUCT_DESIGN');
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
       let done = false;
