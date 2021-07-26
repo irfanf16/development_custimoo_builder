@@ -70,6 +70,7 @@ import {http} from "@/httpCommon";
             if(item.design_name.toLowerCase() == design_name.toLowerCase()) {
               designFound  = true
               Vue.set(item, 'design_show', 1)
+              this.$store.dispatch('setSelectedProductDesignID',item.id)
             } else {
               Vue.set(item, 'design_show', 0)
             }
@@ -79,6 +80,7 @@ import {http} from "@/httpCommon";
               this.selectedProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{
                 if (index ==0 ){
                   Vue.set(this.selectedProduct.productstyles[i].productdesigns[0], 'design_show', 1)
+                  this.$store.dispatch('setSelectedProductDesignID',this.selectedProduct.productstyles[i].productdesigns[0].id)
                 }else{
                   Vue.set(this.selectedProduct.productstyles[i].productdesigns[index], 'design_show', 0);
                 }

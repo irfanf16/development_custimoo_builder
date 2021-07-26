@@ -20,7 +20,8 @@ const ProductAttributes:Module<any, any> = {
     logoTabIndex: 0,
     actionBeforeLogin: '',
     undoItems : [{ action: '', data: null}],
-    redoItems:[]
+    redoItems:[],
+    selectedDesignId:0
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
@@ -32,6 +33,46 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
+    },
+    SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
+      state.selectedDesignId = payload;
+    },
+    SET_SELECTED_PRODUCT_AND_STYLE(state: Record<any, any>) {
+        if(typeof state.products[state.selectedIndex] === 'undefined'){
+          state.selectedIndex = 0;
+          state.styleIndex=0;
+          state.selectedDesignId =0;
+        }else{
+          if(typeof state.products[state.selectedIndex].productstyles[state.styleIndex] === 'undefined'){
+            state.products[state.selectedIndex].productstyles[state.styleIndex] = 0;
+            state.selectedDesignId =0;
+          }
+        }
+    },
+    SET_SELECTED_PRODUCT_DESIGN(state: Record<any, any>) {
+      if (state.selectedDesignId > 0) {
+      const style_index = state.styleIndex;
+      const product_index = state.selectedIndex
+      if (typeof state.products[product_index].productstyles[style_index] !== 'undefined') {
+        let checkDesignFound = false;
+        let defaultDesignShow = 0;
+        state.products[product_index].productstyles[style_index].productdesigns.map((design: Record<any, any>, index:number) => {
+          if(design.design_show){
+            defaultDesignShow = index
+          }
+          if (design.id == state.selectedDesignId) {
+            checkDesignFound = true;
+            design.design_show = 1
+          } else {
+            design.design_show = 0
+          }
+        });
+        if(!checkDesignFound){
+          Vue.set(state.products[product_index].productstyles[style_index].productdesigns[defaultDesignShow], 'design_show', 1)
+          state.selectedDesignId = state.products[product_index].productstyles[style_index].productdesigns[defaultDesignShow].id
+        }
+      }
+    }
     },
     categories(state: Record<any, any>, categories: Record<any, any>) {
       if(categories){
@@ -215,31 +256,60 @@ const ProductAttributes:Module<any, any> = {
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
     },
-    UPDATE_UNDO:(state, payload)=> state.undoItems.push(payload),
-    UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
-    DO_UNDO(state: Record<any, any>) {
-      const lastUndo = state.undoItems.pop()
-      state.redoItems.push(lastUndo)
-      if(lastUndo.action == 'customLogos') {
-        state.customLogos = lastUndo.data
-      }
-      else if (lastUndo.action == 'defaultColor'){
-        console.log('sah ley')
-      }else if (lastUndo.action == 'groupColor'){
-        console.log('sah ley')
-      }
-    },
-    DO_REDO(state:Record<any, any>){
+    UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       if (state.redoItems.length){
+        const item = state.redoItems.find((item:Record<any, any>) => {
+          return item.action == payload.action
+        })
+        if (item){
+          return true
+        }else{
+          if (payload.action == 'defaultColor'){
+            state.redoItems.push({ action: 'defaultColor', data: state.defaultColors })
+          }
+        }
+      }else{
+        if (payload.action == 'defaultColor'){
+          state.redoItems.push({ action: 'defaultColor', data: state.defaultColors})
+        }
+      }
+      state.undoItems.push(payload)
+    },
+    UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
+    DO_UNDO(state: Record<any, any>, payload) {
+      console.log(payload)
+      if (state.undoItems.length) {
         const lastUndo = state.undoItems.pop()
         state.redoItems.push(lastUndo)
+        if (lastUndo.action == 'customLogos') {
+          state.customLogos = lastUndo.data
+        } else if (lastUndo.action == 'defaultColor') {
+          state.defaultColors = lastUndo.data
+        } else if (lastUndo.action == 'groupColor') {
+          state.groupColors = lastUndo.data
+        } else if (lastUndo.action == 'customTexts') {
+          state.customTexts = lastUndo.data
+        }
+      }else{
+        console.log('nothing')
+      }
+    },
+    DO_REDO(state:Record<any, any>, payload){
+      console.log(payload)
+      if (state.redoItems.length){
+        const lastUndo = state.redoItems.pop()
+        state.undoItems.push(lastUndo)
         if(lastUndo.action == 'customLogos') {
           state.customLogos = lastUndo.data
         }
         else if (lastUndo.action == 'defaultColor'){
-          console.log('sah ley')
-        }else if (lastUndo.action == 'groupColor'){
-          console.log('sah ley')
+          state.defaultColors = lastUndo.data
+        }
+        else if (lastUndo.action == 'groupColor'){
+          state.groupColors = lastUndo.data
+        }
+        else if (lastUndo.action == 'customTexts'){
+          state.customTexts = lastUndo.data
         }
       }
     }
@@ -259,6 +329,9 @@ const ProductAttributes:Module<any, any> = {
     getActiveLogoIndex: (state: any) => state.logoTabIndex,
     getCurrentStyleIndex: state => {
       return state.styleIndex
+    },
+    getSelectedDesignId: state => {
+      return state.selectedDesignId
     },
     getCustomTexts: state => {
       return state.customTexts
@@ -357,6 +430,15 @@ const ProductAttributes:Module<any, any> = {
     },
     setProductionSVGs({commit}, payload){
       commit('productionSVGs', payload)
+    },
+    setSelectedProductDesignID({commit}, payload){
+      commit('SET_SELECTED_PRODUCT_DESIGN_ID', payload);
+    },
+    async setSelectedProductAndStyle({commit}){
+      await commit('SET_SELECTED_PRODUCT_AND_STYLE');
+    },
+    async setSelectedProductDesign({commit}){
+      await commit('SET_SELECTED_PRODUCT_DESIGN');
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
       let done = false;

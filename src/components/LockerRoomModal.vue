@@ -185,6 +185,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
           this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
             if (item.id == element.design_id){
               Vue.set(item, 'design_show', 1)
+              this.$store.dispatch('setSelectedProductDesignID',item.id)
             }else{
               Vue.set(item, 'design_show', 0)
             }
