@@ -1,5 +1,6 @@
 <template>
   <div class="page-wrapper m-lg-4">
+    <div class="loader" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
         <template v-if="manageComponents.BasicCustomization">
@@ -26,7 +27,7 @@
         </template>
         <template v-if="manageComponents.AdvanceCustomization">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs :tabIndexNew="tabIndex" @tabIndexChange="changeTabs"/>
+            <CustomizationTabs :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
           </b-col>
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
@@ -177,6 +178,7 @@ import set = Reflect.set;
       await this.getFillColors()
     }
     if (this.$route.params.name) {
+      this.showLoader = true
       setTimeout(async () => {
         let url = 'share/' + this.$route.params.product + '/' + this.$route.params.name
         let res = await this.$store.dispatch('getShareProductDetails', url)
@@ -193,12 +195,15 @@ import set = Reflect.set;
         this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
           if (item.id == res.design_id){
             Vue.set(item, 'design_show', 1)
+            this.$store.dispatch('setSelectedProductDesignID',item.id)
           }else{
             Vue.set(item, 'design_show', 0)
           }
         });
         }, 2000)
       setTimeout(() => {
+        this.showLoader = false
+        console.log(this.showLoader)
         this.productUpdated = true
       }, 10000)
     }
@@ -233,6 +238,9 @@ export default class Home extends Vue {
   public showModal = false
   public shared_link = ''
   public extractedcolorclass = ""
+
+  public showLoader = false
+
 
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab
@@ -288,6 +296,9 @@ export default class Home extends Vue {
   }
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
+  }
+  get selectedDesignId():number{
+    return  this.$store.getters.getSelectedDesignId;
   }
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
@@ -423,6 +434,7 @@ export default class Home extends Vue {
     }
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
+    this.$store.dispatch('setWindowView', 2)
   }
   public undoAction(){
     this.$store.dispatch('undoAction')
@@ -433,6 +445,7 @@ export default class Home extends Vue {
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
+    this.$store.dispatch('setWindowView', 1)
   }
   public showDesign() {
     if(this.manageComponents.mobileScreen){
@@ -482,6 +495,12 @@ export default class Home extends Vue {
         }
         if(!this.mounted){
           this.mounted = true;
+        }
+        this.$store.dispatch('setSelectedProductAndStyle')
+        this.$store.dispatch('setSelectedProductDesign')
+        let windowView = this.$store.getters.getWindowView;
+        if(windowView == 2){
+          this.showAdvanceCustomization();
         }
       }).catch((e: any) => {
         console.log(e)
@@ -613,6 +632,8 @@ export default class Home extends Vue {
       index = 4
     }
     this.tabIndex = index
+    this.$store.dispatch('setTabMain',{value:index})
+    console.log('index',index)
   }
 
   public buyNow() {
@@ -628,6 +649,7 @@ export default class Home extends Vue {
   public resetStore(){
     this.$store.dispatch('resetStore');
   }
+
 
   // public resetPreview() {
   //   this.$store.dispatch('defaultColors', [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}])
@@ -962,6 +984,28 @@ export default class Home extends Vue {
   align-items: center;
   justify-content: center;
   z-index: 99;
+}
+
+.loader{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.9);
+  z-index: 9999;
+  img{
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
 }
 
 

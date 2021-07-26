@@ -18,8 +18,9 @@ const ProductAttributes:Module<any, any> = {
     lockerColors:[],
     logoTabIndex: 0,
     actionBeforeLogin: '',
-    undoItems : [],
-    redoItems:[]
+    undoItems : [{ action: '', data: null}],
+    redoItems:[],
+    selectedDesignId:0
   },
   mutations: {
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
@@ -213,63 +214,31 @@ const ProductAttributes:Module<any, any> = {
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
     },
-    UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
-      if (state.redoItems.length){
-        const item = state.redoItems.find((item:Record<any, any>) => {
-          return item.action == payload.action
-        })
-        if (item){
-          return true
-        }else{
-          if (payload.action == 'defaultColor'){
-            state.redoItems.push({ action: 'defaultColor', data: state.defaultColors })
-          }
-        }
-      }else{
-        if (payload.action == 'defaultColor'){
-          state.redoItems.push({ action: 'defaultColor', data: state.defaultColors})
-        }
-      }
-      state.undoItems.push(payload)
-    },
+    UPDATE_UNDO:(state, payload)=> state.undoItems.push(payload),
     UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
-    DO_UNDO(state: Record<any, any>, payload) {
-      console.log(payload)
-      if (state.undoItems.length) {
-        const lastUndo = state.undoItems.pop()
-        if (!state.redoItems.length){
-          state.redoItems.push(lastUndo)
-        }
-        if (lastUndo.action == 'customLogos') {
-          state.customLogos = lastUndo.data
-        } else if (lastUndo.action == 'defaultColor') {
-          state.defaultColors = lastUndo.data
-        } else if (lastUndo.action == 'groupColor') {
-          state.groupColors = lastUndo.data
-        } else if (lastUndo.action == 'customTexts') {
-          state.customTexts = lastUndo.data
-        }
-      }else{
-        console.log('nothing')
+    DO_UNDO(state: Record<any, any>) {
+      const lastUndo = state.undoItems.pop()
+      state.redoItems.push(lastUndo)
+      if(lastUndo.action == 'customLogos') {
+        state.customLogos = lastUndo.data
+      }
+      else if (lastUndo.action == 'defaultColor'){
+        console.log('sah ley')
+      }else if (lastUndo.action == 'groupColor'){
+        console.log('sah ley')
       }
     },
-    DO_REDO(state:Record<any, any>, payload){
-      console.log(payload)
+    DO_REDO(state:Record<any, any>){
       if (state.redoItems.length){
-        const lastUndo = state.redoItems.pop()
-        console.log(lastUndo)
-        state.undoItems.push(lastUndo)
+        const lastUndo = state.undoItems.pop()
+        state.redoItems.push(lastUndo)
         if(lastUndo.action == 'customLogos') {
           state.customLogos = lastUndo.data
         }
         else if (lastUndo.action == 'defaultColor'){
-          state.defaultColors = lastUndo.data
-        }
-        else if (lastUndo.action == 'groupColor'){
-          state.groupColors = lastUndo.data
-        }
-        else if (lastUndo.action == 'customTexts'){
-          state.customTexts = lastUndo.data
+          console.log('sah ley')
+        }else if (lastUndo.action == 'groupColor'){
+          console.log('sah ley')
         }
       }
     }
@@ -383,7 +352,7 @@ const ProductAttributes:Module<any, any> = {
     setRosterDetails({commit}, payload){
       commit('rosterDetails', payload)
     },
-    updateRosterDetailAttriabute({commit}, payload){
+    updateRosterDetailAttribute({commit}, payload){
       commit('rosterDetailAttribute', payload)
     },
     setProductionSVGs({commit}, payload){
@@ -425,11 +394,11 @@ const ProductAttributes:Module<any, any> = {
     resetStore({commit}){
       commit('RESET_STORE')
     },
-    undoAction({commit}){
-      commit('DO_UNDO', '');
+    undoAction({commit}, payload){
+      commit('DO_UNDO', payload);
     },
-    redoAction({commit}){
-      commit('DO_REDO', '')
+    redoAction({commit}, payload){
+      commit('DO_REDO', payload)
     },
     async updateSharedProduct({commit}, payload){
       console.log(commit)

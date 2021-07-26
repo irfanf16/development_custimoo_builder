@@ -6,10 +6,10 @@
     <b-tabs>
       <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
         <template #title>
-          <span>{{  index == 0 ? 'Team Logo' : 'logo ' + index  }}</span>
+          <span>{{ index == 0 ? 'Team Logo' : 'logo ' + index  }}</span>
           <div v-if="index === customLogos.length - 1 && index != 0">
             <span class="remove-logo" @click="removeLogoTab(index)">
-              <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+              <font-awesome-icon :icon="['fas', 'trash-alt']" />
             </span>
           </div>
         </template>
@@ -39,9 +39,9 @@
               </div>
               <div class="logo-option-area text-center my-3 mb-lg-3">
                 <b-form-checkbox :key="index"
-                  v-model="customLogos[index].is_transparent"
-                  name="transparent-logo-background"
-                  @change="toggleLogoBackground(index)"
+                                 v-model="customLogos[index].is_transparent"
+                                 name="transparent-logo-background"
+                                 @change="toggleLogoBackground(index)"
                 >
                   Remove Logo Background
                 </b-form-checkbox>
@@ -155,7 +155,7 @@ export default class LogoPlacementTabs extends Vue {
 
 
 
-  public addTab(index: number){
+  public async addTab(index: number){
     if(this.numberOfLogos < this.allowedLogosLimit) {
       let logoSetting: Record<any, any>
       if(this.logosSetting[index]) {
@@ -183,17 +183,18 @@ export default class LogoPlacementTabs extends Vue {
         customLogo: true,
         status: 'not acc'
       }
-      this.tabIndex = index;
-      this.$store.dispatch('setCustomLogos', logo)
+
+      await this.$store.dispatch('setCustomLogos', logo)
+      this.tabIndex = this.customLogos.length - 1
       this.$store.dispatch('setLogoTab', this.tabIndex)
-     }
+    }
   }
 
   public removeLogoTab(index: number){
     let payload = {
       index: index
     }
-    this.tabIndex = index;
+    this.tabIndex = this.tabIndex - 1;
     this.$store.dispatch('deleteCustomLogoTab', payload)
   }
 
@@ -271,7 +272,7 @@ export default class LogoPlacementTabs extends Vue {
 
   public toggleLogoBackground(index: number){
     this.$store.dispatch('toggleLogoBackgroud', index)
-   }
+  }
 
 }
 </script>
