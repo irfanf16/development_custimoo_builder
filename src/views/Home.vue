@@ -508,7 +508,7 @@ export default class Home extends Vue {
         }
       }).catch((e: any) => {
         console.log(e)
-        console.log('in catch')
+       // console.log('in catch')
       });
     }
   }

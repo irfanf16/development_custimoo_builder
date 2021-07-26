@@ -6,9 +6,6 @@ import Main from "@/store/modules/main";
 import Product from "@/store/modules/product";
 import createPersistedState from "vuex-persistedstate";
 
-
-
-
 Vue.use(Vuex)
 
 export default new Vuex.Store({
