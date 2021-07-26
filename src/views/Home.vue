@@ -92,7 +92,7 @@
               </header>
               <div class="undo-btn-area text-left pt-3">
                 <b-button variant="outline-secondary mr-2" @click="undoAction">Undo</b-button>
-                <b-button variant="outline-secondary">Redo</b-button>
+                <b-button variant="outline-secondary" @click="redoAction">Redo</b-button>
               </div>
             </div>
           </template>
@@ -425,15 +425,11 @@ export default class Home extends Vue {
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
   }
   public undoAction(){
-   const redo =  this.$store.getters.getRedoItems
-   const undo =  this.$store.getters.getUndoItems
-
-    console.log('undo',undo)
+    this.$store.dispatch('undoAction')
   }
-  // public redoAction(){
-  //     // let commit = this.undone.pop();
-  //     this.$store.commit(`${commit.type}`, commit.payload);
-  // }
+  public redoAction(){
+      this.$store.dispatch('redoAction');
+  }
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})

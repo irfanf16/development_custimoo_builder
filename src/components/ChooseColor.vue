@@ -86,7 +86,7 @@ export default class ChooseColor extends Vue {
     this.colorPickerActive = false
     this.$store.dispatch('setGroupColors', {})
     this.$store.dispatch('setDefaultColor', { index: this.selectColorIndex, color: color.value, pantone: color.name, pantoneName: '' })
-    this.$store.commit('UPDATE_UNDO', { data: this.defaultColors, action:'setDefaultColor' })
+    this.$store.commit('UPDATE_UNDO', { data: this.defaultColors, action: 'defaultColor' })
     console.log(this.defaultColors)
   }
 
@@ -328,6 +328,7 @@ export default class ChooseColor extends Vue {
         @media only screen and (min-width: 1024px) {
           border: 3px solid #fff;
         }
+
         @media only screen and (min-width: 1274px) {
           border: 5px solid #fff;
         }
