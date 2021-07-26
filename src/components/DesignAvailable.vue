@@ -40,6 +40,7 @@ export default class DesignAvailable extends Vue {
     this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {
         Vue.set(design, 'design_show', 1)
+        this.$store.dispatch('setSelectedProductDesignID',design.id);
       } else {
         Vue.set(design, 'design_show', 0)
       }
