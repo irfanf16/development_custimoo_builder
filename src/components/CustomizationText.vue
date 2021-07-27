@@ -7,6 +7,7 @@
         class="mb-2 mr-sm-2 mb-sm-0"
         placeholder="Type Here"
         v-model="customTexts[customTextIndex].text"
+        @input="updateTextField(customTextIndex,$event)"
       ></b-form-input>
       <h4 class="mt-3 mb-2 fz-16">Font Type</h4>
       <div class="font-type-area">
@@ -133,6 +134,10 @@ export default class CustomizationText extends Vue {
     this.$store.commit('customTextAttribute', payload)
   }
   public isHidden= false
+
+  updateTextField(index: number,value: any) {
+    this.$store.dispatch('updateCustomTextAttribute', {index, attribute: 'text', value})
+  }
 }
 </script>
 
