@@ -59,7 +59,6 @@
           unchecked-value="not_accepted">
           Confirm for all logos
         </b-form-checkbox>
-
       </div>
       <div class="upload-logo-buttons">
         <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
