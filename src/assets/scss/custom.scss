@@ -589,7 +589,16 @@ button{
                     position: static;
                     padding: 0;
                     background: none;
+                    border-top: none;
                     .upload-logo-content{display: none;}
+                    .upload-box{
+                        width: 100%;
+                        height: 100%;
+                        margin: 0;
+                        padding: 0;
+                        border: none;
+                        font-size: 0;
+                    }
                 }
 
             }
