@@ -585,6 +585,13 @@ button{
                     border-radius: 50%;
                     overflow: hidden;
                 }
+                .upload-logo-opener{
+                    position: static;
+                    padding: 0;
+                    background: none;
+                    .upload-logo-content{display: none;}
+                }
+
             }
             .logo-placemet-content{
                 width: 144px;

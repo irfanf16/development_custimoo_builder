@@ -28,8 +28,7 @@
                     </a>
                   </template>
                   <template v-else>
-                    <div class="additional-holder" @click="addImageOpener()">
-                    </div>
+                    <UploadLogo :customLogoIndex="index" @showFileInputHander="showFileInput = $event" :showFileInput="showFileInput" ref="logoUploadModalOpener" />
                   </template>
                 </div>
                 <div class="logo-placemet-content">
@@ -459,4 +458,5 @@ export default class LogoPlacementTabs extends Vue {
   display: block;
   width: 100%;
 }
+
 </style>
