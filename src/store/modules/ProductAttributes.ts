@@ -19,7 +19,7 @@ const ProductAttributes:Module<any, any> = {
     lockerColors:[],
     logoTabIndex: 0,
     actionBeforeLogin: '',
-    undoItems : [{ action: '', data: null}],
+    undoItems : [],
     redoItems:[],
     selectedDesignId:0
   },
@@ -257,58 +257,64 @@ const ProductAttributes:Module<any, any> = {
       state.groupColors = {};
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
-      if (state.redoItems.length){
-        const item = state.redoItems.find((item:Record<any, any>) => {
-          return item.action == payload.action
-        })
-        if (item){
-          return true
-        }else{
-          if (payload.action == 'defaultColor'){
-            state.redoItems.push({ action: 'defaultColor', data: state.defaultColors })
-          }
-        }
-      }else{
-        if (payload.action == 'defaultColor'){
-          state.redoItems.push({ action: 'defaultColor', data: state.defaultColors})
-        }
-      }
+      // if (state.redoItems.length){
+      //   const item = state.redoItems.find((item:Record<any, any>) => {
+      //     return item.action == payload.action
+      //   })
+      //   if (item){
+      //     return true
+      //   }else{
+      //     if (payload.action == 'defaultColor'){
+      //       state.redoItems.push({ action: 'defaultColor', data: state.defaultColors })
+      //     }
+      //   }
+      // }else{
+      //   if (payload.action == 'defaultColor'){
+      //     state.redoItems.push({ action: 'defaultColor', data: state.defaultColors})
+      //   }
+      // }
+      console.log('undo updated here')
       state.undoItems.push(payload)
     },
     UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
-    DO_UNDO(state: Record<any, any>, payload) {
-      console.log(payload)
+    DO_UNDO(state: Record<any, any>) {
       if (state.undoItems.length) {
         const lastUndo = state.undoItems.pop()
-        state.redoItems.push(lastUndo)
+        console.log(lastUndo)
         if (lastUndo.action == 'customLogos') {
           state.customLogos = lastUndo.data
         } else if (lastUndo.action == 'defaultColor') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
+          console.log(state.defaultColors)
           state.defaultColors = lastUndo.data
         } else if (lastUndo.action == 'groupColor') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
           state.groupColors = lastUndo.data
         } else if (lastUndo.action == 'customTexts') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
         }
       }else{
         console.log('nothing')
       }
     },
-    DO_REDO(state:Record<any, any>, payload){
-      console.log(payload)
+    DO_REDO(state:Record<any, any>){
       if (state.redoItems.length){
         const lastUndo = state.redoItems.pop()
-        state.undoItems.push(lastUndo)
+        console.log(lastUndo)
         if(lastUndo.action == 'customLogos') {
           state.customLogos = lastUndo.data
         }
         else if (lastUndo.action == 'defaultColor'){
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
           state.defaultColors = lastUndo.data
         }
         else if (lastUndo.action == 'groupColor'){
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
           state.groupColors = lastUndo.data
         }
         else if (lastUndo.action == 'customTexts'){
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
         }
       }
@@ -476,8 +482,8 @@ const ProductAttributes:Module<any, any> = {
     resetStore({commit}){
       commit('RESET_STORE')
     },
-    undoAction({commit}, payload){
-      commit('DO_UNDO', payload);
+    undoAction({commit}){
+      commit('DO_UNDO');
     },
     redoAction({commit}, payload){
       commit('DO_REDO', payload)
