@@ -463,7 +463,9 @@ export default class Scene extends Vue {
         })
         if(this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
           item.set('fill', this.initialSvgGroups[svgIndex].color)
-          Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
+          if(!this.back) {
+            Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
+          }
         }
       }
     })
@@ -496,6 +498,7 @@ export default class Scene extends Vue {
           })
           if(this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
             item.set('fill', this.initialSvgGroups[svgIndex].color)
+            Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
           }
         }
       })
