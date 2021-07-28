@@ -132,7 +132,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: () => { return [] }}) readonly logosSettings !: [Record<any, any>]
   @Prop({required: false, default: () => { return [] }}) readonly productNamesSetting !: [Record<any, any>]
   @Prop({required: false}) readonly logoAllowed !: boolean
-  @Prop({required: false}) readonly multipleLogo !: boolean
+  @Prop({required: false, default: true}) readonly multipleLogo !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
   @Prop({required: true, default: 10}) readonly measurementRatio!: number;
@@ -227,11 +227,12 @@ export default class Scene extends Vue {
       }
       newVal.forEach((logo: Record<any, any>, index: number) => {
         let logoUrl = logo? (this.storageUrl + logo.url).trim().split(' ').join('%20') : ''
-        if(logo && ((this.customLogoObjects[logo.logoIndex] && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element.src != logoUrl))){
+        if(logo && ((this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && this.customLogoObjects[logo.logoIndex]._element.src != logoUrl))){
           self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
           if (self.backCanvas) {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
           }
+          console.log('error in line 235')
           this.customLogoObjects[logo.logoIndex] = null
           if(this.otherSideLogos[index]) {
             this.frontCanvas.remove(this.otherSideLogos[index])
@@ -246,6 +247,7 @@ export default class Scene extends Vue {
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[index])
             }
+            console.log('error in line 250')
             this.customLogoObjects[index] = null
             if(this.otherSideLogos[index]) {
               this.frontCanvas.remove(this.otherSideLogos[index])
@@ -431,10 +433,11 @@ export default class Scene extends Vue {
   }
 
   public changeGroupColor (groupColors: Record<any, any>): void {
+    let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
       if (groupColors[item.id]) {
-        item.set('fill', groupColors[item.id].color);
+        item.set('fill', groupColors[item.id].color)
         let svgIndex = 0
         this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
           if (svgGroup.id == item.id) {
@@ -450,6 +453,17 @@ export default class Scene extends Vue {
             pantone: groupColors[item.id].pantone,
             name: groupColors[item.id].name
           })
+        }
+      }else if (!defaultColors.length) {
+        let svgIndex = 0
+        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+          if (svgGroup.id == item.id) {
+            svgIndex = index
+          }
+        })
+        if(this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
+          item.set('fill', this.initialSvgGroups[svgIndex].color)
+          Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
         }
       }
     })
@@ -472,6 +486,16 @@ export default class Scene extends Vue {
               pantone: groupColors[item.id].pantone,
               name: groupColors[item.id].name
             })
+          }
+        }else if (!defaultColors.length) {
+          let svgIndex = 0
+          this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+            if (svgGroup.id == item.id) {
+              svgIndex = index
+            }
+          })
+          if(this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
+            item.set('fill', this.initialSvgGroups[svgIndex].color)
           }
         }
       })
@@ -779,14 +803,12 @@ export default class Scene extends Vue {
 
         if(!self.back || (self.back && side == 'back')) {
           if(self.logos.length) {
-            setTimeout(() => {
-              self.addLogos(self.logos)
-            }, 200)
+            this.addLogos(self.logos)
           }
           let logos: Record<any, any>[] = []
 
           if (self.customLogos && self.logoAllowed) {
-            let customLogos = self.customLogos
+            let customLogos = JSON.parse(JSON.stringify(self.customLogos))
             if (self.logosLimit) {
               customLogos = self.customLogos.slice(0, self.logosLimit) as [Record<any, any>]
             }
@@ -846,7 +868,7 @@ export default class Scene extends Vue {
             self.addTexts(texts)
           }
           this.showLoader = false
-          self.mounted = true
+          this.mounted = true
         }
 
         if (self.mainPreview) {
@@ -1223,12 +1245,6 @@ export default class Scene extends Vue {
   }
 
   public addLogos(logos: [Record<any, any>], logoIndex: null|number = null) {
-    if (this.multipleLogo !== undefined && !this.multipleLogo) {
-      if (logoIndex > 0) {
-        return false;
-      }
-    }
-    //custom debug
     const self = this
     logos.forEach((logo: Record<any, any>, index: number) => {
       if(logo && logo.url) {
@@ -1247,7 +1263,11 @@ export default class Scene extends Vue {
             })
           }
         }
-        if (logo.side == 'front' || (logo.side == 'back' && self.back)) {
+
+        if ((logo.side == 'front' || (logo.side == 'back' && self.back)) && (this.multipleLogo || (!this.multipleLogo && logoIndex as number == 0)) && !this.customLogoObjects[logoIndex as number]) {
+          if (logo.customLogo) {
+            this.customLogoObjects[logoIndex as number] = true
+          }
           logo.haveControls = Boolean(logo.haveControls)
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
           fabric.Image.fromURL(logoUrl, (img: any) => {
@@ -1317,7 +1337,7 @@ export default class Scene extends Vue {
                   }
                 })
               }
-              self.customLogoObjects[logoIndex as number] = img
+              this.customLogoObjects[logoIndex as number] = img
             } else {
               self.logoObjects.push(img)
             }
@@ -1366,7 +1386,7 @@ export default class Scene extends Vue {
           })
         }
       }
-      if(text.text && text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back))) {
+      if(text.text && text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back)) && !this.customTextObjects[textIndex as number]) {
         let textBox = new fabric.Text(text.text, {
           left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
           top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,

@@ -255,6 +255,38 @@ const ProductAttributes:Module<any, any> = {
       state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
+      const selectedProduct = state.products[state.selectedIndex];
+      if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
+        let logoSetting = selectedProduct.logos_setting[0]
+
+        if(!logoSetting) {
+          logoSetting = {
+            width: 200,
+            x_axis: 150,
+            y_axis: 190,
+            rotation: 0,
+            haveControls: true,
+            side: 'front'
+          }
+        }
+
+        const logo = {
+          url: '',
+          width: logoSetting.width,
+          height: logoSetting.height,
+          x_axis: logoSetting.x_axis,
+          y_axis: logoSetting.y_axis,
+          rotation: logoSetting.rotation,
+          haveControls: Boolean(!logoSetting.is_locked),
+          side: logoSetting.side,
+          customLogo: true,
+          logoIndex: 0,
+          is_transparent: false
+        }
+        state.customLogos.push(logo);
+      }
+
+
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       // if (state.redoItems.length){
