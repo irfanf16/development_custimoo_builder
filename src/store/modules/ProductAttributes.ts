@@ -280,10 +280,11 @@ const ProductAttributes:Module<any, any> = {
           haveControls: Boolean(!logoSetting.is_locked),
           side: logoSetting.side,
           customLogo: true,
-          logoIndex: 0,
-          is_transparent: false
+          is_transparent: false,
+          autoOpner: false
         }
         state.customLogos.push(logo);
+        state.logoTabIndex = 0;
       }
 
 
