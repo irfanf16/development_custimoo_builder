@@ -433,10 +433,11 @@ export default class Scene extends Vue {
   }
 
   public changeGroupColor (groupColors: Record<any, any>): void {
+    let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
       if (groupColors[item.id]) {
-        item.set('fill', groupColors[item.id].color);
+        item.set('fill', groupColors[item.id].color)
         let svgIndex = 0
         this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
           if (svgGroup.id == item.id) {
@@ -452,6 +453,19 @@ export default class Scene extends Vue {
             pantone: groupColors[item.id].pantone,
             name: groupColors[item.id].name
           })
+        }
+      }else if (!defaultColors.length) {
+        let svgIndex = 0
+        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+          if (svgGroup.id == item.id) {
+            svgIndex = index
+          }
+        })
+        if(this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
+          item.set('fill', this.initialSvgGroups[svgIndex].color)
+          if(!this.back) {
+            Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
+          }
         }
       }
     })
@@ -474,6 +488,17 @@ export default class Scene extends Vue {
               pantone: groupColors[item.id].pantone,
               name: groupColors[item.id].name
             })
+          }
+        }else if (!defaultColors.length) {
+          let svgIndex = 0
+          this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+            if (svgGroup.id == item.id) {
+              svgIndex = index
+            }
+          })
+          if(this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
+            item.set('fill', this.initialSvgGroups[svgIndex].color)
+            Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
           }
         }
       })
