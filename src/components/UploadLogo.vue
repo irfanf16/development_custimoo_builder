@@ -88,10 +88,8 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 
     if (this.customLogos.length) {
       if (this.customLogos[this.customLogoIndex] && this.customLogos[this.customLogoIndex].url == '') {
-       if(this.showFileInput) {
+       if(this.customLogoIndex != 0) {
          this.modalHandler()
-       }else {
-         this.$emit('showFileInputHander',true);
        }
       }
     }
@@ -103,8 +101,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public mounted !: boolean
   public colors:any = [];
   @Prop({required: true}) customLogoIndex!: any
-  @Prop({required: false, default:true}) showFileInput!: boolean
-
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct

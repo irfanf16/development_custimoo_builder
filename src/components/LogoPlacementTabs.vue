@@ -28,7 +28,7 @@
                     </a>
                   </template>
                   <template v-else>
-                    <UploadLogo :customLogoIndex="index" @showFileInputHander="showFileInput = $event" :showFileInput="showFileInput" ref="logoUploadModalOpener" />
+                    <UploadLogo :customLogoIndex="index"  ref="logoUploadModalOpener" />
                   </template>
                 </div>
                 <div class="logo-placemet-content">
@@ -78,7 +78,7 @@
             </div>
           </template>
           <template v-if="manageComponents.LogoArea">
-            <UploadLogo :customLogoIndex="index" @showFileInputHander="showFileInput = $event" :showFileInput="showFileInput" ref="logoUploadModalOpener" />
+            <UploadLogo :customLogoIndex="index"  ref="logoUploadModalOpener" />
           </template>
         </div>
       </b-tab>
