@@ -203,7 +203,7 @@ export default class LogoPlacementTabs extends Vue {
 
   public addImageOpener() {
     this.showFileInput = true;
-    console.log('here')
+    // console.log('here')
   }
 
 
