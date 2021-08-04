@@ -191,7 +191,7 @@ export default class LogoPlacementTabs extends Vue {
           status: 'not acc',
           autoOpner: false
         }
-        this.showFileInput = false;
+        // this.showFileInput = false;
         await this.$store.dispatch('setCustomLogos', logo)
         this.tabIndex = this.customLogos.length - 1
         this.$store.dispatch('setLogoTab', this.tabIndex)
@@ -348,6 +348,9 @@ export default class LogoPlacementTabs extends Vue {
       margin: 0;
       padding: 20px;
       background: #fff;
+    }
+    .logo-option-area{
+      @media only screen and (max-width: 992px){display: none;}
     }
   }
   .logo-placement-area{

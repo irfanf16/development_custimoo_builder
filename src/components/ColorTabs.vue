@@ -82,7 +82,6 @@ export default class ColorTabs extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
-    alert()
     this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectTabIndex].id, color: color.value, pantone: color.name })
   }
 
