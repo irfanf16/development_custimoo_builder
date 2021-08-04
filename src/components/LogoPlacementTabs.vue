@@ -188,7 +188,8 @@ export default class LogoPlacementTabs extends Vue {
           haveControls: Boolean(!logoSetting.is_locked),
           side: logoSetting.side,
           customLogo: true,
-          status: 'not acc'
+          status: 'not acc',
+          autoOpner: false
         }
         this.showFileInput = false;
         await this.$store.dispatch('setCustomLogos', logo)
@@ -232,7 +233,8 @@ export default class LogoPlacementTabs extends Vue {
         haveControls: Boolean(!logoSetting.is_locked),
         side: logoSetting.side,
         customLogo: true,
-        status: 'not acc'
+        status: 'not acc',
+        autoOpner: true
       }
 
       await this.$store.dispatch('setCustomLogos', logo)
