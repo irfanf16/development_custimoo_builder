@@ -840,7 +840,9 @@ export default class Scene extends Vue {
             logos = logos.concat(customLogos) as [Record<any, any>]
           }
           if (logos.length) {
-            self.addLogos(logos as [Record<any, any>])
+            setTimeout(() => {
+              this.addLogos(logos as [Record<any, any>])
+            }, 500)
           }
 
           if (self.customTexts.length || self.texts.length) {
@@ -868,14 +870,16 @@ export default class Scene extends Vue {
               }
             })
             texts = texts.concat(self.customTexts) as [Record<any, any>]
-            self.addTexts(texts)
+            setTimeout(() => {
+              this.addTexts(texts)
+            }, 500)
           }
           this.showLoader = false
           this.mounted = true
         }
 
-        if (self.mainPreview) {
-          self.setProductionSVG()
+        if (this.mainPreview) {
+          this.setProductionSVG()
         }
         clearInterval(timer)
       }
@@ -1346,7 +1350,6 @@ export default class Scene extends Vue {
             }
 
             img.on('selected', (e: Record<any, any>) => {
-              //this.$store.dispatch('setLogoTab', logoIndex)
               this.$root.$emit('changeLogoTabIndex', logoIndex);
               this.showDimensions(e, dimText)
             })
