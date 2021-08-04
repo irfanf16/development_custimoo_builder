@@ -1907,6 +1907,9 @@ button{
                 padding-right: 1.5rem;
                 position: relative;
                 z-index: 1;
+                @media only screen and (max-width: 767px){
+                    max-width: 180px;
+                }
                 &:focus{
                     outline: none;
                     box-shadow: none;
@@ -2311,12 +2314,5 @@ button{
 .tabs-logo-container{
     .upload-logo-opener{
         .logo-option-area{display: none;}
-    }
-}
-.home-sharing{
-    .form-control{
-        @media only screen and (max-width: 767px){
-            max-width: 180px;
-        }
     }
 }
