@@ -80,6 +80,7 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
+      // Vue.set(state.customLogos, state.customLogos.length, customLogo)
       if(customLogo){
         if('logoIndex' in customLogo && customLogo.logoIndex != null) {
          Vue.set(state.customLogos, customLogo.logoIndex, customLogo)
