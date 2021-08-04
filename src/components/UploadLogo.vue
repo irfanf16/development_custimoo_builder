@@ -86,15 +86,16 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     }
     // this.$store.dispatch('setJwtToken')
 
-    if (this.customLogos.length) {
-      if (this.customLogos[this.customLogoIndex] && this.customLogos[this.customLogoIndex].url == '') {
-       if(this.showFileInput) {
-         this.modalHandler()
-       }else {
-         this.$emit('showFileInputHander',true);
-       }
+      if (this.customLogos.length) {
+        if (this.customLogos[this.customLogoIndex] && this.customLogos[this.customLogoIndex].autoOpner && this.customLogos[this.customLogoIndex].url == '') {
+          if(this.customLogoIndex != 0) {
+            this.modalHandler()
+            console.log(this.customLogoIndex)
+            this.$store.dispatch('updateCustomLogoAttribute', {index: this.customLogoIndex, attribute: 'autoOpner', value: false})
+          }
+        }
       }
-    }
+
   }
 })
 export default class UploadLogo extends Mixins(ErrorMessages) {
@@ -103,8 +104,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public mounted !: boolean
   public colors:any = [];
   @Prop({required: true}) customLogoIndex!: any
-  @Prop({required: false, default:true}) showFileInput!: boolean
-
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -204,7 +203,8 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         side: logoSetting.side,
         customLogo: true,
         logoIndex: customLogoIndex,
-        is_transparent: false
+        is_transparent: false,
+        autoOpner: false
       }
       this.$store.dispatch('setCustomLogos', logo)
     }

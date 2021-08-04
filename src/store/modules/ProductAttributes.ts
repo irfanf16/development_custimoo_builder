@@ -19,7 +19,7 @@ const ProductAttributes:Module<any, any> = {
     lockerColors:[],
     logoTabIndex: 0,
     actionBeforeLogin: '',
-    undoItems : [{ action: '', data: null}],
+    undoItems : [],
     redoItems:[],
     selectedDesignId:0
   },
@@ -255,60 +255,99 @@ const ProductAttributes:Module<any, any> = {
       state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
-    },
-    UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
-      if (state.redoItems.length){
-        const item = state.redoItems.find((item:Record<any, any>) => {
-          return item.action == payload.action
-        })
-        if (item){
-          return true
-        }else{
-          if (payload.action == 'defaultColor'){
-            state.redoItems.push({ action: 'defaultColor', data: state.defaultColors })
+      const selectedProduct = state.products[state.selectedIndex];
+      if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
+        let logoSetting = selectedProduct.logos_setting[0]
+
+        if(!logoSetting) {
+          logoSetting = {
+            width: 200,
+            x_axis: 150,
+            y_axis: 190,
+            rotation: 0,
+            haveControls: true,
+            side: 'front'
           }
         }
-      }else{
-        if (payload.action == 'defaultColor'){
-          state.redoItems.push({ action: 'defaultColor', data: state.defaultColors})
+
+        const logo = {
+          url: '',
+          width: logoSetting.width,
+          height: logoSetting.height,
+          x_axis: logoSetting.x_axis,
+          y_axis: logoSetting.y_axis,
+          rotation: logoSetting.rotation,
+          haveControls: Boolean(!logoSetting.is_locked),
+          side: logoSetting.side,
+          customLogo: true,
+          is_transparent: false,
+          autoOpner: false
         }
+        state.customLogos.push(logo);
+        state.logoTabIndex = 0;
       }
+
+
+    },
+    UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
+      // if (state.redoItems.length){
+      //   const item = state.redoItems.find((item:Record<any, any>) => {
+      //     return item.action == payload.action
+      //   })
+      //   if (item){
+      //     return true
+      //   }else{
+      //     if (payload.action == 'defaultColor'){
+      //       state.redoItems.push({ action: 'defaultColor', data: state.defaultColors })
+      //     }
+      //   }
+      // }else{
+      //   if (payload.action == 'defaultColor'){
+      //     state.redoItems.push({ action: 'defaultColor', data: state.defaultColors})
+      //   }
+      // }
+      console.log('undo updated here')
       state.undoItems.push(payload)
     },
     UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
-    DO_UNDO(state: Record<any, any>, payload) {
-      console.log(payload)
+    DO_UNDO(state: Record<any, any>) {
       if (state.undoItems.length) {
         const lastUndo = state.undoItems.pop()
-        state.redoItems.push(lastUndo)
+        console.log(lastUndo)
         if (lastUndo.action == 'customLogos') {
           state.customLogos = lastUndo.data
         } else if (lastUndo.action == 'defaultColor') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
+          console.log(state.defaultColors)
           state.defaultColors = lastUndo.data
         } else if (lastUndo.action == 'groupColor') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
           state.groupColors = lastUndo.data
         } else if (lastUndo.action == 'customTexts') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
         }
       }else{
         console.log('nothing')
       }
     },
-    DO_REDO(state:Record<any, any>, payload){
-      console.log(payload)
+    DO_REDO(state:Record<any, any>){
       if (state.redoItems.length){
         const lastUndo = state.redoItems.pop()
-        state.undoItems.push(lastUndo)
+        console.log(lastUndo)
         if(lastUndo.action == 'customLogos') {
           state.customLogos = lastUndo.data
         }
         else if (lastUndo.action == 'defaultColor'){
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
           state.defaultColors = lastUndo.data
         }
         else if (lastUndo.action == 'groupColor'){
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
           state.groupColors = lastUndo.data
         }
         else if (lastUndo.action == 'customTexts'){
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
         }
       }
@@ -476,8 +515,8 @@ const ProductAttributes:Module<any, any> = {
     resetStore({commit}){
       commit('RESET_STORE')
     },
-    undoAction({commit}, payload){
-      commit('DO_UNDO', payload);
+    undoAction({commit}){
+      commit('DO_UNDO');
     },
     redoAction({commit}, payload){
       commit('DO_REDO', payload)

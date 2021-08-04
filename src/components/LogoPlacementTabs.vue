@@ -28,7 +28,7 @@
                     </a>
                   </template>
                   <template v-else>
-                    <UploadLogo :customLogoIndex="index" @showFileInputHander="showFileInput = $event" :showFileInput="showFileInput" ref="logoUploadModalOpener" />
+                    <UploadLogo :customLogoIndex="index"  ref="logoUploadModalOpener" />
                   </template>
                 </div>
                 <div class="logo-placemet-content">
@@ -78,7 +78,7 @@
             </div>
           </template>
           <template v-if="manageComponents.LogoArea">
-            <UploadLogo :customLogoIndex="index" @showFileInputHander="showFileInput = $event" :showFileInput="showFileInput" ref="logoUploadModalOpener" />
+            <UploadLogo :customLogoIndex="index"  ref="logoUploadModalOpener" />
           </template>
         </div>
       </b-tab>
@@ -188,7 +188,8 @@ export default class LogoPlacementTabs extends Vue {
           haveControls: Boolean(!logoSetting.is_locked),
           side: logoSetting.side,
           customLogo: true,
-          status: 'not acc'
+          status: 'not acc',
+          autoOpner: false
         }
         this.showFileInput = false;
         await this.$store.dispatch('setCustomLogos', logo)
@@ -232,7 +233,8 @@ export default class LogoPlacementTabs extends Vue {
         haveControls: Boolean(!logoSetting.is_locked),
         side: logoSetting.side,
         customLogo: true,
-        status: 'not acc'
+        status: 'not acc',
+        autoOpner: true
       }
 
       await this.$store.dispatch('setCustomLogos', logo)

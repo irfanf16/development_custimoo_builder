@@ -647,7 +647,8 @@ export default class Home extends Vue {
   }
 
   public resetStore(){
-    this.$store.dispatch('resetStore');
+    this.$store.dispatch('resetStore')
+    this.$store.dispatch('SET_LOGO_COLORS', [])
   }
 
 
