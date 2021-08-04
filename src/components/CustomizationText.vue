@@ -6,13 +6,13 @@
         @click="isHidden = !isHidden"
         class="mb-2 mr-sm-2 mb-sm-0"
         placeholder="Type Here"
-        v-model="customTexts[customTextIndex].text"
+        :value="customTexts[customTextIndex].text"
         @input="updateTextField(customTextIndex,$event)"
       ></b-form-input>
       <h4 class="mt-3 mb-2 fz-16">Font Type</h4>
       <div class="font-type-area">
         <div class="type-block">
-          <b-form-select v-model="customTexts[customTextIndex].fontFamily" :options="fontOptions" ></b-form-select>
+          <b-form-select v-model="customTexts[customTextIndex].fontFamily" @input="fontOptionChanged(customTextIndex, $event)" :options="fontOptions" ></b-form-select>
         </div>
         <div class="arc-block">
           <b-form-select v-model="customTexts[customTextIndex].side" :options="['front', 'back']"></b-form-select>
@@ -29,7 +29,7 @@
         </a>
         <a @click="showColor('outline', customTextIndex)" v-if="customTexts[customTextIndex].outlineEnabled && outLineWidthValue > 0">
           <div class="text-color-box">
-            <div class="color-circle"
+             <div class="color-circle"
                  :style="{ background : customTexts[customTextIndex].outLineColor? customTexts[customTextIndex].outLineColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
             <strong>Outline Color</strong>
           </div>
@@ -101,7 +101,7 @@ export default class CustomizationText extends Vue {
   }
 
   public showColor(fontColorType: any, fontColorIndex: number) {
-    console.log('set Color call on show color')
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
     this.fontColorType = fontColorType
     this.fontColorIndex = fontColorIndex
     this.customTexts.forEach((customText: Record<any, any>, index: number) => {
@@ -111,6 +111,12 @@ export default class CustomizationText extends Vue {
         this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: false})
       }
     })
+  }
+
+  public fontOptionChanged(index:number, event:any){
+    console.log(event)
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
+    this.$store.dispatch('updateCustomTextAttribute', { index:index, attribute: 'fontFamily', event})
   }
 
   public setColor(color: Record<any, any>) {
@@ -136,6 +142,7 @@ export default class CustomizationText extends Vue {
   public isHidden= false
 
   updateTextField(index: number,value: any) {
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', {index, attribute: 'text', value})
   }
 }
