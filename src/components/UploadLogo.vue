@@ -1,35 +1,27 @@
 <template>
-
   <div class="upload-logo-opener" >
-    <div class="logo-option-area mb-3" v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
-      <b-form-checkbox
-        name="transparent-logo-background"
-        v-model="customLogos[0].is_transparent"
-        @change="toggleLogoBackground"
-      >
+    <div class="logo-option-area mb-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
+      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground">
         Remove Logo Background
       </b-form-checkbox>
     </div>
 
-    <div class="position-relative" v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
-      <a class="remove-img" @click="deleteFirstLogo">
+    <div class="position-relative" v-if="showActions && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
+      <a class="remove-img" @click="deleteLogo">
         <font-awesome-icon :icon="['fas', 'trash-alt']"/>
       </a>
     </div>
 
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
-        <div v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
-          <img ref="logoImageExtract" crossorigin="anonymous" :src="storageUrl+customLogos[0].url" width="100%"/>
+        <div v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
+          <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url" width="100%"/>
         </div>
         <div v-else>
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
           </div>
           Upload Logo
-          <img ref="logoImageExtract" v-if="customLogos[0] && customLogos[0].url"
-               :style="{visibility : manageComponents.BasicCustomization? 'visible' : 'hidden'}"
-               crossorigin="anonymous" :src="storageUrl+customLogos[0].url" width="0" height="0"/>
         </div>
       </div>
 
@@ -72,7 +64,6 @@
 
 import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon"
-import ColorThief from 'colorthief'
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -84,35 +75,24 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     } else {
       this.open_modal = false
     }
-    // this.$store.dispatch('setJwtToken')
-
-      if (this.customLogos.length) {
-        if (this.customLogos[this.customLogoIndex] && this.customLogos[this.customLogoIndex].autoOpner && this.customLogos[this.customLogoIndex].url == '') {
-          if(this.customLogoIndex != 0) {
-            this.modalHandler()
-            console.log(this.customLogoIndex)
-            this.$store.dispatch('updateCustomLogoAttribute', {index: this.customLogoIndex, attribute: 'autoOpner', value: false})
-          }
-        }
-      }
-
   }
 })
 export default class UploadLogo extends Mixins(ErrorMessages) {
   public status = 'accepted'
-  public open_modal !: boolean
-  public mounted !: boolean
-  public colors:any = [];
-  @Prop({required: true}) customLogoIndex!: any
+  public open_modal!: boolean
+  public mounted!: boolean
+  public colors: any = [];
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
+  public ref = this.$refs as Record<any, any>
+  public imageColors: any[] = []
+
+  @Prop({ required: true }) customLogoIndex!: number
+  @Prop({ required: false, default: true }) showImage!: boolean
+  @Prop({ required: false, default: true }) showActions!: boolean
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-
-  private jwtToken !: string
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
-  public ref = this.$refs as Record<any, any>
-  public imageColors: any[] = []
 
   @Watch('customLogos', {
     deep: true
@@ -157,20 +137,10 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   public modalHandler() {
-    let manageComponent = this.manageComponents as Record<any, any>
-    if (manageComponent.AdvanceCustomization) {
-      if (this.open_modal) {
-        this.showModal()
-      } else {
-        this.uploadLogoBtn()
-      }
-    }
-    if (manageComponent.BasicCustomization) {
-      if (this.open_modal) {
-        this.showModal()
-      } else {
-        this.uploadLogoBtn()
-      }
+    if (this.open_modal) {
+      this.showModal()
+    } else {
+      this.uploadLogoBtn()
     }
   }
 
@@ -203,8 +173,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         side: logoSetting.side,
         customLogo: true,
         logoIndex: customLogoIndex,
-        is_transparent: false,
-        autoOpner: false
+        is_transparent: false
       }
       this.$store.dispatch('setCustomLogos', logo)
     }
@@ -328,24 +297,21 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
-  public deleteFirstLogo() {
+  public deleteLogo() {
     let inputRef = this.$refs.fileInput as Record<any, any>
     inputRef.value = null;
 
     let payload = {
-      index: 0
+      index: this.customLogoIndex
     }
     this.$store.dispatch('deleteCustomLogo', payload)
   }
 
   public toggleLogoBackground() {
-
-      if(this.customLogos[this.customLogoIndex]){
-        this.$store.dispatch('toggleLogoBackgroud', this.customLogoIndex)
-      }
-
+    if(this.customLogos[this.customLogoIndex]){
+      this.$store.dispatch('toggleLogoBackgroud', this.customLogoIndex)
+    }
   }
-
 }
 
 </script>

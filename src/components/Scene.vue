@@ -232,7 +232,6 @@ export default class Scene extends Vue {
           if (self.backCanvas) {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
           }
-          console.log('error in line 235')
           this.customLogoObjects[logo.logoIndex] = null
           if(this.otherSideLogos[index]) {
             this.frontCanvas.remove(this.otherSideLogos[index])
@@ -247,7 +246,6 @@ export default class Scene extends Vue {
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[index])
             }
-            console.log('error in line 250')
             this.customLogoObjects[index] = null
             if(this.otherSideLogos[index]) {
               this.frontCanvas.remove(this.otherSideLogos[index])

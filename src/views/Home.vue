@@ -6,7 +6,7 @@
         <template v-if="manageComponents.BasicCustomization">
           <b-col cols="12" lg="3" class="text-left home-color-area" :class="extractedcolorclass">
             <div class="py-2 py-md-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
-              <ChooseColor :colors="colors"/>
+              <ChooseColor v-if="!hideColorSection" :colors="colors"/>
             </div>
             <template v-if="manageComponents.ExtractedColors">
               <div class="mb-3 mb-lg-0" v-if="customLogos[0] && customLogos[0].url" :class="extractedcolorclass">
@@ -171,6 +171,9 @@ import set = Reflect.set;
     LoginForm
   },
   async mounted() {
+    if (this.hideColorSection){
+      this.$store.commit('hideColorSection', false)
+    }
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
     if (this.isAuthenticated) {
@@ -649,6 +652,10 @@ export default class Home extends Vue {
   public resetStore(){
     this.$store.dispatch('resetStore')
     this.$store.dispatch('SET_LOGO_COLORS', [])
+  }
+
+  get hideColorSection() {
+    return this.$store.getters.getHideColorSection
   }
 
 
