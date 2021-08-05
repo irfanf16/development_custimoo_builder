@@ -280,14 +280,11 @@ const ProductAttributes:Module<any, any> = {
           haveControls: Boolean(!logoSetting.is_locked),
           side: logoSetting.side,
           customLogo: true,
-          is_transparent: false,
-          autoOpner: false
+          is_transparent: false
         }
         state.customLogos.push(logo);
         state.logoTabIndex = 0;
       }
-
-
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       // if (state.redoItems.length){

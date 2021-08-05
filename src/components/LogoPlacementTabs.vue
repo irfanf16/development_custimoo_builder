@@ -19,31 +19,12 @@
             <div class="logo-placement-area mb-3 mb-lg-4 pt-2">
               <div class="logo-placement-holder mb-lg-3">
                 <div class="logo-holder">
-                  <template v-if="customLogos[index].url != ''">
-                    <div class="additional-holder">
-                      <img ref="logoImg" :src="storageUrl+customLogos[index].url" alt="logo Shirt"/>
-                    </div>
-                    <a href="#" class="remove-img" @click="deleteLogo(index)">
-                      <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-                    </a>
-                  </template>
-                  <template v-else>
-                    <UploadLogo :customLogoIndex="index"  ref="logoUploadModalOpener" />
-                  </template>
+                  <UploadLogo :customLogoIndex="index" :showImage="true" :showActions="true" :ref="'logoUploadModalOpener'+index" :key="'top'+index" />
                 </div>
                 <div class="logo-placemet-content">
                   <h4>Logo Placement</h4>
                   <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
                 </div>
-              </div>
-              <div class="logo-option-area text-center my-3 mb-lg-3">
-                <b-form-checkbox :key="index"
-                                 v-model="customLogos[index].is_transparent"
-                                 name="transparent-logo-background"
-                                 @change="toggleLogoBackground(index)"
-                >
-                  Remove Logo Background
-                </b-form-checkbox>
               </div>
               <template v-if="isCustomerAuthenticated">
                 <b-button :key="'saveLogoModal'" v-if="customLogos[0] && customLogos[index].url" class="btn btn-secondary w-100 fw-bold save-logo-btn" v-b-modal.modal-center-savelogomodal>Save Logo</b-button>
@@ -77,9 +58,7 @@
               <SaveColorModal />
             </div>
           </template>
-          <template v-if="manageComponents.LogoArea">
-            <UploadLogo :customLogoIndex="index"  ref="logoUploadModalOpener" />
-          </template>
+          <UploadLogo :customLogoIndex="index" :showImage="false" :showActions="false" :key="'bottom'+index" />
         </div>
       </b-tab>
     </b-tabs>
@@ -100,7 +79,6 @@ import SaveColorModal from "@/components/SaveColorModal.vue"
     SaveColorModal
   },
   mounted() {
-
     if(this.numberOfLogosAllowed > 0) {
       this.allowedLogosLimit = this.numberOfLogosAllowed
     }
@@ -108,11 +86,9 @@ import SaveColorModal from "@/components/SaveColorModal.vue"
       // here you need to use the arrow function
       this.tabIndex = index;
     })
-
     this.$nextTick(function() {
       this.initFirstLogoTab(0)
     });
-
   }
 })
 export default class LogoPlacementTabs extends Vue {
@@ -159,9 +135,7 @@ export default class LogoPlacementTabs extends Vue {
     return this.$store.getters.isCustomerAuthenticated
   }
 
-
   public async initFirstLogoTab(index: number){
-
     if(this.$store.getters.getCustomLogos.length < 1){
       if(this.numberOfLogos < this.allowedLogosLimit) {
         let logoSetting: Record<any, any>
@@ -187,25 +161,15 @@ export default class LogoPlacementTabs extends Vue {
           rotation: logoSetting.rotation as number,
           haveControls: Boolean(!logoSetting.is_locked),
           side: logoSetting.side,
-          customLogo: true,
-          status: 'not acc',
-          autoOpner: false
+          customLogo: true
         }
         // this.showFileInput = false;
         await this.$store.dispatch('setCustomLogos', logo)
         this.tabIndex = this.customLogos.length - 1
         this.$store.dispatch('setLogoTab', this.tabIndex)
-
       }
     }
-
   }
-
-  public addImageOpener() {
-    this.showFileInput = true;
-    // console.log('here')
-  }
-
 
   public async addTab(index: number){
     if(this.numberOfLogos < this.allowedLogosLimit) {
@@ -232,14 +196,15 @@ export default class LogoPlacementTabs extends Vue {
         rotation: logoSetting.rotation as number,
         haveControls: Boolean(!logoSetting.is_locked),
         side: logoSetting.side,
-        customLogo: true,
-        status: 'not acc',
-        autoOpner: true
+        customLogo: true
       }
 
       await this.$store.dispatch('setCustomLogos', logo)
       this.tabIndex = this.customLogos.length - 1
-      this.$store.dispatch('setLogoTab', this.tabIndex)
+      await this.$store.dispatch('setLogoTab', this.tabIndex)
+
+      let component = this.$refs['logoUploadModalOpener'+ index] as Record<any, any>
+      component[0].modalHandler()
     }
   }
 
