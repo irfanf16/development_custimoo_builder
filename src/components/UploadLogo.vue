@@ -246,7 +246,13 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         }else{
           logo_url = original_logo;
         }
-
+        let getLogos = []
+        if (this.customLogos.length > 1){
+          getLogos = this.customLogos.slice(0, -1)
+        }else{
+          getLogos = this.customLogos
+        }
+        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(getLogos)), action: 'customLogos' })
         let payload = [{
           index: this.customLogoIndex,
           attribute: 'url',

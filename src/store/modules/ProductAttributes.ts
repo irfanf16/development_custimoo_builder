@@ -313,12 +313,11 @@ const ProductAttributes:Module<any, any> = {
     DO_UNDO(state: Record<any, any>) {
       if (state.undoItems.length) {
         const lastUndo = state.undoItems.pop()
-        console.log(lastUndo)
         if (lastUndo.action == 'customLogos') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customLogos)), action: 'customLogos'})
           state.customLogos = lastUndo.data
         } else if (lastUndo.action == 'defaultColor') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
-          console.log(state.defaultColors)
           state.defaultColors = lastUndo.data
         } else if (lastUndo.action == 'groupColor') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
@@ -334,8 +333,8 @@ const ProductAttributes:Module<any, any> = {
     DO_REDO(state:Record<any, any>){
       if (state.redoItems.length){
         const lastUndo = state.redoItems.pop()
-        console.log(lastUndo)
         if(lastUndo.action == 'customLogos') {
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.customLogos)), action: 'customLogos'})
           state.customLogos = lastUndo.data
         }
         else if (lastUndo.action == 'defaultColor'){

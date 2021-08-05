@@ -33,7 +33,7 @@
                 </div>
                 <div class="logo-placemet-content">
                   <h4>Logo Placement</h4>
-                  <b-form-select @change="changeSide(index)" v-model="customLogos[index].side" :options="options"></b-form-select>
+                  <b-form-select @change="changeSide(index, $event)" :value="customLogos[index].side" :options="options"></b-form-select>
                 </div>
               </div>
               <div class="logo-option-area text-center my-3 mb-lg-3">
@@ -236,7 +236,6 @@ export default class LogoPlacementTabs extends Vue {
         status: 'not acc',
         autoOpner: true
       }
-
       await this.$store.dispatch('setCustomLogos', logo)
       this.tabIndex = this.customLogos.length - 1
       this.$store.dispatch('setLogoTab', this.tabIndex)
@@ -258,13 +257,16 @@ export default class LogoPlacementTabs extends Vue {
     this.$store.dispatch('deleteCustomLogo', payload)
   }
 
-  public changeSide(index: number) {
+  public async changeSide(index: number, event:string) {
+    console.log(event)
+    console.log(this.customLogos[index].side)
+    await this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customLogos)), action: 'customLogos' })
     const payload = {
       index: index,
       attribute: 'side',
-      value: this.customLogos[index].side
+      value: event
     }
-    this.$store.dispatch('updateCustomLogoAttribute', payload)
+    await this.$store.dispatch('updateCustomLogoAttribute', payload)
   }
 
   useLogoColors() {

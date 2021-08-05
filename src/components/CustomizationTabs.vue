@@ -349,7 +349,6 @@ export default class CustomizationProcess extends Vue {
       outLineColorPantone: this.secondColor.name,
       outLineWidth: 0
     }
-
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
   }
 }
