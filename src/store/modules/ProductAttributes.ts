@@ -21,9 +21,13 @@ const ProductAttributes:Module<any, any> = {
     actionBeforeLogin: '',
     undoItems : [],
     redoItems:[],
-    selectedDesignId:0
+    selectedDesignId:0,
+    hideColorSection : false
   },
   mutations: {
+    SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
+      state.hideColorSection = payload
+    },
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
       if(payload.length) {
         state.products = [...state.products, ...payload];
@@ -354,6 +358,9 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
+    getHideColorSection: state => {
+      return state.hideColorSection
+    },
     getProducts: (state: any) => state.products,
     getSelectedIndex: (state: any) => state.selectedIndex,
     getSelectedProduct: (state => {

@@ -70,6 +70,10 @@
 
         public designsIndex = 0
 
+      get manageComponents(): Record<any, any> {
+        return this.$store.getters.getManageComponents
+      }
+
         retrieveProducts(): void {
             this.product_id = '1'
             this.company_id = '1'
@@ -94,6 +98,10 @@
       public homeScreen() {
           console.log(this.$store.getters.getMainTab);
         this.$router.push('/')
+
+        if(this.manageComponents.mobileScreen){
+          this.$store.commit('SET_HIDE_COLOR_SECTION', true)
+        }
 
       }
     }
