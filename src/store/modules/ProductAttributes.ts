@@ -21,9 +21,13 @@ const ProductAttributes:Module<any, any> = {
     actionBeforeLogin: '',
     undoItems : [],
     redoItems:[],
-    selectedDesignId:0
+    selectedDesignId:0,
+    hideColorSection : false
   },
   mutations: {
+    SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
+      state.hideColorSection = payload
+    },
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
       if(payload.length) {
         state.products = [...state.products, ...payload];
@@ -287,35 +291,17 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
-      // if (state.redoItems.length){
-      //   const item = state.redoItems.find((item:Record<any, any>) => {
-      //     return item.action == payload.action
-      //   })
-      //   if (item){
-      //     return true
-      //   }else{
-      //     if (payload.action == 'defaultColor'){
-      //       state.redoItems.push({ action: 'defaultColor', data: state.defaultColors })
-      //     }
-      //   }
-      // }else{
-      //   if (payload.action == 'defaultColor'){
-      //     state.redoItems.push({ action: 'defaultColor', data: state.defaultColors})
-      //   }
-      // }
-      console.log('undo updated here')
       state.undoItems.push(payload)
     },
     UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
     DO_UNDO(state: Record<any, any>) {
       if (state.undoItems.length) {
         const lastUndo = state.undoItems.pop()
-        console.log(lastUndo)
         if (lastUndo.action == 'customLogos') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customLogos)), action: 'customLogos'})
           state.customLogos = lastUndo.data
         } else if (lastUndo.action == 'defaultColor') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
-          console.log(state.defaultColors)
           state.defaultColors = lastUndo.data
         } else if (lastUndo.action == 'groupColor') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
@@ -331,8 +317,8 @@ const ProductAttributes:Module<any, any> = {
     DO_REDO(state:Record<any, any>){
       if (state.redoItems.length){
         const lastUndo = state.redoItems.pop()
-        console.log(lastUndo)
         if(lastUndo.action == 'customLogos') {
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.customLogos)), action: 'customLogos'})
           state.customLogos = lastUndo.data
         }
         else if (lastUndo.action == 'defaultColor'){
@@ -351,6 +337,9 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
+    getHideColorSection: state => {
+      return state.hideColorSection
+    },
     getProducts: (state: any) => state.products,
     getSelectedIndex: (state: any) => state.selectedIndex,
     getSelectedProduct: (state => {
