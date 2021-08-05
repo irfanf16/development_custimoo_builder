@@ -1103,6 +1103,7 @@ export default class Scene extends Vue {
       this.customTexts.forEach((text, index) => {
         if(e.target.textIndex == index) {
           if (e.action == 'drag') {
+            self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'x_axis',
@@ -1114,6 +1115,7 @@ export default class Scene extends Vue {
               value: e.target.top
             })
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
+            self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
             const width = e.target.width * e.target.scaleX;
             const height = e.target.height * e.target.scaleY;
             const outLineWidth = e.target.strokeWidth * e.target.scaleX
@@ -1143,6 +1145,7 @@ export default class Scene extends Vue {
               value: outLineWidth * this.measurementRatio
             })
           } else if (e.action == 'rotate') {
+            self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'rotation',
@@ -1167,6 +1170,7 @@ export default class Scene extends Vue {
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
           if (logoUrl == e.target._element.src) {
             if (e.action == 'drag') {
+              self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customLogos)), action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
                 index: index,
                 attribute: 'x_axis',
@@ -1178,6 +1182,7 @@ export default class Scene extends Vue {
                 value: e.target.top
               })
             } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
+              self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customLogos)), action: 'customLogos' })
               const width = e.target.width * e.target.scaleX;
               const height = e.target.height * e.target.scaleY;
               self.$store.dispatch('updateCustomLogoAttribute', {
@@ -1201,6 +1206,7 @@ export default class Scene extends Vue {
                 value: Math.floor(height * this.measurementRatio)
               })
             } else if (e.action == 'rotate') {
+              self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customLogos)), action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
                 index: index,
                 attribute: 'rotation',
