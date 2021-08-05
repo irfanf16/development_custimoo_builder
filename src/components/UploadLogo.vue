@@ -1,7 +1,7 @@
 <template>
 
   <div class="upload-logo-opener" >
-    <div class="logo-option-area mb-3" v-if="customLogos[0] && manageComponents.BasicCustomization" >
+    <div class="logo-option-area mb-3" v-if="customLogos[0] && customLogos[0].url && manageComponents.BasicCustomization">
       <b-form-checkbox
         name="transparent-logo-background"
         v-model="customLogos[0].is_transparent"

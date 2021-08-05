@@ -65,10 +65,10 @@
                     <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
                   <li>
-                    <a :id="'share'" @click="shareProduct(selectedProduct)">
+                    <b-button :id="'share'" @click="shareProduct(selectedProduct)">
                       <font-awesome-icon :icon="['fas', 'share-alt']"/>
-                    </a>
-                    <b-tooltip :target="'share'" custom-class="share-tooltip" placement="bottom" triggers="click">
+                    </b-button>
+                    <b-tooltip :target="'share'" custom-class="share-tooltip home-sharing" placement="bottom" triggers="focus">
                       <div class="share-holder">
                         <h3>Copy link and Share</h3>
                         <div class="share-form">
@@ -830,6 +830,9 @@ export default class Home extends Vue {
     &:last-child{margin: 0;}
     &:hover {
       color: #fff;
+    }
+    &#share{
+      margin: 0;
     }
   }
 
