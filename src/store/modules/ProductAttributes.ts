@@ -290,23 +290,6 @@ const ProductAttributes:Module<any, any> = {
 
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
-      // if (state.redoItems.length){
-      //   const item = state.redoItems.find((item:Record<any, any>) => {
-      //     return item.action == payload.action
-      //   })
-      //   if (item){
-      //     return true
-      //   }else{
-      //     if (payload.action == 'defaultColor'){
-      //       state.redoItems.push({ action: 'defaultColor', data: state.defaultColors })
-      //     }
-      //   }
-      // }else{
-      //   if (payload.action == 'defaultColor'){
-      //     state.redoItems.push({ action: 'defaultColor', data: state.defaultColors})
-      //   }
-      // }
-      console.log('undo updated here')
       state.undoItems.push(payload)
     },
     UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
