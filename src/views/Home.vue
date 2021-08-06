@@ -92,8 +92,8 @@
                 </div>
               </header>
               <div class="undo-btn-area text-left pt-3">
-                <b-button variant="outline-secondary mr-2" @click="undoAction">Undo</b-button>
-                <b-button variant="outline-secondary" @click="redoAction">Redo</b-button>
+                <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
+                <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
             </div>
           </template>
@@ -290,7 +290,12 @@ export default class Home extends Vue {
       console.log(error)
     }
   }
-
+ get undoItems():Record<any, any>{
+    return this.$store.getters.getUndoItems
+ }
+ get redoitems():Record<any, any>{
+    return this.$store.getters.getRedoItems
+ }
   get products():[Record<any, any>]{
     return this.$store.getters.getProducts
   }
