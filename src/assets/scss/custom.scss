@@ -2316,3 +2316,14 @@ button{
         .logo-option-area{display: none;}
     }
 }
+.collection-btn{
+    .btn-secondary{
+        background-color: #545b62;
+        border-color: #545b62;
+        font-size: 0.8rem;
+        &.active{
+            background-color: #219F84 !important;
+            border-color: #219F84 !important;
+        }
+    }
+}

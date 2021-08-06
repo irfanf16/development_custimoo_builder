@@ -4,6 +4,10 @@
 <!--    <div class="customization-nav-area px-3 px-lg-0">-->
 <!--      <Search :categoryListing="categories" @search="searchProduct"/>-->
 <!--    </div>-->
+    <div class="collection-btn mb-2">
+      <b-form-checkbox class="mr-3" name="check-button" button>Customized</b-form-checkbox>
+      <b-form-checkbox name="check-button" button>Personalized</b-form-checkbox>
+    </div>
     <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>
     <DesignAvailable />
@@ -57,4 +61,5 @@ export default class ItemToCustomize extends Vue {
       background: none;
     }
   }
+
 </style>
