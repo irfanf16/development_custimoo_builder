@@ -6,12 +6,6 @@
       </b-form-checkbox>
     </div>
 
-    <div class="position-relative" v-if="showActions && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-      <a class="remove-img" @click="deleteLogo">
-        <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-      </a>
-    </div>
-
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
         <div v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
@@ -22,6 +16,11 @@
             <font-awesome-icon :icon="['fas', 'image']"/>
           </div>
           Upload Logo
+        </div>
+        <div class="remove-img" v-if="showActions && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
+          <a @click="deleteLogo">
+            <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+          </a>
         </div>
       </div>
 
