@@ -171,6 +171,11 @@ import set = Reflect.set;
     LoginForm
   },
   async mounted() {
+
+    // this.$root.$on('customEvent', (text:any) => { // here you need to use the arrow function
+    //   this.retrieveProducts()
+    // })
+
     if (this.hideColorSection){
       this.$store.commit('hideColorSection', false)
     }
@@ -488,7 +493,7 @@ export default class Home extends Vue {
     if (searchCall) {
       this.$store.commit('SET_PRODUCTS', []);
     }
-
+  console.log('this.hasProducts',this.hasProducts);
     if (this.hasProducts) {
       http.get(url).then((response: any) => {
         let product_data = this.products.concat(response.data.products.data)
