@@ -516,20 +516,20 @@ button{
             justify-content: space-between;
             align-items: center;
             .logo-holder{
-                width: 60px;
-                height: 60px;
-                position: relative;
-                border: 1px solid #EFF2F4;
-                border-radius: 5px;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                flex-direction: column;
-                align-items: center;
-                @media only screen and (min-width: 992px){
-                    width: 75px;
-                    height: 75px;
-                }
+                //width: 60px;
+                //height: 60px;
+                //position: relative;
+                //border: 1px solid #EFF2F4;
+                //border-radius: 5px;
+                //display: flex;
+                //flex-wrap: wrap;
+                //justify-content: center;
+                //flex-direction: column;
+                //align-items: center;
+                //@media only screen and (min-width: 992px){
+                //    width: 75px;
+                //    height: 75px;
+                //}
                 .additional-holder{
                     border: 1px solid #EFF2F4;
                     border-radius: 5px;
@@ -594,14 +594,14 @@ button{
                     border-top: none;
                     margin: 0;
                     .upload-logo-content{display: none;}
-                    .upload-box{
-                        width: 100%;
-                        height: 100%;
-                        margin: 0;
-                        padding: 0;
-                        border: none;
-                        font-size: 0;
-                    }
+                    //.upload-box{
+                    //    width: 100%;
+                    //    height: 100%;
+                    //    margin: 0;
+                    //    padding: 0;
+                    //    border: none;
+                    //    font-size: 0;
+                    //}
                 }
 
             }
@@ -2312,7 +2312,20 @@ button{
     }
 }
 .tabs-logo-container{
+    .logo-placement-holder{
+        padding-bottom: 30px;
+        position: relative;
+    }
     .upload-logo-opener{
-        .logo-option-area{display: none;}
+        .logo-option-area{
+            display: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 0 !important;
+            text-align: center;
+            max-width: 100%;
+        }
     }
 }

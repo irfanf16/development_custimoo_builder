@@ -8,7 +8,7 @@
 
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
-        <div v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
+        <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url" width="100%"/>
         </div>
         <div v-else>
@@ -408,6 +408,17 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         font-size: 32px;
       }
     }
+    .uploaded-logo-holder{
+      height: 100%;
+      max-width: 100%;
+      img{
+        display: block;
+        height: auto;
+        margin: 0 auto;
+        max-width: 100%;
+        max-height: 100%;
+      }
+    }
   }
 
   .upload-logo-content {
@@ -492,16 +503,16 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
 
   .remove-img {
     position: absolute;
-    right: 194px;
-    top: 20px;
+    right: 0;
+    top: 0;
     width: 20px;
     height: 20px;
     border-radius: 50%;
     background: #F8E1E2;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
+    //display: flex;
+    //flex-wrap: wrap;
+    //justify-content: center;
+    //align-items: center;
     font-size: 10px;
     color: #D53943;
   }
