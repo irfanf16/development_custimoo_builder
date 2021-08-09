@@ -1079,16 +1079,16 @@ button{
     }
     .tab-content{
         max-height: calc(100vh - 250px);
-        overflow-y: auto;
-        &::-webkit-scrollbar{
-            width: 5px;
-        }
-        &::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        &::-webkit-scrollbar-thumb {
-            background: #219F84;
-        }
+        //overflow-y: auto;
+        //&::-webkit-scrollbar{
+        //    width: 5px;
+        //}
+        //&::-webkit-scrollbar-track {
+        //    background: #f1f1f1;
+        //}
+        //&::-webkit-scrollbar-thumb {
+        //    background: #219F84;
+        //}
     }
 }
 .color-holder{
