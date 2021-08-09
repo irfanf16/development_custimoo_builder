@@ -5,8 +5,8 @@
 <!--      <Search :categoryListing="categories" @search="searchProduct"/>-->
 <!--    </div>-->
     <div class="collection-btn mb-2">
-      <b-form-checkbox class="mr-3" name="check-button" button>Customized</b-form-checkbox>
-      <b-form-checkbox name="check-button" button>Personalized</b-form-checkbox>
+      <b-form-checkbox v-model="getCustomized" @change="changeProductType('customized')"  class="mr-3" name="check-button" button>Customized</b-form-checkbox>
+      <b-form-checkbox v-model="getPersonalized" @change="changeProductType('personalized')" name="check-button" button>Personalized</b-form-checkbox>
     </div>
     <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>
@@ -29,12 +29,33 @@
 })
 export default class ItemToCustomize extends Vue {
   @Prop({required: true}) categories!: any
+  @Prop({required: true}) test!: any
+
 
   public retrieveProductsC(index :number){
     this.$emit('retrieveProducts', index)
   }
   public searchProduct(param: string, type: string){
     this.$emit('search', param, type)
+  }
+  public changeProductType(prd_type :any){
+    this.$emit('retrieveProducts')
+
+    let value = false;
+    if(prd_type == 'personalized')
+      value = this.getPersonalized;
+    else
+      value = this.getCustomized;
+    console.log('value',!value);
+
+    this.$store.dispatch('setProductType', {prd_type: prd_type, value: !value});
+  }
+
+  get getPersonalized(): boolean {
+    return this.$store.getters.getPersonalized
+  }
+  get getCustomized(): boolean {
+    return this.$store.getters.getCustomized
   }
 }
 </script>

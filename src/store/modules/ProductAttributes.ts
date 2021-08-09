@@ -22,9 +22,13 @@ const ProductAttributes:Module<any, any> = {
     undoItems : [],
     redoItems:[],
     selectedDesignId:0,
-    hideColorSection : false
+    hideColorSection : false,
+    customized: true,
+    personalized: false
+
   },
   mutations: {
+
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
     },
@@ -37,6 +41,12 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
+    },
+    SET_PRODUCT_TYPE(state: Record<any, any>, payload: Record<any, any>){
+      if(payload.prd_type == 'personalized')
+        Vue.set(state, 'personalized', payload.value)
+      else
+        Vue.set(state, 'customized', payload.value)
     },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
@@ -383,11 +393,21 @@ const ProductAttributes:Module<any, any> = {
       return state.actionBeforeLogin
     },
     getUndoItems:(state)=> state.undoItems,
-    getRedoItems:(state)=> state.redoItems
+    getRedoItems:(state)=> state.redoItems,
+
+    getCustomized: state => {
+      return state.customized
+    },
+    getPersonalized: state => {
+      return state.personalized
+    },
   },
   actions: {
     setSelectedIndex({commit}, payload) {
       commit('SET_SELECTED', payload)
+    },
+    setProductType({commit}, payload) {
+      commit('SET_PRODUCT_TYPE', payload)
     },
     setCategories({commit}){
       const url = '/product/categories'
