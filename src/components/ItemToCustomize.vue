@@ -29,8 +29,6 @@
 })
 export default class ItemToCustomize extends Vue {
   @Prop({required: true}) categories!: any
-  @Prop({required: true}) test!: any
-
 
   public retrieveProductsC(index :number){
     this.$emit('retrieveProducts', index)
