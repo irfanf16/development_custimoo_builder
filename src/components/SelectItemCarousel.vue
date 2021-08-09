@@ -44,6 +44,7 @@ export default {
       this.$store.commit('CHANGE_STYLE_INDEX', 0);
       this.$store.dispatch("getModels", this.products[index].product_id);
       this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
+      this.$store.dispatch('setColorSectionVisibility')
     },
     loadMoreProduct: function (currentIndex) {
       if(this.$store.getters.getProducts.length - 5 <= currentIndex){

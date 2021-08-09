@@ -511,7 +511,16 @@ const ProductAttributes:Module<any, any> = {
       console.log(commit)
       const res = await http.post('updatesharedproduct', payload);
       return res
+    },
+    setColorSectionVisibility({commit, getters}){
+      const selectedProduct = getters.getSelectedProduct;
+      if(selectedProduct && selectedProduct.product_type==='personalized'){
+        commit('SET_HIDE_COLOR_SECTION', true);
+      }else{
+        commit('SET_HIDE_COLOR_SECTION', false);
+      }
     }
+
   }
 }
 export default ProductAttributes;

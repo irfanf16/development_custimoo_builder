@@ -10,7 +10,7 @@
             </div>
             <template v-if="manageComponents.ExtractedColors">
               <div class="mb-3 mb-lg-0" v-if="customLogos[0] && customLogos[0].url" :class="extractedcolorclass">
-                <ExtractedColors />
+                <ExtractedColors v-if="!hideColorSection" />
               </div>
             </template>
 
@@ -195,6 +195,7 @@ import set = Reflect.set;
         await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(res.text));
         await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.defaultcolors));
         await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.groupcolors));
+        await  this.$store.dispatch('setColorSectionVisibility')
         this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
           if (item.id == res.design_id){
             Vue.set(item, 'design_show', 1)
@@ -501,6 +502,7 @@ export default class Home extends Vue {
         }
         this.$store.dispatch('setSelectedProductAndStyle')
         this.$store.dispatch('setSelectedProductDesign')
+        this.$store.dispatch('setColorSectionVisibility')
         let windowView = this.$store.getters.getWindowView;
         if(windowView == 2){
           this.showAdvanceCustomization();
