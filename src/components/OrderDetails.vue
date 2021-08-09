@@ -257,6 +257,7 @@ export default class OrderDetails extends Vue {
   }
 
   public generateProductionPdf(e: any) {
+    $('meta[name=viewport]').attr('content', 'width=1024')
     let frontCanvas = this.productionSVGs.front
     let backCanvas = this.productionSVGs.back
 
@@ -286,15 +287,12 @@ export default class OrderDetails extends Vue {
     let frontViewPdf = front2D.get(0)
     let backViewPdf = back2D.get(0)
 
-    console.log(frontViewPdf)
     $("#front-svg").html(frontViewPdf)
     $("#back-svg").html(backViewPdf)
     this.logosConversionToBase64()
   }
 
   public htmlPdfGenerator() {
-
-
     let style_index = this.$store.getters.getCurrentStyleIndex;
     let selected_product = this.$store.getters.getSelectedProduct;
     const product_id = selected_product.product_id;
@@ -346,10 +344,11 @@ export default class OrderDetails extends Vue {
         .then(function(pdfAsString: string) {
           order_payload.order_file = pdfAsString;
           const res = http.post('orders/create', order_payload);
-          console.log(res);
         })
         .save()
-    }, 1000)
+
+      $('meta[name=viewport]').attr('content', 'width=device-width')
+    }, 500)
   }
 
   public toDataURLCustom(url: string, callback: any) {

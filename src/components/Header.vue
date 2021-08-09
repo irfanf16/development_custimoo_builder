@@ -1,5 +1,6 @@
 <template>
     <header id="header" class="shadow py-3 py-lg-0">
+      <meta name="viewport" content="width=device-width">
         <b-container fluid>
             <b-row class="align-items-center py-4">
                 <b-col cols="6" lg="2">
