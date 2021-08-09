@@ -353,7 +353,7 @@ export default class OrderDetails extends Vue {
 
       $('meta[name=viewport]').attr('content', 'width=device-width')
       this.showLoader = false
-    }, 500)
+    }, 1000)
   }
 
   public toDataURLCustom(url: string, callback: any) {

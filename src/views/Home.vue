@@ -17,7 +17,7 @@
 
             <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
               <template v-if="manageComponents.LogoArea">
-                <UploadLogo :customLogoIndex="0"/>
+                <UploadLogo v-if="!hideColorSection" :customLogoIndex="0"/>
               </template>
             </template>
             <template v-if="manageComponents.ChooseInterest">
