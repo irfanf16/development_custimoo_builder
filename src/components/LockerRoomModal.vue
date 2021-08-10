@@ -182,10 +182,10 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
           await this.$store.dispatch('setSelectedIndex', {selectedIndex:ind});
           let selectedIndex = this.selectedProduct.productstyles.findIndex((x:Record<any, any>) => x.id === element.style_id);
           await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-          await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
-          await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
-          await  this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
-          await  this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
+          await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
+          await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
+          await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
+          await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
           this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
             if (item.id == element.design_id){
               Vue.set(item, 'design_show', 1)
