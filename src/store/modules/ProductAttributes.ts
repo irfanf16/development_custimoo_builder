@@ -527,9 +527,7 @@ const ProductAttributes:Module<any, any> = {
       return res
     },
     async overRideLockerProduct({commit}, payload){
-      console.log(payload)
       await http.post('updatelockerproduct', payload).then((res) => {
-        console.log(res)
         if (res.status == 201){
           alert(res.data.message)
         }else if (res.status == 404){

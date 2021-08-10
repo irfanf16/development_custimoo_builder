@@ -450,7 +450,6 @@ export default class Home extends Vue {
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
-
     let locker = {
       product_id: this.selectedProduct.product_id,
       style_id: this.selectedProduct.productstyles[this.styleIndex].id,
@@ -462,7 +461,6 @@ export default class Home extends Vue {
       groupcolors: this.groupColors,
       id: this.$store.getters.getEditProductId
     }
-    console.log(locker)
     if (this.editStatus){
       await this.$store.dispatch('overRideLockerProduct', locker)
     }
