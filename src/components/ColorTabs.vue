@@ -71,6 +71,10 @@ export default class ColorTabs extends Vue {
     return this.$store.getters.getSvgGroups
   }
 
+  get getGroupColors(){
+    return this.$store.getters.getGroupColors
+  }
+
   public showColor(index: number) {
     this.selectTabIndex = index
   }
@@ -82,6 +86,7 @@ export default class ColorTabs extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.getGroupColors)), action: 'groupColor' })
     this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectTabIndex].id, color: color.value, pantone: color.name })
   }
 

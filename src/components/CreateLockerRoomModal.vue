@@ -25,6 +25,10 @@
       public ref = this.$refs as Record<any, any>
 
       public async createLocker(){
+        if(this.name == ''){
+          alert('please input locker name')
+          return false
+        }
         let res = await this.$store.dispatch('createLocker', this.name);
        if (res == ''){
          this.name = ''

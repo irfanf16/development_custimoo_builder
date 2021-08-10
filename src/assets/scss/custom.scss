@@ -317,6 +317,11 @@ button{
             border-radius: 5px;
             color: #808895;
             font-size: 12px;
+            
+            a{
+                display: block;
+            }
+
             @media only screen and (min-width: 992px){
                 font-size: 10px;
                 padding: 0.5rem;
@@ -338,6 +343,9 @@ button{
             .icon-holder{
                 font-size: 20px;
                 margin: 0 0 3px;
+                display: block;
+                width: 100%;
+
                 @media only screen and (min-width:992px){
                     font-size: 16px;
                 }
@@ -516,20 +524,20 @@ button{
             justify-content: space-between;
             align-items: center;
             .logo-holder{
-                width: 60px;
-                height: 60px;
-                position: relative;
-                border: 1px solid #EFF2F4;
-                border-radius: 5px;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                flex-direction: column;
-                align-items: center;
-                @media only screen and (min-width: 992px){
-                    width: 75px;
-                    height: 75px;
-                }
+                //width: 60px;
+                //height: 60px;
+                //position: relative;
+                //border: 1px solid #EFF2F4;
+                //border-radius: 5px;
+                //display: flex;
+                //flex-wrap: wrap;
+                //justify-content: center;
+                //flex-direction: column;
+                //align-items: center;
+                //@media only screen and (min-width: 992px){
+                //    width: 75px;
+                //    height: 75px;
+                //}
                 .additional-holder{
                     border: 1px solid #EFF2F4;
                     border-radius: 5px;
@@ -594,14 +602,14 @@ button{
                     border-top: none;
                     margin: 0;
                     .upload-logo-content{display: none;}
-                    .upload-box{
-                        width: 100%;
-                        height: 100%;
-                        margin: 0;
-                        padding: 0;
-                        border: none;
-                        font-size: 0;
-                    }
+                    //.upload-box{
+                    //    width: 100%;
+                    //    height: 100%;
+                    //    margin: 0;
+                    //    padding: 0;
+                    //    border: none;
+                    //    font-size: 0;
+                    //}
                 }
 
             }
@@ -1079,16 +1087,16 @@ button{
     }
     .tab-content{
         max-height: calc(100vh - 250px);
-        overflow-y: auto;
-        &::-webkit-scrollbar{
-            width: 5px;
-        }
-        &::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        &::-webkit-scrollbar-thumb {
-            background: #219F84;
-        }
+        //overflow-y: auto;
+        //&::-webkit-scrollbar{
+        //    width: 5px;
+        //}
+        //&::-webkit-scrollbar-track {
+        //    background: #f1f1f1;
+        //}
+        //&::-webkit-scrollbar-thumb {
+        //    background: #219F84;
+        //}
     }
 }
 .color-holder{
@@ -1673,6 +1681,12 @@ button{
             font-size: 12px;
             position: relative;
             padding: 0;
+            display: block;
+
+            a{
+                display: block;
+            }
+
             @media only screen and (min-width: 992px){
                 font-size: 14px;
             }
@@ -2295,7 +2309,7 @@ button{
             &:before{
                 top: 50%;
                 transform: translateY(-50%);
-                width: 1.3rem;
+                width: 1.4rem;
                 height: 1.3rem;
                 left: -1.8rem;
             }
@@ -2312,8 +2326,55 @@ button{
     }
 }
 .tabs-logo-container{
+    .logo-placement-holder{
+        padding-bottom: 45px;
+        position: relative;
+    }
     .upload-logo-opener{
-        .logo-option-area{display: none;}
+        .logo-option-area{
+            display: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 0 !important;
+            text-align: center;
+            max-width: 100%;
+        }
+    }
+    .logo-placement-holder{
+        .upload-logo-opener{
+            .logo-option-area{
+                display: block;
+            }
+        }
+    }
+    .logo-placement-area{
+        &.extracted-color-area{
+            .logo-placement-holder{padding-bottom: 0;}
+        }
+    }
+}
+
+.products-holder .products-block .image-holder{
+    .custom-checkbox{
+        position: absolute;
+        left: 5px;
+        top: 5px;
+        .custom-control-label{
+            &:before{
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+            &:after{
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+        }
+        .custom-control-input:checked ~ .custom-control-label:before{
+            background-color: #219F84;
+            border-color: #219F84;
+        }
     }
 }
 .collection-btn{
