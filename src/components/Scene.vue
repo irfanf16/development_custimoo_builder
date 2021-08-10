@@ -957,10 +957,10 @@ export default class Scene extends Vue {
 
   public addToOtherSide(target: any, side: string) {
     if(side == 'back' || (this.back && side == 'front')) {
-      let model = this.frontModel
+      let model = this.frontTexture
       let canvas = this.frontCanvas
       if (side == 'back' && this.back) {
-        model = this.backModel
+        model = this.backTexture
         canvas = this.backCanvas
       }
 
