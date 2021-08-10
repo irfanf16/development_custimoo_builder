@@ -102,36 +102,23 @@
             <CreateLockerRoomModal @lockerAdded="lockerAdded" />
           </div>
         </b-tabs>
-        <!-- <div class="lockerroom-header">
-            <div class="locker-opener">
-                <a href="#" class="arrow arrow-left"><font-awesome-icon :icon="['fas', 'arrow-left']" /></a>
-                <b-button variant="secondary" class="active">Locker 1</b-button>
-                <b-button variant="secondary">Locker 2<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-                <b-button variant="secondary">Locker 3<a class="remove" href="#"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-                <a href="#" class="arrow arrow-right"><font-awesome-icon :icon="['fas', 'arrow-right']" /></a>
-            </div>
-            <div class="create-lockerroom">
-                <b-button class="create-btn" variant="secondary"><span>Create New </span>+</b-button>
-            </div>
-        </div> -->
     </b-modal>
 </template>
 
 <script lang="ts">
-
 import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     import ErrorMessages from "@/mixins/ErrorMessages";
     import Scene from "@/components/Scene.vue"
-    @Component<CustomizationPreviewProcess>({
+    @Component<LockerRoomModal>({
         components: {
           LockerRoomProducts,
           Scene,
           CreateLockerRoomModal
         }
     })
-    export default class CustomizationPreviewProcess extends Mixins(ErrorMessages) {
+    export default class LockerRoomModal extends Mixins(ErrorMessages) {
       private storageUrl = process.env.VUE_APP_STORAGE_URL
       private baseUrl = location.host+"/#/"
       public ref = this.$refs as Record<any, any>
@@ -260,9 +247,6 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
       }
 
     }
-
-
-
 </script>
 
 <style lang="scss" scoped>
