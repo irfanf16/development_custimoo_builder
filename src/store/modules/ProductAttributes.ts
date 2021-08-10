@@ -19,11 +19,19 @@ const ProductAttributes:Module<any, any> = {
     lockerColors:[],
     logoTabIndex: 0,
     actionBeforeLogin: '',
-    undoItems : [{ action: '', data: null}],
+    undoItems : [],
     redoItems:[],
-    selectedDesignId:0
+    selectedDesignId:0,
+    hideColorSection : false,
+    customized: true,
+    personalized: false
+
   },
   mutations: {
+
+    SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
+      state.hideColorSection = payload
+    },
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
       if(payload.length) {
         state.products = [...state.products, ...payload];
@@ -33,6 +41,12 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
+    },
+    SET_PRODUCT_TYPE(state: Record<any, any>, payload: Record<any, any>){
+      if(payload.prd_type == 'personalized')
+        Vue.set(state, 'personalized', payload.value)
+      else
+        Vue.set(state, 'customized', payload.value)
     },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
@@ -255,66 +269,87 @@ const ProductAttributes:Module<any, any> = {
       state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
-    },
-    UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
-      if (state.redoItems.length){
-        const item = state.redoItems.find((item:Record<any, any>) => {
-          return item.action == payload.action
-        })
-        if (item){
-          return true
-        }else{
-          if (payload.action == 'defaultColor'){
-            state.redoItems.push({ action: 'defaultColor', data: state.defaultColors })
+      const selectedProduct = state.products[state.selectedIndex];
+      if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
+        let logoSetting = selectedProduct.logos_setting[0]
+
+        if(!logoSetting) {
+          logoSetting = {
+            width: 200,
+            x_axis: 150,
+            y_axis: 190,
+            rotation: 0,
+            haveControls: true,
+            side: 'front'
           }
         }
-      }else{
-        if (payload.action == 'defaultColor'){
-          state.redoItems.push({ action: 'defaultColor', data: state.defaultColors})
+
+        const logo = {
+          url: '',
+          width: logoSetting.width,
+          height: logoSetting.height,
+          x_axis: logoSetting.x_axis,
+          y_axis: logoSetting.y_axis,
+          rotation: logoSetting.rotation,
+          haveControls: Boolean(!logoSetting.is_locked),
+          side: logoSetting.side,
+          customLogo: true,
+          is_transparent: false
         }
+        state.customLogos.push(logo);
+        state.logoTabIndex = 0;
       }
+    },
+    UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       state.undoItems.push(payload)
     },
     UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
-    DO_UNDO(state: Record<any, any>, payload) {
-      console.log(payload)
+    DO_UNDO(state: Record<any, any>) {
       if (state.undoItems.length) {
         const lastUndo = state.undoItems.pop()
-        state.redoItems.push(lastUndo)
         if (lastUndo.action == 'customLogos') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customLogos)), action: 'customLogos'})
           state.customLogos = lastUndo.data
         } else if (lastUndo.action == 'defaultColor') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
           state.defaultColors = lastUndo.data
         } else if (lastUndo.action == 'groupColor') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
           state.groupColors = lastUndo.data
         } else if (lastUndo.action == 'customTexts') {
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
         }
       }else{
         console.log('nothing')
       }
     },
-    DO_REDO(state:Record<any, any>, payload){
-      console.log(payload)
+    DO_REDO(state:Record<any, any>){
       if (state.redoItems.length){
         const lastUndo = state.redoItems.pop()
-        state.undoItems.push(lastUndo)
         if(lastUndo.action == 'customLogos') {
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.customLogos)), action: 'customLogos'})
           state.customLogos = lastUndo.data
         }
         else if (lastUndo.action == 'defaultColor'){
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
           state.defaultColors = lastUndo.data
         }
         else if (lastUndo.action == 'groupColor'){
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
           state.groupColors = lastUndo.data
         }
         else if (lastUndo.action == 'customTexts'){
+          state.undoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
         }
       }
     }
   },
   getters: {
+    getHideColorSection: state => {
+      return state.hideColorSection
+    },
     getProducts: (state: any) => state.products,
     getSelectedIndex: (state: any) => state.selectedIndex,
     getSelectedProduct: (state => {
@@ -358,11 +393,21 @@ const ProductAttributes:Module<any, any> = {
       return state.actionBeforeLogin
     },
     getUndoItems:(state)=> state.undoItems,
-    getRedoItems:(state)=> state.redoItems
+    getRedoItems:(state)=> state.redoItems,
+
+    getCustomized: state => {
+      return state.customized
+    },
+    getPersonalized: state => {
+      return state.personalized
+    },
   },
   actions: {
     setSelectedIndex({commit}, payload) {
       commit('SET_SELECTED', payload)
+    },
+    setProductType({commit}, payload) {
+      commit('SET_PRODUCT_TYPE', payload)
     },
     setCategories({commit}){
       const url = '/product/categories'
@@ -476,8 +521,8 @@ const ProductAttributes:Module<any, any> = {
     resetStore({commit}){
       commit('RESET_STORE')
     },
-    undoAction({commit}, payload){
-      commit('DO_UNDO', payload);
+    undoAction({commit}){
+      commit('DO_UNDO');
     },
     redoAction({commit}, payload){
       commit('DO_REDO', payload)
@@ -486,7 +531,16 @@ const ProductAttributes:Module<any, any> = {
       console.log(commit)
       const res = await http.post('updatesharedproduct', payload);
       return res
+    },
+    setColorSectionVisibility({commit, getters}){
+      const selectedProduct = getters.getSelectedProduct;
+      if(selectedProduct && selectedProduct.product_type==='personalized'){
+        commit('SET_HIDE_COLOR_SECTION', true);
+      }else{
+        commit('SET_HIDE_COLOR_SECTION', false);
+      }
     }
+
   }
 }
 export default ProductAttributes;

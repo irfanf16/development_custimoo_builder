@@ -28,9 +28,9 @@
                                                 <li>
                                                     <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                                                 </li>
-                                                <li class="d-none d-lg-block">
-                                                    <a :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
-                                                    <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="click">
+                                                <li>
+                                                    <b-button :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                                                    <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
                                                         <div class="share-holder">
                                                             <h3>Copy link and Share</h3>
                                                             <div class="share-form">
@@ -182,6 +182,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
           await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
           await  this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
           await  this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
+          await  this.$store.dispatch('setColorSectionVisibility');
           this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
             if (item.id == element.design_id){
               Vue.set(item, 'design_show', 1)
@@ -423,6 +424,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
                         display: block;
                         margin: 0 0 5px;
                     }
+                  .btn,
                     a{
                         display: flex !important;
                         flex-wrap: wrap;
@@ -435,6 +437,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
                         background: #fff;
                         border-radius: 50%;
                         cursor: pointer;
+                    border: none;
                         @media only screen and (min-width: 992px){
                             width: 30px !important;
                             height: 30px;

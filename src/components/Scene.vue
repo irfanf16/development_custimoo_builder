@@ -209,10 +209,10 @@ export default class Scene extends Vue {
   customLogosChanged(newVal: [Record<any, any>]) {
     if(this.mounted && this.logoAllowed) {
       const self = this
-      if(this.customLogoObjects.length != this.customLogos.length) {
+      if(this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo.url).length) {
         let deleteIndex: number[] = []
         this.customLogoObjects.forEach((item: Record<any, any>, index: number) => {
-          if(item && !this.customLogos[item.logoIndex]) {
+          if(item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '')) {
             this.frontCanvas.remove(this.customLogoObjects[item.logoIndex])
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
@@ -232,7 +232,6 @@ export default class Scene extends Vue {
           if (self.backCanvas) {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
           }
-          console.log('error in line 235')
           this.customLogoObjects[logo.logoIndex] = null
           if(this.otherSideLogos[index]) {
             this.frontCanvas.remove(this.otherSideLogos[index])
@@ -247,7 +246,6 @@ export default class Scene extends Vue {
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[index])
             }
-            console.log('error in line 250')
             this.customLogoObjects[index] = null
             if(this.otherSideLogos[index]) {
               this.frontCanvas.remove(this.otherSideLogos[index])
@@ -433,10 +431,11 @@ export default class Scene extends Vue {
   }
 
   public changeGroupColor (groupColors: Record<any, any>): void {
+    let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
       if (groupColors[item.id]) {
-        item.set('fill', groupColors[item.id].color);
+        item.set('fill', groupColors[item.id].color)
         let svgIndex = 0
         this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
           if (svgGroup.id == item.id) {
@@ -452,6 +451,19 @@ export default class Scene extends Vue {
             pantone: groupColors[item.id].pantone,
             name: groupColors[item.id].name
           })
+        }
+      }else if (!defaultColors.length) {
+        let svgIndex = 0
+        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+          if (svgGroup.id == item.id) {
+            svgIndex = index
+          }
+        })
+        if(this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
+          item.set('fill', this.initialSvgGroups[svgIndex].color)
+          if(!this.back) {
+            Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
+          }
         }
       }
     })
@@ -474,6 +486,17 @@ export default class Scene extends Vue {
               pantone: groupColors[item.id].pantone,
               name: groupColors[item.id].name
             })
+          }
+        }else if (!defaultColors.length) {
+          let svgIndex = 0
+          this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+            if (svgGroup.id == item.id) {
+              svgIndex = index
+            }
+          })
+          if(this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
+            item.set('fill', this.initialSvgGroups[svgIndex].color)
+            Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
           }
         }
       })
@@ -815,7 +838,9 @@ export default class Scene extends Vue {
             logos = logos.concat(customLogos) as [Record<any, any>]
           }
           if (logos.length) {
-            self.addLogos(logos as [Record<any, any>])
+            setTimeout(() => {
+              this.addLogos(logos as [Record<any, any>])
+            }, 500)
           }
 
           if (self.customTexts.length || self.texts.length) {
@@ -843,14 +868,16 @@ export default class Scene extends Vue {
               }
             })
             texts = texts.concat(self.customTexts) as [Record<any, any>]
-            self.addTexts(texts)
+            setTimeout(() => {
+              this.addTexts(texts)
+            }, 500)
           }
           this.showLoader = false
           this.mounted = true
         }
 
-        if (self.mainPreview) {
-          self.setProductionSVG()
+        if (this.mainPreview) {
+          this.setProductionSVG()
         }
         clearInterval(timer)
       }
@@ -1074,6 +1101,7 @@ export default class Scene extends Vue {
       this.customTexts.forEach((text, index) => {
         if(e.target.textIndex == index) {
           if (e.action == 'drag') {
+            self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'x_axis',
@@ -1085,6 +1113,7 @@ export default class Scene extends Vue {
               value: e.target.top
             })
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
+            self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
             const width = e.target.width * e.target.scaleX;
             const height = e.target.height * e.target.scaleY;
             const outLineWidth = e.target.strokeWidth * e.target.scaleX
@@ -1114,6 +1143,7 @@ export default class Scene extends Vue {
               value: outLineWidth * this.measurementRatio
             })
           } else if (e.action == 'rotate') {
+            self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               attribute: 'rotation',
@@ -1138,6 +1168,7 @@ export default class Scene extends Vue {
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
           if (logoUrl == e.target._element.src) {
             if (e.action == 'drag') {
+              self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customLogos)), action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
                 index: index,
                 attribute: 'x_axis',
@@ -1149,6 +1180,7 @@ export default class Scene extends Vue {
                 value: e.target.top
               })
             } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
+              self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customLogos)), action: 'customLogos' })
               const width = e.target.width * e.target.scaleX;
               const height = e.target.height * e.target.scaleY;
               self.$store.dispatch('updateCustomLogoAttribute', {
@@ -1172,6 +1204,7 @@ export default class Scene extends Vue {
                 value: Math.floor(height * this.measurementRatio)
               })
             } else if (e.action == 'rotate') {
+              self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customLogos)), action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
                 index: index,
                 attribute: 'rotation',
@@ -1321,7 +1354,6 @@ export default class Scene extends Vue {
             }
 
             img.on('selected', (e: Record<any, any>) => {
-              //this.$store.dispatch('setLogoTab', logoIndex)
               this.$root.$emit('changeLogoTabIndex', logoIndex);
               this.showDimensions(e, dimText)
             })

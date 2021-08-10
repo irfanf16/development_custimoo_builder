@@ -38,8 +38,12 @@
           return this.$store.getters.getLogosColors
         }
 
+        get selectedProduct(): [Record<any, any>] {
+            return this.$store.getters.getSelectedProduct
+        }
+
         get customLogos(): [Record<any, any>] {
-            return this.$store.getters.getCustomLogos
+          return this.$store.getters.getCustomLogos
         }
 
         public useLogoColors() {
