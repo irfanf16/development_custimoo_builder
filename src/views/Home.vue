@@ -43,14 +43,14 @@
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                   </template>
-                  <LockerRoomModal ref="lockerModal" />
+                  <LockerRoomModal ref="lockerModal"  />
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'savetolocker'" variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
                   </template>
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
                   </template>
-                  <AddLockerRoomModal ref="saveToLockerModal" />
+                  <AddLockerRoomModal v-if="!editProductStatus" ref="saveToLockerModal" />
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
                   </template>
@@ -211,6 +211,7 @@ import set = Reflect.set;
         this.productUpdated = true
       }, 10000)
     }
+    this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
     this.jwtToken = localStorage.getItem('jwtToken') as string
     await this.$store.dispatch('setCategories')
     // await this.$store.dispatch('setJwtToken')
@@ -272,6 +273,11 @@ export default class Home extends Vue {
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
   }
+
+  get editProductStatus():boolean{
+    return  this.$store.getters.getEditStatus
+  }
+
   @Watch('customLogos', {
     deep: true
   })
@@ -381,6 +387,7 @@ export default class Home extends Vue {
   get groupColors(): [Record<any, any>] {
     return this.$store.getters.getGroupColors
   }
+
   @Watch('groupColors', {
     deep: true
   })
@@ -402,6 +409,9 @@ export default class Home extends Vue {
   }
   get actionBeforeLogin(): string {
     return this.$store.getters.getActionBeforeLogin
+  }
+  get editStatus():boolean{
+    return  this.$store.getters.getEditStatus
   }
   public getUrlParams(){
     if (this.$route.params.product && this.$route.params.name && this.productUpdated){
@@ -430,12 +440,33 @@ export default class Home extends Vue {
     });
   }
 
+
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
   }
 
   public async getLockers(){
     await this.$store.dispatch("getLockers");
+    const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+      return item.design_show
+    })
+    if (this.$store.getters.getEditDesignId != currentDesign[0].id || this.$store.getters.getEditStyleId != this.selectedProduct.productstyles[this.styleIndex].id){
+      this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+    }
+    let locker = {
+      product_id: this.selectedProduct.product_id,
+      style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+      design_id: currentDesign[0].id,
+      custom_logos: this.customLogos,
+      text: this.customTexts,
+      colors: this.logoColors,
+      defaultcolors: this.defaultColors,
+      groupcolors: this.groupColors,
+      id: this.$store.getters.getEditProductId
+    }
+    if (this.editStatus){
+      await this.$store.dispatch('overRideLockerProduct', locker)
+    }
   }
   public showAdvanceCustomization() {
     if (this.isCustomerAuthenticated){
