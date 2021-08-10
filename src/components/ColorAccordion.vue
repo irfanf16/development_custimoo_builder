@@ -121,15 +121,14 @@ export default class ColorAccordion extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
-    console.log(color)
-     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
-     this.$store.dispatch('updateGroupColors',
-      {
-        index: this.svgGroups[this.selectAccordionIndex].id,
-        color: color.value,
-        pantone: color.pantone,
-        name: color.name
-      })
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
+    this.$store.dispatch('updateGroupColors',
+    {
+      index: this.svgGroups[this.selectAccordionIndex].id,
+      color: color.value,
+      pantone: color.pantone,
+      name: color.name
+    })
   }
 
   public changeColor(color: Record<any, any>) {
