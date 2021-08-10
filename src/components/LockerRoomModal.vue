@@ -14,11 +14,17 @@
                         <b-card no-body>
                             <b-tabs card changed="currentTabs">
                               <b-tab title="Products">
-                                <div class="products-holder d-lg-flex flex-lg-wrap">
+                                <div class="products-holder d-lg-flex flex-lg-wrap mb-4">
                                     <template v-for="(product, ind) in room.product">
                                         <div :key="ind" class="products-block">
                                             <div class="image-holder">
                                           <a>
+                                            <b-form-checkbox
+                                              name="checkbox-1"
+                                              value="accepted"
+                                              unchecked-value="not_accepted"
+                                            >
+                                            </b-form-checkbox>
                                             <Scene :measurement-ratio="product.design.measurement_ratio"
                                               :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: storageUrl+product.style.front.file_url}"
                                                 :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
@@ -54,6 +60,9 @@
                                           </div>
                                         </div>
                                     </template>
+                                </div>
+                                <div class="text-right">
+                                  <b-button variant="secondary">Add selected designs to a new collection</b-button>
                                 </div>
                               </b-tab>
                                 <b-tab title="Assets" class="assets-file">
@@ -167,6 +176,8 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
       public showLockerRoomModal() {
         this.ref['locker-modal'].show()
       }
+
+      public lockerStatus = 'not_accepted'
 
 
       public async editProduct(lockerIndex: number, productIndex: number){
@@ -450,6 +461,7 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
                         }
                     }
                 }
+
             }
 
         }

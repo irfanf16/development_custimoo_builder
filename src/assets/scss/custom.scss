@@ -2295,7 +2295,7 @@ button{
             &:before{
                 top: 50%;
                 transform: translateY(-50%);
-                width: 1.3rem;
+                width: 1.4rem;
                 height: 1.3rem;
                 left: -1.8rem;
             }
@@ -2338,6 +2338,28 @@ button{
     .logo-placement-area{
         &.extracted-color-area{
             .logo-placement-holder{padding-bottom: 0;}
+        }
+    }
+}
+
+.products-holder .products-block .image-holder{
+    .custom-checkbox{
+        position: absolute;
+        left: 5px;
+        top: 5px;
+        .custom-control-label{
+            &:before{
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+            &:after{
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+        }
+        .custom-control-input:checked ~ .custom-control-label:before{
+            background-color: #219F84;
+            border-color: #219F84;
         }
     }
 }

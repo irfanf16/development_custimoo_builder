@@ -348,7 +348,7 @@ export default class LogoPlacementTabs extends Vue {
       &.save-logo-btn{
         position: absolute;
         right: 0;
-        top: 20px;
+        top: 35px;
         @media only screen and (min-width: 992px){
           position: static;
         }
