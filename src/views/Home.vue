@@ -450,6 +450,9 @@ export default class Home extends Vue {
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
+    if (this.$store.getters.getEditDesignId != currentDesign[0].id || this.$store.getters.getEditStyleId != this.selectedProduct.productstyles[this.styleIndex].id){
+      this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+    }
     let locker = {
       product_id: this.selectedProduct.product_id,
       style_id: this.selectedProduct.productstyles[this.styleIndex].id,
