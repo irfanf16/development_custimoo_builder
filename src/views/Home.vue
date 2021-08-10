@@ -99,16 +99,9 @@
           </template>
           <div class="customization-area d-flex flex-wrap justify-content-center align-items-center" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
             <div v-bind:class="{active: isActive}">
-              <!--              <b-button class="preview-btn" variant="secondary" v-on:click="myFilter">-->
-              <!--                <span class="three-d-btn"><font-awesome-icon :icon="['fas', 'cube']"/> 3D View</span>-->
-              <!--                <span class="two-d-btn"><font-awesome-icon :icon="['fas', 'dice-two']"/> 2D View</span>-->
-              <!--              </b-button>-->
               <div class="twoD-view">
                 <CustomizationPreview />
               </div>
-              <!--              <div class="threeD-view">-->
-              <!--                <CustomizationPreviewThreeD />-->
-              <!--              </div>-->
               <template v-if="manageComponents.BasicCustomization">
                 <b-button @click="showAdvanceCustomization()" class="d-none d-lg-inline-block mt-5" variant="secondary">Continue</b-button>
               </template>
@@ -149,11 +142,9 @@ import SaveColorModal from "@/components/SaveColorModal.vue"
 import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
-import CustomizationPreviewThreeD from '@/components/CustomizationPreviewThreeD.vue'
 import ExtractedColors from '@/components/ExtractedColors.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import {http} from "@/httpCommon"
-import set = Reflect.set;
 
 @Component<Home>({
   components: {
@@ -166,7 +157,6 @@ import set = Reflect.set;
     LockerRoomModal,
     AddLockerRoomModal,
     SaveColorModal,
-    CustomizationPreviewThreeD,
     ExtractedColors,
     LoginForm
   },
