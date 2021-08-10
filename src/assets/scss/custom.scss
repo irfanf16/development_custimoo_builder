@@ -2327,7 +2327,7 @@ button{
 }
 .tabs-logo-container{
     .logo-placement-holder{
-        padding-bottom: 30px;
+        padding-bottom: 45px;
         position: relative;
     }
     .upload-logo-opener{
@@ -2340,6 +2340,18 @@ button{
             margin: 0 !important;
             text-align: center;
             max-width: 100%;
+        }
+    }
+    .logo-placement-holder{
+        .upload-logo-opener{
+            .logo-option-area{
+                display: block;
+            }
+        }
+    }
+    .logo-placement-area{
+        &.extracted-color-area{
+            .logo-placement-holder{padding-bottom: 0;}
         }
     }
 }

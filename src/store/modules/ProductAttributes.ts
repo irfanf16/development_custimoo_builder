@@ -22,9 +22,25 @@ const ProductAttributes:Module<any, any> = {
     undoItems : [],
     redoItems:[],
     selectedDesignId:0,
-    hideColorSection : false
+    hideColorSection : false,
+    editStatus: false,
+    editProductId: 0,
+    editDesignId: 0,
+    editStyleId: 0
   },
   mutations: {
+    CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
+      state.editStatus = payload.status
+      if (payload.id) {
+        state.editProductId = payload.id
+      }
+      if (payload.designId){
+        state.editDesignId = payload.designId
+      }
+      if (payload.styleId){
+        state.editStyleId = payload.styleId
+      }
+      },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
     },
@@ -178,6 +194,7 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_GROUP_COLORS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
+        Vue.delete(state.groupColors, color.index)
         Vue.set(state.groupColors, color.index, { color: color.color, pantone: color.pantone, name: color.name })
       }
     },
@@ -337,6 +354,18 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
+    getEditStatus: state => {
+      return state.editStatus
+    },
+    getEditProductId: state => {
+      return state.editProductId
+    },
+    getEditStyleId: state => {
+      return state.editStyleId
+    },
+    getEditDesignId: state => {
+      return state.editDesignId
+    },
     getHideColorSection: state => {
       return state.hideColorSection
     },
@@ -511,6 +540,20 @@ const ProductAttributes:Module<any, any> = {
       console.log(commit)
       const res = await http.post('updatesharedproduct', payload);
       return res
+    },
+    async overRideLockerProduct({commit}, payload){
+      await http.post('updatelockerproduct', payload).then((res) => {
+        if (res.status == 201){
+          alert(res.data.message)
+        }else if (res.status == 404){
+          alert(res.data.message)
+        }
+      }).catch(err => {
+        if(err.response.status){
+          alert(err.response.data.message)
+          commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+        }
+      })
     }
   }
 }
