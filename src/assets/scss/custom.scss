@@ -317,6 +317,11 @@ button{
             border-radius: 5px;
             color: #808895;
             font-size: 12px;
+            
+            a{
+                display: block;
+            }
+
             @media only screen and (min-width: 992px){
                 font-size: 10px;
                 padding: 0.5rem;
@@ -338,6 +343,9 @@ button{
             .icon-holder{
                 font-size: 20px;
                 margin: 0 0 3px;
+                display: block;
+                width: 100%;
+
                 @media only screen and (min-width:992px){
                     font-size: 16px;
                 }
@@ -1673,6 +1681,12 @@ button{
             font-size: 12px;
             position: relative;
             padding: 0;
+            display: block;
+
+            a{
+                display: block;
+            }
+
             @media only screen and (min-width: 992px){
                 font-size: 14px;
             }

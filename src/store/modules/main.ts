@@ -1,4 +1,5 @@
 import {http, noTokenRequest} from "@/httpCommon";
+import { Object } from "fabric/fabric-impl";
 import { Module } from "vuex";
 const mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 const Main:Module<any, any> = {
@@ -34,6 +35,13 @@ const Main:Module<any, any> = {
       state.windowView = payload
     },
     SET_HIDE_TAB(state: Record<any, any>, payload: Record<any, any>) {
+      state.hideTab = {
+        logoHide: !mobileScreen,
+        colorHide: !mobileScreen,
+        textHide: !mobileScreen,
+        styleHide: !mobileScreen,
+        teamHide: !mobileScreen
+      }
       state.hideTab[payload.index] = payload.value
     },
     SET_TAB_MAIN(state: Record<any, any>, payload: Record<any, any>) {
@@ -61,7 +69,7 @@ const Main:Module<any, any> = {
     setWindowView({ commit }, payload) {
       commit('setWindowView', payload)
     },
-    setHideTab({ commit }, payload) {
+    async setHideTab({ commit }, payload) {
       commit('SET_HIDE_TAB', payload)
     },
     setTabMain({ commit }, payload) {

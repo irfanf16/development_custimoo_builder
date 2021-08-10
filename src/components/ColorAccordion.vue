@@ -86,7 +86,7 @@ export default class ColorAccordion extends Vue {
   get svgGroups() {
     return this.$store.getters.getSvgGroups
   }
-  get getGroupColors(){
+  get groupColors(){
     return this.$store.getters.getGroupColors
   }
   public showColor(index: number) {
@@ -120,16 +120,15 @@ export default class ColorAccordion extends Vue {
     }
   }
 
-  public  setColor(color: Record<any, any>) {
-    console.log(this.getGroupColors)
-     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.getGroupColors)), action: 'groupColor' })
-     this.$store.dispatch('updateGroupColors',
-      {
-        index: this.svgGroups[this.selectAccordionIndex].id,
-        color: color.value,
-        pantone: color.pantone,
-        name: color.name
-      })
+  public setColor(color: Record<any, any>) {
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
+    this.$store.dispatch('updateGroupColors',
+    {
+      index: this.svgGroups[this.selectAccordionIndex].id,
+      color: color.value,
+      pantone: color.pantone,
+      name: color.name
+    })
   }
 
   public changeColor(color: Record<any, any>) {

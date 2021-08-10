@@ -182,7 +182,9 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
 
       public async editProduct(lockerIndex: number, productIndex: number){
         const id = this.getLockerProducts[lockerIndex].product[productIndex].id
-        this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true})
+        const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
+        const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
+        this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
         const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
         const element = this.getLockerProducts[lockerIndex].product[productIndex];
         let res = await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
@@ -191,10 +193,10 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
           await this.$store.dispatch('setSelectedIndex', {selectedIndex:ind});
           let selectedIndex = this.selectedProduct.productstyles.findIndex((x:Record<any, any>) => x.id === element.style_id);
           await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-          await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
-          await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
-          await  this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
-          await  this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
+          await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
+          await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
+          await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
+          await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
           this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
             if (item.id == element.design_id){
               Vue.set(item, 'design_show', 1)

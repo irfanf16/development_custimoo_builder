@@ -247,15 +247,17 @@ export default class OrderDetails extends Vue {
       self.htmlPdfGenerator()
     }
     self.customLogos.forEach((logos: Record<any, any>, index: number) => {
-      let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
-      self.toDataURLCustom(this.storageUrl+logos.url, (dataUrl: any) => {
-        if (dataUrl) {
-          self.base64Logos.push({'b64logo': dataUrl, 'logoSize': logoDimension})
-          if (index == self.customLogos.length - 1) {
-            self.htmlPdfGenerator()
+      if(logos.url) {
+        let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
+        self.toDataURLCustom(this.storageUrl+logos.url, (dataUrl: any) => {
+          if (dataUrl) {
+            self.base64Logos.push({'b64logo': dataUrl, 'logoSize': logoDimension})
+            if (index == self.customLogos.length - 1) {
+              self.htmlPdfGenerator()
+            }
           }
-        }
-      })
+        })
+      }
     })
   }
 
@@ -266,7 +268,11 @@ export default class OrderDetails extends Vue {
     let backCanvas = this.productionSVGs.back
 
     let front = new fabric.Canvas(this.$refs.pdfFront as HTMLCanvasElement)
+    front.setHeight(600);
+    front.setWidth(600);
     let back = new fabric.Canvas(this.$refs.pdfBack as HTMLCanvasElement)
+    back.setHeight(600);
+    back.setWidth(600);
     let emptyCallback = () => { console }
     front.loadFromJSON(JSON.stringify(frontCanvas), emptyCallback, emptyCallback)
     back.loadFromJSON(JSON.stringify(backCanvas), emptyCallback, emptyCallback)

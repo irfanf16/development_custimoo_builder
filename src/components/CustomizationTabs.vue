@@ -6,10 +6,10 @@
         <b-tab v-if="selectedProduct.is_logo_allowed == 1">
           <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
           <template #title>
-            <a @click="setHideTab('logoHide', true)">
-              <div class="icon-holder">
+            <a @click="setHideTab('logoHide', true)" >
+              <span class="icon-holder">
                 <font-awesome-icon :icon="['fas', 'image']"/>
-              </div>
+              </span>
               Logo
             </a>
           </template>
@@ -21,12 +21,12 @@
         <b-tab>
           <button @click="setHideTab('colorHide', !hideTab.colorHide)" class="tab-close-btn d-lg-none"></button>
           <template #title>
-            <a @click="setHideTab('colorHide', true)">
-              <div class="icon-holder">
+            <a @click="setHideTab('colorHide', true)" >
+              <span class="icon-holder">
                 <font-awesome-icon :icon="['fas', 'fill-drip']"/>
-              </div>
+              </span>
+              Color
             </a>
-            Color
           </template>
           <div v-if="hideTab.colorHide">
             <h2 class="fw-bold fz-16 p-3 d-none d-lg-block">Choose Color</h2>
@@ -41,12 +41,12 @@
         <b-tab>
           <button @click="setHideTab('textHide', !hideTab.textHide)" class="tab-close-btn d-lg-none"></button>
           <template #title>
-            <a @click="setHideTab('textHide', true)">
-              <div class="icon-holder">
+            <a @click="setHideTab('textHide', true)" >
+              <span class="icon-holder">
                 <font-awesome-icon :icon="['fas', 'text-height']"/>
-              </div>
+              </span>
+              Text
             </a>
-            Text
           </template>
           <div class="d-none d-lg-block">
             <div v-for="(customText, index) in customTexts" :key="index">
@@ -81,12 +81,12 @@
         <b-tab @click="getModels">
           <button @click="setHideTab('styleHide', !hideTab.styleHide)" class="tab-close-btn d-lg-none"></button>
           <template #title>
-            <a @click="setHideTab('styleHide', true)">
-              <div class="icon-holder">
+            <a @click="setHideTab('styleHide', true)" >
+              <span class="icon-holder">
                 <font-awesome-icon :icon="['fas', 'swatchbook']"/>
-              </div>
+              </span>
+              Style
             </a>
-            Style
           </template>
           <div class="collar-section p-4" v-if="hideTab.styleHide">
             <h2 class="fw-bold mb-2 fz-18">Choose Product</h2>
@@ -96,12 +96,12 @@
         <b-tab>
           <button @click="setHideTab('teamHide', !hideTab.teamHide)" class="tab-close-btn d-lg-none"></button>
           <template #title>
-            <a @click="setHideTab('teamHide', true)">
-              <div class="icon-holder">
+            <a @click="setHideTab('teamHide', true)" >
+              <span class="icon-holder">
                 <font-awesome-icon :icon="['fas', 'user-friends']"/>
-              </div>
+              </span>
+              Team
             </a>
-            Team
           </template>
           <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
             <h2 class="fw-bold mb-2 fz-18">Roster</h2>
@@ -123,6 +123,7 @@ import EditRosterArea from '@/components/EditRosterArea.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
+import { log } from 'fabric/fabric-impl'
 
 @Component<CustomizationProcess>({
   components: {
