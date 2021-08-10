@@ -493,8 +493,10 @@ export default class Home extends Vue {
     if (searchCall) {
       this.$store.commit('SET_PRODUCTS', []);
     }
-    if(productType)
+    if(productType) {
+      this.$store.commit('SET_PRODUCTS', [])
       this.hasProducts = true
+    }
 
     let customized = this.$store.getters.getCustomized
     let personalized = this.$store.getters.getPersonalized
