@@ -32,7 +32,7 @@
         </template>
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
           <!-- <template v-if="manageComponents.AdvanceCustomization"> -->
-            <template>
+          <template>
             <div class="customization-preview-process w-100">
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
@@ -73,10 +73,10 @@
                         <h3>Copy link and Share</h3>
                         <div class="share-form">
                           <b-form inline>
-<!--                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>-->
+                            <!--                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>-->
                             <b-form-input v-model="shared_link" id="copy-link"></b-form-input>
                             <b-button variant="primary" @click="copyLink">Copy Link</b-button>
-<!--                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>-->
+                            <!--                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>-->
                           </b-form>
                         </div>
                       </div>
@@ -99,16 +99,16 @@
           </template>
           <div class="customization-area d-flex flex-wrap justify-content-center align-items-center" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
             <div v-bind:class="{active: isActive}">
-<!--              <b-button class="preview-btn" variant="secondary" v-on:click="myFilter">-->
-<!--                <span class="three-d-btn"><font-awesome-icon :icon="['fas', 'cube']"/> 3D View</span>-->
-<!--                <span class="two-d-btn"><font-awesome-icon :icon="['fas', 'dice-two']"/> 2D View</span>-->
-<!--              </b-button>-->
+              <!--              <b-button class="preview-btn" variant="secondary" v-on:click="myFilter">-->
+              <!--                <span class="three-d-btn"><font-awesome-icon :icon="['fas', 'cube']"/> 3D View</span>-->
+              <!--                <span class="two-d-btn"><font-awesome-icon :icon="['fas', 'dice-two']"/> 2D View</span>-->
+              <!--              </b-button>-->
               <div class="twoD-view">
                 <CustomizationPreview />
               </div>
-<!--              <div class="threeD-view">-->
-<!--                <CustomizationPreviewThreeD />-->
-<!--              </div>-->
+              <!--              <div class="threeD-view">-->
+              <!--                <CustomizationPreviewThreeD />-->
+              <!--              </div>-->
               <template v-if="manageComponents.BasicCustomization">
                 <b-button @click="showAdvanceCustomization()" class="d-none d-lg-inline-block mt-5" variant="secondary">Continue</b-button>
               </template>
@@ -208,7 +208,7 @@ import set = Reflect.set;
             Vue.set(item, 'design_show', 0)
           }
         });
-        }, 2000)
+      }, 2000)
       setTimeout(() => {
         this.showLoader = false
         console.log(this.showLoader)
@@ -370,7 +370,7 @@ export default class Home extends Vue {
           defaultcolors: this.defaultColors,
           url: query
         }
-       let res = await this.$store.dispatch('updateSharedProduct', param)
+        let res = await this.$store.dispatch('updateSharedProduct', param)
         console.log(res)
       }
     }catch (error){
@@ -448,7 +448,7 @@ export default class Home extends Vue {
     this.$store.dispatch('undoAction')
   }
   public redoAction(){
-      this.$store.dispatch('redoAction');
+    this.$store.dispatch('redoAction');
   }
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
@@ -457,11 +457,11 @@ export default class Home extends Vue {
   }
   public showDesign() {
     if(this.manageComponents.mobileScreen){
-        this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
-        this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
-        this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
-        this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
-        this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
+      this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
       this.$store.dispatch('setManageComponents', {index: 'DefaultColorShuffleBtn', value: true})
     }
   }
@@ -485,14 +485,21 @@ export default class Home extends Vue {
     console.log('isCustomerAuthenticated',this.isCustomerAuthenticated)
   }
 
-  public retrieveProducts(url = '/list/products', searchCall = false): void {
+  public retrieveProducts(url = '/list/products', searchCall = false, productType = false): void {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
     if (searchCall) {
       this.$store.commit('SET_PRODUCTS', []);
     }
-  console.log('this.hasProducts',this.hasProducts);
+    if(productType)
+      this.hasProducts = true
+
+    let customized = this.$store.getters.getCustomized
+    let personalized = this.$store.getters.getPersonalized
+    url += `?customized=${customized}&personalized=${personalized}`
+
+
     if (this.hasProducts) {
       http.get(url).then((response: any) => {
         let product_data = this.products.concat(response.data.products.data)
@@ -512,7 +519,7 @@ export default class Home extends Vue {
         }
       }).catch((e: any) => {
         console.log(e)
-       // console.log('in catch')
+        // console.log('in catch')
       });
     }
   }
@@ -687,112 +694,112 @@ export default class Home extends Vue {
   }
 }
 .logo-placement-area{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  .logo-placement-holder{
+    flex: 0 0 67%;
+    max-width: 67%;
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
-    .logo-placement-holder{
-      flex: 0 0 67%;
-      max-width: 67%;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
+    @media only screen and (min-width: 992px){
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+  .btn{
+    flex: 0 0 30%;
+    max-width: 30%;
+    font-size: 12px;
+    padding: 0.50rem;
+    @media only screen and (min-width: 992px){
+      flex: 0 0 100%;
+      max-width: 100%;
+      font-size: 14px;
+      padding: 0.50rem 0.75rem;
+    }
+  }
+  &.extracted-color-area{
+    max-width: 300px;
+    margin: 0 auto;
+    .logo-holder{
+      width: 60px;
+      height: 60px;
+      position: relative;
+      border: 1px solid #EFF2F4;
+      border-radius: 50%;
+      overflow: hidden;
       @media only screen and (min-width: 992px){
+        width: 75px;
+        height: 75px;
+      }
+      .color-extract-container{
+        width: 100%;
+        height: 100%;
+      }
+      .color-box{
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .logo-placement-holder{
+      @media only screen and (max-width: 992px){
         flex: 0 0 100%;
         max-width: 100%;
       }
     }
     .btn{
-      flex: 0 0 30%;
-      max-width: 30%;
-      font-size: 12px;
-      padding: 0.50rem;
-      @media only screen and (min-width: 992px){
+      flex: none;
+      color: #03142E;
+      &.use-btn{
+        background: none;
+        padding: 0 0 2px;
+        margin: 0;
+        border: none;
+        border-bottom: 2px solid #F7FAFC;
+        color: #808895;
+        font-size: 14px;
+        max-width: 35%;
+        @media only screen and (min-width: 1024px){
+          font-size: 13px;
+        }
+        @media only screen and (min-width: 1367px){
+          max-width: 30%;
+          font-size: 14px;
+        }
+        &:focus{
+          outline: none;
+          box-shadow: none;
+          border: none;
+        }
+      }
+      &.reset{
+        background: none;
+        color: #03142E;
+        border: none;
+        padding: 0;
+        width: auto;
+      }
+      &:hover{
+        @media only screen and (min-width: 1024px){
+          color: #808895 !important;
+        }
+      }
+    }
+    .btn-save-color{
+      color: #fff;
+      @media only screen and (max-width: 992px){
         flex: 0 0 100%;
         max-width: 100%;
-        font-size: 14px;
-        padding: 0.50rem 0.75rem;
+        margin-top: 20px;
       }
-    }
-    &.extracted-color-area{
-      max-width: 300px;
-      margin: 0 auto;
-      .logo-holder{
-        width: 60px;
-        height: 60px;
-        position: relative;
-        border: 1px solid #EFF2F4;
-        border-radius: 50%;
-        overflow: hidden;
-        @media only screen and (min-width: 992px){
-          width: 75px;
-          height: 75px;
-        }
-        .color-extract-container{
-          width: 100%;
-          height: 100%;
-        }
-        .color-box{
-          width: 100%;
-          height: 100%;
-        }
-      }
-      .logo-placement-holder{
-        @media only screen and (max-width: 992px){
-          flex: 0 0 100%;
-          max-width: 100%;
-        }
-      }
-      .btn{
-        flex: none;
-        color: #03142E;
-        &.use-btn{
-          background: none;
-          padding: 0 0 2px;
-          margin: 0;
-          border: none;
-          border-bottom: 2px solid #F7FAFC;
-          color: #808895;
-          font-size: 14px;
-          max-width: 35%;
-          @media only screen and (min-width: 1024px){
-            font-size: 13px;
-          }
-          @media only screen and (min-width: 1367px){
-            max-width: 30%;
-            font-size: 14px;
-          }
-          &:focus{
-            outline: none;
-            box-shadow: none;
-            border: none;
-          }
-        }
-        &.reset{
-          background: none;
-          color: #03142E;
-          border: none;
-          padding: 0;
-          width: auto;
-        }
-        &:hover{
-          @media only screen and (min-width: 1024px){
-            color: #808895 !important;
-          }
-        }
-      }
-      .btn-save-color{
-        color: #fff;
-        @media only screen and (max-width: 992px){
-          flex: 0 0 100%;
-          max-width: 100%;
-          margin-top: 20px;
-        }
-        &:hover{color: #219F84;}
-      }
+      &:hover{color: #219F84;}
     }
   }
+}
 //.customization-preview-process{
 .undo-btn-area {
   .btn {
