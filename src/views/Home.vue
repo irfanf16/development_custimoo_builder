@@ -10,7 +10,7 @@
             </div>
             <template v-if="manageComponents.ExtractedColors">
               <div class="mb-3 mb-lg-0" v-if="customLogos[0] && customLogos[0].url" :class="extractedcolorclass">
-                <ExtractedColors />
+                <ExtractedColors v-if="!hideColorSection" />
               </div>
             </template>
 
@@ -116,12 +116,12 @@
                 <div class="d-none d-lg-block continue-btn-holder pt-5">
                   <b-button v-if="tabIndex == 0" @click="showBasicCustomization()" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                   <b-button v-else @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                  <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="tabIndex <= 3">Next</b-button>
+                  <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= 2) || (!hideColorSection && tabIndex <= 3)">Next</b-button>
                   <template v-if="isCustomerAuthenticated">
-                    <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="tabIndex > 3">Summary</b-button>
+                    <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
                   </template>
                   <template v-else>
-                    <b-button @click="setActionBeforeLogin('summary')" v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="tabIndex > 3">Summary</b-button>
+                    <b-button @click="setActionBeforeLogin('summary')" v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
                   </template>
                 </div>
               </template>
@@ -200,6 +200,7 @@ import set = Reflect.set;
         await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(res.text));
         await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.defaultcolors));
         await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.groupcolors));
+        await  this.$store.dispatch('setColorSectionVisibility')
         this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
           if (item.id == res.design_id){
             Vue.set(item, 'design_show', 1)
@@ -513,6 +514,7 @@ export default class Home extends Vue {
         }
         this.$store.dispatch('setSelectedProductAndStyle')
         this.$store.dispatch('setSelectedProductDesign')
+        this.$store.dispatch('setColorSectionVisibility')
         let windowView = this.$store.getters.getWindowView;
         if(windowView == 2){
           this.showAdvanceCustomization();

@@ -30,8 +30,10 @@
 export default class ItemToCustomize extends Vue {
   @Prop({required: true}) categories!: any
 
+
   public personalized = this.$store.getters.getPersonalized
   public customized = this.$store.getters.getCustomized
+
 
   public retrieveProductsC(index :number){
     this.$emit('retrieveProducts', index)

@@ -18,7 +18,7 @@
                                :logosSetting="selectedProduct.logos_setting"/>
           </div>
         </b-tab>
-        <b-tab>
+        <b-tab v-if="selectedProduct.product_type !== 'personalized'">
           <button @click="setHideTab('colorHide', !hideTab.colorHide)" class="tab-close-btn d-lg-none"></button>
           <template #title>
             <a @click="setHideTab('colorHide', true)">
