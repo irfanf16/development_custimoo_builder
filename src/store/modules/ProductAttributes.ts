@@ -186,6 +186,7 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_GROUP_COLORS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
+        Vue.delete(state.groupColors, color.index)
         Vue.set(state.groupColors, color.index, { color: color.color, pantone: color.pantone, name: color.name })
       }
     },
@@ -532,7 +533,6 @@ const ProductAttributes:Module<any, any> = {
           alert(res.data.message)
         }else if (res.status == 404){
           alert(res.data.message)
-
         }
       }).catch(err => {
         if(err.response.status){
