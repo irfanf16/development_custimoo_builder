@@ -22,9 +22,17 @@ const ProductAttributes:Module<any, any> = {
     undoItems : [],
     redoItems:[],
     selectedDesignId:0,
-    hideColorSection : false
+    hideColorSection : false,
+    editStatus: false,
+    editProductId: 0
   },
   mutations: {
+    CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
+      state.editStatus = payload.status
+      if (payload.id) {
+        state.editProductId = payload.id
+      }
+      },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
     },
@@ -337,6 +345,12 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
+    getEditStatus: state => {
+      return state.editStatus
+    },
+    getEditProductId: state => {
+      return state.editProductId
+    },
     getHideColorSection: state => {
       return state.hideColorSection
     },
@@ -511,6 +525,23 @@ const ProductAttributes:Module<any, any> = {
       console.log(commit)
       const res = await http.post('updatesharedproduct', payload);
       return res
+    },
+    async overRideLockerProduct({commit}, payload){
+      console.log(payload)
+      await http.post('updatelockerproduct', payload).then((res) => {
+        console.log(res)
+        if (res.status == 201){
+          alert(res.data.message)
+        }else if (res.status == 404){
+          alert(res.data.message)
+
+        }
+      }).catch(err => {
+        if(err.response.status){
+          alert(err.response.data.message)
+          commit('CHANGE_EDIT_STATUS', {status : false, id: 0})
+        }
+      })
     }
   }
 }

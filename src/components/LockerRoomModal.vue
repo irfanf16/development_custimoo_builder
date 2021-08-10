@@ -170,6 +170,8 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
 
 
       public async editProduct(lockerIndex: number, productIndex: number){
+        const id = this.getLockerProducts[lockerIndex].product[productIndex].id
+        this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true})
         const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
         const element = this.getLockerProducts[lockerIndex].product[productIndex];
         let res = await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
