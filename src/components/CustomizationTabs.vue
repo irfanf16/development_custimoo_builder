@@ -277,7 +277,7 @@ export default class CustomizationProcess extends Vue {
           fillColorPantone: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.name,
           outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.value,
           outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
-          outLineWidth: 0,
+          outLineWidth: this.customTexts[index].outLineWidth ? this.customTexts[index].outLineWidth : 0,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
