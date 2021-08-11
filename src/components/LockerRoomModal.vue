@@ -184,30 +184,29 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
         const id = this.getLockerProducts[lockerIndex].product[productIndex].id
         const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
         const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
+        this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
         const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
-        this.$store.commit('CHANGE_EDIT_STATUS', {id: id})
-        if(!this.$store.getters.getEditStatus && this.$store.getters.getEditProductId == id){
-           await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
-        }
-        this.$store.commit('CHANGE_EDIT_STATUS', {status: true, designId: designId, styleId: styleId})
         const element = this.getLockerProducts[lockerIndex].product[productIndex];
-        let ind = this.products.length - 1;
-        await this.$store.dispatch('setSelectedIndex', {selectedIndex:ind});
-        let selectedIndex = this.selectedProduct.productstyles.findIndex((x:Record<any, any>) => x.id === element.style_id);
-        await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-        await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
-        await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
-        await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
-        await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
-        this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-          if (item.id == element.design_id){
-            Vue.set(item, 'design_show', 1)
-            this.$store.dispatch('setSelectedProductDesignID',item.id)
-          }else{
-            Vue.set(item, 'design_show', 0)
-          }
-        });
-        this.ref['locker-modal'].hide();
+        let res = await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
+        if (res == true){
+          let ind = this.products.length - 1;
+          await this.$store.dispatch('setSelectedIndex', {selectedIndex:ind});
+          let selectedIndex = this.selectedProduct.productstyles.findIndex((x:Record<any, any>) => x.id === element.style_id);
+          await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+          await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
+          await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
+          await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
+          await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
+          this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
+            if (item.id == element.design_id){
+              Vue.set(item, 'design_show', 1)
+              this.$store.dispatch('setSelectedProductDesignID',item.id)
+            }else{
+              Vue.set(item, 'design_show', 0)
+            }
+          });
+          this.ref['locker-modal'].hide();
+       }
       }
       public async shareProduct(product:Record<any, any>, ind:number, lockerIndex:number){
         try {
