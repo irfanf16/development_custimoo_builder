@@ -38,7 +38,6 @@ import rgbHex from 'rgb-hex'
     const self = this
     this.loadScene(this.front, 'front')
     if (this.back) {
-      console.log('in load back')
       this.loadScene(this.back, 'back')
     }
 
@@ -366,7 +365,7 @@ export default class Scene extends Vue {
     deep: true
   })
   defaultColorsChanged(newVal: [Record<any, any>]) {
-    if(this.mounted) {
+    if(this.productType == 'customized' && this.mounted) {
       let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
       if(defaultColors.length) {
         this.changeDefaultColors(defaultColors)
@@ -380,7 +379,7 @@ export default class Scene extends Vue {
     deep: true, immediate: false
   })
   groupColorsChanged(newVal: Record<any, any>) {
-    if(this.mounted) {
+    if(this.productType == 'customized' && this.mounted) {
       this.changeGroupColor(newVal)
     }
   }
@@ -703,13 +702,13 @@ export default class Scene extends Vue {
       this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
-    if(this.lockerDefaultColors.length) {
+    if(this.productType == 'customized' && this.lockerDefaultColors.length) {
       let lockerDefaultColors = this.lockerDefaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
       if(lockerDefaultColors.length) {
         this.changeDefaultColors(lockerDefaultColors)
       }
     }
-    else if(this.defaultColors.length) {
+    else if(this.productType == 'customized' && this.defaultColors.length) {
       let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
       if(defaultColors.length) {
         this.changeDefaultColors(defaultColors)
@@ -717,10 +716,14 @@ export default class Scene extends Vue {
     }
 
     if(Object.keys(this.lockerGroupColors).length) {
-      this.changeGroupColor(this.lockerGroupColors)
+      if(this.productType == 'customized') {
+        this.changeGroupColor(this.lockerGroupColors)
+      }
     }
     else if(Object.keys(this.groupColors).length && !this.lockerDefaultColors.length) {
-      this.changeGroupColor(this.groupColors)
+      if(this.productType == 'customized') {
+        this.changeGroupColor(this.groupColors)
+      }
     }
   }
 
