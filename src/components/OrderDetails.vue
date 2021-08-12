@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <div class="d-none">
       <div id="production-pdf-html">
         <div id="wrapper">
@@ -217,6 +218,8 @@ export default class OrderDetails extends Vue {
     }
   }
 
+  public showLoader = false
+
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
   }
@@ -244,24 +247,32 @@ export default class OrderDetails extends Vue {
       self.htmlPdfGenerator()
     }
     self.customLogos.forEach((logos: Record<any, any>, index: number) => {
-      let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
-      self.toDataURLCustom(this.storageUrl+logos.url, (dataUrl: any) => {
-        if (dataUrl) {
-          self.base64Logos.push({'b64logo': dataUrl, 'logoSize': logoDimension})
-          if (index == self.customLogos.length - 1) {
-            self.htmlPdfGenerator()
+      if(logos.url) {
+        let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
+        self.toDataURLCustom(this.storageUrl+logos.url, (dataUrl: any) => {
+          if (dataUrl) {
+            self.base64Logos.push({'b64logo': dataUrl, 'logoSize': logoDimension})
+            if (index == self.customLogos.length - 1) {
+              self.htmlPdfGenerator()
+            }
           }
-        }
-      })
+        })
+      }
     })
   }
 
   public generateProductionPdf(e: any) {
+    this.showLoader = true
+    $('meta[name=viewport]').attr('content', 'width=1024')
     let frontCanvas = this.productionSVGs.front
     let backCanvas = this.productionSVGs.back
 
     let front = new fabric.Canvas(this.$refs.pdfFront as HTMLCanvasElement)
+    front.setHeight(600);
+    front.setWidth(600);
     let back = new fabric.Canvas(this.$refs.pdfBack as HTMLCanvasElement)
+    back.setHeight(600);
+    back.setWidth(600);
     let emptyCallback = () => { console }
     front.loadFromJSON(JSON.stringify(frontCanvas), emptyCallback, emptyCallback)
     back.loadFromJSON(JSON.stringify(backCanvas), emptyCallback, emptyCallback)
@@ -286,15 +297,12 @@ export default class OrderDetails extends Vue {
     let frontViewPdf = front2D.get(0)
     let backViewPdf = back2D.get(0)
 
-    console.log(frontViewPdf)
     $("#front-svg").html(frontViewPdf)
     $("#back-svg").html(backViewPdf)
     this.logosConversionToBase64()
   }
 
   public htmlPdfGenerator() {
-
-
     let style_index = this.$store.getters.getCurrentStyleIndex;
     let selected_product = this.$store.getters.getSelectedProduct;
     const product_id = selected_product.product_id;
@@ -346,9 +354,11 @@ export default class OrderDetails extends Vue {
         .then(function(pdfAsString: string) {
           order_payload.order_file = pdfAsString;
           const res = http.post('orders/create', order_payload);
-          console.log(res);
         })
         .save()
+
+      $('meta[name=viewport]').attr('content', 'width=device-width')
+      this.showLoader = false
     }, 1000)
   }
 
@@ -701,6 +711,27 @@ a {
 .name-no-details .color-name-details {
   flex: 0 0 50px;
   max-width: 50px;
+}
+.loader{
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  z-index: 9999;
+img{
+  max-width: 7%;
+  display: block;
+  margin: 0 auto;
+  height: auto;
+}
 }
 
 </style>

@@ -6,15 +6,9 @@
       </b-form-checkbox>
     </div>
 
-    <div class="position-relative" v-if="showActions && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-      <a class="remove-img" @click="deleteLogo">
-        <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-      </a>
-    </div>
-
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
-        <div v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
+        <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url" width="100%"/>
         </div>
         <div v-else>
@@ -22,6 +16,11 @@
             <font-awesome-icon :icon="['fas', 'image']"/>
           </div>
           Upload Logo
+        </div>
+        <div class="remove-img" v-if="showActions && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
+          <a @click="deleteLogo">
+            <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+          </a>
         </div>
       </div>
 
@@ -383,11 +382,11 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    overflow: hidden;
+    //overflow: hidden;
+    position: relative;
     @media only screen and (min-width: 992px) {
       width: 64px;
       height: 64px;
-      position: relative;
     }
     @media only screen and (min-width: 1200px) {
       width: 74px;
@@ -407,6 +406,17 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       }
       @media only screen and (min-width: 1366px) {
         font-size: 32px;
+      }
+    }
+    .uploaded-logo-holder{
+      height: 100%;
+      max-width: 100%;
+      img{
+        display: block;
+        height: auto;
+        margin: 0 auto;
+        max-width: 100%;
+        max-height: 100%;
       }
     }
   }
@@ -442,7 +452,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
 
   .remove-img {
     position: absolute;
-    left: 64px;
+    right: -10px;
     top: -10px;
     width: 20px;
     height: 20px;
@@ -455,7 +465,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     font-size: 10px;
     color: #D53943;
     @media only screen and (min-width: 992px) {
-      left: 84px;
+      left: auto;
       top: -7px;
     }
   }
@@ -491,21 +501,20 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
-  .remove-img {
-    position: absolute;
-    right: 194px;
-    top: 20px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #F8E1E2;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    font-size: 10px;
-    color: #D53943;
-  }
+  //.remove-img {
+  //  position: absolute;
+  //  left: auto;
+  //  width: 20px;
+  //  height: 20px;
+  //  border-radius: 50%;
+  //  background: #F8E1E2;
+  //  //display: flex;
+  //  //flex-wrap: wrap;
+  //  //justify-content: center;
+  //  //align-items: center;
+  //  font-size: 10px;
+  //  color: #D53943;
+  //}
 }
 
 .upload-logo-content {

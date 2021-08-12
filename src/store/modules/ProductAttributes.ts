@@ -24,11 +24,37 @@ const ProductAttributes:Module<any, any> = {
     selectedDesignId:0,
     hideColorSection : false,
     customized: true,
-    personalized: false
-
+    personalized: false,
+    editStatus: false,
+    editProductId: 0,
+    editDesignId: 0,
+    editStyleId: 0,
+    selectedCollectionProducts: [],
+    designCollections: [],
+    editProduct:{
+      editProductId: 0,
+      editStyleId: 0,
+      editDesignId: 0,
+      mainProductId: 0,
+      editStatus: false
+    }
   },
   mutations: {
-
+    CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
+      state.editProduct.editStatus = payload.status
+      if (payload.id) {
+        state.editProduct.editProductId = payload.id
+      }
+      if (payload.designId){
+        state.editProduct.editDesignId = payload.designId
+      }
+      if (payload.styleId){
+        state.editProduct.editStyleId = payload.styleId
+      }
+      if (payload.product_id){
+        state.editProduct.mainProductId = payload.product_id
+      }
+    },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
     },
@@ -43,10 +69,11 @@ const ProductAttributes:Module<any, any> = {
       state.selectedIndex = payload.selectedIndex;
     },
     SET_PRODUCT_TYPE(state: Record<any, any>, payload: Record<any, any>){
-      if(payload.prd_type == 'personalized')
+      Vue.set(state, payload.prd_type, payload.value)
+     /* if(payload.prd_type == 'personalized')
         Vue.set(state, 'personalized', payload.value)
       else
-        Vue.set(state, 'customized', payload.value)
+        Vue.set(state, 'customized', payload.value)*/
     },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
@@ -344,16 +371,43 @@ const ProductAttributes:Module<any, any> = {
           state.customTexts = lastUndo.data
         }
       }
+    },
+    SET_SELECTED_COLLECTION_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
+      state.selectedCollectionProducts = payload;
+    },
+    ADD_DESIGN_COLLECTION(state:Record<any, any>, payload:Record<any, any>){
+      const collections = JSON.parse(JSON.stringify(state.designCollections));
+      collections.push(payload);
+      state.designCollections = collections;
     }
   },
   getters: {
+    getEditMainProductId: state => {
+      return state.editProduct.mainProductId
+    },
+    getEditStatus: state => {
+      return state.editProduct.editStatus
+    },
+    getEditProductId: state => {
+      return state.editProduct.editProductId
+    },
+    getEditStyleId: state => {
+      return state.editProduct.editStyleId
+    },
+    getEditDesignId: state => {
+      return state.editProduct.editDesignId
+    },
     getHideColorSection: state => {
       return state.hideColorSection
     },
     getProducts: (state: any) => state.products,
     getSelectedIndex: (state: any) => state.selectedIndex,
     getSelectedProduct: (state => {
-      return state.products[state.selectedIndex]
+      if(state.products[state.selectedIndex]) {
+        return state.products[state.selectedIndex]
+      } else {
+        return false
+      }
     }),
     getCategories: state => {
       return state.categories
@@ -401,6 +455,12 @@ const ProductAttributes:Module<any, any> = {
     getPersonalized: state => {
       return state.personalized
     },
+    getSelectedCollectionProducts(state:Record<any, any>){
+      return state.selectedCollectionProducts
+    },
+    getDesignCollections(state:Record<any, any>){
+      return state.designCollections
+    }
   },
   actions: {
     setSelectedIndex({commit}, payload) {
@@ -527,18 +587,35 @@ const ProductAttributes:Module<any, any> = {
     redoAction({commit}, payload){
       commit('DO_REDO', payload)
     },
+    async addDesignCollection({commit}, payload){
+      commit('ADD_DESIGN_COLLECTION', payload);
+    },
     async updateSharedProduct({commit}, payload){
       console.log(commit)
       const res = await http.post('updatesharedproduct', payload);
       return res
     },
-    setColorSectionVisibility({commit, getters}){
+    setColorSectionVisibility({commit, getters}) {
       const selectedProduct = getters.getSelectedProduct;
-      if(selectedProduct && selectedProduct.product_type==='personalized'){
+      if (selectedProduct && selectedProduct.product_type === 'personalized') {
         commit('SET_HIDE_COLOR_SECTION', true);
-      }else{
+      } else {
         commit('SET_HIDE_COLOR_SECTION', false);
       }
+    },
+    async overRideLockerProduct({commit}, payload){
+      await http.post('updatelockerproduct', payload).then((res) => {
+        if (res.status == 201){
+          alert(res.data.message)
+        }else if (res.status == 404){
+          alert(res.data.message)
+        }
+      }).catch(err => {
+        if(err.response.status){
+          alert(err.response.data.message)
+          commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+        }
+      })
     }
 
   }

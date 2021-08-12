@@ -1,5 +1,6 @@
 <template>
   <div class="page-wrapper m-lg-4">
+    <meta name="viewport" content="width=device-width">
     <div class="loader" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
@@ -16,7 +17,7 @@
 
             <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
               <template v-if="manageComponents.LogoArea">
-                <UploadLogo :customLogoIndex="0"/>
+                <UploadLogo v-if="!hideColorSection" :customLogoIndex="0"/>
               </template>
             </template>
             <template v-if="manageComponents.ChooseInterest">
@@ -42,14 +43,15 @@
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                   </template>
-                  <LockerRoomModal ref="lockerModal" />
+                  <LockerRoomModal @showCollectionModal="this.showCollectionModal" ref="lockerModal"  />
+                  <DesignCollectionModal ref="collectionModal"  />
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'savetolocker'" variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
                   </template>
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
                   </template>
-                  <AddLockerRoomModal ref="saveToLockerModal" />
+                  <AddLockerRoomModal v-if="!editProductStatus" ref="saveToLockerModal" />
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
                   </template>
@@ -92,23 +94,16 @@
                 </div>
               </header>
               <div class="undo-btn-area text-left pt-3">
-                <b-button variant="outline-secondary mr-2" @click="undoAction">Undo</b-button>
-                <b-button variant="outline-secondary" @click="redoAction">Redo</b-button>
+                <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
+                <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
             </div>
           </template>
           <div class="customization-area d-flex flex-wrap justify-content-center align-items-center" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
             <div v-bind:class="{active: isActive}">
-              <!--              <b-button class="preview-btn" variant="secondary" v-on:click="myFilter">-->
-              <!--                <span class="three-d-btn"><font-awesome-icon :icon="['fas', 'cube']"/> 3D View</span>-->
-              <!--                <span class="two-d-btn"><font-awesome-icon :icon="['fas', 'dice-two']"/> 2D View</span>-->
-              <!--              </b-button>-->
               <div class="twoD-view">
                 <CustomizationPreview />
               </div>
-              <!--              <div class="threeD-view">-->
-              <!--                <CustomizationPreviewThreeD />-->
-              <!--              </div>-->
               <template v-if="manageComponents.BasicCustomization">
                 <b-button @click="showAdvanceCustomization()" class="d-none d-lg-inline-block mt-5" variant="secondary">Continue</b-button>
               </template>
@@ -149,14 +144,14 @@ import SaveColorModal from "@/components/SaveColorModal.vue"
 import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
-import CustomizationPreviewThreeD from '@/components/CustomizationPreviewThreeD.vue'
 import ExtractedColors from '@/components/ExtractedColors.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import {http} from "@/httpCommon"
-import set = Reflect.set;
+import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 
 @Component<Home>({
   components: {
+    DesignCollectionModal,
     ChooseColor,
     CustomizationPreview,
     ItemToCustomize,
@@ -166,7 +161,6 @@ import set = Reflect.set;
     LockerRoomModal,
     AddLockerRoomModal,
     SaveColorModal,
-    CustomizationPreviewThreeD,
     ExtractedColors,
     LoginForm
   },
@@ -216,6 +210,7 @@ import set = Reflect.set;
         this.productUpdated = true
       }, 10000)
     }
+    this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
     this.jwtToken = localStorage.getItem('jwtToken') as string
     await this.$store.dispatch('setCategories')
     // await this.$store.dispatch('setJwtToken')
@@ -277,6 +272,15 @@ export default class Home extends Vue {
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos
   }
+
+  get editProductStatus():boolean{
+    return  this.$store.getters.getEditStatus
+  }
+
+  public showCollectionModal = () =>{
+    this.ref['collectionModal'].showCollectionModal()
+  }
+
   @Watch('customLogos', {
     deep: true
   })
@@ -296,7 +300,12 @@ export default class Home extends Vue {
       console.log(error)
     }
   }
-
+ get undoItems():Record<any, any>{
+    return this.$store.getters.getUndoItems
+ }
+ get redoitems():Record<any, any>{
+    return this.$store.getters.getRedoItems
+ }
   get products():[Record<any, any>]{
     return this.$store.getters.getProducts
   }
@@ -381,6 +390,7 @@ export default class Home extends Vue {
   get groupColors(): [Record<any, any>] {
     return this.$store.getters.getGroupColors
   }
+
   @Watch('groupColors', {
     deep: true
   })
@@ -402,6 +412,9 @@ export default class Home extends Vue {
   }
   get actionBeforeLogin(): string {
     return this.$store.getters.getActionBeforeLogin
+  }
+  get editStatus():boolean{
+    return  this.$store.getters.getEditStatus
   }
   public getUrlParams(){
     if (this.$route.params.product && this.$route.params.name && this.productUpdated){
@@ -430,12 +443,33 @@ export default class Home extends Vue {
     });
   }
 
+
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
   }
 
   public async getLockers(){
     await this.$store.dispatch("getLockers");
+    const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+      return item.design_show
+    })
+    if (this.$store.getters.getEditDesignId != currentDesign[0].id || this.$store.getters.getEditStyleId != this.selectedProduct.productstyles[this.styleIndex].id){
+      this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+    }
+    let locker = {
+      product_id: this.selectedProduct.product_id,
+      style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+      design_id: currentDesign[0].id,
+      custom_logos: this.customLogos,
+      text: this.customTexts,
+      colors: this.logoColors,
+      defaultcolors: this.defaultColors,
+      groupcolors: this.groupColors,
+      id: this.$store.getters.getEditProductId
+    }
+    if (this.editStatus){
+      await this.$store.dispatch('overRideLockerProduct', locker)
+    }
   }
   public showAdvanceCustomization() {
     if (this.isCustomerAuthenticated){
@@ -490,11 +524,7 @@ export default class Home extends Vue {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
-    if (searchCall) {
-      this.$store.commit('SET_PRODUCTS', []);
-    }
-    if(productType) {
-      this.$store.commit('SET_PRODUCTS', [])
+    if (searchCall || productType) {
       this.hasProducts = true
     }
 
@@ -505,6 +535,11 @@ export default class Home extends Vue {
 
     if (this.hasProducts) {
       http.get(url).then((response: any) => {
+        if (searchCall || productType) {
+          this.$store.commit('SET_PRODUCTS', []);
+          this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
+        }
+
         let product_data = this.products.concat(response.data.products.data)
         this.$store.commit('SET_PRODUCTS', product_data);
         this.nextPageUrl = response.data.products.next_page_url
