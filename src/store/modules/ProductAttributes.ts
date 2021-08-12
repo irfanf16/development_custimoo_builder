@@ -68,10 +68,11 @@ const ProductAttributes:Module<any, any> = {
       state.selectedIndex = payload.selectedIndex;
     },
     SET_PRODUCT_TYPE(state: Record<any, any>, payload: Record<any, any>){
-      if(payload.prd_type == 'personalized')
+      Vue.set(state, payload.prd_type, payload.value)
+     /* if(payload.prd_type == 'personalized')
         Vue.set(state, 'personalized', payload.value)
       else
-        Vue.set(state, 'customized', payload.value)
+        Vue.set(state, 'customized', payload.value)*/
     },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
@@ -396,7 +397,11 @@ const ProductAttributes:Module<any, any> = {
     getProducts: (state: any) => state.products,
     getSelectedIndex: (state: any) => state.selectedIndex,
     getSelectedProduct: (state => {
-      return state.products[state.selectedIndex]
+      if(state.products[state.selectedIndex]) {
+        return state.products[state.selectedIndex]
+      } else {
+        return false
+      }
     }),
     getCategories: state => {
       return state.categories

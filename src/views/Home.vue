@@ -517,11 +517,7 @@ export default class Home extends Vue {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
-    if (searchCall) {
-      this.$store.commit('SET_PRODUCTS', []);
-    }
-    if(productType) {
-      this.$store.commit('SET_PRODUCTS', [])
+    if (searchCall || productType) {
       this.hasProducts = true
     }
 
@@ -532,6 +528,11 @@ export default class Home extends Vue {
 
     if (this.hasProducts) {
       http.get(url).then((response: any) => {
+        if (searchCall || productType) {
+          this.$store.commit('SET_PRODUCTS', []);
+          this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
+        }
+
         let product_data = this.products.concat(response.data.products.data)
         this.$store.commit('SET_PRODUCTS', product_data);
         this.nextPageUrl = response.data.products.next_page_url
