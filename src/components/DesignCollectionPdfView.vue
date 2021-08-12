@@ -45,30 +45,31 @@
         <div id="main">
           <div class="image-holder" id="both-svg" style="text-align: center;">
            <template v-if="selectedProduct">
-             <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
-               <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
-                 <Scene v-if="selectedProduct.productstyles[styleIndex].back" :measurement-ratio="design.measurement_ratio"
-                        :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].front.file_url}"
-                        :back="{textureUrl: storageUrl+design.back_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].back.file_url}"
-                        :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                        :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                        :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :canvasWidth="450" :canvasHeight="450"/>
+             <div v-for="i in 5" :key="i">
+               <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
+                 <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id+i">
+                   <Scene v-if="selectedProduct.productstyles[styleIndex].back" :measurement-ratio="design.measurement_ratio"
+                          :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].front.file_url}"
+                          :back="{textureUrl: storageUrl+design.back_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].back.file_url}"
+                          :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                          :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
+                          :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :canvasWidth="450" :canvasHeight="450"/>
 
-                 <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio"
-                        :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].front.file_url}"
-                        :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                        :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                        :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :canvasWidth="450" :canvasHeight="450"/>
+                   <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio"
+                          :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].front.file_url}"
+                          :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                          :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
+                          :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :canvasWidth="450" :canvasHeight="450"/>
+                 </div>
+               </template>
+               <div :key="`desc${i}`">
+                 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
+                 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
                </div>
-             </template>
+             </div>
+
            </template>
           </div>
-        </div>
-        <div>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
         </div>
       </div>
     </div>
