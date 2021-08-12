@@ -3,11 +3,11 @@
     <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id">
       <a @click="changeDesign(index); showDesign()">
         <Scene canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
-          :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].front.file_url}"
+          :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
            :backTextureUrl="design.back_design? design.back_design.file_url: ''"
            :logos="selectedProduct.productstyles[styleIndex].logo"
            :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
-           :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)" />
+           :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"/>
       </a>
       <h3>{{ design.design_name }}</h3>
     </div>
