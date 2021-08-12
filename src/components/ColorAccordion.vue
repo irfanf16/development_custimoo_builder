@@ -94,19 +94,12 @@ export default class ColorAccordion extends Vue {
   }
 
   public selectType(index: number, showOther = false) {
-
-    //console.log('showOther',showOther);
-    //console.log('index',index);
-
     if (showOther){
       this.othersActive = true;
     }
     else {
       this.othersActive = false;
     }
-
-
-    //console.log('this.productColors',this.productColors);
 
     this.selectTypeIndex = index
     this.showOther = showOther

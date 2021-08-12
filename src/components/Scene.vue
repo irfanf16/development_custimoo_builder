@@ -38,6 +38,7 @@ import rgbHex from 'rgb-hex'
     const self = this
     this.loadScene(this.front, 'front')
     if (this.back) {
+      console.log('in load back')
       this.loadScene(this.back, 'back')
     }
 
@@ -760,11 +761,13 @@ export default class Scene extends Vue {
         img.center().setCoords()
         model = img
         if (side == 'back') {
-          self.backModel = img
+          this.backModel = img
         } else {
-          self.frontModel = img
+          this.frontModel = img
         }
       }, { crossOrigin: 'Anonymous' })
+    } else {
+      model = true
     }
 
     this.addTexture(ImageData.textureUrl, side)
@@ -776,28 +779,30 @@ export default class Scene extends Vue {
     const self = this
 
     const timer = setInterval(() => {
-      let texture = self.frontTexture
+      let texture = this.frontTexture
       if (side == 'back') {
-        texture = self.backTexture
+        texture = this.backTexture
       }
-      if (model && texture && (!self.backTextureUrl || (self.backTextureUrl && self.backTexture))) {
-        if (!self.back || (self.back && side == 'back')) {
-          self.getSvgGroups()
+      if (model && texture && (!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
+        if (this.productType == 'customized' && (!this.back || (this.back && side == 'back'))) {
+          this.getSvgGroups()
         }
         canvas.add(texture)
         canvas.viewportCenterObject(texture)
-        self.logoObjects.forEach((logoObject) => {
+        this.logoObjects.forEach((logoObject) => {
           canvas.add(logoObject)
         })
-        self.customLogoObjects.forEach((logoObject) => {
+        this.customLogoObjects.forEach((logoObject) => {
           canvas.add(logoObject)
         })
-        self.customTextObjects.forEach((textObject) => {
+        this.customTextObjects.forEach((textObject) => {
           canvas.add(textObject)
         })
 
-        canvas.add(model)
-        canvas.viewportCenterObject(model)
+        if(this.productType == 'customized') {
+          canvas.add(model)
+          canvas.viewportCenterObject(model)
+        }
         if (side == 'back') {
           canvas.add(self.dimTextBack)
         } else {
@@ -904,14 +909,14 @@ export default class Scene extends Vue {
   }
 
   public objectScaling(e: Record<any, any>, side: string) {
-    let model = this.frontModel
+    let texture = this.frontTexture
     let canvas = this.frontCanvas
     if(side == 'back') {
-      model = this.backModel
+      texture = this.backTexture
       canvas = this.backCanvas
     }
 
-    const modelBoundingRect = model.getBoundingRect()
+    const modelBoundingRect = texture.getBoundingRect()
     let boundingRect = {
       left: modelBoundingRect.left,
       right: modelBoundingRect.left + modelBoundingRect.width,
@@ -933,7 +938,7 @@ export default class Scene extends Vue {
     }
 
     let centerPoint = e.target.getCenterPoint()
-    if(canvas.isTargetTransparent(model, centerPoint.x, centerPoint.y)) {
+    if(canvas.isTargetTransparent(texture, centerPoint.x, centerPoint.y)) {
       const boundingDistance = {
         left: Math.abs(boundingRect.left - centerPoint.x),
         right: Math.abs(boundingRect.right - centerPoint.x)
@@ -946,7 +951,7 @@ export default class Scene extends Vue {
         }
       })
 
-      let direction = this.targetNonTransparent(canvas, model, e.target.left, e.target.top, moveTo)
+      let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, moveTo)
 
       e.target.left = direction.left
     }
@@ -1049,11 +1054,15 @@ export default class Scene extends Vue {
           otherSideObjects[addIndex] = objectAdd
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)
-            this.frontModel.bringToFront()
+            if(this.productType == 'customized') {
+              this.frontModel.bringToFront()
+            }
           } else {
             if(this.back) {
               this.backCanvas.add(objectAdd)
-              this.backModel.bringToFront()
+              if(this.productType == 'customized') {
+                this.backModel.bringToFront()
+              }
             }
           }
         }
@@ -1333,8 +1342,9 @@ export default class Scene extends Vue {
               side: logo.side
             })
             canvas.add(img)
-           // console.log('img',img);
-            model.bringToFront()
+            if(this.productType == 'customized') {
+              model.bringToFront()
+            }
             canvas.renderAll()
 
             this.addToOtherSide(img, logo.side)
@@ -1453,7 +1463,9 @@ export default class Scene extends Vue {
         })
         self.customTextObjects[textIndex as number] = textBox
         canvas.add(textBox)
-        model.bringToFront()
+        if(this.productType == 'customized') {
+          model.bringToFront()
+        }
         canvas.renderAll()
 
         this.addToOtherSide(textBox, text.side)
