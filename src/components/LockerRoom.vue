@@ -163,26 +163,27 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
     const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
-    let res = await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
-    if (res == true){
-      let ind = this.products.length - 1;
-      await this.$store.dispatch('setSelectedIndex', {selectedIndex:ind});
-      let selectedIndex = this.selectedProduct.productstyles.findIndex((x:Record<any, any>) => x.id === element.style_id);
-      await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-      await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
-      await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
-      await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
-      await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
-      this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-        if (item.id == element.design_id){
-          Vue.set(item, 'design_show', 1)
-          this.$store.dispatch('setSelectedProductDesignID',item.id)
-        }else{
-          Vue.set(item, 'design_show', 0)
-        }
-      });
-      this.$emit('hideLockerRoomModal')
+    if (product_id != this.$store.getters.getEditMainProductId){
+      await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
+      this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
     }
+    let ind = this.products.length - 1;
+    await this.$store.dispatch('setSelectedIndex', {selectedIndex:ind});
+    let selectedIndex = this.selectedProduct.productstyles.findIndex((x:Record<any, any>) => x.id === element.style_id);
+    await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+    await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
+    await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
+    await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
+    await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
+    this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
+      if (item.id == element.design_id){
+        Vue.set(item, 'design_show', 1)
+        this.$store.dispatch('setSelectedProductDesignID',item.id)
+      }else{
+        Vue.set(item, 'design_show', 0)
+      }
+    });
+    this.$emit('hideLockerRoomModal')
   }
   public async shareProduct(product:Record<any, any>, ind:number, lockerIndex:number){
     try {

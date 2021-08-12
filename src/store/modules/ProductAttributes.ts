@@ -29,19 +29,29 @@ const ProductAttributes:Module<any, any> = {
     editProductId: 0,
     editDesignId: 0,
     editStyleId: 0,
-    selectedCollectionProducts: []
+    selectedCollectionProducts: [],
+    editProduct:{
+      editProductId: 0,
+      editStyleId: 0,
+      editDesignId: 0,
+      mainProductId: 0,
+      editStatus: false
+    }
   },
   mutations: {
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
-      state.editStatus = payload.status
+      state.editProduct.editStatus = payload.status
       if (payload.id) {
-        state.editProductId = payload.id
+        state.editProduct.editProductId = payload.id
       }
       if (payload.designId){
-        state.editDesignId = payload.designId
+        state.editProduct.editDesignId = payload.designId
       }
       if (payload.styleId){
-        state.editStyleId = payload.styleId
+        state.editProduct.editStyleId = payload.styleId
+      }
+      if (payload.product_id){
+        state.editProduct.mainProductId = payload.product_id
       }
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
@@ -365,17 +375,20 @@ const ProductAttributes:Module<any, any> = {
     },
   },
   getters: {
+    getEditMainProductId: state => {
+      return state.editProduct.mainProductId
+    },
     getEditStatus: state => {
-      return state.editStatus
+      return state.editProduct.editStatus
     },
     getEditProductId: state => {
-      return state.editProductId
+      return state.editProduct.editProductId
     },
     getEditStyleId: state => {
-      return state.editStyleId
+      return state.editProduct.editStyleId
     },
     getEditDesignId: state => {
-      return state.editDesignId
+      return state.editProduct.editDesignId
     },
     getHideColorSection: state => {
       return state.hideColorSection
