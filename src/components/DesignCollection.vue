@@ -11,257 +11,52 @@
         <div class="lockerroom-tabs">
           <div>
             <b-card no-body>
-              <b-tabs card changed="currentTabs">
-                <b-tab title="Products">
-                  <div class="products-holder d-lg-flex flex-lg-wrap mb-4">
-                    <template v-for="(product, ind) in room.product">
-                      <div :key="ind" class="products-block">
-                        <div class="image-holder">
-                          <a>
-                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <Scene :measurement-ratio="product.design.measurement_ratio"
-                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: storageUrl+product.style.front.file_url}"
-                                   :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
-                                   :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />
-                          </a>
-                          <ul class="product-icons">
-                            <li>
-                              <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
-                            </li>
-                            <li>
-                              <b-button :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
-                              <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
-                                <div class="share-holder">
-                                  <h3>Copy link and Share</h3>
-                                  <div class="share-form">
-                                    <b-form inline>
-                                      <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
-
-                                      ></b-form-input>
-                                      <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
-                                    </b-form>
-                                  </div>
-                                </div>
-                              </b-tooltip>
-                            </li>
-                            <li class="d-none d-lg-block">
-                              <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            </li>
-                          </ul>
-                        </div>
-                        <div class="d-none d-lg-block product-description text-center">
-                          <p>{{ product.product_name }}</p>
-                        </div>
-                      </div>
-                    </template>
-                  </div>
-                  <div class="text-right">
-                    <b-button @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
-                  </div>
-                </b-tab>
-                <b-tab title="Assets" class="assets-file">
-                  <template v-for="(logo, inda) in room.logos">
-                    <div :key="inda" class="assets-logo-block">
-                      <img :src="storageUrl+logo.logo_url "/>
-                      <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
-                    </div>
-                  </template>
-                </b-tab>
-                <b-tab title="Colors">
-                  <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
-                    <div class="pt-lg-2 folder-wrapper">
-                      <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
-                      <div class="d-flex flex-wrap color-folder-holder">
-                        <template v-for="(folder, inde) in room.folders">
-                          <a href="#" class="text-center d-block" @click="fetchColors(inde, i)" :key="inde">
-                            <font-awesome-icon :icon="['fas', 'folder']"/>
-                            <span class="folder-name d-block">{{ folder.folder_name }}</span>
-                          </a>
-                        </template>
-                      </div>
-                    </div>
-                    <div class="color-holder" v-if="colors">
-                      <div class="color-container">
-                        <template v-for="(item, ix) in colors">
-                          <div :key="`item_${ix}`">
-                            <div class="color-box"
-                                 :style="{backgroundColor: item.value}" :key="`${ix}`">
-                            </div>
-                            <span> {{ item.name }} </span>
-                          </div>
-                        </template>
-                      </div>
-                    </div>
-                  </div>
-                </b-tab>
-              </b-tabs>
+              <div>asasdsdasdasdsad</div>
             </b-card>
           </div>
         </div>
       </b-tab>
     </template>
-    <div class="create-lockerroom">
-      <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
-      <CreateLockerRoomModal @lockerAdded="lockerAdded" />
-    </div>
   </b-tabs>
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     import ErrorMessages from "@/mixins/ErrorMessages";
     import Scene from "@/components/Scene.vue"
 
-@Component<LockerRoom>({
+@Component<DesignCollection>({
   components: {
     LockerRoomProducts,
     Scene,
     CreateLockerRoomModal
   }
 })
-export default class LockerRoom extends Mixins(ErrorMessages) {
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
-  private baseUrl = location.host+"/#/"
-  public ref = this.$refs as Record<any, any>
-  public colors : [] = []
-  public tabIndex = 0
-  public url = ''
+export default class DesignCollection extends Mixins(ErrorMessages) {
+  private title = '';
+  private product_nickname = '';
+  private description = 'pre';
+  private product_note = '';
+  private order_number = '';
+  private design = () => this.designCollections();
+  private style = {};
 
-  @Prop(Boolean) addCollection!: boolean;
-
-  get getLockerProducts():Record<any, any>{
-    return this.$store.getters.getLockerProducts;
-  }
-
-  public addDesignCollection = () => {
-    this.$emit('hideLockerRoomModal');
-    this.$emit('showCollectionModal');
+  public get designCollections(){
+    return this.$store.getters.getDesignCollections
   }
 
-  get products():[Record<any, any>]{
-    return this.$store.getters.getProducts
-  }
-  get customLogos():[Record<any, any>] {
-    return this.$store.getters.getCustomLogos
-  }
-  get lockers():Record<any, any>{
-    return  this.$store.getters.getLockers;
-  }
-  get selectedProduct(): Record<any, any>{
-    return this.$store.getters.getSelectedProduct
-  }
-  get customer():Record<any, any>{
-    return  this.$store.getters.getCustomer
-  }
-  public lockerAdded(){
-    setTimeout(() => {
-      let index = this.getLockerProducts.length -1
-      this.tabIndex = index
-    }, 1000)
-  }
-
-  public lockerStatus = 'not_accepted'
-
-  public async editProduct(lockerIndex: number, productIndex: number){
-    const id = this.getLockerProducts[lockerIndex].product[productIndex].id
-    const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
-    const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
-    this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
-    const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
-    const element = this.getLockerProducts[lockerIndex].product[productIndex];
-    let res = await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
-    if (res == true){
-      let ind = this.products.length - 1;
-      await this.$store.dispatch('setSelectedIndex', {selectedIndex:ind});
-      let selectedIndex = this.selectedProduct.productstyles.findIndex((x:Record<any, any>) => x.id === element.style_id);
-      await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-      await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
-      await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
-      await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
-      await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
-      this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-        if (item.id == element.design_id){
-          Vue.set(item, 'design_show', 1)
-          this.$store.dispatch('setSelectedProductDesignID',item.id)
-        }else{
-          Vue.set(item, 'design_show', 0)
-        }
-      });
-      this.$emit('hideLockerRoomModal')
-    }
-  }
-  public async shareProduct(product:Record<any, any>, ind:number, lockerIndex:number){
-    try {
-      let payload = { type: 'locker', id: product.id , customer_id :  this.customer ? this.customer.id : '', product_id: this.selectedProduct.product_id}
-      let shared_url = "";
-      if (product.shared_url){
-        shared_url += product.shared_url;
-      }else{
-        let res = await this.$store.dispatch('shareProduct', payload);
-        shared_url += res.data.url;
-        Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url',  shared_url)
-      }
-    }catch (error){
-      console.log(error)
-    }
-  }
-  public copyLink(product:Record<any, any>, ind:number){
-    let testingCodeToCopy = document.querySelector('#copy-'+ind)  as Record<any, any>
-    testingCodeToCopy.select()
-    try {
-      document.execCommand('copy');
-      this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
-    } catch (err) {
-      alert('Oops, unable to copy');
-    }
-  }
-  public async deleteProduct(i:number, ind:number, id:number){
-    await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
-  }
-  public async deleteRoom(id:number, index:number){
-    if (confirm('You are going to delete associated product')) {
-      await this.$store.dispatch('deleteRoom', {id: id, index: index});
-      this.showToast('Room Deleted', 'SUCCESS');
-    }
-  }
-
-  public fetchColors(i:number, ind:number){
-    this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
-  }
-  public changeColor(){
-    this.colors = []
-  }
-  public addToCustomLogos(currentLogo:Record<any, any>){
-    if (this.customLogos.length  < this.selectedProduct.allowed_logos_count){
-      let index = this.customLogos.length
-      let logo = {
-        id: currentLogo.id,
-        url: currentLogo.logo_url,
-        width: this.selectedProduct.logos_setting[index].width,
-        height: this.selectedProduct.logos_setting[index].height,
-        x_axis: this.selectedProduct.logos_setting[index].x_axis,
-        y_axis: this.selectedProduct.logos_setting[index].y_axis,
-        rotation: this.selectedProduct.logos_setting[index].rotation as number,
-        haveControls: Boolean(!this.selectedProduct.logos_setting[index].is_locked),
-        side: this.selectedProduct.logos_setting[index].side,
-        customLogo: true,
-        is_transparent: false
-      }
-      this.$store.dispatch('setCustomLogos', logo)
-    }else{
-      alert("logo upload limit exceed")
-    }
-    this.$emit('hideLockerRoomModal')
-  }
-
-  public get selectedCollectionProducts() {
-    return this.$store.getters.getSelectedCollectionProducts
-  }
-
-  public set selectedCollectionProducts(val : Record<any, any>) {
-    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',val)
+  public addDesignCollections(){
+    this.$store.dispatch('addDesignCollection', {
+      title: this.title,
+      product_nickname: this.product_nickname,
+      description: this.description,
+      product_note: this.product_note,
+      order_number: this.order_number,
+      design: this.design(),
+      style: this.style,
+    })
   }
 }
 </script>

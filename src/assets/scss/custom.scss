@@ -2388,3 +2388,68 @@ button{
         }
     }
 }
+
+.collection-modal {
+    .modal-header {
+        width: 100%;
+
+        .modal-title{
+            width: 100%;
+        }
+    }
+}
+
+$increase : 0;
+
+@for $i from 1 through 10 {
+    $increase : $increase + 0.5;
+
+    .gap-#{$i}{ gap: #{$increase}rem }
+    .gap-x-#{$i}{ column-gap: #{$increase}rem }
+    .gap-y-#{$i}{ row-gap: #{$increase}rem }
+}
+
+$fontSize: 0.5;
+@for $i from 1 through 10 {
+    $fontSize : $fontSize + 0.2;
+
+    .fs-#{$i}{ font-size: #{$fontSize}rem }
+}
+
+.btn-secondary{
+    &:hover{
+        background: transparentize(#219F84, 0.2);
+        border-color: transparentize(#219F84, 0.2);
+        color: #fff;
+    }
+
+    &.light{
+        background: #E7F4F1;
+        color: #219F84;
+        border-color: #E7F4F1;
+
+        &:hover{
+            border-color: #219F84;
+        }
+    }
+}
+
+.btn.remove{
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+    flex-shrink: 0;
+    color: #D53943;
+    background: #F8E1E2;
+    border-radius: 50%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+
+    &.absolute{
+        position: absolute;
+        right: -10px;
+        top: -14px;
+    }
+}

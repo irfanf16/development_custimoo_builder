@@ -29,7 +29,8 @@ const ProductAttributes:Module<any, any> = {
     editProductId: 0,
     editDesignId: 0,
     editStyleId: 0,
-    selectedCollectionProducts: []
+    selectedCollectionProducts: [],
+    designCollections: []
   },
   mutations: {
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
@@ -363,6 +364,11 @@ const ProductAttributes:Module<any, any> = {
     SET_SELECTED_COLLECTION_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
       state.selectedCollectionProducts = payload;
     },
+    ADD_DESIGN_COLLECTION(state:Record<any, any>, payload:Record<any, any>){
+      const collections = JSON.parse(JSON.stringify(state.designCollections));
+      collections.push(payload);
+      state.designCollections = collections;
+    }
   },
   getters: {
     getEditStatus: state => {
@@ -433,6 +439,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getSelectedCollectionProducts(state:Record<any, any>){
       return state.selectedCollectionProducts
+    },
+    getDesignCollections(state:Record<any, any>){
+      return state.designCollections
     }
   },
   actions: {
@@ -559,6 +568,9 @@ const ProductAttributes:Module<any, any> = {
     },
     redoAction({commit}, payload){
       commit('DO_REDO', payload)
+    },
+    async addDesignCollection({commit}, payload){
+      commit('ADD_DESIGN_COLLECTION', payload);
     },
     async updateSharedProduct({commit}, payload){
       console.log(commit)
