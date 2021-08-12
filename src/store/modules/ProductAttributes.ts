@@ -29,7 +29,8 @@ const ProductAttributes:Module<any, any> = {
     editProductId: 0,
     editDesignId: 0,
     editStyleId: 0,
-    selectedCollectionProducts: []
+    selectedCollectionProducts: [],
+    collections: []
   },
   mutations: {
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
@@ -279,6 +280,10 @@ const ProductAttributes:Module<any, any> = {
     ACTION_BEFORE_LOGIN(state: Record<any, any>, action: string){
       state.actionBeforeLogin = action
     },
+    SET_COLLECTIONS (state: Record<any, any>, collections: Record<any, any>) {
+        state.collections = collections
+
+    },
     RESET_STORE(state: Record<any, any>){
       state.customLogos = [];
       state.customTexts.map((item:Record<any, any>) => item.text = '' );
@@ -437,7 +442,11 @@ const ProductAttributes:Module<any, any> = {
     },
     getSelectedCollectionProducts(state:Record<any, any>){
       return state.selectedCollectionProducts
-    }
+    },
+    getCollections(state:Record<any, any>){
+      return state.collections
+    },
+
   },
   actions: {
     setSelectedIndex({commit}, payload) {
@@ -553,6 +562,11 @@ const ProductAttributes:Module<any, any> = {
     async getLockerRoomColors({commit}){
       await http.get('folder/colors').then(async (res) =>{
        await commit('ADD_LOCKER_ROOM_COLORS', res.data)
+      })
+    },
+    async getCollections({commit}){
+      await http.get('collection').then(async (res) =>{
+        await commit('SET_COLLECTIONS', res.data)
       })
     },
     resetStore({commit}){

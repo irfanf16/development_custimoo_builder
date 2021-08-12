@@ -94,6 +94,41 @@
                     </div>
                   </div>
                 </b-tab>
+                <b-tab title="Collections">
+
+                  <div class="products-holder d-lg-flex flex-lg-wrap mb-4">
+                    <template v-for="(collection, index) in getCollections">
+                      <div :key="index" class="products-block">
+                        <div class="image-holder">
+                          <a>
+<!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
+<!--                            <Scene :measurement-ratio="product.design.measurement_ratio"
+                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: storageUrl+product.style.front.file_url}"
+                                   :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
+                                   :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />-->
+                          </a>
+                          <ul class="product-icons">
+                            <li>
+                              <a class="remove-tab" >
+                                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                              </a>
+                            </li>
+
+                            <li class="d-none d-lg-block">
+                              <a @click="editProduct(1, 0)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            </li>
+                          </ul>
+                        </div>
+                        <div class="d-none d-lg-block product-description text-center">
+                          <p>{{ collection.name }}</p>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                  <div class="text-right">
+                    <b-button variant="secondary">Add selected designs to a new collection</b-button>
+                  </div>
+                </b-tab>
               </b-tabs>
             </b-card>
           </div>
@@ -119,6 +154,10 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
     LockerRoomProducts,
     Scene,
     CreateLockerRoomModal
+  },
+  mounted() {
+    this.setCollections()
+    console.log('getCollections',this.getCollections)
   }
 })
 export default class LockerRoom extends Mixins(ErrorMessages) {
@@ -128,9 +167,20 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public colors : [] = []
   public tabIndex = 0
   public url = ''
-  get getLockerProducts():Record<any, any>{
-    return this.$store.getters.getLockerProducts;
+
+
+  public async setCollections() {
+    await this.$store.dispatch('getCollections')
   }
+
+  get getLockerProducts():Record<any, any>{
+    return this.$store.getters.getLockerProducts
+  }
+  get getCollections():Record<any, any>{
+    return this.$store.getters.getCollections
+  }
+
+
 
   get products():[Record<any, any>]{
     return this.$store.getters.getProducts
