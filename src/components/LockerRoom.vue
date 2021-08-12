@@ -13,7 +13,7 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs">
                 <b-tab title="Products">
-                  <div class="products-holder d-lg-flex flex-lg-wrap mb-4">
+                  <draggable class="products-holder d-lg-flex flex-lg-wrap mb-4" :options="{animation: 250}">
                     <template v-for="(product, ind) in room.product">
                       <div :key="ind" class="products-block">
                         <div class="image-holder">
@@ -54,7 +54,7 @@
                         </div>
                       </div>
                     </template>
-                  </div>
+                  </draggable>
                 </b-tab>
                 <b-tab title="Assets" class="assets-file">
                   <template v-for="(logo, inda) in room.logos">
@@ -109,13 +109,15 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     import ErrorMessages from "@/mixins/ErrorMessages";
-    import Scene from "@/components/Scene.vue"
+    import Scene from "@/components/Scene.vue";
+    import draggable from "vuedraggable";
 
 @Component<LockerRoom>({
   components: {
     LockerRoomProducts,
     Scene,
-    CreateLockerRoomModal
+    CreateLockerRoomModal,
+    draggable
   }
 })
 export default class LockerRoom extends Mixins(ErrorMessages) {
