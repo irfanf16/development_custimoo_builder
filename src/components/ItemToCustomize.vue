@@ -5,8 +5,10 @@
 <!--      <Search :categoryListing="categories" @search="searchProduct"/>-->
 <!--    </div>-->
     <div class="collection-btn mb-2">
-      <b-form-checkbox v-model="customized" @change="changeProductType('customized')"  class="mr-3" name="check-button" button>Customized</b-form-checkbox>
-      <b-form-checkbox v-model="personalized" @change="changeProductType('personalized')" name="check-button" button>Personalized</b-form-checkbox>
+      <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized">Customized</b-form-checkbox>
+      <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized">Personalized</b-form-checkbox>
+
+
     </div>
     <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>
@@ -41,7 +43,24 @@ export default class ItemToCustomize extends Vue {
   public searchProduct(param: string, type: string){
     this.$emit('search', param, type)
   }
-  public async changeProductType(prd_type :any){
+  public async changeProductType(new_val:boolean, prd_type:string) {
+    let self:Record<string, any> = this;
+    let old_val = self[prd_type];
+    self[prd_type] = new_val;
+    if(new_val == false) {
+      if(self.customized || self.personalized) {
+        await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
+        this.$emit('retrieveProducts','/list/products',false,true)
+      } else {
+        await this.$store.dispatch('setProductType', {prd_type: prd_type, value: old_val});
+        self[prd_type] = prd_type == "personalized" ? self.$store.getters.getPersonalized : this.$store.getters.getCustomized;
+      }
+    } else {
+      await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
+      this.$emit('retrieveProducts','/list/products',false,true)
+    }
+  }
+  public async changeProductType_back(prd_type :any){
 
     let value = false
     if(prd_type == 'personalized')
