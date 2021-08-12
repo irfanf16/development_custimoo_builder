@@ -55,9 +55,6 @@
                       </div>
                     </template>
                   </div>
-                  <div class="text-right">
-                    <b-button @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
-                  </div>
                 </b-tab>
                 <b-tab title="Assets" class="assets-file">
                   <template v-for="(logo, inda) in room.logos">

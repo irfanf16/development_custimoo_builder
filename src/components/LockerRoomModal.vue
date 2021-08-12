@@ -1,6 +1,12 @@
 <template>
-    <b-modal ref="locker-modal" id="modal-center-lockerroom" scrollable size="xl" title="Locker Room" content-class="lockerroom-modal">
-      <LockerRoom @hideLockerRoomModal="hideLockerRoomModal" @showCollectionModal="showCollectionModal" v-bind.sync="this.addCollection"></LockerRoom>
+    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" title="Locker Room" content-class="lockerroom-modal">
+      <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal" @showCollectionModal="showCollectionModal" v-bind.sync="this.addCollection"></LockerRoom>
+
+      <template #modal-footer>
+        <div class="text-right border-top">
+          <b-button @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
+        </div>
+      </template>
     </b-modal>
 </template>
 
@@ -31,6 +37,10 @@ export default class LockerRoomModal extends Vue {
 
   public showLockerRoomModal () {
     this.ref['locker-modal'].show()
+  }
+
+  public addDesignCollection () {
+    this.ref['lockerRoom'].addDesignCollection()
   }
 }
 </script>
