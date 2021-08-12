@@ -30,19 +30,29 @@ const ProductAttributes:Module<any, any> = {
     editDesignId: 0,
     editStyleId: 0,
     selectedCollectionProducts: [],
-    designCollections: []
+    designCollections: [],
+    editProduct:{
+      editProductId: 0,
+      editStyleId: 0,
+      editDesignId: 0,
+      mainProductId: 0,
+      editStatus: false
+    }
   },
   mutations: {
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
-      state.editStatus = payload.status
+      state.editProduct.editStatus = payload.status
       if (payload.id) {
-        state.editProductId = payload.id
+        state.editProduct.editProductId = payload.id
       }
       if (payload.designId){
-        state.editDesignId = payload.designId
+        state.editProduct.editDesignId = payload.designId
       }
       if (payload.styleId){
-        state.editStyleId = payload.styleId
+        state.editProduct.editStyleId = payload.styleId
+      }
+      if (payload.product_id){
+        state.editProduct.mainProductId = payload.product_id
       }
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
@@ -59,10 +69,11 @@ const ProductAttributes:Module<any, any> = {
       state.selectedIndex = payload.selectedIndex;
     },
     SET_PRODUCT_TYPE(state: Record<any, any>, payload: Record<any, any>){
-      if(payload.prd_type == 'personalized')
+      Vue.set(state, payload.prd_type, payload.value)
+     /* if(payload.prd_type == 'personalized')
         Vue.set(state, 'personalized', payload.value)
       else
-        Vue.set(state, 'customized', payload.value)
+        Vue.set(state, 'customized', payload.value)*/
     },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
@@ -371,17 +382,20 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
+    getEditMainProductId: state => {
+      return state.editProduct.mainProductId
+    },
     getEditStatus: state => {
-      return state.editStatus
+      return state.editProduct.editStatus
     },
     getEditProductId: state => {
-      return state.editProductId
+      return state.editProduct.editProductId
     },
     getEditStyleId: state => {
-      return state.editStyleId
+      return state.editProduct.editStyleId
     },
     getEditDesignId: state => {
-      return state.editDesignId
+      return state.editProduct.editDesignId
     },
     getHideColorSection: state => {
       return state.hideColorSection
@@ -389,7 +403,11 @@ const ProductAttributes:Module<any, any> = {
     getProducts: (state: any) => state.products,
     getSelectedIndex: (state: any) => state.selectedIndex,
     getSelectedProduct: (state => {
-      return state.products[state.selectedIndex]
+      if(state.products[state.selectedIndex]) {
+        return state.products[state.selectedIndex]
+      } else {
+        return false
+      }
     }),
     getCategories: state => {
       return state.categories
