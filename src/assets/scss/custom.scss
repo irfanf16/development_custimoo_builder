@@ -1597,7 +1597,9 @@ button{
 }
 #modal-center-addlockerroom,
 #modal-center-lockerroom{
-    height: auto;
+    //height: auto;
+    overflow-y: auto;
+
     @media only screen and (max-width: 991px){
         top: auto;
         bottom: 0;
