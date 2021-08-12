@@ -384,7 +384,11 @@ const ProductAttributes:Module<any, any> = {
     getProducts: (state: any) => state.products,
     getSelectedIndex: (state: any) => state.selectedIndex,
     getSelectedProduct: (state => {
-      return state.products[state.selectedIndex]
+      if(state.products[state.selectedIndex]) {
+        return state.products[state.selectedIndex]
+      } else {
+        return false
+      }
     }),
     getCategories: state => {
       return state.categories
