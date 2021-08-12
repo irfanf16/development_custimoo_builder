@@ -1822,7 +1822,7 @@ button{
             }
         }
     }
-    .modal-footer{display: none;}
+    //.modal-footer{display: none;}
     .create-lockerroom{
         position: absolute;
         right: 1rem;
@@ -2451,5 +2451,10 @@ $fontSize: 0.5;
         position: absolute;
         right: -10px;
         top: -14px;
+    }
+}
+.sortable-ghost{
+    .card{
+        border-color: #219F84;
     }
 }
