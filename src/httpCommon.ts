@@ -1,4 +1,3 @@
-import axios from "axios";
 
 const base_url = process.env.VUE_APP_API_BASE_URL
 import Axios, { AxiosRequestConfig } from "axios"

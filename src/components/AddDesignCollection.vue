@@ -10,12 +10,14 @@
               </a>
               <div class="text-center fs-2 fw-bold">T-Shirt Jensen Cut {{collectionItem}}</div>
               <div class="mt-2 d-flex gap-1">
-                <div>
+                <div class="w-100">
                   <b-form-input class="w-100" placeholder="Product Nick Name"></b-form-input>
                 </div>
 
                 <div>
-                  <b-button class="dragHandle border-0">Drag</b-button>
+                  <b-button class="dragHandle border-0">
+                    <b-icon icon="arrows-move"></b-icon>
+                  </b-button>
                 </div>
               </div>
 

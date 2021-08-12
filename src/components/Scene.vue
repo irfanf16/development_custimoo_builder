@@ -142,6 +142,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 600}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly mainPreview!: boolean;
   @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
+  @Prop({required: false, default: 'customized'}) readonly productType!: string;
   @Prop({required: false}) readonly colorGrouping!: Record<any, any>;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
@@ -747,26 +748,28 @@ export default class Scene extends Vue {
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
     let model: any
-    fabric.Image.fromURL(ImageData.modelUrl, (img: any) => {
-      img.scaleToHeight(canvas.getHeight() - 10).set({
-        hasControls: false,
-        selectable: false,
-        evented: false,
-        globalCompositeOperation: 'multiply'
-        // globalCompositeOperation: 'overlay'
-      })
-      img.center().setCoords()
-      model = img
-      if (side == 'back') {
-        self.backModel = img
-      } else {
-        self.frontModel = img
-      }
-    }, { crossOrigin: 'Anonymous'})
+    if(this.productType == 'customized') {
+      fabric.Image.fromURL(ImageData.modelUrl, (img: any) => {
+        img.scaleToHeight(canvas.getHeight() - 10).set({
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          globalCompositeOperation: 'multiply'
+          // globalCompositeOperation: 'overlay'
+        })
+        img.center().setCoords()
+        model = img
+        if (side == 'back') {
+          self.backModel = img
+        } else {
+          self.frontModel = img
+        }
+      }, { crossOrigin: 'Anonymous' })
+    }
 
     this.addTexture(ImageData.textureUrl, side)
 
-    if(this.backTextureUrl) {
+    if(this.backTextureUrl && side == 'front') {
       this.addTexture(this.storageUrl + this.backTextureUrl, 'back')
     }
 
@@ -882,15 +885,15 @@ export default class Scene extends Vue {
         clearInterval(timer)
       }
     }, 1000)
-    canvas.on('object:modified', (e) => {
+    canvas.on('object:modified', (e: Record<any, any>) => {
       self.objectMove(e, side)
       self.addToOtherSide(e.target, side)
     })
-    canvas.on('object:moving', (e) => {
+    canvas.on('object:moving', (e: Record<any, any>) => {
       self.objectScaling(e, side)
     });
 
-    canvas.on('object:scaling', (e) => {
+    canvas.on('object:scaling', (e: Record<any, any>) => {
       let dimText = this.dimTextFront
       if (e.target.side == 'back') {
         dimText = this.dimTextBack
@@ -900,7 +903,7 @@ export default class Scene extends Vue {
 
   }
 
-  public objectScaling(e: any, side: string) {
+  public objectScaling(e: Record<any, any>, side: string) {
     let model = this.frontModel
     let canvas = this.frontCanvas
     if(side == 'back') {
