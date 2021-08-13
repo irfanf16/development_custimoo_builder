@@ -31,7 +31,9 @@
                       <b-form-input class="w-100" v-model="collectionItem.product_nickname" placeholder="Product Nick Name"></b-form-input>
                     </div>
                   <div>
-                      <b-button class="dragHandle border-0">Drag</b-button>
+                      <b-button class="dragHandle border-0">
+                        <b-icon icon="arrows-move"></b-icon>
+                      </b-button>
                     </div>
                   </div>
 
@@ -41,12 +43,12 @@
                            :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: storageUrl+collectionItem.product_locker_room.style.front.file_url}"
                            :back="{textureUrl: storageUrl+collectionItem.product_locker_room.design.back_design.file_url, modelUrl: storageUrl+collectionItem.product_locker_room.style.back.file_url}"
                            :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collectionItem.product_locker_room.defaultcolors)"
-                           :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))" :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"  />
+                           :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150" :canvasWidth="150" :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))" :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"  />
 
                     <Scene v-else  :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio"
                            :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: storageUrl+collectionItem.product_locker_room.style.front.file_url}"
                            :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collectionItem.product_locker_room.defaultcolors)"
-                           :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))" :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"  />
+                           :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150" :canvasWidth="150" :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))" :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"  />
                   </div>
 
                   <div class="mt-3">
