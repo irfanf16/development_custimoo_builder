@@ -1,53 +1,156 @@
 <template>
-  <b-modal ref="collection-modal" id="modal-center-collection" scrollable size="xl" content-class="collection-modal">
+  <b-modal ref="collection-modal" hide-footer id="modal-center-collection" scrollable size="xl" content-class="collection-modal">
     <template #modal-title>
       <div class="d-flex align-items-center justify-content-between w-100">
         <div>
-          <b-form-input placeholder="Collection Name"></b-form-input>
+          <b-form-input  v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
         </div>
 
         <div>
-          <b-button>Save</b-button>
+          <b-button @click="saveCollectionForm">Save</b-button>
         </div>
       </div>
     </template>
 
-    <AddDesignCollection></AddDesignCollection>
-    <!--<DesignCollection @hideCollectionModal="hideCollectionModal"></DesignCollection>-->
+    <template>
+      <div class="design-collection-form">
+        <b-form inline>
+          <b-container fluid>
+            <draggable class="row gap-y-5" :options="{handle: '.dragHandle', animation: 250}" v-model='collectionItems.collection_products'>
+              <b-col cols="12" lg="6" xl="4" v-for="(collectionItem, index) in collectionItems.collection_products" :key="index">
+                <b-card>
+                  <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id,index)">
+                    <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                  </a>
+                  <div class="text-center fs-2 fw-bold">{{collectionItem.product_locker_room.product_name}}</div>
+                  <div class="mt-2 d-flex gap-1">
+                    <div>
+                      <b-form-input class="w-100" v-model="collectionItem.product_nickname" placeholder="Product Nick Name"></b-form-input>
+                    </div>
 
-    <template #modal-footer>
+                    <div>
+                      <b-button class="dragHandle border-0">Drag</b-button>
+                    </div>
+                  </div>
+
+                  <div class="mt-3">
+
+                    <Scene :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio"
+                           :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: storageUrl+collectionItem.product_locker_room.style.front.file_url}"
+                           :back="{textureUrl: storageUrl+collectionItem.product_locker_room.design.back_design.file_url, modelUrl: storageUrl+collectionItem.product_locker_room.style.back.file_url}"
+                           :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collectionItem.product_locker_room.defaultcolors)"
+                           :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))" :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"  />
+                  </div>
+
+                  <div class="mt-3">
+                    {{collectionItem.product_locker_room.product_name}}
+                  </div>
+
+                  <div class="mt-3">
+                    <b-form-textarea v-model="collectionItem.product_note" placeholder="Description" class="w-100"></b-form-textarea>
+                  </div>
+                </b-card>
+              </b-col>
+            </draggable>
+          </b-container>
+        </b-form>
+      </div>
+    </template>
+
+
+<!--    <template #modal-footer>
       <div class="d-flex align-items-center justify-content-end w-100 gap-1">
         <b-button variant="secondary" class="light">Cancel</b-button>
         <b-button variant="secondary">Save</b-button>
       </div>
-    </template>
+    </template>-->
   </b-modal>
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator'
-import DesignCollection from "@/components/DesignCollection.vue";
-import AddDesignCollection from "@/components/AddDesignCollection.vue";
 
+import {Component, Mixins} from 'vue-property-decorator'
+import DesignCollection from "@/components/DesignCollection.vue";
+import ErrorMessages from "@/mixins/ErrorMessages";
+import Scene from "@/components/Scene.vue"
+import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
+import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+import draggable from "vuedraggable";
 
 @Component({
   components: {
     // eslint-disable-next-line no-undef
-    AddDesignCollection,
-    DesignCollection
+    Scene,
+    DesignCollection,
+    LockerRoomProducts,
+    CreateLockerRoomModal,
+    draggable
   }
 })
-export default class LockerRoomModal extends Vue {
-  private addCollection = false;
+
+export default class DesignCollectionModal extends Mixins(ErrorMessages) {
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
+  private addCollection = false
+
+  private collectionItems = {id:"",name:"",link:"",collection_products:[]}
 
   public ref = this.$refs as Record<any, any>
+
+  public async retrievCollectionItems(){
+    let res = await this.$store.dispatch('getCollectionItems')
+    this.collectionItems = res;
+  }
 
   public hideCollectionModal () {
     this.ref['collection-modal'].hide()
   }
 
   public showCollectionModal () {
-    this.ref['collection-modal'].show()
+    const payload = {"attribute":"collection_id","value":0}
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
+    this.ref['collection-modal'].show();
+    this.retrievCollectionItems();
   }
+
+  public deleteLockerProduct(locker_prod_id,index){
+    this.collectionItems.collection_products.splice(index, 1)
+    this.$store.commit('DELETE_SELECTED_COLLECTION_PRODUCT',locker_prod_id)
+    if(this.collectionItems.collection_products.length < 1){
+      this.hideCollectionModal()
+    }
+  }
+
+  public async saveCollectionForm(){
+    let collectionItems = this.collectionItems;
+    let formData = {};
+
+    formData.name = collectionItems.name;
+    formData.link = collectionItems.link
+    let products = [];
+    collectionItems.collection_products.forEach(function (item,index) {
+        products.push({
+          "product_nickname":item.product_nickname,
+          "product_note":item.product_note,
+          "product_locker_room_id":item.product_locker_room.id,
+          "order_number":(index+1)})
+    })
+    formData.products = products
+    let res;
+    if(collectionItems.id == ""){
+       res = await this.$store.dispatch('createNewCollection',formData);
+    }else{
+       res = await this.$store.dispatch('updateNewCollection',formData,collectionItems.id);
+    }
+    if(res.status){
+      this.showToast(res.message,'SUCCESS')
+      const payload = {"attribute":"locker_products","value":[]};
+      this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
+      this.ref['collection-modal'].hide();
+    }else
+    {
+      this.showErrorArr(res.message)
+    }
+  }
+
 }
 </script>

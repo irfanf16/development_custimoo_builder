@@ -1,6 +1,7 @@
 import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
+import get = Reflect.get;
 const ProductAttributes:Module<any, any> = {
   state: {
     products:[],
@@ -29,7 +30,7 @@ const ProductAttributes:Module<any, any> = {
     editProductId: 0,
     editDesignId: 0,
     editStyleId: 0,
-    selectedCollectionProducts: [],
+    selectedCollectionProducts: {locker_products:[],collection_id:0},
     designCollections: [],
     editProduct:{
       editProductId: 0,
@@ -373,7 +374,22 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     SET_SELECTED_COLLECTION_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
-      state.selectedCollectionProducts = payload;
+      switch (payload.attribute){
+        case "locker_products":
+          state.selectedCollectionProducts.locker_products = payload.value;
+        break;
+        case "collection_id":
+          state.selectedCollectionProducts.collection_id = payload.value
+        break;
+      }
+
+    },
+    DELETE_SELECTED_COLLECTION_PRODUCT(state:Record<any, any>, product_id:number){
+      let lockerProds = state.selectedCollectionProducts.locker_products;
+      lockerProds = lockerProds.filter(item => item !== product_id)
+      console.log(product_id);
+      console.log(lockerProds);
+      state.selectedCollectionProducts.locker_products = lockerProds
     },
     ADD_DESIGN_COLLECTION(state:Record<any, any>, payload:Record<any, any>){
       const collections = JSON.parse(JSON.stringify(state.designCollections));
@@ -456,6 +472,9 @@ const ProductAttributes:Module<any, any> = {
       return state.personalized
     },
     getSelectedCollectionProducts(state:Record<any, any>){
+      return state.selectedCollectionProducts.locker_products
+    },
+    getSelectedCollectionParams(state:Record<any, any>){
       return state.selectedCollectionProducts
     },
     getDesignCollections(state:Record<any, any>){
@@ -616,6 +635,55 @@ const ProductAttributes:Module<any, any> = {
           commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
         }
       })
+    },
+    async getCollectionItems({getters}){
+      let payload ;
+      const selectedData = getters.getSelectedCollectionParams;
+
+      if(selectedData.collection_id > 0){
+        payload = {collection_id:selectedData.collection_id}
+      }else{
+        payload = {collection_prd_ids:selectedData.locker_products}
+      }
+
+      const res =  await http.post('collection-data', payload).then((res) =>{
+        return res.data;
+      })
+      return res
+    },
+    async createNewCollection(_,payload){
+      let resp =  {status:false,message:""};
+      await http.post('collection', payload).then((res) => {
+        if (res.status == 201){
+          resp = {status:true,message:"Collection added successfully"};
+        }else if (res.status == 404){
+          resp = {status:false,message:"Collection not added"};
+        }
+      }).catch(err => {
+        if(err.response.status){
+          resp = {status:false,message:err.response.data.errors};
+        }
+      })
+
+      return resp;
+
+    },
+    async updateNewCollection(_,payload,collection_id){
+      let resp =  {status:false,message:""};
+      await http.put(`collection/${collection_id}`, payload).then((res) => {
+        if (res.status == 201){
+          resp = {status:true,message:"Collection updated successfully"};
+        }else if (res.status == 404){
+          resp = {status:false,message:"Collection not updated"};
+        }
+      }).catch(err => {
+        if(err.response.status){
+          resp = {status:false,message:err.response.data.errors};
+        }
+      })
+
+      return resp;
+
     }
 
   }

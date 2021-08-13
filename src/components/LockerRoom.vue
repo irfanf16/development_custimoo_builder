@@ -56,7 +56,7 @@
                     </template>
                   </div>
                   <div class="text-right">
-                    <b-button @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
+                    <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
                   </div>
                 </b-tab>
                 <b-tab title="Assets" class="assets-file">
@@ -262,7 +262,8 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public set selectedCollectionProducts(val : Record<any, any>) {
-    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',val)
+    const payload = {"attribute":"locker_products","value":val};
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
   }
 }
 </script>
