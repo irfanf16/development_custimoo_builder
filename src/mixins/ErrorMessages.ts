@@ -38,4 +38,19 @@ export default class ErrorMessages extends Vue{
     }
 
   }
+  public showErrorArr(errors: []):void{
+   const errArr: string[] = [];
+    Object.keys(errors).map((field) => {
+      errArr.push(errors[field][0]);
+    });
+    errArr.forEach(element => {
+      Vue.$toast.open({
+        message: element,
+        type: 'error',
+        dismissible: true,
+        duration: 5000,
+        position: 'bottom-left'
+      });
+    })
+  }
 }

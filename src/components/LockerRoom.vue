@@ -55,6 +55,7 @@
                       </div>
                     </template>
                   </draggable>
+
                 </b-tab>
                 <b-tab title="Assets" class="assets-file">
                   <template v-for="(logo, inda) in room.logos">
@@ -109,7 +110,7 @@
                             <a @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
-                            <a @click="editProduct(1, 0)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            <a @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -119,7 +120,7 @@
                     </template>
                   </div>
                   <div class="text-right">
-                    <b-button variant="secondary">Add selected designs to a new collection</b-button>
+                    <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
                   </div>
                 </b-tab>
               </b-tabs>
@@ -314,7 +315,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public set selectedCollectionProducts(val : Record<any, any>) {
-    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',val)
+    const payload = {"attribute":"locker_products","value":val};
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
+  }
+  public editCollection(collection_id:number){
+    this.$emit('editCollectionModal',collection_id)
+    this.$emit('hideLockerRoomModal')
   }
 }
 </script>

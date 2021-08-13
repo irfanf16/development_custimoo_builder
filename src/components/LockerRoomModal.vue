@@ -1,10 +1,13 @@
 <template>
     <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" title="Locker Room" content-class="lockerroom-modal">
-      <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal" @showCollectionModal="showCollectionModal" ></LockerRoom>
+      <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
+                  @showCollectionModal="showCollectionModal"
+                  @editCollectionModal="editCollectionModal"
+      ></LockerRoom>
 
       <template #modal-footer>
         <div class="text-right border-top">
-          <b-button @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
+          <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
         </div>
       </template>
     </b-modal>
@@ -31,6 +34,10 @@ export default class LockerRoomModal extends Vue {
     this.$emit('showCollectionModal')
   }
 
+  public editCollectionModal = (collection_id:number) => {
+   this.$emit('editCollectionModal',collection_id)
+  }
+
   public hideLockerRoomModal () {
     this.ref['locker-modal'].hide()
   }
@@ -41,6 +48,9 @@ export default class LockerRoomModal extends Vue {
 
   public addDesignCollection () {
     this.ref['lockerRoom'].addDesignCollection()
+  }
+  get selectedCollectionProducts(){
+    return this.$store.getters.getSelectedCollectionProducts;
   }
 }
 </script>
