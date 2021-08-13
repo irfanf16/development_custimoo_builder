@@ -43,12 +43,11 @@
               </svg>
             </div>
           </div>
-        </div>
 
-        <div id="main">
+          <div id="main">
           <div class="image-holder" id="both-svg" style="text-align: center;">
            <template v-if="selectedProduct">
-             <div v-for="i in 5" :key="i">
+             <div>
                <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
                  <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id+i">
                    <Scene v-if="selectedProduct.productstyles[styleIndex].back" :measurement-ratio="design.measurement_ratio"
@@ -73,6 +72,7 @@
 
            </template>
           </div>
+        </div>
         </div>
 
       </div>
