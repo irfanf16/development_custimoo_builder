@@ -36,7 +36,6 @@ export default {
   },
   computed: {
     products: function() {
-      console.log('yoooo')
       return this.$store.getters.getProducts
     }
   },

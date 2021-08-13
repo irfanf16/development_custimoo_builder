@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
 
+$theme-color: #219F84;
+
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -2458,5 +2460,93 @@ $fontSize: 0.5;
 .sortable-ghost{
     .card{
         border-color: #219F84;
+    }
+}
+
+.break-after{
+    page-break-after: always !important;
+}
+.break-before{
+    page-break-before: always !important;
+}
+
+.avoid-inside-break{
+    page-break-inside: avoid !important;
+}
+
+.checkbox_buttons{
+    .btn.btn-secondary{
+        background: #fff;
+        color: #999;
+        border-color: #999;
+
+        &:not(.active):hover{
+            color: $theme-color;
+            border-color: $theme-color;
+        }
+
+        .checked{
+            display: inline-block;
+            vertical-align: middle;
+            max-width: 0;
+            overflow: hidden;
+            transition: 0.2s all ease;
+        }
+
+        &.active{
+            .checked{
+                max-width: 20px;
+            }
+            &.focus{
+                box-shadow: 0 0 0 3px transparentize($theme-color, 0.6);
+            }
+        }
+    }
+}
+
+.designCollections{
+    .products-block{
+        position: relative;
+
+        .controls{
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 0.5rem;
+
+            a{
+                height: 30px !important;
+                width: 30px !important;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+
+    .image-holder{
+        height: 250px;
+        width: 100%;
+        &>.convas_container{
+            width: 80%;
+            height: 80%;
+            position: absolute;
+        }
+
+        &>.convas_container:nth-child(1){
+            left: 0;
+            top: 0;
+        }
+
+        &>.convas_container:nth-child(2){
+            left: 15px;
+            top: 20px;
+        }
+        convas_container:nth-child(3){
+            left: 25px;
+            top: 30px;
+        }
     }
 }

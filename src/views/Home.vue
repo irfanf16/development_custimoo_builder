@@ -43,7 +43,7 @@
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                   </template>
-                  <LockerRoomModal @showCollectionModal="this.showCollectionModal" ref="lockerModal"  />
+                  <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
                   <DesignCollectionModal ref="collectionModal"  />
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'savetolocker'" variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
@@ -280,7 +280,9 @@ export default class Home extends Vue {
   public showCollectionModal = () =>{
     this.ref['collectionModal'].showCollectionModal()
   }
-
+  public editCollectionModal = (collection_id:number) =>{
+    this.ref['collectionModal'].editCollectionModal(collection_id)
+  }
   @Watch('customLogos', {
     deep: true
   })

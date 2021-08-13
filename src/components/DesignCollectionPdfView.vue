@@ -186,6 +186,7 @@ a {
 
 #header .header-content {
   background: #009eda;
+  page-break-inside: avoid !important;
   color: #000;
   text-align: center;
   display: inline-block;
