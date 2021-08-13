@@ -2445,12 +2445,16 @@ $fontSize: 0.5;
     flex-shrink: 0;
     color: #D53943;
     background: #F8E1E2;
+    border: 1px solid #F8E1E2;
     border-radius: 50%;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
 
+    &:hover{
+        border-color: #D53943;
+    }
     &.absolute{
         position: absolute;
         right: -10px;
@@ -2522,16 +2526,17 @@ $fontSize: 0.5;
                 display: flex !important;
                 align-items: center;
                 justify-content: center;
+                font-size: 1em;
             }
         }
     }
 
     .image-holder{
-        height: 250px;
+        height: 220px;
         width: 100%;
         &>.convas_container{
-            width: 80%;
-            height: 80%;
+            width: 84%;
+            height: 84%;
             position: absolute;
         }
 
@@ -2541,12 +2546,12 @@ $fontSize: 0.5;
         }
 
         &>.convas_container:nth-child(2){
-            left: 15px;
-            top: 20px;
+            left: 20px;
+            top: 25px;
         }
-        convas_container:nth-child(3){
-            left: 25px;
-            top: 30px;
+        &>.convas_container:nth-child(3){
+            left: 45px;
+            top: 50px;
         }
     }
 }
