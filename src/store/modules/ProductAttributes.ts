@@ -384,7 +384,10 @@ const ProductAttributes:Module<any, any> = {
       const collections = JSON.parse(JSON.stringify(state.designCollections));
       collections.push(payload);
       state.designCollections = collections;
-    }
+    },
+    DELETE_COLLECTION(state:Record<any, any>, payload){
+      state.collections.splice(payload.index, 1);
+    },
   },
   getters: {
     getEditMainProductId: state => {
@@ -497,8 +500,16 @@ const ProductAttributes:Module<any, any> = {
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
     },
+
     deleteCustomLogoTab({commit}, payload){
       commit('customLogoTabDelete', payload)
+    },
+
+
+    async deleteCollection({commit}, payload){
+      const resp = await http.delete("collection/"+payload.id);
+      commit('DELETE_COLLECTION', payload);
+      return resp
     },
 
     setLogoTab({commit}, payload){

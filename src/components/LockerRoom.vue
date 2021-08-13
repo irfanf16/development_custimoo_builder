@@ -91,30 +91,24 @@
                     </div>
                   </div>
                 </b-tab>
-                <b-tab title="Collections">
+                <b-tab v-if="getCollections.length > 0" title="Collections">
 
                   <div class="products-holder d-lg-flex flex-lg-wrap mb-4">
                     <template v-for="(collection, index) in getCollections">
                       <div :key="index" class="products-block">
                         <div class="image-holder">
-                          <a>
-<!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
-<!--                            <Scene :measurement-ratio="product.design.measurement_ratio"
-                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: storageUrl+product.style.front.file_url}"
-                                   :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
-                                   :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />-->
-                          </a>
-                          <ul class="product-icons">
-                            <li>
-                              <a class="remove-tab" >
-                                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-                              </a>
-                            </li>
 
-                            <li class="d-none d-lg-block">
-                              <a @click="editProduct(1, 0)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            </li>
-                          </ul>
+                          <a :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
+<!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
+                            <Scene :measurement-ratio="collection_product.product_locker_room.design.measurement_ratio"
+                                   :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: storageUrl+collection_product.product_locker_room.style.front.file_url}"
+                                   :backTextureUrl="collection_product.product_locker_room.design.back_design? collection_product.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collection_product.product_locker_room.defaultcolors)"
+                                   :lockerGroupColors="JSON.parse(collection_product.product_locker_room.groupcolors)" :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :productNamesSetting="collection_product.product_locker_room.productnames" :canvasSelection="false"  />
+                          </a>
+                          <a @click="deleteCollection(collection.id,index)" class="remove btn" style="display: inline-block !important; width: 30px !important;">
+                            <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                          </a>
+                          <a @click="editProduct(1, 0)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
                           <p>{{ collection.name }}</p>
@@ -266,6 +260,15 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
   public async deleteProduct(i:number, ind:number, id:number){
     await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+  }
+  public async deleteCollection(id:number,index:number){
+    try{
+       let res = await this.$store.dispatch('deleteCollection', {id: id, index: index});
+      this.showToast(res.data.message, 'SUCCESS');
+    }
+    catch (e) {
+      this.showError(e);
+    }
   }
   public async deleteRoom(id:number, index:number){
     if (confirm('You are going to delete associated product')) {

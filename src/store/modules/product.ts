@@ -63,6 +63,9 @@ const Product:Module<any, any> = {
     DELETE_ROOM_PRODUCT(state:Record<any, any>, payload){
       state.locker_products[payload.room_index].product.splice(payload.product_index, 1);
     },
+
+
+
     CHANGE_EYE_INDEX(state:Record<any, any>, payload){
       state.eyeIndex = payload
     }
@@ -140,6 +143,9 @@ const Product:Module<any, any> = {
         }
       })
     },
+
+
+
     async storeFolder({commit}, payload){
       let saved = false;
       await  http.post("locker/folder", payload).then((res) => {
