@@ -54,11 +54,6 @@
                         </div>
                       </div>
                     </template>
-
-                  <div class="text-right">
-                    <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
-                  </div>
-
                   </draggable>
 
                 </b-tab>
@@ -123,7 +118,7 @@
                     </template>
                   </div>
                   <div class="text-right">
-                    <b-button variant="secondary">Add selected designs to a new collection</b-button>
+                    <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
                   </div>
                 </b-tab>
               </b-tabs>

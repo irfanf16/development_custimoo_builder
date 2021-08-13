@@ -675,7 +675,7 @@ const ProductAttributes:Module<any, any> = {
       })
       return res
     },
-    async createNewCollection(_,payload){
+    async createNewCollection({commit},payload:Record<any, any>){
       let resp =  {status:false,message:""};
       await http.post('collection', payload).then((res) => {
         if (res.status == 201){
@@ -692,7 +692,7 @@ const ProductAttributes:Module<any, any> = {
       return resp;
 
     },
-    async updateNewCollection(_,payload,collection_id){
+    async updateNewCollection({commit},payload:Record<any, any>,collection_id:number){
       let resp =  {status:false,message:""};
       await http.put(`collection/${collection_id}`, payload).then((res) => {
         if (res.status == 201){

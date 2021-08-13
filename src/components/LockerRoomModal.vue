@@ -4,7 +4,7 @@
 
       <template #modal-footer>
         <div class="text-right border-top">
-          <b-button @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
+          <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
         </div>
       </template>
     </b-modal>
@@ -41,6 +41,9 @@ export default class LockerRoomModal extends Vue {
 
   public addDesignCollection () {
     this.ref['lockerRoom'].addDesignCollection()
+  }
+  get selectedCollectionProducts(){
+    return this.$store.getters.getSelectedCollectionProducts;
   }
 }
 </script>
