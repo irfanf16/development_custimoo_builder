@@ -20,7 +20,7 @@
                           <a>
                             <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <Scene :measurement-ratio="product.design.measurement_ratio"
-                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: storageUrl+product.style.front.file_url}"
+                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front ? storageUrl+product.style.front.file_url : ''}"
                                    :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
                                    :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />
                           </a>
@@ -65,6 +65,33 @@
                   </template>
                 </b-tab>
                 <b-tab title="Colors">
+                  <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
+                    <div class="pt-lg-2 folder-wrapper">
+                      <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
+                      <div class="d-flex flex-wrap color-folder-holder">
+                        <template v-for="(folder, inde) in room.folders">
+                          <a href="#" class="text-center d-block" @click="fetchColors(inde, i)" :key="inde">
+                            <font-awesome-icon :icon="['fas', 'folder']"/>
+                            <span class="folder-name d-block">{{ folder.folder_name }}</span>
+                          </a>
+                        </template>
+                      </div>
+                    </div>
+                    <div class="color-holder" v-if="colors">
+                      <div class="color-container">
+                        <template v-for="(item, ix) in colors">
+                          <div :key="`item_${ix}`">
+                            <div class="color-box"
+                                 :style="{backgroundColor: item.value}" :key="`${ix}`">
+                            </div>
+                            <span> {{ item.name }} </span>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </b-tab>
+                <b-tab title="collections" @click="getCollections">
                   <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
                     <div class="pt-lg-2 folder-wrapper">
                       <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
@@ -162,7 +189,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public lockerStatus = 'not_accepted'
-
+  public getCollections() {
+    this.$store.dispatch('getCollections')
+  }
   public async editProduct(lockerIndex: number, productIndex: number){
     const id = this.getLockerProducts[lockerIndex].product[productIndex].id
     const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id

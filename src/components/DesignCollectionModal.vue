@@ -24,7 +24,7 @@
       </div>
     </template>
   </b-modal>
-    <DesignCollectionPdfView/>
+    <DesignCollectionPdfView :collectionData="collectionData"/>
   </span>
 
 </template>
@@ -47,6 +47,7 @@ import html2pdf from "html2pdf.js"
 })
 export default class LockerRoomModal extends Vue {
   private addCollection = false;
+  public collectionData : any[] = []
 
   public ref = this.$refs as Record<any, any>
 
@@ -58,27 +59,30 @@ export default class LockerRoomModal extends Vue {
     this.ref['collection-modal'].show()
   }
 
-  public generateCollectionPdf() {
+  public async generateCollectionPdf() {
+    let res = await this.$store.dispatch('getCollection')
     let self = this;
-    const element = document.getElementById("collectionPdfContainer")
-    const opt = {
-      margin: [15, 10, 15, 10],
-      filename: 'production.pdf',
-      image: {type: "jpeg", quality: 1},
-      html2canvas: {
-        dpi: 192,
-        scale: 4,
-        useCORS: true,
-        letterRendering: true,
-      },
-      jsPDF: {
-        unit: "mm",
-        format: "letter",
-        orientation: 'landscape'
-      }
-    };
-    html2pdf().set(opt).from(element).save();
-    console.log("hey pdf downloaded")
+    self.collectionData = res
+    setTimeout(()=>{
+      const element = document.getElementById("collectionPdfContainer")
+      const opt = {
+        margin: [15, 10, 15, 10],
+        filename: 'production.pdf',
+        image: {type: "jpeg", quality: 1},
+        html2canvas: {
+          dpi: 192,
+          scale: 4,
+          useCORS: true,
+          letterRendering: true,
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "letter",
+          orientation: 'landscape'
+        }
+      };
+      html2pdf().set(opt).from(element).save();
+    }, 3000)
   }
 }
 </script>

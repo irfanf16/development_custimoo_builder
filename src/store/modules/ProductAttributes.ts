@@ -616,6 +616,11 @@ const ProductAttributes:Module<any, any> = {
           commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
         }
       })
+    },
+    async getCollection({commit}){
+      return await  http.post('collection-data', {collection_id: 1}).then((res) =>{
+        return res.data
+      })
     }
 
   }
