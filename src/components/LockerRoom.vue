@@ -20,7 +20,7 @@
                           <a>
                             <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <Scene :measurement-ratio="product.design.measurement_ratio"
-                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: storageUrl+product.style.front.file_url}"
+                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front ? storageUrl+product.style.front.file_url : ''}"
                                    :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
                                    :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />
                           </a>

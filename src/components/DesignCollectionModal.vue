@@ -75,7 +75,7 @@
       </div>
     </template>
   </b-modal>
-    <DesignCollectionPdfView/>
+    <DesignCollectionPdfView :collectionData="collectionData"/>
   </span>
 
 </template>
@@ -106,7 +106,7 @@ import html2pdf from "html2pdf.js"
 
 export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
-
+  public collectionData : any[] = []
   private collectionItems = {id:"",name:"",link:"",collection_products:[]}
   public ref = this.$refs as Record<any, any>
 
@@ -179,27 +179,30 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     }
   }
 
-  public generateCollectionPdf() {
+  public async generateCollectionPdf() {
+    let res = await this.$store.dispatch('getCollection')
     let self = this;
-    const element = document.getElementById("collectionPdfContainer")
-    const opt = {
-      margin: [15, 10, 15, 10],
-      filename: 'production.pdf',
-      image: {type: "jpeg", quality: 1},
-      html2canvas: {
-        dpi: 192,
-        scale: 4,
-        useCORS: true,
-        letterRendering: true,
-      },
-      jsPDF: {
-        unit: "mm",
-        format: "letter",
-        orientation: 'landscape'
-      }
-    };
-    html2pdf().set(opt).from(element).save();
-    console.log("hey pdf downloaded")
+    self.collectionData = res
+    setTimeout(()=>{
+      const element = document.getElementById("collectionPdfContainer")
+      const opt = {
+        margin: [15, 10, 15, 10],
+        filename: 'production.pdf',
+        image: {type: "jpeg", quality: 1},
+        html2canvas: {
+          dpi: 192,
+          scale: 4,
+          useCORS: true,
+          letterRendering: true,
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "letter",
+          orientation: 'landscape'
+        }
+      };
+      html2pdf().set(opt).from(element).save();
+    }, 3000)
   }
 
 }

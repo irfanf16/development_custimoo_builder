@@ -3,7 +3,8 @@
     <div id="collectionPdfContainer">
       <div id="wrapper">
         <h1 class="fs-5 pb-1 text-center text-secondary">Collection Name Goes Here</h1>
-        <div style="page-break-inside: avoid" v-for="i in 5" :key="i" class="mt-1 break-after">
+        <template v-if="collectionData">
+        <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1 break-after">
           <div id="header">
             <div class="header-content">Product Nick Name Goes Here</div>
             <div class="logo">
@@ -43,58 +44,44 @@
               </svg>
             </div>
           </div>
-
           <div id="main">
-          <div class="image-holder" id="both-svg" style="text-align: center;">
-           <template v-if="selectedProduct">
-             <div>
-               <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
-                 <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id+i">
-                   <Scene v-if="selectedProduct.productstyles[styleIndex].back" :measurement-ratio="design.measurement_ratio"
-                          :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                          :back="{textureUrl: storageUrl+design.back_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
-                          :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                          :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                          :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :canvasWidth="450" :canvasHeight="450" :productType="selectedProduct.product_type" />
-
-                   <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio"
-                          :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                          :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                          :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                          :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :canvasWidth="450" :canvasHeight="450" :productType="selectedProduct.product_type"/>
-                 </div>
-               </template>
-               <div :key="`desc${i}`">
-                 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
-                 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
-               </div>
-             </div>
-
-           </template>
+            <div class="image-holder" id="both-svg" style="text-align: center;">
+              <Scene v-if="product.product_locker_room.design.back_design" :measurement-ratio="product.product_locker_room.design.measurement_ratio"
+                     :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
+                     :back="{textureUrl: product.product_locker_room.design.back_design ? storageUrl+product.product_locker_room.design.back_design.file_url: '', modelUrl: product.product_locker_room.style.back ? storageUrl+product.product_locker_room.style.back.file_url : ''}"
+                     :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))" :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false"  />
+              <Scene  v-else class="view-back" :measurement-ratio="product.product_locker_room.design.measurement_ratio"
+                      :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
+                      :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)"
+                      :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))" :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false"  />
+              <div :key="`desc${i}`">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
+              </div>
+            </div>
           </div>
         </div>
-        </div>
-
+        </template>
       </div>
     </div>
   </div>
 </template>
-
 <script lang="ts">
 
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import Scene from "@/components/Scene.vue";
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 
-
 @Component<DesignCollectionPdfView>({
   components: {
     Scene, CustomizationPreview
-  }
+  },
 })
 
 export default class DesignCollectionPdfView extends Vue {
   @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
+  @Prop({required: true}) collectionData!: any[]
+
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   get selectedProduct(): Record<any, any>{
