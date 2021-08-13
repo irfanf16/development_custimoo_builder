@@ -391,7 +391,7 @@ const ProductAttributes:Module<any, any> = {
     },
     DELETE_SELECTED_COLLECTION_PRODUCT(state:Record<any, any>, product_id:number){
       let lockerProds = state.selectedCollectionProducts.locker_products;
-      lockerProds = lockerProds.filter(item => item !== product_id)
+      lockerProds = lockerProds.filter((item: number) => item !== product_id)
       state.selectedCollectionProducts.locker_products = lockerProds
     },
     ADD_DESIGN_COLLECTION(state:Record<any, any>, payload:Record<any, any>){
