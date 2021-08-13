@@ -1,6 +1,9 @@
 <template>
     <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" title="Locker Room" content-class="lockerroom-modal">
-      <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal" @showCollectionModal="showCollectionModal" ></LockerRoom>
+      <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
+                  @showCollectionModal="showCollectionModal"
+                  @editCollectionModal="editCollectionModal"
+      ></LockerRoom>
 
       <template #modal-footer>
         <div class="text-right border-top">
@@ -29,6 +32,10 @@ export default class LockerRoomModal extends Vue {
   private showCollectionModal = () => {
     // alert("asd")
     this.$emit('showCollectionModal')
+  }
+
+  public editCollectionModal = (collection_id:number) => {
+   this.$emit('editCollectionModal',collection_id)
   }
 
   public hideLockerRoomModal () {

@@ -109,7 +109,7 @@
                           <a @click="deleteCollection(collection.id,index)" class="remove btn" style="display: inline-block !important; width: 30px !important;">
                             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                           </a>
-                          <a @click="editProduct(1, 0)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                          <a @click="editCollection(collection.id)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
                           <p>{{ collection.name }}</p>
@@ -315,6 +315,10 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public set selectedCollectionProducts(val : Record<any, any>) {
     const payload = {"attribute":"locker_products","value":val};
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
+  }
+  public editCollection(collection_id:number){
+    this.$emit('editCollectionModal',collection_id)
+    this.$emit('hideLockerRoomModal')
   }
 }
 </script>

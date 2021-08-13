@@ -392,8 +392,6 @@ const ProductAttributes:Module<any, any> = {
     DELETE_SELECTED_COLLECTION_PRODUCT(state:Record<any, any>, product_id:number){
       let lockerProds = state.selectedCollectionProducts.locker_products;
       lockerProds = lockerProds.filter(item => item !== product_id)
-      console.log(product_id);
-      console.log(lockerProds);
       state.selectedCollectionProducts.locker_products = lockerProds
     },
     ADD_DESIGN_COLLECTION(state:Record<any, any>, payload:Record<any, any>){
@@ -692,10 +690,11 @@ const ProductAttributes:Module<any, any> = {
       return resp;
 
     },
-    async updateNewCollection({commit},payload:Record<any, any>,collection_id:number){
+    async updateNewCollection({commit},payload:Record<any, any>){
       let resp =  {status:false,message:""};
-      await http.put(`collection/${collection_id}`, payload).then((res) => {
-        if (res.status == 201){
+      console.log(payload)
+      await http.put(`collection/${payload.collection_id}`, payload).then((res) => {
+        if (res.status == 201 || res.status == 200){
           resp = {status:true,message:"Collection updated successfully"};
         }else if (res.status == 404){
           resp = {status:false,message:"Collection not updated"};

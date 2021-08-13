@@ -22,7 +22,7 @@
             <draggable class="row gap-y-5" :options="{handle: '.dragHandle', animation: 250}" v-model='collectionItems.collection_products'>
               <b-col cols="12" lg="6" xl="4" v-for="(collectionItem, index) in collectionItems.collection_products" :key="index">
                 <b-card>
-                  <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id,index)">
+                  <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id)">
                     <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                   </a>
                   <div class="text-center fs-2 fw-bold">{{collectionItem.product_locker_room.product_name}}</div>
@@ -124,8 +124,19 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     this.retrievCollectionItems();
   }
 
-  public deleteLockerProduct(locker_prod_id,index){
-    this.collectionItems.collection_products.splice(index, 1)
+  public editCollectionModal (collection_id:number) {
+    const payload = {"attribute":"collection_id","value":collection_id}
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
+    this.ref['collection-modal'].show();
+    this.retrievCollectionItems();
+  }
+
+  public deleteLockerProduct(locker_prod_id:number){
+    console.log(locker_prod_id);
+    let lockerItems = this.collectionItems.collection_products;
+    lockerItems = lockerItems.filter(item => item.product_locker_room.id !== locker_prod_id)
+    this.collectionItems.collection_products = lockerItems;
+    console.log(this.collectionItems.collection_products)
     this.$store.commit('DELETE_SELECTED_COLLECTION_PRODUCT',locker_prod_id)
     if(this.collectionItems.collection_products.length < 1){
       this.hideCollectionModal()
@@ -139,6 +150,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     formData.name = collectionItems.name;
     formData.link = collectionItems.link
     let products = [];
+
     collectionItems.collection_products.forEach(function (item,index) {
         products.push({
           "product_nickname":item.product_nickname,
@@ -151,7 +163,8 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     if(collectionItems.id == ""){
        res = await this.$store.dispatch('createNewCollection',formData);
     }else{
-       res = await this.$store.dispatch('updateNewCollection',formData,collectionItems.id);
+       formData.collection_id = collectionItems.id;
+       res = await this.$store.dispatch('updateNewCollection',formData);
     }
     if(res.status){
       this.showToast(res.message,'SUCCESS')
