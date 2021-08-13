@@ -31,6 +31,7 @@ const ProductAttributes:Module<any, any> = {
     editDesignId: 0,
     editStyleId: 0,
     selectedCollectionProducts: {locker_products:[],collection_id:0},
+    collections: [],
     designCollections: [],
     editProduct:{
       editProductId: 0,
@@ -292,6 +293,10 @@ const ProductAttributes:Module<any, any> = {
     ACTION_BEFORE_LOGIN(state: Record<any, any>, action: string){
       state.actionBeforeLogin = action
     },
+    SET_COLLECTIONS (state: Record<any, any>, collections: Record<any, any>) {
+        state.collections = collections
+
+    },
     RESET_STORE(state: Record<any, any>){
       state.customLogos = [];
       state.customTexts.map((item:Record<any, any>) => item.text = '' );
@@ -395,7 +400,10 @@ const ProductAttributes:Module<any, any> = {
       const collections = JSON.parse(JSON.stringify(state.designCollections));
       collections.push(payload);
       state.designCollections = collections;
-    }
+    },
+    DELETE_COLLECTION(state:Record<any, any>, payload){
+      state.collections.splice(payload.index, 1);
+    },
   },
   getters: {
     getEditMainProductId: state => {
@@ -477,6 +485,9 @@ const ProductAttributes:Module<any, any> = {
     getSelectedCollectionParams(state:Record<any, any>){
       return state.selectedCollectionProducts
     },
+    getCollections(state:Record<any, any>){
+      return state.collections
+    },
     getDesignCollections(state:Record<any, any>){
       return state.designCollections
     }
@@ -508,8 +519,16 @@ const ProductAttributes:Module<any, any> = {
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
     },
+
     deleteCustomLogoTab({commit}, payload){
       commit('customLogoTabDelete', payload)
+    },
+
+
+    async deleteCollection({commit}, payload){
+      const resp = await http.delete("collection/"+payload.id);
+      commit('DELETE_COLLECTION', payload);
+      return resp
     },
 
     setLogoTab({commit}, payload){
@@ -595,6 +614,11 @@ const ProductAttributes:Module<any, any> = {
     async getLockerRoomColors({commit}){
       await http.get('folder/colors').then(async (res) =>{
        await commit('ADD_LOCKER_ROOM_COLORS', res.data)
+      })
+    },
+    async getCollections({commit}){
+      await http.get('collection').then(async (res) =>{
+        await commit('SET_COLLECTIONS', res.data)
       })
     },
     resetStore({commit}){

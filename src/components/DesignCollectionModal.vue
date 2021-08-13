@@ -1,5 +1,8 @@
 <template>
-  <b-modal ref="collection-modal" hide-footer id="modal-center-collection" scrollable size="xl" content-class="collection-modal">
+
+  <span>
+  <b-modal ref="collection-modal" id="modal-center-collection" size="xl" content-class="collection-modal">
+
     <template #modal-title>
       <div class="d-flex align-items-center justify-content-between w-100">
         <div>
@@ -27,8 +30,7 @@
                     <div>
                       <b-form-input class="w-100" v-model="collectionItem.product_nickname" placeholder="Product Nick Name"></b-form-input>
                     </div>
-
-                    <div>
+                  <div>
                       <b-button class="dragHandle border-0">Drag</b-button>
                     </div>
                   </div>
@@ -58,16 +60,21 @@
     </template>
 
 
-<!--    <template #modal-footer>
+   <template #modal-footer>
       <div class="d-flex align-items-center justify-content-end w-100 gap-1">
-        <b-button variant="secondary" class="light">Cancel</b-button>
-        <b-button variant="secondary">Save</b-button>
+        <b-button @click="hideCollectionModal" variant="secondary" class="light">Cancel</b-button>
+        <b-button variant="secondary"  @click="saveCollectionForm">Save</b-button>
+        <b-button variant="secondary" @click="generateCollectionPdf">Download PDF</b-button>
       </div>
-    </template>-->
+    </template>
   </b-modal>
+    <DesignCollectionPdfView/>
+  </span>
+
 </template>
 
 <script lang="ts">
+
 
 import {Component, Mixins} from 'vue-property-decorator'
 import DesignCollection from "@/components/DesignCollection.vue";
@@ -75,25 +82,24 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import Scene from "@/components/Scene.vue"
 import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import draggable from "vuedraggable";
 
 @Component({
   components: {
-    // eslint-disable-next-line no-undef
     Scene,
     DesignCollection,
     LockerRoomProducts,
     CreateLockerRoomModal,
+    DesignCollectionPdfView,
     draggable
   }
 })
 
 export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
-  private addCollection = false
 
   private collectionItems = {id:"",name:"",link:"",collection_products:[]}
-
   public ref = this.$refs as Record<any, any>
 
   public async retrievCollectionItems(){
@@ -150,6 +156,29 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     {
       this.showErrorArr(res.message)
     }
+  }
+
+  public generateCollectionPdf() {
+    let self = this;
+    const element = document.getElementById("collectionPdfContainer")
+    const opt = {
+      margin: [15, 10, 15, 10],
+      filename: 'production.pdf',
+      image: {type: "jpeg", quality: 1},
+      html2canvas: {
+        dpi: 192,
+        scale: 4,
+        useCORS: true,
+        letterRendering: true,
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "letter",
+        orientation: 'landscape'
+      }
+    };
+    html2pdf().set(opt).from(element).save();
+    console.log("hey pdf downloaded")
   }
 
 }

@@ -13,7 +13,7 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs">
                 <b-tab title="Products">
-                  <div class="products-holder d-lg-flex flex-lg-wrap mb-4">
+                  <draggable class="products-holder d-lg-flex flex-lg-wrap mb-4" :options="{animation: 250}">
                     <template v-for="(product, ind) in room.product">
                       <div :key="ind" class="products-block">
                         <div class="image-holder">
@@ -54,10 +54,13 @@
                         </div>
                       </div>
                     </template>
-                  </div>
+
                   <div class="text-right">
                     <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
                   </div>
+
+                  </draggable>
+
                 </b-tab>
                 <b-tab title="Assets" class="assets-file">
                   <template v-for="(logo, inda) in room.logos">
@@ -94,6 +97,35 @@
                     </div>
                   </div>
                 </b-tab>
+                <b-tab v-if="getCollections.length > 0" title="Collections">
+
+                  <div class="products-holder d-lg-flex flex-lg-wrap mb-4">
+                    <template v-for="(collection, index) in getCollections">
+                      <div :key="index" class="products-block">
+                        <div class="image-holder">
+
+                          <a :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
+<!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
+                            <Scene :measurement-ratio="collection_product.product_locker_room.design.measurement_ratio"
+                                   :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: storageUrl+collection_product.product_locker_room.style.front.file_url}"
+                                   :backTextureUrl="collection_product.product_locker_room.design.back_design? collection_product.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collection_product.product_locker_room.defaultcolors)"
+                                   :lockerGroupColors="JSON.parse(collection_product.product_locker_room.groupcolors)" :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :productNamesSetting="collection_product.product_locker_room.productnames" :canvasSelection="false"  />
+                          </a>
+                          <a @click="deleteCollection(collection.id,index)" class="remove btn" style="display: inline-block !important; width: 30px !important;">
+                            <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                          </a>
+                          <a @click="editProduct(1, 0)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                        </div>
+                        <div class="d-none d-lg-block product-description text-center">
+                          <p>{{ collection.name }}</p>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                  <div class="text-right">
+                    <b-button variant="secondary">Add selected designs to a new collection</b-button>
+                  </div>
+                </b-tab>
               </b-tabs>
             </b-card>
           </div>
@@ -112,13 +144,18 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     import ErrorMessages from "@/mixins/ErrorMessages";
-    import Scene from "@/components/Scene.vue"
+    import Scene from "@/components/Scene.vue";
+    import draggable from "vuedraggable";
 
 @Component<LockerRoom>({
   components: {
     LockerRoomProducts,
     Scene,
-    CreateLockerRoomModal
+    CreateLockerRoomModal,
+    draggable
+  },
+  mounted() {
+    this.setCollections()
   }
 })
 export default class LockerRoom extends Mixins(ErrorMessages) {
@@ -129,11 +166,21 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public tabIndex = 0
   public url = ''
 
-  @Prop(Boolean) addCollection!: boolean;
+
+  public async setCollections() {
+    await this.$store.dispatch('getCollections')
+  }
+
+
 
   get getLockerProducts():Record<any, any>{
-    return this.$store.getters.getLockerProducts;
+    return this.$store.getters.getLockerProducts
   }
+  get getCollections():Record<any, any>{
+    return this.$store.getters.getCollections
+  }
+
+
 
   public addDesignCollection = () => {
     this.$emit('hideLockerRoomModal');
@@ -220,6 +267,15 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
   public async deleteProduct(i:number, ind:number, id:number){
     await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+  }
+  public async deleteCollection(id:number,index:number){
+    try{
+       let res = await this.$store.dispatch('deleteCollection', {id: id, index: index});
+      this.showToast(res.data.message, 'SUCCESS');
+    }
+    catch (e) {
+      this.showError(e);
+    }
   }
   public async deleteRoom(id:number, index:number){
     if (confirm('You are going to delete associated product')) {

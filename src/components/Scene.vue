@@ -142,6 +142,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: 600}) readonly canvasHeight!: number;
   @Prop({required: false, default: false}) readonly mainPreview!: boolean;
   @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
+  @Prop({required: false, default: 'customized'}) readonly productType!: string;
   @Prop({required: false}) readonly colorGrouping!: Record<any, any>;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
@@ -364,7 +365,7 @@ export default class Scene extends Vue {
     deep: true
   })
   defaultColorsChanged(newVal: [Record<any, any>]) {
-    if(this.mounted) {
+    if(this.productType == 'customized' && this.mounted) {
       let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
       if(defaultColors.length) {
         this.changeDefaultColors(defaultColors)
@@ -378,7 +379,7 @@ export default class Scene extends Vue {
     deep: true, immediate: false
   })
   groupColorsChanged(newVal: Record<any, any>) {
-    if(this.mounted) {
+    if(this.productType == 'customized' && this.mounted) {
       this.changeGroupColor(newVal)
     }
   }
@@ -701,13 +702,13 @@ export default class Scene extends Vue {
       this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
-    if(this.lockerDefaultColors.length) {
+    if(this.productType == 'customized' && this.lockerDefaultColors.length) {
       let lockerDefaultColors = this.lockerDefaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
       if(lockerDefaultColors.length) {
         this.changeDefaultColors(lockerDefaultColors)
       }
     }
-    else if(this.defaultColors.length) {
+    else if(this.productType == 'customized' && this.defaultColors.length) {
       let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
       if(defaultColors.length) {
         this.changeDefaultColors(defaultColors)
@@ -715,10 +716,14 @@ export default class Scene extends Vue {
     }
 
     if(Object.keys(this.lockerGroupColors).length) {
-      this.changeGroupColor(this.lockerGroupColors)
+      if(this.productType == 'customized') {
+        this.changeGroupColor(this.lockerGroupColors)
+      }
     }
     else if(Object.keys(this.groupColors).length && !this.lockerDefaultColors.length) {
-      this.changeGroupColor(this.groupColors)
+      if(this.productType == 'customized') {
+        this.changeGroupColor(this.groupColors)
+      }
     }
   }
 
@@ -747,54 +752,60 @@ export default class Scene extends Vue {
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
     let model: any
-    fabric.Image.fromURL(ImageData.modelUrl, (img: any) => {
-      img.scaleToHeight(canvas.getHeight() - 10).set({
-        hasControls: false,
-        selectable: false,
-        evented: false,
-        globalCompositeOperation: 'multiply'
-        // globalCompositeOperation: 'overlay'
-      })
-      img.center().setCoords()
-      model = img
-      if (side == 'back') {
-        self.backModel = img
-      } else {
-        self.frontModel = img
-      }
-    }, { crossOrigin: 'Anonymous'})
+    if(this.productType == 'customized') {
+      fabric.Image.fromURL(ImageData.modelUrl, (img: any) => {
+        img.scaleToHeight(canvas.getHeight() - 10).set({
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          globalCompositeOperation: 'multiply'
+          // globalCompositeOperation: 'overlay'
+        })
+        img.center().setCoords()
+        model = img
+        if (side == 'back') {
+          this.backModel = img
+        } else {
+          this.frontModel = img
+        }
+      }, { crossOrigin: 'Anonymous' })
+    } else {
+      model = true
+    }
 
     this.addTexture(ImageData.textureUrl, side)
 
-    if(this.backTextureUrl) {
+    if(this.backTextureUrl && side == 'front') {
       this.addTexture(this.storageUrl + this.backTextureUrl, 'back')
     }
 
     const self = this
 
     const timer = setInterval(() => {
-      let texture = self.frontTexture
+      let texture = this.frontTexture
       if (side == 'back') {
-        texture = self.backTexture
+        texture = this.backTexture
       }
-      if (model && texture && (!self.backTextureUrl || (self.backTextureUrl && self.backTexture))) {
-        if (!self.back || (self.back && side == 'back')) {
-          self.getSvgGroups()
+      if (model && texture && (!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
+        if (this.productType == 'customized' && (!this.back || (this.back && side == 'back'))) {
+          this.getSvgGroups()
         }
         canvas.add(texture)
         canvas.viewportCenterObject(texture)
-        self.logoObjects.forEach((logoObject) => {
+        this.logoObjects.forEach((logoObject) => {
           canvas.add(logoObject)
         })
-        self.customLogoObjects.forEach((logoObject) => {
+        this.customLogoObjects.forEach((logoObject) => {
           canvas.add(logoObject)
         })
-        self.customTextObjects.forEach((textObject) => {
+        this.customTextObjects.forEach((textObject) => {
           canvas.add(textObject)
         })
 
-        canvas.add(model)
-        canvas.viewportCenterObject(model)
+        if(this.productType == 'customized') {
+          canvas.add(model)
+          canvas.viewportCenterObject(model)
+        }
         if (side == 'back') {
           canvas.add(self.dimTextBack)
         } else {
@@ -882,15 +893,15 @@ export default class Scene extends Vue {
         clearInterval(timer)
       }
     }, 1000)
-    canvas.on('object:modified', (e) => {
+    canvas.on('object:modified', (e: Record<any, any>) => {
       self.objectMove(e, side)
       self.addToOtherSide(e.target, side)
     })
-    canvas.on('object:moving', (e) => {
+    canvas.on('object:moving', (e: Record<any, any>) => {
       self.objectScaling(e, side)
     });
 
-    canvas.on('object:scaling', (e) => {
+    canvas.on('object:scaling', (e: Record<any, any>) => {
       let dimText = this.dimTextFront
       if (e.target.side == 'back') {
         dimText = this.dimTextBack
@@ -900,15 +911,15 @@ export default class Scene extends Vue {
 
   }
 
-  public objectScaling(e: any, side: string) {
-    let model = this.frontModel
+  public objectScaling(e: Record<any, any>, side: string) {
+    let texture = this.frontTexture
     let canvas = this.frontCanvas
     if(side == 'back') {
-      model = this.backModel
+      texture = this.backTexture
       canvas = this.backCanvas
     }
 
-    const modelBoundingRect = model.getBoundingRect()
+    const modelBoundingRect = texture.getBoundingRect()
     let boundingRect = {
       left: modelBoundingRect.left,
       right: modelBoundingRect.left + modelBoundingRect.width,
@@ -930,7 +941,7 @@ export default class Scene extends Vue {
     }
 
     let centerPoint = e.target.getCenterPoint()
-    if(canvas.isTargetTransparent(model, centerPoint.x, centerPoint.y)) {
+    if(canvas.isTargetTransparent(texture, centerPoint.x, centerPoint.y)) {
       const boundingDistance = {
         left: Math.abs(boundingRect.left - centerPoint.x),
         right: Math.abs(boundingRect.right - centerPoint.x)
@@ -943,7 +954,7 @@ export default class Scene extends Vue {
         }
       })
 
-      let direction = this.targetNonTransparent(canvas, model, e.target.left, e.target.top, moveTo)
+      let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, moveTo)
 
       e.target.left = direction.left
     }
@@ -1046,11 +1057,15 @@ export default class Scene extends Vue {
           otherSideObjects[addIndex] = objectAdd
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)
-            this.frontModel.bringToFront()
+            if(this.productType == 'customized') {
+              this.frontModel.bringToFront()
+            }
           } else {
             if(this.back) {
               this.backCanvas.add(objectAdd)
-              this.backModel.bringToFront()
+              if(this.productType == 'customized') {
+                this.backModel.bringToFront()
+              }
             }
           }
         }
@@ -1330,8 +1345,9 @@ export default class Scene extends Vue {
               side: logo.side
             })
             canvas.add(img)
-           // console.log('img',img);
-            model.bringToFront()
+            if(this.productType == 'customized') {
+              model.bringToFront()
+            }
             canvas.renderAll()
 
             this.addToOtherSide(img, logo.side)
@@ -1450,7 +1466,9 @@ export default class Scene extends Vue {
         })
         self.customTextObjects[textIndex as number] = textBox
         canvas.add(textBox)
-        model.bringToFront()
+        if(this.productType == 'customized') {
+          model.bringToFront()
+        }
         canvas.renderAll()
 
         this.addToOtherSide(textBox, text.side)
