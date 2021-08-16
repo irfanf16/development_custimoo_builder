@@ -52,7 +52,7 @@
                   </div>
 
                   <div class="mt-3">
-                    {{collectionItem.product_locker_room.product_name}}
+                    <span v-html="collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.product_model_description : ''"></span>
                   </div>
 
                   <div class="mt-3">
