@@ -79,6 +79,10 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       get groupColors() : [Record<any, any>] {
         return this.$store.getters.getGroupColors
       }
+
+      get productModels(): Record<any, any> {
+        return this.$store.getters.getProductModels;
+      }
       public showButton(id:number, index:number){
         this.locker_selected = false;
         this.room_id = id;
@@ -92,6 +96,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
         }
       }
       public async saveToLocker(){
+        const modelIndex = this.$store.getters.getSelectedModelIndex
         if (this.isCustomerAuthenticated) {
           const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
             return item.design_show
@@ -103,6 +108,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
           let locker = {
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
+            model_id: this.productModels[modelIndex].id,
             product_name: this.product_name,
             style_id: this.selectedProduct.productstyles[this.styleIndex].id,
             design_id: currentDesign[0].id,
