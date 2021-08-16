@@ -36,7 +36,7 @@
       return this.$store.getters.getSelectedProduct
     }
     get styleIndex():number{
-      return  this.$store.getters.getCurrentStyleIndex;
+      return  this.$store.getters.getCurrentStyleIndex
     }
   }
 </script>

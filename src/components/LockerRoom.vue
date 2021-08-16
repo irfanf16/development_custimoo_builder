@@ -13,7 +13,7 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs">
                 <b-tab title="Products">
-                  <draggable class="products-holder d-lg-flex flex-lg-wrap mb-4" :options="{animation: 250}">
+                  <draggable class="products-holder d-lg-flex flex-lg-wrap mb-4" :options="{animation: 250, handle: '.change_sort'}">
                     <template v-for="(product, ind) in room.product">
                       <div :key="ind" class="products-block">
                         <div class="image-holder">
@@ -46,6 +46,9 @@
                             </li>
                             <li class="d-none d-lg-block">
                               <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            </li>
+                            <li class="">
+                              <a class="change_sort"><b-icon icon="arrows-move"></b-icon></a>
                             </li>
                           </ul>
                         </div>
