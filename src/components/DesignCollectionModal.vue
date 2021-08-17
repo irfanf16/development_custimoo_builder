@@ -108,7 +108,6 @@ import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
 import { getRandom } from "../helpers/Helpers";
 
-import html2pdf from "html2pdf.js"
 
 
 @Component({
