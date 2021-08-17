@@ -35,9 +35,10 @@ export default class LockerRoomModal extends Vue {
     this.$emit('showCollectionModal')
   }
 
-  public editCollectionModal = (collection_id:number) => {
-   this.$emit('editCollectionModal',collection_id)
+  public editCollectionModal = () => {
+     this.$emit('editCollectionModal')
   }
+
 
   public hideLockerRoomModal () {
     this.ref['locker-modal'].hide()

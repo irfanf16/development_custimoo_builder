@@ -5,7 +5,7 @@
                 <label for="inline-form-input-productname" class="w-100 d-block mb-2">Name</label>
                 <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
                     <b-input-group>
-                      <b-form-select v-model="collection_id"  :options="collections" ></b-form-select>
+                      <b-form-select v-model="collection_id"  :options="getCollections" ></b-form-select>
                     </b-input-group>
                     <b-button variant="primary" @click="addExisting">Add</b-button>
                 </div>
@@ -19,37 +19,33 @@
 import {Component, Mixins, Vue} from 'vue-property-decorator'
     import ErrorMessages from "@/mixins/ErrorMessages";
 
-   @Component<ExistingCollectionModal>({
-     async mounted(){
-
-       let collect = await this.$store.getters.getCollections;
-       let optionArray = [];
-
-       if(collect.length > 0){
-         optionArray.push({ value: null, text: 'Please select an option' })
-         collect.forEach((item:any) => {
-           optionArray.push({ value: item.id, text: item.name })
-         })
-       }
-
-        this.collections = optionArray;
-     }
-   })
-
-
+   @Component
     export default class ExistingCollectionModal extends Mixins(ErrorMessages) {
       public collections = []
       public collection_id = null;
       public ref = this.$refs as Record<any, any>
 
+      get getCollections(){
+        let collections =  this.$store.getters.getCollections;
+        let optionArray = [];
+
+        if(collections.length > 0){
+          optionArray.push({ value: null, text: 'Please select an option' })
+          collections.forEach((item:any) => {
+            optionArray.push({ value: item.id, text: item.name })
+          })
+        }
+        return optionArray;
+      }
 
       public async addExisting(){
-        if(this.collection_id === null){
+        if(!this.collection_id){
           this.showToast("Please select a collection",'error')
         }else{
           const payload = {"attribute":"collection_id","value":this.collection_id}
           this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
           this.ref['existing-collection-modal'].hide();
+          this.$emit('existingCollection')
         }
 
       }
