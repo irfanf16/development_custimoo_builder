@@ -92,6 +92,7 @@ import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
+import {http} from "@/httpCommon";
 
 @Component({
   components: {
@@ -105,6 +106,11 @@ import html2pdf from "html2pdf.js"
 })
 
 export default class DesignCollectionModal extends Mixins(ErrorMessages) {
+  mounted(){
+    this.$root.$on('callPdfAction', (id:number) =>{
+      this.generateCollectionPdf(id)
+    })
+  }
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public collectionData : any[] = []
   private collectionItems = {id:"",name:"",link:"",collection_products:[]}
@@ -179,10 +185,9 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     }
   }
 
-  public async generateCollectionPdf() {
-    let res = await this.$store.dispatch('getCollection')
-    let self = this;
-    self.collectionData = res
+  public async generateCollectionPdf(id:any) {
+    let res = await this.$store.dispatch('getCollection', id)
+    this.collectionData = res
     setTimeout(()=>{
       const element = document.getElementById("collectionPdfContainer")
       const opt = {
@@ -201,7 +206,16 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
           orientation: 'landscape'
         }
       };
-      html2pdf().set(opt).from(element).save();
+      html2pdf().set(opt).from(element).output('datauristring').then((pdf:any)=>{
+        let arr = pdf.split(',');
+        pdf = arr[1];
+        let data = new FormData();
+        data.append("data" , pdf);
+        data.append('id' , id);
+        http.post('savepdf', data).then(res => {
+         console.log(res)
+       })
+      });
     }, 3000)
   }
 

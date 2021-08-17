@@ -708,8 +708,8 @@ const ProductAttributes:Module<any, any> = {
       return resp;
 
     },
-    async getCollection({commit}){
-      return await  http.post('collection-data', {collection_id: 1}).then((res) =>{
+    async getCollection({commit}, payload){
+      return await  http.post('collection-data', {collection_id: payload}).then((res) =>{
         return res.data
       })
     }
