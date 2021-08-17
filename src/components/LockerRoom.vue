@@ -263,8 +263,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
           data.append("data" , pdf);
           data.append('id' , collection.id);
           http.post('savepdf', data).then(res => {
-            console.log(res)
-            // Vue.set(this.collectionData[index], 'link', res.link)
+            Vue.set(this.getCollections[index], 'link', res.data.link)
           })
         });
       }, 3000)
