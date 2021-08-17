@@ -136,9 +136,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     this.retrievCollectionItems();
   }
 
-  public editCollectionModal(collection_id: number) {
-    const payload = {"attribute": "collection_id", "value": collection_id}
-    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
+  public editCollectionModal() {
     this.ref['collection-modal'].show();
     this.retrievCollectionItems();
   }

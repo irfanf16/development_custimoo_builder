@@ -659,14 +659,9 @@ const ProductAttributes:Module<any, any> = {
       })
     },
     async getCollectionItems({getters}){
-      let payload ;
-      const selectedData = getters.getSelectedCollectionParams;
 
-      if(selectedData.collection_id > 0){
-        payload = {collection_id:selectedData.collection_id}
-      }else{
-        payload = {collection_prd_ids:selectedData.locker_products}
-      }
+      const selectedData = getters.getSelectedCollectionParams;
+      const payload  = {collection_id:selectedData.collection_id, collection_prd_ids:selectedData.locker_products}
 
       const res =  await http.post('collection-data', payload).then((res) =>{
         return res.data;
