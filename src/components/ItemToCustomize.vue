@@ -4,11 +4,9 @@
 <!--    <div class="customization-nav-area px-3 px-lg-0">-->
 <!--      <Search :categoryListing="categories" @search="searchProduct"/>-->
 <!--    </div>-->
-    <div class="collection-btn mb-2">
-      <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized">Customized</b-form-checkbox>
-      <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized">Personalized</b-form-checkbox>
-
-
+    <div class="collection-btn mb-2 checkbox_buttons">
+      <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>
+      <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Personalized</b-form-checkbox>
     </div>
     <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>

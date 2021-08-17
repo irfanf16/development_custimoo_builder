@@ -2,18 +2,18 @@
     <div class="preview-section p-3 d-flex flex-wrap justify-content-center align-items-center" v-if="selectedProduct">
       <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
         <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
-          <Scene v-if="selectedProduct.productstyles[styleIndex].back" :measurement-ratio="design.measurement_ratio"
-                 :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].front.file_url}"
-                 :back="{textureUrl: storageUrl+design.back_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].back.file_url}"
+          <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio"
+                 :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
+                 :back="{textureUrl: storageUrl+design.back_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" />
+                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type" />
 
           <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio"
-                 :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: storageUrl+selectedProduct.productstyles[styleIndex].front.file_url}"
+                 :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" />
+                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type" />
         </div>
       </template>
     </div>
@@ -36,7 +36,7 @@
       return this.$store.getters.getSelectedProduct
     }
     get styleIndex():number{
-      return  this.$store.getters.getCurrentStyleIndex;
+      return  this.$store.getters.getCurrentStyleIndex
     }
   }
 </script>

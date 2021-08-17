@@ -5,11 +5,11 @@
         <template v-for="design in product.productstyles[0].productdesigns">
           <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
             <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
-              :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: product.productstyles[0].front ? storageUrl+product.productstyles[0].front.file_url : ''}"
+              :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_url : ''}"
                    :backTextureUrl="design.back_design? design.back_design.file_url: ''"
                    :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
                    :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
-                   :colorGrouping="JSON.parse(design.front_design.color_group)"/>
+                   :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type"/>
           </div>
         </template>
         <h3 class="text-center">{{ product.display_name }}</h3>
@@ -36,7 +36,6 @@ export default {
   },
   computed: {
     products: function() {
-      console.log('yoooo')
       return this.$store.getters.getProducts
     }
   },
