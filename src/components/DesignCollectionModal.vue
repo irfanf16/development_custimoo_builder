@@ -10,8 +10,10 @@
         </div>
 
         <div>
-          <b-button @click="saveCollectionForm">Save</b-button>
+           <b-button @click="saveCollectionForm">Save</b-button>
+          <b-button @click="openLockerModel">Back to Locker</b-button>
         </div>
+
       </div>
     </template>
 
@@ -177,6 +179,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     {
       this.showErrorArr(res.message)
     }
+  }
+
+  public openLockerModel() {
+   this.$emit('showLockerRoomModal');
   }
 
   public async generateCollectionPdf() {

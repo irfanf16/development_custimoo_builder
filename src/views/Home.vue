@@ -44,7 +44,7 @@
                     <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                   </template>
                   <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
-                  <DesignCollectionModal ref="collectionModal"  />
+                  <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'savetolocker'" variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
                   </template>
@@ -435,6 +435,9 @@ export default class Home extends Vue {
     } else {
       this.buyNow()
     }
+  }
+  showLockerRoomModal() {
+    this.ref['lockerModal'].showLockerRoomModal()
   }
   getFillColors() {
     const url = '/product/colors?default_color=1'
