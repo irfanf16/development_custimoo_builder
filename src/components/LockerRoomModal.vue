@@ -1,13 +1,17 @@
 <template>
-    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" title="Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room" content-class="lockerroom-modal">
       <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
                   @showCollectionModal="showCollectionModal"
                   @editCollectionModal="editCollectionModal"
       ></LockerRoom>
 
       <template #modal-footer>
-        <div class="text-right border-top">
+        <div v-if="!getAddMoreCollectionStatus" class="text-right border-top">
+          <b-button v-if="selectedCollectionProducts.length>0"  v-b-modal.modal-center-existingCollection variant="outline-primary" style="margin-right: 5px">Add selected designs to Existing collection</b-button>
           <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
+        </div>
+        <div v-else class="text-right border-top">
+          <b-button v-if="selectedCollectionProducts.length>0" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
         </div>
       </template>
     </b-modal>
@@ -34,9 +38,16 @@ export default class LockerRoomModal extends Vue {
     this.$emit('showCollectionModal')
   }
 
-  public editCollectionModal = (collection_id:number) => {
-   this.$emit('editCollectionModal',collection_id)
+  public editCollectionModal = () => {
+     this.$emit('editCollectionModal')
   }
+
+  public addMoreCollectionModal = () => {
+    this.$emit('editCollectionModal')
+    this.ref['locker-modal'].hide()
+    this.$store.commit('SET_ADD_MORE_COLLECTION',false)
+  }
+
 
   public hideLockerRoomModal () {
     this.ref['locker-modal'].hide()
@@ -51,6 +62,9 @@ export default class LockerRoomModal extends Vue {
   }
   get selectedCollectionProducts(){
     return this.$store.getters.getSelectedCollectionProducts;
+  }
+  get getAddMoreCollectionStatus(){
+    return this.$store.getters.getAddMoreCollectionStatus;
   }
 }
 </script>
