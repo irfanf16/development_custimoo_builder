@@ -200,41 +200,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     this.hideCollectionModal()
   }
 
-  public async generateCollectionPdf() {
-    let res = await this.$store.dispatch('getCollection')
-    let self = this;
-    self.collectionData = res
-    setTimeout(() => {
-      const element = document.getElementById("collectionPdfContainer")
-      const opt = {
-        margin: [15, 10, 15, 10],
-        filename: 'production.pdf',
-        image: {type: "jpeg", quality: 1},
-        html2canvas: {
-          dpi: 192,
-          scale: 4,
-          useCORS: true,
-          letterRendering: true,
-        },
-        jsPDF: {
-          unit: "mm",
-          format: "letter",
-          orientation: 'landscape'
-        }
-      };
-      html2pdf().set(opt).from(element).output('datauristring').then((pdf:any)=>{
-        let arr = pdf.split(',');
-        pdf = arr[1];
-        let data = new FormData();
-        data.append("data" , pdf);
-        data.append('id' , id);
-        http.post('savepdf', data).then(res => {
-         console.log(res)
-       })
-      });
-    }, 3000)
-  }
-
   public collectionItemMoved(moved_item_metadata: Record<string, any>) {
     let item = moved_item_metadata.moved;
     let new_index = item.newIndex;

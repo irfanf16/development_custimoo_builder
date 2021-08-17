@@ -261,7 +261,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
           pdf = arr[1];
           let data = new FormData();
           data.append("data" , pdf);
-          data.append('id' , id);
+          data.append('id' , collection.id);
           http.post('savepdf', data).then(res => {
             console.log(res)
             // Vue.set(this.collectionData[index], 'link', res.link)
