@@ -54,7 +54,7 @@
                    :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150"
                    :canvasWidth="150"
                    :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
-                   :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"/>
+                   :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
 
             <Scene v-else :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
                    :key="collectionItem.key"
@@ -64,7 +64,7 @@
                    :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150"
                    :canvasWidth="150"
                    :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
-                   :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"/>
+                   :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
           </div>
 
           <div class="mt-3">
