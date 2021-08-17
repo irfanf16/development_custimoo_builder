@@ -46,11 +46,11 @@
           </div>
           <div id="main">
             <div class="image-holder" id="both-svg" style="text-align: center;">
-              <Scene v-if="product.product_locker_room.design.back_design" :measurement-ratio="product.product_locker_room.design.measurement_ratio"
+              <Scene v-if="product.product_locker_room.design.back_design" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type"
                      :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
                      :back="{textureUrl: product.product_locker_room.design.back_design ? storageUrl+product.product_locker_room.design.back_design.file_url: '', modelUrl: product.product_locker_room.style.back ? storageUrl+product.product_locker_room.style.back.file_url : ''}"
                      :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))" :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false"  :canvasWidth="400" :canvasHeight="400"/>
-              <Scene  v-else class="view-back" :measurement-ratio="product.product_locker_room.design.measurement_ratio"
+              <Scene  v-else class="view-back" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type"
                       :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
                       :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)"
                       :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :canvasWidth="400" :canvasHeight="400" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))" :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false"  />

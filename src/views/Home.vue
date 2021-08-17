@@ -554,6 +554,7 @@ export default class Home extends Vue {
         this.$store.dispatch('setSelectedProductAndStyle')
         this.$store.dispatch('setSelectedProductDesign')
         this.$store.dispatch('setColorSectionVisibility')
+        this.$store.dispatch("getModels", this.selectedProduct.product_id);
         let windowView = this.$store.getters.getWindowView;
         if(windowView == 2){
           this.showAdvanceCustomization();
