@@ -3,7 +3,7 @@
     <div id="collectionPdfContainer">
       <div id="wrapper">
         <h1 class="fs-5 pb-1 text-center text-secondary">Collection Name Goes Here</h1>
-        <template v-if="Object.keys(collectionData).length && collectionData.collection_products.length">
+        <template v-if="collectionData && collectionData.collection_products.length > 0">
         <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1 break-after">
           <div id="header">
             <div class="header-content">Product Nick Name Goes Here</div>

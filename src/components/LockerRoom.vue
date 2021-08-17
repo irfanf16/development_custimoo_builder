@@ -119,7 +119,7 @@
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
                                   <b-form inline>
-                                    <b-form-input  :id="'copy-'+index" :value="collection.link !== ''  ?  storageUrl + collection.link  : ''"
+                                    <b-form-input  :class="'copylink_'+index" :value="collection.link !== ''  ?  storageUrl + collection.link  : ''"
                                     ></b-form-input>
                                     <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
                                   </b-form>
@@ -319,7 +319,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }
   }
   public copyCollectionLink(ind:number){
-    let testingCodeToCopy = document.querySelector('copy_collection_'+ind)  as Record<any, any>
+    let testingCodeToCopy = document.querySelector('copylink_'+ind)  as Record<any, any>
     console.log(testingCodeToCopy)
     testingCodeToCopy.select()
     try {
