@@ -21,7 +21,7 @@
       <div class="design-collection-form">
         <b-form inline>
           <b-container fluid>
-            <draggable class="row gap-y-5" :options="{handle: '.dragHandle', animation: 250}"
+            <draggable class="row draggable gap-y-5" :options="{animation: 250, delayOnTouchOnly: 250}"
                        v-model='collectionItems.collection_products' @change="collectionItemMoved">
       <b-col cols="12" lg="6" xl="4" v-for="(collectionItem, index) in collectionItems.collection_products"
              :key="index">
@@ -30,22 +30,22 @@
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
           <div class="text-center fs-2 fw-bold">{{ collectionItem.product_locker_room.product_name }}</div>
-          <div class="mt-2 d-flex gap-1">
+          <div class="mt-2 d-block gap-1">
             <div>
               <b-form-input class="w-100" v-model="collectionItem.product_nickname"
                             placeholder="Product Nick Name"></b-form-input>
             </div>
-            <div>
-              <b-button class="dragHandle border-0">
-                <b-icon icon="arrows-move"></b-icon>
-              </b-button>
-            </div>
+<!--            <div>-->
+<!--              <b-button class="dragHandle border-0">-->
+<!--                <b-icon icon="arrows-move"></b-icon>-->
+<!--              </b-button>-->
+<!--            </div>-->
           </div>
 
           <div class="mt-3">
 
             <Scene v-if="collectionItem.product_locker_room.design.back_design"
-                   :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio"
+                   :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
                    :key="collectionItem.key"
                    :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: collectionItem.product_locker_room.style.front? storageUrl+collectionItem.product_locker_room.style.front.file_url : ''}"
                    :back="{textureUrl: storageUrl+collectionItem.product_locker_room.design.back_design.file_url, modelUrl: collectionItem.product_locker_room.style.back? storageUrl+collectionItem.product_locker_room.style.back.file_url: ''}"
@@ -56,7 +56,7 @@
                    :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
                    :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"/>
 
-            <Scene v-else :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio"
+            <Scene v-else :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
                    :key="collectionItem.key"
                    :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: collectionItem.product_locker_room.style? storageUrl+collectionItem.product_locker_room.style.front.file_url : ''}"
                    :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''"
@@ -122,6 +122,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public collectionData: any[] = []
   private collectionItems = {id: "", name: "", link: "", collection_products: []}
   public ref = this.$refs as Record<any, any>
+  // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   public async retrievCollectionItems() {
     let res = await this.$store.dispatch('getCollectionItems')

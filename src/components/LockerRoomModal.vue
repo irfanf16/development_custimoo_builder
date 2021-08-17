@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" title="Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room" content-class="lockerroom-modal">
       <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
                   @showCollectionModal="showCollectionModal"
                   @editCollectionModal="editCollectionModal"

@@ -13,17 +13,17 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs">
                 <b-tab title="Products">
-                  <draggable class="products-holder d-lg-flex flex-lg-wrap mb-4" :options="{animation: 250, handle: '.change_sort'}">
+                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: 250}">
                     <template v-for="(product, ind) in room.product">
-                      <div :key="ind" class="products-block">
+                      <label :key="ind" class="products-block">
                         <div class="image-holder">
-                          <a>
+                          <div>
                             <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <Scene :measurement-ratio="product.design.measurement_ratio"
+                            <Scene :measurement-ratio="product.design.measurement_ratio" :productType="product.product_type"
                                    :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front ? storageUrl+product.style.front.file_url : ''}"
                                    :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
                                    :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />
-                          </a>
+                          </div>
                           <ul class="product-icons">
                             <li>
                               <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
@@ -47,15 +47,12 @@
                             <li class="d-none d-lg-block">
                               <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                             </li>
-                            <li class="">
-                              <a class="change_sort"><b-icon icon="arrows-move"></b-icon></a>
-                            </li>
                           </ul>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
                           <p>{{ product.product_name }}</p>
                         </div>
-                      </div>
+                      </label>
                     </template>
                   </draggable>
 
@@ -103,7 +100,7 @@
 
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
-                            <Scene :measurement-ratio="collection_product.product_locker_room.design.measurement_ratio"
+                            <Scene :measurement-ratio="collection_product.product_locker_room.design.measurement_ratio" :productType="collection_product.product_locker_room.product_type"
                                    :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: storageUrl+collection_product.product_locker_room.style.front.file_url}"
                                    :backTextureUrl="collection_product.product_locker_room.design.back_design? collection_product.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collection_product.product_locker_room.defaultcolors)"
                                    :lockerGroupColors="JSON.parse(collection_product.product_locker_room.groupcolors)" :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :productNamesSetting="collection_product.product_locker_room.productnames" :canvasSelection="false"  />
@@ -165,6 +162,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public colors : [] = []
   public tabIndex = 0
   public url = ''
+  public group = ''
 
 
   public async setCollections() {
@@ -183,6 +181,14 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public addDesignCollection = () => {
     this.$emit('hideLockerRoomModal');
     this.$emit('showCollectionModal');
+  }
+
+  get selected(){
+    return this.group;
+  }
+
+  set selected(val){
+    this.group = val;
   }
 
   get products():[Record<any, any>]{
