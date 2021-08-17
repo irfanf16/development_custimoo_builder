@@ -21,7 +21,7 @@
       <div class="design-collection-form">
         <b-form inline>
           <b-container fluid>
-            <draggable class="row draggable gap-y-5" :options="{animation: 250, delayOnTouchOnly: 250}"
+            <draggable class="row draggable gap-y-5" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}"
                        v-model='collectionItems.collection_products' @change="collectionItemMoved">
       <b-col cols="12" lg="6" xl="4" v-for="(collectionItem, index) in collectionItems.collection_products"
              :key="index">
@@ -54,7 +54,7 @@
                    :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150"
                    :canvasWidth="150"
                    :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
-                   :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"/>
+                   :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
 
             <Scene v-else :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
                    :key="collectionItem.key"
@@ -64,7 +64,7 @@
                    :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150"
                    :canvasWidth="150"
                    :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
-                   :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"/>
+                   :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
           </div>
 
           <div class="mt-3">
