@@ -10,8 +10,8 @@
         </div>
 
         <div>
-           <b-button @click="saveCollectionForm">Save</b-button>
-          <b-button @click="openLockerModel">Back to Locker</b-button>
+           <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
+          <b-button @click="openLockerModel">Add More Products</b-button>
         </div>
 
       </div>
@@ -193,6 +193,8 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
   public openLockerModel() {
    this.$emit('showLockerRoomModal');
+   this.$store.commit('SET_ADD_MORE_COLLECTION',true)
+    this.hideCollectionModal()
   }
 
   public async generateCollectionPdf() {

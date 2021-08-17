@@ -438,6 +438,7 @@ export default class Home extends Vue {
   }
   showLockerRoomModal() {
     this.ref['lockerModal'].showLockerRoomModal()
+
   }
   getFillColors() {
     const url = '/product/colors?default_color=1'
@@ -451,6 +452,7 @@ export default class Home extends Vue {
 
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$store.commit('SET_ADD_MORE_COLLECTION',false)
   }
 
   public async getLockers(){
@@ -623,6 +625,7 @@ export default class Home extends Vue {
     this.searchProducts()
   }
   public async getLockerRoomProducts(){
+    this.$store.commit('SET_ADD_MORE_COLLECTION',false)
     if(this.isCustomerAuthenticated){
       await this.$store.dispatch('GET_LOCKER_PRODUCTS');
     }
