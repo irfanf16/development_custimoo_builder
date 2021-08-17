@@ -19,22 +19,24 @@
       <div class="design-collection-form">
         <b-form inline>
           <b-container fluid>
-            <draggable class="row gap-y-5" :options="{handle: '.dragHandle', animation: 250}" v-model='collectionItems.collection_products'>
+            <div v-if="
+            isMobile">ismobile</div>
+            <draggable class="row draggable gap-y-5" :options="{animation: 250, delayOnTouchOnly: 250}" v-model='collectionItems.collection_products'>
               <b-col cols="12" lg="6" xl="4" v-for="(collectionItem, index) in collectionItems.collection_products" :key="index">
                 <b-card>
                   <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id)">
                     <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                   </a>
                   <div class="text-center fs-2 fw-bold">{{collectionItem.product_locker_room.product_name}}</div>
-                  <div class="mt-2 d-flex gap-1">
+                  <div class="mt-2 d-block gap-1">
                     <div>
                       <b-form-input class="w-100" v-model="collectionItem.product_nickname" placeholder="Product Nick Name"></b-form-input>
                     </div>
-                  <div>
-                      <b-button class="dragHandle border-0">
-                        <b-icon icon="arrows-move"></b-icon>
-                      </b-button>
-                    </div>
+<!--                  <div>-->
+<!--                      <b-button class="dragHandle border-0">-->
+<!--                        <b-icon icon="arrows-move"></b-icon>-->
+<!--                      </b-button>-->
+<!--                    </div>-->
                   </div>
 
                   <div class="mt-3">
@@ -109,6 +111,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public collectionData : any[] = []
   private collectionItems = {id:"",name:"",link:"",collection_products:[]}
   public ref = this.$refs as Record<any, any>
+  // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   public async retrievCollectionItems(){
     let res = await this.$store.dispatch('getCollectionItems')
