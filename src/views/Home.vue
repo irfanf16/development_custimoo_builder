@@ -44,7 +44,7 @@
                     <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                   </template>
                   <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
-                  <DesignCollectionModal ref="collectionModal"  />
+                  <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'savetolocker'" variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
                   </template>
@@ -436,6 +436,10 @@ export default class Home extends Vue {
       this.buyNow()
     }
   }
+  showLockerRoomModal() {
+    this.ref['lockerModal'].showLockerRoomModal()
+
+  }
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
@@ -448,6 +452,7 @@ export default class Home extends Vue {
 
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$store.commit('SET_ADD_MORE_COLLECTION',false)
   }
 
   public async getLockers(){
@@ -620,6 +625,7 @@ export default class Home extends Vue {
     this.searchProducts()
   }
   public async getLockerRoomProducts(){
+    this.$store.commit('SET_ADD_MORE_COLLECTION',false)
     if(this.isCustomerAuthenticated){
       await this.$store.dispatch('GET_LOCKER_PRODUCTS');
     }

@@ -10,8 +10,10 @@
         </div>
 
         <div>
-          <b-button @click="saveCollectionForm">Save</b-button>
+           <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
+          <b-button @click="openLockerModel">Add More Products</b-button>
         </div>
+
       </div>
     </template>
 
@@ -66,7 +68,7 @@
           </div>
 
           <div class="mt-3">
-            {{ collectionItem.product_locker_room.product_name }}
+            <span v-html="collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.product_model_description : '' "></span>
           </div>
 
           <div class="mt-3">
@@ -188,6 +190,12 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     } else {
       this.showErrorArr(res.message)
     }
+  }
+
+  public openLockerModel() {
+   this.$emit('showLockerRoomModal');
+   this.$store.commit('SET_ADD_MORE_COLLECTION',true)
+    this.hideCollectionModal()
   }
 
   public async generateCollectionPdf() {
