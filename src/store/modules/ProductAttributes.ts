@@ -9,6 +9,7 @@ const ProductAttributes:Module<any, any> = {
     categories: [],
     customLogos: [],
     defaultcustomLogos: false,
+    addMoreCollection: false,
     customTexts: [],
     styleIndex: 0,
     defaultColors: [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}],
@@ -59,6 +60,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
+    },
+    SET_ADD_MORE_COLLECTION(state: Record<any, any>, payload: boolean){
+      state.addMoreCollection = payload
     },
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
       if(payload.length) {
@@ -404,6 +408,9 @@ const ProductAttributes:Module<any, any> = {
     },
   },
   getters: {
+    getAddMoreCollectionStatus: state => {
+      return state.addMoreCollection
+    },
     getEditMainProductId: state => {
       return state.editProduct.mainProductId
     },
