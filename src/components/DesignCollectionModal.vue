@@ -43,7 +43,7 @@
           <div class="mt-3">
 
             <Scene v-if="collectionItem.product_locker_room.design.back_design"
-                   :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio"
+                   :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
                    :key="collectionItem.key"
                    :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: collectionItem.product_locker_room.style.front? storageUrl+collectionItem.product_locker_room.style.front.file_url : ''}"
                    :back="{textureUrl: storageUrl+collectionItem.product_locker_room.design.back_design.file_url, modelUrl: collectionItem.product_locker_room.style.back? storageUrl+collectionItem.product_locker_room.style.back.file_url: ''}"
@@ -54,7 +54,7 @@
                    :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
                    :productNamesSetting="collectionItem.product_locker_room.productnames" :canvasSelection="false"/>
 
-            <Scene v-else :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio"
+            <Scene v-else :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
                    :key="collectionItem.key"
                    :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: collectionItem.product_locker_room.style? storageUrl+collectionItem.product_locker_room.style.front.file_url : ''}"
                    :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''"
