@@ -7,6 +7,7 @@
 
       <template #modal-footer>
         <div class="text-right border-top">
+          <b-button v-if="selectedCollectionProducts.length>0"  v-b-modal.modal-center-existingCollection variant="outline-primary" style="margin-right: 5px">Add selected designs to Existing collection</b-button>
           <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
         </div>
       </template>
