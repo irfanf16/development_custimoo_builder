@@ -3,7 +3,7 @@
     <div id="collectionPdfContainer">
       <div id="wrapper">
         <h1 class="fs-5 pb-1 text-center text-secondary">Collection Name Goes Here</h1>
-        <template v-if="collectionData">
+        <template v-if="collectionData && collectionData.collection_products.length > 0">
         <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1 break-after">
           <div id="header">
             <div class="header-content">Product Nick Name Goes Here</div>
@@ -79,8 +79,11 @@ import CustomizationPreview from '@/components/CustomizationPreview.vue'
 })
 
 export default class DesignCollectionPdfView extends Vue {
+  mounted() {
+    console.log("mounted", this.collectionData);
+  }
   @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
-  @Prop({required: true}) collectionData!: any[]
+  @Prop({required: true}) collectionData!: Record<any, any>
 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 

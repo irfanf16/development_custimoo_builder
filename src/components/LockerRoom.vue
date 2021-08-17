@@ -1,4 +1,5 @@
 <template>
+  <span>
   <b-tabs content-class="mt-3">
     <template v-for="(room, i) in getLockerProducts">
       <b-tab  :key="i" :active="tabIndex === i">
@@ -20,7 +21,7 @@
                           <div>
                             <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <Scene :measurement-ratio="product.design.measurement_ratio" :productType="product.product_type"
-                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front ? storageUrl+product.style.front.file_url : ''}"
+                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front? storageUrl+product.style.front.file_url : ''}"
                                    :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
                                    :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :texts="JSON.parse(product.text)" :canvasSelection="false"  />
                           </div>
@@ -101,7 +102,7 @@
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
                             <Scene v-if="collection_product_index <= 2" :measurement-ratio="collection_product.product_locker_room.design.measurement_ratio" :productType="collection_product.product_locker_room.product_type"
-                                   :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: storageUrl+collection_product.product_locker_room.style.front.file_url}"
+                                   :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: collection_product.product_locker_room.style.front? storageUrl+collection_product.product_locker_room.style.front.file_url : ''}"
                                    :backTextureUrl="collection_product.product_locker_room.design.back_design? collection_product.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collection_product.product_locker_room.defaultcolors)"
                                    :lockerGroupColors="JSON.parse(collection_product.product_locker_room.groupcolors)" :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :texts="JSON.parse(collection_product.product_locker_room.text)" :canvasSelection="false"  />
                           </div>
@@ -111,7 +112,20 @@
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
                             <a @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <a class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
+                            <b-button :id="`collection_${index}`" :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"  custom-class="share-tooltip" @click="generateCollectionPdf(collection, index)"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+<!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
+                            <b-tooltip :target="`collection_${index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
+                              <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                  <b-form inline>
+                                    <b-form-input  :class="'copylink_'+index" :value="collection.link !== ''  ?  storageUrl + collection.link  : ''"
+                                    ></b-form-input>
+                                    <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
+                                  </b-form>
+                                </div>
+                              </div>
+                            </b-tooltip>
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -133,6 +147,8 @@
       <ExistingCollectionModal @existingCollection="existingCollection" />
     </div>
   </b-tabs>
+   <DesignCollectionPdfView v-if="collection_available" :collectionData="collectionData"/>
+  </span>
 </template>
 
 <script lang="ts">
@@ -143,6 +159,9 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     import ErrorMessages from "@/mixins/ErrorMessages";
     import Scene from "@/components/Scene.vue";
     import draggable from "vuedraggable";
+import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
+import html2pdf from "html2pdf.js"
+import {http} from "@/httpCommon";
 
 @Component<LockerRoom>({
   components: {
@@ -150,6 +169,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     Scene,
     CreateLockerRoomModal,
     ExistingCollectionModal,
+    DesignCollectionPdfView,
     draggable
   },
   mounted() {
@@ -164,13 +184,13 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public tabIndex = 0
   public url = ''
   public group = ''
+  public collection_available = false;
 
+  public collectionData = {}
 
   public async setCollections() {
     await this.$store.dispatch('getCollections')
   }
-
-
 
   get getLockerProducts():Record<any, any>{
     return this.$store.getters.getLockerProducts
@@ -212,6 +232,44 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       let index = this.getLockerProducts.length -1
       this.tabIndex = index
     }, 1000)
+  }
+  public async generateCollectionPdf(collection:Record<any, any>, index:number) {
+    if (collection.link == ""){
+      let res = await this.$store.dispatch('getCollection', collection.id)
+      this.collection_available = true;
+      this.collectionData = res
+      setTimeout(()=>{
+        const element = document.getElementById("collectionPdfContainer")
+        const opt = {
+          margin: [15, 10, 15, 10],
+          filename: 'production.pdf',
+          image: {type: "jpeg", quality: 1},
+          html2canvas: {
+            dpi: 192,
+            scale: 4,
+            useCORS: true,
+            letterRendering: true,
+          },
+          jsPDF: {
+            unit: "mm",
+            format: "letter",
+            orientation: 'landscape'
+          }
+        };
+        html2pdf().set(opt).from(element).output('datauristring').then((pdf:any)=>{
+          let arr = pdf.split(',');
+          pdf = arr[1];
+          let data = new FormData();
+          data.append("data" , pdf);
+          data.append('id' , collection.id);
+          http.post('savepdf', data).then(res => {
+            console.log(res)
+            // Vue.set(this.collectionData[index], 'link', res.link)
+          })
+        });
+      }, 3000)
+    }
+
   }
 
   public lockerStatus = 'not_accepted'
@@ -258,6 +316,17 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       }
     }catch (error){
       console.log(error)
+    }
+  }
+  public copyCollectionLink(ind:number){
+    let testingCodeToCopy = document.querySelector('copylink_'+ind)  as Record<any, any>
+    console.log(testingCodeToCopy)
+    testingCodeToCopy.select()
+    try {
+      document.execCommand('copy');
+      this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
+    } catch (err) {
+      alert('Oops, unable to copy');
     }
   }
   public copyLink(product:Record<any, any>, ind:number){

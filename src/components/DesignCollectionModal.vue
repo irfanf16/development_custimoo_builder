@@ -88,7 +88,6 @@
       <div class="d-flex align-items-center justify-content-end w-100 gap-1">
         <b-button @click="hideCollectionModal" variant="secondary" class="light">Cancel</b-button>
         <b-button variant="secondary" @click="saveCollectionForm">Save</b-button>
-        <b-button variant="secondary" @click="generateCollectionPdf">Download PDF</b-button>
       </div>
     </template>
   </b-modal>
@@ -107,6 +106,7 @@ import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
 import { getRandom } from "../helpers/Helpers";
+
 
 
 @Component({
@@ -192,36 +192,11 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     }
   }
 
+
   public openLockerModel() {
    this.$emit('showLockerRoomModal');
    this.$store.commit('SET_ADD_MORE_COLLECTION',true)
     this.hideCollectionModal()
-  }
-
-  public async generateCollectionPdf() {
-    let res = await this.$store.dispatch('getCollection')
-    let self = this;
-    self.collectionData = res
-    setTimeout(() => {
-      const element = document.getElementById("collectionPdfContainer")
-      const opt = {
-        margin: [15, 10, 15, 10],
-        filename: 'production.pdf',
-        image: {type: "jpeg", quality: 1},
-        html2canvas: {
-          dpi: 192,
-          scale: 4,
-          useCORS: true,
-          letterRendering: true,
-        },
-        jsPDF: {
-          unit: "mm",
-          format: "letter",
-          orientation: 'landscape'
-        }
-      };
-      html2pdf().set(opt).from(element).save();
-    }, 3000)
   }
 
   public collectionItemMoved(moved_item_metadata: Record<string, any>) {
