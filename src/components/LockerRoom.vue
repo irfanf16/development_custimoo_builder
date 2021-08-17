@@ -13,7 +13,7 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs">
                 <b-tab title="Products">
-                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: 250}">
+                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">
                     <template v-for="(product, ind) in room.product">
                       <label :key="ind" class="products-block">
                         <div class="image-holder">
@@ -111,6 +111,7 @@
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
                             <a @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            <a class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
