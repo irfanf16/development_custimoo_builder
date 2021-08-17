@@ -122,11 +122,7 @@
                       </div>
                     </template>
                   </div>
-                  <div class="text-right">
-                    <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
-                  </div>
-                  
-                </b-tab>
+                 </b-tab>
               </b-tabs>
             </b-card>
           </div>
@@ -136,6 +132,7 @@
     <div class="create-lockerroom">
       <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
       <CreateLockerRoomModal @lockerAdded="lockerAdded" />
+      <ExistingCollectionModal  />
     </div>
   </b-tabs>
 </template>
@@ -144,6 +141,7 @@
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+    import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue'
     import ErrorMessages from "@/mixins/ErrorMessages";
     import Scene from "@/components/Scene.vue";
     import draggable from "vuedraggable";
@@ -153,6 +151,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     LockerRoomProducts,
     Scene,
     CreateLockerRoomModal,
+    ExistingCollectionModal,
     draggable
   },
   mounted() {
@@ -180,8 +179,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   get getCollections():Record<any, any>{
     return this.$store.getters.getCollections
   }
-
-
 
   public addDesignCollection = () => {
     this.$emit('hideLockerRoomModal');
