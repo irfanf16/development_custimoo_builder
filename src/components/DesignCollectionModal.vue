@@ -104,6 +104,7 @@ import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
+import { getRandom } from "../helpers/Helpers";
 
 
 @Component({
@@ -123,6 +124,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public async retrievCollectionItems() {
     let res = await this.$store.dispatch('getCollectionItems')
     this.collectionItems = res;
+    this.collectionItems.collection_products = this.collectionItems.collection_products.map((collection_item:any, collection_item_index) => ({ ...collection_item, key: collection_item_index }))
   }
 
   public hideCollectionModal() {
@@ -219,8 +221,8 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     let item = moved_item_metadata.moved;
     let new_index = item.newIndex;
     let old_index = item.oldIndex;
-    this.collectionItems.collection_products[new_index].key = new_index;
-    this.collectionItems.collection_products[old_index].key = old_index;
+    this.collectionItems.collection_products[new_index].key = getRandom(5);
+    this.collectionItems.collection_products[old_index].key = getRandom(5);
   }
 
 
