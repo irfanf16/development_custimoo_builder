@@ -132,7 +132,7 @@
     <div class="create-lockerroom">
       <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
       <CreateLockerRoomModal @lockerAdded="lockerAdded" />
-      <ExistingCollectionModal  />
+      <ExistingCollectionModal @existingCollection="existingCollection" />
     </div>
   </b-tabs>
 </template>
@@ -319,8 +319,14 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     const payload = {"attribute":"locker_products","value":val};
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
   }
-  public editCollection(collection_id:number){
-    this.$emit('editCollectionModal',collection_id)
+  public editCollection(collection_id: number){
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute":"collection_id","value": collection_id})
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute":"locker_products","value": []})
+    this.$emit('editCollectionModal')
+    this.$emit('hideLockerRoomModal')
+  }
+  public existingCollection(){
+    this.$emit('editCollectionModal')
     this.$emit('hideLockerRoomModal')
   }
 }
