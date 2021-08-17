@@ -1601,11 +1601,12 @@ button{
 #modal-center-lockerroom{
     //height: auto;
     overflow-y: auto;
+    padding-left: 0 !important;
 
     @media only screen and (max-width: 991px){
-        top: auto;
-        bottom: 0;
-        height: 50vh;
+        // top: auto;
+        // bottom: 0;
+        // height: 50vh;
     }
     .modal-dialog{
         @media only screen and (max-width: 991px){
@@ -1641,19 +1642,19 @@ button{
                     top: -8px;
                 }
             }
-            &::-webkit-scrollbar{
-                height: 5px;
-                @media only screen and (min-width: 1024px){
-                    height: auto;
-                    width: 5px;
-                }
-            }
-            &::-webkit-scrollbar-track {
-                background: transparent;
-            }
-            &::-webkit-scrollbar-thumb {
-                background: #219F84;
-            }
+            //&::-webkit-scrollbar{
+            //    height: 5px;
+            //    @media only screen and (min-width: 1024px){
+            //        height: auto;
+            //        width: 5px;
+            //    }
+            //}
+            //&::-webkit-scrollbar-track {
+            //    background: transparent;
+            //}
+            //&::-webkit-scrollbar-thumb {
+            //    background: #219F84;
+            //}
         }
     }
 }
@@ -1663,7 +1664,7 @@ button{
         flex-wrap: nowrap;
         overflow-x: auto;
         padding: 10px 0;
-        max-width: 85%;
+        //max-width: 85%;
         @media only screen and (min-width: 1024px){
             max-width: 80%;
             white-space: normal;
@@ -1719,19 +1720,19 @@ button{
                 border-radius: 50%;
             }
         }
-        &::-webkit-scrollbar{
-            height: 5px;
-            @media only screen and (min-width: 1024px){
-                height: auto;
-                width: 5px;
-            }
-        }
-        &::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        &::-webkit-scrollbar-thumb {
-            background: #219F84;
-        }
+        //&::-webkit-scrollbar{
+        //    height: 5px;
+        //    @media only screen and (min-width: 1024px){
+        //        height: auto;
+        //        width: 5px;
+        //    }
+        //}
+        //&::-webkit-scrollbar-track {
+        //    background: transparent;
+        //}
+        //&::-webkit-scrollbar-thumb {
+        //    background: #219F84;
+        //}
     }
     .nav-tabs{
         border: none;
@@ -1791,15 +1792,15 @@ button{
                         margin: 0;
                     }
                 }
-                &::-webkit-scrollbar{
-                    width: 5px;
-                }
-                &::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                &::-webkit-scrollbar-thumb {
-                    background: #219F84;
-                }
+                //&::-webkit-scrollbar{
+                //    width: 5px;
+                //}
+                //&::-webkit-scrollbar-track {
+                //    background: transparent;
+                //}
+                //&::-webkit-scrollbar-thumb {
+                //    background: #219F84;
+                //}
             }
         }
         .nav-tabs{
