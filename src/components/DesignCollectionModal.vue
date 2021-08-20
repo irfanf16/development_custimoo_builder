@@ -1,17 +1,16 @@
 <template>
 
   <span>
-  <b-modal ref="collection-modal" id="modal-center-collection" size="xl" content-class="collection-modal">
+  <b-modal ref="collection-modal" id="modal-center-collection" size="xl" modal-class="modal-fullscreen2" content-class="collection-modal">
 
     <template #modal-title>
-      <div class="d-flex align-items-center justify-content-between w-100">
+      <div class="d-flex align-items-center justify-content-between gap-1 w-100">
         <div>
           <b-form-input v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
         </div>
 
         <div>
            <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
-          <b-button @click="openLockerModel">Add More Products</b-button>
         </div>
 
       </div>
@@ -23,7 +22,7 @@
           <b-container fluid>
             <draggable class="row draggable gap-y-5" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}"
                        v-model='collectionItems.collection_products' @change="collectionItemMoved">
-      <b-col cols="12" lg="6" xl="4" v-for="(collectionItem, index) in collectionItems.collection_products"
+      <b-col cols="12" md="6" lg="4" xl="3" v-for="(collectionItem, index) in collectionItems.collection_products"
              :key="index">
         <b-card>
           <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id)">
@@ -42,7 +41,7 @@
 <!--            </div>-->
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 respCanvas">
 
             <Scene v-if="collectionItem.product_locker_room.design.back_design"
                    :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
@@ -88,6 +87,7 @@
       <div class="d-flex align-items-center justify-content-end w-100 gap-1">
         <b-button @click="hideCollectionModal" variant="secondary" class="light">Cancel</b-button>
         <b-button variant="secondary" @click="saveCollectionForm">Save</b-button>
+        <b-button @click="openLockerModel">Add more</b-button>
       </div>
     </template>
   </b-modal>
@@ -105,7 +105,7 @@ import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
-import { getRandom } from "../helpers/Helpers";
+import { getRandom } from "@/helpers/Helpers";
 
 
 
@@ -120,14 +120,14 @@ import { getRandom } from "../helpers/Helpers";
 export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public collectionData: any[] = []
-  private collectionItems = {id: "", name: "", link: "", collection_products: []}
+  private collectionItems = {id: "", name: "", link: "", collection_products: []} as Record<any, any>
   public ref = this.$refs as Record<any, any>
   // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   public async retrievCollectionItems() {
     let res = await this.$store.dispatch('getCollectionItems')
     this.collectionItems = res;
-    this.collectionItems.collection_products = this.collectionItems.collection_products.map((collection_item:any, collection_item_index) => ({ ...collection_item, key: collection_item_index }))
+    this.collectionItems.collection_products = this.collectionItems.collection_products.map((collection_item: Record<any, any>, collection_item_index: number) => ({ ...collection_item, key: collection_item_index }))
   }
 
   public hideCollectionModal() {
