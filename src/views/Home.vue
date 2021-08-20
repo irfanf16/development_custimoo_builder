@@ -62,7 +62,7 @@
                 <ul class="preview-header-icons">
                   <li class="d-flex flex-wrap align-items-center">
                     <b-button v-if="!isCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
-                    <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
+                    <strong @click="showConfirm" class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
@@ -129,6 +129,7 @@
         </b-col>
       </b-row>
     </b-container>
+    <confirm-modal message="Do you really want to reset everything?" cancel_text="Cancel" confirm_text="Reset" ref="reset-modal"></confirm-modal>
   </div>
 </template>
 
@@ -148,9 +149,11 @@ import ExtractedColors from '@/components/ExtractedColors.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
+import ConfirmModal from "@/components/ConfirmModal.vue";
 
 @Component<Home>({
   components: {
+    ConfirmModal,
     DesignCollectionModal,
     ChooseColor,
     CustomizationPreview,
@@ -245,6 +248,9 @@ export default class Home extends Vue {
 
   public showLoader = false
 
+  public showConfirm(){
+    this.ref['reset-modal'].showConfirm()
+  }
 
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab

@@ -1,7 +1,7 @@
-const getRandom = (length=5, type='number') => {
-  let rand_string = "";
+const getRandom = (length= 5, type= 'number') => {
+  let rand_string: number|string = "";
   if (type === 'number') {
-    let max_number = "9";
+    let max_number: number|string = "9";
     for (let i = 1; i < length; i++) {
       max_number = max_number + "9";
     }

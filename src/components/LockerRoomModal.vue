@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room" modal-class="modal-fullscreen2" content-class="lockerroom-modal">
       <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
                   @showCollectionModal="showCollectionModal"
                   @editCollectionModal="editCollectionModal"
@@ -7,7 +7,7 @@
 
       <template #modal-footer>
         <div v-if="!getAddMoreCollectionStatus" class="text-right border-top">
-          <b-button v-if="selectedCollectionProducts.length>0"  v-b-modal.modal-center-existingCollection variant="outline-primary" style="margin-right: 5px">Add selected designs to Existing collection</b-button>
+          <b-button v-if="selectedCollectionProducts.length>0"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add selected designs to Existing collection</b-button>
           <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
         </div>
         <div v-else class="text-right border-top">

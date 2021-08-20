@@ -1,4 +1,5 @@
 <template>
+  <span>
   <b-tabs content-class="mt-3">
     <template v-for="(room, i) in getLockerProducts">
       <b-tab  :key="i" :active="tabIndex === i">
@@ -14,21 +15,25 @@
 
             <b-card no-body>
               <b-tabs card changed="currentTabs">
-                <b-tab  title="Products">
-                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: 250}">
+                <b-tab title="Products">
+<!--                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">-->
+                  <draggable class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">
                     <template v-for="(product, ind) in room.product">
                       <label :key="ind" class="products-block">
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <Scene :measurement-ratio="product.design.measurement_ratio" :productType="product.product_type"
-                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front ? storageUrl+product.style.front.file_url : ''}"
+                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front? storageUrl+product.style.front.file_url : ''}"
                                    :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
-                                   :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :productNamesSetting="product.productnames" :canvasSelection="false"  />
+                                   :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :texts="JSON.parse(product.text)" :canvasSelection="false"  />
                           </div>
                           <ul class="product-icons">
                             <li>
                               <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
+                            </li>
+                            <li class="d-none d-lg-block">
+                              <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                             </li>
                             <li>
                               <b-button :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
@@ -45,9 +50,6 @@
                                   </div>
                                 </div>
                               </b-tooltip>
-                            </li>
-                            <li class="d-none d-lg-block">
-                              <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                             </li>
                           </ul>
                         </div>
@@ -94,8 +96,8 @@
                     </div>
                   </div>
                 </b-tab>
-                <b-tab v-if="!getAddMoreCollectionStatus"  title="Collections" class="designCollections">
-                  <div class="products-holder d-lg-flex flex-lg-wrap mb-4">
+                <b-tab v-if="!getAddMoreCollectionStatus && getCollections.length > 0"  title="Collections" class="designCollections">
+                  <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
                     <template v-for="(collection, index) in getCollections">
                       <div  :key="index" class="products-block">
                         <div class="image-holder">
@@ -103,9 +105,9 @@
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
                             <Scene v-if="collection_product_index <= 2" :measurement-ratio="collection_product.product_locker_room.design.measurement_ratio" :productType="collection_product.product_locker_room.product_type"
-                                   :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: storageUrl+collection_product.product_locker_room.style.front.file_url}"
+                                   :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: collection_product.product_locker_room.style.front? storageUrl+collection_product.product_locker_room.style.front.file_url : ''}"
                                    :backTextureUrl="collection_product.product_locker_room.design.back_design? collection_product.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collection_product.product_locker_room.defaultcolors)"
-                                   :lockerGroupColors="JSON.parse(collection_product.product_locker_room.groupcolors)" :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :productNamesSetting="collection_product.product_locker_room.productnames" :canvasSelection="false"  />
+                                   :lockerGroupColors="JSON.parse(collection_product.product_locker_room.groupcolors)" :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :texts="JSON.parse(collection_product.product_locker_room.text)" :canvasSelection="false"  />
                           </div>
 
                           <div class="controls">
@@ -113,6 +115,20 @@
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
                             <a @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            <b-button :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+<!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
+                            <b-tooltip :target="`collection_${index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
+                              <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                  <b-form inline>
+                                    <b-form-input :ref="'copylink_'+index" :value="collection.link !== ''?  storageUrl + collection.link  : ''"
+                                    ></b-form-input>
+                                    <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
+                                  </b-form>
+                                </div>
+                              </div>
+                            </b-tooltip>
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -134,6 +150,8 @@
       <ExistingCollectionModal @existingCollection="existingCollection" />
     </div>
   </b-tabs>
+   <DesignCollectionPdfView v-if="collection_available" :collectionData="collectionData"/>
+  </span>
 </template>
 
 <script lang="ts">
@@ -144,6 +162,9 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     import ErrorMessages from "@/mixins/ErrorMessages";
     import Scene from "@/components/Scene.vue";
     import draggable from "vuedraggable";
+import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
+import html2pdf from "html2pdf.js"
+import {http} from "@/httpCommon";
 
 @Component<LockerRoom>({
   components: {
@@ -151,6 +172,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     Scene,
     CreateLockerRoomModal,
     ExistingCollectionModal,
+    DesignCollectionPdfView,
     draggable
   },
   mounted() {
@@ -165,13 +187,13 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public tabIndex = 0
   public url = ''
   public group = ''
+  public collection_available = false;
 
+  public collectionData = {}
 
   public async setCollections() {
     await this.$store.dispatch('getCollections')
   }
-
-
   get getAddMoreCollectionStatus(){
     return this.$store.getters.getAddMoreCollectionStatus;
   }
@@ -180,6 +202,16 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
   get getCollections():Record<any, any>{
     return this.$store.getters.getCollections
+  }
+  @Watch('getCollections', {
+    deep: true
+  })
+  getCollectionsChanged(collections: [Record<any, any>]) {
+    collections.forEach((collection: Record<any, any>, index: number) => {
+      if(!collection.link) {
+        this.generateCollectionPdf(collection, index)
+      }
+    })
   }
 
   public addDesignCollection = () => {
@@ -215,6 +247,41 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       let index = this.getLockerProducts.length -1
       this.tabIndex = index
     }, 1000)
+  }
+
+  public async generateCollectionPdf(collection:Record<any, any>, index:number) {
+    let res = await this.$store.dispatch('getCollection', collection.id)
+    this.collection_available = true;
+    this.collectionData = res
+    setTimeout(()=>{
+      const element = document.getElementById("collectionPdfContainer")
+      const opt = {
+        margin: [15, 10, 15, 10],
+        filename: 'production.pdf',
+        image: {type: "jpeg", quality: 1},
+        html2canvas: {
+          dpi: 192,
+          scale: 4,
+          useCORS: true,
+          letterRendering: true,
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "letter",
+          orientation: 'landscape'
+        }
+      };
+      html2pdf().set(opt).from(element).output('datauristring').then((pdf:any)=>{
+        let arr = pdf.split(',');
+        pdf = arr[1];
+        let data = new FormData();
+        data.append("data" , pdf);
+        data.append('id' , collection.id);
+        http.post('savepdf', data).then(res => {
+          Vue.set(this.getCollections[index], 'link', res.data.link)
+        })
+      });
+    }, 3000)
   }
 
   public lockerStatus = 'not_accepted'
@@ -261,6 +328,17 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       }
     }catch (error){
       console.log(error)
+    }
+  }
+  public copyCollectionLink(ind:number){
+    let toCopy = this.$refs['copylink_'+ind] as Record<any, any>
+    toCopy = toCopy[0].$el as Record<any, any>
+    toCopy.select()
+    try {
+      document.execCommand('copy');
+      this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
+    } catch (err) {
+      alert('Oops, unable to copy');
     }
   }
   public copyLink(product:Record<any, any>, ind:number){
@@ -453,27 +531,27 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 
 .products-holder{
         width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
-        flex-wrap: nowrap;
-        padding-top: 7px;
+        //overflow-x: auto;
+        //white-space: nowrap;
+        //flex-wrap: nowrap;
+        //padding-top: 7px;
         @media only screen and (min-width: 992px){
             width: 100%;
-            overflow-x: hidden;
-            white-space: normal;
-            padding-top: 0;
+            //overflow-x: hidden;
+            //white-space: normal;
+            //padding-top: 0;
         }
         .products-block{
-            flex: 0 0 22%;
-            margin: 0 0.3rem 10px;
-            display: inline-block;
+            //flex: 0 0 22%;
+            //margin: 0 0.3rem 10px;
+            //display: inline-block;
             @media only screen and (min-width: 992px){
-                margin: 0 0.6rem 25px;
-                max-width: 22%;
+                //margin: 0 0.6rem 25px;
+                //max-width: 22%;
             }
             @media only screen and (min-width: 1199px){
-                flex: 0 0 18%;
-                max-width: 18%;
+                //flex: 0 0 18%;
+                //max-width: 18%;
             }
             .image-holder{
                 position: relative;
@@ -531,80 +609,80 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         }
     }
 
-    .products-holder{
-        width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-top: 7px;
-        @media only screen and (min-width: 992px){
-            width: 100%;
-            overflow-x: hidden;
-            white-space: normal;
-            padding-top: 0;
-        }
-        .products-block{
-            flex: 0 0 22%;
-            max-width: 22%;
-            margin: 0 0.3rem 10px;
-            display: inline-block;
-            @media only screen and (min-width: 992px){
-                margin: 0 0.6rem 25px;
-            }
-            @media only screen and (min-width: 1199px){
-                flex: 0 0 18%;
-                max-width: 18%;
-            }
-            .image-holder{
-                position: relative;
-                margin: 0;
-                @media only screen and (min-width: 992px){overflow: hidden;}
-                img{
-                    display: block;
-                    max-width: 100%;
-                    margin: 0 auto;
-                    height: auto;
-                }
-                .product-icons{
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                    position: absolute;
-                    right: -5px;
-                    top: -5px;
-                    z-index: 1;
-                    @media only screen and (min-width: 992px){
-                        right: 5px;
-                        top: 5px;
-                    }
-                    li{
-                        display: block;
-                        margin: 0 0 5px;
-                    }
-                    a{
-                        display: flex;
-                        flex-wrap: wrap;
-                        justify-content: center;
-                        align-items: center;
-                        width: 20px;
-                        height: 20px;
-                        font-size: 9px;
-                        color: #219f84;
-                        background: #fff;
-                        border-radius: 50%;
-                        @media only screen and (min-width: 992px){
-                            width: 30px;
-                            height: 30px;
-                            font-size: 14px;
-                        }
-                        &.remove{
-                            background: #F8E1E2;
-                            color: #D53943;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //.products-holder{
+    //    width: 100%;
+    //    overflow-x: auto;
+    //    white-space: nowrap;
+    //    padding-top: 7px;
+    //    @media only screen and (min-width: 992px){
+    //        width: 100%;
+    //        overflow-x: hidden;
+    //        white-space: normal;
+    //        padding-top: 0;
+    //    }
+    //    .products-block{
+    //        flex: 0 0 22%;
+    //        max-width: 22%;
+    //        margin: 0 0.3rem 10px;
+    //        display: inline-block;
+    //        @media only screen and (min-width: 992px){
+    //            margin: 0 0.6rem 25px;
+    //        }
+    //        @media only screen and (min-width: 1199px){
+    //            flex: 0 0 18%;
+    //            max-width: 18%;
+    //        }
+    //        .image-holder{
+    //            position: relative;
+    //            margin: 0;
+    //            @media only screen and (min-width: 992px){overflow: hidden;}
+    //            img{
+    //                display: block;
+    //                max-width: 100%;
+    //                margin: 0 auto;
+    //                height: auto;
+    //            }
+    //            .product-icons{
+    //                list-style: none;
+    //                padding: 0;
+    //                margin: 0;
+    //                position: absolute;
+    //                right: -5px;
+    //                top: -5px;
+    //                z-index: 1;
+    //                @media only screen and (min-width: 992px){
+    //                    right: 5px;
+    //                    top: 5px;
+    //                }
+    //                li{
+    //                    display: block;
+    //                    margin: 0 0 5px;
+    //                }
+    //                a{
+    //                    display: flex;
+    //                    flex-wrap: wrap;
+    //                    justify-content: center;
+    //                    align-items: center;
+    //                    width: 20px;
+    //                    height: 20px;
+    //                    font-size: 9px;
+    //                    color: #219f84;
+    //                    background: #fff;
+    //                    border-radius: 50%;
+    //                    @media only screen and (min-width: 992px){
+    //                        width: 30px;
+    //                        height: 30px;
+    //                        font-size: 14px;
+    //                    }
+    //                    &.remove{
+    //                        background: #F8E1E2;
+    //                        color: #D53943;
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
     .lockerroom-color-folders{
         position: relative;
         .folder-wrapper{

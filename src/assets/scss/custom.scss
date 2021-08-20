@@ -1601,15 +1601,16 @@ button{
 #modal-center-lockerroom{
     //height: auto;
     overflow-y: auto;
+    padding-left: 0 !important;
 
     @media only screen and (max-width: 991px){
-        top: auto;
-        bottom: 0;
-        height: 50vh;
+        // top: auto;
+        // bottom: 0;
+        // height: 50vh;
     }
     .modal-dialog{
         @media only screen and (max-width: 991px){
-            margin: 0;
+            //margin: 0;
             min-height: 100%;
             max-width: 100%;
         }
@@ -1641,19 +1642,19 @@ button{
                     top: -8px;
                 }
             }
-            &::-webkit-scrollbar{
-                height: 5px;
-                @media only screen and (min-width: 1024px){
-                    height: auto;
-                    width: 5px;
-                }
-            }
-            &::-webkit-scrollbar-track {
-                background: transparent;
-            }
-            &::-webkit-scrollbar-thumb {
-                background: #219F84;
-            }
+            //&::-webkit-scrollbar{
+            //    height: 5px;
+            //    @media only screen and (min-width: 1024px){
+            //        height: auto;
+            //        width: 5px;
+            //    }
+            //}
+            //&::-webkit-scrollbar-track {
+            //    background: transparent;
+            //}
+            //&::-webkit-scrollbar-thumb {
+            //    background: #219F84;
+            //}
         }
     }
 }
@@ -1663,7 +1664,7 @@ button{
         flex-wrap: nowrap;
         overflow-x: auto;
         padding: 10px 0;
-        max-width: 85%;
+        //max-width: 85%;
         @media only screen and (min-width: 1024px){
             max-width: 80%;
             white-space: normal;
@@ -1719,19 +1720,19 @@ button{
                 border-radius: 50%;
             }
         }
-        &::-webkit-scrollbar{
-            height: 5px;
-            @media only screen and (min-width: 1024px){
-                height: auto;
-                width: 5px;
-            }
-        }
-        &::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        &::-webkit-scrollbar-thumb {
-            background: #219F84;
-        }
+        //&::-webkit-scrollbar{
+        //    height: 5px;
+        //    @media only screen and (min-width: 1024px){
+        //        height: auto;
+        //        width: 5px;
+        //    }
+        //}
+        //&::-webkit-scrollbar-track {
+        //    background: transparent;
+        //}
+        //&::-webkit-scrollbar-thumb {
+        //    background: #219F84;
+        //}
     }
     .nav-tabs{
         border: none;
@@ -1791,15 +1792,15 @@ button{
                         margin: 0;
                     }
                 }
-                &::-webkit-scrollbar{
-                    width: 5px;
-                }
-                &::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                &::-webkit-scrollbar-thumb {
-                    background: #219F84;
-                }
+                //&::-webkit-scrollbar{
+                //    width: 5px;
+                //}
+                //&::-webkit-scrollbar-track {
+                //    background: transparent;
+                //}
+                //&::-webkit-scrollbar-thumb {
+                //    background: #219F84;
+                //}
             }
         }
         .nav-tabs{
@@ -1867,8 +1868,13 @@ button{
             display: block !important;
             width: 100% !important;
             .canvas-container{
-                width: 80px !important;
-                height: 100px !important;
+                width: 100% !important;
+                height: 160px !important;
+
+                @media (max-width: 400px) {
+                    height: 113px !important;
+                }
+
                 @media only screen and (min-width: 1023px){
                     width: 100% !important;
                     height: 180px !important;
@@ -1878,7 +1884,9 @@ button{
                 }
                 .canvas{
                     width: 100% !important;
-                    height: auto !important;
+                    height: 100% !important;
+                    max-width: 100%;
+                    object-fit: contain;
                     // @media only screen and (min-width: 1023px){
                     //     height: 180px !important;
                     // }
@@ -2528,13 +2536,20 @@ $fontSize: 0.5;
             grid-template-columns: repeat(1, 1fr);
             gap: 0.5rem;
 
-            a{
+            .btn{
                 height: 30px !important;
                 width: 30px !important;
                 display: flex !important;
                 align-items: center;
                 justify-content: center;
                 font-size: 1em;
+
+                @media (max-width: 600px) {
+                    font-size: 0.6rem;
+                    height: 20px !important;
+                    width: 20px !important;
+                    padding: 0;
+                }
             }
         }
     }
@@ -2582,4 +2597,157 @@ $fontSize: 0.5;
         }
     }
 
+}
+
+.grid{
+    display: grid;
+}
+
+.grid-4{
+    @media only screen and (max-width: 600px) {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    @media only screen and (min-width: 600px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media only screen and (min-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media only screen and (min-width: 992px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media only screen and (min-width: 1200px) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+.grid-5{
+    @media only screen and (max-width: 600px) {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    @media only screen and (min-width: 600px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media only screen and (min-width: 768px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media only screen and (min-width: 992px) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media only screen and (min-width: 1200px) {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+.grid-6{
+    @media only screen and (max-width: 600px) {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    @media only screen and (min-width: 600px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media only screen and (min-width: 768px) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media only screen and (min-width: 992px) {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    @media only screen and (min-width: 1200px) {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+.mobile-cols-2{
+    @media only screen and (max-width: 600px) {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+.modal-fullscreen1 .modal {
+    padding: 0 !important;
+}
+.modal-fullscreen1 {
+    .modal-dialog {
+        max-width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+    .modal-content {
+        border: 0;
+        border-radius: 0;
+        min-height: 100%;
+        height: auto;
+    }
+}
+
+.modal-fullscreen2 {
+    display: flex;
+    align-items: center;
+
+    .modal {
+        padding: 0 !important;
+    }
+    .modal-dialog {
+        max-width: 100%;
+        min-height: calc(100% - 2rem);
+        margin: 0;
+    }
+    .modal-content {
+        width: calc(100% - 2rem);
+        min-height: 100%;
+        height: auto;
+        margin: 1rem;
+    }
+}
+
+.respCanvas {
+    .canvas-area-holder{
+        @media (max-width: 767px) {
+            justify-content: center !important;
+            gap: 10px !important;
+        }
+    }
+    .canvas-container {
+        @media (max-width: 600px) {
+            height: 100px !important;
+            width: 100px !important;
+        }
+
+        .canvas {
+            @media (max-width: 600px) {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: contain;
+            }
+        }
+    }
+}
+
+.available-designs-section .design-col a .canvas-container{
+    .canvas{
+        height: 100% !important;
+        width: 100% !important;
+        object-fit: contain;
+    }
+}
+
+.confirm-icon{
+    font-size: 4rem !important;
+    height: 6rem !important;
+    width: 6rem !important;
+    padding: 0 !important;
+    cursor: default !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
