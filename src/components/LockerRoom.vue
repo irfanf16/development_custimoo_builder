@@ -10,9 +10,11 @@
         </template>
         <div class="lockerroom-tabs">
           <div>
+
+
             <b-card no-body>
               <b-tabs card changed="currentTabs">
-                <b-tab title="Products">
+                <b-tab  title="Products">
                   <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: 250}">
                     <template v-for="(product, ind) in room.product">
                       <label :key="ind" class="products-block">
@@ -57,7 +59,7 @@
                   </draggable>
 
                 </b-tab>
-                <b-tab title="Assets" class="assets-file">
+                <b-tab v-if="!getAddMoreCollectionStatus" title="Assets" class="assets-file">
                   <template v-for="(logo, inda) in room.logos">
                     <div :key="inda" class="assets-logo-block">
                       <img :src="storageUrl+logo.logo_url "/>
@@ -65,7 +67,7 @@
                     </div>
                   </template>
                 </b-tab>
-                <b-tab title="Colors">
+                <b-tab v-if="!getAddMoreCollectionStatus" title="Colors">
                   <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
                     <div class="pt-lg-2 folder-wrapper">
                       <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
@@ -92,7 +94,7 @@
                     </div>
                   </div>
                 </b-tab>
-                <b-tab v-if="getCollections.length > 0" title="Collections" class="designCollections">
+                <b-tab v-if="!getAddMoreCollectionStatus"  title="Collections" class="designCollections">
                   <div class="products-holder d-lg-flex flex-lg-wrap mb-4">
                     <template v-for="(collection, index) in getCollections">
                       <div  :key="index" class="products-block">
@@ -127,7 +129,7 @@
       </b-tab>
     </template>
     <div class="create-lockerroom">
-      <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
+      <b-button v-if="!getAddMoreCollectionStatus" class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
       <CreateLockerRoomModal @lockerAdded="lockerAdded" />
       <ExistingCollectionModal @existingCollection="existingCollection" />
     </div>
@@ -170,7 +172,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
 
-
+  get getAddMoreCollectionStatus(){
+    return this.$store.getters.getAddMoreCollectionStatus;
+  }
   get getLockerProducts():Record<any, any>{
     return this.$store.getters.getLockerProducts
   }

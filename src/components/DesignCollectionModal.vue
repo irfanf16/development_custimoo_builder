@@ -10,8 +10,9 @@
         </div>
 
         <div>
+          <b-button style="margin-right: 10px" @click="openLockerModel(false)">Back To Locker Room</b-button>
            <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
-          <b-button @click="openLockerModel">Add More Products</b-button>
+          <b-button @click="openLockerModel(true)">Add More Products</b-button>
         </div>
 
       </div>
@@ -29,6 +30,9 @@
           <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
+<!--          <a >
+              <font-awesome-icon  :icon="['fas',    'eye' ]"/>
+            </a>-->
           <div class="text-center fs-2 fw-bold">{{ collectionItem.product_locker_room.product_name }}</div>
           <div class="mt-2 d-block gap-1">
             <div>
@@ -192,9 +196,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     }
   }
 
-  public openLockerModel() {
+  public openLockerModel(add_more_status:boolean) {
    this.$emit('showLockerRoomModal');
-   this.$store.commit('SET_ADD_MORE_COLLECTION',true)
+   if(add_more_status)
+     this.$store.commit('SET_ADD_MORE_COLLECTION',true)
     this.hideCollectionModal()
   }
 
