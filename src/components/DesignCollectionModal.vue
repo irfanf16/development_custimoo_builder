@@ -105,7 +105,7 @@ import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
-import { getRandom } from "../helpers/Helpers";
+import { getRandom } from "@/helpers/Helpers";
 
 
 
@@ -120,14 +120,14 @@ import { getRandom } from "../helpers/Helpers";
 export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public collectionData: any[] = []
-  private collectionItems = {id: "", name: "", link: "", collection_products: []}
+  private collectionItems = {id: "", name: "", link: "", collection_products: []} as Record<any, any>
   public ref = this.$refs as Record<any, any>
   // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   public async retrievCollectionItems() {
     let res = await this.$store.dispatch('getCollectionItems')
     this.collectionItems = res;
-    this.collectionItems.collection_products = this.collectionItems.collection_products.map((collection_item:any, collection_item_index) => ({ ...collection_item, key: collection_item_index }))
+    this.collectionItems.collection_products = this.collectionItems.collection_products.map((collection_item: Record<any, any>, collection_item_index: number) => ({ ...collection_item, key: collection_item_index }))
   }
 
   public hideCollectionModal() {
