@@ -62,7 +62,7 @@
                 <ul class="preview-header-icons">
                   <li class="d-flex flex-wrap align-items-center">
                     <b-button v-if="!isCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
-                    <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
+                    <strong @click="showConfirm" class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
@@ -129,6 +129,29 @@
         </b-col>
       </b-row>
     </b-container>
+
+    <b-modal ref="reset-confirm" id="reset-confirm" size="md" :hide-footer="true" :hide-header="true" modal-class="confirm-modal">
+      <div class="text-center">
+        <span class="btn btn-secondary light rounded-circle confirm-icon">
+          <b-icon-question></b-icon-question>
+        </span>
+      </div>
+      <div v-if="true" class="fs-4 text-muted text-center p-4">
+        Do you really want to reset everything?
+      </div>
+      <div v-else class="fs-4 text-muted text-center p-4">
+        Are you sure you want to logout?
+      </div>
+
+      <div v-if="true" class="d-flex align-items-center justify-content-center gap-2">
+        <b-button @click="hideConfirm" class="light">Cancel</b-button>
+        <b-button>Reset</b-button>
+      </div>
+      <div v-else class="d-flex align-items-center justify-content-center gap-2">
+        <b-button @click="hideConfirm" class="light">Cancel</b-button>
+        <b-button>Logout</b-button>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -245,6 +268,12 @@ export default class Home extends Vue {
 
   public showLoader = false
 
+  public showConfirm(){
+    this.ref['reset-confirm'].show()
+  }
+  public hideConfirm(){
+    this.ref['reset-confirm'].hide()
+  }
 
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab

@@ -2536,13 +2536,20 @@ $fontSize: 0.5;
             grid-template-columns: repeat(1, 1fr);
             gap: 0.5rem;
 
-            a{
+            .btn{
                 height: 30px !important;
                 width: 30px !important;
                 display: flex !important;
                 align-items: center;
                 justify-content: center;
                 font-size: 1em;
+
+                @media (max-width: 600px) {
+                    font-size: 0.6rem;
+                    height: 20px !important;
+                    width: 20px !important;
+                    padding: 0;
+                }
             }
         }
     }
@@ -2732,4 +2739,15 @@ $fontSize: 0.5;
         width: 100% !important;
         object-fit: contain;
     }
+}
+
+.confirm-icon{
+    font-size: 4rem !important;
+    height: 6rem !important;
+    width: 6rem !important;
+    padding: 0 !important;
+    cursor: default !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
