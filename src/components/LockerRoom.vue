@@ -14,7 +14,8 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs">
                 <b-tab title="Products">
-                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">
+<!--                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">-->
+                  <draggable class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">
                     <template v-for="(product, ind) in room.product">
                       <label :key="ind" class="products-block">
                         <div class="image-holder">
@@ -94,7 +95,8 @@
                   </div>
                 </b-tab>
                 <b-tab v-if="getCollections.length > 0" title="Collections" class="designCollections">
-                  <div class="products-holder d-lg-flex flex-lg-wrap mb-4">
+<!--                  <div class="products-holder d-lg-flex flex-lg-wrap mb-4">-->
+                  <div class="products-holder grid gap-5 grid-6">
                     <template v-for="(collection, index) in getCollections">
                       <div  :key="index" class="products-block">
                         <div class="image-holder">
@@ -526,27 +528,27 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 
 .products-holder{
         width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
-        flex-wrap: nowrap;
-        padding-top: 7px;
+        //overflow-x: auto;
+        //white-space: nowrap;
+        //flex-wrap: nowrap;
+        //padding-top: 7px;
         @media only screen and (min-width: 992px){
             width: 100%;
-            overflow-x: hidden;
-            white-space: normal;
-            padding-top: 0;
+            //overflow-x: hidden;
+            //white-space: normal;
+            //padding-top: 0;
         }
         .products-block{
-            flex: 0 0 22%;
-            margin: 0 0.3rem 10px;
-            display: inline-block;
+            //flex: 0 0 22%;
+            //margin: 0 0.3rem 10px;
+            //display: inline-block;
             @media only screen and (min-width: 992px){
-                margin: 0 0.6rem 25px;
-                max-width: 22%;
+                //margin: 0 0.6rem 25px;
+                //max-width: 22%;
             }
             @media only screen and (min-width: 1199px){
-                flex: 0 0 18%;
-                max-width: 18%;
+                //flex: 0 0 18%;
+                //max-width: 18%;
             }
             .image-holder{
                 position: relative;
@@ -604,80 +606,80 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         }
     }
 
-    .products-holder{
-        width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-top: 7px;
-        @media only screen and (min-width: 992px){
-            width: 100%;
-            overflow-x: hidden;
-            white-space: normal;
-            padding-top: 0;
-        }
-        .products-block{
-            flex: 0 0 22%;
-            max-width: 22%;
-            margin: 0 0.3rem 10px;
-            display: inline-block;
-            @media only screen and (min-width: 992px){
-                margin: 0 0.6rem 25px;
-            }
-            @media only screen and (min-width: 1199px){
-                flex: 0 0 18%;
-                max-width: 18%;
-            }
-            .image-holder{
-                position: relative;
-                margin: 0;
-                @media only screen and (min-width: 992px){overflow: hidden;}
-                img{
-                    display: block;
-                    max-width: 100%;
-                    margin: 0 auto;
-                    height: auto;
-                }
-                .product-icons{
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                    position: absolute;
-                    right: -5px;
-                    top: -5px;
-                    z-index: 1;
-                    @media only screen and (min-width: 992px){
-                        right: 5px;
-                        top: 5px;
-                    }
-                    li{
-                        display: block;
-                        margin: 0 0 5px;
-                    }
-                    a{
-                        display: flex;
-                        flex-wrap: wrap;
-                        justify-content: center;
-                        align-items: center;
-                        width: 20px;
-                        height: 20px;
-                        font-size: 9px;
-                        color: #219f84;
-                        background: #fff;
-                        border-radius: 50%;
-                        @media only screen and (min-width: 992px){
-                            width: 30px;
-                            height: 30px;
-                            font-size: 14px;
-                        }
-                        &.remove{
-                            background: #F8E1E2;
-                            color: #D53943;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //.products-holder{
+    //    width: 100%;
+    //    overflow-x: auto;
+    //    white-space: nowrap;
+    //    padding-top: 7px;
+    //    @media only screen and (min-width: 992px){
+    //        width: 100%;
+    //        overflow-x: hidden;
+    //        white-space: normal;
+    //        padding-top: 0;
+    //    }
+    //    .products-block{
+    //        flex: 0 0 22%;
+    //        max-width: 22%;
+    //        margin: 0 0.3rem 10px;
+    //        display: inline-block;
+    //        @media only screen and (min-width: 992px){
+    //            margin: 0 0.6rem 25px;
+    //        }
+    //        @media only screen and (min-width: 1199px){
+    //            flex: 0 0 18%;
+    //            max-width: 18%;
+    //        }
+    //        .image-holder{
+    //            position: relative;
+    //            margin: 0;
+    //            @media only screen and (min-width: 992px){overflow: hidden;}
+    //            img{
+    //                display: block;
+    //                max-width: 100%;
+    //                margin: 0 auto;
+    //                height: auto;
+    //            }
+    //            .product-icons{
+    //                list-style: none;
+    //                padding: 0;
+    //                margin: 0;
+    //                position: absolute;
+    //                right: -5px;
+    //                top: -5px;
+    //                z-index: 1;
+    //                @media only screen and (min-width: 992px){
+    //                    right: 5px;
+    //                    top: 5px;
+    //                }
+    //                li{
+    //                    display: block;
+    //                    margin: 0 0 5px;
+    //                }
+    //                a{
+    //                    display: flex;
+    //                    flex-wrap: wrap;
+    //                    justify-content: center;
+    //                    align-items: center;
+    //                    width: 20px;
+    //                    height: 20px;
+    //                    font-size: 9px;
+    //                    color: #219f84;
+    //                    background: #fff;
+    //                    border-radius: 50%;
+    //                    @media only screen and (min-width: 992px){
+    //                        width: 30px;
+    //                        height: 30px;
+    //                        font-size: 14px;
+    //                    }
+    //                    &.remove{
+    //                        background: #F8E1E2;
+    //                        color: #D53943;
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
     .lockerroom-color-folders{
         position: relative;
         .folder-wrapper{

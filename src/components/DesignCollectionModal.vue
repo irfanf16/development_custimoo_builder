@@ -1,7 +1,7 @@
 <template>
 
   <span>
-  <b-modal ref="collection-modal" id="modal-center-collection" size="xl" content-class="collection-modal">
+  <b-modal ref="collection-modal" id="modal-center-collection" size="xl" modal-class="modal-fullscreen2" content-class="collection-modal">
 
     <template #modal-title>
       <div class="d-flex align-items-center justify-content-between w-100">
@@ -23,7 +23,7 @@
           <b-container fluid>
             <draggable class="row draggable gap-y-5" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}"
                        v-model='collectionItems.collection_products' @change="collectionItemMoved">
-      <b-col cols="12" lg="6" xl="4" v-for="(collectionItem, index) in collectionItems.collection_products"
+      <b-col cols="12" md="6" lg="4" xl="3" v-for="(collectionItem, index) in collectionItems.collection_products"
              :key="index">
         <b-card>
           <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id)">
