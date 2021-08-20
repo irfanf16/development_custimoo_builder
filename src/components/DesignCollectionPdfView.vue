@@ -55,8 +55,7 @@
                       :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)"
                       :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :canvasWidth="400" :canvasHeight="400" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))" :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false"  />
               <div :key="`desc${i}`">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
+                <p>{{  product.product_locker_room.model_description.product_model_description || ''}}</p>
               </div>
             </div>
           </div>
