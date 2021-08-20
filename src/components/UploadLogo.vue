@@ -48,7 +48,7 @@
           name="checkbox-1"
           value="accepted"
           unchecked-value="not_accepted">
-          Confirm for all logos
+          Don't show again.
         </b-form-checkbox>
       </div>
       <div class="upload-logo-buttons">

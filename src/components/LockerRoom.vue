@@ -30,6 +30,9 @@
                             <li>
                               <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                             </li>
+                            <li class="d-none d-lg-block">
+                              <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            </li>
                             <li>
                               <b-button :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
                               <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
@@ -45,9 +48,6 @@
                                   </div>
                                 </div>
                               </b-tooltip>
-                            </li>
-                            <li class="d-none d-lg-block">
-                              <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                             </li>
                           </ul>
                         </div>
@@ -96,7 +96,7 @@
                 </b-tab>
                 <b-tab v-if="getCollections.length > 0" title="Collections" class="designCollections">
 <!--                  <div class="products-holder d-lg-flex flex-lg-wrap mb-4">-->
-                  <div class="products-holder grid gap-5 grid-6">
+                  <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
                     <template v-for="(collection, index) in getCollections">
                       <div  :key="index" class="products-block">
                         <div class="image-holder">
@@ -114,7 +114,7 @@
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
                             <a @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <b-button :id="`collection_${index}`" :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                            <b-button :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
 <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
                             <b-tooltip :target="`collection_${index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
                               <div class="share-holder">
