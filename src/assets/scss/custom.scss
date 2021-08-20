@@ -2702,3 +2702,34 @@ $fontSize: 0.5;
         margin: 1rem;
     }
 }
+
+.respCanvas {
+    .canvas-area-holder{
+        @media (max-width: 767px) {
+            justify-content: center !important;
+            gap: 10px !important;
+        }
+    }
+    .canvas-container {
+        @media (max-width: 600px) {
+            height: 100px !important;
+            width: 100px !important;
+        }
+
+        .canvas {
+            @media (max-width: 600px) {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: contain;
+            }
+        }
+    }
+}
+
+.available-designs-section .design-col a .canvas-container{
+    .canvas{
+        height: 100% !important;
+        width: 100% !important;
+        object-fit: contain;
+    }
+}

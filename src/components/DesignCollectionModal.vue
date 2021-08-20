@@ -4,14 +4,13 @@
   <b-modal ref="collection-modal" id="modal-center-collection" size="xl" modal-class="modal-fullscreen2" content-class="collection-modal">
 
     <template #modal-title>
-      <div class="d-flex align-items-center justify-content-between w-100">
+      <div class="d-flex align-items-center justify-content-between gap-1 w-100">
         <div>
           <b-form-input v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
         </div>
 
         <div>
            <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
-          <b-button @click="openLockerModel">Add More Products</b-button>
         </div>
 
       </div>
@@ -42,7 +41,7 @@
 <!--            </div>-->
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 respCanvas">
 
             <Scene v-if="collectionItem.product_locker_room.design.back_design"
                    :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
@@ -88,6 +87,7 @@
       <div class="d-flex align-items-center justify-content-end w-100 gap-1">
         <b-button @click="hideCollectionModal" variant="secondary" class="light">Cancel</b-button>
         <b-button variant="secondary" @click="saveCollectionForm">Save</b-button>
+        <b-button @click="openLockerModel">Add more</b-button>
       </div>
     </template>
   </b-modal>
