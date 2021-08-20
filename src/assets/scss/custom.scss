@@ -2492,7 +2492,7 @@ $fontSize: 0.5;
 .sortable-ghost,
 .sortable-chosen{
     .card{
-        border-color: #219F84;
+        animation: 0.5s animateBorder linear alternate infinite;
     }
 }
 
@@ -2764,4 +2764,24 @@ $fontSize: 0.5;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+.products-block{
+    //transition: 0.2s all ease;
+    border: 1px solid transparent;
+    border-radius: 0.3rem;
+
+    &.sortable-chosen.sortable-ghost{
+        padding: 0.4rem;
+        animation: 0.5s animateBorder linear alternate infinite;
+    }
+}
+
+@keyframes animateBorder {
+    0%{
+        border: 1px solid #eee;
+    }
+    100%{
+        border: 1px solid #219F84;
+    }
 }

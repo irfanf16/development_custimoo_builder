@@ -10,9 +10,8 @@
         </div>
 
         <div>
-          <b-button style="margin-right: 10px" @click="openLockerModel(false)">Back To Locker Room</b-button>
+          <b-button style="margin-right: 10px" @click="openLockerModel(false)">Locker Room</b-button>
            <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
-          <b-button @click="openLockerModel(true)">Add More Products</b-button>
 
         </div>
 
