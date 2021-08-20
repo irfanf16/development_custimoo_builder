@@ -22,6 +22,10 @@ time, mark, audio, video {
 	font: inherit;
 	vertical-align: baseline;
     box-sizing: border-box;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+    scroll-behavior: smooth;
 }
 
 article, aside, details, figcaption, figure, 
@@ -89,6 +93,16 @@ button{
     //     }
     // }
 }
+
+.btn.btn-outline-secondary[disabled]{
+    color: #999 !important;
+    cursor: not-allowed !important;
+}
+
+.btn.btn-outline-secondary:not([disabled]):hover{
+    background: #666;
+}
+
 .h-100vh{height: 100vh;}
 .btn-secondary{
     background: #219F84;
