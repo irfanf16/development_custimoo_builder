@@ -128,6 +128,14 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public async retrievCollectionItems() {
     let res = await this.$store.dispatch('getCollectionItems')
     this.collectionItems = res;
+
+    let prod_ids = [];
+    this.collectionItems.collection_products.forEach(function (item) {
+      prod_ids.push(item.product_locker_room.id)
+    })
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',
+      {"attribute": "locker_products", "value": prod_ids})
+
   }
 
   public hideCollectionModal() {
