@@ -91,7 +91,7 @@
       </div>
     </template>
   </b-modal>
-    <DesignCollectionPdfView :collectionData="collectionData"/>
+    <DesignCollectionPdfView :collectionData="collectionItems" :key="DesignCollectionPdfViewKey"/>
   </span>
 
 </template>
@@ -122,12 +122,12 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public collectionData: any[] = []
   private collectionItems = {id: "", name: "", link: "", collection_products: []} as Record<any, any>
   public ref = this.$refs as Record<any, any>
+  public DesignCollectionPdfViewKey = 12345
   // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   public async retrievCollectionItems() {
     let res = await this.$store.dispatch('getCollectionItems')
     this.collectionItems = res;
-    this.collectionItems.collection_products = this.collectionItems.collection_products.map((collection_item: Record<any, any>, collection_item_index: number) => ({ ...collection_item, key: collection_item_index }))
   }
 
   public hideCollectionModal() {
@@ -151,6 +151,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     let lockerItems = this.collectionItems.collection_products;
     lockerItems = lockerItems.filter(item => item.product_locker_room.id !== locker_prod_id)
     this.collectionItems.collection_products = lockerItems;
+    this.reRenderPdfView();
     console.log(this.collectionItems.collection_products)
     this.$store.commit('DELETE_SELECTED_COLLECTION_PRODUCT', locker_prod_id)
     if (this.collectionItems.collection_products.length < 1) {
@@ -158,7 +159,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     }
   }
 
-  public async saveCollectionForm() {
+  public async saveCollectionForm_back() {
     let collectionItems = this.collectionItems;
     let formData = {};
 
@@ -192,19 +193,82 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     }
   }
 
+  public async saveCollectionForm() {
+    let collectionItems = this.collectionItems;
+    let formData = {};
+
+    formData.name = collectionItems.name;
+    formData.link = collectionItems.link
+    let products = [];
+
+    collectionItems.collection_products.forEach(function (item, index) {
+      products.push({
+        "product_nickname": item.product_nickname,
+        "product_note": item.product_note,
+        "product_locker_room_id": item.product_locker_room.id,
+        "order_number": (index + 1)
+      })
+    })
+    formData.products = products
+    let res;
+    if (collectionItems.id == "") {
+      res = await this.$store.dispatch('createNewCollection', formData);
+    } else {
+      formData.collection_id = collectionItems.id;
+      res = await this.$store.dispatch('updateNewCollection', formData);
+    }
+    this.generateCollectionPdf();
+    if (res.status) {
+      this.showToast(res.message, 'SUCCESS')
+      const payload = {"attribute": "locker_products", "value": []};
+      this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
+      this.ref['collection-modal'].hide();
+    } else {
+      this.showErrorArr(res.message)
+    }
+  }
+
 
   public openLockerModel() {
    this.$emit('showLockerRoomModal');
    this.$store.commit('SET_ADD_MORE_COLLECTION',true)
     this.hideCollectionModal()
+    this.reRenderPdfView();
   }
 
   public collectionItemMoved(moved_item_metadata: Record<string, any>) {
+    this.reRenderPdfView();
     let item = moved_item_metadata.moved;
     let new_index = item.newIndex;
     let old_index = item.oldIndex;
     this.collectionItems.collection_products[new_index].key = getRandom(5);
     this.collectionItems.collection_products[old_index].key = getRandom(5);
+  }
+
+  public reRenderPdfView() {
+    this.DesignCollectionPdfViewKey = getRandom();
+  }
+
+  public async generateCollectionPdf() {
+    let self = this;
+    const element = document.getElementById("collectionPdfContainer")
+    const opt = {
+      margin: [15, 10, 15, 10],
+      filename: 'production.pdf',
+      image: {type: "jpeg", quality: 1},
+      html2canvas: {
+        dpi: 192,
+        scale: 4,
+        useCORS: true,
+        letterRendering: true,
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "letter",
+        orientation: 'landscape'
+      }
+    };
+    html2pdf().set(opt).from(element).save();
   }
 
 

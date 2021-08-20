@@ -6,7 +6,7 @@
         <template v-if="collectionData && collectionData.collection_products.length > 0">
         <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1 break-after">
           <div id="header">
-            <div class="header-content">Product Nick Name Goes Here</div>
+            <div class="header-content">{{product.product_nickname}}</div>
             <div class="logo">
               <svg width="200px" height="36px" viewBox="0 0 200 36" version="1.1" xmlns="http://www.w3.org/2000/svg"
                    xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -55,8 +55,7 @@
                       :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)"
                       :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :canvasWidth="400" :canvasHeight="400" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))" :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false"  />
               <div :key="`desc${i}`">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, asperiores dolores eum, hic impedit laborum laudantium libero maxime nostrum, obcaecati perferendis porro quibusdam similique soluta tempore vitae voluptatibus. Obcaecati, unde.
+                <p>{{  product.product_locker_room.model_description.product_model_description || ''}}</p>
               </div>
             </div>
           </div>
@@ -80,7 +79,7 @@ import CustomizationPreview from '@/components/CustomizationPreview.vue'
 
 export default class DesignCollectionPdfView extends Vue {
   mounted() {
-    console.log("mounted", this.collectionData);
+    console.log("mountedsss", this.collectionData);
   }
   @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
   @Prop({required: true}) collectionData!: Record<any, any>
