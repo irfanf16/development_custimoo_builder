@@ -38,7 +38,7 @@ export default class ErrorMessages extends Vue{
     }
 
   }
-  public showErrorArr(errors: Record<any, any>[Record<any, any>]):void{
+  public showErrorArr(errors: Record<any, any>[string]):void{
    const errArr: string[] = [];
     Object.keys(errors).map((field: string) => {
       errArr.push(errors[field][0]);
