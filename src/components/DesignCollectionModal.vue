@@ -30,10 +30,11 @@
           <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
-<!--          <a >
-              <font-awesome-icon  :icon="['fas',    'eye' ]"/>
-            </a>-->
-          <div class="text-center fs-2 fw-bold">{{ collectionItem.product_locker_room.product_name }}</div>
+
+          <div class="text-center fs-2 fw-bold">
+            <a  @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
+            {{ collectionItem.product_locker_room.product_name }}
+          </div>
           <div class="mt-2 d-block gap-1">
             <div>
               <b-form-input class="w-100" v-model="collectionItem.product_nickname"
@@ -72,6 +73,7 @@
           </div>
 
           <div class="mt-3">
+            <a  @click="clickEyeIcon('description',index)" style="cursor: default"><font-awesome-icon  :icon="['fas', collectionItem.allow_description === true ? 'eye' : 'eye-slash' ]"/></a>
             <span v-html="collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.product_model_description : '' "></span>
           </div>
 
@@ -172,6 +174,15 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     }
   }
 
+  public clickEyeIcon(type:string,index:number) {
+    if(type == 'title') {
+      this.collectionItems.collection_products[index].allow_title = !this.collectionItems.collection_products[index].allow_title;
+    }
+    else {
+      this.collectionItems.collection_products[index].allow_description = !this.collectionItems.collection_products[index].allow_description;
+    }
+  }
+
   public async saveCollectionForm_back() {
     let collectionItems = this.collectionItems;
     let formData: Record<any, any> = {};
@@ -219,7 +230,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         "product_nickname": item.product_nickname,
         "product_note": item.product_note,
         "product_locker_room_id": item.product_locker_room.id,
-        "order_number": (index + 1)
+        "order_number": (index + 1),
+        "allow_title": item.allow_title,
+        "allow_description": item.allow_description,
+
       })
     })
     formData.products = products
