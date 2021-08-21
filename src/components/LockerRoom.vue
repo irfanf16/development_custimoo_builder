@@ -11,6 +11,8 @@
         </template>
         <div class="lockerroom-tabs">
           <div>
+
+
             <b-card no-body>
               <b-tabs card changed="currentTabs">
                 <b-tab title="Products">
@@ -30,6 +32,9 @@
                             <li>
                               <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                             </li>
+                            <li class="d-none d-lg-block">
+                              <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            </li>
                             <li>
                               <b-button :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
                               <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
@@ -46,9 +51,6 @@
                                 </div>
                               </b-tooltip>
                             </li>
-                            <li class="d-none d-lg-block">
-                              <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            </li>
                           </ul>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -59,7 +61,7 @@
                   </draggable>
 
                 </b-tab>
-                <b-tab title="Assets" class="assets-file">
+                <b-tab v-if="!getAddMoreCollectionStatus" title="Assets" class="assets-file">
                   <template v-for="(logo, inda) in room.logos">
                     <div :key="inda" class="assets-logo-block">
                       <img :src="storageUrl+logo.logo_url "/>
@@ -67,7 +69,7 @@
                     </div>
                   </template>
                 </b-tab>
-                <b-tab title="Colors">
+                <b-tab v-if="!getAddMoreCollectionStatus" title="Colors">
                   <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
                     <div class="pt-lg-2 folder-wrapper">
                       <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
@@ -94,9 +96,8 @@
                     </div>
                   </div>
                 </b-tab>
-                <b-tab v-if="getCollections.length > 0" title="Collections" class="designCollections">
-<!--                  <div class="products-holder d-lg-flex flex-lg-wrap mb-4">-->
-                  <div class="products-holder grid gap-5 grid-6">
+                <b-tab v-if="!getAddMoreCollectionStatus && getCollections.length > 0"  title="Collections" class="designCollections">
+                  <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
                     <template v-for="(collection, index) in getCollections">
                       <div  :key="index" class="products-block">
                         <div class="image-holder">
@@ -114,7 +115,7 @@
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
                             <a @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <b-button :id="`collection_${index}`" :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                            <b-button :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
 <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
                             <b-tooltip :target="`collection_${index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
                               <div class="share-holder">
@@ -144,7 +145,7 @@
       </b-tab>
     </template>
     <div class="create-lockerroom">
-      <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
+      <b-button v-if="!getAddMoreCollectionStatus" class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
       <CreateLockerRoomModal @lockerAdded="lockerAdded" />
       <ExistingCollectionModal @existingCollection="existingCollection" />
     </div>
@@ -193,7 +194,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public async setCollections() {
     await this.$store.dispatch('getCollections')
   }
-
+  get getAddMoreCollectionStatus(){
+    return this.$store.getters.getAddMoreCollectionStatus;
+  }
   get getLockerProducts():Record<any, any>{
     return this.$store.getters.getLockerProducts
   }

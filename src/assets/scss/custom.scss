@@ -22,6 +22,10 @@ time, mark, audio, video {
 	font: inherit;
 	vertical-align: baseline;
     box-sizing: border-box;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+    scroll-behavior: smooth;
 }
 
 article, aside, details, figcaption, figure, 
@@ -89,6 +93,16 @@ button{
     //     }
     // }
 }
+
+.btn.btn-outline-secondary[disabled]{
+    color: #999 !important;
+    cursor: not-allowed !important;
+}
+
+.btn.btn-outline-secondary:not([disabled]):hover{
+    background: #666;
+}
+
 .h-100vh{height: 100vh;}
 .btn-secondary{
     background: #219F84;
@@ -2478,7 +2492,7 @@ $fontSize: 0.5;
 .sortable-ghost,
 .sortable-chosen{
     .card{
-        border-color: #219F84;
+        animation: 0.5s animateBorder linear alternate infinite;
     }
 }
 
@@ -2536,13 +2550,20 @@ $fontSize: 0.5;
             grid-template-columns: repeat(1, 1fr);
             gap: 0.5rem;
 
-            a{
+            .btn{
                 height: 30px !important;
                 width: 30px !important;
                 display: flex !important;
                 align-items: center;
                 justify-content: center;
                 font-size: 1em;
+
+                @media (max-width: 600px) {
+                    font-size: 0.6rem;
+                    height: 20px !important;
+                    width: 20px !important;
+                    padding: 0;
+                }
             }
         }
     }
@@ -2731,5 +2752,36 @@ $fontSize: 0.5;
         height: 100% !important;
         width: 100% !important;
         object-fit: contain;
+    }
+}
+
+.confirm-icon{
+    font-size: 4rem !important;
+    height: 6rem !important;
+    width: 6rem !important;
+    padding: 0 !important;
+    cursor: default !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.products-block{
+    //transition: 0.2s all ease;
+    border: 1px solid transparent;
+    border-radius: 0.3rem;
+
+    &.sortable-chosen.sortable-ghost{
+        padding: 0.4rem;
+        animation: 0.5s animateBorder linear alternate infinite;
+    }
+}
+
+@keyframes animateBorder {
+    0%{
+        border: 1px solid #eee;
+    }
+    100%{
+        border: 1px solid #219F84;
     }
 }
