@@ -6,11 +6,11 @@
       ></LockerRoom>
 
       <template #modal-footer>
-        <div v-if="!getAddMoreCollectionStatus" class="text-right border-top">
-          <b-button v-if="selectedCollectionProducts.length>0"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add selected designs to Existing collection</b-button>
-          <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add selected designs to a new collection</b-button>
+        <div v-if="!getAddMoreCollectionStatus" class="text-right">
+          <b-button v-if="selectedCollectionProducts.length>0"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
+          <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add to a new collection</b-button>
         </div>
-        <div v-else class="text-right border-top">
+        <div v-else class="text-right">
           <b-button v-if="selectedCollectionProducts.length>0" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
         </div>
       </template>

@@ -10,7 +10,9 @@
         </div>
 
         <div>
+          <b-button style="margin-right: 10px" @click="openLockerModel(false)">Locker Room</b-button>
            <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
+
         </div>
 
       </div>
@@ -28,7 +30,11 @@
           <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
-          <div class="text-center fs-2 fw-bold">{{ collectionItem.product_locker_room.product_name }}</div>
+
+          <div class="text-center fs-2 fw-bold">
+            <a  @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
+            {{ collectionItem.product_locker_room.product_name }}
+          </div>
           <div class="mt-2 d-block gap-1">
             <div>
               <b-form-input class="w-100" v-model="collectionItem.product_nickname"
@@ -67,6 +73,7 @@
           </div>
 
           <div class="mt-3">
+            <a  @click="clickEyeIcon('description',index)" style="cursor: default"><font-awesome-icon  :icon="['fas', collectionItem.allow_description === true ? 'eye' : 'eye-slash' ]"/></a>
             <span v-html="collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.product_model_description : '' "></span>
           </div>
 
@@ -122,12 +129,20 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public collectionData: any[] = []
   private collectionItems = {id: "", name: "", link: "", collection_products: []} as Record<any, any>
   public ref = this.$refs as Record<any, any>
-  public DesignCollectionPdfViewKey = 12345
+  public DesignCollectionPdfViewKey: number|string = 12345
   // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   public async retrievCollectionItems() {
     let res = await this.$store.dispatch('getCollectionItems')
     this.collectionItems = res;
+
+    let prod_ids: number[] = [];
+    this.collectionItems.collection_products.forEach(function (item: Record<any, any>) {
+      prod_ids.push(item.product_locker_room.id)
+    })
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',
+      {"attribute": "locker_products", "value": prod_ids})
+
   }
 
   public hideCollectionModal() {
@@ -149,7 +164,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public deleteLockerProduct(locker_prod_id: number) {
     console.log(locker_prod_id);
     let lockerItems = this.collectionItems.collection_products;
-    lockerItems = lockerItems.filter(item => item.product_locker_room.id !== locker_prod_id)
+    lockerItems = lockerItems.filter((item: Record<any, any>) => item.product_locker_room.id !== locker_prod_id)
     this.collectionItems.collection_products = lockerItems;
     this.reRenderPdfView();
     console.log(this.collectionItems.collection_products)
@@ -159,15 +174,24 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     }
   }
 
+  public clickEyeIcon(type:string,index:number) {
+    if(type == 'title') {
+      this.collectionItems.collection_products[index].allow_title = !this.collectionItems.collection_products[index].allow_title;
+    }
+    else {
+      this.collectionItems.collection_products[index].allow_description = !this.collectionItems.collection_products[index].allow_description;
+    }
+  }
+
   public async saveCollectionForm_back() {
     let collectionItems = this.collectionItems;
-    let formData = {};
+    let formData: Record<any, any> = {};
 
     formData.name = collectionItems.name;
     formData.link = collectionItems.link
-    let products = [];
+    let products: Record<any, any>[] = [];
 
-    collectionItems.collection_products.forEach(function (item, index) {
+    collectionItems.collection_products.forEach(function (item: Record<any, any>, index: number) {
       products.push({
         "product_nickname": item.product_nickname,
         "product_note": item.product_note,
@@ -195,18 +219,21 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
   public async saveCollectionForm() {
     let collectionItems = this.collectionItems;
-    let formData = {};
+    let formData: Record<any, any> = {};
 
     formData.name = collectionItems.name;
     formData.link = collectionItems.link
-    let products = [];
+    let products: Record<any, any>[] = [];
 
-    collectionItems.collection_products.forEach(function (item, index) {
+    collectionItems.collection_products.forEach(function (item: Record<any, any>, index: number) {
       products.push({
         "product_nickname": item.product_nickname,
         "product_note": item.product_note,
         "product_locker_room_id": item.product_locker_room.id,
-        "order_number": (index + 1)
+        "order_number": (index + 1),
+        "allow_title": item.allow_title,
+        "allow_description": item.allow_description,
+
       })
     })
     formData.products = products
@@ -232,10 +259,11 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     }
   }
 
+  public openLockerModel(add_more_status:boolean) {
 
-  public openLockerModel() {
    this.$emit('showLockerRoomModal');
-   this.$store.commit('SET_ADD_MORE_COLLECTION',true)
+   if(add_more_status)
+     this.$store.commit('SET_ADD_MORE_COLLECTION',true)
     this.hideCollectionModal()
     this.reRenderPdfView();
   }
