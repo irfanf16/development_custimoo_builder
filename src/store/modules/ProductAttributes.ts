@@ -27,10 +27,6 @@ const ProductAttributes:Module<any, any> = {
     hideColorSection : false,
     customized: true,
     personalized: false,
-    editStatus: false,
-    editProductId: 0,
-    editDesignId: 0,
-    editStyleId: 0,
     selectedCollectionProducts: {locker_products:[],collection_id:0},
     collections: [],
     designCollections: [],
@@ -44,7 +40,9 @@ const ProductAttributes:Module<any, any> = {
   },
   mutations: {
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
-      state.editProduct.editStatus = payload.status
+      if (payload.status){
+        state.editProduct.editStatus = payload.status
+      }
       if (payload.id) {
         state.editProduct.editProductId = payload.id
       }
