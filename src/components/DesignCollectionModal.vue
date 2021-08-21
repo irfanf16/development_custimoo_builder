@@ -196,7 +196,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         "product_nickname": item.product_nickname,
         "product_note": item.product_note,
         "product_locker_room_id": item.product_locker_room.id,
-        "order_number": (index + 1)
+        "order_number": (index + 1),
+        "allow_title": item.allow_title,
+        "allow_description": item.allow_description,
+
       })
     })
     formData.products = products
@@ -238,13 +241,17 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     })
     formData.products = products
     let res;
+    let content = ''
     if (collectionItems.id == "") {
+      content = await this.generateCollectionPdf();
+      formData.data = content
       res = await this.$store.dispatch('createNewCollection', formData);
     } else {
+      content = await this.generateCollectionPdf();
+      formData.data = content
       formData.collection_id = collectionItems.id;
       res = await this.$store.dispatch('updateNewCollection', formData);
     }
-    await this.generateCollectionPdf();
     if (res.status) {
       this.showToast(res.message, 'SUCCESS')
       const payload = {"attribute": "locker_products", "value": []};
@@ -280,7 +287,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     this.DesignCollectionPdfViewKey = getRandom();
   }
 
-  public async generateCollectionPdf() {
+  public  generateCollectionPdf() {
     let self = this;
     const element = document.getElementById("collectionPdfContainer")
     const opt = {
@@ -299,7 +306,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         orientation: 'landscape'
       }
     };
-    html2pdf().set(opt).from(element).save();
+    return  html2pdf().set(opt).from(element).toPdf().output('datauristring').then((pdf:any) =>{
+      let arr = pdf.split(',');
+      return  arr[1];
+    })
   }
 
 

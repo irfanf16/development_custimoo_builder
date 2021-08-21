@@ -44,7 +44,9 @@ const ProductAttributes:Module<any, any> = {
   },
   mutations: {
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
-      state.editProduct.editStatus = payload.status
+      if (payload.status){
+        state.editProduct.editStatus = payload.status
+      }
       if (payload.id) {
         state.editProduct.editProductId = payload.id
       }
