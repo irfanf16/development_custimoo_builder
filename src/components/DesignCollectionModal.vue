@@ -196,7 +196,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         "product_nickname": item.product_nickname,
         "product_note": item.product_note,
         "product_locker_room_id": item.product_locker_room.id,
-        "order_number": (index + 1)
+        "order_number": (index + 1),
+        "allow_title": item.allow_title,
+        "allow_description": item.allow_description,
+
       })
     })
     formData.products = products
