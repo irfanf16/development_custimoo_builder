@@ -127,15 +127,15 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public collectionData: any[] = []
   private collectionItems = {id: "", name: "", link: "", collection_products: []} as Record<any, any>
   public ref = this.$refs as Record<any, any>
-  public DesignCollectionPdfViewKey = 12345
+  public DesignCollectionPdfViewKey: number|string = 12345
   // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   public async retrievCollectionItems() {
     let res = await this.$store.dispatch('getCollectionItems')
     this.collectionItems = res;
 
-    let prod_ids = [];
-    this.collectionItems.collection_products.forEach(function (item) {
+    let prod_ids: number[] = [];
+    this.collectionItems.collection_products.forEach(function (item: Record<any, any>) {
       prod_ids.push(item.product_locker_room.id)
     })
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',
@@ -162,7 +162,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public deleteLockerProduct(locker_prod_id: number) {
     console.log(locker_prod_id);
     let lockerItems = this.collectionItems.collection_products;
-    lockerItems = lockerItems.filter(item => item.product_locker_room.id !== locker_prod_id)
+    lockerItems = lockerItems.filter((item: Record<any, any>) => item.product_locker_room.id !== locker_prod_id)
     this.collectionItems.collection_products = lockerItems;
     this.reRenderPdfView();
     console.log(this.collectionItems.collection_products)
@@ -174,13 +174,13 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
   public async saveCollectionForm_back() {
     let collectionItems = this.collectionItems;
-    let formData = {};
+    let formData: Record<any, any> = {};
 
     formData.name = collectionItems.name;
     formData.link = collectionItems.link
-    let products = [];
+    let products: Record<any, any>[] = [];
 
-    collectionItems.collection_products.forEach(function (item, index) {
+    collectionItems.collection_products.forEach(function (item: Record<any, any>, index: number) {
       products.push({
         "product_nickname": item.product_nickname,
         "product_note": item.product_note,
@@ -208,13 +208,13 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
   public async saveCollectionForm() {
     let collectionItems = this.collectionItems;
-    let formData = {};
+    let formData: Record<any, any> = {};
 
     formData.name = collectionItems.name;
     formData.link = collectionItems.link
-    let products = [];
+    let products: Record<any, any>[] = [];
 
-    collectionItems.collection_products.forEach(function (item, index) {
+    collectionItems.collection_products.forEach(function (item: Record<any, any>, index: number) {
       products.push({
         "product_nickname": item.product_nickname,
         "product_note": item.product_note,
@@ -230,7 +230,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
       formData.collection_id = collectionItems.id;
       res = await this.$store.dispatch('updateNewCollection', formData);
     }
-    this.generateCollectionPdf();
+    await this.generateCollectionPdf();
     if (res.status) {
       this.showToast(res.message, 'SUCCESS')
       const payload = {"attribute": "locker_products", "value": []};
