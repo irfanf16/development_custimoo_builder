@@ -27,7 +27,11 @@ const ProductAttributes:Module<any, any> = {
     hideColorSection : false,
     customized: true,
     personalized: false,
-    selectedCollectionProducts: {locker_products:[],collection_id:0},
+    editStatus: false,
+    editProductId: 0,
+    editDesignId: 0,
+    editStyleId: 0,
+    selectedCollectionProducts: {locker_products:[],disabled_products:[],collection_id:0},
     collections: [],
     designCollections: [],
     editProduct:{
@@ -61,6 +65,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_ADD_MORE_COLLECTION(state: Record<any, any>, payload: boolean){
       state.addMoreCollection = payload
+    },
+    SET_DISABLED_PRODUCTS(state: Record<any, any>, payload: boolean){
+      state.selectedCollectionProducts.disabled_products = state.selectedCollectionProducts.locker_products
     },
     SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
       if(payload.length) {
@@ -484,6 +491,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getSelectedCollectionProducts(state:Record<any, any>){
       return state.selectedCollectionProducts.locker_products
+    },
+    getDisabledProducts(state:Record<any, any>){
+      return state.selectedCollectionProducts.disabled_products
     },
     getSelectedCollectionParams(state:Record<any, any>){
       return state.selectedCollectionProducts

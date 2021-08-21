@@ -265,8 +265,11 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public openLockerModel(add_more_status:boolean) {
 
    this.$emit('showLockerRoomModal');
-   if(add_more_status)
+   if(add_more_status) {
      this.$store.commit('SET_ADD_MORE_COLLECTION',true)
+     this.$store.commit('SET_DISABLED_PRODUCTS',true)
+   }
+
     this.hideCollectionModal()
     this.reRenderPdfView();
   }

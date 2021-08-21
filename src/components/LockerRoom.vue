@@ -22,7 +22,7 @@
                       <label :key="ind" class="products-block">
                         <div class="image-holder">
                           <div>
-                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
+                            <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <Scene :measurement-ratio="product.design.measurement_ratio" :productType="product.product_type"
                                    :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front? storageUrl+product.style.front.file_url : ''}"
                                    :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
@@ -403,6 +403,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     return this.$store.getters.getSelectedCollectionProducts
   }
 
+
   public set selectedCollectionProducts(val : Record<any, any>) {
     const payload = {"attribute":"locker_products","value":val};
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
@@ -416,6 +417,18 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public existingCollection(){
     this.$emit('editCollectionModal')
     this.$emit('hideLockerRoomModal')
+  }
+  public getDisabled(locker_prd_id:number):boolean {
+    if(this.getAddMoreCollectionStatus) {
+      //let selected = this.$store.getters.getSelectedCollectionProducts
+      let disabled = this.$store.getters.getDisabledProducts
+      let res = disabled.find((id:number) => {
+        return id == locker_prd_id
+      })
+      return !!res;
+    }
+    return false
+
   }
 }
 </script>
