@@ -402,8 +402,6 @@ const ProductAttributes:Module<any, any> = {
       switch (payload.attribute){
         case "locker_products":
           state.selectedCollectionProducts.locker_products = payload.value;
-          console.log(payload.value)
-          state.selectedCollectionProducts.deleted_products = state.selectedCollectionProducts.deleted_products.filter((id: number) => !payload.value.includes(id))
          break;
         case "collection_id":
           state.selectedCollectionProducts.collection_id = payload.value
