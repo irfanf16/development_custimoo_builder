@@ -20,6 +20,7 @@
 
     <template>
       <div class="design-collection-form">
+        <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
         <b-form inline>
           <b-container fluid>
             <draggable class="row draggable gap-y-5" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}"
@@ -125,9 +126,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public ref = this.$refs as Record<any, any>
   public DesignCollectionPdfViewKey: number|string = 12345
   // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  public showLoader = false
 
   public async retrievCollectionItems() {
-
+    this.showLoader = true;
     let res: Record<any, any> = await this.$store.dispatch('getCollectionItems')
     let collectionItems: Record<any, any> = res;
 
@@ -166,7 +168,8 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "locker_products", "value": prod_ids})
     this.$store.commit('SET_COLLECTION_ITEMS', collectionItems)
-
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "deleted_products", "value": []})
+    this.showLoader = false;
   }
 
   get collectionItems(){
@@ -182,8 +185,9 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   }
 
   public showCollectionModal() {
-    const payload = {"attribute": "collection_id", "value": 0}
-    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
+
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {"attribute": "collection_id", "value": 0})
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "deleted_products", "value": []})
     this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
     this.ref['collection-modal'].show();
     this.retrievCollectionItems();
@@ -197,6 +201,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public deleteLockerProduct(locker_prod_id: number) {
     this.$store.commit('DELETE_COLLECTION_ITEM', locker_prod_id)
     this.$store.commit('DELETE_SELECTED_COLLECTION_PRODUCT', locker_prod_id)
+    this.$store.commit('ADD_DELETED_COLLECTION_PRODUCT', locker_prod_id)
     if (this.collectionItems.collection_products.length < 1) {
       this.hideCollectionModal()
     }
@@ -205,20 +210,18 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public clickEyeIcon(type:string,index:number) {
     if(type == 'title') {
       this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_title', value: !this.collectionItems.collection_products[index].allow_title})
-     // this.collectionItems.collection_products[index].allow_title = !this.collectionItems.collection_products[index].allow_title;
     }
     else {
       this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_description', value: !this.collectionItems.collection_products[index].allow_description})
-      //this.collectionItems.collection_products[index].allow_description = !this.collectionItems.collection_products[index].allow_description;
     }
   }
 
-  public updateCollectionItemAttribute(attribute, index, value){
+  public updateCollectionItemAttribute(attribute: string, index: number, value: string){
     this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: attribute, value: value})
   }
 
   public async saveCollectionForm_back() {
-    let collectionItems = this.collectionItems;
+    let collectionItems: Record<any, any> = this.collectionItems;
     let formData: Record<any, any> = {};
 
     formData.name = collectionItems.name;
@@ -255,6 +258,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   }
 
   public async saveCollectionForm() {
+    this.showLoader = true;
     let collectionItems = this.collectionItems;
     let formData: Record<any, any> = {};
 
@@ -286,6 +290,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
       formData.collection_id = collectionItems.id;
       res = await this.$store.dispatch('updateNewCollection', formData);
     }
+    this.showLoader = false;
     if (res.status) {
       this.showToast(res.message, 'SUCCESS')
       const payload = {"attribute": "locker_products", "value": []};
@@ -336,3 +341,28 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
 }
 </script>
+<style scoped>
+.loader {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+z-index: 9999;
+
+img {
+  width: 100px !important;
+  max-width: 100px;
+  display: block;
+  margin: 0 auto;
+  height: auto;
+}
+
+}
+</style>

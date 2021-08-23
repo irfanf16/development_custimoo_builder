@@ -11,13 +11,13 @@
             </div>
             <template v-if="manageComponents.ExtractedColors">
               <div class="mb-3 mb-lg-0" v-if="customLogos[0] && customLogos[0].url" :class="extractedcolorclass">
-                <ExtractedColors />
+                <ExtractedColors v-if="!hideColorSection" />
               </div>
             </template>
 
             <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
               <template v-if="manageComponents.LogoArea">
-                <UploadLogo v-if="!hideColorSection" :customLogoIndex="0"/>
+                <UploadLogo  :customLogoIndex="0"/>
               </template>
             </template>
             <template v-if="manageComponents.ChooseInterest">
@@ -286,8 +286,8 @@ export default class Home extends Vue {
   public showCollectionModal = () =>{
     this.ref['collectionModal'].showCollectionModal()
   }
-  public editCollectionModal = (collection_id:number) =>{
-    this.ref['collectionModal'].editCollectionModal(collection_id)
+  public editCollectionModal = () =>{
+    this.ref['collectionModal'].editCollectionModal()
   }
   @Watch('customLogos', {
     deep: true
