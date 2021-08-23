@@ -7,7 +7,7 @@
         <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1 break-after">
           <div id="header">
             <div class="header-content">
-              Product Nick Name: {{product.product_nickname }}</div>
+               {{ product.product_nickname != "" ? `Nick Name: ${product.product_nickname} / ` : '' }}   {{ product.allow_title ? `Title: ${product.product_locker_room.product_name}` : ''}}</div>
             <div class="logo">
               <svg width="200px" height="36px" viewBox="0 0 200 36" version="1.1" xmlns="http://www.w3.org/2000/svg"
                    xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -51,14 +51,18 @@
                      :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
                      :back="{textureUrl: product.product_locker_room.design.back_design ? storageUrl+product.product_locker_room.design.back_design.file_url: '', modelUrl: product.product_locker_room.style.back ? storageUrl+product.product_locker_room.style.back.file_url : ''}"
                      :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"
-                     :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false"  :canvasWidth="400" :canvasHeight="400"/>
+                     :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="400" :canvasHeight="400" :preSetData="true" />
               <Scene v-else class="view-back" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"
                       :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
-                      :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :canvasWidth="400" :canvasHeight="400"
+                      :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)"
                       :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"
-                      :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false"  />
+                      :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="400" :canvasHeight="400" :preSetData="true" />
               <div :key="`desc${i}`">
-                <p v-html="product.product_locker_room.model_description ? product.product_locker_room.model_description.product_model_description : ''"></p>
+                <p v-html="(product.product_locker_room.model_description && product.allow_description) ? product.product_locker_room.model_description.product_model_description : ''"></p>
+              </div>
+              <br>
+              <div :key="`prd_note${i}`">
+                <p v-html="product.product_note != '' ? product.product_note : ''"></p>
               </div>
             </div>
           </div>
