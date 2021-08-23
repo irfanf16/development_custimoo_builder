@@ -171,6 +171,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "locker_products", "value": prod_ids})
     this.$store.commit('SET_COLLECTION_ITEMS', collectionItems)
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "deleted_products", "value": []})
 
   }
 
@@ -187,8 +188,9 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   }
 
   public showCollectionModal() {
-    const payload = {"attribute": "collection_id", "value": 0}
-    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
+
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {"attribute": "collection_id", "value": 0})
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "deleted_products", "value": []})
     this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
     this.ref['collection-modal'].show();
     this.retrievCollectionItems();
@@ -203,6 +205,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     this.$store.commit('DELETE_COLLECTION_ITEM', locker_prod_id)
     this.reRenderPdfView();
     this.$store.commit('DELETE_SELECTED_COLLECTION_PRODUCT', locker_prod_id)
+    this.$store.commit('ADD_DELETED_COLLECTION_PRODUCT', locker_prod_id)
     if (this.collectionItems.collection_products.length < 1) {
       this.hideCollectionModal()
     }
@@ -211,20 +214,18 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public clickEyeIcon(type:string,index:number) {
     if(type == 'title') {
       this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_title', value: !this.collectionItems.collection_products[index].allow_title})
-     // this.collectionItems.collection_products[index].allow_title = !this.collectionItems.collection_products[index].allow_title;
     }
     else {
       this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_description', value: !this.collectionItems.collection_products[index].allow_description})
-      //this.collectionItems.collection_products[index].allow_description = !this.collectionItems.collection_products[index].allow_description;
     }
   }
 
-  public updateCollectionItemAttribute(attribute, index, value){
+  public updateCollectionItemAttribute(attribute: string, index: number, value: string){
     this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: attribute, value: value})
   }
 
   public async saveCollectionForm_back() {
-    let collectionItems = this.collectionItems;
+    let collectionItems: Record<any, any> = this.collectionItems;
     let formData: Record<any, any> = {};
 
     formData.name = collectionItems.name;

@@ -286,8 +286,8 @@ export default class Home extends Vue {
   public showCollectionModal = () =>{
     this.ref['collectionModal'].showCollectionModal()
   }
-  public editCollectionModal = (collection_id:number) =>{
-    this.ref['collectionModal'].editCollectionModal(collection_id)
+  public editCollectionModal = () =>{
+    this.ref['collectionModal'].editCollectionModal()
   }
   @Watch('customLogos', {
     deep: true

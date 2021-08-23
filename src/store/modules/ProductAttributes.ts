@@ -31,7 +31,7 @@ const ProductAttributes:Module<any, any> = {
     editProductId: 0,
     editDesignId: 0,
     editStyleId: 0,
-    selectedCollectionProducts: {locker_products:[],disabled_products:[],collection_id:0},
+    selectedCollectionProducts: {locker_products:[],disabled_products:[],deleted_products:[],collection_id:0},
     collectionItems: {id: "", name: "", link: "", collection_products: []},
     collections: [],
     designCollections: [],
@@ -402,9 +402,14 @@ const ProductAttributes:Module<any, any> = {
       switch (payload.attribute){
         case "locker_products":
           state.selectedCollectionProducts.locker_products = payload.value;
-        break;
+          console.log(payload.value)
+          state.selectedCollectionProducts.deleted_products = state.selectedCollectionProducts.deleted_products.filter((id: number) => !payload.value.includes(id))
+         break;
         case "collection_id":
           state.selectedCollectionProducts.collection_id = payload.value
+        break;
+        case "deleted_products":
+          state.selectedCollectionProducts.deleted_products = payload.value
         break;
       }
 
@@ -413,6 +418,9 @@ const ProductAttributes:Module<any, any> = {
       let lockerProds = state.selectedCollectionProducts.locker_products;
       lockerProds = lockerProds.filter((item: number) => item !== product_id)
       state.selectedCollectionProducts.locker_products = lockerProds
+    },
+    ADD_DELETED_COLLECTION_PRODUCT(state:Record<any, any>, product_id:number){
+      state.selectedCollectionProducts.deleted_products.push(product_id)
     },
     DELETE_COLLECTION_ITEM(state:Record<any, any>, product_id:number){
       let lockerItems = state.collectionItems.collection_products;
@@ -695,7 +703,7 @@ const ProductAttributes:Module<any, any> = {
     async getCollectionItems({getters}){
 
       const selectedData = getters.getSelectedCollectionParams;
-      const payload  = {collection_id:selectedData.collection_id, collection_prd_ids:selectedData.locker_products}
+      const payload  = {collection_id:selectedData.collection_id, collection_prd_ids:selectedData.locker_products, delete_ids:selectedData.deleted_products}
 
       const res =  await http.post('collection-data', payload).then((res) =>{
         return res.data;
