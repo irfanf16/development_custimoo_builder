@@ -111,7 +111,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       localStorage.setItem('logo_modal_status', 'false')
       this.open_modal = false
     }
-    this.ref.fileInput.click()
+    if(this.ref.fileInput) {
+      this.ref.fileInput.click()
+    }
   }
 
 
