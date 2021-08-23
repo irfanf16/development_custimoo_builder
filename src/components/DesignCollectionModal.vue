@@ -23,7 +23,7 @@
         <b-form inline>
           <b-container fluid>
             <draggable class="row draggable gap-y-5" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}"
-                       v-model='collectionItems.collection_products' @change="collectionItemMoved">
+                       v-model='collectionItems.collection_products'>
       <b-col cols="12" md="6" lg="4" xl="3" v-for="(collectionItem, index) in collectionItems.collection_products"
              :key="index">
         <b-card>
@@ -51,23 +51,21 @@
 
             <Scene v-if="collectionItem.product_locker_room.design.back_design"
                    :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
-                   :key="collectionItem.key"
+                   :key="collectionItem.id"
                    :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: collectionItem.product_locker_room.style.front? storageUrl+collectionItem.product_locker_room.style.front.file_url : ''}"
                    :back="{textureUrl: storageUrl+collectionItem.product_locker_room.design.back_design.file_url, modelUrl: collectionItem.product_locker_room.style.back? storageUrl+collectionItem.product_locker_room.style.back.file_url: ''}"
                    :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''"
                    :lockerDefaultColors="JSON.parse(collectionItem.product_locker_room.defaultcolors)"
-                   :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150"
-                   :canvasWidth="150"
+                   :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150" :canvasWidth="150"
                    :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
                    :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
 
             <Scene v-else :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
-                   :key="collectionItem.key"
+                   :key="collectionItem.id"
                    :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: collectionItem.product_locker_room.style? storageUrl+collectionItem.product_locker_room.style.front.file_url : ''}"
                    :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''"
                    :lockerDefaultColors="JSON.parse(collectionItem.product_locker_room.defaultcolors)"
-                   :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150"
-                   :canvasWidth="150"
+                   :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150" :canvasWidth="150"
                    :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
                    :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
           </div>
@@ -112,9 +110,6 @@ import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
-import { getRandom } from "@/helpers/Helpers";
-
-
 
 @Component({
   components: {
@@ -203,7 +198,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
   public deleteLockerProduct(locker_prod_id: number) {
     this.$store.commit('DELETE_COLLECTION_ITEM', locker_prod_id)
-    this.reRenderPdfView();
     this.$store.commit('DELETE_SELECTED_COLLECTION_PRODUCT', locker_prod_id)
     this.$store.commit('ADD_DELETED_COLLECTION_PRODUCT', locker_prod_id)
     if (this.collectionItems.collection_products.length < 1) {
@@ -313,20 +307,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
    }
 
     this.hideCollectionModal()
-    this.reRenderPdfView();
-  }
-
-  public collectionItemMoved(moved_item_metadata: Record<string, any>) {
-    this.reRenderPdfView();
-    let item = moved_item_metadata.moved;
-    let new_index = item.newIndex;
-    let old_index = item.oldIndex;
-    this.collectionItems.collection_products[new_index].key = getRandom(5);
-    this.collectionItems.collection_products[old_index].key = getRandom(5);
-  }
-
-  public reRenderPdfView() {
-    this.DesignCollectionPdfViewKey = getRandom();
   }
 
   public  generateCollectionPdf() {
