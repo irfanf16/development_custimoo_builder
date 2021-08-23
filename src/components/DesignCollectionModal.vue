@@ -132,6 +132,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   public async retrievCollectionItems() {
+
     let res: Record<any, any> = await this.$store.dispatch('getCollectionItems')
     let collectionItems: Record<any, any> = res;
 
