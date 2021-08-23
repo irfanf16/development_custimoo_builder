@@ -131,7 +131,8 @@ export default class Scene extends Vue {
   @Prop({required: false, default:  () => { return {} }}) readonly lockerGroupColors !: Record<string, any>;
   @Prop({required: false, default: () => { return [] }}) readonly logosSettings !: [Record<any, any>]
   @Prop({required: false, default: () => { return [] }}) readonly productNamesSetting !: [Record<any, any>]
-  @Prop({required: false}) readonly logoAllowed !: boolean
+  @Prop({required: false, default: false}) readonly logoAllowed !: boolean
+  @Prop({required: false, default: false}) readonly preSetData !: boolean
   @Prop({required: false, default: true}) readonly multipleLogo !: boolean
   @Prop({required: false}) readonly logosLimit !: number
   @Prop({required: false}) readonly productColors !: [Record<string, any>];
@@ -817,68 +818,71 @@ export default class Scene extends Vue {
           if(self.logos.length) {
             this.addLogos(self.logos)
           }
-          let logos: Record<any, any>[] = []
+          if(this.preSetData) {
+            let logos: Record<any, any>[] = []
 
-          if (self.customLogos && self.logoAllowed) {
-            let customLogos = JSON.parse(JSON.stringify(self.customLogos))
-            if (self.logosLimit) {
-              customLogos = self.customLogos.slice(0, self.logosLimit) as [Record<any, any>]
-            }
-            customLogos.forEach((item: Record<any, any>, index: number) => {
-              if (item && (!item.action && self.logosSettings[index])) {
-                item.width = self.logosSettings[index].width
-                item.height = self.logosSettings[index].height
-                item.x_axis = self.logosSettings[index].x_axis
-                item.y_axis = self.logosSettings[index].y_axis
-                item.rotation = self.logosSettings[index].rotation
-
-                if(self.mainPreview) {
-                  self.$store.dispatch('updateCustomLogoWithoutTrigger', {
-                    index: index,
-                    data: {
-                      width: self.logosSettings[index].width,
-                      height: self.logosSettings[index].height,
-                      x_axis: self.logosSettings[index].x_axis,
-                      y_axis: self.logosSettings[index].y_axis,
-                      rotation: self.logosSettings[index].rotation
-                    }
-                  })
-                }
+            if (self.customLogos && self.logoAllowed) {
+              let customLogos = JSON.parse(JSON.stringify(self.customLogos))
+              if (self.logosLimit) {
+                customLogos = self.customLogos.slice(0, self.logosLimit) as [Record<any, any>]
               }
-            })
-            logos = logos.concat(customLogos) as [Record<any, any>]
-          }
-          if (logos.length) {
-            setTimeout(() => {
-              this.addLogos(logos as [Record<any, any>])
-            }, 500)
-          }
+              customLogos.forEach((item: Record<any, any>, index: number) => {
+                if (item && (!item.action && self.logosSettings[index])) {
+                  item.width = self.logosSettings[index].width
+                  item.height = self.logosSettings[index].height
+                  item.x_axis = self.logosSettings[index].x_axis
+                  item.y_axis = self.logosSettings[index].y_axis
+                  item.rotation = self.logosSettings[index].rotation
 
+                  if (self.mainPreview) {
+                    self.$store.dispatch('updateCustomLogoWithoutTrigger', {
+                      index: index,
+                      data: {
+                        width: self.logosSettings[index].width,
+                        height: self.logosSettings[index].height,
+                        x_axis: self.logosSettings[index].x_axis,
+                        y_axis: self.logosSettings[index].y_axis,
+                        rotation: self.logosSettings[index].rotation
+                      }
+                    })
+                  }
+                }
+              })
+              logos = logos.concat(customLogos) as [Record<any, any>]
+            }
+            if (logos.length) {
+              setTimeout(() => {
+                this.addLogos(logos as [Record<any, any>])
+              }, 500)
+            }
+          }
           if (self.customTexts.length || self.texts.length) {
             let texts = self.texts
-            self.customTexts.forEach((item: Record<any, any>, index: number) => {
-              if (!item.action && self.productNamesSetting[index]) {
-                item.width = self.productNamesSetting[index].width
-                item.height = self.productNamesSetting[index].height
-                item.x_axis = self.productNamesSetting[index].x_axis
-                item.y_axis = self.productNamesSetting[index].y_axis
-                item.rotation = self.productNamesSetting[index].rotation
+            if(!this.preSetData) {
+              self.customTexts.forEach((item: Record<any, any>, index: number) => {
+                if (!item.action && self.productNamesSetting[index]) {
+                  item.width = self.productNamesSetting[index].width
+                  item.height = self.productNamesSetting[index].height
+                  item.x_axis = self.productNamesSetting[index].x_axis
+                  item.y_axis = self.productNamesSetting[index].y_axis
+                  item.rotation = self.productNamesSetting[index].rotation
 
-                if(self.mainPreview) {
-                  self.$store.dispatch('updateCustomTextWithoutTrigger', {
-                    index: index,
-                    data: {
-                      width: self.productNamesSetting[index].width,
-                      height: self.productNamesSetting[index].height,
-                      x_axis: self.productNamesSetting[index].x_axis,
-                      y_axis: self.productNamesSetting[index].y_axis,
-                      rotation: self.productNamesSetting[index].rotation
-                    }
-                  })
+                  if (self.mainPreview) {
+                    self.$store.dispatch('updateCustomTextWithoutTrigger', {
+                      index: index,
+                      data: {
+                        width: self.productNamesSetting[index].width,
+                        height: self.productNamesSetting[index].height,
+                        x_axis: self.productNamesSetting[index].x_axis,
+                        y_axis: self.productNamesSetting[index].y_axis,
+                        rotation: self.productNamesSetting[index].rotation
+                      }
+                    })
+                  }
                 }
-              }
-            })
-            texts = texts.concat(self.customTexts) as [Record<any, any>]
+              })
+              texts = texts.concat(self.customTexts) as [Record<any, any>]
+            }
             setTimeout(() => {
               this.addTexts(texts)
             }, 500)
