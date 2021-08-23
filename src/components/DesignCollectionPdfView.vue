@@ -2,11 +2,12 @@
   <div class="d-none">
     <div id="collectionPdfContainer">
       <div id="wrapper">
-        <h1 class="fs-5 pb-1 text-center text-secondary">Collection Name Goes Here</h1>
+        <h1 class="fs-5 pb-1 text-center text-secondary">Collection Name: {{ collectionData.name}}</h1>
         <template v-if="collectionData && collectionData.collection_products.length > 0">
         <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1 break-after">
           <div id="header">
-            <div class="header-content">{{product.product_nickname}}</div>
+            <div class="header-content">
+              Product Nick Name: {{product.product_nickname }}</div>
             <div class="logo">
               <svg width="200px" height="36px" viewBox="0 0 200 36" version="1.1" xmlns="http://www.w3.org/2000/svg"
                    xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -55,7 +56,7 @@
                       :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)"
                       :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :canvasWidth="400" :canvasHeight="400" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))" :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false"  />
               <div :key="`desc${i}`">
-                <p>{{  product.product_locker_room.model_description.product_model_description || ''}}</p>
+                <p v-html="product.product_locker_room.model_description ? product.product_locker_room.model_description.product_model_description : ''"></p>
               </div>
             </div>
           </div>
