@@ -39,8 +39,9 @@ export default class LockerRoomModal extends Vue {
   }
 
   public editCollectionModal = () => {
-     this.$emit('editCollectionModal')
-  }
+    this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
+    this.$emit('editCollectionModal')
+ }
 
   public addMoreCollectionModal = () => {
     this.$emit('editCollectionModal')

@@ -32,6 +32,7 @@ const ProductAttributes:Module<any, any> = {
     editDesignId: 0,
     editStyleId: 0,
     selectedCollectionProducts: {locker_products:[],collection_id:0},
+    collectionItems: {id: "", name: "", link: "", collection_products: []},
     collections: [],
     designCollections: [],
     editProduct:{
@@ -382,6 +383,16 @@ const ProductAttributes:Module<any, any> = {
         }
       }
     },
+    SET_COLLECTION_ITEMS(state:Record<any, any>, payload:Record<any, any>){
+        state.collectionItems = payload;
+    },
+    SET_COLLECTION_ITEMS_ATTRIBUTE(state:Record<any, any>, payload:Record<any, any>){
+     if(payload.index===""){
+        Vue.set(state.collectionItems, payload.attribute, payload.value)
+      }else{
+        Vue.set(state.collectionItems.collection_products[payload.index], payload.attribute, payload.value)
+      }
+    },
     SET_SELECTED_COLLECTION_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
       switch (payload.attribute){
         case "locker_products":
@@ -397,6 +408,11 @@ const ProductAttributes:Module<any, any> = {
       let lockerProds = state.selectedCollectionProducts.locker_products;
       lockerProds = lockerProds.filter((item: number) => item !== product_id)
       state.selectedCollectionProducts.locker_products = lockerProds
+    },
+    DELETE_COLLECTION_ITEM(state:Record<any, any>, product_id:number){
+      let lockerItems = state.collectionItems.collection_products;
+      lockerItems = lockerItems.filter((item: Record<any, any>) => item.product_locker_room.id !== locker_prod_id)
+      state.collectionItems.collection_products = lockerItems;
     },
     ADD_DESIGN_COLLECTION(state:Record<any, any>, payload:Record<any, any>){
       const collections = JSON.parse(JSON.stringify(state.designCollections));
@@ -492,6 +508,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getCollections(state:Record<any, any>){
       return state.collections
+    },
+    getCollectionItems(state:Record<any, any>){
+      return state.collectionItems
     },
     getDesignCollections(state:Record<any, any>){
       return state.designCollections

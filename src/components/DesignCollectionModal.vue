@@ -6,7 +6,7 @@
     <template #modal-title>
       <div class="d-flex align-items-center justify-content-between gap-1 w-100">
         <div>
-          <b-form-input v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
+          <b-form-input @input="updateCollectionItemAttribute('name','',$event)" v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
         </div>
 
         <div>
@@ -32,12 +32,12 @@
           </a>
 
           <div class="text-center fs-2 fw-bold">
-            <a  @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
+            <a  @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
             {{ collectionItem.product_locker_room.product_name }}
           </div>
           <div class="mt-2 d-block gap-1">
             <div>
-              <b-form-input class="w-100" v-model="collectionItem.product_nickname"
+              <b-form-input @input="updateCollectionItemAttribute('product_nickname',index, $event)"  class="w-100" v-model="collectionItem.product_nickname"
                             placeholder="Product Nick Name"></b-form-input>
             </div>
 <!--            <div>-->
@@ -73,12 +73,12 @@
           </div>
 
           <div class="mt-3">
-            <a  @click="clickEyeIcon('description',index)" style="cursor: default"><font-awesome-icon  :icon="['fas', collectionItem.allow_description === true ? 'eye' : 'eye-slash' ]"/></a>
+            <a  @click="clickEyeIcon('description',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_description"  :icon="['fas', collectionItem.allow_description === true ? 'eye' : 'eye-slash' ]"/></a>
             <span v-html="collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.product_model_description : '' "></span>
           </div>
 
           <div class="mt-3">
-            <b-form-textarea v-model="collectionItem.product_note" placeholder="Description"
+            <b-form-textarea @input="updateCollectionItemAttribute('product_note',index, $event)" v-model="collectionItem.product_note" placeholder="Description"
                              class="w-100"></b-form-textarea>
           </div>
         </b-card>
@@ -127,22 +127,58 @@ import { getRandom } from "@/helpers/Helpers";
 export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public collectionData: any[] = []
-  private collectionItems = {id: "", name: "", link: "", collection_products: []} as Record<any, any>
   public ref = this.$refs as Record<any, any>
   public DesignCollectionPdfViewKey: number|string = 12345
   // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   public async retrievCollectionItems() {
-    let res = await this.$store.dispatch('getCollectionItems')
-    this.collectionItems = res;
+    let res: Record<any, any> = await this.$store.dispatch('getCollectionItems')
+    let collectionItems: Record<any, any> = res;
+
+    let prevCollection = this.$store.getters.getCollectionItems;
+    let collecItemById: any[] = [];
+    prevCollection.collection_products.forEach(function (item: Record<any, any>, index: number) {
+      collecItemById[item.product_locker_room_id] = item
+    })
+
+    if(prevCollection.name && prevCollection.name != ""){
+      collectionItems.name = prevCollection.name
+    }
+
+    if(prevCollection.link && prevCollection.link != ""){
+      collectionItems.link = prevCollection.link
+    }
 
     let prod_ids: number[] = [];
-    this.collectionItems.collection_products.forEach(function (item: Record<any, any>) {
-      prod_ids.push(item.product_locker_room.id)
-    })
-    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',
-      {"attribute": "locker_products", "value": prod_ids})
+    collectionItems.collection_products.forEach(function (item: Record<any, any>) {
+      let prevItem = [];
+       prevItem = collecItemById[item.product_locker_room_id]
 
+      if(prevItem){
+        item.allow_description = prevItem.allow_description
+        item.allow_title = prevItem.allow_title
+        if(prevItem.product_nickname != ""){
+          item.product_nickname = prevItem.product_nickname;
+        }
+        if(prevItem.product_note != ""){
+          item.product_note = prevItem.product_note;
+        }
+      }
+
+      prod_ids.push(item.product_locker_room_id)
+    })
+
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "locker_products", "value": prod_ids})
+    this.$store.commit('SET_COLLECTION_ITEMS', collectionItems)
+
+  }
+
+  get collectionItems(){
+    return this.$store.getters.getCollectionItems
+  }
+  set collectionItems(val){
+    console.log('setter called')
+    this.$store.commit('SET_COLLECTION_ITEMS',val)
   }
 
   public hideCollectionModal() {
@@ -152,6 +188,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   public showCollectionModal() {
     const payload = {"attribute": "collection_id", "value": 0}
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
+    this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
     this.ref['collection-modal'].show();
     this.retrievCollectionItems();
   }
@@ -162,12 +199,8 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   }
 
   public deleteLockerProduct(locker_prod_id: number) {
-    console.log(locker_prod_id);
-    let lockerItems = this.collectionItems.collection_products;
-    lockerItems = lockerItems.filter((item: Record<any, any>) => item.product_locker_room.id !== locker_prod_id)
-    this.collectionItems.collection_products = lockerItems;
+    this.$store.commit('DELETE_COLLECTION_ITEM', locker_prod_id)
     this.reRenderPdfView();
-    console.log(this.collectionItems.collection_products)
     this.$store.commit('DELETE_SELECTED_COLLECTION_PRODUCT', locker_prod_id)
     if (this.collectionItems.collection_products.length < 1) {
       this.hideCollectionModal()
@@ -176,11 +209,17 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
   public clickEyeIcon(type:string,index:number) {
     if(type == 'title') {
-      this.collectionItems.collection_products[index].allow_title = !this.collectionItems.collection_products[index].allow_title;
+      this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_title', value: !this.collectionItems.collection_products[index].allow_title})
+     // this.collectionItems.collection_products[index].allow_title = !this.collectionItems.collection_products[index].allow_title;
     }
     else {
-      this.collectionItems.collection_products[index].allow_description = !this.collectionItems.collection_products[index].allow_description;
+      this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_description', value: !this.collectionItems.collection_products[index].allow_description})
+      //this.collectionItems.collection_products[index].allow_description = !this.collectionItems.collection_products[index].allow_description;
     }
+  }
+
+  public updateCollectionItemAttribute(attribute, index, value){
+    this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: attribute, value: value})
   }
 
   public async saveCollectionForm_back() {
@@ -249,6 +288,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
       this.showToast(res.message, 'SUCCESS')
       const payload = {"attribute": "locker_products", "value": []};
       this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
+      this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
       this.ref['collection-modal'].hide();
     } else {
       this.showErrorArr(res.message)
