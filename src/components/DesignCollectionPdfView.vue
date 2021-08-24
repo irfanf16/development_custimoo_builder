@@ -61,7 +61,7 @@
                 <p v-html="(product.product_locker_room.model_description && product.allow_description) ? product.product_locker_room.model_description.product_model_description : ''"></p>
               </div>
               <br>
-              <div :key="`desc${i}`">
+              <div :key="`note${i}`">
                 <p v-html="product.product_note != '' ? product.product_note : ''"></p>
               </div>
             </div>

@@ -14,16 +14,17 @@
 
 
             <b-card no-body>
-              <b-tabs card changed="currentTabs">
+              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" v-model="lockerActiveTabIndex">
                 <b-tab title="Products">
 <!--                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">-->
-                  <draggable class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">
+                  <draggable v-model="room.product" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true"
+                             :options="{animation: 250, delayOnTouchOnly: true, delay: 500}" @change="lockerProductsMoved">
                     <template v-for="(product, ind) in room.product">
                       <label :key="ind" class="products-block">
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <Scene :measurement-ratio="product.design.measurement_ratio" :productType="product.product_type"
+                            <Scene :key="product.id" :measurement-ratio="product.design.measurement_ratio" :productType="product.product_type"
                                    :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front? storageUrl+product.style.front.file_url : ''}"
                                    :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
                                    :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :texts="JSON.parse(product.text)"
@@ -190,6 +191,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public url = ''
   public group = ''
   public collection_available = false;
+  public lockerActiveTabIndex = this.$store.getters.getLockerActiveTabIndex;
 
   public collectionData = {}
 
@@ -431,6 +433,35 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }
     return false
 
+  }
+
+  public lockerTabUpdated(tab_info:[]) {
+    this.$store.commit("Change_Locker_Active_Tab", tab_info);
+  }
+
+  public lockerProductsMoved(payload:Record<string, Record<string, any>>) {
+   let moved_info = payload.moved;
+   let old_index = moved_info.oldIndex;
+   let new_index = moved_info.newIndex;
+   let re_arranged_products = [];
+   let products = this.getLockerProducts[0].product;
+   let start_form = old_index > new_index ? new_index : old_index;
+   let end_at = old_index > new_index ? old_index : new_index;
+   for(let i=start_form; i<=end_at ;i++ ) {
+      let product  = products[i];
+      product.sort_order = i;
+     re_arranged_products.push({
+       id: product.id,
+       sort_order: i + 1
+     });
+   }
+   http.put(`locker/products/re_arrange`, {re_arranged_products: re_arranged_products}).then((res) => {
+     console.log("response", res.data);
+    }).catch(err => {
+      if(err.response.status){
+        //resp = {status:false,message:err.response.data.errors};
+      }
+    })
   }
 }
 </script>

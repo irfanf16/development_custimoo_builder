@@ -1,12 +1,13 @@
 <template>
-    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room" modal-class="modal-fullscreen2" content-class="lockerroom-modal">
+    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room" modal-class="modal-fullscreen2" content-class="lockerroom-modal"
+    @close="$store.commit('Change_Locker_Active_Tab', 0)">
       <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
                   @showCollectionModal="showCollectionModal"
                   @editCollectionModal="editCollectionModal"
       ></LockerRoom>
 
       <template #modal-footer>
-        <div v-if="!getAddMoreCollectionStatus" class="text-right">
+        <div v-if="!getAddMoreCollectionStatus && lockerActiveTabIndex == 0" class="text-right">
           <b-button v-if="selectedCollectionProducts.length>0"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
           <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add to a new collection</b-button>
         </div>
@@ -59,13 +60,18 @@ export default class LockerRoomModal extends Vue {
   }
 
   public addDesignCollection () {
-    this.ref['lockerRoom'].addDesignCollection()
+    this.ref['lockerRoom'].addDesignCollection();
+    this.$store.commit("Change_Locker_Active_Tab", 3)
   }
   get selectedCollectionProducts(){
     return this.$store.getters.getSelectedCollectionProducts;
   }
   get getAddMoreCollectionStatus(){
     return this.$store.getters.getAddMoreCollectionStatus;
+  }
+
+  get lockerActiveTabIndex(){
+    return this.$store.getters.getLockerActiveTabIndex;
   }
 }
 </script>
