@@ -12,7 +12,7 @@
           <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Add to a new collection</b-button>
         </div>
         <div v-else class="text-right">
-          <b-button v-if="selectedCollectionProducts.length>0" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
+          <b-button v-if="selectedCollectionProducts.length>0 && $store.getters.getAddMoreCollectionStatus" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
         </div>
       </template>
     </b-modal>
