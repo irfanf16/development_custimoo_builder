@@ -28,7 +28,7 @@
                                    :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front? storageUrl+product.style.front.file_url : ''}"
                                    :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
                                    :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :texts="JSON.parse(product.text)"
-                                   :colorGrouping="JSON.parse(product.design.front_design.color_group)" :canvasSelection="false"  />
+                                   :colorGrouping="JSON.parse(product.design.front_design.color_group)" :canvasSelection="false" :preSetData="true"  />
                           </div>
                           <ul class="product-icons">
                             <li>
@@ -110,7 +110,7 @@
                                    :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: collection_product.product_locker_room.style.front? storageUrl+collection_product.product_locker_room.style.front.file_url : ''}"
                                    :backTextureUrl="collection_product.product_locker_room.design.back_design? collection_product.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collection_product.product_locker_room.defaultcolors)"
                                    :lockerGroupColors="JSON.parse(collection_product.product_locker_room.groupcolors)" :colorGrouping="JSON.parse(collection_product.product_locker_room.design.front_design.color_group)"
-                                   :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :texts="JSON.parse(collection_product.product_locker_room.text)" :canvasSelection="false"  />
+                                   :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :texts="JSON.parse(collection_product.product_locker_room.text)" :canvasSelection="false" :preSetData="true" />
                           </div>
 
                           <div class="controls">

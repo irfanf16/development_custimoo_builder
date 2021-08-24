@@ -34,7 +34,7 @@
               </template>
               <SaveLogoModal :logoIndex="index" />
             </div>
-            <div class="logo-placement-area extracted-color-area" v-if="index == 0" >
+            <div class="logo-placement-area extracted-color-area" v-if="index == 0 && !hideColorSection" >
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
               <div class="logo-placement-holder mb-lg-3">
                 <div class="logo-holder color-extracted-area">
