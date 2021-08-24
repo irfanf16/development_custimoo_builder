@@ -176,10 +176,9 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
           item.product_price = prevItem.product_price;
         }
       }else{
-        if(collectionItems.id > 0) {
+        if(!item.id) {
           item.product_nickname =  item.product_locker_room.product_name
         }
-
 
       }
 
@@ -391,8 +390,17 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: cen
+  align-items: center;
+  z-index: 9999;
+
+img {
+  max-width: 7%;
+  display: block;
+  margin: 0 auto;
+  height: auto;
+}
+
+}
 
 
-
-
+</style>
