@@ -406,13 +406,13 @@ const ProductAttributes:Module<any, any> = {
       switch (payload.attribute){
         case "locker_products":
           state.selectedCollectionProducts.locker_products = payload.value;
-         break;
+          break;
         case "collection_id":
           state.selectedCollectionProducts.collection_id = payload.value
-        break;
+          break;
         case "deleted_products":
           state.selectedCollectionProducts.deleted_products = payload.value
-        break;
+          break;
       }
 
     },

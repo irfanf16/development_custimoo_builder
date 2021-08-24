@@ -34,18 +34,18 @@
 
           <div class="text-center fs-2 fw-bold">
             <a  @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
-            {{ collectionItem.product_locker_room.product_name }}
+            {{ (collectionItem.product_locker_room.model_description) ? collectionItem.product_locker_room.model_description.model_name : '' }}
           </div>
           <div class="mt-2 d-block gap-1">
             <div>
               <b-form-input @input="updateCollectionItemAttribute('product_nickname',index, $event)"  class="w-100" v-model="collectionItem.product_nickname"
                             placeholder="Product Nick Name"></b-form-input>
             </div>
-<!--            <div>-->
-<!--              <b-button class="dragHandle border-0">-->
-<!--                <b-icon icon="arrows-move"></b-icon>-->
-<!--              </b-button>-->
-<!--            </div>-->
+            <!--            <div>-->
+            <!--              <b-button class="dragHandle border-0">-->
+            <!--                <b-icon icon="arrows-move"></b-icon>-->
+            <!--              </b-button>-->
+            <!--            </div>-->
           </div>
 
           <div class="mt-3 respCanvas">
@@ -86,7 +86,7 @@
           </div>
           <div class="mt-3">
             <b-form-input @input="updateCollectionItemAttribute('product_price',index, $event)"  class="w-100" v-model="collectionItem.product_price"
-                            placeholder="Product Price"></b-form-input>
+                          placeholder="Product Price"></b-form-input>
           </div>
         </b-card>
       </b-col>
@@ -95,6 +95,7 @@
         </b-form>
       </div>
     </template>
+
 
 
    <template #modal-footer>
@@ -158,7 +159,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     let prod_ids: number[] = [];
     collectionItems.collection_products.forEach(function (item: Record<any, any>) {
       let prevItem = [];
-       prevItem = collecItemById[item.product_locker_room_id]
+      prevItem = collecItemById[item.product_locker_room_id]
 
       if(prevItem){
         item.allow_description = prevItem.allow_description
@@ -167,12 +168,28 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         if(prevItem.product_nickname != ""){
           item.product_nickname = prevItem.product_nickname;
         }
+
         if(prevItem.product_note != ""){
           item.product_note = prevItem.product_note;
         }
         if(prevItem.product_price != ""){
           item.product_price = prevItem.product_price;
         }
+      }else{
+        if(collectionItems.id > 0) {
+          item.product_nickname =  item.product_locker_room.product_name
+        }
+
+
+      }
+
+      if(collectionItems.id < 1){
+        if(prevItem){
+          item.product_nickname = prevItem.product_nickname;
+        }else{
+          item.product_nickname =  item.product_locker_room.product_name
+        }
+
       }
 
       prod_ids.push(item.product_locker_room_id)
@@ -232,7 +249,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_price', value: !this.collectionItems.collection_products[index].allow_price})
         break;
     }
- }
+  }
 
   public updateCollectionItemAttribute(attribute: string, index: number, value: string){
     this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: attribute, value: value})
@@ -294,19 +311,19 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         "allow_title": item.allow_title,
         "allow_description": item.allow_description,
         "allow_price": item.allow_price
-       })
+      })
     })
     formData.products = products
     let res;
     let content = ''
     if (collectionItems.id == "") {
-        content = await this.generateCollectionPdf();
-        formData.data = content
+      content = await this.generateCollectionPdf();
+      formData.data = content
       res = await this.$store.dispatch('createNewCollection', formData);
       console.log("responssse", res)
     } else {
-        content = await this.generateCollectionPdf();
-        formData.data = content
+      content = await this.generateCollectionPdf();
+      formData.data = content
       formData.collection_id = collectionItems.id;
       res = await this.$store.dispatch('updateNewCollection', formData);
     }
@@ -325,11 +342,11 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
   public openLockerModel(add_more_status:boolean) {
 
-   this.$emit('showLockerRoomModal');
-   if(add_more_status) {
-     this.$store.commit('SET_ADD_MORE_COLLECTION',true)
-     this.$store.commit('SET_DISABLED_PRODUCTS',true)
-   }
+    this.$emit('showLockerRoomModal');
+    if(add_more_status) {
+      this.$store.commit('SET_ADD_MORE_COLLECTION',true)
+      this.$store.commit('SET_DISABLED_PRODUCTS',true)
+    }
 
     this.hideCollectionModal()
   }
@@ -374,16 +391,8 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: center;
-z-index: 9999;
+  align-items: cen
 
-img {
-  width: 100px !important;
-  max-width: 100px;
-  display: block;
-  margin: 0 auto;
-  height: auto;
-}
 
-}
-</style>
+
+
