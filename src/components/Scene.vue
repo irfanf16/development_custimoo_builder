@@ -211,7 +211,7 @@ export default class Scene extends Vue {
   customLogosChanged(newVal: [Record<any, any>]) {
     if(this.mounted && this.logoAllowed) {
       const self = this
-      if(this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo.url).length) {
+      if(this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
         let deleteIndex: number[] = []
         this.customLogoObjects.forEach((item: Record<any, any>, index: number) => {
           if(item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '')) {
@@ -591,7 +591,6 @@ export default class Scene extends Vue {
       })
       this.backCanvas.renderAll()
     }
-    this.unHideColorGrouping()
   }
 
   public unHideColorGrouping() {
@@ -818,7 +817,7 @@ export default class Scene extends Vue {
           if(self.logos.length) {
             this.addLogos(self.logos)
           }
-          if(this.preSetData) {
+          if(!this.preSetData) {
             let logos: Record<any, any>[] = []
 
             if (self.customLogos && self.logoAllowed) {

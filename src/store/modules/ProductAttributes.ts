@@ -4,6 +4,7 @@ import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
 const ProductAttributes:Module<any, any> = {
   state: {
+    lockerActiveTabIndex:0,
     products:[],
     selectedIndex: 0,
     categories: [],
@@ -44,6 +45,9 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   mutations: {
+    Change_Locker_Active_Tab(state:Record<any, any>, payload) {
+      state.lockerActiveTabIndex = payload
+    },
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
       if (payload.status){
         state.editProduct.editStatus = payload.status
@@ -402,15 +406,13 @@ const ProductAttributes:Module<any, any> = {
       switch (payload.attribute){
         case "locker_products":
           state.selectedCollectionProducts.locker_products = payload.value;
-          // console.log(payload.value)
-          state.selectedCollectionProducts.deleted_products = state.selectedCollectionProducts.deleted_products.filter((id: number) => !payload.value.includes(id))
-         break;
+          break;
         case "collection_id":
           state.selectedCollectionProducts.collection_id = payload.value
-        break;
+          break;
         case "deleted_products":
           state.selectedCollectionProducts.deleted_products = payload.value
-        break;
+          break;
       }
 
     },
@@ -437,6 +439,9 @@ const ProductAttributes:Module<any, any> = {
     },
   },
   getters: {
+    getLockerActiveTabIndex: state => {
+      return state.lockerActiveTabIndex
+    },
     getAddMoreCollectionStatus: state => {
       return state.addMoreCollection
     },
@@ -711,16 +716,16 @@ const ProductAttributes:Module<any, any> = {
       return res
     },
     async createNewCollection({commit},payload:Record<any, any>){
-      let resp =  {status:false,message:""};
+      let resp =  {status:false,message:"", collection:{}};
       await http.post('collection', payload).then((res) => {
         if (res.status == 201){
-          resp = {status:true,message:"Collection added successfully"};
+          resp = {status:true,message:"Collection added successfully", collection: res.data.data};
         }else if (res.status == 404){
-          resp = {status:false,message:"Collection not added"};
+          resp = {status:false,message:"Collection not added", collection: {}};
         }
       }).catch(err => {
         if(err.response.status){
-          resp = {status:false,message:err.response.data.errors};
+          resp = {status:false,message:err.response.data.errors, collection: {}};
         }
       })
 
