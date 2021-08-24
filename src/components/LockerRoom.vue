@@ -4,22 +4,22 @@
     <template v-for="(room, i) in getLockerProducts">
       <b-tab  :key="i" :active="tabIndex === i">
         <template #title>
-          <span @click="changeColor">{{room.room_name}}</span>
+<!--          <span @drop="dropped" @dragover="allowDrop" @click="changeColor">{{room.room_name}}</span>-->
+          <draggable :list="getLockerProducts" :options="{disabled:true}"><span @click="changeColor">{{room.room_name}}</span></draggable>
           <a class="remove-tab" @click="deleteRoom(room.id, i)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </template>
+
         <div class="lockerroom-tabs">
           <div>
-
-
             <b-card no-body>
               <b-tabs card changed="currentTabs">
                 <b-tab title="Products">
 <!--                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">-->
                   <draggable class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">
                     <template v-for="(product, ind) in room.product">
-                      <label :key="ind" class="products-block">
+                      <label :key="ind" class="products-block" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
@@ -191,6 +191,14 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public group = ''
   public collection_available = false;
 
+  private setSelected(e:Record<any, any>){
+    console.log('ev', e.target)
+  }
+
+  public chose(evt:Record<any, any>) {
+    console.log('element index within parent: ',evt.oldIndex)
+  }
+
   public collectionData = {}
 
   public async setCollections() {
@@ -220,6 +228,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.$emit('hideLockerRoomModal');
     this.$emit('showCollectionModal');
   }
+
 
   get selected(){
     return this.group;

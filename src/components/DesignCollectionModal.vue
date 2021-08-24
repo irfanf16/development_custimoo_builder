@@ -31,9 +31,9 @@
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
 
-          <div class="text-center fs-2 fw-bold">
-            <a  @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
+          <div class="text-center fs-2 fw-bold toggle_pdf">
             {{ collectionItem.product_locker_room.product_name }}
+            <a class="toggle_icon btn btn-secondary light" v-b-tooltip.hover.bottom="(collectionItem.allow_title ? 'Hide title' : 'Show title') + ' on pdf'" @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
           </div>
           <div class="mt-2 d-block gap-1">
             <div>
@@ -70,9 +70,11 @@
                    :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
           </div>
 
-          <div class="mt-3">
-            <a  @click="clickEyeIcon('description',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_description"  :icon="['fas', collectionItem.allow_description === true ? 'eye' : 'eye-slash' ]"/></a>
-            <span v-html="collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.product_model_description : '' "></span>
+          <div class="mt-3 toggle_pdf">
+            <div class="product-description">
+              <a class="toggle_icon btn btn-secondary light" @click="clickEyeIcon('description',index)" style="cursor: default" v-b-tooltip.hover.bottom="(collectionItem.allow_description ? 'Hide description' : 'Show description') + ' on pdf'"><font-awesome-icon v-model="collectionItem.allow_description"  :icon="['fas', collectionItem.allow_description === true ? 'eye' : 'eye-slash' ]"/></a>
+              <div :class="collectionItem.allow_description ? '' : 'inactive'" v-html="collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.product_model_description: ''"></div>
+            </div>
           </div>
 
           <div class="mt-3">
@@ -110,13 +112,15 @@ import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
+// import jQuery from 'jquery';
 
 @Component({
   components: {
     DesignCollectionPdfView,
     Scene,
+    // jQuery,
     draggable
-  }
+  },
 })
 
 export default class DesignCollectionModal extends Mixins(ErrorMessages) {
@@ -175,7 +179,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   }
   set collectionItems(val){
     console.log('setter called')
-    this.$store.commit('SET_COLLECTION_ITEMS',val)
+    this.$store.commit('SET_COLLECTION_ITEMS',val);
   }
 
   public hideCollectionModal() {

@@ -2726,10 +2726,8 @@ $fontSize: 0.5;
 
 .respCanvas {
     .canvas-area-holder{
-        @media (max-width: 767px) {
-            justify-content: center !important;
-            gap: 10px !important;
-        }
+        justify-content: center !important;
+        gap: 10px !important;
     }
     .canvas-container {
         @media (max-width: 600px) {
@@ -2803,5 +2801,51 @@ $fontSize: 0.5;
     }
     100%{
         border: 1px solid #219F84;
+    }
+}
+
+.toggle_pdf{
+    .toggle_icon{
+        transition: 0.15s all ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 20px !important;
+        width: 20px !important;
+        font-size: smaller;
+        padding: 0 !important;
+        border-radius: 999px;
+        flex-shrink: 0;
+
+        svg{
+            height: 14px;
+            width: 14px;
+        }
+    }
+
+    .product-description{
+        position: relative;
+
+        &>div{
+            padding: 10px 12px;
+            border-radius: 5px;
+            border: 1px solid transparent;
+            transition: 0.2s all ease;
+        }
+
+        .toggle_icon{
+            position: absolute;
+            top: -7px;
+            right: -7px;
+
+            &:hover{
+                &+div{
+                    border-color: #eee;
+                }
+                &+div.inactive{
+                    background: #fcfcfc;
+                }
+            }
+        }
     }
 }
