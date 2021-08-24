@@ -7,7 +7,7 @@
         <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1 break-after">
           <div id="header">
             <div class="header-content">
-               {{ product.product_nickname != "" ? `Nick Name: ${product.product_nickname} / ` : '' }}   {{ product.allow_title ? `Title: ${product.product_locker_room.product_name}` : ''}}</div>
+               {{ product.product_nickname != "" ? `Nick Name: ${product.product_nickname} / ` : '' }}   {{ (product.allow_title && product.product_locker_room.model_description) ? `Title: ${product.product_locker_room.model_description.model_name}` : ''}}</div>
             <div class="logo">
               <svg width="200px" height="36px" viewBox="0 0 200 36" version="1.1" xmlns="http://www.w3.org/2000/svg"
                    xmlns:xlink="http://www.w3.org/1999/xlink">

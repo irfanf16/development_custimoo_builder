@@ -34,7 +34,7 @@
 
           <div class="text-center fs-2 fw-bold">
             <a  @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
-            {{ collectionItem.product_locker_room.product_name }}
+            {{ (collectionItem.product_locker_room.model_description) ? collectionItem.product_locker_room.model_description.model_name : '' }}
           </div>
           <div class="mt-2 d-block gap-1">
             <div>
@@ -167,12 +167,22 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         if(prevItem.product_nickname != ""){
           item.product_nickname = prevItem.product_nickname;
         }
+
         if(prevItem.product_note != ""){
           item.product_note = prevItem.product_note;
         }
         if(prevItem.product_price != ""){
           item.product_price = prevItem.product_price;
         }
+      }
+
+      if(collectionItems.id < 1){
+        if(prevItem){
+          item.product_nickname = prevItem.product_nickname;
+        }else{
+          item.product_nickname =  item.product_locker_room.product_name
+        }
+
       }
 
       prod_ids.push(item.product_locker_room_id)
