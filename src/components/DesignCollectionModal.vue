@@ -80,6 +80,14 @@
             <b-form-textarea @input="updateCollectionItemAttribute('product_note',index, $event)" v-model="collectionItem.product_note" placeholder="Description"
                              class="w-100"></b-form-textarea>
           </div>
+
+          <div class="mt-3">
+            <a  @click="clickEyeIcon('price',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_price"  :icon="['fas', collectionItem.allow_price === true ? 'eye' : 'eye-slash' ]"/></a>
+          </div>
+          <div class="mt-3">
+            <b-form-input @input="updateCollectionItemAttribute('product_price',index, $event)"  class="w-100" v-model="collectionItem.product_price"
+                            placeholder="Product Price"></b-form-input>
+          </div>
         </b-card>
       </b-col>
     </draggable>
@@ -155,11 +163,15 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
       if(prevItem){
         item.allow_description = prevItem.allow_description
         item.allow_title = prevItem.allow_title
+        item.allow_price = prevItem.allow_price
         if(prevItem.product_nickname != ""){
           item.product_nickname = prevItem.product_nickname;
         }
         if(prevItem.product_note != ""){
           item.product_note = prevItem.product_note;
+        }
+        if(prevItem.product_price != ""){
+          item.product_price = prevItem.product_price;
         }
       }
 
@@ -207,14 +219,20 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     }
   }
 
-  public clickEyeIcon(type:string,index:number) {
-    if(type == 'title') {
-      this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_title', value: !this.collectionItems.collection_products[index].allow_title})
+  public clickEyeIcon(type:string, index:number) {
+
+    switch (type){
+      case "title":
+        this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_title', value: !this.collectionItems.collection_products[index].allow_title})
+        break;
+      case "description":
+        this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_description', value: !this.collectionItems.collection_products[index].allow_description})
+        break;
+      case "price":
+        this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_price', value: !this.collectionItems.collection_products[index].allow_price})
+        break;
     }
-    else {
-      this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: 'allow_description', value: !this.collectionItems.collection_products[index].allow_description})
-    }
-  }
+ }
 
   public updateCollectionItemAttribute(attribute: string, index: number, value: string){
     this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: attribute, value: value})
@@ -270,26 +288,29 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
       products.push({
         "product_nickname": item.product_nickname,
         "product_note": item.product_note,
+        "product_price": item.product_price,
         "product_locker_room_id": item.product_locker_room.id,
         "order_number": (index + 1),
         "allow_title": item.allow_title,
         "allow_description": item.allow_description,
-
-      })
+        "allow_price": item.allow_price
+       })
     })
     formData.products = products
     let res;
     let content = ''
     if (collectionItems.id == "") {
-      content = await this.generateCollectionPdf();
-      formData.data = content
+        content = await this.generateCollectionPdf();
+        formData.data = content
       res = await this.$store.dispatch('createNewCollection', formData);
+      console.log("responssse", res)
     } else {
-      content = await this.generateCollectionPdf();
-      formData.data = content
+        content = await this.generateCollectionPdf();
+        formData.data = content
       formData.collection_id = collectionItems.id;
       res = await this.$store.dispatch('updateNewCollection', formData);
     }
+    this.openLockerModel(false);
     this.showLoader = false;
     if (res.status) {
       this.showToast(res.message, 'SUCCESS')
