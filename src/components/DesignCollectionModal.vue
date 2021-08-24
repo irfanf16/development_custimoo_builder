@@ -33,7 +33,7 @@
           </a>
 
           <div class="text-center fs-2 fw-bold toggle_pdf">
-            {{ collectionItem.product_locker_room.product_name }}
+            {{ collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.model_name : '' }}
             <a class="toggle_icon btn btn-secondary light" v-b-tooltip.hover.bottom="(collectionItem.allow_title ? 'Hide title' : 'Show title') + ' on pdf'" @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
           </div>
           <div class="mt-2 d-block gap-1">
