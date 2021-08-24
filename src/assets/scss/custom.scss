@@ -2804,7 +2804,7 @@ $fontSize: 0.5;
     }
 }
 
-.toggle_pdf{
+.toggle_pdf, .product-price{
     .toggle_icon{
         transition: 0.15s all ease;
         display: inline-flex;
@@ -2823,7 +2823,7 @@ $fontSize: 0.5;
         }
     }
 
-    .product-description{
+    .product-description, product-price{
         position: relative;
 
         &>div{
@@ -2845,6 +2845,32 @@ $fontSize: 0.5;
                 &+div.inactive{
                     background: #fcfcfc;
                 }
+            }
+        }
+    }
+}
+
+.product-price{
+    position: relative;
+
+    &>div{
+        padding: 10px 12px;
+        border-radius: 5px;
+        border: 1px solid transparent;
+        transition: 0.2s all ease;
+    }
+
+    .toggle_icon{
+        position: absolute;
+        top: -7px;
+        right: -7px;
+
+        &:hover{
+            &+div{
+                border-color: #eee;
+            }
+            &+div.inactive{
+                background: #fcfcfc;
             }
         }
     }

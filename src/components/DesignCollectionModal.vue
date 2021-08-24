@@ -32,9 +32,9 @@
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
 
-          <div class="text-center fs-2 fw-bold">
-            <a  @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
-            {{ (collectionItem.product_locker_room.model_description) ? collectionItem.product_locker_room.model_description.model_name : '' }}
+          <div class="text-center fs-2 fw-bold toggle_pdf">
+            {{ collectionItem.product_locker_room.product_name }}
+            <a class="toggle_icon btn btn-secondary light" v-b-tooltip.hover.bottom="(collectionItem.allow_title ? 'Hide title' : 'Show title') + ' on pdf'" @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
           </div>
           <div class="mt-2 d-block gap-1">
             <div>
@@ -71,9 +71,11 @@
                    :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
           </div>
 
-          <div class="mt-3">
-            <a  @click="clickEyeIcon('description',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_description"  :icon="['fas', collectionItem.allow_description === true ? 'eye' : 'eye-slash' ]"/></a>
-            <span v-html="collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.product_model_description : '' "></span>
+          <div class="mt-3 toggle_pdf" v-if="collectionItem.product_locker_room.model_description">
+            <div class="product-description">
+              <a class="toggle_icon btn btn-secondary light" @click="clickEyeIcon('description',index)" style="cursor: default" v-b-tooltip.hover.bottom="(collectionItem.allow_description ? 'Hide description' : 'Show description') + ' on pdf'"><font-awesome-icon v-model="collectionItem.allow_description"  :icon="['fas', collectionItem.allow_description === true ? 'eye' : 'eye-slash' ]"/></a>
+              <div :class="collectionItem.allow_description ? '' : 'inactive'" v-html="collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.product_model_description: ''"></div>
+            </div>
           </div>
 
           <div class="mt-3">
@@ -81,10 +83,8 @@
                              class="w-100"></b-form-textarea>
           </div>
 
-          <div class="mt-3">
-            <a  @click="clickEyeIcon('price',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_price"  :icon="['fas', collectionItem.allow_price === true ? 'eye' : 'eye-slash' ]"/></a>
-          </div>
-          <div class="mt-3">
+          <div class="mt-3 product-price">
+            <a class="btn btn-secondary light toggle_icon" v-b-tooltip.hover.bottom="(collectionItem.allow_price ? 'Hide price' : 'Show price') + ' on pdf'" @click="clickEyeIcon('price',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_price"  :icon="['fas', collectionItem.allow_price === true ? 'eye' : 'eye-slash' ]"/></a>
             <b-form-input @input="updateCollectionItemAttribute('product_price',index, $event)"  class="w-100" v-model="collectionItem.product_price"
                           placeholder="Product Price"></b-form-input>
           </div>

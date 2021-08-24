@@ -30,8 +30,6 @@ import DesignCollection from '@/components/DesignCollection.vue'
   }
 })
 export default class LockerRoomModal extends Vue {
-
-
   public ref = this.$refs as Record<any, any>
 
   private showCollectionModal = () => {
