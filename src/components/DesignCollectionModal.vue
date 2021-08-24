@@ -100,8 +100,8 @@
    <template #modal-footer>
       <div class="d-flex align-items-center justify-content-end w-100 gap-1">
         <b-button @click="hideCollectionModal" variant="secondary" class="light">Cancel</b-button>
-        <b-button variant="secondary" @click="saveCollectionForm">Save</b-button>
         <b-button @click="openLockerModel">Add more</b-button>
+        <b-button variant="secondary" @click="saveCollectionForm">Save</b-button>
       </div>
     </template>
   </b-modal>
