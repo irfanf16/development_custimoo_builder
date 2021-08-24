@@ -591,7 +591,6 @@ export default class Scene extends Vue {
       })
       this.backCanvas.renderAll()
     }
-    this.unHideColorGrouping()
   }
 
   public unHideColorGrouping() {
@@ -818,7 +817,7 @@ export default class Scene extends Vue {
           if(self.logos.length) {
             this.addLogos(self.logos)
           }
-          if(this.preSetData) {
+          if(!this.preSetData) {
             let logos: Record<any, any>[] = []
 
             if (self.customLogos && self.logoAllowed) {
