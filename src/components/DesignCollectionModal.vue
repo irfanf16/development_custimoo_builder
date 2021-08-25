@@ -197,13 +197,20 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
   get collectionItemsPdf() {
     let products: Record<any, any>[] = []
+    let subProducts: Record<any, any>[] = []
     let groupIndex = 0
     this.$store.getters.getCollectionItems.collection_products.forEach((product: Record<any, any>, index: number) => {
-      if(index!= 0 && index % 3 == 0) {
-        groupIndex++
+      console.log('here')
+      Vue.set(subProducts, groupIndex, product)
+      groupIndex++
+
+      if((index!= 0 && index % 2 == 0) || index == this.$store.getters.getCollectionItems.collection_products.length -1) {
+        products.push(subProducts)
+        subProducts = []
+        groupIndex = 0
       }
-      Vue.set(products, groupIndex, product)
     })
+    console.log(products)
     return { name: this.$store.getters.getCollectionItems.name, collection_products: products }
   }
 
