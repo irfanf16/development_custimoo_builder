@@ -153,19 +153,17 @@
       <ExistingCollectionModal @existingCollection="existingCollection" />
     </div>
   </b-tabs>
-   <DesignCollectionPdfView v-if="collection_available" :collectionData="collectionData"/>
   </span>
 </template>
 
 <script lang="ts">
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
-    import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
-    import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
-    import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue'
-    import ErrorMessages from "@/mixins/ErrorMessages";
-    import Scene from "@/components/Scene.vue";
-    import draggable from "vuedraggable";
-import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
+import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
+import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue'
+import ErrorMessages from "@/mixins/ErrorMessages";
+import Scene from "@/components/Scene.vue";
+import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 
@@ -175,7 +173,6 @@ import {http} from "@/httpCommon";
     Scene,
     CreateLockerRoomModal,
     ExistingCollectionModal,
-    DesignCollectionPdfView,
     draggable
   },
   mounted() {
