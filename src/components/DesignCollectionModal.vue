@@ -101,7 +101,7 @@
       </div>
     </template>
   </b-modal>
-    <DesignCollectionPdfView :collectionData="collectionItems" :key="DesignCollectionPdfViewKey"/>
+    <DesignCollectionPdfView :collectionData="collectionItemsPdf" :key="DesignCollectionPdfViewKey"/>
   </span>
 
 </template>
@@ -109,7 +109,7 @@
 <script lang="ts">
 
 
-import {Component, Mixins} from 'vue-property-decorator'
+import {Component, Mixins, Vue} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
@@ -193,6 +193,25 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     this.$store.commit('SET_COLLECTION_ITEMS', collectionItems)
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "deleted_products", "value": []})
     this.showLoader = false;
+  }
+
+  get collectionItemsPdf() {
+    let products: Record<any, any>[] = []
+    let subProducts: Record<any, any>[] = []
+    let groupIndex = 0
+    this.$store.getters.getCollectionItems.collection_products.forEach((product: Record<any, any>, index: number) => {
+      console.log('here')
+      Vue.set(subProducts, groupIndex, product)
+      groupIndex++
+
+      if((index!= 0 && index % 2 == 0) || index == this.$store.getters.getCollectionItems.collection_products.length -1) {
+        products.push(subProducts)
+        subProducts = []
+        groupIndex = 0
+      }
+    })
+    console.log(products)
+    return { name: this.$store.getters.getCollectionItems.name, collection_products: products }
   }
 
   get collectionItems(){
