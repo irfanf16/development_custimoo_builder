@@ -49,7 +49,7 @@ const ProductAttributes:Module<any, any> = {
       state.lockerActiveTabIndex = payload
     },
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
-      if (payload.status){
+      if (payload.status == true || payload.status == false){
         state.editProduct.editStatus = payload.status
       }
       if (payload.id) {

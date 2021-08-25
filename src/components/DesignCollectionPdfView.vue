@@ -1,5 +1,5 @@
 <template>
-  <div class="d-nones">
+  <div class="d-none">
     <div id="collectionPdfContainer">
       <div class="pdf_cover">
         <div class="pdf_collection">
