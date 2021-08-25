@@ -23,12 +23,15 @@
               </tr>
               <tr>
                 <td v-for="(product, i) in products" :key="index+''+i">
-                  <div v-if="product.product_nickname != ''" style="font-weight: 600; font-size: larger">
-                    {{ product.product_nickname }}
-                  </div>
-                  <div v-if="product.allow_title && product.product_locker_room.model_description">
+                  <div v-if="product.allow_title && product.product_locker_room.model_description" style="font-weight: 600; font-size: larger">
                     {{ product.product_locker_room.model_description.model_name }}
                   </div>
+                  <div v-else style="opacity: 0">N /A</div>
+
+                  <div v-if="product.product_nickname != ''">
+                    {{ product.product_nickname }}
+                  </div>
+                  <div v-else style="opacity: 0">N /A</div>
                   <div class="image-holder" id="both-svg" style="text-align: center;">
                     <Scene v-if="product.product_locker_room.design.back_design" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"
                            :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
@@ -41,6 +44,10 @@
                            :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"
                            :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="170" :canvasHeight="200" :preSetData="true" />
                   </div>
+
+                  <div class="pdf_description" v-if="product.product_locker_room.model_description   && product.allow_description" v-html="'<strong>Product Info: </strong>'+ product.product_locker_room.model_description.product_model_description"></div>
+                  <div class="pdf_description" v-if="product.product_note != ''" v-html="'<strong>Description: </strong>'+ product.product_note"></div>
+                  <div class="pdf_price" v-if="product.product_price != '' && product.allow_price" v-html="'<strong>Price: </strong>'+ product.product_price"></div>
                 </td>
               </tr>
               </tbody>
@@ -160,11 +167,6 @@ export default class DesignCollectionPdfView extends Vue {
 
 .pdf_page .pdf_description{
   text-align: left;
-}
-
-.pdf_page strong{
-  font-weight: 600;
-  color: #123976;
 }
 
 .logo{
