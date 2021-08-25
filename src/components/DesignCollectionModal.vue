@@ -349,7 +349,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     let self = this;
     const element = document.getElementById("collectionPdfContainer")
     const opt = {
-      margin: [15, 10, 15, 10],
+      margin: [0, 0, 0, 0],
       filename: 'production.pdf',
       image: {type: "jpeg", quality: 1},
       html2canvas: {
@@ -359,7 +359,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         letterRendering: true,
       },
       jsPDF: {
-        unit: "mm",
+        unit: "in",
         format: "letter",
         orientation: 'landscape'
       }
@@ -387,6 +387,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   justify-content: center;
   align-items: center;
   z-index: 9999;
+}
 
 img {
   max-width: 7%;
@@ -394,8 +395,5 @@ img {
   margin: 0 auto;
   height: auto;
 }
-
-}
-
 
 </style>
