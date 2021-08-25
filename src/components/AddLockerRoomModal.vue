@@ -83,6 +83,12 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       get productModels(): Record<any, any> {
         return this.$store.getters.getProductModels;
       }
+
+      get mainProductType():string{
+        let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
+        return selected_product.back_design ?  "front_back" : "front";
+      }
+
       public showButton(id:number, index:number){
         this.locker_selected = false;
         this.room_id = id;
@@ -105,6 +111,12 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
             alert('product name is required')
             return false
           }
+        let locker_front_png = this.$parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
+          let locker_back_png = null;
+          if(this.mainProductType == "front_back") {
+            locker_back_png = this.$parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+          }
+
           let locker = {
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
@@ -116,7 +128,9 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
             text: this.customTexts,
             colors: this.logoColors,
             defaultcolors: this.defaultColors,
-            groupcolors: this.groupColors
+            groupcolors: this.groupColors,
+            locker_front_png: locker_front_png,
+            locker_back_png: locker_back_png
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res == ''){
