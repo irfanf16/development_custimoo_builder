@@ -171,8 +171,9 @@ export default class DesignCollectionPdfView extends Vue {
   background: url('../assets/pdf_cover.jpg') no-repeat center;
   background-size: cover !important;
   width: 11in;
-  height: 8.5in;
+  height: 8.499in;
   page-break-before: avoid !important;
+  page-break-after: avoid !important;
 }
 
 .pdf_cover .pdf_collection h1{
@@ -183,13 +184,10 @@ export default class DesignCollectionPdfView extends Vue {
 .pdf_page{
   background-size: cover !important;
   width: 11in;
-  height: 8.5in;
+  height: 8.499in;
   background: url("../assets/page_background.png") no-repeat center;
-  page-break-after: always !important;
-  page-break-inside: avoid !important;
-}
-
-.pdf_page:last-child{
+  /*page-break-after: always !important;*/
+  /*page-break-inside: avoid !important;*/
   page-break-after: avoid !important;
 }
 
@@ -209,6 +207,11 @@ export default class DesignCollectionPdfView extends Vue {
   background: none;
   border: none;
   text-align: center;
+}
+
+.pdf_page .print-table td:nth-child(2){
+  border-left: 1px solid #123976;
+  border-right: 1px solid #123976;
 }
 
 .pdf_collection h1{
