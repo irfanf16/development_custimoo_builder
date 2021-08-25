@@ -1,5 +1,5 @@
 <template>
-  <div class="d-nones">
+  <div class="d-none">
     <div id="collectionPdfContainer">
       <div class="pdf_cover">
         <div class="pdf_collection">
@@ -143,8 +143,8 @@ export default class DesignCollectionPdfView extends Vue {
 }
 
 .pdf_page .print-table td:nth-child(2){
-  border-left: 1px solid #123976;
-  border-right: 1px solid #123976;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
 }
 
 .pdf_collection h1{
