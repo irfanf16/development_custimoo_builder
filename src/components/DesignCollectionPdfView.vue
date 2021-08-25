@@ -1,10 +1,66 @@
 <template>
-  <div class="d-none">
+  <div class="d-nones">
     <div id="collectionPdfContainer">
+      <div class="pdf_cover">
+        <div class="pdf_collection">
+          <h1>{{ collectionData.name }}</h1>
+        </div>
+
+        <div class="logo">
+          <img src="../assets/logo.png" alt="Logo">
+        </div>
+      </div>
+
+      <template v-if="collectionData && collectionData.collection_products.length > 0">
+        <div class="pdf_page" v-for="(product, i)  in collectionData.collection_products" :key="i">
+          <table class="print-table">
+            <tbody>
+            <tr>
+              <td colspan="3" class="pdf_collection">
+                <h1>{{ collectionData.name }}</h1>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div v-if="product.product_nickname != ''" style="font-weight: 600; font-size: larger">
+                  {{ product.product_nickname }}
+                </div>
+                <div v-if="product.allow_title && product.product_locker_room.model_description">
+                  {{ product.product_locker_room.model_description.model_name }}
+                </div>
+                <div class="image-holder" id="both-svg" style="text-align: center;">
+                  <Scene v-if="product.product_locker_room.design.back_design" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"
+                         :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
+                         :back="{textureUrl: product.product_locker_room.design.back_design ? storageUrl+product.product_locker_room.design.back_design.file_url: '', modelUrl: product.product_locker_room.style.back ? storageUrl+product.product_locker_room.style.back.file_url : ''}"
+                         :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"
+                         :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="170" :canvasHeight="200" :preSetData="true" />
+                  <Scene v-else class="view-back" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"
+                         :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
+                         :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)"
+                         :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"
+                         :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="170" :canvasHeight="200" :preSetData="true" />
+                </div>
+              </td>
+              <td>PRODUCT NAME</td>
+              <td>PRODUCT NAME</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="page-break-inside: avoid"  class="mt-1" :class="collectionData.collection_products.length == i ? '' : 'break-after'">
+          </div>
+      </template>
+
+
+    </div>
+
+    <div id="collectionPdfContainer" v-if="false">
       <div id="wrapper">
-        <h1 class="fs-5 pb-1 text-center text-secondary">Collection Name: {{ collectionData.name}}</h1>
+        <h1 v-if="false" class="fs-5 pb-1 text-center text-secondary">Collection Name: {{ collectionData.name}}</h1>
+
         <template v-if="collectionData && collectionData.collection_products.length > 0">
-          <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1 break-after">
+          <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1" :class="collectionData.collection_products.length == i ? '' : 'break-after'">
             <div id="header">
               <div class="header-content">
                 {{ product.product_nickname != "" ? `Nick Name: ${product.product_nickname} / ` : '' }}   {{ (product.allow_title && product.product_locker_room.model_description) ? `Title: ${product.product_locker_room.model_description.model_name}` : ''}}</div>
@@ -51,12 +107,12 @@
                        :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
                        :back="{textureUrl: product.product_locker_room.design.back_design ? storageUrl+product.product_locker_room.design.back_design.file_url: '', modelUrl: product.product_locker_room.style.back ? storageUrl+product.product_locker_room.style.back.file_url : ''}"
                        :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"
-                       :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="400" :canvasHeight="400" :preSetData="true" />
+                       :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="200" :canvasHeight="250" :preSetData="true" />
                 <Scene v-else class="view-back" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"
                        :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
                        :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)"
                        :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"
-                       :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="400" :canvasHeight="400" :preSetData="true" />
+                       :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="200" :canvasHeight="250" :preSetData="true" />
                 <div :key="`desc${i}`">
                   <p v-html="(product.product_locker_room.model_description && product.allow_description) ? product.product_locker_room.model_description.product_model_description : ''"></p>
                 </div>
@@ -104,7 +160,71 @@ export default class DesignCollectionPdfView extends Vue {
 </script>
 
 <style scoped>
+@page{
+  margin: 0 !important;
+  padding: 0 !important;
+  size: letter landscape;
+}
 
+.pdf_cover{
+  position: relative;
+  background: url('../assets/pdf_cover.jpg') no-repeat center;
+  background-size: cover !important;
+  width: 11in;
+  height: 8.499in;
+  page-break-before: avoid !important;
+  page-break-after: avoid !important;
+}
+
+.pdf_cover .pdf_collection h1{
+  color: #fff;
+  text-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.pdf_page{
+  background-size: cover !important;
+  width: 11in;
+  height: 8.499in;
+  background: url("../assets/page_background.png") no-repeat center;
+  /*page-break-after: always !important;*/
+  /*page-break-inside: avoid !important;*/
+  page-break-after: avoid !important;
+}
+
+
+.pdf_page .print-table{
+  border: none;
+  color: #121212;
+  table-layout: fixed;
+  width: 100%;
+}
+.pdf_page .print-table td{
+  width: 33.33333333%;
+}
+
+.pdf_page .print-table tr,
+.pdf_page .print-table td{
+  background: none;
+  border: none;
+  text-align: center;
+}
+
+.pdf_page .print-table td:nth-child(2){
+  border-left: 1px solid #123976;
+  border-right: 1px solid #123976;
+}
+
+.pdf_collection h1{
+  font-size: 0.3in;
+  text-align: center;
+  padding-top: 0.35in;
+  color: #121212;
+  font-weight: 600;
+}
+
+.logo{
+  padding: 0.1in 0 0 0.45in;
+}
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
 /*body {*/
 /* min-width: 320px;*/
