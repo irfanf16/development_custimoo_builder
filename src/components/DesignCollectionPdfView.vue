@@ -193,9 +193,6 @@ export default class DesignCollectionPdfView extends Vue {
   page-break-after: avoid !important;
 }
 
-.pdf_page .canvas-area-holder{
-  justify-content: center !important;
-}
 
 .pdf_page .print-table{
   border: none;
