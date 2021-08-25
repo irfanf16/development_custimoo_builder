@@ -99,10 +99,28 @@
               </div>
             </div>
           </template>
-          <div class="customization-area d-flex flex-wrap justify-content-center align-items-center" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
+          <div class="customization-area" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
             <div v-bind:class="{active: isActive}">
               <div class="twoD-view">
-                <CustomizationPreview />
+<!--                <CustomizationPreview />-->
+                <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" v-if="selectedProduct">
+                  <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
+                    <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
+                      <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
+                             :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
+                             :back="{textureUrl: storageUrl+design.back_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
+                             :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                             :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
+                             :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
+
+                      <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio" ref="mainScene"
+                             :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
+                             :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                             :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
+                             :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
+                    </div>
+                  </template>
+                </div>
               </div>
               <template v-if="manageComponents.BasicCustomization">
                 <b-button @click="showAdvanceCustomization()" class="d-none d-lg-inline-block mt-5" variant="secondary">Continue</b-button>
@@ -150,6 +168,7 @@ import LoginForm from '@/components/LoginForm.vue'
 import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
+import Scene from "@/components/Scene.vue"
 
 @Component<Home>({
   components: {
@@ -165,7 +184,8 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
     AddLockerRoomModal,
     SaveColorModal,
     ExtractedColors,
-    LoginForm
+    LoginForm,
+    Scene
   },
   async mounted() {
 
@@ -246,7 +266,8 @@ export default class Home extends Vue {
   public shared_link = ''
   public extractedcolorclass = ""
 
-  public showLoader = false
+  public showLoader = false;
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   public showConfirm(){
     this.ref['reset-modal'].showConfirm()
@@ -281,6 +302,11 @@ export default class Home extends Vue {
 
   get editProductStatus():boolean{
     return  this.$store.getters.getEditStatus
+  }
+
+  get mainProductType():string{
+    let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
+    return selected_product.back_design ?  "front_back" : "front";
   }
 
   public showCollectionModal = () =>{
@@ -469,6 +495,12 @@ export default class Home extends Vue {
     if (this.$store.getters.getEditDesignId != currentDesign[0].id || this.$store.getters.getEditStyleId != this.selectedProduct.productstyles[this.styleIndex].id){
       this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
     }
+    let main_scene = this.ref.mainScene[0];
+    let locker_front_png = main_scene.$refs.front.toDataURL("image/png").split(',')[1];
+    let locker_back_png = null;
+    if(this.mainProductType == "front_back") {
+      locker_back_png = main_scene.$refs.back.toDataURL("image/png").split(',')[1];
+    }
     let locker = {
       product_id: this.selectedProduct.product_id,
       style_id: this.selectedProduct.productstyles[this.styleIndex].id,
@@ -478,7 +510,9 @@ export default class Home extends Vue {
       colors: this.logoColors,
       defaultcolors: this.defaultColors,
       groupcolors: this.groupColors,
-      id: this.$store.getters.getEditProductId
+      id: this.$store.getters.getEditProductId,
+      locker_front_png: locker_front_png,
+      locker_back_png: locker_back_png
     }
     if (this.editStatus){
       await this.$store.dispatch('overRideLockerProduct', locker)
@@ -724,6 +758,16 @@ export default class Home extends Vue {
     return this.$store.getters.getHideColorSection
   }
 
+  async getMainProductPngs(convert_to="png") {
+    let self = this;
+    let main_scene = this.ref.mainScene[0];
+    let product_pngs = {front_png: "", back_png: ""};
+    product_pngs.front_png = main_scene.$refs.front.toDataURL("image/png").split(',')[1];
+    product_pngs.back_png = main_scene.$refs.back.toDataURL("image/png").split(',')[1];
+    console.log("pngs", product_pngs.front_png)
+    return product_pngs;
+  }
+
 
   // public resetPreview() {
   //   this.$store.dispatch('defaultColors', [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}])
@@ -733,7 +777,6 @@ export default class Home extends Vue {
 </script>
 
 <style lang="scss" scoped>
-
 .page-wrapper {
   @media only screen and (min-width: 992px) {
     border: 1px solid #dee2e6;
