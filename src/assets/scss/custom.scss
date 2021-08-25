@@ -2875,3 +2875,17 @@ $fontSize: 0.5;
         }
     }
 }
+.main-preview{
+    width: 100% !important;
+
+    .canvas-container{
+        width: 100% !important;
+        height: auto !important;
+
+        canvas{
+            width: 100% !important;
+            height: auto !important;
+            object-fit: contain;
+        }
+    }
+}
