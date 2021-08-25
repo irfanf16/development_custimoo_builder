@@ -33,7 +33,7 @@
           </a>
 
           <div class="text-center fs-2 fw-bold toggle_pdf">
-            {{ collectionItem.product_locker_room.product_name }}
+            {{ collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.model_name : '' }}
             <a class="toggle_icon btn btn-secondary light" v-b-tooltip.hover.bottom="(collectionItem.allow_title ? 'Hide title' : 'Show title') + ' on pdf'" @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
           </div>
           <div class="mt-2 d-block gap-1">
@@ -171,10 +171,9 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
           item.product_price = prevItem.product_price;
         }
       }else{
-        if(collectionItems.id > 0) {
+        if(!item.id) {
           item.product_nickname =  item.product_locker_room.product_name
         }
-
 
       }
 
@@ -386,8 +385,17 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: cen
+  align-items: center;
+  z-index: 9999;
+
+img {
+  max-width: 7%;
+  display: block;
+  margin: 0 auto;
+  height: auto;
+}
+
+}
 
 
-
-
+</style>
