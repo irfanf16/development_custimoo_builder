@@ -40,6 +40,16 @@
                          :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"
                          :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="170" :canvasHeight="200" :preSetData="true" />
                 </div>
+
+                <div class="pdf_description">
+                  <strong>Product Info: </strong> Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid amet asperiores commodi consequatur, deleniti dolore eius est exercitationem fugiat minima necessitatibus numquam officiis, pariatur rerum sunt totam vel! Inventore, quibusdam?
+                </div>
+                <div class="pdf_description">
+                  <strong>Description: </strong> Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab accusantium, aliquam beatae consequatur, dolorem exercitationem impedit libero minima, neque officiis omnis tempore vitae voluptates. Accusantium atque enim nesciunt quidem quisquam.
+                </div>
+                <div class="pdf_price">
+                  <strong>Price: </strong> $123
+                </div>
               </td>
               <td>PRODUCT NAME</td>
               <td>PRODUCT NAME</td>
@@ -202,6 +212,9 @@ export default class DesignCollectionPdfView extends Vue {
   width: 33.33333333%;
 }
 
+.pdf_page .print-table tr:first-child td{
+  padding-bottom: 0.3in;
+}
 .pdf_page .print-table tr,
 .pdf_page .print-table td{
   background: none;
@@ -220,6 +233,25 @@ export default class DesignCollectionPdfView extends Vue {
   padding-top: 0.35in;
   color: #121212;
   font-weight: 600;
+}
+
+.pdf_page .pdf_description,
+.pdf_page .pdf_price{
+  padding: 0.1in;
+  border-radius: 5pt;
+  border: 1px solid #999;
+  text-align: center;
+  margin-top: 0.1in;
+  color: #333;
+}
+
+.pdf_page .pdf_description{
+  text-align: left;
+}
+
+.pdf_page strong{
+  font-weight: 600;
+  color: #123976;
 }
 
 .logo{
