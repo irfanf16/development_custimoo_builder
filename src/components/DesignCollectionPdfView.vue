@@ -1,10 +1,28 @@
 <template>
   <div class="d-none">
-    <div id="collectionPdfContainer">
+    <div id="collectionPdfContainer"  v-if="false">
+      <div class="pdf_cover">
+        cvre
+      </div>
+      <table>
+        <tbody>
+        <tr>
+          <td colspan="3">"COLLECTION CREATOR NAME"</td>
+        </tr>
+        <tr>
+          <td>“PRODUCT NAME”</td>
+          <td>“PRODUCT NAME”</td>
+          <td>“PRODUCT NAME”</td>
+        </tr>
+        </tbody>
+      </table>
+
       <div id="wrapper">
-        <h1 class="fs-5 pb-1 text-center text-secondary">Collection Name: {{ collectionData.name}}</h1>
+        <h1 v-if="false" class="fs-5 pb-1 text-center text-secondary">Collection Name: {{ collectionData.name}}</h1>
+
+        {{collectionData && collectionData.collection_products}}
         <template v-if="collectionData && collectionData.collection_products.length > 0">
-          <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1 break-after">
+          <div style="page-break-inside: avoid" v-for="(product, i)  in collectionData.collection_products" :key="i" class="mt-1" :class="collectionData.collection_products.length == i ? '' : 'break-after'">
             <div id="header">
               <div class="header-content">
                 {{ product.product_nickname != "" ? `Nick Name: ${product.product_nickname} / ` : '' }}   {{ (product.allow_title && product.product_locker_room.model_description) ? `Title: ${product.product_locker_room.model_description.model_name}` : ''}}</div>
@@ -104,7 +122,18 @@ export default class DesignCollectionPdfView extends Vue {
 </script>
 
 <style scoped>
+.pdf_cover{
+  position: relative;
+  background: url("../assets/pdf_cover.jpg") no-repeat center cover;
+  /*width: 11in;*/
+  /*height: 8.5in;*/
+}
 
+.cover_bg{
+  margin: ;
+  width: 100%;
+  height: 100%;
+}
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
 /*body {*/
 /* min-width: 320px;*/

@@ -41,11 +41,6 @@
               <b-form-input @input="updateCollectionItemAttribute('product_nickname',index, $event)"  class="w-100" v-model="collectionItem.product_nickname"
                             placeholder="Product Nick Name"></b-form-input>
             </div>
-            <!--            <div>-->
-            <!--              <b-button class="dragHandle border-0">-->
-            <!--                <b-icon icon="arrows-move"></b-icon>-->
-            <!--              </b-button>-->
-            <!--            </div>-->
           </div>
 
           <div class="mt-3 respCanvas">
