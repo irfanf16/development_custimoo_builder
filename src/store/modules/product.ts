@@ -128,26 +128,26 @@ const Product:Module<any, any> = {
       commit('SET_LOGO_URL', payload);
     },
     async deleteRoom({commit}, payload){
-      await http.get("deletelocker/"+payload.id).then((res) => {
+      return await http.get("deletelocker/"+payload.id).then((res) => {
         if (res.status == 200){
-          alert(res.data.message);
           commit('DELETE_ROOM', payload.index);
+          return true
         }
       }).catch(err => {
         if(err.response.status == 404){
-          alert(err.response.data.message)
+          return err.response.data.message
         }
       })
     },
     async deleteRoomProduct({commit}, payload){
-      await http.get("deletelockerproduct/"+payload.id).then((res) => {
+      return await http.get("deletelockerproduct/"+payload.id).then((res) => {
         if (res.status == 200){
-          alert(res.data.message);
           commit('DELETE_ROOM_PRODUCT', payload);
+          return true
         }
       }).catch(err => {
         if(err.response.status == 404){
-          alert(err.response.data.message)
+          return err.response.data.message
         }
       })
     },
