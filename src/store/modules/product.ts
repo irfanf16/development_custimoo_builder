@@ -133,6 +133,10 @@ const Product:Module<any, any> = {
           alert(res.data.message);
           commit('DELETE_ROOM', payload.index);
         }
+      }).catch(err => {
+        if(err.response.status == 404){
+          alert(err.response.data.message)
+        }
       })
     },
     async deleteRoomProduct({commit}, payload){
@@ -141,11 +145,12 @@ const Product:Module<any, any> = {
           alert(res.data.message);
           commit('DELETE_ROOM_PRODUCT', payload);
         }
+      }).catch(err => {
+        if(err.response.status == 404){
+          alert(err.response.data.message)
+        }
       })
     },
-
-
-
     async storeFolder({commit}, payload){
       let saved = false;
       await  http.post("locker/folder", payload).then((res) => {
