@@ -10,7 +10,7 @@ export default class ErrorMessages extends Vue{
       position: 'bottom-left'
     })
   }
-  public showError(err:Record<any, any>):void{
+  public showError(err: any):void{
     if(typeof err === 'string') {
       Vue.$toast.open({
         message: err,

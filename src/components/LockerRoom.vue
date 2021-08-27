@@ -125,7 +125,7 @@
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
                                   <b-form inline>
-                                    <b-form-input :ref="'copylink_'+index" :value="collection.link !== ''?  storageUrl + collection.link  : ''"
+                                    <b-form-input :ref="'copylink_'+index" :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}`  : ''"
                                     ></b-form-input>
                                     <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
                                   </b-form>
@@ -176,6 +176,9 @@ import {http} from "@/httpCommon";
     draggable
   },
   mounted() {
+    let href:any = location.href;
+    href = href.split('#')
+    this.collection_base_url = `${href[0]}`
     this.setCollections()
   }
 })
@@ -189,6 +192,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public group = ''
   public collection_available = false;
   public lockerActiveTabIndex = this.$store.getters.getLockerActiveTabIndex;
+  public collection_base_url = ''
 
   private setSelected(e:Record<any, any>){
     console.log('ev', e.target)
