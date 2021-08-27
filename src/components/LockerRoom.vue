@@ -24,11 +24,7 @@
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <Scene :key="product.id" :measurement-ratio="product.design.measurement_ratio" :productType="product.product_type"
-                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front? storageUrl+product.style.front.file_url : ''}"
-                                   :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
-                                   :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :texts="JSON.parse(product.text)"
-                                   :colorGrouping="JSON.parse(product.design.front_design.color_group)" :canvasSelection="false" :preSetData="true"  />
+                            <img :src="product.product_url+'/'+product.id+'/front_thumbnail.png'" alt="">
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -107,11 +103,7 @@
 
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
-                            <Scene v-if="collection_product_index <= 2" :measurement-ratio="collection_product.product_locker_room.design.measurement_ratio" :productType="collection_product.product_locker_room.product_type"
-                                   :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: collection_product.product_locker_room.style.front? storageUrl+collection_product.product_locker_room.style.front.file_url : ''}"
-                                   :backTextureUrl="collection_product.product_locker_room.design.back_design? collection_product.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collection_product.product_locker_room.defaultcolors)"
-                                   :lockerGroupColors="JSON.parse(collection_product.product_locker_room.groupcolors)" :colorGrouping="JSON.parse(collection_product.product_locker_room.design.front_design.color_group)"
-                                   :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :texts="JSON.parse(collection_product.product_locker_room.text)" :canvasSelection="false" :preSetData="true" />
+                            <img :src="collection_product.product_locker_room.product_url+'/'+collection_product.product_locker_room.id+'/front_thumbnail.png'" alt="">
                           </div>
 
                           <div class="controls">
@@ -126,7 +118,7 @@
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
                                   <b-form inline>
-                                    <b-form-input :ref="'copylink_'+index" :value="collection.link !== ''?  storageUrl + collection.link  : ''"
+                                    <b-form-input :ref="'copylink_'+index" :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}`  : ''"
                                     ></b-form-input>
                                     <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
                                   </b-form>
@@ -177,6 +169,9 @@ import {http} from "@/httpCommon";
     draggable
   },
   mounted() {
+    let href:any = location.href;
+    href = href.split('#')
+    this.collection_base_url = `${href[0]}`
     this.setCollections()
   }
 })
@@ -190,6 +185,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public group = ''
   public collection_available = false;
   public lockerActiveTabIndex = this.$store.getters.getLockerActiveTabIndex;
+  public collection_base_url = ''
 
   private setSelected(e:Record<any, any>){
     console.log('ev', e.target)
@@ -363,7 +359,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }
   }
   public async deleteProduct(i:number, ind:number, id:number){
-    await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+    let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+    if (res == true){
+      this.showToast('Product Deleted', 'SUCCESS')
+    }else{
+      this.showError(res)
+    }
   }
   public async deleteCollection(id:number,index:number){
     try{
@@ -376,8 +377,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
   public async deleteRoom(id:number, index:number){
     if (confirm('You are going to delete associated product')) {
-      await this.$store.dispatch('deleteRoom', {id: id, index: index});
-      this.showToast('Room Deleted', 'SUCCESS');
+      let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
+      if (res == true){
+        this.showToast('room deleted', 'SUCCESS')
+      }else{
+        this.showError(res);
+      }
     }
   }
 

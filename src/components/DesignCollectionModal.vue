@@ -340,9 +340,9 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
       formData.collection_id = collectionItems.id;
       res = await this.$store.dispatch('updateNewCollection', formData);
     }
-    this.openLockerModel(false);
     this.showLoader = false;
     if (res.status) {
+      this.openLockerModel(false);
       this.showToast(res.message, 'SUCCESS')
       const payload = {"attribute": "locker_products", "value": []};
       this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
