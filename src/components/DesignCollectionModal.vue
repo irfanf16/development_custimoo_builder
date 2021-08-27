@@ -44,8 +44,12 @@
           </div>
 
           <div class="mt-3 respCanvas">
-            <img :src="collectionItem.product_locker_room.product_url+'/'+collectionItem.product_locker_room.id+'/front.png'" alt="">
-            <img :src="collectionItem.product_locker_room.product_url+'/'+collectionItem.product_locker_room.id+'/back.png'" alt="">
+            <div><img
+              :src="collectionItem.product_locker_room.product_url+'/'+collectionItem.product_locker_room.id+'/front.png'"
+              alt=""></div>
+            <div><img
+              :src="collectionItem.product_locker_room.product_url+'/'+collectionItem.product_locker_room.id+'/back.png'"
+              alt=""></div>
           </div>
 
           <div class="mt-3 toggle_pdf" v-if="collectionItem.product_locker_room.model_description">
@@ -375,6 +379,22 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 }
 </script>
 <style scoped>
+.respCanvas{
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.respCanvas >div{
+  width: 100%;
+}
+
+.respCanvas >div img{
+  max-width: 100%;
+}
+
 .loader {
   position: fixed;
   left: 0;
@@ -390,7 +410,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   z-index: 9999;
 }
 
-img {
+.loader img {
   max-width: 7%;
   display: block;
   margin: 0 auto;
