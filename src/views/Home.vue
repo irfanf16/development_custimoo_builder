@@ -169,8 +169,6 @@ import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import Scene from "@/components/Scene.vue";
-import { Hooper, Slide } from 'hooper';
-import 'hooper/dist/hooper.css';
 
 @Component<Home>({
   components: {
