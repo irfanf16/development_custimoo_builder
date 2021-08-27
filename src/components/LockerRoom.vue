@@ -366,7 +366,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }
   }
   public async deleteProduct(i:number, ind:number, id:number){
-    await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+    let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+    if (res == true){
+      this.showToast('Product Deleted', 'SUCCESS')
+    }else{
+      this.showError(res)
+    }
   }
   public async deleteCollection(id:number,index:number){
     try{
@@ -379,8 +384,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
   public async deleteRoom(id:number, index:number){
     if (confirm('You are going to delete associated product')) {
-      await this.$store.dispatch('deleteRoom', {id: id, index: index});
-      this.showToast('Room Deleted', 'SUCCESS');
+      let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
+      if (res == true){
+        this.showToast('room deleted', 'SUCCESS')
+      }else{
+        this.showError(res);
+      }
     }
   }
 
