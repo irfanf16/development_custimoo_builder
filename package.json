@@ -23,6 +23,7 @@
     "csq-vue-multi-draggable": "^1.0.1",
     "fabric": "^4.4.0",
     "hex-rgb": "^5.0.0",
+    "hooper": "^0.3.4",
     "html2pdf.js": "^0.9.3",
     "jquery": "^3.6.0",
     "read-excel-file": "^5.1.0",
