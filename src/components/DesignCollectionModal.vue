@@ -44,26 +44,8 @@
           </div>
 
           <div class="mt-3 respCanvas">
-
-            <Scene v-if="collectionItem.product_locker_room.design.back_design"
-                   :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
-                   :key="collectionItem.product_locker_room.id"
-                   :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: collectionItem.product_locker_room.style.front? storageUrl+collectionItem.product_locker_room.style.front.file_url : ''}"
-                   :back="{textureUrl: storageUrl+collectionItem.product_locker_room.design.back_design.file_url, modelUrl: collectionItem.product_locker_room.style.back? storageUrl+collectionItem.product_locker_room.style.back.file_url: ''}"
-                   :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''"
-                   :lockerDefaultColors="JSON.parse(collectionItem.product_locker_room.defaultcolors)"
-                   :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150" :canvasWidth="150"
-                   :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
-                   :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
-
-            <Scene v-else :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
-                   :key="collectionItem.product_locker_room.id"
-                   :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: collectionItem.product_locker_room.style? storageUrl+collectionItem.product_locker_room.style.front.file_url : ''}"
-                   :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''"
-                   :lockerDefaultColors="JSON.parse(collectionItem.product_locker_room.defaultcolors)"
-                   :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150" :canvasWidth="150"
-                   :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
-                   :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
+            <img :src="collectionItem.product_locker_room.product_url+'/'+collectionItem.product_locker_room.id+'/front.png'" alt="">
+            <img :src="collectionItem.product_locker_room.product_url+'/'+collectionItem.product_locker_room.id+'/back.png'" alt="">
           </div>
 
           <div class="mt-3 toggle_pdf" v-if="collectionItem.product_locker_room.model_description">
