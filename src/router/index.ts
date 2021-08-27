@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 import ViewScene from '../views/ViewScene.vue'
 import CustomizationProcess from '../views/CustomizationProcess.vue'
 import ConfirmOrder from '../views/ConfirmOrder.vue'
+import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
 
 Vue.use(VueRouter)
 
@@ -22,6 +23,11 @@ const routes: Array<RouteConfig> = [
     path:'/share/:product/:name',
     name: 'ShareUrl',
     component: Home
+  },
+  {
+    path:'/collection/:collection_name?',
+    name: 'CollectionUrl',
+    component: CollectionViewPDF
   }
 ]
 
