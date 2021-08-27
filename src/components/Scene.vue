@@ -268,7 +268,9 @@ export default class Scene extends Vue {
               const logoObject = this.customLogoObjects[logo.logoIndex]
               const otherSideObject = this.otherSideLogos[logo.logoIndex]
 
-              this.eventAction(logo, logoObject, otherSideObject)
+              if(!this.logosSettings[index] || (this.logosSettings[index] && !this.logosSettings[index].is_locked)) {
+                this.eventAction(logo, logoObject, otherSideObject)
+              }
               addLogo = false
             }
 
@@ -832,6 +834,8 @@ export default class Scene extends Vue {
                   item.x_axis = self.logosSettings[index].x_axis
                   item.y_axis = self.logosSettings[index].y_axis
                   item.rotation = self.logosSettings[index].rotation
+                  item.haveControls = self.logosSettings[index].is_locked
+                  // console.log(this.logosSettings) to-do here
 
                   if (self.mainPreview) {
                     self.$store.dispatch('updateCustomLogoWithoutTrigger', {
@@ -841,7 +845,8 @@ export default class Scene extends Vue {
                         height: self.logosSettings[index].height,
                         x_axis: self.logosSettings[index].x_axis,
                         y_axis: self.logosSettings[index].y_axis,
-                        rotation: self.logosSettings[index].rotation
+                        rotation: self.logosSettings[index].rotation,
+                        haveControls: self.logosSettings[index].is_locked
                       }
                     })
                   }

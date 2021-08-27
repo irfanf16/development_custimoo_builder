@@ -26,16 +26,17 @@
 
 <script lang="ts">
 
-import {Component, Vue, Watch} from 'vue-property-decorator'
-    import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
-    import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
+import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
+import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+import ErrorMessages from "@/mixins/ErrorMessages";
     @Component<AddLockerRoomModal>({
         components: {
             LockerRoomProducts,
             CreateLockerRoomModal
         }
     })
-    export default class AddLockerRoomModal extends Vue {
+    export default class AddLockerRoomModal extends Mixins(ErrorMessages) {
       public locker_selected = true;
       public room_id = 0;
       public product_name = '';
@@ -145,10 +146,15 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       }
       public async deleteRoom(id:number, index:number){
         if (confirm('You are going to delete associated product')){
-          await this.$store.dispatch('deleteRoom', {id: id, index: index});
-          this.tabIndex = 0
-          if (this.lockers[0]){
-            this.room_id = this.lockers[0].id
+          let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
+          if (res == true){
+            this.showToast('room deleted', 'SUCCESS')
+            this.tabIndex = 0
+            if (this.lockers[0]){
+              this.room_id = this.lockers[0].id
+            }
+          }else{
+            this.showError(res);
           }
         }
       }
