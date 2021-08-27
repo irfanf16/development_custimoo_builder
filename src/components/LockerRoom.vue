@@ -24,11 +24,7 @@
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <Scene :key="product.id" :measurement-ratio="product.design.measurement_ratio" :productType="product.product_type"
-                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front? storageUrl+product.style.front.file_url : ''}"
-                                   :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
-                                   :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :texts="JSON.parse(product.text)"
-                                   :colorGrouping="JSON.parse(product.design.front_design.color_group)" :canvasSelection="false" :preSetData="true"  />
+                            <img :src="product.product_url+'/'+product.id+'/front_thumbnail.png'" alt="">
                           </div>
                           <ul class="product-icons">
                             <li>
@@ -106,11 +102,7 @@
 
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
-                            <Scene v-if="collection_product_index <= 2" :measurement-ratio="collection_product.product_locker_room.design.measurement_ratio" :productType="collection_product.product_locker_room.product_type"
-                                   :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: collection_product.product_locker_room.style.front? storageUrl+collection_product.product_locker_room.style.front.file_url : ''}"
-                                   :backTextureUrl="collection_product.product_locker_room.design.back_design? collection_product.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collection_product.product_locker_room.defaultcolors)"
-                                   :lockerGroupColors="JSON.parse(collection_product.product_locker_room.groupcolors)" :colorGrouping="JSON.parse(collection_product.product_locker_room.design.front_design.color_group)"
-                                   :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :texts="JSON.parse(collection_product.product_locker_room.text)" :canvasSelection="false" :preSetData="true" />
+                            <img :src="collection_product.product_locker_room.product_url+'/'+collection_product.product_locker_room.id+'/front_thumbnail.png'" alt="">
                           </div>
 
                           <div class="controls">
