@@ -19,14 +19,20 @@
 <!--                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">-->
                   <draggable v-model="room.product" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true"
                              :options="{animation: 250, delayOnTouchOnly: true, delay: 500}" @change="lockerProductsMoved">
-                    <template v-for="(product, ind) in room.product">
-                      <label :key="ind" class="products-block" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
+                    <div class="products-block" v-for="(product, ind) in room.product" :key="ind">
+                      <label :key="ind" class="w-100" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <img :src="product.product_url+'/'+product.id+'/front_thumbnail.png'" alt="">
                           </div>
-                          <ul class="product-icons">
+                        </div>
+                        <div class="d-none d-lg-block product-description text-center">
+                          <p>{{ product.product_name }}</p>
+                        </div>
+                      </label>
+
+                      <ul class="product-icons">
                             <li>
                               <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                             </li>
@@ -50,12 +56,7 @@
                               </b-tooltip>
                             </li>
                           </ul>
-                        </div>
-                        <div class="d-none d-lg-block product-description text-center">
-                          <p>{{ product.product_name }}</p>
-                        </div>
-                      </label>
-                    </template>
+                    </div>
                   </draggable>
 
                 </b-tab>
@@ -602,6 +603,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
             //flex: 0 0 22%;
             //margin: 0 0.3rem 10px;
             //display: inline-block;
+          position: relative;
             @media only screen and (min-width: 992px){
                 //margin: 0 0.6rem 25px;
                 //max-width: 22%;
@@ -620,49 +622,49 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
                     margin: 0 auto;
                     height: auto;
                 }
-                .product-icons{
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                    position: absolute;
-                    right: -5px;
-                    top: -5px;
-                    z-index: 1;
-                    @media only screen and (min-width: 992px){
-                        right: 5px;
-                        top: 5px;
-                    }
-                    li{
-                        display: block;
-                        margin: 0 0 5px;
-                    }
-                  .btn,
-                    a{
-                        display: flex !important;
-                        flex-wrap: wrap;
-                        justify-content: center;
-                        align-items: center;
-                        width: 20px !important;
-                        height: 20px;
-                        font-size: 9px;
-                        color: #219f84;
-                        background: #fff;
-                        border-radius: 50%;
-                        cursor: pointer;
-                    border: none;
-                        @media only screen and (min-width: 992px){
-                            width: 30px !important;
-                            height: 30px;
-                            font-size: 14px;
-                        }
-                        &.remove{
-                            background: #F8E1E2;
-                            color: #D53943;
-                        }
-                    }
-                }
             }
 
+            .product-icons{
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            right: -5px;
+            top: -5px;
+            z-index: 1;
+            @media only screen and (min-width: 992px){
+              right: 5px;
+              top: 5px;
+            }
+            li{
+              display: block;
+              margin: 0 0 5px;
+            }
+            .btn,
+            a{
+              display: flex !important;
+              flex-wrap: wrap;
+              justify-content: center;
+              align-items: center;
+              width: 20px !important;
+              height: 20px;
+              font-size: 9px;
+              color: #219f84;
+              background: #fff;
+              border-radius: 50%;
+              cursor: pointer;
+              border: none;
+              @media only screen and (min-width: 992px){
+                width: 30px !important;
+                height: 30px;
+                font-size: 14px;
+              }
+              &.remove{
+                background: #F8E1E2;
+                color: #D53943;
+              }
+            }
+          }
         }
     }
 
