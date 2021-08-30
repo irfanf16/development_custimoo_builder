@@ -32,16 +32,17 @@
                           </div>
                           <ul class="product-icons">
                             <li>
-                              <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
+                              <a v-b-tooltip.hover title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                             </li>
                             <li class="d-none d-lg-block">
-                              <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                              <a v-b-tooltip.hover title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                             </li>
                             <li>
-                              <b-button :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                              <b-button v-b-tooltip.hover title="Share design" :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
                               <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
                                 <div class="share-holder">
-                                  <h3>Copy link and Share</h3>
+                                  <h3>Copy link
+                                    ..and Share</h3>
                                   <div class="share-form">
                                     <b-form inline>
                                       <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
@@ -114,11 +115,11 @@
                           </div>
 
                           <div class="controls">
-                            <a @click="deleteCollection(collection.id,index)" class="remove btn">
+                            <a v-b-tooltip.hover title="Delete collection" @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
-                            <a @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <b-button :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                            <a v-b-tooltip.hover title="Edit collection" @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            <b-button v-b-tooltip.hover title="Share collection" :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
 <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
                             <b-tooltip :target="`collection_${index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
                               <div class="share-holder">
@@ -153,7 +154,10 @@
       <ExistingCollectionModal @existingCollection="existingCollection" />
     </div>
   </b-tabs>
+
+     <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
   </span>
+
 </template>
 
 <script lang="ts">
@@ -166,9 +170,11 @@ import Scene from "@/components/Scene.vue";
 import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
+import ConfirmModal from "@/components/ConfirmModal.vue";
 
 @Component<LockerRoom>({
   components: {
+    ConfirmModal,
     LockerRoomProducts,
     Scene,
     CreateLockerRoomModal,
@@ -198,6 +204,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     console.log('ev', e.target)
   }
 
+  public showConfirm(){
+    this.ref['reset-modal'].showConfirm()
+  }
   public chose(evt:Record<any, any>) {
     console.log('element index within parent: ',evt.oldIndex)
   }
@@ -366,17 +375,24 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }
   }
   public async deleteProduct(i:number, ind:number, id:number){
-    let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
-    if (res == true){
-      this.showToast('Product Deleted', 'SUCCESS')
-    }else{
-      this.showError(res)
+
+    const ok = await this.ref['reset-modal'].showConfirm()
+    if (ok) {
+      let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+      if (res == true){
+        this.showToast('Product Deleted', 'SUCCESS')
+      }else{
+        this.showError(res)
+      }
     }
   }
   public async deleteCollection(id:number,index:number){
     try{
-       let res = await this.$store.dispatch('deleteCollection', {id: id, index: index});
-      this.showToast(res.data.message, 'SUCCESS');
+      const ok = await this.ref['reset-modal'].showConfirm()
+      if (ok) {
+        let res = await this.$store.dispatch('deleteCollection', {id: id, index: index});
+        this.showToast(res.data.message, 'SUCCESS');
+      }
     }
     catch (e) {
       this.showError(e);

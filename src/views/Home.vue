@@ -147,7 +147,7 @@
         </b-col>
       </b-row>
     </b-container>
-    <confirm-modal message="Do you really want to reset everything?" cancel_text="Cancel" confirm_text="Reset" ref="reset-modal"></confirm-modal>
+    <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
   </div>
 </template>
 
@@ -563,7 +563,10 @@ export default class Home extends Vue {
     }
   }
   public async logoutCustomer(){
-    await this.$store.dispatch('logoutCustomer');
+    const ok = await this.ref['reset-modal'].showConfirm()
+    if (ok) {
+      await this.$store.dispatch('logoutCustomer');
+    }
     console.log('isCustomerAuthenticated',this.isCustomerAuthenticated)
   }
 
