@@ -41,8 +41,8 @@
                               <a v-b-tooltip.hover title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                             </li>
                             <li>
-                              <b-button v-b-tooltip.hover title="Share design" :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
-                              <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
+                              <b-button v-b-tooltip.hover title="Share design" :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                              <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
                                 <div class="share-holder">
                                   <h3>Copy link
                                     ..and Share</h3>
