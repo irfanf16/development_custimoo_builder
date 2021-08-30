@@ -1,5 +1,6 @@
 import { Module } from "vuex";
 import {http} from "@/httpCommon";
+import {Vue} from "vue-property-decorator";
 const Product:Module<any, any> = {
   state:{
     Product_Models:[],
@@ -41,7 +42,7 @@ const Product:Module<any, any> = {
       state.selectedModelIndex = selectedModelIndex;
     },
     SET_LOCKER_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
-      state.locker_products = payload;
+      Vue.set(state, 'locker_products', payload)
     },
     SET_LOCKERS(state:Record<any, any>, payload:Record<any, any>){
       state.lockers = []
