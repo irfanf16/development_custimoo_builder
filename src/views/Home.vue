@@ -168,7 +168,7 @@ import LoginForm from '@/components/LoginForm.vue'
 import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import Scene from "@/components/Scene.vue"
+import Scene from "@/components/Scene.vue";
 
 @Component<Home>({
   components: {

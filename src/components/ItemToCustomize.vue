@@ -8,6 +8,7 @@
       <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>
       <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Personalized</b-form-checkbox>
     </div>
+<!--    <items-carousel @retrieveProductsC="retrieveProductsC"></items-carousel>-->
     <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>
     <DesignAvailable />
@@ -17,12 +18,14 @@
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator'
   import Search from '@/components/Search.vue'
+  import ItemsCarousel from '@/components/ItemsCarousel.vue'
   import SelectItemCarousel from '../components/SelectItemCarousel.vue'
   import DesignAvailable from '../components/DesignAvailable.vue'
 
 @Component<ItemToCustomize>({
   components: {
     Search,
+    // ItemsCarousel,
     SelectItemCarousel,
     DesignAvailable
   }
