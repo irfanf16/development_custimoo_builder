@@ -92,10 +92,11 @@ const Product:Module<any, any> = {
       });
       return res;
     },
-    GET_LOCKER_PRODUCTS({commit}){
-      http.get("locker/products").then((res) => {
+    async GET_LOCKER_PRODUCTS({commit}){
+      return  await http.get("locker/products").then(async (res) => {
         if (res.status == 200){
-          commit('SET_LOCKER_PRODUCTS', res.data)
+          await commit('SET_LOCKER_PRODUCTS', res.data)
+          return true
         }
       })
     },

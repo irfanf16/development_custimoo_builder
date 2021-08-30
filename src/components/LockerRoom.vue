@@ -103,7 +103,9 @@
 
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
-                            <img :src="collection_product.product_locker_room.product_url+'/'+collection_product.product_locker_room.id+'/front_thumbnail.png'" alt="">
+                            <template v-if="collection_product_index < 3">
+                              <img :src="collection_product.product_locker_room.product_url+'/'+collection_product.product_locker_room.id+'/front_thumbnail.png'" alt="">
+                            </template>
                           </div>
 
                           <div class="controls">

@@ -38,7 +38,7 @@
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
                   <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts" variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
+                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts" variant="outline-secondary">Locker room</b-button>
                   </template>
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
@@ -667,7 +667,11 @@ export default class Home extends Vue {
   public async getLockerRoomProducts(){
     this.$store.commit('SET_ADD_MORE_COLLECTION',false)
     if(this.isCustomerAuthenticated){
-      await this.$store.dispatch('GET_LOCKER_PRODUCTS');
+      let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+      if (res == true){
+        console.log(this.$store.getters.getLockerProducts)
+        this.showLockerRoomModal()
+      }
     }
   }
 
