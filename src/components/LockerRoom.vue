@@ -502,13 +502,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 </script>
 
 <style lang="scss" scoped>
-.lockerroom-modal .nav-tabs .add_new_locker {
+.lockerroom-modal .nav-tabs .add_new_locker .nav-link{
   border: none !important;
   padding: 0;
-  font-size: 10px;
-  .nav-link .btn {
+  .btn {
     font-size: 1em !important;
-    line-height: 1;
+    line-height: normal;
   }
 }
 
