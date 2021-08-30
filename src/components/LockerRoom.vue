@@ -11,6 +11,7 @@
           </a>
         </template>
 
+
         <div class="lockerroom-tabs">
           <div>
             <b-card no-body>
@@ -140,11 +141,15 @@
         </div>
       </b-tab>
     </template>
-    <div class="create-lockerroom">
-      <b-button v-if="!getAddMoreCollectionStatus" class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
-      <CreateLockerRoomModal @lockerAdded="lockerAdded" />
-      <ExistingCollectionModal @existingCollection="existingCollection" />
-    </div>
+
+    <template #tabs-end>
+      <b-nav-item v-b-tooltip.auto="'Add New Locker Room'" v-if="!getAddMoreCollectionStatus" role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
+        <span class="btn btn-secondary light">Add <BIconFolderPlus /></span>
+      </b-nav-item>
+    </template>
+
+    <CreateLockerRoomModal @lockerAdded="lockerAdded" />
+    <ExistingCollectionModal @existingCollection="existingCollection" />
   </b-tabs>
   </span>
 </template>
@@ -479,6 +484,16 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 </script>
 
 <style lang="scss" scoped>
+.lockerroom-modal .nav-tabs .add_new_locker {
+  border: none !important;
+  padding: 0;
+  font-size: 10px;
+  .nav-link .btn {
+    font-size: 1em !important;
+    line-height: 1;
+  }
+}
+
 .lockerroom-header{
   display: flex;
   flex-wrap: wrap;
@@ -556,36 +571,36 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
 }
-.create-lockerroom{
-  .btn{
-    padding: 0;
-    font-size: 24px;
-    line-height: 1;
-    font-weight: 700;
-    color: #fff;
-    background: #219f84;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    border: none;
-    @media only screen and (min-width: 992px){
-      padding: 10px 30px;
-      border: 1px solid #E7F4F1;
-      border-radius: 0.25rem;
-      width: auto;
-      height: auto;
-      font-size: 14px;
-      font-weight: 400;
-    }
-    span{
-      @media only screen and (max-width: 991px){display: none;}
-    }
-  }
-}
+//.create-lockerroom{
+//  .btn{
+//    padding: 0;
+//    font-size: 24px;
+//    line-height: 1;
+//    font-weight: 700;
+//    color: #fff;
+//    background: #219f84;
+//    width: 24px;
+//    height: 24px;
+//    border-radius: 50%;
+//    display: flex;
+//    flex-wrap: wrap;
+//    justify-content: center;
+//    align-items: center;
+//    border: none;
+//    @media only screen and (min-width: 992px){
+//      padding: 10px 30px;
+//      border: 1px solid #E7F4F1;
+//      border-radius: 0.25rem;
+//      width: auto;
+//      height: auto;
+//      font-size: 14px;
+//      font-weight: 400;
+//    }
+//    span{
+//      @media only screen and (max-width: 991px){display: none;}
+//    }
+//  }
+//}
 
 .products-holder {
   width: 100%;
@@ -659,10 +674,16 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         height: 20px;
         font-size: 9px;
         color: #219f84;
-        background: #fff;
+        background: #E7F4F1;
         border-radius: 50%;
         cursor: pointer;
         border: none;
+        border: 1px solid transparent;
+
+        &:hover{
+          border-color: #219f84;
+        }
+
         @media only screen and (min-width: 992px) {
           width: 30px !important;
           height: 30px;
@@ -672,6 +693,10 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         &.remove {
           background: #F8E1E2;
           color: #D53943;
+
+          &:hover{
+            border-color: #D53943;
+          }
         }
       }
     }
