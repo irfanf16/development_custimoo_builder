@@ -45,10 +45,10 @@
 
           <div class="mt-3 respCanvas">
             <div><img
-              :src="collectionItem.product_locker_room.product_url+'/'+collectionItem.product_locker_room.id+'/front.png'"
+              :src="collectionItem.product_locker_room.front_url"
               alt=""></div>
             <div><img
-              :src="collectionItem.product_locker_room.product_url+'/'+collectionItem.product_locker_room.id+'/back.png'"
+              :src="collectionItem.product_locker_room.back_url"
               alt=""></div>
           </div>
 
@@ -101,6 +101,7 @@ import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
+import {getRandom} from "@/helpers/Helpers";
 
 @Component({
   components: {
@@ -196,12 +197,23 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         groupIndex = 0
       }
     })
-    console.log(products)
     return { name: this.$store.getters.getCollectionItems.name, collection_products: products }
   }
 
   get collectionItems(){
-    return this.$store.getters.getCollectionItems
+    let main_product_id = this.$store.getters.getEditProductId;
+    let items = this.$store.getters.getCollectionItems
+    let collections = this.$store.getters.getCollectionItems.collection_products.map((item: Record<any, any>) => {
+        if (item.product_locker_room.id == main_product_id){
+          let random = getRandom()
+          item.product_locker_room.front_url = `${item.product_locker_room.front_url}?${random}`
+          item.product_locker_room.back_url = `${item.product_locker_room.back_url}?${random}`
+        }
+        return item
+      })
+    items.collection_products = collections
+    console.log(items)
+      return items
   }
   set collectionItems(val){
     console.log('setter called')
