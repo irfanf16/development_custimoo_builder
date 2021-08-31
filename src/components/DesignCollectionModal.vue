@@ -329,13 +329,13 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     let res;
     let content = ''
     if (collectionItems.id == "") {
-      content = await this.generateCollectionPdf();
-      formData.data = content
+      //content = await this.generateCollectionPdf();
+      //formData.data = content
       res = await this.$store.dispatch('createNewCollection', formData);
       console.log("responssse", res)
     } else {
-      content = await this.generateCollectionPdf();
-      formData.data = content
+      //content = await this.generateCollectionPdf();
+      //formData.data = content
       formData.collection_id = collectionItems.id;
       res = await this.$store.dispatch('updateNewCollection', formData);
     }
