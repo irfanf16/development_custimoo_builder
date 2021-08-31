@@ -146,8 +146,8 @@
     </template>
 
     <template #tabs-end>
-      <b-nav-item v-b-tooltip.auto="'Add New Locker Room'" v-if="!getAddMoreCollectionStatus" role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
-        <span class="btn btn-secondary light">Add <BIconFolderPlus /></span>
+      <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getAddMoreCollectionStatus" role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
+        <span class="btn btn-secondary light">Add <BIconPlus /></span>
       </b-nav-item>
     </template>
 
