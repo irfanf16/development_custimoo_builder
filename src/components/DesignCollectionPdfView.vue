@@ -73,9 +73,6 @@ import CustomizationPreview from '@/components/CustomizationPreview.vue'
 })
 
 export default class DesignCollectionPdfView extends Vue {
-  mounted() {
-    console.log("mountedsss", this.collectionData);
-  }
   @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
   @Prop({required: true}) collectionData!: Record<any, any>
 
