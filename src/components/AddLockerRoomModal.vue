@@ -139,6 +139,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
         this.tabIndex = index
         if (this.lockers[index]){
           this.room_id = this.lockers[index].id
+          this.productData = this.roomWithProducts[index].product;
         }
       }
       public async saveToLocker(){
@@ -191,6 +192,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
             this.tabIndex = 0
             if (this.lockers[0]){
               this.room_id = this.lockers[0].id
+              this.productData = this.roomWithProducts[0].product
             }
           }else{
             this.showError(res);
