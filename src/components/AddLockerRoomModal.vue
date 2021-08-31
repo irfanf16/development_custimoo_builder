@@ -20,7 +20,29 @@
                 </div>
             </b-form>
         </div>
-
+      <div class="grid grid-6 gap-3 w-100 mt-4">
+        <div v-for="(product, ind) in productData" :key="ind" class="products-block">
+          <label :key="ind" class="w-100" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
+            <div class="image-holder position-relative">
+              <div>
+                <div class="d-flex w-100 align-items-center justify-content-between position-absolute">
+                  <div>
+                    <b-form-checkbox   v-bind:value="product.id"></b-form-checkbox>
+                  </div>
+                  <div>
+                    <a v-b-tooltip.hover title="Delete design" class="btn remove" @click="deleteProduct(ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
+                  </div>
+                </div>
+                <img class="w-100" :src="product.product_url" alt="">
+              </div>
+            </div>
+            <div class="d-none d-lg-block product-description text-center">
+              <p>{{ product.product_name }}</p>
+            </div>
+          </label>
+        </div>
+      </div>
+      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
     </b-modal>
 </template>
 
@@ -30,18 +52,28 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
 import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
+import ConfirmModal from "@/components/ConfirmModal.vue";
+import LockerRoom from "@/components/LockerRoom.vue";
     @Component<AddLockerRoomModal>({
         components: {
+          ConfirmModal,
+          LockerRoom,
             LockerRoomProducts,
             CreateLockerRoomModal
-        }
+        },
     })
     export default class AddLockerRoomModal extends Mixins(ErrorMessages) {
+      async mounted(){
+        await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+        this.productData = this.roomWithProducts[0].product
+      }
+      private baseUrl = location.host+"/#/"
       public locker_selected = true;
       public room_id = 0;
       public product_name = '';
       public ref = this.$refs as Record<any, any>
       public tabIndex = 0
+      public productData: any[] = []
 
       get customTexts(): [Record<any, any>] {
         return this.$store.getters.getCustomTexts
@@ -49,6 +81,10 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       get lockers():[Record<any, any>]{
         return this.$store.getters.getLockers;
       }
+      get roomWithProducts():Record<any, any>{
+        return this.$store.getters.getLockerProducts
+      }
+
       @Watch('lockers', {
         deep: true
       })
@@ -94,6 +130,8 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         this.locker_selected = false;
         this.room_id = id;
         this.tabIndex = index
+        this.productData = this.roomWithProducts[index].product
+        console.log(this.productData)
       }
       public lockerAdded(){
         let index = this.lockers.length -1
@@ -135,7 +173,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res == ''){
-            this.ref['my-modal'].hide();
+            this.showToast('Design saved successfully', 'SUCCESS')
             this.product_name = ''
           }else{
             alert(res);
@@ -160,6 +198,18 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       }
       public showSaveToLockerRoomModal() {
         this.ref['my-modal'].show()
+      }
+      public async deleteProduct(ind:number, id:number){
+        let room_index = this.roomWithProducts.findIndex((room:Record<any, any>) => room.id == this.room_id)
+        const ok = await this.ref['reset-modal'].showConfirm()
+        if (ok) {
+          let res = await this.$store.dispatch('deleteRoomProduct', {room_index: room_index, product_index: ind, id:id});
+          if (res == true){
+            this.showToast('Product Deleted', 'SUCCESS')
+          }else{
+            this.showError(res)
+          }
+        }
       }
     }
 
@@ -298,5 +348,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
           }
         }
     }
+
 
 </style>
