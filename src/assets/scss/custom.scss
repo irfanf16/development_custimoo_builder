@@ -1680,7 +1680,7 @@ button{
         padding: 10px 0;
         //max-width: 85%;
         @media only screen and (min-width: 1024px){
-            max-width: 80%;
+            //max-width: 80%;
             white-space: normal;
             flex-wrap: wrap;
             overflow-x: hidden;
@@ -2075,7 +2075,7 @@ button{
 
 #modal-center-savecolormodal___BV_modal_body_{
     .nav-tabs{
-        max-width: 80%;
+        //max-width: 80%;
         padding-bottom: 3px;
         overflow: hidden;
         overflow-x: auto;
@@ -2537,62 +2537,73 @@ $fontSize: 0.5;
     }
 }
 
-.designCollections{
-    .products-block{
-        position: relative;
-        cursor: move;
+.designCollections {
+    .products-holder {
+        .products-block {
+            position: relative;
+            cursor: move;
 
-        .controls{
-            position: absolute;
-            top: 0;
-            right: 0;
-            display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            gap: 0.5rem;
+            .image-holder {
+                height: 220px;
+                width: 100%;
 
-            .btn{
-                height: 30px !important;
-                width: 30px !important;
-                display: flex !important;
-                align-items: center;
-                justify-content: center;
-                font-size: 1em;
+                & > .convas_container {
+                    width: 84%;
+                    height: 84%;
+                    position: absolute;
+                    text-align: center;
 
-                @media (max-width: 600px) {
-                    font-size: 0.6rem;
-                    height: 20px !important;
-                    width: 20px !important;
-                    padding: 0;
+                    img {
+                        width: auto;
+                        height: 100%;
+                        display: inline-block;
+                    }
+                }
+
+                & > .convas_container:nth-child(1) {
+                    left: 0;
+                    top: 0;
+                }
+
+                & > .convas_container:nth-child(2) {
+                    left: 20px;
+                    top: 25px;
+                }
+
+                & > .convas_container:nth-child(3) {
+                    left: 45px;
+                    top: 50px;
+                }
+
+                .controls {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    display: grid;
+                    grid-template-columns: repeat(1, 1fr);
+                    gap: 0.5rem;
+                    width: auto;
+
+                    .btn {
+                        height: 30px !important;
+                        width: 30px !important;
+                        display: flex !important;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 1em;
+
+                        @media (max-width: 600px) {
+                            font-size: 0.6rem;
+                            height: 20px !important;
+                            width: 20px !important;
+                            padding: 0;
+                        }
+                    }
                 }
             }
         }
     }
-
-    .image-holder{
-        height: 220px;
-        width: 100%;
-        &>.convas_container{
-            width: 84%;
-            height: 84%;
-            position: absolute;
-        }
-
-        &>.convas_container:nth-child(1){
-            left: 0;
-            top: 0;
-        }
-
-        &>.convas_container:nth-child(2){
-            left: 20px;
-            top: 25px;
-        }
-        &>.convas_container:nth-child(3){
-            left: 45px;
-            top: 50px;
-        }
-    }
 }
-
 .draggable{
     .canvas-area-holder{
         position: relative;

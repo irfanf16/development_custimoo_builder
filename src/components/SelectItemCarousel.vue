@@ -12,7 +12,7 @@
                    :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type"/>
           </div>
         </template>
-        <h3 class="text-center">{{ product.display_name }}</h3>
+        <h3 class="text-center">{{ product.product_name }}</h3>
       </a>
     </template>
   </slither-slider>

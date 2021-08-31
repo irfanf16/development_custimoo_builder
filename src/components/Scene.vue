@@ -1280,6 +1280,17 @@ export default class Scene extends Vue {
 
   public addLogos(logos: [Record<any, any>], logoIndex: null|number = null) {
     const self = this
+    let front_logo_setting = null
+    let back_logo_setting = null;
+    if(this.logosSettings.length > 0) {
+      this.logosSettings.forEach((logo_Setting) => {
+        if(logo_Setting.side == "front") {
+          front_logo_setting = logo_Setting
+        } else {
+          back_logo_setting = logo_Setting
+        }
+      })
+    }
     logos.forEach((logo: Record<any, any>, index: number) => {
       if(logo && logo.url) {
         if (logoIndex == null) {
@@ -1304,6 +1315,10 @@ export default class Scene extends Vue {
           }
           logo.haveControls = Boolean(logo.haveControls)
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
+          let selectable = front_logo_setting ? !front_logo_setting.is_locked : true;
+          if(logo.side == "back") {
+            selectable = back_logo_setting ? !back_logo_setting.is_locked : true;
+          }
           fabric.Image.fromURL(logoUrl, (img: any) => {
             img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
             img.set({
@@ -1311,7 +1326,8 @@ export default class Scene extends Vue {
               top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
               angle: logo.rotation as number,
               centeredScaling: true,
-              selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
+              selectable: selectable,
+              //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
               hasControls: logo.haveControls,
               hasBorders: false,
               evented: logo.haveControls,
