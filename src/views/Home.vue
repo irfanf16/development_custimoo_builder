@@ -672,7 +672,6 @@ export default class Home extends Vue {
     if(this.isCustomerAuthenticated){
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       if (res == true){
-        console.log(this.$store.getters.getLockerProducts)
         this.showLockerRoomModal()
       }
     }

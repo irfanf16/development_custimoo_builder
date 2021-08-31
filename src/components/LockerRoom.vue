@@ -25,7 +25,7 @@
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <img :src="product.product_url+'/'+product.id+'/front_thumbnail.png'" alt="">
+                            <img :src="product.product_url" alt="">
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -106,7 +106,7 @@
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
                             <template v-if="collection_product_index < 3">
-                              <img :src="collection_product.product_locker_room.product_url+'/'+collection_product.product_locker_room.id+'/front_thumbnail.png'" alt="">
+                              <img :src="collection_product.product_locker_room.product_url" alt="">
                             </template>
                           </div>
 
@@ -171,6 +171,7 @@ import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
+import {getRandom} from "@/helpers/Helpers";
 
 @Component<LockerRoom>({
   components: {
@@ -220,10 +221,35 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     return this.$store.getters.getAddMoreCollectionStatus;
   }
   get getLockerProducts():Record<any, any>{
-    return this.$store.getters.getLockerProducts
+    let main_product_id = this.$store.getters.getEditProductId;
+    let locker_products = this.$store.getters.getLockerProducts.map((item: Record<any, any>) => {
+      item.product = item.product.map((locker_product:Record<any, any>) =>{
+        if(main_product_id == locker_product.id) {
+          let random = getRandom();
+          locker_product.product_url = `${locker_product.product_url}?${random}`;
+        }
+        return locker_product
+      })
+      return item
+    })
+   return locker_products;
+  }
+  get mainproductId():number{
+    return this.$store.getters.getEditMainProductId
   }
   get getCollections():Record<any, any>{
-    return this.$store.getters.getCollections
+    let main_product_id = this.$store.getters.getEditProductId;
+    let collections = this.$store.getters.getCollections.map((item: Record<any, any>) => {
+      item.collection_products = item.collection_products.map((collection:Record<any, any>) =>{
+        if (collection.product_locker_room.id == main_product_id){
+          let random = getRandom()
+          collection.product_locker_room.product_url = `${collection.product_locker_room.product_url}?${random}`
+        }
+        return collection
+      })
+      return item
+    })
+    return collections
   }
   @Watch('getCollections', {
     deep: true
@@ -265,6 +291,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
   }
+
   public lockerAdded(){
     setTimeout(() => {
       let index = this.getLockerProducts.length -1
