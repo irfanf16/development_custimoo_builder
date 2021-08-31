@@ -1,13 +1,14 @@
 <template>
-    <b-modal ref="my-modal" id="modal-center-addlockerroom" centered scrollable size="xl" title="Add to Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="my-modal" id="modal-center-addlockerroom" hide-footer centered scrollable size="lg" title="Add to Locker Room" modal-class="add_locker" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener">
-                <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-               </div>
-            <div class="create-lockerroom">
-                <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
-                <CreateLockerRoomModal @lockerAdded="lockerAdded" />
+              <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
             </div>
+            <div class="add_new_locker">
+              <span class="btn btn-secondary light" v-b-modal.modal-center-createlockerroom>Add <BIconPlus /></span>
+            </div>
+<!--                <b-button class="create-btn" variant="secondary" ><span>Create New </span>+</b-button>-->
+                <CreateLockerRoomModal @lockerAdded="lockerAdded" />
         </div>
         <div class="pt-4 design-name-form" v-if="lockers.length > 0">
             <b-form inline>
@@ -216,12 +217,17 @@ import LockerRoom from "@/components/LockerRoom.vue";
 </script>
 
 <style lang="scss" scoped>
+.lockerroom-modal .add_new_locker {
+  //.btn {
+  //  font-size: 1em !important;
+  //  line-height: normal;
+  //}
+}
     .lockerroom-header{
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         .locker-opener{
-            max-width: 90%;
             padding: 15px;
             font-size: 18px;
             position: relative;
@@ -236,7 +242,6 @@ import LockerRoom from "@/components/LockerRoom.vue";
             }
             .btn{
                 padding: 5px 10px;
-                margin: 0 5px 10px;
                 position: relative;
                 background: none;
                 border-color: rgba(3,20,46,0.13);
@@ -244,7 +249,6 @@ import LockerRoom from "@/components/LockerRoom.vue";
                 font-size: 0.8rem;
                 @media only screen and (min-width: 992px){
                     padding: 10px 30px;
-                    margin: 0 10px 10px;
                     font-size: 1rem;
                 }
                 &.active,
@@ -297,7 +301,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
                 padding: 0;
                 font-size: 24px;
                 line-height: 1;
-                font-weight: 700px;
+                font-weight: 700;
                 color: #fff;
                 background: #219f84;
                 width: 24px;

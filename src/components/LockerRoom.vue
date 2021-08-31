@@ -25,7 +25,7 @@
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <img :src="product.product_url" alt="">
+                            <img :src="product.product_url" :class="product.product_url ? '' : 'placeholder'" alt="">
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -35,13 +35,13 @@
 
                       <ul class="product-icons">
                             <li>
-                              <a v-b-tooltip.hover title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
-                            </li>
-                            <li class="d-none d-lg-block">
-                              <a v-b-tooltip.hover title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                              <a v-b-tooltip.hover.right title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                             </li>
                             <li>
-                              <b-button v-b-tooltip.hover title="Share design" :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                              <a v-b-tooltip.hover.right title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            </li>
+                            <li>
+                              <b-button v-b-tooltip.hover.right title="Share design" :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
                               <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
                                 <div class="share-holder">
                                   <h3>Copy link
@@ -106,16 +106,16 @@
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
                             <template v-if="collection_product_index < 3">
-                              <img :src="collection_product.product_locker_room.product_url" alt="">
+                              <img :src="collection_product.product_locker_room.product_url" :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'" alt="">
                             </template>
                           </div>
 
                           <div class="controls">
-                            <a v-b-tooltip.hover title="Delete collection" @click="deleteCollection(collection.id,index)" class="remove btn">
+                            <a v-b-tooltip.hover.right title="Delete collection" @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
-                            <a v-b-tooltip.hover title="Edit collection" @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <b-button v-b-tooltip.hover title="Share collection" :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                            <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
 <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
                             <b-tooltip :target="`collection_${index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
                               <div class="share-holder">
@@ -146,8 +146,8 @@
     </template>
 
     <template #tabs-end>
-      <b-nav-item v-b-tooltip.auto="'Add New Locker Room'" v-if="!getAddMoreCollectionStatus" role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
-        <span class="btn btn-secondary light">Add <BIconFolderPlus /></span>
+      <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getAddMoreCollectionStatus" role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
+        <span class="btn btn-secondary light">Add <BIconPlus /></span>
       </b-nav-item>
     </template>
 
@@ -723,6 +723,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         cursor: pointer;
         border: none;
         border: 1px solid transparent;
+        padding: 0;
 
         &:hover{
           border-color: #219f84;

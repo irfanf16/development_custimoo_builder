@@ -4,15 +4,14 @@
   <b-modal ref="collection-modal" id="modal-center-collection" size="xl" modal-class="modal-fullscreen2" content-class="collection-modal">
 
     <template #modal-title>
-      <div class="d-flex align-items-center justify-content-between gap-1 w-100">
+      <div class="d-flex justify-content-sm-between flex-wrap align-items-center justify-content-center gap-1 w-100">
         <div>
           <b-form-input @input="updateCollectionItemAttribute('name','',$event)" v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
         </div>
 
         <div>
           <b-button style="margin-right: 10px" @click="openLockerModel(false)">Locker Room</b-button>
-           <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
-
+          <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
         </div>
 
       </div>
@@ -46,9 +45,11 @@
           <div class="mt-3 respCanvas">
             <div><img
               :src="collectionItem.product_locker_room.front_url"
+              :class="collectionItem.product_locker_room.front_url ? '' : 'placeholder'"
               alt=""></div>
             <div><img
               :src="collectionItem.product_locker_room.back_url"
+              :class="collectionItem.product_locker_room.back_url ? '' : 'placeholder'"
               alt=""></div>
           </div>
 
@@ -327,13 +328,13 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     let res;
     let content = ''
     if (collectionItems.id == "") {
-      content = await this.generateCollectionPdf();
-      formData.data = content
+      //content = await this.generateCollectionPdf();
+      //formData.data = content
       res = await this.$store.dispatch('createNewCollection', formData);
       console.log("responssse", res)
     } else {
-      content = await this.generateCollectionPdf();
-      formData.data = content
+      //content = await this.generateCollectionPdf();
+      //formData.data = content
       formData.collection_id = collectionItems.id;
       res = await this.$store.dispatch('updateNewCollection', formData);
     }
