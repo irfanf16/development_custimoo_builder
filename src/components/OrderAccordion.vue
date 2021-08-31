@@ -1,6 +1,6 @@
 <template>
   <div class="accordion my-3" role="tablist">
-    <b-card no-body>
+    <b-card no-body v-if="selectedProduct.product_type != 'personalized' ">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-1 class="p-3"><span class="text">Colors</span> <span
           class="accordion-icon"></span></b-button>
@@ -21,7 +21,7 @@
       </b-collapse>
     </b-card>
 
-    <b-card no-body>
+    <b-card no-body v-if="rosterDetails.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-2 class="p-3"><span class="text">Roster</span> <span
           class="accordion-icon"></span></b-button>
@@ -85,13 +85,16 @@
           <div class="order-logo-holder d-flex flex-wrap justify-content-between align-items-center">
             <div class="logo-area d-flex flex-wrap align-items-center border p-3" v-for="(logo, index) in customLogos"
                  :key="index">
-              <div class="image-holder border mr-3">
-                <img :src="storageUrl+logo.url" alt="logo" width="80px" />
-              </div>
-              <div class="text-left">
-                <span class="d-block mb-1">Logo Placement</span>
-                <span class="text-uppercase">{{ logo.side }}</span>
-              </div>
+              <template v-if="logo != null && logo.url != '' ">
+                <div class="image-holder border mr-3">
+                  <img :src="storageUrl+logo.url" alt="logo" width="80px" />
+                </div>
+                <div class="text-left">
+                  <span class="d-block mb-1">Logo Placement</span>
+                  <span class="text-uppercase">{{ logo.side }}</span>
+                </div>
+              </template>
+
             </div>
           </div>
         </b-card-body>

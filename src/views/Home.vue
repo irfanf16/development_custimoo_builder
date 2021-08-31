@@ -570,7 +570,7 @@ export default class Home extends Vue {
     console.log('isCustomerAuthenticated',this.isCustomerAuthenticated)
   }
 
-  public retrieveProducts(url = '/list/products', searchCall = false, productType = false): void {
+  public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): void {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -584,14 +584,15 @@ export default class Home extends Vue {
 
 
     if (this.hasProducts) {
-      http.get(url).then((response: any) => {
+      http.get(url).then(async (response: any) => {
         if (searchCall || productType) {
           this.$store.commit('SET_PRODUCTS', []);
           this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
         }
 
         let product_data = this.products.concat(response.data.products.data)
-        this.$store.commit('SET_PRODUCTS', product_data);
+        await this.$store.commit('SET_PRODUCTS', product_data);
+
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
@@ -604,6 +605,8 @@ export default class Home extends Vue {
         this.$store.dispatch('setColorSectionVisibility')
         this.$store.dispatch("getModels", this.selectedProduct.product_id);
         let windowView = this.$store.getters.getWindowView;
+
+        this.$root.$emit('sliderEvent');
         if(windowView == 2){
           this.showAdvanceCustomization();
         }
