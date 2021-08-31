@@ -25,7 +25,7 @@
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <img :src="product.product_url" alt="">
+                            <img :src="product.product_url" :class="product.product_url ? '' : 'placeholder'" alt="">
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -37,7 +37,7 @@
                             <li>
                               <a v-b-tooltip.hover.right title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                             </li>
-                            <li class="d-none d-lg-block">
+                            <li>
                               <a v-b-tooltip.hover.right title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                             </li>
                             <li>
@@ -106,7 +106,7 @@
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
                             <template v-if="collection_product_index < 3">
-                              <img :src="collection_product.product_locker_room.product_url" alt="">
+                              <img :src="collection_product.product_locker_room.product_url" :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'" alt="">
                             </template>
                           </div>
 
@@ -723,6 +723,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         cursor: pointer;
         border: none;
         border: 1px solid transparent;
+        padding: 0;
 
         &:hover{
           border-color: #219f84;

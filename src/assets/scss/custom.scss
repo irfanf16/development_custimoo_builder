@@ -2389,7 +2389,7 @@ button{
     & > div {
         width: 100%;
 
-        img{
+        img.placeholder{
             min-height: 200px;
             width: 100% !important;
             animation-duration: 1.8s;
@@ -2570,6 +2570,13 @@ $fontSize: 0.5;
                 height: 220px;
                 width: 100%;
 
+                @media (max-width: 767px) {
+                    height: 150px;
+                }
+                @media (max-width: 400px) {
+                    height: 120px;
+                }
+
                 & > .convas_container {
                     width: 84%;
                     height: 84%;
@@ -2580,6 +2587,8 @@ $fontSize: 0.5;
                         width: auto;
                         height: 100%;
                         display: inline-block;
+                        max-width: 100%;
+                        object-fit: contain;
                     }
                 }
 
@@ -2589,13 +2598,23 @@ $fontSize: 0.5;
                 }
 
                 & > .convas_container:nth-child(2) {
-                    left: 20px;
-                    top: 25px;
+                    left: 1vw;
+                    top: 1.2vw;
+
+                    @media (max-width: 600px) {
+                        left: calc(1.3vw);
+                        top: calc(1.5vw);
+                    }
                 }
 
                 & > .convas_container:nth-child(3) {
-                    left: 45px;
-                    top: 50px;
+                    left: 1.5vw;
+                    top: 1.7vw;
+
+                    @media (max-width: 600px) {
+                        left: calc(1.8vw);
+                        top: calc(2vw);
+                    }
                 }
 
                 .controls {
@@ -2741,6 +2760,7 @@ $fontSize: 0.5;
 .modal-fullscreen2 {
     display: flex;
     align-items: center;
+    padding-left: 0 !important;
 
     .modal {
         padding: 0 !important;
