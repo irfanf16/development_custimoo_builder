@@ -29,10 +29,13 @@
                 <div class="d-flex w-100 align-items-center justify-content-between position-absolute">
                   <div>
                     <a v-b-tooltip.hover title="Delete design" class="btn remove" @click="deleteProduct(ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
-                  </div>
+                   </div>
+                  <div>
+                   <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover :title="product.is_back_img ? 'Show front' : 'Show back' " class="btn" @click="swapDesign(ind)"><font-awesome-icon :icon="['fas', 'arrows-alt-h']" />swap</a>
+                   </div>
                 </div>
                 <img class="w-100" :src="product.product_url" alt="">
-              </div>
+               </div>
             </div>
             <div class="d-none d-lg-block product-description text-center">
               <p>{{ product.product_name }}</p>
@@ -214,6 +217,19 @@ import LockerRoom from "@/components/LockerRoom.vue";
             this.showError(res)
           }
         }
+      }
+      public swapDesign(productIndex: number){
+
+        let product: Record<any, any> = this.productData[productIndex];
+
+        if(product.is_back_img==0){
+          product.is_back_img = 1
+          product.product_url = product.product_back_url
+        }else{
+          product.is_back_img = 0
+          product.product_url = product.product_front_url
+        }
+        this.productData[productIndex] = product;
       }
     }
 

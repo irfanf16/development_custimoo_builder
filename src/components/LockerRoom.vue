@@ -57,6 +57,9 @@
                                 </div>
                               </b-tooltip>
                             </li>
+                            <li>
+                              <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover.right  :title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)"><font-awesome-icon :icon="['fas', 'arrows-alt-h']" />swap</a>
+                            </li>
                           </ul>
                     </div>
                   </draggable>
@@ -523,6 +526,20 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         //resp = {status:false,message:err.response.data.errors};
       }
     })
+  }
+
+  public swapDesign(lockerIndex: number, productIndex: number){
+
+    let product: Record<any, any> = this.getLockerProducts[lockerIndex].product[productIndex];
+
+    if(product.is_back_img==0){
+      product.is_back_img = 1
+      product.product_url = product.product_back_url
+    }else{
+      product.is_back_img = 0
+      product.product_url = product.product_front_url
+    }
+    this.getLockerProducts[lockerIndex].product[productIndex] = product;
   }
 }
 </script>
