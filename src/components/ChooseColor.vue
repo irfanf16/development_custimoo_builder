@@ -35,7 +35,8 @@
           <div v-if="defaultColors.filter((color) => { return color.color }).length == 3" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[0].color +' 0% 33.33%, ' + defaultColors[1].color +' 33.33% 66.66%, ' + defaultColors[2].color +' 66.66% 100%)'}"></div>
           <div v-if="defaultColors.filter((color) => { return color.color }).length == 4" class="color-box" :style="{background: 'conic-gradient(' + defaultColors[1].color +' 0% 25%, ' + defaultColors[2].color +' 25% 50%, ' + defaultColors[3].color +' 50% 75%, ' + defaultColors[0].color +' 75% 100%)'}"></div>
         </div>
-        <button v-if="defaultColors.filter((color) => { return color.color }).length > 1" @click="shuffleColors()" class="btn btn-secondary">Shuffle</button>
+        <button v-if="showShuffleButton" @click="shuffleColors()" class="btn btn-secondary">Shuffle</button>
+<!--        <button v-if="defaultColors.filter((color) => { return color.color }).length > 1" @click="shuffleColors()" class="btn btn-secondary">Shuffle</button>-->
         <button v-if="previousDefaultColors.length" @click="rollbackPreviousColors()" class="redo-btn d-none d-lg-block">
           <font-awesome-icon :icon="['fas', 'redo-alt']"/>
         </button>
@@ -66,8 +67,22 @@ export default class ChooseColor extends Vue {
   public selectColorIndex !: number
   public previousDefaultColors : [] = []
 
+  get imageColors(): any[] {
+    return this.$store.getters.getLogosColors
+  }
+
   get defaultColors() : [Record<any, any>] {
     return this.$store.getters.getDefaultColors
+  }
+
+  get showShuffleButton() : boolean {
+    let def_colors = this.defaultColors.filter((color) => { return color.color });
+    if(def_colors.length > 1){
+      return true;
+    }else{
+      return false;
+    }
+
   }
 
   get manageComponents(): Record<any, any> {

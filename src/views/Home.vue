@@ -583,8 +583,9 @@ export default class Home extends Vue {
 
     let customized = this.$store.getters.getCustomized
     let personalized = this.$store.getters.getPersonalized
-    url += `?customized=${customized}&personalized=${personalized}`
 
+    url += `?customized=${customized}&personalized=${personalized}`
+    console.log('urlll',url)
 
     if (this.hasProducts) {
       http.get(url).then(async (response: any) => {

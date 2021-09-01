@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="my-modal" id="modal-center-addlockerroom" hide-footer centered scrollable size="xl" title="Add to Locker Room" modal-class="add_locker" content-class="lockerroom-modal">
+  <b-modal ref="my-modal" id="modal-center-addlockerroom" hide-footer centered scrollable size="xl" title="Add to Locker Room" modal-class="add_locker" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener">
               <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
@@ -28,9 +28,6 @@
               <div>
                 <div class="d-flex w-100 align-items-center justify-content-between position-absolute">
                   <div>
-                    <b-form-checkbox   v-bind:value="product.id"></b-form-checkbox>
-                  </div>
-                  <div>
                     <a v-b-tooltip.hover title="Delete design" class="btn remove" @click="deleteProduct(ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                   </div>
                 </div>
@@ -44,6 +41,7 @@
         </div>
       </div>
       <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     </b-modal>
 </template>
 
@@ -64,10 +62,14 @@ import LockerRoom from "@/components/LockerRoom.vue";
         },
     })
     export default class AddLockerRoomModal extends Mixins(ErrorMessages) {
-      async mounted(){
+      async recallProducts(){
         await this.$store.dispatch('GET_LOCKER_PRODUCTS')
-        this.productData = this.roomWithProducts[0].product
+        if (this.roomWithProducts.length){
+          this.productData = this.roomWithProducts[0].product
+          this.tabIndex = 0
+        }
       }
+      public showLoader = false
       private baseUrl = location.host+"/#/"
       public locker_selected = true;
       public room_id = 0;
@@ -83,9 +85,9 @@ import LockerRoom from "@/components/LockerRoom.vue";
         return this.$store.getters.getLockers;
       }
       get roomWithProducts():Record<any, any>{
-        return this.$store.getters.getLockerProducts
+        const room = this.$store.getters.getLockerProducts
+        return room
       }
-
       @Watch('lockers', {
         deep: true
       })
@@ -95,7 +97,6 @@ import LockerRoom from "@/components/LockerRoom.vue";
           this.locker_selected = false
         }
       }
-
       get isCustomerAuthenticated(): boolean {
         return this.$store.getters.isCustomerAuthenticated
       }
@@ -117,46 +118,51 @@ import LockerRoom from "@/components/LockerRoom.vue";
       get groupColors() : [Record<any, any>] {
         return this.$store.getters.getGroupColors
       }
-
       get productModels(): Record<any, any> {
         return this.$store.getters.getProductModels;
       }
-
       get mainProductType():string{
         let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
         return selected_product.back_design ?  "front_back" : "front";
       }
-
       public showButton(id:number, index:number){
         this.locker_selected = false;
         this.room_id = id;
         this.tabIndex = index
         this.productData = this.roomWithProducts[index].product
-        console.log(this.productData)
       }
       public lockerAdded(){
         let index = this.lockers.length -1
         this.tabIndex = index
         if (this.lockers[index]){
           this.room_id = this.lockers[index].id
+          this.productData = this.roomWithProducts[index].product;
         }
       }
       public async saveToLocker(){
+        this.showLoader = true
         const modelIndex = this.$store.getters.getSelectedModelIndex
         if (this.isCustomerAuthenticated) {
           const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
             return item.design_show
           })
           if (this.product_name == ''){
-            alert('product name is required')
+            this.showError('product name is required')
             return false
           }
-        let locker_front_png = this.$parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
+        let locker_front_png = null
           let locker_back_png = null;
-          if(this.mainProductType == "front_back") {
-            locker_back_png = this.$parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+          if (this.$parent.$refs.product_preview !==undefined){
+            locker_front_png = this.$parent.$refs.product_preview.$refs.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1]
+            if(this.mainProductType == "front_back") {
+              locker_back_png = this.$parent.$refs.product_preview.$refs.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+            }
+          }else if(this.$parent.ref.mainScene !==undefined){
+            locker_front_png = this.$parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
+            if(this.mainProductType == "front_back") {
+              locker_back_png = this.$parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+            }
           }
-
           let locker = {
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
@@ -173,14 +179,16 @@ import LockerRoom from "@/components/LockerRoom.vue";
             locker_back_png: locker_back_png
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
-          if (res == ''){
+          if (res.status == 201){
+            this.showLoader = false
             this.showToast('Design saved successfully', 'SUCCESS')
             this.product_name = ''
           }else{
-            alert(res);
+            this.showLoader = false
+            this.showError(res);
           }
         }else{
-          alert("please login first");
+          this.showError("please login first");
         }
       }
       public async deleteRoom(id:number, index:number){
@@ -191,6 +199,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
             this.tabIndex = 0
             if (this.lockers[0]){
               this.room_id = this.lockers[0].id
+              this.productData = this.roomWithProducts[0].product
             }
           }else{
             this.showError(res);
@@ -199,6 +208,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
       }
       public showSaveToLockerRoomModal() {
         this.ref['my-modal'].show()
+        this.recallProducts();
       }
       public async deleteProduct(ind:number, id:number){
         let room_index = this.roomWithProducts.findIndex((room:Record<any, any>) => room.id == this.room_id)
@@ -217,6 +227,27 @@ import LockerRoom from "@/components/LockerRoom.vue";
 </script>
 
 <style lang="scss" scoped>
+.loader{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.9);
+  z-index: 9999;
+  img{
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
+}
 .lockerroom-modal .add_new_locker {
   //.btn {
   //  font-size: 1em !important;
