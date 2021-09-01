@@ -2598,11 +2598,11 @@ $fontSize: 0.5;
                 }
 
                 & > .convas_container:nth-child(2) {
-                    left: 1vw;
-                    top: 1.2vw;
+                    left: 0.5vw;
+                    top: 1.1vw;
 
                     @media (max-width: 600px) {
-                        left: calc(1.3vw);
+                        left: calc(1vw);
                         top: calc(1.5vw);
                     }
                 }
