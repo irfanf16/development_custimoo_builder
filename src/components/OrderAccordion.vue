@@ -75,7 +75,7 @@
       </b-card>
     </template>
 
-    <b-card no-body>
+    <b-card no-body v-if="customLogos.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-4 class="p-3"><span class="text">Logos</span> <span
           class="accordion-icon"></span></b-button>
@@ -84,7 +84,7 @@
         <b-card-body class="border-top">
           <div class="order-logo-holder d-flex flex-wrap justify-content-between align-items-center">
             <template v-for="(logo, index) in customLogos">
-              <div class="logo-area d-flex flex-wrap align-items-center border p-3" v-if="logo != null && logo.url != '' " :key="index">
+              <div class="logo-area d-flex flex-wrap align-items-center border p-3" :key="index">
                 <div class="image-holder border mr-3">
                   <img :src="storageUrl+logo.url" alt="logo" width="80px" />
                 </div>
@@ -110,6 +110,8 @@ import {Component, Vue} from 'vue-property-decorator'
 export default class OrderAccordion extends Vue {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
+  public customLogosExists = false;
+
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
@@ -119,7 +121,7 @@ export default class OrderAccordion extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos.filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
   }
 
   get svgGroups(): [Record<any, any>] {
