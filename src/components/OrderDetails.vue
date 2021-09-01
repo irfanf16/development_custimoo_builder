@@ -213,9 +213,7 @@ export default class OrderDetails extends Vue {
   }
 
   public buyNow() {
-    if (this.total > 0) {
-      this.$router.push('/confirm-order')
-    }
+    this.$router.push('/confirm-order')
   }
 
   public showLoader = false
@@ -726,12 +724,12 @@ a {
   align-items: center;
   background: #fff;
   z-index: 9999;
-img{
+}
+
+img {
   max-width: 7%;
   display: block;
   margin: 0 auto;
   height: auto;
 }
-}
-
 </style>

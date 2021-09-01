@@ -36,7 +36,6 @@ export default class  ConfirmModal extends Vue{
   private showConfirm(){
     this.ref['confirm-modal'].show()
 
-
     return new Promise((resolve, reject) => {
       this.resolvePromise = resolve
       this.rejectPromise = reject
