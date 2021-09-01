@@ -20,6 +20,7 @@
       </div>
       <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
       <div class="text-color-holder" :class="{ active: customTexts[customTextIndex].selectColor }">
+<!--      <div class="text-color-holder active" >-->
         <a @click="showColor('fill', customTextIndex)">
           <div class="text-color-box">
             <div class="color-circle"
@@ -168,7 +169,7 @@ export default class CustomizationText extends Vue {
     this.fontColorIndex = fontColorIndex
     this.customTexts.forEach((customText: Record<any, any>, index: number) => {
       if(index == fontColorIndex) {
-        this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: true})
+        this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: !customText.selectColor})
       } else {
         this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: false})
       }
@@ -195,7 +196,7 @@ export default class CustomizationText extends Vue {
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColor', value: color.value})
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColorPantone', value: color.name})
     }
-    this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'selectColor', value: false})
+    //this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'selectColor', value: false})
   }
 
   public selectType(index: number) {
@@ -207,6 +208,7 @@ export default class CustomizationText extends Vue {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
     let payload = {index: this.customTextIndex, attribute: 'outLineWidth', value: event}
     this.$store.commit('customTextAttribute', payload)
+    this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, attribute: 'selectColor', value: false})
   }
   public isHidden= false
 

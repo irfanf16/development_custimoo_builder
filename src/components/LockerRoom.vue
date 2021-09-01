@@ -402,7 +402,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }
   }
   public async deleteProduct(i:number, ind:number, id:number){
-
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
       let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
