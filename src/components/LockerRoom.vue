@@ -11,6 +11,7 @@
           </a>
         </template>
 
+
         <div class="lockerroom-tabs">
           <div>
             <b-card no-body>
@@ -24,7 +25,7 @@
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <img :src="product.product_url+'/'+product.id+'/front_thumbnail.png'" alt="">
+                            <img :src="product.product_url" :class="product.product_url ? '' : 'placeholder'" alt="">
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -34,14 +35,14 @@
 
                       <ul class="product-icons">
                             <li>
-                              <a v-b-tooltip.hover title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
-                            </li>
-                            <li class="d-none d-lg-block">
-                              <a v-b-tooltip.hover title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                              <a v-b-tooltip.hover.right title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                             </li>
                             <li>
-                              <b-button v-b-tooltip.hover title="Share design" :id="'share'+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
-                              <b-tooltip :target="'share'+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
+                              <a v-b-tooltip.hover.right title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            </li>
+                            <li>
+                              <b-button v-b-tooltip.hover.right title="Share design" :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                              <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
                                 <div class="share-holder">
                                   <h3>Copy link
                                     ..and Share</h3>
@@ -104,15 +105,17 @@
 
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
-                            <img :src="collection_product.product_locker_room.product_url+'/'+collection_product.product_locker_room.id+'/front_thumbnail.png'" alt="">
+                            <template v-if="collection_product_index < 3">
+                              <img :src="collection_product.product_locker_room.product_url" :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'" alt="">
+                            </template>
                           </div>
 
                           <div class="controls">
-                            <a v-b-tooltip.hover title="Delete collection" @click="deleteCollection(collection.id,index)" class="remove btn">
+                            <a v-b-tooltip.hover.right title="Delete collection" @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
-                            <a v-b-tooltip.hover title="Edit collection" @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <b-button v-b-tooltip.hover title="Share collection" :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                            <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
 <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
                             <b-tooltip :target="`collection_${index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
                               <div class="share-holder">
@@ -141,11 +144,15 @@
         </div>
       </b-tab>
     </template>
-    <div class="create-lockerroom">
-      <b-button v-if="!getAddMoreCollectionStatus" class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
-      <CreateLockerRoomModal @lockerAdded="lockerAdded" />
-      <ExistingCollectionModal @existingCollection="existingCollection" />
-    </div>
+
+    <template #tabs-end>
+      <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getAddMoreCollectionStatus" role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
+        <span class="btn btn-secondary light">Add <BIconPlus /></span>
+      </b-nav-item>
+    </template>
+
+    <CreateLockerRoomModal @lockerAdded="lockerAdded" />
+    <ExistingCollectionModal @existingCollection="existingCollection" />
   </b-tabs>
 
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
@@ -164,6 +171,7 @@ import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
+import {getRandom} from "@/helpers/Helpers";
 
 @Component<LockerRoom>({
   components: {
@@ -213,10 +221,35 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     return this.$store.getters.getAddMoreCollectionStatus;
   }
   get getLockerProducts():Record<any, any>{
-    return this.$store.getters.getLockerProducts
+    let main_product_id = this.$store.getters.getEditProductId;
+    let locker_products = this.$store.getters.getLockerProducts.map((item: Record<any, any>) => {
+      item.product = item.product.map((locker_product:Record<any, any>) =>{
+        if(main_product_id == locker_product.id) {
+          let random = getRandom();
+          locker_product.product_url = `${locker_product.product_url}?${random}`;
+        }
+        return locker_product
+      })
+      return item
+    })
+   return locker_products;
+  }
+  get mainproductId():number{
+    return this.$store.getters.getEditMainProductId
   }
   get getCollections():Record<any, any>{
-    return this.$store.getters.getCollections
+    let main_product_id = this.$store.getters.getEditProductId;
+    let collections = this.$store.getters.getCollections.map((item: Record<any, any>) => {
+      item.collection_products = item.collection_products.map((collection:Record<any, any>) =>{
+        if (collection.product_locker_room.id == main_product_id){
+          let random = getRandom()
+          collection.product_locker_room.product_url = `${collection.product_locker_room.product_url}?${random}`
+        }
+        return collection
+      })
+      return item
+    })
+    return collections
   }
   @Watch('getCollections', {
     deep: true
@@ -258,6 +291,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
   }
+
   public lockerAdded(){
     setTimeout(() => {
       let index = this.getLockerProducts.length -1
@@ -495,6 +529,15 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 </script>
 
 <style lang="scss" scoped>
+.lockerroom-modal .nav-tabs .add_new_locker .nav-link{
+  border: none !important;
+  padding: 0;
+  .btn {
+    font-size: 1em !important;
+    line-height: normal;
+  }
+}
+
 .lockerroom-header{
   display: flex;
   flex-wrap: wrap;
@@ -572,36 +615,36 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
 }
-.create-lockerroom{
-  .btn{
-    padding: 0;
-    font-size: 24px;
-    line-height: 1;
-    font-weight: 700;
-    color: #fff;
-    background: #219f84;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    border: none;
-    @media only screen and (min-width: 992px){
-      padding: 10px 30px;
-      border: 1px solid #E7F4F1;
-      border-radius: 0.25rem;
-      width: auto;
-      height: auto;
-      font-size: 14px;
-      font-weight: 400;
-    }
-    span{
-      @media only screen and (max-width: 991px){display: none;}
-    }
-  }
-}
+//.create-lockerroom{
+//  .btn{
+//    padding: 0;
+//    font-size: 24px;
+//    line-height: 1;
+//    font-weight: 700;
+//    color: #fff;
+//    background: #219f84;
+//    width: 24px;
+//    height: 24px;
+//    border-radius: 50%;
+//    display: flex;
+//    flex-wrap: wrap;
+//    justify-content: center;
+//    align-items: center;
+//    border: none;
+//    @media only screen and (min-width: 992px){
+//      padding: 10px 30px;
+//      border: 1px solid #E7F4F1;
+//      border-radius: 0.25rem;
+//      width: auto;
+//      height: auto;
+//      font-size: 14px;
+//      font-weight: 400;
+//    }
+//    span{
+//      @media only screen and (max-width: 991px){display: none;}
+//    }
+//  }
+//}
 
 .products-holder {
   width: 100%;
@@ -675,10 +718,17 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         height: 20px;
         font-size: 9px;
         color: #219f84;
-        background: #fff;
+        background: #E7F4F1;
         border-radius: 50%;
         cursor: pointer;
         border: none;
+        border: 1px solid transparent;
+        padding: 0;
+
+        &:hover{
+          border-color: #219f84;
+        }
+
         @media only screen and (min-width: 992px) {
           width: 30px !important;
           height: 30px;
@@ -688,6 +738,10 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         &.remove {
           background: #F8E1E2;
           color: #D53943;
+
+          &:hover{
+            border-color: #D53943;
+          }
         }
       }
     }

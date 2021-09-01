@@ -1,6 +1,6 @@
 <template>
   <div class="accordion my-3" role="tablist">
-    <b-card no-body>
+    <b-card no-body v-if="selectedProduct.product_type != 'personalized' ">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-1 class="p-3"><span class="text">Colors</span> <span
           class="accordion-icon"></span></b-button>
@@ -21,7 +21,7 @@
       </b-collapse>
     </b-card>
 
-    <b-card no-body>
+    <b-card no-body v-if="rosterDetails.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-2 class="p-3"><span class="text">Roster</span> <span
           class="accordion-icon"></span></b-button>
@@ -75,7 +75,7 @@
       </b-card>
     </template>
 
-    <b-card no-body>
+    <b-card no-body v-if="customLogos.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-4 class="p-3"><span class="text">Logos</span> <span
           class="accordion-icon"></span></b-button>
@@ -83,16 +83,19 @@
       <b-collapse id="accordion-4" accordion="my-accordion" role="tabpanel">
         <b-card-body class="border-top">
           <div class="order-logo-holder d-flex flex-wrap justify-content-between align-items-center">
-            <div class="logo-area d-flex flex-wrap align-items-center border p-3" v-for="(logo, index) in customLogos"
-                 :key="index">
-              <div class="image-holder border mr-3">
-                <img :src="storageUrl+logo.url" alt="logo" width="80px" />
+            <template v-for="(logo, index) in customLogos">
+              <div class="logo-area d-flex flex-wrap align-items-center border p-3" :key="index">
+                <div class="image-holder border mr-3">
+                  <img :src="storageUrl+logo.url" alt="logo" width="80px" />
+                </div>
+                <div class="text-left">
+                  <span class="d-block mb-1">Logo Placement</span>
+                  <span class="text-uppercase">{{ logo.side }}</span>
+                </div>
+
               </div>
-              <div class="text-left">
-                <span class="d-block mb-1">Logo Placement</span>
-                <span class="text-uppercase">{{ logo.side }}</span>
-              </div>
-            </div>
+            </template>
+
           </div>
         </b-card-body>
       </b-collapse>
@@ -107,6 +110,8 @@ import {Component, Vue} from 'vue-property-decorator'
 export default class OrderAccordion extends Vue {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
+  public customLogosExists = false;
+
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
@@ -116,7 +121,7 @@ export default class OrderAccordion extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos.filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
   }
 
   get svgGroups(): [Record<any, any>] {

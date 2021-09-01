@@ -1,5 +1,6 @@
 import { Module } from "vuex";
 import {http} from "@/httpCommon";
+import {Vue} from "vue-property-decorator";
 const Product:Module<any, any> = {
   state:{
     Product_Models:[],
@@ -41,7 +42,7 @@ const Product:Module<any, any> = {
       state.selectedModelIndex = selectedModelIndex;
     },
     SET_LOCKER_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
-      state.locker_products = payload;
+      Vue.set(state, 'locker_products', payload)
     },
     SET_LOCKERS(state:Record<any, any>, payload:Record<any, any>){
       state.lockers = []
@@ -64,10 +65,12 @@ const Product:Module<any, any> = {
       state.locker_products[payload.room_index].product.splice(payload.product_index, 1);
     },
 
-
-
     CHANGE_EYE_INDEX(state:Record<any, any>, payload){
       state.eyeIndex = payload
+    },
+    ADD_PRODUCT_TO_LOCKER(state:Record<any, any>, payload){
+      const room_index = state.locker_products.findIndex((room:Record<any, any>) => room.id == payload.room_id)
+      Vue.set(state.locker_products[room_index].product, state.locker_products[room_index].product.length, payload.data);
     }
 
 
@@ -82,6 +85,7 @@ const Product:Module<any, any> = {
       let err = '';
       const res = http.post("save/product/locker", payload).then((res) => {
         if (res.status == 201){
+          commit('ADD_PRODUCT_TO_LOCKER', {room_id : payload.room_id, data: res.data.data})
           return '';
         }
       }).catch((errors)=>{
@@ -92,10 +96,11 @@ const Product:Module<any, any> = {
       });
       return res;
     },
-    GET_LOCKER_PRODUCTS({commit}){
-      http.get("locker/products").then((res) => {
+    async GET_LOCKER_PRODUCTS({commit}){
+      return  await http.get("locker/products").then(async (res) => {
         if (res.status == 200){
-          commit('SET_LOCKER_PRODUCTS', res.data)
+          await commit('SET_LOCKER_PRODUCTS', res.data)
+          return true
         }
       })
     },

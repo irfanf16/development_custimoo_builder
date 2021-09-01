@@ -1636,7 +1636,11 @@ button{
 #modal-center-addlockerroom{
     .lockerroom-header{
         .locker-opener{
-            padding: 10px 0;
+            padding: 10px 15px 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+
             @media only screen and (min-width: 1024px){
                 max-height: 110px;
                 overflow-x: hidden;
@@ -1647,7 +1651,6 @@ button{
                 font-size: 12px;
                 @media only screen and (min-width: 1024px){
                     font-size: 14px;
-                    margin: 0 15px 15px 0;
                 }
                 .remove{
                     width: 20px;
@@ -1680,7 +1683,7 @@ button{
         padding: 10px 0;
         //max-width: 85%;
         @media only screen and (min-width: 1024px){
-            max-width: 80%;
+            //max-width: 80%;
             white-space: normal;
             flex-wrap: wrap;
             overflow-x: hidden;
@@ -2075,7 +2078,7 @@ button{
 
 #modal-center-savecolormodal___BV_modal_body_{
     .nav-tabs{
-        max-width: 80%;
+        //max-width: 80%;
         padding-bottom: 3px;
         overflow: hidden;
         overflow-x: auto;
@@ -2382,6 +2385,26 @@ button{
     }
 }
 
+.products-block .image-holder {
+    & > div {
+        width: 100%;
+
+        img.placeholder{
+            min-height: 200px;
+            width: 100% !important;
+            animation-duration: 1.8s;
+            animation-fill-mode: forwards;
+            animation-iteration-count: infinite;
+            animation-name: placeHolderShimmer;
+            animation-timing-function: linear;
+            background: #f6f7f8;
+            background: linear-gradient(to bottom right, #fefefe 8%, #f5f5f5 38%, #fefefe 54%);
+            background-size: 1000px 640px;
+            border: none;
+        }
+    }
+}
+
 .products-holder .products-block .image-holder{
     .custom-checkbox{
         position: absolute;
@@ -2537,62 +2560,92 @@ $fontSize: 0.5;
     }
 }
 
-.designCollections{
-    .products-block{
-        position: relative;
-        cursor: move;
+.designCollections {
+    .products-holder {
+        .products-block {
+            position: relative;
+            cursor: move;
 
-        .controls{
-            position: absolute;
-            top: 0;
-            right: 0;
-            display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            gap: 0.5rem;
+            .image-holder {
+                height: 220px;
+                width: 100%;
 
-            .btn{
-                height: 30px !important;
-                width: 30px !important;
-                display: flex !important;
-                align-items: center;
-                justify-content: center;
-                font-size: 1em;
+                @media (max-width: 767px) {
+                    height: 150px;
+                }
+                @media (max-width: 400px) {
+                    height: 120px;
+                }
 
-                @media (max-width: 600px) {
-                    font-size: 0.6rem;
-                    height: 20px !important;
-                    width: 20px !important;
-                    padding: 0;
+                & > .convas_container {
+                    width: 84%;
+                    height: 84%;
+                    position: absolute;
+                    text-align: center;
+
+                    img {
+                        width: auto;
+                        height: 100%;
+                        display: inline-block;
+                        max-width: 100%;
+                        object-fit: contain;
+                    }
+                }
+
+                & > .convas_container:nth-child(1) {
+                    left: 0;
+                    top: 0;
+                }
+
+                & > .convas_container:nth-child(2) {
+                    left: 1vw;
+                    top: 1.2vw;
+
+                    @media (max-width: 600px) {
+                        left: calc(1.3vw);
+                        top: calc(1.5vw);
+                    }
+                }
+
+                & > .convas_container:nth-child(3) {
+                    left: 1.5vw;
+                    top: 1.7vw;
+
+                    @media (max-width: 600px) {
+                        left: calc(1.8vw);
+                        top: calc(2vw);
+                    }
+                }
+
+                .controls {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    display: grid;
+                    grid-template-columns: repeat(1, 1fr);
+                    gap: 0.5rem;
+                    width: auto;
+
+                    .btn {
+                        height: 30px !important;
+                        width: 30px !important;
+                        display: flex !important;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 1em;
+
+                        @media (max-width: 600px) {
+                            font-size: 0.6rem;
+                            height: 20px !important;
+                            width: 20px !important;
+                            padding: 0;
+                        }
+                    }
                 }
             }
         }
     }
-
-    .image-holder{
-        height: 220px;
-        width: 100%;
-        &>.convas_container{
-            width: 84%;
-            height: 84%;
-            position: absolute;
-        }
-
-        &>.convas_container:nth-child(1){
-            left: 0;
-            top: 0;
-        }
-
-        &>.convas_container:nth-child(2){
-            left: 20px;
-            top: 25px;
-        }
-        &>.convas_container:nth-child(3){
-            left: 45px;
-            top: 50px;
-        }
-    }
 }
-
 .draggable{
     .canvas-area-holder{
         position: relative;
@@ -2707,6 +2760,7 @@ $fontSize: 0.5;
 .modal-fullscreen2 {
     display: flex;
     align-items: center;
+    padding-left: 0 !important;
 
     .modal {
         padding: 0 !important;
@@ -2873,4 +2927,17 @@ $fontSize: 0.5;
 .pdf_page strong{
     font-weight: 600;
     color: #123976;
+}
+
+.add_locker .modal-dialog-centered.modal-dialog-scrollable{
+    height: auto;
+}
+
+@keyframes placeHolderShimmer{
+    0%{
+        background-position: -468px 0
+    }
+    100%{
+        background-position: 468px 0
+    }
 }
