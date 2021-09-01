@@ -86,7 +86,7 @@ const Product:Module<any, any> = {
       const res = http.post("save/product/locker", payload).then((res) => {
         if (res.status == 201){
           commit('ADD_PRODUCT_TO_LOCKER', {room_id : payload.room_id, data: res.data.data})
-          return '';
+          return res;
         }
       }).catch((errors)=>{
         if (errors.response.status == 422){

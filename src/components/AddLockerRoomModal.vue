@@ -62,9 +62,12 @@ import LockerRoom from "@/components/LockerRoom.vue";
         },
     })
     export default class AddLockerRoomModal extends Mixins(ErrorMessages) {
-      async mounted(){
+      async recallProducts(){
         await this.$store.dispatch('GET_LOCKER_PRODUCTS')
-        this.productData = this.roomWithProducts[0].product
+        if (this.roomWithProducts.length){
+          this.productData = this.roomWithProducts[0].product
+          this.tabIndex = 0
+        }
       }
       public showLoader = false
       private baseUrl = location.host+"/#/"
@@ -82,7 +85,8 @@ import LockerRoom from "@/components/LockerRoom.vue";
         return this.$store.getters.getLockers;
       }
       get roomWithProducts():Record<any, any>{
-        return this.$store.getters.getLockerProducts
+        const room = this.$store.getters.getLockerProducts
+        return room
       }
       @Watch('lockers', {
         deep: true
@@ -126,7 +130,6 @@ import LockerRoom from "@/components/LockerRoom.vue";
         this.room_id = id;
         this.tabIndex = index
         this.productData = this.roomWithProducts[index].product
-        console.log(this.productData)
       }
       public lockerAdded(){
         let index = this.lockers.length -1
@@ -144,15 +147,22 @@ import LockerRoom from "@/components/LockerRoom.vue";
             return item.design_show
           })
           if (this.product_name == ''){
-            alert('product name is required')
+            this.showError('product name is required')
             return false
           }
-        let locker_front_png = this.$parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
+        let locker_front_png = null
           let locker_back_png = null;
-          if(this.mainProductType == "front_back") {
-            locker_back_png = this.$parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+          if (this.$parent.$refs.product_preview !==undefined){
+            locker_front_png = this.$parent.$refs.product_preview.$refs.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1]
+            if(this.mainProductType == "front_back") {
+              locker_back_png = this.$parent.$refs.product_preview.$refs.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+            }
+          }else if(this.$parent.ref.mainScene !==undefined){
+            locker_front_png = this.$parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
+            if(this.mainProductType == "front_back") {
+              locker_back_png = this.$parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+            }
           }
-
           let locker = {
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
@@ -169,7 +179,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
             locker_back_png: locker_back_png
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
-          if (res == ''){
+          if (res.status == 201){
             this.showLoader = false
             this.showToast('Design saved successfully', 'SUCCESS')
             this.product_name = ''
@@ -178,7 +188,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
             this.showError(res);
           }
         }else{
-          alert("please login first");
+          this.showError("please login first");
         }
       }
       public async deleteRoom(id:number, index:number){
@@ -198,6 +208,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
       }
       public showSaveToLockerRoomModal() {
         this.ref['my-modal'].show()
+        this.recallProducts();
       }
       public async deleteProduct(ind:number, id:number){
         let room_index = this.roomWithProducts.findIndex((room:Record<any, any>) => room.id == this.room_id)

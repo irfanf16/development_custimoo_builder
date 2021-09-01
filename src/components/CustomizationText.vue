@@ -20,6 +20,7 @@
       </div>
       <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
       <div class="text-color-holder" :class="{ active: customTexts[customTextIndex].selectColor }">
+<!--      <div class="text-color-holder active" >-->
         <a @click="showColor('fill', customTextIndex)">
           <div class="text-color-box">
             <div class="color-circle"
@@ -35,17 +36,38 @@
           </div>
         </a>
         <div class="color-holder">
-          <b-card-body>
+          <b-card-body style="padding: 0 !important;">
             <b-nav class="d-flex flex-wrap align-items-center">
               <b-nav-item class="mr-2" v-for="(colorType, index) in fontsColors" :key="index" @click="selectType(index)">{{ colorType.file_type }}</b-nav-item>
             </b-nav>
-            <div class="color-holder">
-              <div class="color-container">
-                <div class="color-box" v-for="(color, index) in fontColor" @click="setColor(color)"
-                     :title="color.name" :style="{background: color.value}" :key="index"></div>
-              </div>
-            </div>
+
+
+
+<!--            <div class="color-holder">-->
+<!--              <div class="">-->
+<!--                <div class="color-box" v-for="(color, index) in fontColor" @click="setColor(color)"
+                     :title="color.name" :style="{background: color.value}" :key="index">
+
+                </div>-->
+
+                <TextColorTabs ref="text-color-tab" @setColors="setColor" :productColors="productColors" :showSVGS="Boolean(showSVGs)"/>
+
+
+
+
+<!--              </div>-->
+
+
+
+
+
+<!--            </div>-->
+
+
+
           </b-card-body>
+
+
         </div>
       </div>
       <div class="outline-slider-area pt-4">
@@ -64,12 +86,21 @@
 <script lang="ts">
 
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
+import ColorTabs from '@/components/ColorTabs.vue'
+import TextColorTabs from "@/components/TextColorTabs.vue";
+
 
 @Component<CustomizationText>({
+  components: {
+    TextColorTabs,
+    ColorTabs
+  },
   mounted() {
     this.$nextTick(() => {
       this.selectType(this.selectTypeIndex)
     })
+    this.getColors()
+
   },
   filters: {
     capitalize: (value: string) => {
@@ -91,6 +122,8 @@ export default class CustomizationText extends Vue {
   public selectTypeIndex = 0
   public fontColor: any[] = []
   public outLineWidthValue = 0
+  public productColors: any[] = []
+  public showSVGs = false
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
@@ -100,12 +133,43 @@ export default class CustomizationText extends Vue {
     return this.$store.getters.getCustomTexts
   }
 
+  get selectedProduct(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct
+  }
+  get logoColors(): [] {
+    return this.$store.getters.getLogosColors
+  }
+
+  get lockerColors(){
+    return this.$store.getters.getLockerColors
+  }
+  public getColors() {
+    this.productColors = []
+    this.selectedProduct.colors.forEach((colors: any, key: number) => {
+      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
+      finalColor.color_text = JSON.parse(colors.color_text)
+      this.productColors = this.productColors.concat(finalColor)
+    })
+    this.productColors = this.productColors.concat(this.lockerColors)
+
+    if(this.logoColors.length){
+      let logoColorsNew: any[] = []
+      this.logoColors.forEach((color: any, index: number) => {
+        logoColorsNew = logoColorsNew.concat([{name: color.pantone, value: color.hex, position: index+1}])
+      })
+      let teamLogoColors = [{name: 'Team Logo Colors', color_text: logoColorsNew, selectedColor: ''}]
+      this.productColors = this.productColors.concat(teamLogoColors)
+
+    }
+   // console.log('this.productColors',this.productColors)
+  }
+
   public showColor(fontColorType: any, fontColorIndex: number) {
     this.fontColorType = fontColorType
     this.fontColorIndex = fontColorIndex
     this.customTexts.forEach((customText: Record<any, any>, index: number) => {
       if(index == fontColorIndex) {
-        this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: true})
+        this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: !customText.selectColor})
       } else {
         this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: false})
       }
@@ -128,10 +192,11 @@ export default class CustomizationText extends Vue {
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColor', value: color.value})
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColorPantone', value: color.name})
     } else {
+      console.log('asd',this.fontColorIndex,color)
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColor', value: color.value})
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColorPantone', value: color.name})
     }
-    this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'selectColor', value: false})
+    //this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'selectColor', value: false})
   }
 
   public selectType(index: number) {
@@ -143,6 +208,7 @@ export default class CustomizationText extends Vue {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
     let payload = {index: this.customTextIndex, attribute: 'outLineWidth', value: event}
     this.$store.commit('customTextAttribute', payload)
+    this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, attribute: 'selectColor', value: false})
   }
   public isHidden= false
 
