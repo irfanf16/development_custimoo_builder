@@ -83,9 +83,8 @@
       <b-collapse id="accordion-4" accordion="my-accordion" role="tabpanel">
         <b-card-body class="border-top">
           <div class="order-logo-holder d-flex flex-wrap justify-content-between align-items-center">
-            <div class="logo-area d-flex flex-wrap align-items-center border p-3" v-for="(logo, index) in customLogos"
-                 :key="index">
-              <template v-if="logo != null && logo.url != '' ">
+            <template v-for="(logo, index) in customLogos">
+              <div class="logo-area d-flex flex-wrap align-items-center border p-3" v-if="logo != null && logo.url != '' " :key="index">
                 <div class="image-holder border mr-3">
                   <img :src="storageUrl+logo.url" alt="logo" width="80px" />
                 </div>
@@ -93,9 +92,10 @@
                   <span class="d-block mb-1">Logo Placement</span>
                   <span class="text-uppercase">{{ logo.side }}</span>
                 </div>
-              </template>
 
-            </div>
+              </div>
+            </template>
+
           </div>
         </b-card-body>
       </b-collapse>

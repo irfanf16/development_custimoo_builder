@@ -726,12 +726,12 @@ a {
   align-items: center;
   background: #fff;
   z-index: 9999;
-img{
+}
+
+img {
   max-width: 7%;
   display: block;
   margin: 0 auto;
   height: auto;
 }
-}
-
 </style>
