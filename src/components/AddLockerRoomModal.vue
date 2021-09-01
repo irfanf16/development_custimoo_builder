@@ -147,15 +147,22 @@ import LockerRoom from "@/components/LockerRoom.vue";
             return item.design_show
           })
           if (this.product_name == ''){
-            alert('product name is required')
+            this.showError('product name is required')
             return false
           }
-        let locker_front_png = this.$parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
+        let locker_front_png = null
           let locker_back_png = null;
-          if(this.mainProductType == "front_back") {
-            locker_back_png = this.$parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+          if (this.$parent.$refs.product_preview !==undefined){
+            locker_front_png = this.$parent.$refs.product_preview.$refs.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1]
+            if(this.mainProductType == "front_back") {
+              locker_back_png = this.$parent.$refs.product_preview.$refs.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+            }
+          }else if(this.$parent.ref.mainScene !==undefined){
+            locker_front_png = this.$parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
+            if(this.mainProductType == "front_back") {
+              locker_back_png = this.$parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+            }
           }
-
           let locker = {
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
@@ -181,7 +188,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
             this.showError(res);
           }
         }else{
-          alert("please login first");
+          this.showError("please login first");
         }
       }
       public async deleteRoom(id:number, index:number){
