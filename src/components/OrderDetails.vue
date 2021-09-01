@@ -213,9 +213,7 @@ export default class OrderDetails extends Vue {
   }
 
   public buyNow() {
-    if (this.total > 0) {
-      this.$router.push('/confirm-order')
-    }
+    this.$router.push('/confirm-order')
   }
 
   public showLoader = false
