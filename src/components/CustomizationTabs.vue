@@ -33,6 +33,7 @@
             <div class="d-none d-lg-block">
               <ColorAccordion :productColors="productColors"/>
             </div>
+<!--            for mobile-->
             <div class="color-tabs d-lg-none">
               <ColorTabs :productColors="productColors"/>
             </div>
@@ -141,6 +142,7 @@ import { log } from 'fabric/fabric-impl'
     this.fontsColorsManipulation()
     this.fontsList()
     this.customTextInit()
+   // console.log('customTexts',this.customTexts)
   },
 })
 export default class CustomizationProcess extends Vue {
