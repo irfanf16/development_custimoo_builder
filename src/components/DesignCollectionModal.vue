@@ -213,8 +213,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         return item
       })
     items.collection_products = collections
-    console.log(items)
-      return items
+    return items
   }
   set collectionItems(val){
     console.log('setter called')
