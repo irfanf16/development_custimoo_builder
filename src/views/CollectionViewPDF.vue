@@ -106,40 +106,4 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages) {
 }
 </script>
 
-<style lang="css" scoped>
-@import url("../assets/css/collectionPdf.css");
-.download-pdf {
-  padding: 0;
-  height: 40px;
-  width: 40px;
-  align-items: center;
-  justify-content: center;
-  display: flex;
-  position: fixed;
-  right: 20px;
-  top: 20px;
-  z-index: 100;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-}
-.loader {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  z-index: 1030;
-}
-
-.loader img {
-  max-width: 7%;
-  display: block;
-  margin: 0 auto;
-  height: auto;
-}
-</style>
+<style lang="css" scoped src="@assets/css/collectionPdf.css"></style>
