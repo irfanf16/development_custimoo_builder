@@ -25,7 +25,7 @@ const routes: Array<RouteConfig> = [
     component: Home
   },
   {
-    path:'/collection/:collection_id/view',
+    path:'/collection/:collection_file_name/view',
     name: 'CollectionUrl',
     component: CollectionViewPDF
   }

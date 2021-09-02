@@ -5,9 +5,7 @@
       <a :href="collection.collection_pdf_path" download target="_blank" class="download-pdf rounded-circle btn btn-secondary light"><BIconDownload /></a>
       <div id="collectionPdfContainer">
         <div class="pdf_cover">
-          <div class="pdf_collection">
-            <h1>{{collection.name}}</h1>
-          </div>
+
 
           <div class="logo">
             <img src="../../src/assets/logo.png" alt="Logo">
@@ -93,8 +91,8 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages) {
 
   getCollection(): void {
     this.showLoader = true
-    const collection_id = this.$route.params.collection_id;
-    http.get(`/collection/${collection_id}/view`).then((response: any) => {
+    const collection_file_name = this.$route.params.collection_file_name;
+    http.get(`/collection/${collection_file_name}/view`).then((response: any) => {
         this.collection = response.data.result.collection
         this.showLoader = false
       })
@@ -122,5 +120,26 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages) {
   top: 20px;
   z-index: 100;
   box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+.loader {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  z-index: 1030;
+}
+
+.loader img {
+  max-width: 7%;
+  display: block;
+  margin: 0 auto;
+  height: auto;
 }
 </style>
