@@ -31,7 +31,7 @@
                     <a v-b-tooltip.hover title="Delete design" class="btn remove" @click="deleteProduct(ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                    </div>
                   <div>
-                   <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover :title="product.is_back_img ? 'Show front' : 'Show back' " class="btn" @click="swapDesign(ind)"><font-awesome-icon :icon="['fas', 'arrows-alt-h']" />swap</a>
+                   <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover :title="product.is_back_img ? 'Show front' : 'Show back' " class="btn" @click="swapDesign(ind)"><BIconArrowLeftRight /></a>
                    </div>
                 </div>
                 <img class="w-100" :src="product.product_url" alt="">

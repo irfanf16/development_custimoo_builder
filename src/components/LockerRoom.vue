@@ -58,7 +58,7 @@
                               </b-tooltip>
                             </li>
                             <li>
-                              <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover.right  :title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)"><font-awesome-icon :icon="['fas', 'arrows-alt-h']" />swap</a>
+                              <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover.right  :title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)"><BIconArrowLeftRight /></a>
                             </li>
                           </ul>
                     </div>
