@@ -753,7 +753,7 @@ export default class Home extends Vue {
   }
 
   public buyNow() {
-    this.$router.push('/confirm-order')
+    this.$router.push('/')
   }
 
   public isActive = false;
