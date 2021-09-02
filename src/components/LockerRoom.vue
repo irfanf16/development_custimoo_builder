@@ -57,6 +57,9 @@
                                 </div>
                               </b-tooltip>
                             </li>
+                            <li class="swap">
+                              <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover.right  :title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)"><BIconArrowLeftRight /></a>
+                            </li>
                           </ul>
                     </div>
                   </draggable>
@@ -122,7 +125,7 @@
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
                                   <b-form inline>
-                                    <b-form-input :ref="'copylink_'+index" :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}`  : ''"
+                                    <b-form-input :ref="'copylink_'+index" :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}/view`  : ''"
                                     ></b-form-input>
                                     <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
                                   </b-form>
@@ -524,6 +527,20 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       }
     })
   }
+
+  public swapDesign(lockerIndex: number, productIndex: number){
+
+    let product: Record<any, any> = this.getLockerProducts[lockerIndex].product[productIndex];
+
+    if(product.is_back_img==0){
+      product.is_back_img = 1
+      product.product_url = product.product_back_url
+    }else{
+      product.is_back_img = 0
+      product.product_url = product.product_front_url
+    }
+    this.getLockerProducts[lockerIndex].product[productIndex] = product;
+  }
 }
 </script>
 
@@ -697,6 +714,13 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       right: -5px;
       top: -5px;
       z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .swap{
+        margin-top: auto;
+      }
       @media only screen and (min-width: 992px) {
         right: 5px;
         top: 5px;

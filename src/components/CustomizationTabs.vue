@@ -381,7 +381,7 @@ export default class CustomizationProcess extends Vue {
   justify-content: center;
   align-items: center;
   background: rgba(255,255,255,1);
-  z-index: 9999;
+  z-index: 1030;
   img{
     max-width: 7%;
     display: block;

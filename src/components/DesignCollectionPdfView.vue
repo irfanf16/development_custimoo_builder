@@ -88,7 +88,7 @@ export default class DesignCollectionPdfView extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 @page{
   margin: 0 !important;
   padding: 0 !important;
@@ -97,7 +97,7 @@ export default class DesignCollectionPdfView extends Vue {
 
 .pdf_cover{
   position: relative;
-  background: url('../assets/pdf_cover.jpg') no-repeat center;
+  background: url('../assets/images/pdf_cover.jpg') no-repeat center;
   background-size: cover !important;
   width: 11in;
   height: 8.499in;
@@ -114,7 +114,7 @@ export default class DesignCollectionPdfView extends Vue {
   background-size: cover !important;
   width: 11in;
   height: 8.499in;
-  background: url("../assets/page_background.png") no-repeat center;
+  background: url("../assets/images/page_background.png") no-repeat center;
   /*page-break-after: always !important;*/
   /*page-break-inside: avoid !important;*/
   page-break-after: avoid !important;
@@ -518,15 +518,14 @@ a {
   justify-content: center;
   align-items: center;
   background: #fff;
-  z-index: 9999;
+  z-index: 1030;
 
-img {
-  max-width: 7%;
-  display: block;
-  margin: 0 auto;
-  height: auto;
-}
-
+  img {
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
 }
 
 </style>
