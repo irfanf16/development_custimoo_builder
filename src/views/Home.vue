@@ -465,7 +465,7 @@ export default class Home extends Vue {
       this.getLockers()
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     } else {
-      this.buyNow()
+      this.$router.push('/')
     }
   }
   showLockerRoomModal() {
@@ -753,7 +753,7 @@ export default class Home extends Vue {
   }
 
   public buyNow() {
-    this.$router.push('/')
+    this.$router.push('/confirm-order')
   }
 
   public isActive = false;
