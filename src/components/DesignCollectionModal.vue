@@ -419,7 +419,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 1030;
 }
 
 .loader img {

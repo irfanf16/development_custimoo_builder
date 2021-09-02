@@ -1579,7 +1579,7 @@ export default class Scene extends Vue {
   justify-content: center;
   align-items: center;
   background: rgba(255,255,255,0.9);
-  z-index: 9999;
+  z-index: 1030;
   img{
     max-width: 15%;
     display: block;
