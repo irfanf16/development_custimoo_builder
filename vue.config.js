@@ -1,8 +1,8 @@
 module.exports = {
   configureWebpack: {
     output: {
-      filename: 'js/[name].[contenthash].js',
-      chunkFilename: 'js/[name].[contenthash].js',
+      filename: 'js/[name].[hash].js',
+      chunkFilename: 'js/[name].[hash].js',
     }
   }
 }
