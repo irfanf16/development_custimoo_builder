@@ -379,8 +379,8 @@ img{
     position: relative;
     background: url('../images/pdf_cover.jpg') no-repeat center;
     background-size: cover !important;
-    width: 11in;
-    height: 8.499in;
+    width: 100%;
+    min-height: 100vh;
     /*page-break-before: avoid !important;*/
     /*page-break-after: avoid !important;*/
     page-break-inside: avoid !important;
@@ -393,8 +393,8 @@ img{
 
 .pdf_page{
     background-size: cover !important;
-    width: 11in;
-    height: 8.499in;
+    width: 100%;
+    min-height: 100vh;
     background: url('../images/page_background.png') no-repeat center;
     /*page-break-after: always !important;*/
     page-break-inside: avoid !important;

@@ -2,6 +2,7 @@
   <div>
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif"/></div>
     <div v-if="collection">
+      <a :href="collection.collection_pdf_path" download target="_blank" class="download-pdf rounded-circle btn btn-secondary light"><BIconDownload /></a>
       <div id="collectionPdfContainer">
         <div class="pdf_cover">
           <div class="pdf_collection">
@@ -13,7 +14,7 @@
           </div>
         </div>
 
-        <div class="pdf_page">
+        <div class="pdf_page" v-for="(products_chunks,idx)  in collection.collection_products" :key="idx">
           <table class="print-table">
             <tbody>
             <tr>
@@ -21,7 +22,7 @@
                 <h1>{{ collection.name }} </h1>
               </td>
             </tr>
-            <tr v-for="(products_chunks,idx)  in collection.collection_products" :key="idx">
+            <tr >
               <td v-for="(collection_product, idxs) in products_chunks" :key="idxs">
                 <template v-if="collection_product.allow_title && collection_product.product_locker_room && collection_product.product_locker_room.model_description">
                   <div style="font-weight: 600; font-size: larger; word-wrap: break-word" v-html="collection_product.product_locker_room.model_description.model_name">
@@ -49,7 +50,9 @@
 
                 <div class="pdf_description" v-if="collection_product.allow_description">
                   <strong>Product Info: </strong>
-                  <span v-html="collection_product.product_locker_room.model_description.product_model_description"></span>
+                  <template v-if="collection_product.product_locker_room && collection_product.product_locker_room.model_description && collection_product.product_locker_room.model_description.product_model_description">
+                    <span v-html="collection_product.product_locker_room.model_description.product_model_description"></span>
+                  </template>
                 </div>
                 <div class="pdf_description"><strong>Description: </strong>
                   {{ collection_product.product_note }}
@@ -107,4 +110,17 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages) {
 
 <style lang="css" scoped>
 @import url("../assets/css/collectionPdf.css");
+.download-pdf {
+  padding: 0;
+  height: 40px;
+  width: 40px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  z-index: 100;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
 </style>
