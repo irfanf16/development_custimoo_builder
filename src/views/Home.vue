@@ -1132,7 +1132,7 @@ export default class Home extends Vue {
   justify-content: center;
   align-items: center;
   background: rgba(255,255,255,0.9);
-  z-index: 9999;
+  z-index: 1030;
   img{
     max-width: 7%;
     display: block;

@@ -88,7 +88,7 @@ export default class DesignCollectionPdfView extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 @page{
   margin: 0 !important;
   padding: 0 !important;
@@ -518,15 +518,14 @@ a {
   justify-content: center;
   align-items: center;
   background: #fff;
-  z-index: 9999;
+  z-index: 1030;
 
-img {
-  max-width: 7%;
-  display: block;
-  margin: 0 auto;
-  height: auto;
-}
-
+  img {
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
 }
 
 </style>

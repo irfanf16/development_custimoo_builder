@@ -26,12 +26,12 @@
           <label :key="ind" class="w-100" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
             <div class="image-holder position-relative">
               <div>
-                <div class="d-flex w-100 align-items-center justify-content-between position-absolute">
+                <div class="d-flex align-items-center justify-content-between position-absolute controls">
                   <div>
                     <a v-b-tooltip.hover title="Delete design" class="btn remove" @click="deleteProduct(ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                    </div>
                   <div>
-                   <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover :title="product.is_back_img ? 'Show front' : 'Show back' " class="btn" @click="swapDesign(ind)"><font-awesome-icon :icon="['fas', 'arrows-alt-h']" />swap</a>
+                   <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover :title="product.is_back_img ? 'Show front' : 'Show back' " class="btn btn-secondary light rounded-circle" @click="swapDesign(ind)"><BIconArrowLeftRight /></a>
                    </div>
                 </div>
                 <img class="w-100" :src="product.product_url" alt="">
@@ -243,6 +243,33 @@ import LockerRoom from "@/components/LockerRoom.vue";
 </script>
 
 <style lang="scss" scoped>
+.controls{
+  flex-direction: column;
+  right: 0;
+  left: auto;
+  gap: 5px;
+  height: 100%;
+
+  &>div:last-child{
+    margin-top: auto;
+  }
+
+  .btn {
+    height: 30px !important;
+    width: 30px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: .8em;
+
+    @media (max-width: 600px) {
+      font-size: 0.6rem;
+      height: 20px !important;
+      width: 20px !important;
+      padding: 0;
+    }
+  }
+}
 .loader{
   position: absolute;
   left: 0;
@@ -256,7 +283,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
   justify-content: center;
   align-items: center;
   background: rgba(255,255,255,0.9);
-  z-index: 9999;
+  z-index: 1030;
   img{
     max-width: 7%;
     display: block;

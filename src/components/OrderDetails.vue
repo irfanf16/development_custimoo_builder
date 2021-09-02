@@ -723,7 +723,7 @@ a {
   justify-content: center;
   align-items: center;
   background: #fff;
-  z-index: 9999;
+  z-index: 1030;
 }
 
 img {

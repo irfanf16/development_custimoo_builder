@@ -57,8 +57,8 @@
                                 </div>
                               </b-tooltip>
                             </li>
-                            <li>
-                              <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover.right  :title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)"><font-awesome-icon :icon="['fas', 'arrows-alt-h']" />swap</a>
+                            <li class="swap">
+                              <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover.right  :title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)"><BIconArrowLeftRight /></a>
                             </li>
                           </ul>
                     </div>
@@ -714,6 +714,13 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       right: -5px;
       top: -5px;
       z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .swap{
+        margin-top: auto;
+      }
       @media only screen and (min-width: 992px) {
         right: 5px;
         top: 5px;
