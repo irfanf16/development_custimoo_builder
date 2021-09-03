@@ -125,7 +125,7 @@
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
                                   <b-form inline>
-                                    <b-form-input :ref="'copylink_'+index" :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}`  : ''"
+                                    <b-form-input :ref="'copylink_'+index" :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}/view`  : ''"
                                     ></b-form-input>
                                     <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
                                   </b-form>

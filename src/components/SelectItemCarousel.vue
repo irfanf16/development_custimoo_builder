@@ -36,7 +36,8 @@ export default {
   },
   mounted() {
     this.$root.$on('sliderEvent', () => { // here you need to use the arrow function
-     this.$refs.slider.goToIndex(0);
+     if(this.$refs && this.$refs.slider)
+      this.$refs.slider.goToIndex(0);
     })
   },
   computed: {

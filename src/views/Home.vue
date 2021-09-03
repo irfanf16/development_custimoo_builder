@@ -464,9 +464,10 @@ export default class Home extends Vue {
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
-    } else {
+    } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
     }
+    this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
   showLockerRoomModal() {
     this.ref['lockerModal'].showLockerRoomModal()
