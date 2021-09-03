@@ -5,7 +5,7 @@
       <a :href="collection.collection_pdf_path" download target="_blank" class="download-pdf rounded-circle btn btn-secondary light"><BIconDownload /></a>
       <div id="collectionPdfContainer">
         <div class="pdf_cover">
-
+          <h1 style="text-align: center; color: white">{{ collection.name }} </h1>
 
           <div class="logo">
             <img src="../../src/assets/logo.png" alt="Logo">
