@@ -1132,6 +1132,11 @@ export default class Scene extends Vue {
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
+              attribute: 'action',
+              value: e.action
+            })
+            self.$store.dispatch('updateCustomTextAttribute', {
+              index: index,
               attribute: 'y_axis',
               value: e.target.top
             })
@@ -1144,6 +1149,11 @@ export default class Scene extends Vue {
               index: index,
               attribute: 'scaleX',
               value: e.target.scaleX
+            })
+            self.$store.dispatch('updateCustomTextAttribute', {
+              index: index,
+              attribute: 'action',
+              value: e.action
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
@@ -1342,6 +1352,7 @@ export default class Scene extends Vue {
               img.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
               img.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
             }
+          console.log(logo)
 
             let model = self.frontModel
             let canvas = self.frontCanvas
