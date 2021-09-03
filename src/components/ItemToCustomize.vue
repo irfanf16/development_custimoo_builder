@@ -1,15 +1,19 @@
 <template>
   <div class="item-to-customize text-left py-lg-5">
-    <h2 class="fw-bold p-3 p-lg-0 mb-lg-4 fz-18">Select Item to Customize</h2>
 <!--    <div class="customization-nav-area px-3 px-lg-0">-->
 <!--      <Search :categoryListing="categories" @search="searchProduct"/>-->
 <!--    </div>-->
-    <div class="collection-btn mb-2 checkbox_buttons">
-      <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>
-      <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>
-    </div>
 <!--    <items-carousel @retrieveProductsC="retrieveProductsC"></items-carousel>-->
-    <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>
+<!--    <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>-->
+    <div class="p-3">
+      <h2 class="fw-bold p-lg-0 mb-lg-4 fz-18 bg-transparent">Select Item to Customize</h2>
+      <div class="collection-btn mb-2 mt-3 checkbox_buttons">
+        <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>
+        <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>
+      </div>
+
+      <ItemsGrid @retrieveProductsC="retrieveProductsC" />
+    </div>
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>
     <DesignAvailable />
   </div>
@@ -18,15 +22,16 @@
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator'
   import Search from '@/components/Search.vue'
-  import ItemsCarousel from '@/components/ItemsCarousel.vue'
-  import SelectItemCarousel from '../components/SelectItemCarousel.vue'
+  // import SelectItemCarousel from '../components/SelectItemCarousel.vue'
   import DesignAvailable from '../components/DesignAvailable.vue'
+  import ItemsGrid from "@/components/ItemsGrid.vue";
 
 @Component<ItemToCustomize>({
   components: {
+    ItemsGrid,
     Search,
     // ItemsCarousel,
-    SelectItemCarousel,
+    // SelectItemCarousel,
     DesignAvailable
   }
 })
