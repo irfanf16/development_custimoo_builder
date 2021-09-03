@@ -208,7 +208,9 @@ export default class CustomizationText extends Vue {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
     let payload = {index: this.customTextIndex, attribute: 'outLineWidth', value: event}
     this.$store.commit('customTextAttribute', payload)
-    this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, attribute: 'selectColor', value: false})
+   //this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: false})
+    //this.showColor('outline',this.customTextIndex)
+    //this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, attribute: 'selectColor', value: true})
   }
   public isHidden= false
 
