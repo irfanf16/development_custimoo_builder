@@ -42,7 +42,7 @@ main {
  */
 
 h1 {
-    font-size: 2em;
+    font-size: 0.35in;
     margin: 0.67em 0;
 }
 
@@ -435,7 +435,7 @@ img{
 }
 
 .pdf_collection h1{
-    font-size: 0.3in;
+    font-size: 0.35in;
     text-align: center;
     padding-top: 0.35in;
     color: #121212;
