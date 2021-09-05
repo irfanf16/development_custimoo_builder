@@ -1342,7 +1342,6 @@ export default class Scene extends Vue {
               img.scaleX = self.canvasWidth / self.mainCanvasWidth * logo.scaleX
               img.scaleY = self.canvasHeight / self.mainCanvasHeight * logo.scaleY
             }
-          console.log(logo)
 
             let model = self.frontModel
             let canvas = self.frontCanvas
