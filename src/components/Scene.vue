@@ -1132,11 +1132,6 @@ export default class Scene extends Vue {
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
-              attribute: 'action',
-              value: e.action
-            })
-            self.$store.dispatch('updateCustomTextAttribute', {
-              index: index,
               attribute: 'y_axis',
               value: e.target.top
             })
@@ -1149,11 +1144,6 @@ export default class Scene extends Vue {
               index: index,
               attribute: 'scaleX',
               value: e.target.scaleX
-            })
-            self.$store.dispatch('updateCustomTextAttribute', {
-              index: index,
-              attribute: 'action',
-              value: e.action
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
