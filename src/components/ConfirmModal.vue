@@ -10,8 +10,8 @@
     </div>
 
     <div class="d-flex align-items-center justify-content-center gap-2">
-      <b-button @click="_cancel" class="light">{{ cancel_text }}</b-button>
       <b-button  @click="_confirm" >{{ confirm_text }}</b-button>
+      <b-button @click="_cancel" class="light">{{ cancel_text }}</b-button>
     </div>
   </b-modal>
 </template>

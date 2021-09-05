@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;600;700');
+@import url('../fonts/stylesheet.css');
 * {
     box-sizing: border-box !important;
 }
@@ -42,7 +42,7 @@ main {
  */
 
 h1 {
-    font-size: 2em;
+    font-size: 0.35in;
     margin: 0.67em 0;
 }
 
@@ -353,17 +353,22 @@ template {
 }
 h1,h2,h3,h4,h5,h6{
     margin: 0 !important;
-    font-family: "Ubuntu", sans-serif !important;
+    font-family: "gibson", sans-serif !important;
+    font-weight: 600;
 }
 body,html {
-    font-family: "Ubuntu", sans-serif !important;
     margin: 0;
     padding: 0;
 }
+#collectionPdfContainer,
+#collectionPdfContainer *
+{
+    font-family: "gibson", sans-serif !important;
+}
 .pdf_page strong{
-    font-weight: 600;
+    font-weight: 600 !important;
     color: #123976;
-    font-family: "Ubuntu", sans-serif !important;
+    font-family: "gibson", sans-serif !important;
 }
 @page{
     margin: 0 !important;
@@ -430,7 +435,7 @@ img{
 }
 
 .pdf_collection h1{
-    font-size: 0.3in;
+    font-size: 0.35in;
     text-align: center;
     padding-top: 0.35in;
     color: #121212;
@@ -442,7 +447,7 @@ img{
     padding: 0.1in;
     border-radius: 5pt;
     border: 1px solid #999;
-    text-align: center;
+    text-align: left;
     margin-top: 0.1in;
     color: #333;
 }
@@ -459,7 +464,7 @@ img{
 .pdf_page .pdf_description strong,
 .pdf_page .pdf_description b{
     color: #333 !important;
-    font-weight: bold !important;
+    font-weight: 600 !important;
 }
 
 .pdf_page .pdf_description a{
@@ -504,6 +509,27 @@ img{
     z-index: 100;
     box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
+
+.download-design > a{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    height: 40px;
+    width: 40px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    margin: auto;
+    box-shadow: 0 0 0 1000px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: 0.2s all ease;
+}
+.download-design:hover > a{
+    opacity: 1;
+}
+
 .loader {
     position: fixed;
     left: 0;

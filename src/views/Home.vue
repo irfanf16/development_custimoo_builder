@@ -148,6 +148,8 @@
       </b-row>
     </b-container>
     <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
+    <confirm-modal message="This will reset everything. All design changes will be lost.
+ Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes"></confirm-modal>
   </div>
 </template>
 
@@ -575,6 +577,7 @@ export default class Home extends Vue {
   }
 
   public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): void {
+    console.log('urlll',url)
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -586,7 +589,7 @@ export default class Home extends Vue {
     let personalized = this.$store.getters.getPersonalized
 
     url += `?customized=${customized}&personalized=${personalized}`
-    console.log('urlll',url)
+
 
     if (this.hasProducts) {
       http.get(url).then(async (response: any) => {
@@ -763,9 +766,12 @@ export default class Home extends Vue {
     this.isActive = !this.isActive
   }
 
-  public resetStore(){
-    this.$store.dispatch('resetStore')
-    this.$store.dispatch('SET_LOGO_COLORS', [])
+  public async resetStore(){
+    const ok = await this.ref['reset-changes'].showConfirm()
+    if (ok) {
+      this.$store.dispatch('resetStore')
+      this.$store.dispatch('SET_LOGO_COLORS', [])
+    }
   }
 
   get hideColorSection() {

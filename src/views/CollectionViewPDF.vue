@@ -39,8 +39,18 @@
                   <table class="images-holder">
                     <tbody>
                     <tr>
-                      <td><img :src="`${collection_product.product_locker_room.locker_product_images_folder}/front.png`" alt=""></td>
-                      <td><img :src="`${collection_product.product_locker_room.locker_product_images_folder}/back.png`" alt=""></td>
+                      <td>
+                        <div class="position-relative overflow-hidden download-design">
+                          <a :href="`${collection_product.product_locker_room.locker_product_images_folder}/front.png`" download v-b-tooltip title="Download image" target="_blank" class="rounded-circle btn btn-secondary light"><BIconDownload /></a>
+                          <img :src="`${collection_product.product_locker_room.locker_product_images_folder}/front.png`" alt="">
+                        </div>
+                      </td>
+                      <td>
+                        <div class="position-relative overflow-hidden download-design">
+                          <a :href="`${collection_product.product_locker_room.locker_product_images_folder}/back.png`" download v-b-tooltip title="Download image" target="_blank" class="rounded-circle btn btn-secondary light"><BIconDownload /></a>
+                          <img :src="`${collection_product.product_locker_room.locker_product_images_folder}/back.png`" alt="">
+                        </div>
+                      </td>
                     </tr>
                     </tbody>
                   </table>
