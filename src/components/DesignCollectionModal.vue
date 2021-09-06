@@ -4,15 +4,14 @@
   <b-modal ref="collection-modal" id="modal-center-collection" size="xl" modal-class="modal-fullscreen2" content-class="collection-modal">
 
     <template #modal-title>
-      <div class="d-flex align-items-center justify-content-between gap-1 w-100">
+      <div class="d-flex justify-content-sm-between flex-wrap align-items-center justify-content-center gap-1 w-100">
         <div>
           <b-form-input @input="updateCollectionItemAttribute('name','',$event)" v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
         </div>
 
         <div>
           <b-button style="margin-right: 10px" @click="openLockerModel(false)">Locker Room</b-button>
-           <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
-
+          <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
         </div>
 
       </div>
@@ -44,26 +43,14 @@
           </div>
 
           <div class="mt-3 respCanvas">
-
-            <Scene v-if="collectionItem.product_locker_room.design.back_design"
-                   :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
-                   :key="collectionItem.product_locker_room.id"
-                   :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: collectionItem.product_locker_room.style.front? storageUrl+collectionItem.product_locker_room.style.front.file_url : ''}"
-                   :back="{textureUrl: storageUrl+collectionItem.product_locker_room.design.back_design.file_url, modelUrl: collectionItem.product_locker_room.style.back? storageUrl+collectionItem.product_locker_room.style.back.file_url: ''}"
-                   :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''"
-                   :lockerDefaultColors="JSON.parse(collectionItem.product_locker_room.defaultcolors)"
-                   :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150" :canvasWidth="150"
-                   :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
-                   :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
-
-            <Scene v-else :measurement-ratio="collectionItem.product_locker_room.design.measurement_ratio" :productType="collectionItem.product_locker_room.product_type"
-                   :key="collectionItem.product_locker_room.id"
-                   :front="{textureUrl: storageUrl+collectionItem.product_locker_room.design.front_design.file_url, modelUrl: collectionItem.product_locker_room.style? storageUrl+collectionItem.product_locker_room.style.front.file_url : ''}"
-                   :backTextureUrl="collectionItem.product_locker_room.design.back_design? collectionItem.product_locker_room.design.back_design.file_url: ''"
-                   :lockerDefaultColors="JSON.parse(collectionItem.product_locker_room.defaultcolors)"
-                   :lockerGroupColors="JSON.parse(collectionItem.product_locker_room.groupcolors)" :canvasHeight="150" :canvasWidth="150"
-                   :logos="collectionItem.product_locker_room.style.logo.concat(JSON.parse(collectionItem.product_locker_room.custom_logos))"
-                   :texts="JSON.parse(collectionItem.product_locker_room.text)" :canvasSelection="false"/>
+            <div><img
+              :src="collectionItem.product_locker_room.front_url"
+              :class="collectionItem.product_locker_room.front_url ? '' : 'placeholder'"
+              alt=""></div>
+            <div><img
+              :src="collectionItem.product_locker_room.back_url"
+              :class="collectionItem.product_locker_room.back_url ? '' : 'placeholder'"
+              alt=""></div>
           </div>
 
           <div class="mt-3 toggle_pdf" v-if="collectionItem.product_locker_room.model_description">
@@ -115,6 +102,7 @@ import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
+import {getRandom} from "@/helpers/Helpers";
 
 @Component({
   components: {
@@ -210,12 +198,22 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
         groupIndex = 0
       }
     })
-    console.log(products)
     return { name: this.$store.getters.getCollectionItems.name, collection_products: products }
   }
 
   get collectionItems(){
-    return this.$store.getters.getCollectionItems
+    let main_product_id = this.$store.getters.getEditProductId;
+    let items = this.$store.getters.getCollectionItems
+    let collections = this.$store.getters.getCollectionItems.collection_products.map((item: Record<any, any>) => {
+        if (item.product_locker_room.id == main_product_id){
+          let random = getRandom()
+          item.product_locker_room.front_url = `${item.product_locker_room.front_url}?${random}`
+          item.product_locker_room.back_url = `${item.product_locker_room.back_url}?${random}`
+        }
+        return item
+      })
+    items.collection_products = collections
+    return items
   }
   set collectionItems(val){
     console.log('setter called')
@@ -330,13 +328,13 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     let res;
     let content = ''
     if (collectionItems.id == "") {
-      content = await this.generateCollectionPdf();
-      formData.data = content
+      //content = await this.generateCollectionPdf();
+      //formData.data = content
       res = await this.$store.dispatch('createNewCollection', formData);
       console.log("responssse", res)
     } else {
-      content = await this.generateCollectionPdf();
-      formData.data = content
+      //content = await this.generateCollectionPdf();
+      //formData.data = content
       formData.collection_id = collectionItems.id;
       res = await this.$store.dispatch('updateNewCollection', formData);
     }
@@ -393,6 +391,22 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 }
 </script>
 <style scoped>
+.respCanvas{
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.respCanvas >div{
+  width: 100%;
+}
+
+.respCanvas >div img{
+  max-width: 100%;
+}
+
 .loader {
   position: fixed;
   left: 0;
@@ -405,10 +419,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 1030;
 }
 
-img {
+.loader img {
   max-width: 7%;
   display: block;
   margin: 0 auto;

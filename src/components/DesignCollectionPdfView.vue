@@ -33,16 +33,18 @@
                   </div>
                   <div v-else style="opacity: 0">N /A</div>
                   <div class="image-holder" id="both-svg" style="text-align: center;">
-                    <Scene v-if="product.product_locker_room.design.back_design" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"
-                           :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
-                           :back="{textureUrl: product.product_locker_room.design.back_design ? storageUrl+product.product_locker_room.design.back_design.file_url: '', modelUrl: product.product_locker_room.style.back ? storageUrl+product.product_locker_room.style.back.file_url : ''}"
-                           :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"
-                           :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="170" :canvasHeight="200" :preSetData="true" />
-                    <Scene v-else class="view-back" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"
-                           :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"
-                           :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)"
-                           :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"
-                           :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="170" :canvasHeight="200" :preSetData="true" />
+                    <img :src="product.product_locker_room.front_url" alt="">
+                    <img :src="product.product_locker_room.back_url" alt="">
+<!--                    <Scene v-if="product.product_locker_room.design.back_design" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"-->
+<!--                           :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"-->
+<!--                           :back="{textureUrl: product.product_locker_room.design.back_design ? storageUrl+product.product_locker_room.design.back_design.file_url: '', modelUrl: product.product_locker_room.style.back ? storageUrl+product.product_locker_room.style.back.file_url : ''}"-->
+<!--                           :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"-->
+<!--                           :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="170" :canvasHeight="200" :preSetData="true" />-->
+<!--                    <Scene v-else class="view-back" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"-->
+<!--                           :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"-->
+<!--                           :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)"-->
+<!--                           :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"-->
+<!--                           :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="170" :canvasHeight="200" :preSetData="true" />-->
                   </div>
 
                   <div class="pdf_description" v-if="product.product_locker_room.model_description   && product.allow_description" v-html="'<strong>Product Info: </strong>'+ product.product_locker_room.model_description.product_model_description"></div>
@@ -71,9 +73,6 @@ import CustomizationPreview from '@/components/CustomizationPreview.vue'
 })
 
 export default class DesignCollectionPdfView extends Vue {
-  mounted() {
-    console.log("mountedsss", this.collectionData);
-  }
   @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
   @Prop({required: true}) collectionData!: Record<any, any>
 
@@ -89,7 +88,7 @@ export default class DesignCollectionPdfView extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 @page{
   margin: 0 !important;
   padding: 0 !important;
@@ -98,7 +97,7 @@ export default class DesignCollectionPdfView extends Vue {
 
 .pdf_cover{
   position: relative;
-  background: url('../assets/pdf_cover.jpg') no-repeat center;
+  background: url('../assets/images/pdf_cover.jpg') no-repeat center;
   background-size: cover !important;
   width: 11in;
   height: 8.499in;
@@ -115,7 +114,7 @@ export default class DesignCollectionPdfView extends Vue {
   background-size: cover !important;
   width: 11in;
   height: 8.499in;
-  background: url("../assets/page_background.png") no-repeat center;
+  background: url("../assets/images/page_background.png") no-repeat center;
   /*page-break-after: always !important;*/
   /*page-break-inside: avoid !important;*/
   page-break-after: avoid !important;
@@ -519,15 +518,14 @@ a {
   justify-content: center;
   align-items: center;
   background: #fff;
-  z-index: 9999;
+  z-index: 1030;
 
-img {
-  max-width: 7%;
-  display: block;
-  margin: 0 auto;
-  height: auto;
-}
-
+  img {
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
 }
 
 </style>

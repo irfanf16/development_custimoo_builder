@@ -10,7 +10,7 @@
                         <b-button @click="homeScreen" variant="outline-secondary">Back to Design</b-button>
 <!--                        <SaveDesignModal />-->
                         <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
-                        <AddLockerRoomModal />
+                        <AddLockerRoomModal ref="saveToLockerModal" />
                         <a href="#"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                     </div>
                 </b-col>
@@ -21,7 +21,7 @@
                 </b-col>
                 <b-col md="6">
                     <div class="roster-preview-area">
-                        <CustomizationPreview :designs="products[designsIndex]" :canvasSelection="false" />
+                        <CustomizationPreview ref="product_preview" :designs="products[designsIndex]" :canvasSelection="false" />
                         <OrderDetails />
                     </div>
                 </b-col>
@@ -55,6 +55,7 @@
 
     export default class ConfirmOrder extends Vue {
         public selected= null
+      public ref = this.$refs as Record<any, any>
         public options= [
           { value: 'a', text: 'SM' },
           { value: 'a', text: 'MD' },
@@ -93,6 +94,7 @@
 
       public async getLockers(){
         await this.$store.dispatch("getLockers");
+        this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
       }
 
       public homeScreen() {

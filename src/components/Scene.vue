@@ -268,7 +268,9 @@ export default class Scene extends Vue {
               const logoObject = this.customLogoObjects[logo.logoIndex]
               const otherSideObject = this.otherSideLogos[logo.logoIndex]
 
-              this.eventAction(logo, logoObject, otherSideObject)
+              if(!this.logosSettings[index] || (this.logosSettings[index] && !this.logosSettings[index].is_locked)) {
+                this.eventAction(logo, logoObject, otherSideObject)
+              }
               addLogo = false
             }
 
@@ -832,6 +834,8 @@ export default class Scene extends Vue {
                   item.x_axis = self.logosSettings[index].x_axis
                   item.y_axis = self.logosSettings[index].y_axis
                   item.rotation = self.logosSettings[index].rotation
+                  item.haveControls = self.logosSettings[index].is_locked
+                  // console.log(this.logosSettings) to-do here
 
                   if (self.mainPreview) {
                     self.$store.dispatch('updateCustomLogoWithoutTrigger', {
@@ -841,7 +845,8 @@ export default class Scene extends Vue {
                         height: self.logosSettings[index].height,
                         x_axis: self.logosSettings[index].x_axis,
                         y_axis: self.logosSettings[index].y_axis,
-                        rotation: self.logosSettings[index].rotation
+                        rotation: self.logosSettings[index].rotation,
+                        haveControls: self.logosSettings[index].is_locked
                       }
                     })
                   }
@@ -1275,6 +1280,17 @@ export default class Scene extends Vue {
 
   public addLogos(logos: [Record<any, any>], logoIndex: null|number = null) {
     const self = this
+    let front_logo_setting = null
+    let back_logo_setting = null;
+    if(this.logosSettings.length > 0) {
+      this.logosSettings.forEach((logo_Setting) => {
+        if(logo_Setting.side == "front") {
+          front_logo_setting = logo_Setting
+        } else {
+          back_logo_setting = logo_Setting
+        }
+      })
+    }
     logos.forEach((logo: Record<any, any>, index: number) => {
       if(logo && logo.url) {
         if (logoIndex == null) {
@@ -1299,6 +1315,10 @@ export default class Scene extends Vue {
           }
           logo.haveControls = Boolean(logo.haveControls)
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
+          let selectable = front_logo_setting ? !front_logo_setting.is_locked : true;
+          if(logo.side == "back") {
+            selectable = back_logo_setting ? !back_logo_setting.is_locked : true;
+          }
           fabric.Image.fromURL(logoUrl, (img: any) => {
             img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
             img.set({
@@ -1306,7 +1326,8 @@ export default class Scene extends Vue {
               top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
               angle: logo.rotation as number,
               centeredScaling: true,
-              selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
+              selectable: selectable,
+              //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
               hasControls: logo.haveControls,
               hasBorders: false,
               evented: logo.haveControls,
@@ -1558,7 +1579,7 @@ export default class Scene extends Vue {
   justify-content: center;
   align-items: center;
   background: rgba(255,255,255,0.9);
-  z-index: 9999;
+  z-index: 1030;
   img{
     max-width: 15%;
     display: block;

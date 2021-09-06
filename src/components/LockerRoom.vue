@@ -11,6 +11,7 @@
           </a>
         </template>
 
+
         <div class="lockerroom-tabs">
           <div>
             <b-card no-body>
@@ -24,11 +25,7 @@
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <Scene :key="product.id" :measurement-ratio="product.design.measurement_ratio" :productType="product.product_type"
-                                   :front="{textureUrl: storageUrl+product.design.front_design.file_url, modelUrl: product.style.front? storageUrl+product.style.front.file_url : ''}"
-                                   :backTextureUrl="product.design.back_design? product.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(product.defaultcolors)"
-                                   :lockerGroupColors="JSON.parse(product.groupcolors)" :logos="product.style.logo.concat(JSON.parse(product.custom_logos))" :texts="JSON.parse(product.text)"
-                                   :colorGrouping="JSON.parse(product.design.front_design.color_group)" :canvasSelection="false" :preSetData="true"  />
+                            <img :src="product.product_url" :class="product.product_url ? '' : 'placeholder'" alt="">
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -38,16 +35,17 @@
 
                       <ul class="product-icons">
                             <li>
-                              <a class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
-                            </li>
-                            <li class="d-none d-lg-block">
-                              <a @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                              <a v-b-tooltip.hover.right title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                             </li>
                             <li>
-                              <b-button :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                              <a v-b-tooltip.hover.right title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            </li>
+                            <li>
+                              <b-button v-b-tooltip.hover.right title="Share design" :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
                               <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
                                 <div class="share-holder">
-                                  <h3>Copy link and Share</h3>
+                                  <h3>Copy link
+                                    ..and Share</h3>
                                   <div class="share-form">
                                     <b-form inline>
                                       <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
@@ -58,6 +56,11 @@
                                   </div>
                                 </div>
                               </b-tooltip>
+                            </li>
+                            <li class="swap">
+                              <a v-if="product.design.back_design_count > 0" v-b-tooltip.hover.right  :title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
+                                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
+                              </a>
                             </li>
                           </ul>
                     </div>
@@ -107,26 +110,24 @@
 
                           <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
-                            <Scene v-if="collection_product_index <= 2" :measurement-ratio="collection_product.product_locker_room.design.measurement_ratio" :productType="collection_product.product_locker_room.product_type"
-                                   :front="{textureUrl: storageUrl+collection_product.product_locker_room.design.front_design.file_url, modelUrl: collection_product.product_locker_room.style.front? storageUrl+collection_product.product_locker_room.style.front.file_url : ''}"
-                                   :backTextureUrl="collection_product.product_locker_room.design.back_design? collection_product.product_locker_room.design.back_design.file_url: ''" :lockerDefaultColors="JSON.parse(collection_product.product_locker_room.defaultcolors)"
-                                   :lockerGroupColors="JSON.parse(collection_product.product_locker_room.groupcolors)" :colorGrouping="JSON.parse(collection_product.product_locker_room.design.front_design.color_group)"
-                                   :logos="collection_product.product_locker_room.style.logo.concat(JSON.parse(collection_product.product_locker_room.custom_logos))" :texts="JSON.parse(collection_product.product_locker_room.text)" :canvasSelection="false" :preSetData="true" />
+                            <template v-if="collection_product_index < 3">
+                              <img :src="collection_product.product_locker_room.product_url" :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'" alt="">
+                            </template>
                           </div>
 
                           <div class="controls">
-                            <a @click="deleteCollection(collection.id,index)" class="remove btn">
+                            <a v-b-tooltip.hover.right title="Delete collection" @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
-                            <a @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <b-button :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                            <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
 <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
                             <b-tooltip :target="`collection_${index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
                               <div class="share-holder">
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
                                   <b-form inline>
-                                    <b-form-input :ref="'copylink_'+index" :value="collection.link !== ''?  storageUrl + collection.link  : ''"
+                                    <b-form-input :ref="'copylink_'+index" :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}/view`  : ''"
                                     ></b-form-input>
                                     <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
                                   </b-form>
@@ -148,13 +149,20 @@
         </div>
       </b-tab>
     </template>
-    <div class="create-lockerroom">
-      <b-button v-if="!getAddMoreCollectionStatus" class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
-      <CreateLockerRoomModal @lockerAdded="lockerAdded" />
-      <ExistingCollectionModal @existingCollection="existingCollection" />
-    </div>
+
+    <template #tabs-end>
+      <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getAddMoreCollectionStatus" role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
+        <span class="btn btn-secondary light">Add <BIconPlus /></span>
+      </b-nav-item>
+    </template>
+
+    <CreateLockerRoomModal @lockerAdded="lockerAdded" />
+    <ExistingCollectionModal @existingCollection="existingCollection" />
   </b-tabs>
+
+     <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
   </span>
+
 </template>
 
 <script lang="ts">
@@ -167,9 +175,12 @@ import Scene from "@/components/Scene.vue";
 import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
+import ConfirmModal from "@/components/ConfirmModal.vue";
+import {getRandom} from "@/helpers/Helpers";
 
 @Component<LockerRoom>({
   components: {
+    ConfirmModal,
     LockerRoomProducts,
     Scene,
     CreateLockerRoomModal,
@@ -177,6 +188,9 @@ import {http} from "@/httpCommon";
     draggable
   },
   mounted() {
+    let href:any = location.href;
+    href = href.split('#')
+    this.collection_base_url = `${href[0]}`
     this.setCollections()
   }
 })
@@ -190,11 +204,15 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public group = ''
   public collection_available = false;
   public lockerActiveTabIndex = this.$store.getters.getLockerActiveTabIndex;
+  public collection_base_url = ''
 
   private setSelected(e:Record<any, any>){
     console.log('ev', e.target)
   }
 
+  public showConfirm(){
+    this.ref['reset-modal'].showConfirm()
+  }
   public chose(evt:Record<any, any>) {
     console.log('element index within parent: ',evt.oldIndex)
   }
@@ -208,10 +226,35 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     return this.$store.getters.getAddMoreCollectionStatus;
   }
   get getLockerProducts():Record<any, any>{
-    return this.$store.getters.getLockerProducts
+    let main_product_id = this.$store.getters.getEditProductId;
+    let locker_products = this.$store.getters.getLockerProducts.map((item: Record<any, any>) => {
+      item.product = item.product.map((locker_product:Record<any, any>) =>{
+        if(main_product_id == locker_product.id) {
+          let random = getRandom();
+          locker_product.product_url = `${locker_product.product_url}?${random}`;
+        }
+        return locker_product
+      })
+      return item
+    })
+   return locker_products;
+  }
+  get mainproductId():number{
+    return this.$store.getters.getEditMainProductId
   }
   get getCollections():Record<any, any>{
-    return this.$store.getters.getCollections
+    let main_product_id = this.$store.getters.getEditProductId;
+    let collections = this.$store.getters.getCollections.map((item: Record<any, any>) => {
+      item.collection_products = item.collection_products.map((collection:Record<any, any>) =>{
+        if (collection.product_locker_room.id == main_product_id){
+          let random = getRandom()
+          collection.product_locker_room.product_url = `${collection.product_locker_room.product_url}?${random}`
+        }
+        return collection
+      })
+      return item
+    })
+    return collections
   }
   @Watch('getCollections', {
     deep: true
@@ -253,6 +296,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
   }
+
   public lockerAdded(){
     setTimeout(() => {
       let index = this.getLockerProducts.length -1
@@ -363,12 +407,23 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }
   }
   public async deleteProduct(i:number, ind:number, id:number){
-    await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+    const ok = await this.ref['reset-modal'].showConfirm()
+    if (ok) {
+      let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
+      if (res == true){
+        this.showToast('Product Deleted', 'SUCCESS')
+      }else{
+        this.showError(res)
+      }
+    }
   }
   public async deleteCollection(id:number,index:number){
     try{
-       let res = await this.$store.dispatch('deleteCollection', {id: id, index: index});
-      this.showToast(res.data.message, 'SUCCESS');
+      const ok = await this.ref['reset-modal'].showConfirm()
+      if (ok) {
+        let res = await this.$store.dispatch('deleteCollection', {id: id, index: index});
+        this.showToast(res.data.message, 'SUCCESS');
+      }
     }
     catch (e) {
       this.showError(e);
@@ -376,8 +431,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
   public async deleteRoom(id:number, index:number){
     if (confirm('You are going to delete associated product')) {
-      await this.$store.dispatch('deleteRoom', {id: id, index: index});
-      this.showToast('Room Deleted', 'SUCCESS');
+      let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
+      if (res == true){
+        this.showToast('room deleted', 'SUCCESS')
+      }else{
+        this.showError(res);
+      }
     }
   }
 
@@ -470,10 +529,33 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       }
     })
   }
+
+  public swapDesign(lockerIndex: number, productIndex: number){
+
+    let product: Record<any, any> = this.getLockerProducts[lockerIndex].product[productIndex];
+
+    if(product.is_back_img==0){
+      product.is_back_img = 1
+      product.product_url = product.product_back_url
+    }else{
+      product.is_back_img = 0
+      product.product_url = product.product_front_url
+    }
+    this.getLockerProducts[lockerIndex].product[productIndex] = product;
+  }
 }
 </script>
 
 <style lang="scss" scoped>
+.lockerroom-modal .nav-tabs .add_new_locker .nav-link{
+  border: none !important;
+  padding: 0;
+  .btn {
+    font-size: 1em !important;
+    line-height: normal;
+  }
+}
+
 .lockerroom-header{
   display: flex;
   flex-wrap: wrap;
@@ -551,75 +633,82 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
 }
-.create-lockerroom{
-  .btn{
-    padding: 0;
-    font-size: 24px;
-    line-height: 1;
-    font-weight: 700px;
-    color: #fff;
-    background: #219f84;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    border: none;
-    @media only screen and (min-width: 992px){
-      padding: 10px 30px;
-      border: 1px solid #E7F4F1;
-      border-radius: 0.25rem;
-      width: auto;
-      height: auto;
-      font-size: 14px;
-      font-weight: 400;
-    }
-    span{
-      @media only screen and (max-width: 991px){display: none;}
-    }
-  }
-}
+//.create-lockerroom{
+//  .btn{
+//    padding: 0;
+//    font-size: 24px;
+//    line-height: 1;
+//    font-weight: 700;
+//    color: #fff;
+//    background: #219f84;
+//    width: 24px;
+//    height: 24px;
+//    border-radius: 50%;
+//    display: flex;
+//    flex-wrap: wrap;
+//    justify-content: center;
+//    align-items: center;
+//    border: none;
+//    @media only screen and (min-width: 992px){
+//      padding: 10px 30px;
+//      border: 1px solid #E7F4F1;
+//      border-radius: 0.25rem;
+//      width: auto;
+//      height: auto;
+//      font-size: 14px;
+//      font-weight: 400;
+//    }
+//    span{
+//      @media only screen and (max-width: 991px){display: none;}
+//    }
+//  }
+//}
 
-.products-holder{
+.products-holder {
   width: 100%;
   //overflow-x: auto;
   //white-space: nowrap;
   //flex-wrap: nowrap;
   //padding-top: 7px;
-  @media only screen and (min-width: 992px){
+  @media only screen and (min-width: 992px) {
     width: 100%;
     //overflow-x: hidden;
     //white-space: normal;
     //padding-top: 0;
   }
-  .products-block{
+
+  .products-block {
     //flex: 0 0 22%;
     //margin: 0 0.3rem 10px;
     //display: inline-block;
     position: relative;
-    @media only screen and (min-width: 992px){
+    @media only screen and (min-width: 992px) {
       //margin: 0 0.6rem 25px;
       //max-width: 22%;
     }
-    @media only screen and (min-width: 1199px){
+    @media only screen and (min-width: 1199px) {
       //flex: 0 0 18%;
       //max-width: 18%;
     }
-    .image-holder{
+
+    .image-holder {
       position: relative;
       margin: 0 0 15px;
-      @media only screen and (min-width: 992px){overflow: hidden;}
-      img{
+      @media only screen and (min-width: 992px) {
+        overflow: hidden;
+      }
+      &>div{
+        width: 100%;
+      }
+      img {
         display: block;
-        max-width: 100%;
+        width: 100%;
         margin: 0 auto;
         height: auto;
       }
     }
 
-    .product-icons{
+    .product-icons {
       list-style: none;
       padding: 0;
       margin: 0;
@@ -627,16 +716,25 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       right: -5px;
       top: -5px;
       z-index: 1;
-      @media only screen and (min-width: 992px){
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .swap{
+        margin-top: auto;
+      }
+      @media only screen and (min-width: 992px) {
         right: 5px;
         top: 5px;
       }
-      li{
+
+      li {
         display: block;
         margin: 0 0 5px;
       }
+
       .btn,
-      a{
+      a {
         display: flex !important;
         flex-wrap: wrap;
         justify-content: center;
@@ -645,98 +743,110 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         height: 20px;
         font-size: 9px;
         color: #219f84;
-        background: #fff;
+        background: #E7F4F1;
         border-radius: 50%;
         cursor: pointer;
         border: none;
-        @media only screen and (min-width: 992px){
+        border: 1px solid transparent;
+        padding: 0;
+
+        &:hover{
+          border-color: #219f84;
+        }
+
+        @media only screen and (min-width: 992px) {
           width: 30px !important;
           height: 30px;
           font-size: 14px;
         }
-        &.remove{
+
+        &.remove {
           background: #F8E1E2;
           color: #D53943;
+
+          &:hover{
+            border-color: #D53943;
+          }
         }
       }
     }
   }
-}
 
-//.products-holder{
-//    width: 100%;
-//    overflow-x: auto;
-//    white-space: nowrap;
-//    padding-top: 7px;
-//    @media only screen and (min-width: 992px){
-//        width: 100%;
-//        overflow-x: hidden;
-//        white-space: normal;
-//        padding-top: 0;
-//    }
-//    .products-block{
-//        flex: 0 0 22%;
-//        max-width: 22%;
-//        margin: 0 0.3rem 10px;
-//        display: inline-block;
-//        @media only screen and (min-width: 992px){
-//            margin: 0 0.6rem 25px;
-//        }
-//        @media only screen and (min-width: 1199px){
-//            flex: 0 0 18%;
-//            max-width: 18%;
-//        }
-//        .image-holder{
-//            position: relative;
-//            margin: 0;
-//            @media only screen and (min-width: 992px){overflow: hidden;}
-//            img{
-//                display: block;
-//                max-width: 100%;
-//                margin: 0 auto;
-//                height: auto;
-//            }
-//            .product-icons{
-//                list-style: none;
-//                padding: 0;
-//                margin: 0;
-//                position: absolute;
-//                right: -5px;
-//                top: -5px;
-//                z-index: 1;
-//                @media only screen and (min-width: 992px){
-//                    right: 5px;
-//                    top: 5px;
-//                }
-//                li{
-//                    display: block;
-//                    margin: 0 0 5px;
-//                }
-//                a{
-//                    display: flex;
-//                    flex-wrap: wrap;
-//                    justify-content: center;
-//                    align-items: center;
-//                    width: 20px;
-//                    height: 20px;
-//                    font-size: 9px;
-//                    color: #219f84;
-//                    background: #fff;
-//                    border-radius: 50%;
-//                    @media only screen and (min-width: 992px){
-//                        width: 30px;
-//                        height: 30px;
-//                        font-size: 14px;
-//                    }
-//                    &.remove{
-//                        background: #F8E1E2;
-//                        color: #D53943;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
+  //.products-holder{
+  //    width: 100%;
+  //    overflow-x: auto;
+  //    white-space: nowrap;
+  //    padding-top: 7px;
+  //    @media only screen and (min-width: 992px){
+  //        width: 100%;
+  //        overflow-x: hidden;
+  //        white-space: normal;
+  //        padding-top: 0;
+  //    }
+  //    .products-block{
+  //        flex: 0 0 22%;
+  //        max-width: 22%;
+  //        margin: 0 0.3rem 10px;
+  //        display: inline-block;
+  //        @media only screen and (min-width: 992px){
+  //            margin: 0 0.6rem 25px;
+  //        }
+  //        @media only screen and (min-width: 1199px){
+  //            flex: 0 0 18%;
+  //            max-width: 18%;
+  //        }
+  //        .image-holder{
+  //            position: relative;
+  //            margin: 0;
+  //            @media only screen and (min-width: 992px){overflow: hidden;}
+  //            img{
+  //                display: block;
+  //                max-width: 100%;
+  //                margin: 0 auto;
+  //                height: auto;
+  //            }
+  //            .product-icons{
+  //                list-style: none;
+  //                padding: 0;
+  //                margin: 0;
+  //                position: absolute;
+  //                right: -5px;
+  //                top: -5px;
+  //                z-index: 1;
+  //                @media only screen and (min-width: 992px){
+  //                    right: 5px;
+  //                    top: 5px;
+  //                }
+  //                li{
+  //                    display: block;
+  //                    margin: 0 0 5px;
+  //                }
+  //                a{
+  //                    display: flex;
+  //                    flex-wrap: wrap;
+  //                    justify-content: center;
+  //                    align-items: center;
+  //                    width: 20px;
+  //                    height: 20px;
+  //                    font-size: 9px;
+  //                    color: #219f84;
+  //                    background: #fff;
+  //                    border-radius: 50%;
+  //                    @media only screen and (min-width: 992px){
+  //                        width: 30px;
+  //                        height: 30px;
+  //                        font-size: 14px;
+  //                    }
+  //                    &.remove{
+  //                        background: #F8E1E2;
+  //                        color: #D53943;
+  //                    }
+  //                }
+  //            }
+  //        }
+  //    }
+  //}
+}
 .lockerroom-color-folders{
   position: relative;
   .folder-wrapper{

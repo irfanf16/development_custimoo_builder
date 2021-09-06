@@ -1,5 +1,5 @@
 <template>
-    <header id="header" class="shadow py-3 py-lg-0">
+    <header v-if="$route.name != 'CollectionUrl'" id="header" class="shadow py-3 py-lg-0">
         <b-container fluid>
             <b-row class="align-items-center py-4">
                 <b-col cols="6" lg="2">

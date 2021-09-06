@@ -38,7 +38,7 @@
               <header class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
                   <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts" variant="outline-secondary" v-b-modal.modal-center-lockerroom>Locker room</b-button>
+                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts" variant="outline-secondary">Locker room</b-button>
                   </template>
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
@@ -46,7 +46,7 @@
                   <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
                   <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
                   <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'savetolocker'" variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
+                    <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
                   </template>
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
@@ -147,7 +147,9 @@
         </b-col>
       </b-row>
     </b-container>
-    <confirm-modal message="Do you really want to reset everything?" cancel_text="Cancel" confirm_text="Reset" ref="reset-modal"></confirm-modal>
+    <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
+    <confirm-modal message="This will reset everything. All design changes will be lost.
+ Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes"></confirm-modal>
   </div>
 </template>
 
@@ -168,7 +170,7 @@ import LoginForm from '@/components/LoginForm.vue'
 import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import Scene from "@/components/Scene.vue"
+import Scene from "@/components/Scene.vue";
 
 @Component<Home>({
   components: {
@@ -464,9 +466,10 @@ export default class Home extends Vue {
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
-    } else {
+    } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
     }
+    this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
   showLockerRoomModal() {
     this.ref['lockerModal'].showLockerRoomModal()
@@ -489,6 +492,9 @@ export default class Home extends Vue {
 
   public async getLockers(){
     await this.$store.dispatch("getLockers");
+    if (!this.editStatus){
+      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+    }
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
@@ -563,11 +569,15 @@ export default class Home extends Vue {
     }
   }
   public async logoutCustomer(){
-    await this.$store.dispatch('logoutCustomer');
+    const ok = await this.ref['reset-modal'].showConfirm()
+    if (ok) {
+      await this.$store.dispatch('logoutCustomer');
+    }
     console.log('isCustomerAuthenticated',this.isCustomerAuthenticated)
   }
 
-  public retrieveProducts(url = '/list/products', searchCall = false, productType = false): void {
+  public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): void {
+    console.log('urlll',url)
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -577,18 +587,20 @@ export default class Home extends Vue {
 
     let customized = this.$store.getters.getCustomized
     let personalized = this.$store.getters.getPersonalized
+
     url += `?customized=${customized}&personalized=${personalized}`
 
 
     if (this.hasProducts) {
-      http.get(url).then((response: any) => {
+      http.get(url).then(async (response: any) => {
         if (searchCall || productType) {
           this.$store.commit('SET_PRODUCTS', []);
           this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
         }
 
         let product_data = this.products.concat(response.data.products.data)
-        this.$store.commit('SET_PRODUCTS', product_data);
+        await this.$store.commit('SET_PRODUCTS', product_data);
+
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
@@ -601,6 +613,8 @@ export default class Home extends Vue {
         this.$store.dispatch('setColorSectionVisibility')
         this.$store.dispatch("getModels", this.selectedProduct.product_id);
         let windowView = this.$store.getters.getWindowView;
+
+        this.$root.$emit('sliderEvent');
         if(windowView == 2){
           this.showAdvanceCustomization();
         }
@@ -667,7 +681,10 @@ export default class Home extends Vue {
   public async getLockerRoomProducts(){
     this.$store.commit('SET_ADD_MORE_COLLECTION',false)
     if(this.isCustomerAuthenticated){
-      await this.$store.dispatch('GET_LOCKER_PRODUCTS');
+      let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+      if (res == true){
+        this.showLockerRoomModal()
+      }
     }
   }
 
@@ -749,9 +766,12 @@ export default class Home extends Vue {
     this.isActive = !this.isActive
   }
 
-  public resetStore(){
-    this.$store.dispatch('resetStore')
-    this.$store.dispatch('SET_LOGO_COLORS', [])
+  public async resetStore(){
+    const ok = await this.ref['reset-changes'].showConfirm()
+    if (ok) {
+      this.$store.dispatch('resetStore')
+      this.$store.dispatch('SET_LOGO_COLORS', [])
+    }
   }
 
   get hideColorSection() {
@@ -1119,7 +1139,7 @@ export default class Home extends Vue {
   justify-content: center;
   align-items: center;
   background: rgba(255,255,255,0.9);
-  z-index: 9999;
+  z-index: 1030;
   img{
     max-width: 7%;
     display: block;
