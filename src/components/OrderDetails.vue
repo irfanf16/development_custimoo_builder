@@ -62,7 +62,7 @@
                         <div class="color-details">
                           <span class="color-property">{{ svgColor.id.toUpperCase() }}</span>
                           <div v-if="svgColor.pantone && svgColor.pantone != 'undefined' " class="color-name">Pantone: {{ svgColor.pantone }}</div>
-                          <div v-else class="color-name"> - {{ svgColor.name.toUpperCase() }}</div>
+                          <div v-else class="color-name"> {{ svgColor.name.toUpperCase() }}</div>
                         </div>
                       </div>
                     </div>
