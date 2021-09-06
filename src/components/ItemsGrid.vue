@@ -1,7 +1,7 @@
 <template>
-  <div class="grid grid-mobile-4">
+  <div class="grid grid-mobile-4 gap-2 pick-item mt-3">
     <div v-for="(product, index) in products" :key="index">
-      <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
+      <div ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">
           <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
             <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
@@ -13,7 +13,7 @@
           </div>
         </template>
         <h3 class="text-center">{{ product.product_name }}</h3>
-      </a>
+      </div>
     </div>
   </div>
 </template>
@@ -63,6 +63,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.pick-item{
+  .image-holder{
+    position: relative;
+
+    &:after{
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(0,0,0,0);
+    }
+  }
+}
 .select-item-slider{
   h3{
     overflow: hidden;

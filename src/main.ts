@@ -4,6 +4,8 @@ import router from './router'
 import store from './store'
 import VueToast from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
+import Vue2TouchEvents from 'vue2-touch-events'
+Vue.use(Vue2TouchEvents);
 Vue.use(VueToast);
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {

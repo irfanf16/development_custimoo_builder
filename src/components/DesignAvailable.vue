@@ -70,7 +70,7 @@ export default class DesignAvailable extends Vue {
   //max-height: 15vh;
   overflow: hidden;
   overflow-y: auto;
-  padding-bottom: 15vh;
+  padding-bottom: 13vh;
   //@media only screen and (min-width: 350px){
   //  max-height: 36vh;
   //}

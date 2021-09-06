@@ -5,17 +5,29 @@
 <!--    </div>-->
 <!--    <items-carousel @retrieveProductsC="retrieveProductsC"></items-carousel>-->
 <!--    <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>-->
-    <div class="p-3">
-      <h2 class="fw-bold p-lg-0 mb-lg-4 fz-18 bg-transparent">Select Item to Customize</h2>
-      <div class="collection-btn mb-2 mt-3 checkbox_buttons">
-        <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>
-        <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>
-      </div>
+    <div class="p-3" style="border-bottom: 1px solid #eee">
+      <h2 class="fw-bold p-lg-0 mb-lg-4 fz-18 bg-transparent d-flex align-items-center justify-content-between" @click="toggleItems">
+        <span>Select Item to Customize</span>
+        <span class="mt-1 toggleArrow" :class="showItems ? 'opened' : ''"><BIconChevronDown /></span>
+      </h2>
 
-      <ItemsGrid @retrieveProductsC="retrieveProductsC" />
+      <div class="select-items" :class="showItems ? 'opened' : ''">
+        <div class="collection-btn mb-2 mt-3 px-1 checkbox_buttons">
+          <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>
+          <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>
+        </div>
+
+        <ItemsGrid @retrieveProductsC="retrieveProductsC" />
+      </div>
     </div>
-    <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>
-    <DesignAvailable />
+
+    <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
+      <span>Designs Available</span>
+      <span class="mt-1 toggleArrow" :class="showDesigns ? 'opened' : ''"><BIconChevronDown /></span>
+    </h2>
+    <div class="select-designs" :class="showDesigns ? 'opened' : ''">
+      <DesignAvailable />
+    </div>
   </div>
 </template>
 
@@ -38,10 +50,18 @@
 export default class ItemToCustomize extends Vue {
   @Prop({required: true}) categories!: any
 
+  private showItems = false;
+  private showDesigns = false;
 
   public personalized = this.$store.getters.getPersonalized
   public customized = this.$store.getters.getCustomized
 
+  private toggleItems () {
+    this.showItems = !this.showItems
+  }
+  private toggleDesigns () {
+    this.showDesigns = !this.showDesigns
+  }
 
   public retrieveProductsC(index :number){
     this.$emit('retrieveProducts', index)
@@ -88,6 +108,36 @@ export default class ItemToCustomize extends Vue {
 </script>
 
 <style scoped lang="scss">
+  .select-items{
+    overflow: hidden;
+    max-height: 0;
+    transition: all 0.2s ease;
+    overflow-y: auto;
+
+    &.opened{
+      max-height: 500px;
+    }
+  }
+
+  .select-designs{
+    overflow: hidden;
+    max-height: 0;
+    transition: all 0.2s ease;
+    overflow-y: auto;
+
+    &.opened{
+      max-height: calc(85vh - 120px);
+    }
+  }
+
+  .toggleArrow{
+    transition: 0.2s all ease;
+
+    &.opened{
+      transform: rotate(-180deg);
+    }
+  }
+
   .item-to-customize{
     margin: 0 -15px;
     border-top: 1px solid #EDF2F6;

@@ -2945,3 +2945,28 @@ $fontSize: 0.5;
         background-position: 468px 0
     }
 }
+
+.pick-item{
+    h3{
+        word-break: break-all;
+        word-wrap: break-word;
+        font-size: smaller;
+    }
+
+    .canvas-area-holder{
+        &>a{
+            height: 90px !important;
+            width: 100% !important;
+        }
+        .canvas-container{
+            width: 100% !important;
+            height: 100% !important;
+
+            .canvas{
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: contain;
+            }
+        }
+    }
+}
