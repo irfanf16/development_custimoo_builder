@@ -75,7 +75,7 @@
                           <span>{{ textData.type.toUpperCase() }}: {{ textData.text }}</span>
                           <span>Font: {{ textData.fontFamily }}</span>
                           <span>Size: {{ textData.originalWidth }}cm x {{ textData.originalHeight }}cm</span>
-                          <span>OutLine: {{ textData.originalOutLineWidth ? textData.originalOutLineWidth.toFixed(2) : '' }}cm</span>
+                          <span v-if="textData.originalOutLineWidth">OutLine: {{textData.originalOutLineWidth.toFixed(2) }}cm</span>
                         </div>
                         <div class="color-details">
                           <div class="color-details-wrapper">
@@ -107,7 +107,7 @@
                         <th>Size</th>
                         <th>Qty</th>
                       </tr>
-                      <template v-if="rosterDetails.length && rosterDetails[0].text">
+                      <template v-if="rosterDetails.length">
                         <tr v-for="(roster, index) in rosterDetails" :key="index">
                           <td>{{ roster.text }}</td>
                           <td>{{ roster.number }}</td>
@@ -220,7 +220,7 @@ export default class OrderDetails extends Vue {
   public showLoader = false
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos.filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
   }
 
   get customTexts(): [Record<any, any>] {
