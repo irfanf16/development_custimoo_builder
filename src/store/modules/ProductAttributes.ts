@@ -702,8 +702,8 @@ const ProductAttributes:Module<any, any> = {
         }
       }).catch(err => {
         if(err.response.status){
-          alert(err.response.data.message)
-          commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+          return err.response.data.message
+          // commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
         }
       })
     },

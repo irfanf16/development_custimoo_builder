@@ -527,6 +527,9 @@ export default class Home extends Mixins(ErrorMessages) {
       if (res.status == 201){
         this.showLoader = false
         this.showToast(res.data.message, 'SUCCESS')
+      }else{
+        this.showError(res)
+        this.showLoader = false
       }
     }
   }
