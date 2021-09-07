@@ -88,14 +88,18 @@
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
                   </a></li>
                 </ul>
-                <div class="change-product-area d-lg-none">
-                  <h2>Change Product</h2>
-                  <b-button @click="showDesign()" class="change-product-opener" variant="secondary"></b-button>
+                <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
+<!--                  <h2>Change Product</h2>-->
+<!--                  <button @click="showDesign()" class="change-product-opener btn btn-secondary light">Change Product</button>-->
                 </div>
               </header>
-              <div class="undo-btn-area text-left pt-3">
-                <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
-                <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
+              <div class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
+                <div>
+                  <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
+                  <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
+                </div>
+
+                <a class="custom-link fs-3"><BIconThreeDotsVertical /> </a>
               </div>
             </div>
           </template>
@@ -1058,19 +1062,19 @@ export default class Home extends Vue {
     font-size: 1.25rem;
     font-weight: 600;
   }
-  .change-product-opener{
-    width: 18px;
-    height: 18px;
-    position: relative;
-    &:before{
-      position: absolute;
-      content: '';
-      left: 2px;
-      top: 6px;
-      border: 6px solid transparent;
-      border-top: 6px solid #fff;
-    }
-  }
+  //.change-product-opener{
+  //  width: 18px;
+  //  height: 18px;
+  //  position: relative;
+  //  &:before{
+  //    position: absolute;
+  //    content: '';
+  //    left: 2px;
+  //    top: 6px;
+  //    border: 6px solid transparent;
+  //    border-top: 6px solid #fff;
+  //  }
+  //}
 
 }
 .customization-area{

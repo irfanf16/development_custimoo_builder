@@ -51,7 +51,7 @@ export default class ItemToCustomize extends Vue {
   @Prop({required: true}) categories!: any
 
   private showItems = false;
-  private showDesigns = false;
+  private showDesigns = true;
 
   public personalized = this.$store.getters.getPersonalized
   public customized = this.$store.getters.getCustomized
