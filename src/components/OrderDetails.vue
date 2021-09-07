@@ -53,7 +53,7 @@
                 <img :src="pdf_back_image" alt="" style="width: 100%; max-width: 100%">
               </div>
             </div>
-            <div class="two-columns">
+            <div class="two-columns" style="page-break-inside: avoid; padding-top: 0.5in">
               <div class="left-col">
                 <div class="product-details-area">
                   <div class="details-col">
