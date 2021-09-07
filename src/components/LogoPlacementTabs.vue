@@ -139,6 +139,10 @@ export default class LogoPlacementTabs extends Vue {
     return this.$store.getters.getHideColorSection
   }
 
+  get defaultColors() : [Record<any, any>] {
+    return this.$store.getters.getDefaultColors
+  }
+
   public async initFirstLogoTab(index: number){
     if(this.$store.getters.getCustomLogos.length < 1){
       if(this.numberOfLogos < this.allowedLogosLimit) {
@@ -241,6 +245,7 @@ export default class LogoPlacementTabs extends Vue {
   useLogoColors() {
     this.logoColorUsed = true
     this.$store.dispatch('setGroupColors', {})
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
     for (let i = 0; i < 4; i++) {
       if(this.imageColors[i]) {
         this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone, name: this.imageColors[i].name})
@@ -269,6 +274,7 @@ export default class LogoPlacementTabs extends Vue {
       }
 
       this.$store.dispatch("SET_LOGO_COLORS", imageColors);
+      this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
       imageColors.forEach((imageColor: Record<any, any>, index: number) => {
         this.$store.dispatch('setDefaultColor', {
           index: index,
@@ -281,6 +287,7 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public rollbackPreviousColors (): void {
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
     this.previousImageColors.forEach((defaultColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
     })
