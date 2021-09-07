@@ -47,8 +47,10 @@
           <div id="main">
             <div class="image-holder" id="both-svg" style="text-align: center;">
               <div class="image-area" id="front-svg" style="text-align: center; width:500px; height:600px;">
+                <img :src="pdf_front_image" alt="" style="width: 100%; max-width: 100%">
               </div>
               <div class="image-area" id="back-svg" style="text-align: center; width:500px; height:600px;">
+                <img :src="pdf_back_image" alt="" style="width: 100%; max-width: 100%">
               </div>
             </div>
             <div class="two-columns">
@@ -167,12 +169,12 @@
       </div>
     </div>
 
-    <div class="d-none">
+<!--    <div class="d-none">
       <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
       </canvas>
       <canvas width="600" height="600" ref="pdfBack" style="text-align: center; display: block">
       </canvas>
-    </div>
+    </div>-->
   </div>
 </template>
 
@@ -184,11 +186,20 @@ import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
 
 @Component<OrderDetails>({
+  mounted() {
+    setTimeout(() => {
+      this.pdf_front_image = document.getElementById("scene-front").toDataURL("image/png")
+      this.pdf_back_image = document.getElementById("scene-back").toDataURL("image/png")
+    }, 1000)
+  }
 })
 
 export default class OrderDetails extends Vue {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
+
+  public pdf_front_image = null;
+  public pdf_back_image = null;
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -260,7 +271,29 @@ export default class OrderDetails extends Vue {
     })
   }
 
-  public generateProductionPdf(e: any) {
+  public  generateProductionPdf() {
+    let self = this;
+    const element = document.getElementById("production-pdf-html")
+    const opt = {
+      margin: [0, 0, 0, 0],
+      filename: 'production.pdf',
+      image: {type: "jpeg", quality: 1},
+      html2canvas: {
+        dpi: 192,
+        scale: 4,
+        useCORS: true,
+        letterRendering: true,
+      },
+      jsPDF: {
+        unit: "in",
+        format: "letter",
+        orientation: 'landscape'
+      }
+    };
+    return  html2pdf().set(opt).from(element).toPdf().save('datauristring')
+  }
+
+  public generateProductionPdf_back(e: any) {
     this.showLoader = true
     $('meta[name=viewport]').attr('content', 'width=1024')
     let frontCanvas = this.productionSVGs.front
