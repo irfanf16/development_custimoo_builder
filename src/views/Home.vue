@@ -99,7 +99,16 @@
                   <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
                 </div>
 
-                <a class="custom-link fs-3"><BIconThreeDotsVertical /> </a>
+                <div class="mobile-nav">
+                  <b-dropdown size="lg"  variant="link" toggle-class="text-decoration-none" no-caret>
+                    <template #button-content>
+                      <a class="custom-link fs-3"><BIconThreeDotsVertical /> </a>
+                    </template>
+                    <b-dropdown-item href="#">Action</b-dropdown-item>
+                    <b-dropdown-item href="#">Another action</b-dropdown-item>
+                    <b-dropdown-item href="#">Something else here...</b-dropdown-item>
+                  </b-dropdown>
+                </div>
               </div>
             </div>
           </template>

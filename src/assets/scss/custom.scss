@@ -2970,3 +2970,12 @@ $fontSize: 0.5;
         }
     }
 }
+
+.mobile-nav {
+    font-size: smaller;
+    &>.dropdown{
+        &>.btn{
+            padding: 0;
+        }
+    }
+}
