@@ -25,7 +25,7 @@
                         <div class="image-holder">
                           <div>
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <img :src="product.product_url" :class="product.product_url ? '' : 'placeholder'" alt="">
+                            <img :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
