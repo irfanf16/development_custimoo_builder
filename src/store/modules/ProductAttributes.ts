@@ -312,6 +312,8 @@ const ProductAttributes:Module<any, any> = {
 
     },
     RESET_STORE(state: Record<any, any>){
+      state.undoItems = []
+      state.redoItems = []
       state.customLogos = [];
       state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
