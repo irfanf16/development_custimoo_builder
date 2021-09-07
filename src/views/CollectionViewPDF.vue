@@ -33,7 +33,7 @@
                 </template>
 
                 <div style="word-wrap: break-word">
-                  {{collection_product.product_locker_room ? collection_product.product_locker_room.product_name : '' }}
+                  {{collection_product.product_nickname ? collection_product.product_nickname : '' }}
                 </div>
                 <div>
                   <table class="images-holder">
