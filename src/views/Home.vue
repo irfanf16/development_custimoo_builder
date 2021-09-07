@@ -155,7 +155,7 @@
 
 <script lang="ts">
 
-import {Component, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
@@ -171,6 +171,7 @@ import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import Scene from "@/components/Scene.vue";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<Home>({
   components: {
@@ -245,7 +246,7 @@ import Scene from "@/components/Scene.vue";
   }
 })
 
-export default class Home extends Vue {
+export default class Home extends Mixins(ErrorMessages) {
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -502,10 +503,12 @@ export default class Home extends Vue {
       this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
     }
     let main_scene = this.ref.mainScene[0];
-    let locker_front_png = main_scene.$refs.front.toDataURL("image/png").split(',')[1];
+    main_scene.frontCanvas.discardActiveObject().renderAll();
+    main_scene.backCanvas.discardActiveObject().renderAll();
+    let locker_front_png = main_scene.frontCanvas.toDataURL("image/png").split(',')[1];
     let locker_back_png = null;
     if(this.mainProductType == "front_back") {
-      locker_back_png = main_scene.$refs.back.toDataURL("image/png").split(',')[1];
+      locker_back_png =  main_scene.backCanvas.toDataURL("image/png").split(',')[1];
     }
     let locker = {
       product_id: this.selectedProduct.product_id,
@@ -521,7 +524,15 @@ export default class Home extends Vue {
       locker_back_png: locker_back_png
     }
     if (this.editStatus){
-      await this.$store.dispatch('overRideLockerProduct', locker)
+      this.showLoader = true
+      let res = await this.$store.dispatch('overRideLockerProduct', locker)
+      if (res.status == 201){
+        this.showLoader = false
+        this.showToast(res.data.message, 'SUCCESS')
+      }else{
+        this.showError(res)
+        this.showLoader = false
+      }
     }
   }
   public showAdvanceCustomization() {
@@ -776,16 +787,6 @@ export default class Home extends Vue {
 
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
-  }
-
-  async getMainProductPngs(convert_to="png") {
-    let self = this;
-    let main_scene = this.ref.mainScene[0];
-    let product_pngs = {front_png: "", back_png: ""};
-    product_pngs.front_png = main_scene.$refs.front.toDataURL("image/png").split(',')[1];
-    product_pngs.back_png = main_scene.$refs.back.toDataURL("image/png").split(',')[1];
-    console.log("pngs", product_pngs.front_png)
-    return product_pngs;
   }
 
 

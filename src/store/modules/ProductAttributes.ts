@@ -694,16 +694,16 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     async overRideLockerProduct({commit}, payload){
-      await http.post('updatelockerproduct', payload).then((res) => {
+      return await http.post('updatelockerproduct', payload).then((res) => {
         if (res.status == 201){
-          alert(res.data.message)
+          return res
         }else if (res.status == 404){
           alert(res.data.message)
         }
       }).catch(err => {
         if(err.response.status){
-          alert(err.response.data.message)
-          commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+          return err.response.data.message
+          // commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
         }
       })
     },

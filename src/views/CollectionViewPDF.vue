@@ -2,7 +2,7 @@
   <div>
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif"/></div>
     <div v-if="collection">
-      <a :href="collection.collection_pdf_path" download target="_blank" class="download-pdf rounded-circle btn btn-secondary light"><BIconDownload /></a>
+      <a :href="`${storageUrl}${collection.link}`" download target="_blank" class="download-pdf rounded-circle btn btn-secondary light"><BIconDownload /></a>
       <div id="collectionPdfContainer">
         <div class="pdf_cover">
           <h1 class="text-white p-4">{{ collection.name }} </h1>
@@ -33,7 +33,7 @@
                 </template>
 
                 <div style="word-wrap: break-word">
-                  {{collection_product.product_locker_room ? collection_product.product_locker_room.product_name : '' }}
+                  {{collection_product.product_nickname ? collection_product.product_nickname : '' }}
                 </div>
                 <div>
                   <table class="images-holder">
@@ -41,14 +41,14 @@
                     <tr>
                       <td>
                         <div class="position-relative overflow-hidden download-design">
-                          <a :href="`${collection_product.product_locker_room.locker_product_images_folder}/front.png`" download v-b-tooltip title="Download image" target="_blank" class="rounded-circle btn btn-secondary light"><BIconDownload /></a>
-                          <img :src="`${collection_product.product_locker_room.locker_product_images_folder}/front.png`" alt="">
+                          <a :href="`${collection_product.product_locker_room.locker_product_images_folder}/front.png?q=${collection_product.product_locker_room.random_string}`" download v-b-tooltip title="Download image" target="_blank" class="rounded-circle btn btn-secondary light"><BIconDownload /></a>
+                          <img :src="`${collection_product.product_locker_room.locker_product_images_folder}/front.png?q=${collection_product.product_locker_room.random_string}`" alt="">
                         </div>
                       </td>
                       <td>
                         <div class="position-relative overflow-hidden download-design">
-                          <a :href="`${collection_product.product_locker_room.locker_product_images_folder}/back.png`" download v-b-tooltip title="Download image" target="_blank" class="rounded-circle btn btn-secondary light"><BIconDownload /></a>
-                          <img :src="`${collection_product.product_locker_room.locker_product_images_folder}/back.png`" alt="">
+                          <a :href="`${collection_product.product_locker_room.locker_product_images_folder}/back.png?q=${collection_product.product_locker_room.random_string}`" download v-b-tooltip title="Download image" target="_blank" class="rounded-circle btn btn-secondary light"><BIconDownload /></a>
+                          <img :src="`${collection_product.product_locker_room.locker_product_images_folder}/back.png?q=${collection_product.product_locker_room.random_string}`" alt="">
                         </div>
                       </td>
                     </tr>
