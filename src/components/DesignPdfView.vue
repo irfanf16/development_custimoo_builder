@@ -1,0 +1,536 @@
+<template>
+  <div class="d-none">
+    <div id="production-pdf-html">
+      <div id="wrapper">
+        <div id="header">
+          <div class="year">2021</div>
+          <div class="header-content">1:10 scale artwork on adult size large</div>
+          <div class="logo">
+            <svg width="200px" height="36px" viewBox="0 0 200 36" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                 xmlns:xlink="http://www.w3.org/1999/xlink">
+              <title>assets / logo</title>
+              <desc>Created with Sketch.</desc>
+              <g id="assets-/-logo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                <g id="logo-hummel-pos2" fill="#000000">
+                  <g id="Group">
+                    <path
+                      d="M23.5811966,6.94017094 C25.4957265,6.94017094 27.0512821,5.38461538 27.0512821,3.46581197 C27.0512821,1.55128205 25.4957265,0 23.5811966,0 C21.6623932,0 20.1068376,1.55128205 20.1068376,3.46581197 C20.1068376,5.38461538 21.6623932,6.94017094 23.5811966,6.94017094 Z"
+                      id="Path"></path>
+                    <path
+                      d="M17.465812,20.7179487 C17.2350427,21.0726496 16.7179487,21.8589744 16.3760684,22.4444444 L23.5769231,29.6495726 L30.7820513,22.4444444 C30.4444444,21.8589744 29.9230769,21.0726496 29.6965812,20.7179487 L23.5811966,26.8290598 L17.465812,20.7179487 Z"
+                      id="Path"></path>
+                    <polygon id="Path"
+                             points="18.6196581 19.0470085 23.5811966 24.0128205 28.5384615 19.0598291 23.5811966 12.042735"></polygon>
+                    <path
+                      d="M23.5769231,32.465812 L15.4059829,24.2905983 C15.0940171,25.1837607 14.9230769,26.1410256 14.9230769,27.1452991 C14.9230769,31.9273504 18.7649573,35.7991453 23.5470085,35.7991453 C28.3247863,35.7991453 32.2350427,31.9230769 32.2350427,27.1452991 C32.2350427,26.1452991 32.0641026,25.1837607 31.7521368,24.2905983 L23.5769231,32.465812 Z"
+                      id="Path"></path>
+                    <path
+                      d="M43.0811966,2.47435897 C35.7905983,-2.22222222 30.3076923,6.04700855 24.8760684,10.0598291 C24.8760684,10.0598291 26.8547009,13.4871795 28.9700855,15.8162393 C31.0854701,18.1495726 32.8589744,19.0940171 35.8076923,19.042735 C38.7564103,18.991453 41.3931624,17.1452991 42.542735,15.5299145 C43.6923077,13.9102564 44.2051282,12.2948718 44.2051282,10.0555556 L29.1196581,10.0555556 C31.4188034,8.24786325 33.9145299,5.52136752 36.534188,4.2991453 C38.6837607,3.31196581 41.3205128,4.23504274 42.9358974,6.28632479 C43.7222222,7.36324786 44.2051282,8.73931624 44.2051282,10.0555556 C45.3717949,10.0555556 46.4957265,10.0512821 47.1495726,10.0512821 C47.2948718,6.92307692 45.5769231,4.28205128 43.0811966,2.47435897 Z"
+                      id="Path"></path>
+                    <path
+                      d="M18.1880342,15.8162393 C20.3034188,13.482906 22.2820513,10.0598291 22.2820513,10.0598291 C16.8504274,6.04273504 11.3675214,-2.22649573 4.07692308,2.47435897 C1.58119658,4.28205128 -0.136752137,6.92307692 0.00854700855,10.0555556 C0.666666667,10.0555556 1.79059829,10.0598291 2.95299145,10.0598291 C2.95299145,8.74358974 3.43589744,7.36752137 4.22222222,6.29059829 C5.83760684,4.23504274 8.47435897,3.31196581 10.6239316,4.3034188 C13.2393162,5.52991453 15.7393162,8.25213675 18.0384615,10.0598291 L2.95299145,10.0598291 C2.95299145,12.2948718 3.46581197,13.9145299 4.61538462,15.534188 C5.76495726,17.1538462 8.4017094,19 11.3504274,19.0470085 C14.2991453,19.0940171 16.0726496,18.1452991 18.1880342,15.8162393 Z"
+                      id="Path"></path>
+                  </g>
+                  <path
+                    d="M196.854701,1.40598291 C195.346154,1.40598291 194.119658,2.62820513 194.119658,4.14102564 C194.119658,5.64957265 195.34188,6.87606838 196.854701,6.87606838 C198.363248,6.87606838 199.589744,5.65384615 199.589744,4.14102564 C199.589744,2.62820513 198.363248,1.40598291 196.854701,1.40598291 Z M196.854701,6.49145299 C195.555556,6.49145299 194.504274,5.44017094 194.504274,4.14102564 C194.504274,2.84188034 195.555556,1.79059829 196.854701,1.79059829 C198.153846,1.79059829 199.205128,2.84188034 199.205128,4.14102564 C199.205128,5.43589744 198.153846,6.49145299 196.854701,6.49145299 Z M198.008547,3.47008547 C198.008547,3.2008547 197.880342,2.98290598 197.675214,2.84188034 C197.470085,2.70512821 197.192308,2.63675214 196.850427,2.63675214 L195.880342,2.63675214 L195.880342,5.60683761 L196.363248,5.60683761 L196.363248,4.32905983 L196.730769,4.32905983 L197.534188,5.60683761 L198.064103,5.60683761 L197.226496,4.28632479 C197.589744,4.22222222 198.008547,3.98717949 198.008547,3.47008547 Z M196.717949,3.97863248 L196.363248,3.97863248 L196.363248,2.97435897 L196.717949,2.97435897 C196.957265,2.97435897 197.141026,2.98290598 197.294872,3.08119658 C197.448718,3.17521368 197.512821,3.2991453 197.512821,3.47863248 C197.512821,3.65811966 197.448718,3.77777778 197.294872,3.88034188 C197.136752,3.97008547 196.952991,3.97863248 196.717949,3.97863248 Z"
+                    id="Shape"></path>
+                  <path
+                    d="M157.978632,15.9145299 L157.978632,31.6324786 C157.978632,33.1923077 156.713675,34.2777778 155.15812,34.2777778 L153.619658,34.2777778 C152.059829,34.2777778 150.799145,33.1880342 150.799145,31.6324786 L150.799145,17.8076923 C150.799145,16.8632479 150.004274,16.6752137 149.435897,16.6752137 L149.115385,16.6752137 C148.564103,16.6752137 147.764957,16.8632479 147.764957,17.8162393 L147.764957,31.6367521 C147.764957,33.1965812 146.5,34.2820513 144.944444,34.2820513 L143.405983,34.2820513 C143.380342,34.2820513 143.354701,34.2820513 143.32906,34.2820513 C141.803419,34.2478632 140.581197,33.1709402 140.581197,31.6367521 L140.581197,17.8119658 C140.581197,16.8675214 139.769231,16.6794872 139.217949,16.6794872 L138.884615,16.6794872 C138.311966,16.6794872 137.529915,16.8675214 137.529915,17.8119658 L137.529915,31.6367521 C137.529915,33.1965812 136.264957,34.2820513 134.709402,34.2820513 L133.17094,34.2820513 C131.611111,34.2820513 130.350427,33.1923077 130.350427,31.6367521 L130.350427,15.9188034 C130.350427,12.6666667 131.773504,10.0512768 136.696581,10.0512768 L152.047009,10.0512768 C156.521368,10.0470085 157.978632,12.6623932 157.978632,15.9145299 Z M177.081197,25.3119658 L167.166667,25.3119658 C167.166667,25.3119658 167.166667,26.6324786 167.166667,26.8162393 C167.166667,27.2606838 167.384615,27.957265 168.153846,27.957265 C168.576923,27.9615385 180.277778,27.982906 180.277778,27.982906 C181.837607,27.982906 182.923077,29.0897436 182.923077,30.457265 L182.923077,31.8076923 C182.923077,33.1752137 181.833333,34.2820513 180.277778,34.2820513 L165.854701,34.2820513 C163.166667,34.2820513 159.987179,33.034188 159.987179,28.7179487 L159.987179,15.6153846 C159.987179,11.3931624 163.094017,10.0512821 165.854701,10.0512821 L177.08547,10.0512821 C179.773504,10.0512821 182.952991,11.2991453 182.952991,15.6153846 L182.952991,19.7521368 C182.948718,24.0641026 179.769231,25.3119658 177.081197,25.3119658 Z M176.166667,17.8205128 L176.166667,17.542735 C176.166667,17.0470085 175.944444,16.3461538 174.923077,16.3461538 L168.410256,16.3461538 C167.388889,16.3461538 167.166667,17.0470085 167.166667,17.542735 L167.166667,19.017094 L174.944444,19.017094 C175.957265,19.0042735 176.166667,18.3119658 176.166667,17.8205128 Z M189.316239,1.40598291 L187.777778,1.40598291 C186.217949,1.40598291 184.957265,2.4957265 184.957265,4.05128205 L184.957265,31.6324786 C184.957265,33.1923077 186.222222,34.2777778 187.777778,34.2777778 L189.316239,34.2777778 C190.876068,34.2777778 192.136752,33.1880342 192.136752,31.6324786 L192.136752,4.05128205 C192.136752,2.49145299 190.871795,1.40598291 189.316239,1.40598291 Z M95.8675214,10.0470085 L94.3290598,10.0470085 C92.7692308,10.0470085 91.508547,11.1367521 91.508547,12.6923077 L91.508547,26.4059829 C91.508547,27.4145299 90.7094017,27.6495726 90.1452991,27.6495726 L84.7008547,27.6495726 C84.1367521,27.6495726 83.3376068,27.4230769 83.3376068,26.4059829 L83.3376068,12.6923077 C83.3376068,11.1324786 82.0726496,10.0470085 80.517094,10.0470085 L78.9786325,10.0470085 C77.4188034,10.0470085 76.1581197,11.1367521 76.1581197,12.6923077 L76.1581197,28.4102564 C76.1581197,31.0982906 77.5811966,34.2777778 82.5042735,34.2777778 L92.3461538,34.2777778 C97.2692308,34.2777778 98.6923077,31.0982906 98.6923077,28.4102564 L98.6923077,12.6923077 C98.6880342,11.1367521 97.4273504,10.0470085 95.8675214,10.0470085 Z M122.388889,10.0470085 L107.038462,10.0470085 C102.115385,10.0470085 100.692308,12.6623932 100.692308,15.9145299 L100.692308,31.6324786 C100.692308,33.1923077 101.957265,34.2777778 103.512821,34.2777778 L105.051282,34.2777778 C106.611111,34.2777778 107.871795,33.1880342 107.871795,31.6324786 L107.871795,17.8076923 C107.871795,16.8632479 108.653846,16.6752137 109.226496,16.6752137 L109.559829,16.6752137 C110.106838,16.6752137 110.923077,16.8632479 110.923077,17.8076923 L110.923077,31.6324786 C110.923077,33.1666667 112.145299,34.2435897 113.67094,34.2777778 C113.696581,34.2777778 113.722222,34.2777778 113.747863,34.2777778 L115.286325,34.2777778 C116.846154,34.2777778 118.106838,33.1880342 118.106838,31.6324786 L118.106838,17.8119658 C118.106838,16.8589744 118.905983,16.6709402 119.457265,16.6709402 L119.777778,16.6709402 C120.346154,16.6709402 121.141026,16.8589744 121.141026,17.8034188 L121.141026,31.6282051 C121.141026,33.1880342 122.405983,34.2735043 123.961538,34.2735043 L125.5,34.2735043 C127.059829,34.2735043 128.320597,33.1837607 128.320597,31.6282051 L128.320597,15.9102564 C128.333333,12.6623932 126.876068,10.0470085 122.388889,10.0470085 Z M67.7948718,10.0470085 L58.3589744,10.0470085 L58.3589744,4.05128205 C58.3589744,2.49145299 57.0940171,1.40598291 55.5384615,1.40598291 L54,1.40598291 C52.4401709,1.40598291 51.1794872,2.4957265 51.1794872,4.05128205 L51.1794872,31.6324786 C51.1794872,33.1923077 52.4444444,34.2777778 54,34.2777778 L55.5384615,34.2777778 C57.0982906,34.2777778 58.3589744,33.1880342 58.3589744,31.6324786 L58.3589744,16.7863248 L65.5940171,16.7863248 C66.1581197,16.7863248 66.957265,16.9957265 66.957265,18.0299145 L66.957265,31.6282051 C66.957265,33.1880342 68.2222222,34.2735043 69.7777778,34.2735043 L71.3162393,34.2735043 C72.8760684,34.2735043 74.1367902,33.1837607 74.1367902,31.6282051 L74.1367902,15.9102564 C74.1452991,13.2307692 72.7179487,10.0470085 67.7948718,10.0470085 Z"
+                    id="Shape"></path>
+                </g>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <div id="main">
+          <div class="image-holder" id="both-svg" style="text-align: center;">
+            <div class="image-area" id="front-svg" style="text-align: center; width:500px; height:600px;">
+              <img :src="pdf_front_image" alt="" style="width: 100%; max-width: 100%">
+            </div>
+            <div class="image-area" id="back-svg" style="text-align: center; width:500px; height:600px;">
+              <img :src="pdf_back_image" alt="" style="width: 100%; max-width: 100%">
+            </div>
+          </div>
+          <div class="two-columns" style="page-break-inside: avoid; padding-top: 0.5in">
+            <div class="left-col">
+              <div class="product-details-area">
+                <div class="details-col">
+                  <h2>Colors</h2>
+                  <div class="colors-area">
+                    <div class="color-block" v-for="(svgColor, index) in svgGroups" :key="index">
+                      <div class="color-box" :style="{background: svgColor.color}"></div>
+                      <div class="color-details">
+                        <span class="color-property">{{ svgColor.id.toUpperCase() }}</span>
+                        <div v-if="svgColor.pantone && svgColor.pantone != 'undefined' " class="color-name">Pantone: {{ svgColor.pantone }}</div>
+                        <div v-else class="color-name"> {{ svgColor.name.toUpperCase() }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="details-col">
+                  <h2>Name+Numbers</h2>
+                  <div v-for="(textData, index) in customTexts" :key="index">
+                    <div class="name-no-details" v-if="textData.text">
+                      <div class="text-details">
+                        <span>{{ textData.type.toUpperCase() }}: {{ textData.text }}</span>
+                        <span>Font: {{ textData.fontFamily }}</span>
+                        <span>Size: {{ textData.originalWidth }}cm x {{ textData.originalHeight }}cm</span>
+                        <span v-if="textData.originalOutLineWidth">OutLine: {{textData.originalOutLineWidth.toFixed(2) }}cm</span>
+                      </div>
+                      <div class="color-details">
+                        <div class="color-details-wrapper">
+                          <div class="color-box" :style="{background: textData.fillColor}"></div>
+                          <span class="color-name-details">
+                                      <span>Fill color</span>
+                                      <span>Pantone: {{ textData.fillColorPantone }}</span>
+                                    </span>
+                        </div>
+                        <div class="color-details-wrapper">
+                          <div class="color-box" :style="{background: textData.outLineColor}"></div>
+                          <span class="color-name-details">
+                                      <span>Outline color</span>
+                                      <span>Pantone: {{ textData.outLineColorPantone }}</span>
+                                    </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="logo-area">
+                <h2>Team Roster</h2>
+                <div class="roster-details">
+                  <table>
+                    <tr>
+                      <th>Name</th>
+                      <th>Number</th>
+                      <th>Size</th>
+                      <th>Qty</th>
+                    </tr>
+                    <template v-if="rosterDetails.length">
+                      <tr v-for="(roster, index) in rosterDetails" :key="index">
+                        <td>{{ roster.text }}</td>
+                        <td>{{ roster.number }}</td>
+                        <td>{{ roster.size }}</td>
+                        <td>{{ roster.quantity }}</td>
+                      </tr>
+                    </template>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="right-col">
+              <div class="logo-area">
+                <h2>Logos</h2>
+                <div class="logo-holder">
+                  <div class="logo-block" v-for="(logo, index) in customLogos" :key="index">
+                    <img :src="logo.base64_logo" height="80" width="80">
+                    <p>Size: {{ `${logo.originalHeight}cm x ${logo.originalWidth}cm` }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import {Component, Prop, Vue} from 'vue-property-decorator'
+import {data} from "jquery";
+
+@Component<DesignPdfView>({})
+
+export default class DesignPdfView extends Vue {
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
+  @Prop({required: true}) readonly pdf_front_image!: string;
+  @Prop({required: true}) readonly pdf_back_image!: string;
+
+  get rosterDetails(): [Record<any, any>] {
+    return this.$store.getters.getRosterDetails
+  }
+
+  get customLogos(): [Record<any, any>] {
+    let self = this;
+    let storage_url = self.storageUrl;
+    let custom_logos =  self.$store.getters.getCustomLogos.filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
+    custom_logos = custom_logos.map((custom_logo) => {
+        self.getUrlContent(storage_url+custom_logo.url, (dataUrl: any) => {
+         custom_logo.base64_logo = dataUrl;
+      })
+      return custom_logo;
+    })
+    return custom_logos;
+  }
+
+  get customTexts(): [Record<any, any>] {
+    return this.$store.getters.getCustomTexts
+  }
+
+  get svgGroups(): [Record<any, any>] {
+    return this.$store.getters.getSvgGroups
+  }
+
+  public getUrlContent(url: string, callback: any) {
+    let xhr = new XMLHttpRequest()
+    xhr.onload = function () {
+      let reader = new FileReader()
+      reader.onloadend = function () {
+        callback(reader.result)
+      }
+      reader.readAsDataURL(xhr.response)
+    }
+    xhr.open('GET', url)
+    xhr.responseType = 'blob'
+    xhr.send()
+  }
+}
+</script>
+
+<style scoped>
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+div {
+  box-sizing: border-box;
+}
+
+ol, ul {
+  list-style: none;
+  box-sizing: border-box;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+a {
+  color: #75b4e4;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+#production-pdf-html,
+#wrapper {
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 10px;
+  position: relative;
+  max-width: 1020px;
+  margin: 0 auto;
+}
+
+#header {
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+#header .year {
+  font-weight: 700;
+  background: #000;
+  color: #fff;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 7%;
+  width: 100%;
+  text-align: center;
+  font-size: 24px;
+  padding: 2px;
+}
+
+#header .header-content {
+  background: #009eda;
+  color: #000;
+  text-align: center;
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 77%;
+  width: 100%;
+  font-size: 20px;
+  position: relative;
+  padding: 5px;
+}
+
+#header .header-content:before {
+  position: absolute;
+  content: '';
+  right: -20px;
+  top: 0;
+  border: 20px solid transparent;
+  border-top: 30px solid #fff;
+}
+
+#header .logo {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 15%;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  padding: 5px;
+}
+
+#header .logo svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#main {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.image-holder {
+  overflow: hidden;
+  align-items: center;
+  padding: 20px 0;
+  /*max-width: 600px;*/
+  margin: 0 auto;
+}
+
+.image-holder .image-area {
+  display: inline-block;
+  vertical-align: middle;
+  width: 100%;
+  max-width: 47%;
+  margin: 0 1%;
+}
+
+.image-holder .image-area image,
+.image-holder .image-area svg {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 auto !important;
+}
+
+.two-columns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.two-columns .left-col {
+  flex: 0 0 65%;
+  max-width: 65%;
+}
+
+.two-columns .product-details-area {
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.two-columns .details-col {
+  flex: 0 0 48%;
+  max-width: 48%;
+}
+
+.two-columns h2 {
+  font-size: 24px;
+  font-weight: 700;
+  padding: 0;
+  border: 2px solid #03142E;
+  padding: 5px 10px;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.two-columns h2:before {
+  position: absolute;
+  content: '';
+  right: -3px;
+  top: -3px;
+  border-top: 47px solid #fff;
+  border-left: 33px solid transparent;
+  z-index: 1;
+}
+
+.two-columns h2:after {
+  position: absolute;
+  content: '';
+  right: 14px;
+  top: -6px;
+  bottom: -6px;
+  background: #03142E;
+  width: 2px;
+  z-index: 2;
+  transform: rotate(-35deg);
+}
+
+.two-columns .colors-area {
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+.two-columns .color-block {
+  max-width: 45%;
+  width: 100%;
+  vertical-align: top;
+  display: inline-block;
+  margin: 0 0 10px;
+}
+
+.two-columns .color-box {
+  width: 35px;
+  height: 35px;
+  vertical-align: top;
+  display: inline-block;
+  background: #03142E;
+  margin: 0 10px 0 0;
+}
+
+.two-columns .color-details {
+  max-width: 80px;
+  width: 100%;
+  font-size: 12px;
+  vertical-align: top;
+  display: inline-block;
+}
+
+.logo-area .logo-holder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 0 2px;
+}
+
+.logo-area .logo-block {
+  flex: 0 0 48%;
+  max-width: 48%;
+  padding: 20px 20px 40px;
+  border: 1px solid #03142E;
+  margin: 0 0 2px 0;
+  min-height: 120px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.logo-area .logo-block p {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-top: 1px solid #03142e;
+  z-index: 1;
+  padding: 5px;
+  text-align: center;
+}
+
+.logo-area .logo-block:last-child {
+  margin-left: 0;
+}
+
+.logo-area .logo-block img,
+.logo-area .logo-block svg {
+  display: block;
+  height: auto;
+  width: 100%;
+  margin: 0 auto;
+  max-width: 50px;
+}
+
+.two-columns .right-col {
+  flex: 0 0 30%;
+  max-width: 30%;
+}
+
+.name-no-details {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 0 0 10px;
+}
+
+.name-no-details .text-details {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+.name-no-details .color-details {
+  flex: 0 0 45%;
+  max-width: 45%;
+}
+
+.name-no-details .text-details span {
+  display: block;
+  margin: 0 0 7px;
+}
+
+.name-no-details .color-details-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 0 10px;
+}
+
+.name-no-details .color-details-wrapper .color-box {
+  height: 15px;
+}
+
+.name-no-details .color-name-details {
+  flex: 0 0 50px;
+  max-width: 50px;
+}
+.loader{
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  z-index: 1030;
+}
+
+img {
+  max-width: 7%;
+  display: block;
+  margin: 0 auto;
+  height: auto;
+}
+</style>

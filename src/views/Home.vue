@@ -240,6 +240,9 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     this.jwtToken = localStorage.getItem('jwtToken') as string
     await this.$store.dispatch('setCategories')
     // await this.$store.dispatch('setJwtToken')
+    if(!localStorage.getItem('browserToken')){
+      await this.$store.dispatch('setBrowserToken')
+    }
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getLockerRoomColors')
     }
