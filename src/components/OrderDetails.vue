@@ -135,7 +135,8 @@ export default class OrderDetails extends Vue {
   }
 
   public  generateProductionPdf() {
-    let self = this;
+
+    this.showLoader = true;
     this.pdf_front_image = document.getElementById("scene-front").toDataURL("image/png")
     this.pdf_back_image = document.getElementById("scene-back").toDataURL("image/png")
     const element = document.getElementById("production-pdf-html")
@@ -150,7 +151,8 @@ export default class OrderDetails extends Vue {
         orientation: 'landscape'
       }
     };
-    return  html2pdf().set(opt).from(element).toPdf().save('datauristring')
+     html2pdf().set(opt).from(element).toPdf().save('datauristring');
+     this.showLoader = false;
   }
 
   public generateProductionPdf_back(e: any) {
