@@ -149,10 +149,12 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_RECENT_LOGOS(state: Record<any, any>,payload = []) {
       if(payload.length > 0) {
+        state.recentLogos = []
         state.recentLogos = payload
       }
       else {
-        http.get('logos/customer').then((res) => {
+        http.get('logos/recent').then((res) => {
+          state.recentLogos = []
           state.recentLogos = res.data.data
         }).catch((e) => {
           console.log('e',e)

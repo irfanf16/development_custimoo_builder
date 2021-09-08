@@ -1,14 +1,18 @@
 <template>
-  <div  class="grid grid-4 gap-2">
-   <div style="position:relative;"  class="d-flex align-items-center justify-content-center" v-for="(logo, index) in getRecentLogos" :key="index">
-     <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo.id)" @click="deleteRecentLogo(logo.id)">
-       <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-     </a>
-     <img @click="setLogo(index,logo)" style="max-width: 100%; height: auto"  :src="storageUrl+logo.logo_url" alt="Image 1" />
-     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
-   </div>
+  <div>
+    <h4 v-if="getRecentLogos.length > 0" class="mb-3 mb-lg-4" style="font-weight: 700">Recent Logos</h4>
+    <div  class="grid grid-4 gap-2">
+      <div style="position:relative;"  class="d-flex align-items-center justify-content-center" v-for="(logo, index) in getRecentLogos" :key="index">
+        <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo.id)">
+          <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+        </a>
+        <img @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="Image 1" />
+        <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+      </div>
 
+    </div>
   </div>
+
 </template>
 
 <script lang="ts">
@@ -49,9 +53,17 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   public showLoader = false
 
 
+
+
   get getRecentLogos() {
     return this.$store.getters.getRecentLogos
   }
+
+  // @Watch('recentLogos',{deep:true,immediate: true})
+  //
+  // recentLogosChanged(newLogos: []) {
+  //   alert()
+  // }
 
   public async deleteRecentLogo(id:number) {
     try {
@@ -68,13 +80,13 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     }
   }
 
-  public addDeleteIconOnLogo(logo_id:number) {
+  public addDeleteIconOnLogo(recentLogo:any) {
     let custom_logos = this.$store.getters.getCustomLogos
     let logo_exists = custom_logos.find((logo:any) => {
       if(logo)
-        return logo.id == logo_id
+        return logo.id == recentLogo.id
     })
-    if(logo_exists)
+    if(logo_exists || !recentLogo.canLogoDelete)
       return false
 
     return true
