@@ -88,6 +88,7 @@
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
+import {getClosestColor} from '@/pantoneColor'
 
 
 @Component<CustomizationText>({
@@ -188,13 +189,19 @@ export default class CustomizationText extends Vue {
 
   public setColor(color: Record<any, any>) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
+    let pantone = getClosestColor(color.value);
+    let color_pantone = color.name;
+   // console.log(pantone.pantone);
+    if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+      color_pantone = pantone.pantone;
+    }
+
     if (this.fontColorType == 'fill') {
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColor', value: color.value})
-      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColorPantone', value: color.name})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColorPantone', value: color_pantone})
     } else {
-      console.log('asd',this.fontColorIndex,color)
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColor', value: color.value})
-      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColorPantone', value: color.name})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColorPantone', value: color_pantone})
     }
     //this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'selectColor', value: false})
   }
