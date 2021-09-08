@@ -124,7 +124,11 @@
                 <h2>Logos</h2>
                 <div class="logo-holder">
                   <div class="logo-block" v-for="(logo, index) in customLogos" :key="index">
-                    <img :src="`${storageUrl}${logo.url}`" height="80" width="80">
+<!--                    <img :src="`${storageUrl}${logo.url}`" height="80" width="80">-->
+                    <div class="logo">
+                      <img :src="`${storageUrl}${logo.url}`">
+<!--                      <img src="../assets/images/logo.svg">-->
+                    </div>
                     <p>Size: {{ `${logo.originalHeight}cm x ${logo.originalWidth}cm` }}</p>
                   </div>
                 </div>
@@ -410,7 +414,7 @@ a {
 .logo-area .logo-block {
   flex: 0 0 48%;
   max-width: 48%;
-  padding: 20px 20px 40px;
+  padding: 0;
   border: 1px solid #03142E;
   margin: 0 0 2px 0;
   min-height: 120px;
@@ -421,8 +425,22 @@ a {
   position: relative;
 }
 
+.logo-area .logo-block .logo{
+  padding: 5pt !important;
+  width: 100%;
+}
+
+.logo-area .logo-block .logo img,
+.logo-area .logo-block .logo svg{
+  height: 80px !important;
+  width: 80px !important;
+  position: static;
+  background:red;
+  max-width: 100%;
+}
+
 .logo-area .logo-block p {
-  position: absolute;
+  /*position: absolute;*/
   left: 0;
   right: 0;
   bottom: 0;
@@ -436,14 +454,14 @@ a {
   margin-left: 0;
 }
 
-.logo-area .logo-block img,
-.logo-area .logo-block svg {
-  display: block;
-  height: auto;
-  width: 100%;
-  margin: 0 auto;
-  max-width: 50px;
-}
+/*.logo-area .logo-block img,*/
+/*.logo-area .logo-block svg {*/
+/*  display: block;*/
+/*  height: auto;*/
+/*  width: 100%;*/
+/*  margin: 0 auto;*/
+/*  max-width: 50px;*/
+/*}*/
 
 .two-columns .right-col {
   flex: 0 0 30%;
