@@ -17,6 +17,8 @@
             <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
                                :logosSetting="selectedProduct.logos_setting"/>
           </div>
+
+
         </b-tab>
         <b-tab v-if="selectedProduct.product_type !== 'personalized'">
           <button @click="setHideTab('colorHide', !hideTab.colorHide)" class="tab-close-btn d-lg-none"></button>
@@ -111,6 +113,7 @@
         </b-tab>
       </b-tabs>
     </div>
+
   </div>
 </template>
 
@@ -125,9 +128,11 @@ import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 import { log } from 'fabric/fabric-impl'
+import RecentLogos from "@/components/RecentLogos.vue";
 
 @Component<CustomizationProcess>({
   components: {
+    RecentLogos,
     ColorAccordion,
     LogoPlacementTabs,
     CustomizationText,

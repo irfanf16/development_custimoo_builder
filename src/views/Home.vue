@@ -155,7 +155,7 @@
 
 <script lang="ts">
 
-import {Component, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
@@ -171,6 +171,7 @@ import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import Scene from "@/components/Scene.vue";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<Home>({
   components: {
@@ -191,9 +192,8 @@ import Scene from "@/components/Scene.vue";
   },
   async mounted() {
 
-    // this.$root.$on('customEvent', (text:any) => { // here you need to use the arrow function
-    //   this.retrieveProducts()
-    // })
+    //get recent logos
+    this.setRecentLogos()
 
     if (this.hideColorSection){
       this.$store.commit('hideColorSection', false)
@@ -245,7 +245,7 @@ import Scene from "@/components/Scene.vue";
   }
 })
 
-export default class Home extends Vue {
+export default class Home extends Mixins(ErrorMessages) {
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -270,6 +270,10 @@ export default class Home extends Vue {
 
   public showLoader = false;
   private storageUrl = process.env.VUE_APP_STORAGE_URL
+
+  public setRecentLogos() {
+    this.$store.commit('SET_RECENT_LOGOS')
+  }
 
   public showConfirm(){
     this.ref['reset-modal'].showConfirm()

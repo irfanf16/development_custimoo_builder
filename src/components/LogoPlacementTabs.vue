@@ -58,11 +58,20 @@
               <SaveColorModal />
             </div>
           </template>
+
+
+
+
           <UploadLogo :customLogoIndex="index" :showImage="false" :showActions="false" :key="'bottom'+index" />
         </div>
+        <RecentLogos :logosSetting="logosSetting" :customLogoIndex="index"/>
       </b-tab>
     </b-tabs>
+
+
+
   </div>
+
 </template>
 
 <script lang="ts">
@@ -70,10 +79,12 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
+import RecentLogos from "@/components/RecentLogos.vue";
 
 
 @Component<LogoPlacementTabs>({
   components: {
+    RecentLogos,
     UploadLogo,
     SaveLogoModal,
     SaveColorModal
