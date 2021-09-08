@@ -2135,6 +2135,7 @@ button{
 }
 
 .home-color-area{
+    box-shadow: 0 0 13px rgba(0,0,0,0.1);
     .extracted-color-shuffle-btn{display: none;}
     .additional-class{
         position: fixed;
@@ -2972,7 +2973,13 @@ $fontSize: 0.5;
 }
 
 .mobile-nav {
-    font-size: smaller;
+    .dropdown-menu{
+        li{
+            a{
+                font-size: smaller;
+            }
+        }
+    }
     &>.dropdown{
         &>.btn{
             padding: 0;
