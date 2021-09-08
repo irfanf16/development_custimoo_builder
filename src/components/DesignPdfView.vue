@@ -124,7 +124,7 @@
                 <h2>Logos</h2>
                 <div class="logo-holder">
                   <div class="logo-block" v-for="(logo, index) in customLogos" :key="index">
-                    <img :src="`${storageUrl}${logo.url}`" height="80" width="80">
+                    <img :src="logo.base64_logo" height="80" width="80">
                     <p>Size: {{ `${logo.originalHeight}cm x ${logo.originalWidth}cm` }}</p>
                   </div>
                 </div>
@@ -139,6 +139,7 @@
 
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
+import {data} from "jquery";
 
 @Component<DesignPdfView>({})
 
@@ -152,7 +153,16 @@ export default class DesignPdfView extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos.filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
+    let self = this;
+    let storage_url = self.storageUrl;
+    let custom_logos =  self.$store.getters.getCustomLogos.filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
+    custom_logos = custom_logos.map((custom_logo) => {
+        self.getUrlContent(storage_url+custom_logo.url, (dataUrl: any) => {
+         custom_logo.base64_logo = dataUrl;
+      })
+      return custom_logo;
+    })
+    return custom_logos;
   }
 
   get customTexts(): [Record<any, any>] {
@@ -161,6 +171,20 @@ export default class DesignPdfView extends Vue {
 
   get svgGroups(): [Record<any, any>] {
     return this.$store.getters.getSvgGroups
+  }
+
+  public getUrlContent(url: string, callback: any) {
+    let xhr = new XMLHttpRequest()
+    xhr.onload = function () {
+      let reader = new FileReader()
+      reader.onloadend = function () {
+        callback(reader.result)
+      }
+      reader.readAsDataURL(xhr.response)
+    }
+    xhr.open('GET', url)
+    xhr.responseType = 'blob'
+    xhr.send()
   }
 }
 </script>
