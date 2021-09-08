@@ -239,6 +239,9 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     this.jwtToken = localStorage.getItem('jwtToken') as string
     await this.$store.dispatch('setCategories')
     // await this.$store.dispatch('setJwtToken')
+    if(!localStorage.getItem('browserToken')){
+      await this.$store.dispatch('setBrowserToken')
+    }
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getLockerRoomColors')
     }
@@ -506,10 +509,12 @@ export default class Home extends Mixins(ErrorMessages) {
       this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
     }
     let main_scene = this.ref.mainScene[0];
-    let locker_front_png = main_scene.$refs.front.toDataURL("image/png").split(',')[1];
+    main_scene.frontCanvas.discardActiveObject().renderAll();
+    main_scene.backCanvas.discardActiveObject().renderAll();
+    let locker_front_png = main_scene.frontCanvas.toDataURL("image/png").split(',')[1];
     let locker_back_png = null;
     if(this.mainProductType == "front_back") {
-      locker_back_png = main_scene.$refs.back.toDataURL("image/png").split(',')[1];
+      locker_back_png =  main_scene.backCanvas.toDataURL("image/png").split(',')[1];
     }
     let locker = {
       product_id: this.selectedProduct.product_id,
@@ -525,7 +530,15 @@ export default class Home extends Mixins(ErrorMessages) {
       locker_back_png: locker_back_png
     }
     if (this.editStatus){
-      await this.$store.dispatch('overRideLockerProduct', locker)
+      this.showLoader = true
+      let res = await this.$store.dispatch('overRideLockerProduct', locker)
+      if (res.status == 201){
+        this.showLoader = false
+        this.showToast(res.data.message, 'SUCCESS')
+      }else{
+        this.showError(res)
+        this.showLoader = false
+      }
     }
   }
   public showAdvanceCustomization() {
@@ -780,16 +793,6 @@ export default class Home extends Mixins(ErrorMessages) {
 
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
-  }
-
-  async getMainProductPngs(convert_to="png") {
-    let self = this;
-    let main_scene = this.ref.mainScene[0];
-    let product_pngs = {front_png: "", back_png: ""};
-    product_pngs.front_png = main_scene.$refs.front.toDataURL("image/png").split(',')[1];
-    product_pngs.back_png = main_scene.$refs.back.toDataURL("image/png").split(',')[1];
-    console.log("pngs", product_pngs.front_png)
-    return product_pngs;
   }
 
 

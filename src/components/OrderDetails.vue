@@ -47,11 +47,13 @@
           <div id="main">
             <div class="image-holder" id="both-svg" style="text-align: center;">
               <div class="image-area" id="front-svg" style="text-align: center; width:500px; height:600px;">
+                <img :src="pdf_front_image" alt="" style="width: 100%; max-width: 100%">
               </div>
               <div class="image-area" id="back-svg" style="text-align: center; width:500px; height:600px;">
+                <img :src="pdf_back_image" alt="" style="width: 100%; max-width: 100%">
               </div>
             </div>
-            <div class="two-columns">
+            <div class="two-columns" style="page-break-inside: avoid; padding-top: 0.5in">
               <div class="left-col">
                 <div class="product-details-area">
                   <div class="details-col">
@@ -61,7 +63,8 @@
                         <div class="color-box" :style="{background: svgColor.color}"></div>
                         <div class="color-details">
                           <span class="color-property">{{ svgColor.id.toUpperCase() }}</span>
-                          <div class="color-name">Pantone: {{ svgColor.pantone }}</div>
+                          <div v-if="svgColor.pantone && svgColor.pantone != 'undefined' " class="color-name">Pantone: {{ svgColor.pantone }}</div>
+                          <div v-else class="color-name"> {{ svgColor.name.toUpperCase() }}</div>
                         </div>
                       </div>
                     </div>
@@ -74,7 +77,7 @@
                           <span>{{ textData.type.toUpperCase() }}: {{ textData.text }}</span>
                           <span>Font: {{ textData.fontFamily }}</span>
                           <span>Size: {{ textData.originalWidth }}cm x {{ textData.originalHeight }}cm</span>
-                          <span>OutLine: {{ textData.originalOutLineWidth ? textData.originalOutLineWidth.toFixed(2) : '' }}cm</span>
+                          <span v-if="textData.originalOutLineWidth">OutLine: {{textData.originalOutLineWidth.toFixed(2) }}cm</span>
                         </div>
                         <div class="color-details">
                           <div class="color-details-wrapper">
@@ -106,7 +109,7 @@
                         <th>Size</th>
                         <th>Qty</th>
                       </tr>
-                      <template v-if="rosterDetails.length && rosterDetails[0].text">
+                      <template v-if="rosterDetails.length">
                         <tr v-for="(roster, index) in rosterDetails" :key="index">
                           <td>{{ roster.text }}</td>
                           <td>{{ roster.number }}</td>
@@ -166,12 +169,12 @@
       </div>
     </div>
 
-    <div class="d-none">
+<!--    <div class="d-none">
       <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
       </canvas>
       <canvas width="600" height="600" ref="pdfBack" style="text-align: center; display: block">
       </canvas>
-    </div>
+    </div>-->
   </div>
 </template>
 
@@ -183,11 +186,20 @@ import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
 
 @Component<OrderDetails>({
+  mounted() {
+    setTimeout(() => {
+      this.pdf_front_image = document.getElementById("scene-front").toDataURL("image/png")
+      this.pdf_back_image = document.getElementById("scene-back").toDataURL("image/png")
+    }, 1000)
+  }
 })
 
 export default class OrderDetails extends Vue {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
+
+  public pdf_front_image = null;
+  public pdf_back_image = null;
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -219,7 +231,7 @@ export default class OrderDetails extends Vue {
   public showLoader = false
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos.filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
   }
 
   get customTexts(): [Record<any, any>] {
@@ -259,7 +271,29 @@ export default class OrderDetails extends Vue {
     })
   }
 
-  public generateProductionPdf(e: any) {
+  public  generateProductionPdf() {
+    let self = this;
+    const element = document.getElementById("production-pdf-html")
+    const opt = {
+      margin: [0, 0, 0, 0],
+      filename: 'production.pdf',
+      image: {type: "jpeg", quality: 1},
+      html2canvas: {
+        dpi: 192,
+        scale: 4,
+        useCORS: true,
+        letterRendering: true,
+      },
+      jsPDF: {
+        unit: "in",
+        format: "letter",
+        orientation: 'landscape'
+      }
+    };
+    return  html2pdf().set(opt).from(element).toPdf().save('datauristring')
+  }
+
+  public generateProductionPdf_back(e: any) {
     this.showLoader = true
     $('meta[name=viewport]').attr('content', 'width=1024')
     let frontCanvas = this.productionSVGs.front
