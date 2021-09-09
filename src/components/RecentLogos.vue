@@ -52,7 +52,9 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   public imageColors: any[] = []
   public showLoader = false
 
-
+  get customLogos(): [Record<any, any>] {
+    return this.$store.getters.getCustomLogos
+  }
 
 
   get getRecentLogos() {
@@ -92,7 +94,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     return true
   }
 
-  public setLogo(index:number,logo:any) {
+  public async setLogo(index:number,logo:any) {
 
     const customTabIndex = this.customLogoIndex
     let custom_logos = this.$store.getters.getCustomLogos
@@ -100,7 +102,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     let transparent_logo = logo.transparent_logo_url;
     let original_logo = logo.logo_url;
     let is_transparent = false;
-
+    await this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customLogos)), action: 'customLogos' })
     if(custom_logos[this.customLogoIndex] && custom_logos[this.customLogoIndex].is_transparent===true){
       logo_url = transparent_logo;
       is_transparent = true;
@@ -147,7 +149,6 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     }else{
       getLogos = custom_logos
     }
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(getLogos)), action: 'customLogos' })
 
     payload.forEach((data) => {
       this.$store.dispatch('updateCustomLogoAttribute', data)
