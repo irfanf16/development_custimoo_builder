@@ -12,8 +12,8 @@ const Main:Module<any, any> = {
       CustomizationPreview: !mobileScreen,
       ItemToCustomize: !mobileScreen,
       DefaultColorShuffleBtn: !mobileScreen,
-      BasicCustomization: true,
-      AdvanceCustomization: false,
+      BasicCustomization: false,
+      AdvanceCustomization: true,
       ExtractedColors: true,
     },
     hideTab: {

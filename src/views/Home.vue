@@ -26,11 +26,12 @@
           </b-col>
 
         </template>
-        <template v-if="manageComponents.AdvanceCustomization">
+<!--        <template v-if="manageComponents.AdvanceCustomization">-->
+        <template v-if="selectedProduct">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
           </b-col>
-        </template>
+
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
           <!-- <template v-if="manageComponents.AdvanceCustomization"> -->
           <template>
@@ -145,6 +146,7 @@
           <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
           <button class="backtohome-btn d-lg-none" @click="showHomeLanding()"><font-awesome-icon :icon="['fas', 'arrow-left']"/></button>
         </b-col>
+        </template>
       </b-row>
     </b-container>
     <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
@@ -229,7 +231,6 @@ import Scene from "@/components/Scene.vue";
       }, 2000)
       setTimeout(() => {
         this.showLoader = false
-        console.log(this.showLoader)
         this.productUpdated = true
       }, 10000)
     }
@@ -266,7 +267,7 @@ export default class Home extends Vue {
   public shared_link = ''
   public extractedcolorclass = ""
 
-  public showLoader = false;
+  public showLoader = true;
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   public showConfirm(){
@@ -615,6 +616,7 @@ export default class Home extends Vue {
         if(windowView == 2){
           this.showAdvanceCustomization();
         }
+        this.showLoader = false;
       }).catch((e: any) => {
         console.log(e)
         // console.log('in catch')

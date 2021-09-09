@@ -37,14 +37,20 @@
             <div class="logo-placement-area extracted-color-area" v-if="index == 0 && !hideColorSection" >
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
               <div class="logo-placement-holder mb-lg-3">
-                <div class="logo-holder color-extracted-area">
+                <div class="color-holder">
+                  <div class="color-container">
+                    <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
+                         :title="imageColor.name" :style="{background: imageColor.hex}" :key="icIdx"></div>
+                  </div>
+                </div>
+<!--                <div class="logo-holder color-extracted-area">
                   <div class="color-extract-container">
                     <div v-if="imageColors.length == 1" class="color-box" :style="{background: imageColors[0].hex}"></div>
                     <div v-if="imageColors.length == 2" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 50%, ' + imageColors[1].hex +' 50% 100%)'}"></div>
                     <div v-if="imageColors.length == 3" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 33.33%, ' + imageColors[1].hex +' 33.33% 66.66%, ' + imageColors[2].hex +' 66.66% 100%)'}"></div>
                     <div v-if="imageColors.length == 4" class="color-box" :style="{background: 'conic-gradient(' + imageColors[0].hex +' 0% 25%, ' + imageColors[1].hex +' 25% 50%, ' + imageColors[2].hex +' 50% 75%, ' + imageColors[3].hex +' 75% 100%)'}"></div>
                   </div>
-                </div>
+                </div>-->
                 <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
                 <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
                 <b-button @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
