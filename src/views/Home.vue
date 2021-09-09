@@ -192,9 +192,8 @@ import ErrorMessages from "@/mixins/ErrorMessages";
   },
   async mounted() {
 
-    // this.$root.$on('customEvent', (text:any) => { // here you need to use the arrow function
-    //   this.retrieveProducts()
-    // })
+    //get recent logos
+    this.setRecentLogos()
 
     if (this.hideColorSection){
       this.$store.commit('hideColorSection', false)
@@ -274,6 +273,10 @@ export default class Home extends Mixins(ErrorMessages) {
 
   public showLoader = false;
   private storageUrl = process.env.VUE_APP_STORAGE_URL
+
+  public setRecentLogos() {
+    this.$store.commit('SET_RECENT_LOGOS')
+  }
 
   public showConfirm(){
     this.ref['reset-modal'].showConfirm()
@@ -586,11 +589,11 @@ export default class Home extends Mixins(ErrorMessages) {
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
       await this.$store.dispatch('logoutCustomer');
+      await this.$store.commit('SET_RECENT_LOGOS')
     }
-    console.log('isCustomerAuthenticated',this.isCustomerAuthenticated)
   }
 
-  public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): void {
+  public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): Promise<void> {
     console.log('urlll',url)
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl

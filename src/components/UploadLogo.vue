@@ -18,7 +18,7 @@
           Upload Logo
         </div>
         <div class="remove-img" v-if="showActions && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-          <a @click="deleteLogo">
+          <a  @click="deleteLogo">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
@@ -253,6 +253,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         })
         this.hideModal()
         this.getLogoColors()
+        this.$store.commit('SET_RECENT_LOGOS')
       })
       .catch((error: any) => {
         console.log(error)

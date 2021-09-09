@@ -9,6 +9,7 @@ const ProductAttributes:Module<any, any> = {
     selectedIndex: 0,
     categories: [],
     customLogos: [],
+    recentLogos: [],
     defaultcustomLogos: false,
     addMoreCollection: false,
     customTexts: [],
@@ -145,6 +146,21 @@ const ProductAttributes:Module<any, any> = {
           Vue.set(state.customLogos, state.customLogos.length, customLogo)
         }
       }
+    },
+    SET_RECENT_LOGOS(state: Record<any, any>,payload = []) {
+      if(payload.length > 0) {
+        state.recentLogos = []
+        state.recentLogos = payload
+      }
+      else {
+        http.get('logos/recent').then((res) => {
+          state.recentLogos = []
+          state.recentLogos = res.data.data
+        }).catch((e) => {
+          console.log('e',e)
+        })
+      }
+
     },
     customLogoAttribute(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
@@ -443,6 +459,9 @@ const ProductAttributes:Module<any, any> = {
   getters: {
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
+    },
+    getRecentLogos: state => {
+      return state.recentLogos
     },
     getAddMoreCollectionStatus: state => {
       return state.addMoreCollection
