@@ -85,7 +85,7 @@
                                       <span>Pantone: {{ textData.fillColorPantone }}</span>
                                     </span>
                         </div>
-                        <div class="color-details-wrapper">
+                        <div class="color-details-wrapper" v-if="textData.outLineWidth > 0">
                           <div class="color-box" :style="{background: textData.outLineColor}"></div>
                           <span class="color-name-details">
                                       <span>Outline color</span>
