@@ -120,9 +120,9 @@
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`collection_${i+''+index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
 <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
-                            <b-tooltip :target="`collection_${index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
+                            <b-tooltip :target="`collection_${i+''+index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
                               <div class="share-holder">
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
