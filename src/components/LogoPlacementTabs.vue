@@ -64,7 +64,7 @@
 
           <UploadLogo :customLogoIndex="index" :showImage="false" :showActions="false" :key="'bottom'+index" />
         </div>
-        <RecentLogos :logosSetting="logosSetting" :customLogoIndex="index"/>
+<!--        <RecentLogos :logosSetting="logosSetting" :customLogoIndex="index"/>-->
       </b-tab>
     </b-tabs>
 
