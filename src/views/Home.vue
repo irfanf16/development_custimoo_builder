@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrapper m-lg-4">
+  <div class="page-wrapper m-lg-4" v-cloak>
     <meta name="viewport" content="width=device-width">
     <div class="loader" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
@@ -1152,6 +1152,9 @@ export default class Home extends Mixins(ErrorMessages) {
     display: block;
     margin: 0 auto;
     height: auto;
+  }
+  [v-cloak] {
+    display: none !important;
   }
 }
 
