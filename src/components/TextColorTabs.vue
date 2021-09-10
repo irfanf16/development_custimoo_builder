@@ -11,9 +11,10 @@
                 <b-form class="pantone-color-field" v-on:submit.prevent>
                   <label class="mb-2" for="inline-form-input-pantone-color">Pantone: (TCX Colors)</label>
                   <b-form-input
-                    v-model="svgGroups[selectAccordionIndex].pantone"
+                    v-model="pantoneColorVal"
                     class="mb-2 mr-sm-2 mb-sm-0"
                     placeholder="XX-XXXX"
+                    readonly
                     @input="changePantoneColor"
                   ></b-form-input>
                   <div class="pantone-message">
@@ -59,7 +60,7 @@ export default class TextColorTabs extends Vue {
   @Prop({required: true}) productColors!: any
 
   public color= '#59c7f9'
-  public pantoneColorVal= '18-0107'
+  public pantoneColorVal= '13-4411'
   public showOther = false
   public selectAccordionIndex = 0
   public selectTypeIndex = 0
@@ -103,7 +104,7 @@ export default class TextColorTabs extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
-    console.log('color',color)
+   // console.log('color',color)
     this.$emit('setColors',color)
     // this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
     // this.$store.dispatch('updateGroupColors',
@@ -116,8 +117,12 @@ export default class TextColorTabs extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
+    let pantone = getClosestColor(color.hex);
+    if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+      this.pantoneColorVal = pantone.pantone;
+    }
+
     let pantoneColor = getClosestColor(color.hex)
-    console.log('yesss',pantoneColor)
     this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
   }
 
