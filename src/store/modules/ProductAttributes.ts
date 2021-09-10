@@ -8,6 +8,7 @@ const ProductAttributes:Module<any, any> = {
     products:[],
     selectedIndex: 0,
     categories: [],
+    colorsFromRecent: false,
     customLogos: [],
     recentLogos: [],
     defaultcustomLogos: false,
@@ -68,6 +69,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
+    },
+    SET_COLORS_FROM_RECENT(state: Record<any, any>, payload: boolean){
+      state.colorsFromRecent = payload
     },
     SET_ADD_MORE_COLLECTION(state: Record<any, any>, payload: boolean){
       state.addMoreCollection = payload
@@ -459,6 +463,9 @@ const ProductAttributes:Module<any, any> = {
   getters: {
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
+    },
+    getColorsFromRecent: state => {
+      return state.colorsFromRecent
     },
     getRecentLogos: state => {
       return state.recentLogos

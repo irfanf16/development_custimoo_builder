@@ -101,9 +101,10 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       let inputRef = this.$refs.fileInput as Record<any, any>
       inputRef.value = null;
     }
-    if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
-      this.getLogoColors()
-    }
+    // if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
+    //   if(!this.$store.getters.getColorsFromRecent)
+    //     //this.getLogoColors()
+    // }
   }
 
   public uploadLogoBtn() {
@@ -248,6 +249,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
           }
 
         ];
+        this.$store.commit('SET_COLORS_FROM_RECENT',false)
         payload.forEach((data) => {
           this.$store.dispatch('updateCustomLogoAttribute', data)
         })
@@ -270,12 +272,15 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       if (this.customLogos.length) {
       if (this.customLogos[0] && this.customLogos[0].url) {
         this.$store.dispatch("SET_LOGO_URL", {logoUrl: this.customLogos[0].url})
+        alert('getLogoColors')
         this.processColors(this.colors)
       }
     }
   }
 
   processColors(colors: []) {
+    console.log('asdsadas',colors)
+    alert('processColors')
     this.imageColors = []
     let uniqueColors: string[] = []
     colors.forEach((color: number[]) => {
@@ -295,6 +300,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     })
     //only set logo colors if index is 0
     if(this.customLogoIndex == 0) {
+      console.log('this.imageColorsaaaaaaaaa',this.imageColors)
       this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
     }
   }

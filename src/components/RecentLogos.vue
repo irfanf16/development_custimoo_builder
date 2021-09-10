@@ -148,10 +148,13 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
       getLogos = custom_logos
     }
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(getLogos)), action: 'customLogos' })
-
+    this.$store.commit('SET_COLORS_FROM_RECENT',true)
     payload.forEach((data) => {
       this.$store.dispatch('updateCustomLogoAttribute', data)
     })
+    if(customTabIndex == 0) {
+      this.processColorsCustom(JSON.parse(logo.logo_colors),customTabIndex)
+    }
 
   }
    public async addLogoObject(index:number):Promise<void> {
@@ -183,6 +186,31 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     }
      logo.logoIndex = index
     await this.$store.dispatch('setCustomLogos', logo)
+  }
+
+  public processColorsCustom(colors: [],customLogoIndex:number):void {
+    let imageColors: any[] = []
+    let uniqueColors: string[] = []
+    colors.forEach((color: number[]) => {
+      const hex = rgbHex(color[0], color[1], color[2])
+      if ((!uniqueColors.includes(hex))) {
+        uniqueColors.push(hex)
+      }
+    })
+    let deletedCount = uniqueColors.length - 4
+    uniqueColors.splice(4, deletedCount)
+    console.log('uniqueColors',uniqueColors)
+    uniqueColors.forEach((color: string) => {
+      // console.log(color)
+      let pantoneColor = getClosestColor(color)
+      //console.log(JSON.parse(JSON.stringify(pantoneColor)))
+      imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
+    })
+    //only set logo colors if index is 0
+    if(customLogoIndex == 0) {
+      console.log('here',imageColors)
+      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
+    }
   }
 
 
