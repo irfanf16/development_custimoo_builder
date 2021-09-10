@@ -101,9 +101,10 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       let inputRef = this.$refs.fileInput as Record<any, any>
       inputRef.value = null;
     }
-    if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
-      this.getLogoColors()
-    }
+    // if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
+    //   if(!this.$store.getters.getColorsFromRecent)
+    //     //this.getLogoColors()
+    // }
   }
 
   public uploadLogoBtn() {
@@ -248,6 +249,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
           }
 
         ];
+        this.$store.commit('SET_COLORS_FROM_RECENT',false)
         payload.forEach((data) => {
           this.$store.dispatch('updateCustomLogoAttribute', data)
         })
