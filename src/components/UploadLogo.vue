@@ -1,5 +1,7 @@
 <template>
-  <div class="upload-logo-opener" >
+  <div class="upload-logo-opener">
+    <span class="close" @click="hideAll"><BIconX /></span>
+
     <div class="logo-option-area mb-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
       <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground">
         Remove Logo Background
@@ -66,6 +68,7 @@ import {http} from "@/httpCommon"
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
+import $ from "jquery";
 
 @Component<UploadLogo>({
   mounted() {
@@ -91,6 +94,11 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
+  }
+
+  private hideAll(){
+    this.$store.dispatch('setActiveTab', -1);
+    $(".sideNav li a").removeClass('active')
   }
 
   @Watch('customLogos', {
@@ -326,9 +334,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   padding: 15px;
   text-align: center;
   color: #808895;
-  border-radius: 20px 20px 0 0;
+  //border-radius: 20px 20px 0 0;
   background: #fff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 7px rgba(0, 0, 0, 0.1);
   z-index: 9;
   @media only screen and (min-width: 992px) {
     position: absolute;

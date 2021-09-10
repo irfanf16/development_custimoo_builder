@@ -2974,6 +2974,8 @@ $fontSize: 0.5;
 
 .mobile-nav {
     .dropdown-menu{
+        border: none;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
         li{
             a{
                 font-size: smaller;
@@ -2984,5 +2986,89 @@ $fontSize: 0.5;
         &>.btn{
             padding: 0;
         }
+    }
+}
+
+.sideNav{
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 100px;
+    display: flex;
+    align-items: center;
+
+    ul{
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        li{
+            a{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 0 5px 5px 0;
+                font-size: 1.2rem;
+                height: 35px;
+                width: 35px;
+                color: #555;
+                transition: 0.2s ease all;
+                transform: scale(0.9);
+                /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#eeeeee+0,cccccc+100;Gren+3D */
+                background: #eeeeee; /* Old browsers */
+                background: -moz-linear-gradient(left,  #f5f5f5 0%, #eeeeee 100%); /* FF3.6-15 */
+                background: -webkit-linear-gradient(left,  #f5f5f5 0%,#eeeeee 100%); /* Chrome10-25,Safari5.1-6 */
+                background: linear-gradient(to right,  #f5f5f5 0%,#eeeeee 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+                filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f5f5', endColorstr='#eeeeee',GradientType=1 ); /* IE6-9 */
+
+                &.active{
+                    color: #189076;
+                    transform: scale(1);
+                    background: rgba(24, 144, 118, 0.1);
+                    background: -moz-linear-gradient(left,  rgba(24, 144, 118, 0.1) 0%, rgba(24, 144, 118, 0.2) 100%); /* FF3.6-15 */
+                    background: -webkit-linear-gradient(left,  rgba(24, 144, 118, 0.1) 0%,rgba(24, 144, 118, 0.2) 100%); /* Chrome10-25,Safari5.1-6 */
+                    background: linear-gradient(to right,  rgba(24, 144, 118, 0.1) 0%,rgba(24, 144, 118, 0.2) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+                    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='rgba(24, 144, 118, 0.1)', endColorstr='rgba(24, 144, 118, 0.2)',GradientType=1 ); /* IE6-9 */
+                }
+            }
+        }
+    }
+}
+
+.customize_controls, .upload-logo-opener{
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 15px;
+    text-align: center;
+    color: #808895;
+    //border-radius: 20px 20px 0 0;
+    background: #fff;
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.1);
+    z-index: 9;
+
+    .close{
+        position: absolute;
+        right: 3px;
+        height: 20px;
+        width: 20px;
+        background: transparentize(red, 0.75);
+        color: red;
+        top: -10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        font-size: 1.5em;
+    }
+}
+
+.mobile_controls{
+    input,select{
+        font-size: 1em;
+    }
+    label{
+        font-size: 0.9em;
     }
 }

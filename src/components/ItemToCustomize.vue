@@ -47,8 +47,11 @@
     DesignAvailable
   }
 })
+
+
 export default class ItemToCustomize extends Vue {
-  @Prop({required: true}) categories!: any
+  @Prop({required: true}) categories!: any;
+
 
   private showItems = false;
   private showDesigns = true;

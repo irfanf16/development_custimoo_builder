@@ -26,6 +26,8 @@ import Scene from '@/components/Scene.vue'
 
 export default class DesignAvailable extends Vue {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
+  @Prop() activeTab!: number;
+
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
   }
@@ -37,6 +39,8 @@ export default class DesignAvailable extends Vue {
   }
 
   public changeDesign(index: number) {
+    this.$store.dispatch('setActiveTab', -1)
+    this.$store.commit('SET_SUFFLE', false)
     this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
     this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {

@@ -42,7 +42,9 @@ const ProductAttributes:Module<any, any> = {
       editDesignId: 0,
       mainProductId: 0,
       editStatus: false
-    }
+    },
+    activeTab : 0,
+    showShuffle : true,
   },
   mutations: {
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
@@ -437,8 +439,20 @@ const ProductAttributes:Module<any, any> = {
     DELETE_COLLECTION(state:Record<any, any>, payload){
       state.collections.splice(payload.index, 1);
     },
+    SET_ACTIVE_TAB(state:Record<any, any>, payload){
+      state.activeTab = payload
+    },
+    SET_SUFFLE(state:Record<any, any>, payload){
+      state.showShuffle = payload
+    },
   },
   getters: {
+    getShuffle: state => {
+      return state.showShuffle
+    },
+    getActiveTab: state => {
+      return state.activeTab
+    },
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
     },
@@ -538,6 +552,9 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   actions: {
+    setActiveTab({commit}, payload){
+      commit('SET_ACTIVE_TAB', payload)
+    },
     setSelectedIndex({commit}, payload) {
       commit('SET_SELECTED', payload)
     },
