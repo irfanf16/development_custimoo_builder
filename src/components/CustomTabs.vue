@@ -5,8 +5,8 @@
       <div class="grid grid-mobile-2 gap-1 text-left">
         <div class="mobile_controls">
           <label>Apply to</label>
-          <b-form-select class="mt-1">
-            <b-form-select-option value="Collar">Collar</b-form-select-option>
+          <b-form-select class="mt-1" v-model="selected">
+            <b-form-select-option :value="null">Collar</b-form-select-option>
             <b-form-select-option value="Logo">Logo</b-form-select-option>
             <b-form-select-option value="Logo">Front</b-form-select-option>
             <b-form-select-option value="Logo">Back</b-form-select-option>
@@ -14,18 +14,195 @@
         </div>
         <div class="mobile_controls">
           <label>Color Category</label>
-          <b-form-select class="mt-1">
-            <b-form-select-option value="Category 1">Category 1</b-form-select-option>
+          <b-form-select class="mt-1" v-model="selected">
+            <b-form-select-option :value="null">Category 1</b-form-select-option>
             <b-form-select-option value="Category 2">Category 2</b-form-select-option>
             <b-form-select-option value="Category 3">Category 3</b-form-select-option>
             <b-form-select-option value="Category 4">Category 4</b-form-select-option>
           </b-form-select>
         </div>
       </div>
+
+      <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
+        <div class="color_circle"></div>
+        <div class="color_circle"></div>
+        <div class="color_circle"></div>
+        <div class="color_circle"></div>
+        <div class="color_circle"></div>
+        <div class="color_circle"></div>
+        <div class="color_circle"></div>
+        <div class="color_circle"></div>
+        <div class="color_circle"></div>
+        <div class="color_circle"></div>
+        <div class="color_circle"></div>
+      </div>
     </div>
-    <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 2">/
+    <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 2">
       <span class="close" @click="hideAll"><BIconX /></span>
-      Text
+      <div>
+        <b-tabs class="player_text">
+          <b-tab>
+            <template #title>
+              Back Name
+            </template>
+            <div class="grid mobile-cols-2 gap-1">
+              <div class="mobile_controls">
+                <label for="">Front Name</label>
+                <b-form-input class="mt-1"></b-form-input>
+              </div>
+              <div class="mobile_controls">
+                <label for="">Font Style</label>
+                <b-form-select class="mt-1" v-model="selected">
+                  <b-form-select-option :value="null">Style 1</b-form-select-option>
+                  <b-form-select-option value="Style 2">Style 2</b-form-select-option>
+                  <b-form-select-option value="Style 3">Style 3</b-form-select-option>
+                  <b-form-select-option value="Style 4">Style 4</b-form-select-option>
+                </b-form-select>
+              </div>
+            </div>
+            <div class="grid mobile-cols-2 gap-1">
+              <div class="mt-2 mobile_controls">
+                <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
+                <input type="range" class="custom-range" value="0" min="0" max="100" />
+              </div>
+
+              <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+              </div>
+            </div>
+          </b-tab>
+          <b-tab>
+            <template #title>
+              Front Name
+            </template>
+            <div class="grid mobile-cols-2 gap-1">
+              <div class="mobile_controls">
+                <label for="">Player Name</label>
+                <b-form-input class="mt-1"></b-form-input>
+              </div>
+              <div class="mobile_controls">
+                <label for="">Font Style</label>
+                <b-form-select class="mt-1" v-model="selected">
+                  <b-form-select-option :value="null">Style 1</b-form-select-option>
+                  <b-form-select-option value="Style 2">Style 2</b-form-select-option>
+                  <b-form-select-option value="Style 3">Style 3</b-form-select-option>
+                  <b-form-select-option value="Style 4">Style 4</b-form-select-option>
+                </b-form-select>
+              </div>
+            </div>
+            <div class="grid mobile-cols-2 gap-1">
+              <div class="mt-2 mobile_controls">
+                <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
+                <input type="range" class="custom-range" value="0" min="0" max="100" />
+              </div>
+
+              <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+              </div>
+            </div>
+          </b-tab>
+          <b-tab>
+            <template #title>
+              Back Number
+            </template>
+            <div class="grid mobile-cols-2 gap-1">
+              <div class="mobile_controls">
+                <label for="">Back Number</label>
+                <b-form-input class="mt-1"></b-form-input>
+              </div>
+              <div class="mobile_controls">
+                <label for="">Font Style</label>
+                <b-form-select class="mt-1" v-model="selected">
+                  <b-form-select-option :value="null">Style 1</b-form-select-option>
+                  <b-form-select-option value="Style 2">Style 2</b-form-select-option>
+                  <b-form-select-option value="Style 3">Style 3</b-form-select-option>
+                  <b-form-select-option value="Style 4">Style 4</b-form-select-option>
+                </b-form-select>
+              </div>
+            </div>
+            <div class="grid mobile-cols-2 gap-1">
+              <div class="mt-2 mobile_controls">
+                <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
+                <input type="range" class="custom-range" value="0" min="0" max="100" />
+              </div>
+
+              <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+              </div>
+            </div>
+          </b-tab>
+          <b-tab>
+            <template #title>
+              Front Number
+            </template>
+            <div class="grid mobile-cols-2 gap-1">
+              <div class="mobile_controls">
+                <label for="">Front Number</label>
+                <b-form-input class="mt-1"></b-form-input>
+              </div>
+              <div class="mobile_controls">
+                <label for="">Font Style</label>
+                <b-form-select class="mt-1" v-model="selected">
+                  <b-form-select-option :value="null">Style 1</b-form-select-option>
+                  <b-form-select-option value="Style 2">Style 2</b-form-select-option>
+                  <b-form-select-option value="Style 3">Style 3</b-form-select-option>
+                  <b-form-select-option value="Style 4">Style 4</b-form-select-option>
+                </b-form-select>
+              </div>
+            </div>
+            <div class="grid mobile-cols-2 gap-1">
+              <div class="mt-2 mobile_controls">
+                <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
+                <input type="range" class="custom-range" value="0" min="0" max="100" />
+              </div>
+
+              <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+                <div class="color_circle"></div>
+              </div>
+            </div>
+          </b-tab>
+        </b-tabs>
+      </div>
     </div>
     <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 3">
       <span class="close" @click="hideAll"><BIconX /></span>
@@ -66,6 +243,15 @@ import {default as $} from 'jquery';
 })
 export default class CustomizationProcess extends Vue {
   @Prop() activeTab!: number
+
+  private selected = null
+  private options = [
+    { value: null, text: 'Please select an option' },
+    { value: 'a', text: 'This is First option' },
+    { value: 'b', text: 'Selected Option' },
+    { value: { C: '3PO' }, text: 'This is an option with object value' },
+    { value: 'd', text: 'This one is disabled', disabled: true }
+  ]
 
   private hideAll(){
     this.$store.dispatch('setActiveTab', -1);
