@@ -154,9 +154,15 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     payload.forEach((data) => {
       this.$store.dispatch('updateCustomLogoAttribute', data)
     })
-    if(customTabIndex == 0) {
-      this.processColorsCustom(JSON.parse(logo.logo_colors),customTabIndex)
+    if(!logo.logo_colors) {
+      this.$store.dispatch("SET_LOGO_COLORS", []);
     }
+    else {
+      if(customTabIndex == 0) {
+        this.processColorsCustom(JSON.parse(logo.logo_colors),customTabIndex)
+      }
+    }
+
 
   }
    public async addLogoObject(index:number):Promise<void> {

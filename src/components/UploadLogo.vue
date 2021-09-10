@@ -272,15 +272,12 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       if (this.customLogos.length) {
       if (this.customLogos[0] && this.customLogos[0].url) {
         this.$store.dispatch("SET_LOGO_URL", {logoUrl: this.customLogos[0].url})
-        alert('getLogoColors')
         this.processColors(this.colors)
       }
     }
   }
 
   processColors(colors: []) {
-    console.log('asdsadas',colors)
-    alert('processColors')
     this.imageColors = []
     let uniqueColors: string[] = []
     colors.forEach((color: number[]) => {
@@ -300,7 +297,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     })
     //only set logo colors if index is 0
     if(this.customLogoIndex == 0) {
-      console.log('this.imageColorsaaaaaaaaa',this.imageColors)
       this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
     }
   }
