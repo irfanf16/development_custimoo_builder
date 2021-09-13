@@ -6,7 +6,7 @@
         <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo.id)">
           <font-awesome-icon :icon="['fas', 'trash-alt']"/>
         </a>
-        <img @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="Image 1" />
+        <img  @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
         <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
       </div>
 
@@ -47,7 +47,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   public open_modal!: boolean
   public mounted!: boolean
   public colors: any = [];
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
+  public storageUrl = process.env.VUE_APP_STORAGE_URL
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
   public showLoader = false
@@ -154,9 +154,15 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     payload.forEach((data) => {
       this.$store.dispatch('updateCustomLogoAttribute', data)
     })
-    if(customTabIndex == 0) {
-      this.processColorsCustom(JSON.parse(logo.logo_colors),customTabIndex)
+    if(!logo.logo_colors) {
+      this.$store.dispatch("SET_LOGO_COLORS", []);
     }
+    else {
+      if(customTabIndex == 0) {
+        this.processColorsCustom(JSON.parse(logo.logo_colors),customTabIndex)
+      }
+    }
+
 
   }
    public async addLogoObject(index:number):Promise<void> {

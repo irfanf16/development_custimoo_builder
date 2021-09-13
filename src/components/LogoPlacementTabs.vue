@@ -323,7 +323,8 @@ export default class LogoPlacementTabs extends Vue {
 <style lang="scss" scoped>
 .tabs-logo-container{
   @media only screen and (min-width: 992px){
-    padding: 0 0 150px;
+    //padding: 0 0 150px;
+    padding: 0 0 50px;
   }
   .upload-logo-opener{
     box-shadow: none;
