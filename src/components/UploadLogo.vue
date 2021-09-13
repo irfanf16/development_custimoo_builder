@@ -9,7 +9,7 @@
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-          <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url" width="100%"/>
+          <img crossorigin="" :src="storageUrl+customLogos[customLogoIndex].url+'?not-from-cache-please'" width="100%"/>
         </div>
         <div v-else>
           <div class="icon-holder">

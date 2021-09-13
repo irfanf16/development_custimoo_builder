@@ -1350,7 +1350,7 @@ export default class Scene extends Vue {
 
          // console.log('selectable',selectable);
 
-          fabric.Image.fromURL(logoUrl, (img: any) => {
+          fabric.Image.fromURL(logoUrl + "?not-from-cache-please", (img: any) => {
             img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
             img.set({
               left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,
