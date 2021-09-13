@@ -6,7 +6,7 @@
         <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo.id)">
           <font-awesome-icon :icon="['fas', 'trash-alt']"/>
         </a>
-        <img  @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
+        <img crossorigin="anonymous"   @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
         <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
       </div>
 
