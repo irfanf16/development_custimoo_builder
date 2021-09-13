@@ -132,7 +132,6 @@ export default class LogoPlacementTabs extends Vue {
   public allowedLogosLimit = 1000
 
   get imageColors(): any[] {
-    console.log('getimageColors',this.$store.getters.getLogosColors)
     return this.$store.getters.getLogosColors
   }
 

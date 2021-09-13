@@ -411,6 +411,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     if (ok) {
       let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
       if (res == true){
+        this.$store.commit('SET_RECENT_LOGOS')
         this.showToast('Product Deleted', 'SUCCESS')
       }else{
         this.showError(res)

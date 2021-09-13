@@ -207,7 +207,6 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     })
     let deletedCount = uniqueColors.length - 4
     uniqueColors.splice(4, deletedCount)
-    console.log('uniqueColors',uniqueColors)
     uniqueColors.forEach((color: string) => {
       // console.log(color)
       let pantoneColor = getClosestColor(color)
@@ -216,7 +215,6 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     })
     //only set logo colors if index is 0
     if(customLogoIndex == 0) {
-      console.log('here',imageColors)
       this.$store.dispatch("SET_LOGO_COLORS", imageColors);
     }
   }
