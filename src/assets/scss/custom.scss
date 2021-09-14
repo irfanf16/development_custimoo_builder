@@ -2478,13 +2478,15 @@ $fontSize: 0.5;
         color: #fff;
     }
 
-    &.light{
+    &.light.btn{
         background: #E7F4F1;
         color: #219F84;
         border-color: #E7F4F1;
 
-        &:hover{
+        &:hover, &:focus, &:active{
             border-color: #219F84;
+            color: #219F84;
+            background: #E7F4F1;
         }
     }
 }
@@ -3190,4 +3192,7 @@ $fontSize: 0.5;
 
 .flip_vertical {
     transform: rotate(-180deg) !important;
+}
+.flip_horizontal {
+    transform: rotateY(180deg) !important;
 }

@@ -100,8 +100,12 @@
               </header>
               <div class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                 <div>
-                  <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
-                  <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
+                  <b-button variant="outline-secondary mr-2" :disabled="undoItems.length < 1" @click="undoAction"><span class="d-sm-block d-none">Undo</span><span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span></b-button>
+                  <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1"><span class="d-sm-block d-none">Redo</span><span class="d-sm-none d-block"><BIconReplyFill /></span></b-button>
+                  <button class="btn btn-secondary light" @click="redoAction">
+                    <span class="d-sm-block d-none">Save</span>
+                    <span class="d-sm-none d-block"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></span>
+                  </button>
                 </div>
 
                 <div class="mobile-nav">
@@ -113,7 +117,6 @@
                     </template>
                     <b-dropdown-item href="#">Change Design / Item</b-dropdown-item>
                     <b-dropdown-item href="#">Open locker room</b-dropdown-item>
-                    <b-dropdown-item href="#">Save to locker room</b-dropdown-item>
                     <b-dropdown-item href="#">Summary</b-dropdown-item>
                     <b-dropdown-item href="#">Share</b-dropdown-item>
                     <b-dropdown-item href="#">Reset</b-dropdown-item>
