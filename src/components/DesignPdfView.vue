@@ -3,7 +3,7 @@
     <div id="production-pdf-html">
       <div id="wrapper">
         <div id="header">
-          <div class="year">2021</div>
+          <div class="year">{{ new Date().getFullYear() }}</div>
           <div class="header-content">1:10 scale artwork on adult size large</div>
           <div class="logo">
             <svg width="200px" height="36px" viewBox="0 0 200 36" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -54,19 +54,40 @@
           <div class="two-columns" style="page-break-inside: avoid; padding-top: 0.5in">
             <div class="left-col">
               <div class="product-details-area">
-                <div class="details-col">
-                  <h2>Colors</h2>
-                  <div class="colors-area">
-                    <div class="color-block" v-for="(svgColor, index) in svgGroups" :key="index">
-                      <div class="color-box" :style="{background: svgColor.color}"></div>
-                      <div class="color-details">
-                        <span class="color-property">{{ svgColor.id.toUpperCase() }}</span>
-                        <div v-if="svgColor.pantone && svgColor.pantone != 'undefined' " class="color-name">Pantone: {{ svgColor.pantone }}</div>
-                        <div v-else class="color-name"> {{ svgColor.name.toUpperCase() }}</div>
+                <template v-if="productType">
+                  <template v-if="productType == 'customized'">
+                    <div class="details-col">
+                      <h2>Color</h2>
+                      <div class="colors-area">
+                        <div class="color-block" v-for="(svgColor, index) in svgGroups" :key="index">
+                          <div class="color-box" :style="{background: svgColor.color}"></div>
+                          <div class="color-details">
+                            <span class="color-property">{{ svgColor.id.toUpperCase() }}</span>
+                            <div v-if="svgColor.pantone && svgColor.pantone != 'undefined' " class="color-name">Pantone: {{ svgColor.pantone }}</div>
+                            <div v-else class="color-name"> {{ svgColor.name.toUpperCase() }}</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </template>
+                  <template v-else="">
+                    <div class="details-col">
+                      <h2>Product: {{ selectedProduct ? selectedProduct.product_name : ''}}</h2>
+                      <div class="colors-area" v-if="productDesign">
+                        <table class="w-100">
+                          <tr>
+                            <td style="border: none">
+                              <img :src="productDesign.front_design.base64_image" :alt="`${productDesign.front_design.file_name}`" class="w-100" style="max-width: 100%">
+                              <div class="mt-1 text-center">
+                                Design: {{ productDesign.front_design.design_name}}
+                              </div>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </div>
+                  </template>
+                </template>
                 <div class="details-col">
                   <h2>Name+Numbers</h2>
                   <div v-for="(textData, index) in customTexts" :key="index">
@@ -124,10 +145,10 @@
                 <h2>Logos</h2>
                 <div class="logo-holder">
                   <div class="logo-block" v-for="(logo, index) in customLogos" :key="index">
-<!--                    <img :src="`${storageUrl}${logo.url}`" height="80" width="80">-->
+                    <!--                    <img :src="`${storageUrl}${logo.url}`" height="80" width="80">-->
                     <div class="logo">
                       <img :src="logo.base64_logo" height="80" width="80">
-<!--                      <img src="../assets/images/logo.svg">-->
+                      <!--                      <img src="../assets/images/logo.svg">-->
                     </div>
                     <p>Size: {{ `${logo.originalHeight}cm x ${logo.originalWidth}cm` }}</p>
                   </div>
@@ -152,6 +173,24 @@ export default class DesignPdfView extends Vue {
   @Prop({required: true}) readonly pdf_front_image!: string;
   @Prop({required: true}) readonly pdf_back_image!: string;
 
+  get productType(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct.product_type;
+  }
+
+  get productDesign() {
+    let selected_product = this.$store.getters.getSelectedProduct;
+    let style_index = this.$store.getters.getCurrentStyleIndex;
+    let product_design = selected_product.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>) => product_design.design_show == 1)[0];
+    this.getUrlContent(this.storageUrl+product_design.front_design.file_url, (dataUrl: any) => {
+      product_design.front_design.base64_image = dataUrl;
+    })
+    return product_design;
+  }
+
+  get selectedProduct(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct;
+  }
+
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
@@ -161,8 +200,8 @@ export default class DesignPdfView extends Vue {
     let storage_url = self.storageUrl;
     let custom_logos =  self.$store.getters.getCustomLogos.filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
     custom_logos = custom_logos.map((custom_logo) => {
-        self.getUrlContent(storage_url+custom_logo.url, (dataUrl: any) => {
-         custom_logo.base64_logo = dataUrl;
+      self.getUrlContent(storage_url+custom_logo.url, (dataUrl: any) => {
+        custom_logo.base64_logo = dataUrl;
       })
       return custom_logo;
     })
