@@ -2,7 +2,9 @@
   <b-modal ref="confirm-modal" id="reset-confirm" size="md" :hide-footer="true" :hide-header="true" modal-class="confirm-modal">
     <div class="text-center">
         <span class="btn btn-secondary light rounded-circle confirm-icon">
-          <b-icon-question></b-icon-question>
+          <BIconQuestion v-if="popup_icon === 'question'"/>
+          <BIconInfo v-if="popup_icon === 'info'" />
+
         </span>
     </div>
     <div class="fs-4 text-muted text-center p-4">
@@ -10,8 +12,8 @@
     </div>
 
     <div class="d-flex align-items-center justify-content-center gap-2">
-      <b-button  @click="_confirm" >{{ confirm_text }}</b-button>
-      <b-button @click="_cancel" class="light">{{ cancel_text }}</b-button>
+      <b-button v-if="confirm_text.length > 0"  @click="_confirm" >{{ confirm_text }}</b-button>
+      <b-button v-if="cancel_text.length > 0" @click="_cancel" class="light">{{ cancel_text }}</b-button>
     </div>
   </b-modal>
 </template>
@@ -27,6 +29,7 @@ export default class  ConfirmModal extends Vue{
   @Prop({ type: String, default: "Are you sure?" }) private message!: string;
   @Prop({ type: String, default: "No" }) private cancel_text!: string;
   @Prop({ type: String, default: "Yes" }) private confirm_text!: string;
+  @Prop({required: false, default: 'question'})  popup_icon !: string;
   private ref = this.$refs as Record<any, any>
 
   // Private variables
