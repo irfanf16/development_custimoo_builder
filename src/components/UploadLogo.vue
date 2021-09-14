@@ -297,7 +297,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     //only set logo colors if index is 0
     if(this.customLogoIndex == 0) {
       await this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
-      await this.$store.dispatch("initialLogoColors", this.imageColors);
+      await this.$store.dispatch("initialLogoColors", JSON.stringify(this.imageColors));
     }
   }
 
@@ -309,6 +309,8 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       index: this.customLogoIndex
     }
     this.$store.dispatch('deleteCustomLogo', payload)
+    this.$store.commit('SET_LOGO_COLORS', []);
+    this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
   }
 
   public toggleLogoBackground() {
