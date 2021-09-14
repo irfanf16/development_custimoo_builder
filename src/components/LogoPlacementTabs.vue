@@ -43,7 +43,7 @@
                         @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name" :class="{'active-swatch' : icIdx==selectedSwatchIndex}"
 
                          :style="{background: imageColor.hex}" :key="icIdx"></div>
-                    <LogoColorTabs v-if="showLogoColors" ref="text-color-tab" @setSwatchColor="setSwatchColor" :swatchPantone="defSwatchPantone" :swatchcolor="defSwatchColor" :productColors="productColors" :showSVGS="Boolean(showSVGs)"/>
+                    <LogoColorTabs v-if="showLogoColors" @setSwatchColor="setSwatchColor" :swatchPantone="defSwatchPantone" :swatchcolor="defSwatchColor" :productColors="productColors" :showSVGS="Boolean(showSVGs)"/>
                   </div>
                 </div>
 <!--                <div class="logo-holder color-extracted-area">
