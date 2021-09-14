@@ -10,6 +10,7 @@ const Product:Module<any, any> = {
     logoUrl:'',
     eyeIndex: -1,
     selectedModelIndex: 0,
+    initialColors:[]
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -32,6 +33,9 @@ const Product:Module<any, any> = {
     },
     getEyeIndex(state:Record<any, any>){
       return state.eyeIndex
+    },
+    getInitialColors(state:Record<any, any>){
+      return state.initialColors
     }
   },
   mutations:{
@@ -71,9 +75,10 @@ const Product:Module<any, any> = {
     ADD_PRODUCT_TO_LOCKER(state:Record<any, any>, payload){
       const room_index = state.locker_products.findIndex((room:Record<any, any>) => room.id == payload.room_id)
       Vue.set(state.locker_products[room_index].product, state.locker_products[room_index].product.length, payload.data);
+    },
+    SET_INITIAL_LOGO_COLORS(state:Record<any, any>, payload){
+      state.initialColors = payload
     }
-
-
   },
   actions: {
     async getModels({commit}, paylod:number){
@@ -183,6 +188,9 @@ const Product:Module<any, any> = {
         return res.data;
       })
       return res
+    },
+    initialLogoColors({commit}, payload){
+      commit('SET_INITIAL_LOGO_COLORS', payload)
     }
 
   }

@@ -269,7 +269,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       if (this.customLogos.length) {
       if (this.customLogos[0] && this.customLogos[0].url) {
         this.$store.dispatch("SET_LOGO_URL", {logoUrl: this.customLogos[0].url})
-        this.processColors(this.colors)
+        if (this.colors.length){
+          this.processColors(this.colors)
+        }
       }
     }
   }
@@ -295,6 +297,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     //only set logo colors if index is 0
     if(this.customLogoIndex == 0) {
       this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
+      this.$store.dispatch("initialLogoColors", this.imageColors);
     }
   }
 

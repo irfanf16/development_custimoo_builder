@@ -84,9 +84,13 @@ import SaveColorModal from "@/components/SaveColorModal.vue"
     SaveLogoModal,
     SaveColorModal
   },
-  mounted() {
+  async mounted() {
     if(this.numberOfLogosAllowed > 0) {
       this.allowedLogosLimit = this.numberOfLogosAllowed
+    }
+    if(this.imageColors.length > 0 && this.initialColors.length ==0){
+      console.log('in condition')
+      await  this.$store.dispatch("initialLogoColors", this.imageColors);
     }
     this.$root.$on('changeLogoTabIndex', (index:number) => {
       // here you need to use the arrow function
@@ -143,6 +147,9 @@ export default class LogoPlacementTabs extends Vue {
 
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
+  }
+  get initialColors(){
+    return this.$store.getters.getInitialColors
   }
 
   public async initFirstLogoTab(index: number){
@@ -290,7 +297,8 @@ export default class LogoPlacementTabs extends Vue {
     this.previousImageColors.forEach((defaultColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
     })
-    this.$store.dispatch("SET_LOGO_COLORS", this.previousImageColors);
+    console.log(this.initialColors)
+    this.$store.dispatch("SET_LOGO_COLORS", this.initialColors);
     this.previousImageColors = []
   }
 
