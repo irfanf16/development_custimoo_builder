@@ -47,11 +47,11 @@
             </template>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mobile_controls">
-                <label for="">Front Name</label>
+                <label for="">Back Name</label>
                 <b-form-input class="mt-1"></b-form-input>
               </div>
               <div class="mobile_controls">
-                <label for="">Font Style</label>
+                <label for="">Back Style</label>
                 <b-form-select class="mt-1" v-model="selected">
                   <b-form-select-option :value="null">Style 1</b-form-select-option>
                   <b-form-select-option value="Style 2">Style 2</b-form-select-option>
@@ -63,7 +63,7 @@
             <div class="grid mobile-cols-2 gap-1">
               <div class="mt-2 mobile_controls">
                 <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
-                <input type="range" class="custom-range" value="0" min="0" max="100" />
+                <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
               </div>
 
               <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
@@ -87,7 +87,7 @@
             </template>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mobile_controls">
-                <label for="">Player Name</label>
+                <label for="">Front Name</label>
                 <b-form-input class="mt-1"></b-form-input>
               </div>
               <div class="mobile_controls">
@@ -103,7 +103,7 @@
             <div class="grid mobile-cols-2 gap-1">
               <div class="mt-2 mobile_controls">
                 <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
-                <input type="range" class="custom-range" value="0" min="0" max="100" />
+                <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
               </div>
 
               <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
@@ -143,7 +143,7 @@
             <div class="grid mobile-cols-2 gap-1">
               <div class="mt-2 mobile_controls">
                 <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
-                <input type="range" class="custom-range" value="0" min="0" max="100" />
+                <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
               </div>
 
               <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
@@ -183,7 +183,7 @@
             <div class="grid mobile-cols-2 gap-1">
               <div class="mt-2 mobile_controls">
                 <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
-                <input type="range" class="custom-range" value="0" min="0" max="100" />
+                <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
               </div>
 
               <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
@@ -206,7 +206,77 @@
     </div>
     <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 3">
       <span class="close" @click="hideAll"><BIconX /></span>
-      Styles
+      <div>
+        <div class="font-weight-bold fs-2">Choose Product</div>
+        <div class="d-flex align-items-center gap-2 pt-1 pb-2" style="overflow-x: auto;">
+          <label class="button_radio">
+            <input checked type="radio" name="style" />
+            <span>
+              <BIconCheckCircleFill />
+              <span>Jensen Cut</span>
+            </span>
+          </label>
+          <label class="button_radio">
+            <input type="radio" name="style" />
+            <span>
+              <BIconCheckCircleFill />
+              <span>Jensen Cut</span>
+            </span>
+          </label>
+          <label class="button_radio">
+            <input type="radio" name="style" />
+            <span>
+              <BIconCheckCircleFill />
+              <span>Jensen Cut</span>
+            </span>
+          </label>
+        </div>
+
+        <div>
+          <template v-for="(item, index) in items">
+            <div :key="index" v-if="index===0">
+              <div><span class="font-weight-bold fs-2">* Jensen cut</span> <span class="read_more" @click="toggle_read(index)" :data-index="item"><BIconChevronDown /></span></div>
+              <div style="display: none">
+                Fashioned from performance enhancing fabrics, the Hummel Beespoke Jensen Jersey feels as light as a
+                feather and provides maximum ventilation.
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div class="pt-1 mt-1" style="border-top: 1px solid #eee">
+          <div class="font-weight-bold fs-2">Choose Stuff</div>
+          <div class="pt-1 d-flex align-items-center gap-1" style="overflow-x: auto">
+            <label class="button_checkbox">
+              <input type="checkbox" name="style" />
+              <span>
+              <BIconCheckCircleFill />
+              <span>Jensen Cut</span>
+              <span class="mx-1">-</span>
+              <span>$12</span>
+            </span>
+            </label>
+            <label class="button_checkbox">
+              <input type="checkbox" name="style" />
+              <span>
+              <BIconCheckCircleFill />
+              <span>Jensen Cut</span>
+              <span class="mx-1">-</span>
+              <span>$12</span>
+            </span>
+            </label>
+            <label class="button_checkbox">
+              <input type="checkbox" name="style" />
+              <span>
+              <BIconCheckCircleFill />
+              <span>Jensen Cut</span>
+              <span class="mx-1">-</span>
+              <span>$12</span>
+            </span>
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -243,6 +313,7 @@ import {default as $} from 'jquery';
 })
 export default class CustomizationProcess extends Vue {
   @Prop() activeTab!: number
+  private items = [1,2,3,4]
 
   private selected = null
   private options = [
@@ -256,6 +327,11 @@ export default class CustomizationProcess extends Vue {
   private hideAll(){
     this.$store.dispatch('setActiveTab', -1);
     $(".sideNav li a").removeClass('active')
+  }
+
+  private toggle_read(index:number){
+    $(`.read_more:eq(${index})`).toggleClass('flip_vertical')
+    $(`.read_more:eq(${index})`).parent("div").next("div").slideToggle('fast')
   }
 
   // public showLoader = false
@@ -501,5 +577,9 @@ export default class CustomizationProcess extends Vue {
     margin: 0 auto;
     height: auto;
   }
+}
+
+.read_more{
+  transform: rotate(0deg); transition: 0.2s all ease; display: inline-block;
 }
 </style>

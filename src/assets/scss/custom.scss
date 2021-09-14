@@ -3115,3 +3115,79 @@ $fontSize: 0.5;
         margin-top: 3px;
     }
 }
+
+.button_radio{
+    input{
+        display: none;
+
+        &:checked+span{
+            border-color: #189076;
+            color: #189076;
+
+            svg{
+                opacity: 1;
+            }
+        }
+    }
+
+    &>span{
+        display: flex;
+        padding: 0.3rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        align-items: center;
+        position: relative;
+        transition: 0.2s all ease;
+        white-space: nowrap;
+
+        svg{
+            position: absolute;
+            top: -5px;
+            right: -7px;
+            fill: #189076;
+            opacity: 0;
+            transition: 0.2s all ease;
+            background: #fff;
+        }
+    }
+}
+
+.button_checkbox{
+    input{
+        display: none;
+
+        &:checked+span{
+            border-color: #189076;
+            color: #189076;
+
+            svg{
+                opacity: 1;
+            }
+        }
+    }
+
+    &>span{
+        display: flex;
+        padding: 0.3rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        align-items: center;
+        position: relative;
+        transition: 0.2s all ease;
+        white-space: nowrap;
+
+        svg{
+            position: absolute;
+            top: -5px;
+            right: -7px;
+            fill: #189076;
+            opacity: 0;
+            transition: 0.2s all ease;
+            background: #fff;
+        }
+    }
+}
+
+.flip_vertical {
+    transform: rotate(-180deg) !important;
+}
