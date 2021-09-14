@@ -72,14 +72,14 @@
                   </template>
                   <template v-else="">
                     <div class="details-col">
-                      <h2>Product: {{ selectedProduct ? selectedProduct.product_name : ''}}</h2>
+                      <h2>{{ selectedProduct ? selectedProduct.product_name : ''}}</h2>
                       <div class="colors-area" v-if="productDesign">
                         <table class="w-100">
                           <tr>
                             <td style="border: none">
                               <img :src="productDesign.front_design.base64_image" :alt="`${productDesign.front_design.file_name}`" class="w-100" style="max-width: 100%">
                               <div class="mt-1 text-center">
-                                Design: {{ productDesign.front_design.design_name}}
+                                {{ productDesign.front_design.design_name}}
                               </div>
                             </td>
                           </tr>
