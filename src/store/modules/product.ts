@@ -54,6 +54,10 @@ const Product:Module<any, any> = {
     SET_LOGO_COLORS(state:Record<any, any>, payload:Record<any, any>){
       state.logoColors = payload;
     },
+    SET_LOGO_COLOR(state:Record<any, any>, payload:Record<any, any>){
+      Vue.set(state.logoColors, payload.index, payload.color_info)
+      /*state.logoColors[payload.index] = payload.color_info;*/
+    },
     SET_LOGO_URL(state:Record<any, any>, payload:Record<any, any>){
       state.logoUrl = payload.logoUrl;
     },

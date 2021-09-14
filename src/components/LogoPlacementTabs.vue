@@ -40,7 +40,10 @@
                 <div class="color-holder">
                   <div class="color-container">
                     <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
-                         :title="imageColor.name" :style="{background: imageColor.hex}" :key="icIdx"></div>
+                        @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name" :class="{'active-swatch' : icIdx==selectedSwatchIndex}"
+
+                         :style="{background: imageColor.hex}" :key="icIdx"></div>
+                    <LogoColorTabs v-if="showLogoColors" ref="text-color-tab" @setSwatchColor="setSwatchColor" :swatchPantone="defSwatchPantone" :swatchcolor="defSwatchColor" :productColors="productColors" :showSVGS="Boolean(showSVGs)"/>
                   </div>
                 </div>
 <!--                <div class="logo-holder color-extracted-area">
@@ -76,13 +79,16 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
+import LogoColorTabs from "@/components/LogoColorTabs.vue"
 
 
 @Component<LogoPlacementTabs>({
   components: {
     UploadLogo,
     SaveLogoModal,
-    SaveColorModal
+    SaveColorModal,
+    LogoColorTabs
+
   },
   mounted() {
     if(this.numberOfLogosAllowed > 0) {
@@ -125,6 +131,13 @@ export default class LogoPlacementTabs extends Vue {
   public previousImageColors = []
   public logoColorUsed = false
   public allowedLogosLimit = 1000
+  public productColors: any[] = []
+  public showSVGs = false
+  public showLogoColors = false
+  public selectedSwatchIndex = -1
+  public defSwatchColor = '#ffffff'
+
+
 
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
@@ -254,6 +267,7 @@ export default class LogoPlacementTabs extends Vue {
         this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
       }
     }
+
   }
 
   shuffleLogoColors() {
@@ -304,10 +318,50 @@ export default class LogoPlacementTabs extends Vue {
     this.$store.dispatch('toggleLogoBackgroud', index)
   }
 
+  get selectedProduct(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct
+  }
+  get lockerColors(){
+    return this.$store.getters.getLockerColors
+  }
+  get logoColors(): [] {
+    return this.$store.getters.getLogosColors
+  }
+  public getColors() {
+
+    this.productColors = []
+    this.selectedProduct.colors.forEach((colors: any, key: number) => {
+      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
+      finalColor.color_text = JSON.parse(colors.color_text)
+      this.productColors = this.productColors.concat(finalColor)
+    })
+    this.productColors = this.productColors.concat(this.lockerColors)
+
+  }
+
+  public selectLogoColor(index, imageColor){
+    if(index==this.selectedSwatchIndex) {
+      this.showLogoColors = false;
+      this.selectedSwatchIndex = -1;
+    } else {
+      this.selectedSwatchIndex = index
+      this.defSwatchColor = imageColor.hex
+      this.defSwatchPantone = imageColor.pantone
+      this.getColors();
+      this.showLogoColors = true
+    }
+  }
+
+  public setSwatchColor(color: Record<any, any>) {
+    let payload = {color_info : color , index : this.selectedSwatchIndex}
+    this.$store.commit('SET_LOGO_COLOR', payload)
+  }
+
 }
 </script>
 
 <style lang="scss" scoped>
+
 .tabs-logo-container{
   @media only screen and (min-width: 992px){
     padding: 0 0 150px;
@@ -440,5 +494,6 @@ export default class LogoPlacementTabs extends Vue {
   display: block;
   width: 100%;
 }
+
 
 </style>
