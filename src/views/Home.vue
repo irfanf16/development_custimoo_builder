@@ -594,7 +594,6 @@ export default class Home extends Mixins(ErrorMessages) {
   }
 
   public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): Promise<void> {
-    console.log('urlll',url)
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -770,7 +769,6 @@ export default class Home extends Mixins(ErrorMessages) {
     }
     this.tabIndex = index
     this.$store.dispatch('setTabMain',{value:index})
-    console.log('index',index)
   }
 
   public buyNow() {
