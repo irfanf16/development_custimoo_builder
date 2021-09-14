@@ -10,7 +10,7 @@ const Product:Module<any, any> = {
     logoUrl:'',
     eyeIndex: -1,
     selectedModelIndex: 0,
-    initialColors:[]
+    initialExtractedColors:[]
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -34,8 +34,8 @@ const Product:Module<any, any> = {
     getEyeIndex(state:Record<any, any>){
       return state.eyeIndex
     },
-    getInitialColors(state:Record<any, any>){
-      return state.initialColors
+    getinitialExtractedColors(state:Record<any, any>){
+      return state.initialExtractedColors
     }
   },
   mutations:{
@@ -81,7 +81,8 @@ const Product:Module<any, any> = {
       Vue.set(state.locker_products[room_index].product, state.locker_products[room_index].product.length, payload.data);
     },
     SET_INITIAL_LOGO_COLORS(state:Record<any, any>, payload){
-      state.initialColors = payload
+      state.initialExtractedColors = payload
+      console.log(state.initialExtractedColors)
     }
   },
   actions: {

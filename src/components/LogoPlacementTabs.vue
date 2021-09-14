@@ -94,8 +94,7 @@ import LogoColorTabs from "@/components/LogoColorTabs.vue"
     if(this.numberOfLogosAllowed > 0) {
       this.allowedLogosLimit = this.numberOfLogosAllowed
     }
-    if(this.imageColors.length > 0 && this.initialColors.length ==0){
-      console.log('in condition')
+    if(this.imageColors.length > 0 && this.initialExtractedColors.length ==0){
       await  this.$store.dispatch("initialLogoColors", this.imageColors);
     }
     this.$root.$on('changeLogoTabIndex', (index:number) => {
@@ -161,8 +160,8 @@ export default class LogoPlacementTabs extends Vue {
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
   }
-  get initialColors(){
-    return this.$store.getters.getInitialColors
+  get initialExtractedColors(){
+    return this.$store.getters.getinitialExtractedColors
   }
 
   public async initFirstLogoTab(index: number){
@@ -278,7 +277,7 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   shuffleLogoColors() {
-    if(this.imageColors.length > 1) {
+    if(this.imageColors && this.imageColors.length > 1) {
       this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
       let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
         return imageColor.hex
@@ -307,12 +306,11 @@ export default class LogoPlacementTabs extends Vue {
     }
   }
 
-  public rollbackPreviousColors (): void {
+  public async rollbackPreviousColors (): void {
     this.previousImageColors.forEach((defaultColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
     })
-    console.log(this.initialColors)
-    this.$store.dispatch("SET_LOGO_COLORS", this.initialColors);
+    await this.$store.dispatch("SET_LOGO_COLORS", this.initialExtractedColors);
     this.previousImageColors = []
   }
 

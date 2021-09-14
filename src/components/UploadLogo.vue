@@ -276,7 +276,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
-  processColors(colors: []) {
+  async processColors(colors: []) {
     this.imageColors = []
     let uniqueColors: string[] = []
     colors.forEach((color: number[]) => {
@@ -296,8 +296,8 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     })
     //only set logo colors if index is 0
     if(this.customLogoIndex == 0) {
-      this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
-      this.$store.dispatch("initialLogoColors", this.imageColors);
+      await this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
+      await this.$store.dispatch("initialLogoColors", this.imageColors);
     }
   }
 
