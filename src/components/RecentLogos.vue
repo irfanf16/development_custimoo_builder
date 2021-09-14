@@ -3,7 +3,7 @@
     <h4 v-if="getRecentLogos.length > 0" class="mb-3 mb-lg-4" style="font-weight: 700">Recent Logos</h4>
     <div  class="grid grid-4 gap-2">
       <div style="position:relative;"  class="d-flex align-items-center justify-content-center" v-for="(logo, index) in getRecentLogos" :key="index">
-        <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo.id)">
+        <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo)">
           <font-awesome-icon :icon="['fas', 'trash-alt']"/>
         </a>
         <img crossorigin="anonymous"   @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
