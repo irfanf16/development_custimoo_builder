@@ -1,6 +1,6 @@
 <template>
   <span>
-  <b-tabs content-class="mt-3">
+  <b-tabs content-class="mt-3" @activate-tab="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
       <b-tab  :key="i" :active="tabIndex === i">
         <template #title>
@@ -543,6 +543,15 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       product.product_url = product.product_front_url
     }
     this.getLockerProducts[lockerIndex].product[productIndex] = product;
+  }
+
+  public lockerChanged(newTabIndex: number,  prevTabIndex: number, bvEvent: Record<any, any>) {
+    /*
+    * If locker collection tab is active and user switch to the locker then activate first tab (product tab)
+    * */
+    if(this.lockerActiveTabIndex == 3) {
+      this.lockerActiveTabIndex = 0
+    }
   }
 }
 </script>
