@@ -11,6 +11,7 @@
       </div>
 
     </div>
+    <confirm-modal popup_icon="info" message="This logo cannot be deleted as it is using in one of your locker product" cancel_text="" confirm_text="" ref="delete-logo-ref"></confirm-modal>
   </div>
 
 </template>
@@ -22,10 +23,13 @@ import {http} from "@/httpCommon"
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
+import ConfirmModal from "@/components/ConfirmModal.vue";
 import {log} from "fabric/fabric-impl";
 
 @Component<RecentLogos>({
-
+  components: {
+    ConfirmModal
+  }
 })
 
 
@@ -67,12 +71,20 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   //   alert()
   // }
 
-  public async deleteRecentLogo(id:number) {
+  public async deleteRecentLogo(recentLogo:any) {
     try {
-      const resp = await http.delete(`recent/logos/delete/${id}`);
+      // if(!recentLogo.canLogoDelete) {
+      //   const ok = await this.ref['delete-logo-ref'].showConfirm()
+      //   if (ok) {
+      //     await this.$store.dispatch('logoutCustomer');
+      //     await this.$store.commit('SET_RECENT_LOGOS')
+      //   }
+      // }
+      // return false
+      const resp = await http.delete(`recent/logos/delete/${recentLogo.id}`);
       this.showToast(resp.data.message,'SUCCESS')
       let updated_logos = this.$store.getters.getRecentLogos.filter((recent_logo:any) => {
-        return recent_logo.id != id
+        return recent_logo.id != recentLogo.id
       })
       console.log('updated_logos',updated_logos)
       this.$store.commit('SET_RECENT_LOGOS',updated_logos)
@@ -88,7 +100,8 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
       if(logo)
         return logo.id == recentLogo.id
     })
-    if(logo_exists || !recentLogo.canLogoDelete)
+  //  if(logo_exists || !recentLogo.canLogoDelete)
+    if(logo_exists)
       return false
 
     return true
