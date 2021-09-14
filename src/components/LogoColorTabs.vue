@@ -20,7 +20,7 @@
                     {{ pantoneMessage }}
                   </div>
                 </b-form>
-                <color-picker @changeColor="changeColor" theme="light" :color="color"  />
+                <color-picker @changeColor="changeColor" theme="light" :color="color"  :key="pantoneColorVal"/>
               </div>
               <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
                    :title="color.name" :style="{background: color.value}" :key="index">
@@ -131,6 +131,7 @@ export default class LogoColorTabs extends Vue {
     if (pantoneColor) {
       this.setSwatchColor({hex: pantoneColor.hex.toUpperCase(), name: pantoneColor.name, pantone: pantoneColor.pantone })
       this.pantoneMessage = ''
+      this.color = pantoneColor.hex;
     }
     else {
       this.pantoneMessage = 'Color Not in List.'
@@ -138,7 +139,9 @@ export default class LogoColorTabs extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
+    this.color =color.value;
     let pantoneColor = getClosestColor(color.value)
+    this.pantoneColorVal = pantoneColor.pantone
     this.setSwatchColor({hex: color.value, name: color.name, pantone: pantoneColor.pantone})
   }
 }
