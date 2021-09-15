@@ -82,7 +82,6 @@ const Product:Module<any, any> = {
     },
     SET_INITIAL_LOGO_COLORS(state:Record<any, any>, payload){
       state.initialExtractedColors = payload
-      console.log(state.initialExtractedColors)
     }
   },
   actions: {
@@ -195,7 +194,7 @@ const Product:Module<any, any> = {
       return res
     },
     initialLogoColors({commit}, payload){
-      commit('SET_INITIAL_LOGO_COLORS', payload)
+      commit('SET_INITIAL_LOGO_COLORS', JSON.parse(payload))
     }
 
   }

@@ -100,7 +100,7 @@ import LogoColorTabs from "@/components/LogoColorTabs.vue"
       this.allowedLogosLimit = this.numberOfLogosAllowed
     }
     if(this.imageColors.length > 0 && this.initialExtractedColors.length ==0){
-      await  this.$store.dispatch("initialLogoColors", this.imageColors);
+      await  this.$store.dispatch("initialLogoColors", JSON.stringify(this.imageColors));
     }
     this.$root.$on('changeLogoTabIndex', (index:number) => {
       // here you need to use the arrow function
@@ -257,8 +257,6 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public async changeSide(index: number, event:string) {
-    console.log(event)
-    console.log(this.customLogos[index].side)
     await this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customLogos)), action: 'customLogos' })
     const payload = {
       index: index,
@@ -312,10 +310,11 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public async rollbackPreviousColors (): void {
-    this.previousImageColors.forEach((defaultColor: Record<any, any>, index: number) => {
+    this.initialExtractedColors.forEach((defaultColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
     })
-    await this.$store.dispatch("SET_LOGO_COLORS", this.initialExtractedColors);
+    let initial_colors = JSON.parse(JSON.stringify(this.initialExtractedColors));
+    await this.$store.dispatch("SET_LOGO_COLORS", initial_colors);
     this.previousImageColors = []
   }
 
