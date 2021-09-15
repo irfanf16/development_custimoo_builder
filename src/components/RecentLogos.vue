@@ -229,6 +229,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     //only set logo colors if index is 0
     if(customLogoIndex == 0) {
       this.$store.dispatch("SET_LOGO_COLORS", imageColors);
+      this.$store.dispatch("initialLogoColors", JSON.stringify(imageColors));
     }
   }
 
