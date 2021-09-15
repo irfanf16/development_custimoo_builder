@@ -279,6 +279,7 @@ export default class LogoPlacementTabs extends Vue {
 
   }
 
+
   shuffleLogoColors() {
     if(this.imageColors && this.imageColors.length > 1) {
       this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
@@ -293,9 +294,12 @@ export default class LogoPlacementTabs extends Vue {
         return array;
       }
 
-      while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
-        imageColors.reduce(shuffle)
+      if (!this.checkColorOccurence(imageColors)){
+        while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
+          imageColors.reduce(shuffle)
+        }
       }
+
 
       this.$store.dispatch("SET_LOGO_COLORS", imageColors);
       imageColors.forEach((imageColor: Record<any, any>, index: number) => {
@@ -307,6 +311,21 @@ export default class LogoPlacementTabs extends Vue {
         })
       })
     }
+  }
+ public  checkColorOccurence(data:Record<any, any>){
+    let x = 0
+    let current = data[0].hex
+    let matched = true
+    for (x; x < data.length; x++){
+      if (JSON.stringify(current) == JSON.stringify(data[x].hex)){
+        current = data[x].hex
+        matched = true
+      }else{
+        matched = false
+        break
+      }
+    }
+    return matched
   }
 
   public async rollbackPreviousColors (): void {
