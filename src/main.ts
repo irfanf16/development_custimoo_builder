@@ -4,7 +4,11 @@ import router from './router'
 import store from './store'
 import VueToast from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
+// import { VTooltip, VPopover, VClosePopover } from 'v-tooltip'
 Vue.use(VueToast);
+// Vue.directive('tooltip', VTooltip)
+// Vue.directive('close-popover', VClosePopover)
+// Vue.component('v-popover', VPopover)
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
   faArrowLeft,
