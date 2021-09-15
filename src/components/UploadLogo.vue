@@ -9,7 +9,7 @@
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box">
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-          <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url" width="100%"/>
+          <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url+'?not-from-cache-please'" width="100%"/>
         </div>
         <div v-else>
           <div class="icon-holder">
@@ -18,7 +18,7 @@
           Upload Logo
         </div>
         <div class="remove-img" v-if="showActions && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-          <a @click="deleteLogo">
+          <a  @click="deleteLogo">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
@@ -101,9 +101,10 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       let inputRef = this.$refs.fileInput as Record<any, any>
       inputRef.value = null;
     }
-    if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
-      this.getLogoColors()
-    }
+    // if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
+    //   if(!this.$store.getters.getColorsFromRecent)
+    //     //this.getLogoColors()
+    // }
   }
 
   public uploadLogoBtn() {
@@ -248,11 +249,13 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
           }
 
         ];
+        this.$store.commit('SET_COLORS_FROM_RECENT',false)
         payload.forEach((data) => {
           this.$store.dispatch('updateCustomLogoAttribute', data)
         })
         this.hideModal()
         this.getLogoColors()
+        this.$store.commit('SET_RECENT_LOGOS')
       })
       .catch((error: any) => {
         console.log(error)

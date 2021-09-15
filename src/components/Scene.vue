@@ -2,11 +2,11 @@
   <div class="loading-holder">
     <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
-        <canvas ref="front" id="front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+        <canvas ref="front" id="scene-front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         <h2>Front</h2>
       </a>
       <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}" v-if="back">
-        <canvas v-if="back" ref="back" id="back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+        <canvas v-if="back" ref="back" id="scene-back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         <h2>Back</h2>
       </a>
     </div>
@@ -1280,17 +1280,7 @@ export default class Scene extends Vue {
 
   public addLogos(logos: [Record<any, any>], logoIndex: null|number = null) {
     const self = this
-    let front_logo_setting = null
-    let back_logo_setting = null;
-    if(this.logosSettings.length > 0) {
-      this.logosSettings.forEach((logo_Setting) => {
-        if(logo_Setting.side == "front") {
-          front_logo_setting = logo_Setting
-        } else {
-          back_logo_setting = logo_Setting
-        }
-      })
-    }
+
     logos.forEach((logo: Record<any, any>, index: number) => {
       if(logo && logo.url) {
         if (logoIndex == null) {
@@ -1309,17 +1299,58 @@ export default class Scene extends Vue {
           }
         }
 
+        let front_logo_setting = null
+        let back_logo_setting = null;
+        if(this.logosSettings.length > 0) {
+          this.logosSettings.forEach((logo_Setting,lindex) => {
+            if(lindex == logoIndex){
+              if(logo_Setting.side == "front") {
+                front_logo_setting = logo_Setting
+              } else {
+                back_logo_setting = logo_Setting
+              }
+            }
+           })
+        }
+
+
         if ((logo.side == 'front' || (logo.side == 'back' && self.back)) && (this.multipleLogo || (!this.multipleLogo && logoIndex as number == 0)) && !this.customLogoObjects[logoIndex as number]) {
           if (logo.customLogo) {
             this.customLogoObjects[logoIndex as number] = true
           }
           logo.haveControls = Boolean(logo.haveControls)
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
+
+          //console.log(front_logo_setting);
+
           let selectable = front_logo_setting ? !front_logo_setting.is_locked : true;
+
+          if(front_logo_setting){
+            logo.haveControls = !front_logo_setting.is_locked;
+            if(front_logo_setting.is_locked){
+              logo.x_axis = front_logo_setting.x_axis
+              logo.y_axis = front_logo_setting.y_axis;
+              logo.rotation = front_logo_setting.rotation;
+            }
+          }
+
           if(logo.side == "back") {
             selectable = back_logo_setting ? !back_logo_setting.is_locked : true;
+
+            if(back_logo_setting){
+              logo.haveControls = !back_logo_setting.is_locked;
+              if(back_logo_setting.is_locked){
+                logo.x_axis = back_logo_setting.x_axis
+                logo.y_axis = back_logo_setting.y_axis;
+                logo.rotation = back_logo_setting.rotation;
+              }
+
+            }
           }
-          fabric.Image.fromURL(logoUrl, (img: any) => {
+
+         // console.log('selectable',selectable);
+
+          fabric.Image.fromURL(logoUrl + "?not-from-cache-please", (img: any) => {
             img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
             img.set({
               left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,

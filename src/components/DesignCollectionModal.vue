@@ -188,7 +188,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     let subProducts: Record<any, any>[] = []
     let groupIndex = 0
     this.$store.getters.getCollectionItems.collection_products.forEach((product: Record<any, any>, index: number) => {
-      console.log('here')
       Vue.set(subProducts, groupIndex, product)
       groupIndex++
 

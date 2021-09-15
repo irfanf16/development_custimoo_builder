@@ -64,11 +64,20 @@
               <SaveColorModal />
             </div>
           </template>
+
+
+
+
           <UploadLogo :customLogoIndex="index" :showImage="false" :showActions="false" :key="'bottom'+index" />
         </div>
+        <RecentLogos :logosSetting="logosSetting" :customLogoIndex="index"/>
       </b-tab>
     </b-tabs>
+
+
+
   </div>
+
 </template>
 
 <script lang="ts">
@@ -77,10 +86,12 @@ import UploadLogo from "@/components/UploadLogo.vue"
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
 import LogoColorTabs from "@/components/LogoColorTabs.vue"
+import RecentLogos from "@/components/RecentLogos.vue";
 
 
 @Component<LogoPlacementTabs>({
   components: {
+    RecentLogos,
     UploadLogo,
     SaveLogoModal,
     SaveColorModal,
@@ -160,6 +171,10 @@ export default class LogoPlacementTabs extends Vue {
   }
   get initialExtractedColors(){
     return this.$store.getters.getinitialExtractedColors
+  }
+
+  get defaultColors() : [Record<any, any>] {
+    return this.$store.getters.getDefaultColors
   }
 
   public async initFirstLogoTab(index: number){
@@ -262,6 +277,7 @@ export default class LogoPlacementTabs extends Vue {
   useLogoColors() {
     this.logoColorUsed = true
     this.$store.dispatch('setGroupColors', {})
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
     for (let i = 0; i < 4; i++) {
       if(this.imageColors[i]) {
         this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone, name: this.imageColors[i].name})
@@ -291,6 +307,7 @@ export default class LogoPlacementTabs extends Vue {
       }
 
       this.$store.dispatch("SET_LOGO_COLORS", imageColors);
+      this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
       imageColors.forEach((imageColor: Record<any, any>, index: number) => {
         this.$store.dispatch('setDefaultColor', {
           index: index,
@@ -367,7 +384,8 @@ export default class LogoPlacementTabs extends Vue {
 
 .tabs-logo-container{
   @media only screen and (min-width: 992px){
-    padding: 0 0 150px;
+    //padding: 0 0 150px;
+    padding: 0 0 50px;
   }
   .upload-logo-opener{
     box-shadow: none;

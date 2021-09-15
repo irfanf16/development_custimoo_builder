@@ -171,6 +171,7 @@
         }
         let res = await this.$store.dispatch('loginCustomer', payload)
         if (res.status == 200){
+          this.$store.commit('SET_RECENT_LOGOS')
           await this.$store.dispatch('getLockerRoomColors')
           this.email = ''
           this.password = ''
