@@ -18,7 +18,7 @@
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator'
   import Search from '@/components/Search.vue'
-  import ItemsCarousel from '@/components/ItemsCarousel.vue'
+  // import ItemsCarousel from '@/components/ItemsCarousel.vue'
   import SelectItemCarousel from '../components/SelectItemCarousel.vue'
   import DesignAvailable from '../components/DesignAvailable.vue'
 
@@ -39,7 +39,8 @@ export default class ItemToCustomize extends Vue {
 
 
   public retrieveProductsC(index :number){
-    this.$emit('retrieveProducts', index)
+    //this.$emit('retrieveProducts', index)
+    this.$emit('retrieveProducts','/list/products',false,true)
   }
   public searchProduct(param: string, type: string){
     this.$emit('search', param, type)

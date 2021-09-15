@@ -17,6 +17,8 @@
             <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
                                :logosSetting="selectedProduct.logos_setting"/>
           </div>
+
+
         </b-tab>
         <b-tab v-if="selectedProduct.product_type !== 'personalized'">
           <button @click="setHideTab('colorHide', !hideTab.colorHide)" class="tab-close-btn d-lg-none"></button>
@@ -111,6 +113,7 @@
         </b-tab>
       </b-tabs>
     </div>
+
   </div>
 </template>
 
@@ -124,10 +127,13 @@ import EditRosterArea from '@/components/EditRosterArea.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
+import {getClosestColor} from '@/pantoneColor'
 import { log } from 'fabric/fabric-impl'
+import RecentLogos from "@/components/RecentLogos.vue";
 
 @Component<CustomizationProcess>({
   components: {
+    RecentLogos,
     ColorAccordion,
     LogoPlacementTabs,
     CustomizationText,
@@ -263,6 +269,38 @@ export default class CustomizationProcess extends Vue {
   public customTextInit() {
     this.productNames.forEach((productName: Record<any, any>, index: number) => {
       if (this.customTexts[index] && !this.customTexts[index].action) {
+
+        //calculate colors pantone on init
+        let fill_color_pantone = this.firstColor.name;
+        let fill_hex_color = '';
+        if(this.customTexts[index].fillColor){
+          fill_hex_color = this.customTexts[index].fillColor;
+        }else if(this.firstColor.value){
+          fill_hex_color = this.firstColor.value;
+        }
+        if(fill_hex_color != ''){
+          let pantone = getClosestColor(fill_hex_color);
+          if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+            fill_color_pantone = pantone.pantone;
+          }
+        }
+
+        let outLine_color_pantone = this.secondColor.name;
+        let outLine_hex_color = '';
+        if(this.customTexts[index].outLineColor){
+          outLine_hex_color = this.customTexts[index].outLineColor;
+        }else if(this.secondColor.value){
+          outLine_hex_color = this.secondColor.value;
+        }
+        if(outLine_hex_color != ''){
+          let opantone = getClosestColor(outLine_hex_color);
+          if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+            outLine_color_pantone = opantone.pantone;
+          }
+        }
+
+
+
         let text = {
           text: this.customTexts[index].text,
           type: productName.type,
@@ -276,14 +314,30 @@ export default class CustomizationProcess extends Vue {
           side: productName.side,
           fontFamily: this.customTexts[index].fontFamily ? this.customTexts[index].fontFamily : this.fontOptions[0].value,
           fillColor: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.value,
-          fillColorPantone: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.name,
+          fillColorPantone: fill_color_pantone,
           outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.value,
-          outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
+          //outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
+          outLineColorPantone: outLine_color_pantone,
           outLineWidth: this.customTexts[index].outLineWidth ? this.customTexts[index].outLineWidth : 0,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
       } else if (!this.customTexts[index]) {
+
+        //calculate colors pantone on init
+        let fill_color_pantone = this.firstColor.name;
+        let pantone = getClosestColor(this.firstColor.value);
+        if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+          fill_color_pantone = pantone.pantone;
+        }
+
+        let outLine_color_pantone = this.secondColor.name;
+        let opantone = getClosestColor(this.secondColor.value);
+        if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+          outLine_color_pantone = opantone.pantone;
+        }
+
+
         let text = {
           text: '',
           type: productName.type,
@@ -297,9 +351,9 @@ export default class CustomizationProcess extends Vue {
           side: productName.side,
           fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
           fillColor: this.firstColor.value,
-          fillColorPantone: this.firstColor.name,
+          fillColorPantone: fill_color_pantone,
           outLineColor: this.secondColor.value,
-          outLineColorPantone: this.secondColor.name,
+          outLineColorPantone: outLine_color_pantone,
           outLineWidth: 0,
           selectColor: false
         }

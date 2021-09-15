@@ -8,7 +8,9 @@ const ProductAttributes:Module<any, any> = {
     products:[],
     selectedIndex: 0,
     categories: [],
+    colorsFromRecent: false,
     customLogos: [],
+    recentLogos: [],
     defaultcustomLogos: false,
     addMoreCollection: false,
     customTexts: [],
@@ -67,6 +69,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
+    },
+    SET_COLORS_FROM_RECENT(state: Record<any, any>, payload: boolean){
+      state.colorsFromRecent = payload
     },
     SET_ADD_MORE_COLLECTION(state: Record<any, any>, payload: boolean){
       state.addMoreCollection = payload
@@ -145,6 +150,21 @@ const ProductAttributes:Module<any, any> = {
           Vue.set(state.customLogos, state.customLogos.length, customLogo)
         }
       }
+    },
+    SET_RECENT_LOGOS(state: Record<any, any>,payload = []) {
+      if(payload.length > 0) {
+        state.recentLogos = []
+        state.recentLogos = payload
+      }
+      else {
+        http.get('logos/recent').then((res) => {
+          state.recentLogos = []
+          state.recentLogos = res.data.data
+        }).catch((e) => {
+          console.log('e',e)
+        })
+      }
+
     },
     customLogoAttribute(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
@@ -312,6 +332,8 @@ const ProductAttributes:Module<any, any> = {
 
     },
     RESET_STORE(state: Record<any, any>){
+      state.undoItems = []
+      state.redoItems = []
       state.customLogos = [];
       state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
@@ -441,6 +463,12 @@ const ProductAttributes:Module<any, any> = {
   getters: {
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
+    },
+    getColorsFromRecent: state => {
+      return state.colorsFromRecent
+    },
+    getRecentLogos: state => {
+      return state.recentLogos
     },
     getAddMoreCollectionStatus: state => {
       return state.addMoreCollection
@@ -692,16 +720,16 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     async overRideLockerProduct({commit}, payload){
-      await http.post('updatelockerproduct', payload).then((res) => {
+      return await http.post('updatelockerproduct', payload).then((res) => {
         if (res.status == 201){
-          alert(res.data.message)
+          return res
         }else if (res.status == 404){
           alert(res.data.message)
         }
       }).catch(err => {
         if(err.response.status){
-          alert(err.response.data.message)
-          commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+          return err.response.data.message
+          // commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
         }
       })
     },

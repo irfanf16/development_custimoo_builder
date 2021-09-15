@@ -28,6 +28,11 @@ http.interceptors.request.use((request: AxiosRequestConfig ) => {
   else{
     request.headers.CustomerToken = ''
   }
+  const browserToken = localStorage.getItem('browserToken')
+  if (browserToken)
+    request.headers.browserToken = browserToken
+  else
+    request.headers.browserToken = ''
 
   return request
 })

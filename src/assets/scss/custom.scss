@@ -2758,17 +2758,20 @@ $fontSize: 0.5;
 }
 
 .modal-fullscreen2 {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: start;
+    justify-content: center;
     padding-left: 0 !important;
-
+    //padding-top: 60px;
     .modal {
         padding: 0 !important;
     }
     .modal-dialog {
         max-width: 100%;
+        width: 99%;
         min-height: calc(100% - 2rem);
         margin: 0;
+
     }
     .modal-content {
         width: calc(100% - 2rem);
@@ -2942,6 +2945,10 @@ $fontSize: 0.5;
     }
 }
 
-.active-swatch{
+.active-swatch {
     border: 1px solid #c80b0b !important;
+}
+
+[v-cloak] {
+    display: none;
 }

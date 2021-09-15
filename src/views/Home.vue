@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrapper m-lg-4">
+  <div class="page-wrapper m-lg-4" v-cloak>
     <meta name="viewport" content="width=device-width">
     <div class="loader" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
@@ -150,12 +150,14 @@
       </b-row>
     </b-container>
     <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
+    <confirm-modal message="This will reset everything. All design changes will be lost.
+ Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes"></confirm-modal>
   </div>
 </template>
 
 <script lang="ts">
 
-import {Component, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
@@ -171,6 +173,7 @@ import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import Scene from "@/components/Scene.vue";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<Home>({
   components: {
@@ -191,9 +194,8 @@ import Scene from "@/components/Scene.vue";
   },
   async mounted() {
 
-    // this.$root.$on('customEvent', (text:any) => { // here you need to use the arrow function
-    //   this.retrieveProducts()
-    // })
+    //get recent logos
+    this.setRecentLogos()
 
     if (this.hideColorSection){
       this.$store.commit('hideColorSection', false)
@@ -238,13 +240,16 @@ import Scene from "@/components/Scene.vue";
     this.jwtToken = localStorage.getItem('jwtToken') as string
     await this.$store.dispatch('setCategories')
     // await this.$store.dispatch('setJwtToken')
+    if(!localStorage.getItem('browserToken')){
+      await this.$store.dispatch('setBrowserToken')
+    }
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getLockerRoomColors')
     }
   }
 })
 
-export default class Home extends Vue {
+export default class Home extends Mixins(ErrorMessages) {
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -269,6 +274,10 @@ export default class Home extends Vue {
 
   public showLoader = true;
   private storageUrl = process.env.VUE_APP_STORAGE_URL
+
+  public setRecentLogos() {
+    this.$store.commit('SET_RECENT_LOGOS')
+  }
 
   public showConfirm(){
     this.ref['reset-modal'].showConfirm()
@@ -501,10 +510,12 @@ export default class Home extends Vue {
       this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
     }
     let main_scene = this.ref.mainScene[0];
-    let locker_front_png = main_scene.$refs.front.toDataURL("image/png").split(',')[1];
+    main_scene.frontCanvas.discardActiveObject().renderAll();
+    main_scene.backCanvas.discardActiveObject().renderAll();
+    let locker_front_png = main_scene.frontCanvas.toDataURL("image/png").split(',')[1];
     let locker_back_png = null;
     if(this.mainProductType == "front_back") {
-      locker_back_png = main_scene.$refs.back.toDataURL("image/png").split(',')[1];
+      locker_back_png =  main_scene.backCanvas.toDataURL("image/png").split(',')[1];
     }
     let locker = {
       product_id: this.selectedProduct.product_id,
@@ -520,7 +531,15 @@ export default class Home extends Vue {
       locker_back_png: locker_back_png
     }
     if (this.editStatus){
-      await this.$store.dispatch('overRideLockerProduct', locker)
+      this.showLoader = true
+      let res = await this.$store.dispatch('overRideLockerProduct', locker)
+      if (res.status == 201){
+        this.showLoader = false
+        this.showToast(res.data.message, 'SUCCESS')
+      }else{
+        this.showError(res)
+        this.showLoader = false
+      }
     }
   }
   public showAdvanceCustomization() {
@@ -571,11 +590,11 @@ export default class Home extends Vue {
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
       await this.$store.dispatch('logoutCustomer');
+      await this.$store.commit('SET_RECENT_LOGOS')
     }
-    console.log('isCustomerAuthenticated',this.isCustomerAuthenticated)
   }
 
-  public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): void {
+  public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): Promise<void> {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -587,7 +606,7 @@ export default class Home extends Vue {
     let personalized = this.$store.getters.getPersonalized
 
     url += `?customized=${customized}&personalized=${personalized}`
-    console.log('urlll',url)
+
 
     if (this.hasProducts) {
       http.get(url).then(async (response: any) => {
@@ -752,7 +771,6 @@ export default class Home extends Vue {
     }
     this.tabIndex = index
     this.$store.dispatch('setTabMain',{value:index})
-    console.log('index',index)
   }
 
   public buyNow() {
@@ -765,24 +783,17 @@ export default class Home extends Vue {
     this.isActive = !this.isActive
   }
 
-  public resetStore(){
-    this.$store.dispatch('resetStore')
-    this.$store.dispatch('SET_LOGO_COLORS', [])
-    this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+  public async resetStore(){
+    const ok = await this.ref['reset-changes'].showConfirm()
+    if (ok) {
+      this.$store.dispatch('resetStore')
+      this.$store.dispatch('SET_LOGO_COLORS', [])
+      this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+    }
   }
 
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
-  }
-
-  async getMainProductPngs(convert_to="png") {
-    let self = this;
-    let main_scene = this.ref.mainScene[0];
-    let product_pngs = {front_png: "", back_png: ""};
-    product_pngs.front_png = main_scene.$refs.front.toDataURL("image/png").split(',')[1];
-    product_pngs.back_png = main_scene.$refs.back.toDataURL("image/png").split(',')[1];
-    console.log("pngs", product_pngs.front_png)
-    return product_pngs;
   }
 
 
