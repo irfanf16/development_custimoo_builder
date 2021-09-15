@@ -768,6 +768,7 @@ export default class Home extends Vue {
   public resetStore(){
     this.$store.dispatch('resetStore')
     this.$store.dispatch('SET_LOGO_COLORS', [])
+    this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
   }
 
   get hideColorSection() {
