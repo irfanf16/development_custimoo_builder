@@ -2775,8 +2775,8 @@ $fontSize: 0.5;
     }
     .modal-content {
         width: calc(100% - 2rem);
-        min-height: 100%;
-        height: auto;
+        min-height: calc(100% - 2rem);
+        height: auto !important;
         margin: 1rem;
     }
 }
