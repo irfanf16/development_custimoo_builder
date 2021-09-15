@@ -20,7 +20,7 @@
                     {{ pantoneMessage }}
                   </div>
                 </b-form>
-                <color-picker @changeColor="changeColor" theme="light" :color="color"  :key="pantoneColorVal"/>
+                <color-picker @changeColor="changeColor" theme="light" :color="color" />
               </div>
               <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
                    :title="color.name" :style="{background: color.value}" :key="index">
