@@ -27,6 +27,7 @@ export default new Vuex.Store({
       'ProductAttributes.selectedDesignId',
       'ProductAttributes.rosterDetails',
       'Product.logoColors',
+      'Product.initialExtractedColors',
       'Main.windowView',
       'Main.tabIndexMain',
      ]

@@ -102,9 +102,9 @@ import RecentLogos from "@/components/RecentLogos.vue";
     if(this.numberOfLogosAllowed > 0) {
       this.allowedLogosLimit = this.numberOfLogosAllowed
     }
-    if(this.imageColors.length > 0 && this.initialExtractedColors.length ==0){
-      await  this.$store.dispatch("initialLogoColors", JSON.stringify(this.imageColors));
-    }
+    // if(this.imageColors.length > 0 && this.initialExtractedColors.length ==0){
+    //   await  this.$store.dispatch("initialLogoColors", JSON.stringify(this.imageColors));
+    // }
     this.$root.$on('changeLogoTabIndex', (index:number) => {
       // here you need to use the arrow function
       this.tabIndex = index;
