@@ -130,7 +130,7 @@
             <div v-bind:class="{active: isActive}">
               <div class="twoD-view">
 <!--                <CustomizationPreview />-->
-                <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" v-if="selectedProduct">
+                <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="isFront ? 'front': 'back'" v-if="selectedProduct">
                   <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
                     <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
                       <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
@@ -147,6 +147,8 @@
                              :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
                     </div>
                   </template>
+
+                  <div class="swap-mobile fs-4" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                 </div>
               </div>
               <template v-if="manageComponents.BasicCustomization">
@@ -340,6 +342,7 @@ export default class Home extends Vue {
   public showModal = false
   public shared_link = ''
   public extractedcolorclass = ""
+  private isFront = true
 
   private switchTabs (e:Record<any, any>){
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -1231,7 +1234,4 @@ export default class Home extends Vue {
     height: auto;
   }
 }
-
-
-
 </style>

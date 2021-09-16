@@ -3196,3 +3196,35 @@ $fontSize: 0.5;
 .flip_horizontal {
     transform: rotateY(180deg) !important;
 }
+
+.swap-mobile{
+    position: absolute;
+    right: 0;
+    top: 20px;
+}
+.front {
+    .image-holder{
+        .canvas-area-holder{
+            a:last-child{
+                height: 30px !important;
+                width: 30px !important;
+                position: absolute;
+                left: 0;
+                top: 20px;
+            }
+        }
+    }
+}
+.back {
+    .image-holder{
+        .canvas-area-holder{
+            a:first-child{
+                height: 30px !important;
+                width: 30px !important;
+                position: absolute;
+                left: 0;
+                top: 20px;
+            }
+        }
+    }
+}
