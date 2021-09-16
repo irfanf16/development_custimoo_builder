@@ -296,6 +296,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
   }
+  get logoTabIndex():number{
+    return this.$store.getters.getActiveLogoIndex
+  }
 
   public lockerAdded(){
     setTimeout(() => {
@@ -448,9 +451,10 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.colors = []
   }
   public addToCustomLogos(currentLogo:Record<any, any>){
-    if (this.customLogos.length  < this.selectedProduct.allowed_logos_count){
-      let index = this.customLogos.length
+    let index = this.logoTabIndex
+    if (this.selectedProduct.is_logo_allowed && this.selectedProduct.logos_setting[index]){
       let logo = {
+        logoIndex: index,
         id: currentLogo.id,
         url: currentLogo.logo_url,
         width: this.selectedProduct.logos_setting[index].width,
@@ -464,8 +468,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         is_transparent: false
       }
       this.$store.dispatch('setCustomLogos', logo)
-    }else{
-      alert("logo upload limit exceed")
     }
     this.$emit('hideLockerRoomModal')
   }
