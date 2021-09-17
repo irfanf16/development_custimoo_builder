@@ -47,11 +47,11 @@
             </template>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mobile_controls">
-                <label for="">Back Name</label>
+                <label>Back Name</label>
                 <b-form-input class="mt-1"></b-form-input>
               </div>
               <div class="mobile_controls">
-                <label for="">Back Style</label>
+                <label>Back Style</label>
                 <b-form-select class="mt-1" v-model="selected">
                   <b-form-select-option :value="null">Style 1</b-form-select-option>
                   <b-form-select-option value="Style 2">Style 2</b-form-select-option>
@@ -62,7 +62,7 @@
             </div>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mt-2 mobile_controls">
-                <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
+                <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
                 <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
               </div>
 
@@ -87,11 +87,11 @@
             </template>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mobile_controls">
-                <label for="">Front Name</label>
+                <label>Front Name</label>
                 <b-form-input class="mt-1"></b-form-input>
               </div>
               <div class="mobile_controls">
-                <label for="">Font Style</label>
+                <label>Font Style</label>
                 <b-form-select class="mt-1" v-model="selected">
                   <b-form-select-option :value="null">Style 1</b-form-select-option>
                   <b-form-select-option value="Style 2">Style 2</b-form-select-option>
@@ -102,7 +102,7 @@
             </div>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mt-2 mobile_controls">
-                <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
+                <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
                 <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
               </div>
 
@@ -127,11 +127,11 @@
             </template>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mobile_controls">
-                <label for="">Back Number</label>
+                <label>Back Number</label>
                 <b-form-input class="mt-1"></b-form-input>
               </div>
               <div class="mobile_controls">
-                <label for="">Font Style</label>
+                <label>Font Style</label>
                 <b-form-select class="mt-1" v-model="selected">
                   <b-form-select-option :value="null">Style 1</b-form-select-option>
                   <b-form-select-option value="Style 2">Style 2</b-form-select-option>
@@ -142,7 +142,7 @@
             </div>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mt-2 mobile_controls">
-                <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
+                <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
                 <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
               </div>
 
@@ -167,11 +167,11 @@
             </template>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mobile_controls">
-                <label for="">Front Number</label>
+                <label>Front Number</label>
                 <b-form-input class="mt-1"></b-form-input>
               </div>
               <div class="mobile_controls">
-                <label for="">Font Style</label>
+                <label>Font Style</label>
                 <b-form-select class="mt-1" v-model="selected">
                   <b-form-select-option :value="null">Style 1</b-form-select-option>
                   <b-form-select-option value="Style 2">Style 2</b-form-select-option>
@@ -182,7 +182,7 @@
             </div>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mt-2 mobile_controls">
-                <label for="" class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
+                <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
                 <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
               </div>
 
@@ -276,6 +276,27 @@
             </label>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="customize_controls players-data" v-if="this.$store.getters.getActiveTab === 4">
+      <span class="close" @click="hideAll"><BIconX /></span>
+
+      <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
+        <span>Team Players</span>
+        <span class="addPlayer"><span class="fs-3 icon position-absolute"><BIconPlus /></span> Add Player</span>
+      </div>
+      <div class="players-table mt-2">
+        <table class="table table-bordered">
+          <tbody>
+            <tr v-for="item in [1,2,3,4,5,6,7]" :key="item">
+              <td style="width: 45%">Gulzar</td>
+              <td style="width: 10%; text-align: center">11</td>
+              <td style="width: 10%; text-align: center">xl</td>
+              <td style="width: 10%; text-align: center">1</td>
+              <td style="width: 25%; word-spacing: 10px; text-align: center"><BIconEye class="text-secondary" /> <BIconPencil class="text-secondary" /> <BIconTrash class="text-secondary" /></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

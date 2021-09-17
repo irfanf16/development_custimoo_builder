@@ -3228,3 +3228,45 @@ $fontSize: 0.5;
         }
     }
 }
+
+.players-data{
+    .players-table{
+        max-height: 150px;
+        overflow-y: auto;
+    }
+    .addPlayer{
+        display: inline-flex;
+        align-items: center;
+        font-weight: normal;
+        font-size: 12px;
+        background: #E7F4F1;
+        color: #219F84;
+        padding: 7px 10px 7px 25px;
+        position: relative;
+        border-radius: 3px;
+
+        .icon{
+            left: 7px;
+        }
+    }
+
+    .table{
+        table-layout: fixed;
+        width: 100%;
+        border: none;
+
+        tbody{
+            tr{
+                &:nth-child(odd){
+                    background: #f9f9f9;
+                }
+
+                td{
+                    padding: 5px;
+                    border-color: #eee;
+                    //border: none;
+                }
+            }
+        }
+    }
+}
