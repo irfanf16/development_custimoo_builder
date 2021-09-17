@@ -14,7 +14,7 @@
             </a>
           </template>
           <div class="logo-placement-tabs" v-if="hideTab.logoHide">
-            <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
+            <LogoPlacementTabs :selectedProduct="selectedProduct" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
                                :logosSetting="selectedProduct.logos_setting"/>
           </div>
 

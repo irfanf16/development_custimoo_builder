@@ -200,9 +200,11 @@ export default class DesignPdfView extends Vue {
     let storage_url = self.storageUrl;
     let custom_logos =  self.$store.getters.getCustomLogos.filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
     custom_logos = custom_logos.map((custom_logo) => {
-      self.getUrlContent(storage_url+custom_logo.url, (dataUrl: any) => {
-        custom_logo.base64_logo = dataUrl;
-      })
+      if(custom_logo.url) {
+        self.getUrlContent(storage_url+custom_logo.url, (dataUrl: any) => {
+          custom_logo.base64_logo = dataUrl;
+        })
+      }
       return custom_logo;
     })
     return custom_logos;

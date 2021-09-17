@@ -1,95 +1,10 @@
 <template>
   <div>
-    <b-button class="add-logo-btn" v-if="custom_logo_tabs.length < selectedProduct.allowed_logos_count" @click="addTab">
+    <b-button class="add-logo-btn" v-if="customLogos.length < allowedLogosLimit" @click="addTab(customLogos.length)">
       +
     </b-button>
     <b-tabs>
-      <b-tab v-for="(logo_tab, ltIdx) in custom_logo_tabs" :key="ltIdx" :active="tabIndex === ltIdx">
-        <template #title>
-          <span>{{ ltIdx == 0 ? 'Team Logo' : 'logo ' + ltIdx }}</span>
-          <div v-if="ltIdx > 0">
-            <span class="remove-logo" @click="removeLogoTab(ltIdx)">
-              <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-            </span>
-          </div>
-        </template>
-
-        <div class="tabs-logo-container">
-            <div class="logo-placement-area mb-3 mb-lg-4 pt-2">
-              <div class="logo-placement-holder mb-lg-3">
-                <div class="logo-holder">
-                  <UploadLogo :customLogoIndex="ltIdx" :showImage="true" :showActions="true"
-                              :ref="'logoUploadModalOpener'+ltIdx" :key="'top'+ltIdx"/>
-                </div>
-                <div class="logo-placemet-content">
-                  <h4>Logo Placement</h4>
-                  <b-form-select @change="changeSide(ltIdx, $event)" :value="logo_tab.side"
-                                 :options="options"></b-form-select>
-                </div>
-              </div>
-              <template v-if="isCustomerAuthenticated">
-                <b-button :key="'saveLogoModal'" v-if="logo_tab.url"
-                          class="btn btn-secondary w-100 fw-bold save-logo-btn" v-b-modal.modal-center-savelogomodal>
-                  Save Logo
-                </b-button>
-              </template>
-              <template v-else>
-                <b-button :key="'saveLogoLogin'" class="btn btn-secondary w-100 fw-bold save-logo-btn"
-                          v-b-modal.modal-login>Save Logo
-                </b-button>
-              </template>
-              <SaveLogoModal :logoIndex="ltIdx"/>
-            </div>
-            <div class="logo-placement-area extracted-color-area" v-if="ltIdx == 0 && !hideColorSection">
-              <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
-              <div class="logo-placement-holder mb-lg-3">
-                <div class="color-holder">
-                  <div class="color-container">
-                    <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
-                         @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name"
-                         :class="{'active-swatch' : icIdx==selectedSwatchIndex}"
-
-                         :style="{background: imageColor.hex}" :key="icIdx"></div>
-                    <LogoColorTabs v-if="showLogoColors" @setSwatchColor="setSwatchColor"
-                                   :swatchPantone="defSwatchPantone"
-                                   :swatchcolor="defSwatchColor"
-                                   :productColors="productColors"
-                                   :showSVGS="Boolean(showSVGs)" :defSwatchColor.sync="defSwatchColor"
-                    />
-                  </div>
-                </div>
-                <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
-                <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset">
-                  <font-awesome-icon :icon="['fas', 'redo-alt']"/>
-                </b-button>
-                <b-button @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1"
-                          variant="outline-secondary">Shuffle
-                </b-button>
-              </div>
-              <template v-if="isCustomerAuthenticated">
-                <button :key="'saveLogoColorModal'" v-if="customLogos[0] && customLogos[0].url"
-                        class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal
-                        @click="callRooms">Save Color
-                </button>
-              </template>
-              <template v-else>
-                <b-button :key="'saveLogoColorLogin'" class="btn btn-secondary w-100 fw-bold btn-save-color"
-                          v-b-modal.modal-login>Save Color
-                </b-button>
-              </template>
-              <SaveColorModal/>
-            </div>
-
-
-          <!--          <UploadLogo :customLogoIndex="index" :showImage="false" :showActions="false" :key="'bottom'+index" />-->
-        </div>
-        <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
-      </b-tab>
-
-
-
-
-<!--      <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
+      <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
         <template #title>
           <span>{{ index == 0 ? 'Team Logo' : 'logo ' + index  }}</span>
           <div v-if="index === customLogos.length - 1 && index != 0">
@@ -153,10 +68,10 @@
 
 
 
-&lt;!&ndash;          <UploadLogo :customLogoIndex="index" :showImage="false" :showActions="false" :key="'bottom'+index" />&ndash;&gt;
+          <UploadLogo :customLogoIndex="index" :showImage="false" :showActions="false" :key="'bottom'+index" />
         </div>
         <RecentLogos :logosSetting="logosSetting" :customLogoIndex="index"/>
-      </b-tab>-->
+      </b-tab>
     </b-tabs>
 
 
@@ -172,7 +87,6 @@ import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
 import LogoColorTabs from "@/components/LogoColorTabs.vue"
 import RecentLogos from "@/components/RecentLogos.vue";
-import {getLogoObject, getLogoSettings, setLogoSettings, getCustomLogos,} from "../helpers/Helpers"
 
 
 @Component<LogoPlacementTabs>({
@@ -196,7 +110,7 @@ import {getLogoObject, getLogoSettings, setLogoSettings, getCustomLogos,} from "
       this.tabIndex = index;
     })
     this.$nextTick(function() {
-      // this.initFirstLogoTab(0)
+      this.initFirstLogoTab(0)
     });
   }
 })
@@ -213,7 +127,6 @@ export default class LogoPlacementTabs extends Vue {
       side: 'front',
       customLogo: true
     }]}}) logosSetting!: [Record<any, any>]
-  @Prop({required: false }) selectedProduct!: [Record<any, any>]
 
   public ref = this.$refs as Record<any, any>
   public numberOfLogos = 1
@@ -228,7 +141,6 @@ export default class LogoPlacementTabs extends Vue {
   ]
   public previousImageColors = []
   public logoColorUsed = false
-  public allowed_logos = 1000
   public allowedLogosLimit = 1000
   public productColors: any[] = []
   public showSVGs = false
@@ -236,7 +148,6 @@ export default class LogoPlacementTabs extends Vue {
   public selectedSwatchIndex = -1
   public defSwatchColor = '#ffffff'
   public defSwatchPantone = '11-0601'
-  public custom_logo_tabs = getCustomLogos(true, true)
 
 
 
@@ -302,15 +213,7 @@ export default class LogoPlacementTabs extends Vue {
     }
   }
 
-  public async addTab(index: number) {
-    let new_tab_index = this.custom_logo_tabs.length;
-    let logo_settings = getLogoSettings(this.custom_logo_tabs.length)
-    let logo = setLogoSettings(getLogoObject(), new_tab_index);
-    await this.$store.dispatch('setCustomLogos', logo)
-    this.tabIndex = this.customLogos.length - 1
-  }
-
-  public async addTab_back(index: number){
+  public async addTab(index: number){
     if(this.numberOfLogos < this.allowedLogosLimit) {
       let logoSetting: Record<any, any>
       if(this.logosSetting[index]) {
@@ -454,9 +357,9 @@ export default class LogoPlacementTabs extends Vue {
     this.$store.dispatch('toggleLogoBackgroud', index)
   }
 
-/*  get selectedProduct(): Record<any, any> {
+  get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
-  }*/
+  }
   get lockerColors(){
     return this.$store.getters.getLockerColors
   }

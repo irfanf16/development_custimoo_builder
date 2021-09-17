@@ -1,13 +1,13 @@
 <template>
-  <div class="upload-logo-opener" v-if="customLogos">
+  <div class="upload-logo-opener" >
     <div class="logo-option-area mb-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
       <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground">
-        Remove Logo Backgroundss
+        Remove Logo Background
       </b-form-checkbox>
     </div>
 
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
-      <div class="upload-box position-relative" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
+      <div class="upload-box">
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url+'?not-from-cache-please'" width="100%"/>
         </div>
@@ -22,8 +22,6 @@
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <input  :style="{display: customLogos[customLogoIndex].url ? 'none' : 'block'}" type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
-               accept="image/*,application/postscript,application/pdf">
       </div>
 
       <div class="upload-logo-content">
@@ -37,6 +35,8 @@
         <p>Need High Res Image</p>
       </div>
     </div>
+    <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
+           accept="image/*,application/postscript,application/pdf">
     <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
       <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or
         laws. You may
@@ -66,8 +66,6 @@ import {http} from "@/httpCommon"
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {fileToBase64} from "../helpers/Helpers"
-import Store from "@/store";
 
 @Component<UploadLogo>({
   mounted() {
@@ -115,7 +113,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       this.open_modal = false
     }
     if(this.ref.fileInput) {
-      //this.ref.fileInput.click()
+      this.ref.fileInput.click()
     }
   }
 
@@ -184,55 +182,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   public uploadLogoImage(e: any) {
-    let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
-    custom_logo.logoIndex = this.customLogoIndex;
-    let img = e.target.files[0]
-    let file_extension = img.name.toLowerCase();
-    if (!this.hasExtension(file_extension, ['.jpg','.gif','.png','jpeg','pdf','eps','ai'])) {
-      this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','Error');
-      return false;
-    }
-    fileToBase64(img).then(base64_string => {
-      custom_logo.base64_logo = base64_string
-    })
-
-    let fd = new FormData()
-    let header = {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    }
-    fd.append('file', img)
-    fd.append('product_id', this.selectedProduct.product_id)
-    http.post('/customer/upload/logo', fd, header)
-      .then(resp => {
-        this.colors = resp.data.colors;
-        const inputRef = this.$refs.fileInput as Record<any, any>
-        inputRef.value = null;
-        custom_logo.original_logo = resp.data.file.logo_url;
-        custom_logo.transparent_logo = resp.data.file.transparent_logo_url;
-        custom_logo.url = resp.data.file.logo_url;
-        let getLogos = []
-        if (this.customLogos.length > 1){
-          getLogos = this.customLogos.slice(0, -1)
-        }else{
-          getLogos = this.customLogos
-        }
-        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(getLogos)), action: 'customLogos' })
-        this.$store.commit('SET_COLORS_FROM_RECENT',false)
-        this.$store.commit('customLogos', custom_logo)
-        console.log("sdfsdfdsf", custom_logo)
-        this.hideModal()
-        this.getLogoColors()
-        this.$store.commit('SET_RECENT_LOGOS')
-      })
-      .catch((error: any) => {
-        console.log(error)
-        this.showError(error);
-      })
-  }
-
-  public uploadLogoImage_back(e: any) {
     if (!this.customLogos[this.customLogoIndex]) {
       this.customLogoInit(this.customLogoIndex)
     }
@@ -608,15 +557,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
 }
 
 .fileLoader {
-  display: block;
-  position: absolute;
-  appearance: none;
-  width: 1000px;
-  height: 1000px;
-  left: 0;
-  top: 0;
-  z-index: 50;
-  opacity: 0;
+  display: none;
 }
 .logo-option-area{
   max-width: 285px;
