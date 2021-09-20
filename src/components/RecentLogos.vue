@@ -6,7 +6,7 @@
         <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo)">
           <font-awesome-icon :icon="['fas', 'trash-alt']"/>
         </a>
-        <img crossorigin="anonymous"   @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
+        <img crossorigin="anonymous" @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
         <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
       </div>
 
@@ -25,6 +25,7 @@ import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {log} from "fabric/fabric-impl";
+import {processColorsCustom} from "../helpers/Helpers"
 
 @Component<RecentLogos>({
   components: {
@@ -172,12 +173,21 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     }
     else {
       if(customTabIndex == 0) {
-        this.processColorsCustom(JSON.parse(logo.logo_colors),customTabIndex)
+        if(logo.logo_colors != null) {
+          let image_colors = processColorsCustom(JSON.parse(logo.logo_colors))
+          let image_color_count = image_colors.length;
+          while(image_color_count < 4 ) {
+            image_colors.push({hex: null, pantone: null, name: null});
+            ++image_color_count;
+          }
+          this.$store.dispatch("SET_LOGO_COLORS", image_colors);
+          this.$store.dispatch("initialLogoColors", JSON.stringify(image_colors));
+          this.$store.commit("UPDATE_USING_COLOR_LOGOS", false);
+        }
       }
     }
-
-
   }
+
    public async addLogoObject(index:number):Promise<void> {
     let logoSetting: Record<any, any>
     if(this.logosSetting[index]) {
@@ -208,34 +218,6 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
      logo.logoIndex = index
     await this.$store.dispatch('setCustomLogos', logo)
   }
-
-  public processColorsCustom(colors: [],customLogoIndex:number):void {
-    let imageColors: any[] = []
-    let uniqueColors: string[] = []
-    colors.forEach((color: number[]) => {
-      const hex = rgbHex(color[0], color[1], color[2])
-      if ((!uniqueColors.includes(hex))) {
-        uniqueColors.push(hex)
-      }
-    })
-    let deletedCount = uniqueColors.length - 4
-    uniqueColors.splice(4, deletedCount)
-    uniqueColors.forEach((color: string) => {
-      // console.log(color)
-      let pantoneColor = getClosestColor(color)
-      //console.log(JSON.parse(JSON.stringify(pantoneColor)))
-      imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
-    })
-    //only set logo colors if index is 0
-    if(customLogoIndex == 0) {
-      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
-      this.$store.dispatch("initialLogoColors", JSON.stringify(imageColors));
-    }
-  }
-
-
-
-
 }
 
 </script>

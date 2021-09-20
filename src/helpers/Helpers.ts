@@ -1,4 +1,6 @@
 import Store from '../store'
+import rgbHex from "rgb-hex";
+import {getClosestColor} from "@/pantoneColor";
 
 const getLogoSettingsObject = () => {
   return {
@@ -124,5 +126,24 @@ const fileToBase64 =  (file: any) => {
 
 }
 
+const processColorsCustom = (colors: []) => {
+  const imageColors: any[] = []
+  const uniqueColors: string[] = []
+  colors.forEach((color: number[]) => {
+    const hex = rgbHex(color[0], color[1], color[2])
+    if ((!uniqueColors.includes(hex))) {
+      uniqueColors.push(hex)
+    }
+  })
+  const deletedCount = uniqueColors.length - 4
+  uniqueColors.splice(4, deletedCount)
+  uniqueColors.forEach((color: string) => {
+    const pantoneColor = getClosestColor(color)
+    imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
+  })
+  return imageColors;
 
-export {getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64 };
+}
+
+
+export {getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom };

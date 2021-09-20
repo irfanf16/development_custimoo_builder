@@ -42,8 +42,8 @@
              </template>
               <SaveLogoModal :logoIndex="ltIdx"/>
             </div>
-            <div class="logo-placement-area extracted-color-area" v-if="customLogos[0].url">
-              <h4 class="mb-3 mb-lg-4">Color Extracted from Logoddd</h4>
+            <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url">
+              <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
               <div class="logo-placement-holder mb-lg-3">
                 <div class="color-holder">
                   <div class="color-container">
@@ -61,7 +61,7 @@
                     />
                   </div>
                 </div>
-                <b-button @click="useLogoColors()" class="use-btn">
+                <b-button @click="useLogoColors()" class="use-btn" v-if="imageColors.length > 1">
                   <template v-if="usingColorLogos"> Use Original Colors</template>
                   <template v-else> Use Logo Colors</template>
                 </b-button>

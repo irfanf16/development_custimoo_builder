@@ -2953,8 +2953,8 @@ $fontSize: 0.5;
     display: none;
 }
 
-.loader{
-    &.relative{
+.loader {
+    &.relative {
         position: absolute;
         left: 0;
         right: 0;
@@ -2963,11 +2963,11 @@ $fontSize: 0.5;
         z-index: 1070;
         height: 100%;
         width: 100%;
-        background: rgba(255,255,255,0.9);
+        background: rgba(255, 255, 255, 0.9);
         padding: 20px;
     }
 
-    &.global{
+    &.global {
         position: fixed;
         left: 0;
         right: 0;
@@ -2976,6 +2976,15 @@ $fontSize: 0.5;
         z-index: 99999;
         height: 100%;
         width: 100%;
-        background: rgba(255,255,255,1);
+        background: rgba(255, 255, 255, 1);
     }
+}
+.hover_tooltip{
+    position: fixed;
+    white-space: nowrap;
+    padding: 5px 10px;
+    background: #333;
+    color: #fff;
+    border-radius: 99px;
+    opacity: 0;
 }
