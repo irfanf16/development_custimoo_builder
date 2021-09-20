@@ -27,21 +27,23 @@
                                  :options="options"></b-form-select>
                 </div>
               </div>
-              <template v-if="isCustomerAuthenticated">
-                <b-button :key="'saveLogoModal'" v-if="logo_tab.url"
-                          class="btn btn-secondary w-100 fw-bold save-logo-btn" v-b-modal.modal-center-savelogomodal>
-                  Save Logo
-                </b-button>
-              </template>
-              <template v-else>
-                <b-button :key="'saveLogoLogin'" class="btn btn-secondary w-100 fw-bold save-logo-btn"
-                          v-b-modal.modal-login>Save Logo
-                </b-button>
-              </template>
+             <template v-if="logo_tab.url">
+               <template v-if="isCustomerAuthenticated">
+                 <b-button :key="'saveLogoModal'" v-if="logo_tab.url"
+                           class="btn btn-secondary w-100 fw-bold save-logo-btn" v-b-modal.modal-center-savelogomodal>
+                   Save Logo
+                 </b-button>
+               </template>
+               <template v-else>
+                 <b-button :key="'saveLogoLogin'" class="btn btn-secondary w-100 fw-bold save-logo-btn"
+                           v-b-modal.modal-login>Save Logo
+                 </b-button>
+               </template>
+             </template>
               <SaveLogoModal :logoIndex="ltIdx"/>
             </div>
-            <div class="logo-placement-area extracted-color-area" v-if="ltIdx == 0 && !hideColorSection">
-              <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
+            <div class="logo-placement-area extracted-color-area" v-if="customLogos[0].url">
+              <h4 class="mb-3 mb-lg-4">Color Extracted from Logoddd</h4>
               <div class="logo-placement-holder mb-lg-3">
                 <div class="color-holder">
                   <div class="color-container">
@@ -332,7 +334,9 @@ export default class LogoPlacementTabs extends Vue {
 
   shuffleLogoColors() {
     if(this.imageColors && this.imageColors.length > 1) {
-      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors));
+      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>, icIdx) => {
+        return imageColor.hex
+      });
       let empty_logo_indexes: any = [];
       let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>, icIdx) => {
         if(imageColor.hex == null) {
@@ -353,12 +357,10 @@ export default class LogoPlacementTabs extends Vue {
           imageColors.reduce(shuffle)
         }
       }
-      console.log("before dsfsdfsd", imageColors)
       empty_logo_indexes.forEach((emptyLogoIndex: number) => {
-        console.log("number", emptyLogoIndex)
         imageColors[emptyLogoIndex] = {hex: null, pantone: null, name: null};
       });
-      console.log("after", imageColors, empty_logo_indexes)
+
 
       this.$store.dispatch("SET_LOGO_COLORS", imageColors);
       this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
@@ -443,6 +445,8 @@ export default class LogoPlacementTabs extends Vue {
 
   public setSwatchColor(color: Record<any, any>) {
     let payload = {color_info : color , index : this.selectedSwatchIndex}
+    this.$store.dispatch('setDefaultColor', { index: this.selectedSwatchIndex, color: color.hex, pantone: color.pantone, name: color.name })
+    console.log("shaha", color)
     this.$store.commit('SET_LOGO_COLOR', payload)
   }
 
