@@ -487,13 +487,13 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         is_transparent: false
       }
       if(index == 0) {
-        this.processColorsCustom(JSON.parse(currentLogo.logo_colors), index)
+        this.processColorsCustom(JSON.parse(currentLogo.logo_colors))
       }
       this.$store.dispatch('setCustomLogos', logo)
     }
     this.$emit('hideLockerRoomModal')
   }
-  public processColorsCustom(colors: [],customLogoIndex:number):void {
+  public processColorsCustom(colors: []):void {
     let imageColors: any[] = []
     let uniqueColors: string[] = []
     if (colors.length > 0){
