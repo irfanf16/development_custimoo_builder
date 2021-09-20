@@ -51,7 +51,7 @@
                     />
                   </div>
                 </div>
-                <b-button @click="useLogoColors()" class="use-btn">Use These Colors</b-button>
+                <b-button @click="useLogoColors()" class="use-btn" v-if="logoColorUsed && imageColors.length > 1">Use These Colors</b-button>
                 <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length" class="reset"><font-awesome-icon :icon="['fas', 'redo-alt']"/></b-button>
                 <b-button @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1" variant="outline-secondary">Shuffle</b-button>
               </div>
