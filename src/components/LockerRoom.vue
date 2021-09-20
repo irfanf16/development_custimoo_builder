@@ -487,7 +487,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         is_transparent: false
       }
       if(index == 0) {
-        this.processColorsCustom(JSON.parse(currentLogo.logo_colors))
+        if (logo.logo_color != null){
+          this.processColorsCustom(JSON.parse(currentLogo.logo_colors))
+        }
       }
       this.$store.dispatch('setCustomLogos', logo)
     }
@@ -496,27 +498,20 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public processColorsCustom(colors: []):void {
     let imageColors: any[] = []
     let uniqueColors: string[] = []
-    if (colors.length > 0){
-      colors.forEach((color: number[]) => {
-        const hex = rgbHex(color[0], color[1], color[2])
-        if ((!uniqueColors.includes(hex))) {
-          uniqueColors.push(hex)
-        }
-      })
-      let deletedCount = uniqueColors.length - 4
-      uniqueColors.splice(4, deletedCount)
-      uniqueColors.forEach((color: string) => {
-        // console.log(color)
-        let pantoneColor = getClosestColor(color)
-        //console.log(JSON.parse(JSON.stringify(pantoneColor)))
-        imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
-      })
-      //only set logo colors if index is 0
-      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
-      this.$store.dispatch("initialLogoColors", JSON.stringify(imageColors));
-    }
-
-
+    colors.forEach((color: number[]) => {
+      const hex = rgbHex(color[0], color[1], color[2])
+      if ((!uniqueColors.includes(hex))) {
+        uniqueColors.push(hex)
+      }
+    })
+    let deletedCount = uniqueColors.length - 4
+    uniqueColors.splice(4, deletedCount)
+    uniqueColors.forEach((color: string) => {
+      let pantoneColor = getClosestColor(color)
+      imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
+    })
+    this.$store.dispatch("SET_LOGO_COLORS", imageColors);
+    this.$store.dispatch("initialLogoColors", JSON.stringify(imageColors))
   }
 
 
