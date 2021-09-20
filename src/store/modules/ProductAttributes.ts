@@ -141,6 +141,7 @@ const ProductAttributes:Module<any, any> = {
       if(categories){
         state.categories = categories
       }
+      
     },
     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
       // Vue.set(state.customLogos, state.customLogos.length, customLogo)
