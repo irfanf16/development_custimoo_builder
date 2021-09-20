@@ -35,13 +35,13 @@
 
                       <ul class="product-icons">
                             <li>
-                              <a v-b-tooltip.hover.right title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
+                              <a  title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                             </li>
                             <li>
-                              <a v-b-tooltip.hover.right title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                              <a  title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                             </li>
                             <li>
-                              <b-button v-b-tooltip.hover.right title="Share design" :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                              <b-button  title="Share design" :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
                               <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
                                 <div class="share-holder">
                                   <h3>Copy link
@@ -58,7 +58,7 @@
                               </b-tooltip>
                             </li>
                             <li class="swap">
-                              <a v-if="product.design.back_design_count > 0" v-b-tooltip.right  :title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
+                              <a v-if="product.design.back_design_count > 0"   :title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
                                 <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
                               </a>
                             </li>
@@ -70,7 +70,7 @@
                 <b-tab v-if="!getAddMoreCollectionStatus" title="Assets" class="assets-file">
                   <template v-for="(logo, inda) in room.logos">
                     <div :key="inda" class="assets-logo-block">
-                      <img :src="storageUrl+logo.logo_url "/>
+                      <img :src="storageUrl+logo.logo_url " crossorigin="anonymous"/>
                       <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
                     </div>
                   </template>
@@ -177,6 +177,8 @@ import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {getRandom} from "@/helpers/Helpers";
+import rgbHex from "rgb-hex";
+import {getClosestColor} from "@/pantoneColor";
 
 @Component<LockerRoom>({
   components: {
@@ -295,6 +297,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
+  }
+  get logoTabIndex():number{
+    return this.$store.getters.getActiveLogoIndex
   }
 
   public lockerAdded(){
@@ -448,9 +453,13 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.colors = []
   }
   public addToCustomLogos(currentLogo:Record<any, any>){
-    if (this.customLogos.length  < this.selectedProduct.allowed_logos_count){
-      let index = this.customLogos.length
+    let index = this.logoTabIndex
+    // if (index == 0){
+    //   this.processColorsCustom(JSON.parse(currentLogo.logo_colors), index)
+    // }
+    if (this.selectedProduct.is_logo_allowed && this.selectedProduct.logos_setting[index]){
       let logo = {
+        logoIndex: index,
         id: currentLogo.id,
         url: currentLogo.logo_url,
         width: this.selectedProduct.logos_setting[index].width,
@@ -464,8 +473,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         is_transparent: false
       }
       this.$store.dispatch('setCustomLogos', logo)
-    }else{
-      alert("logo upload limit exceed")
     }
     this.$emit('hideLockerRoomModal')
   }
@@ -553,6 +560,29 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       this.lockerActiveTabIndex = 0
     }
   }
+  // public processColorsCustom(colors: [],customLogoIndex:number):void {
+  //   let imageColors: any[] = []
+  //   let uniqueColors: string[] = []
+  //   colors.forEach((color: number[]) => {
+  //     const hex = rgbHex(color[0], color[1], color[2])
+  //     if ((!uniqueColors.includes(hex))) {
+  //       uniqueColors.push(hex)
+  //     }
+  //   })
+  //   let deletedCount = uniqueColors.length - 4
+  //   uniqueColors.splice(4, deletedCount)
+  //   uniqueColors.forEach((color: string) => {
+  //     // console.log(color)
+  //     let pantoneColor = getClosestColor(color)
+  //     //console.log(JSON.parse(JSON.stringify(pantoneColor)))
+  //     imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
+  //   })
+  //   //only set logo colors if index is 0
+  //   if(customLogoIndex == 0) {
+  //     this.$store.dispatch("SET_LOGO_COLORS", imageColors);
+  //     this.$store.dispatch("initialLogoColors", JSON.stringify(imageColors));
+  //   }
+  // }
 }
 </script>
 
@@ -715,6 +745,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         width: 100%;
         margin: 0 auto;
         height: auto;
+        min-height: 100px;
       }
     }
 

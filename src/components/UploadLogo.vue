@@ -8,6 +8,7 @@
 
     <div class="btn btn-secondary modal-handler" @click="modalHandler">
       <div class="upload-box position-relative" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
+        <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url+'?not-from-cache-please'" width="100%"/>
         </div>
@@ -66,8 +67,7 @@ import {http} from "@/httpCommon"
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {fileToBase64} from "../helpers/Helpers"
-import Store from "@/store";
+import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
 
 @Component<UploadLogo>({
   mounted() {
@@ -86,6 +86,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
+  public showLoader = false;
 
   @Prop({ required: true }) customLogoIndex!: number
   @Prop({ required: false, default: true }) showImage!: boolean
@@ -98,7 +99,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   @Watch('customLogos', {
     deep: true
   })
-  customLogosChanged(newVal: [Record<any, any>]) {
+ /* customLogosChanged(newVal: [Record<any, any>]) {
     if (this.customLogos[0] && !this.customLogos[0].url) {
       let inputRef = this.$refs.fileInput as Record<any, any>
       inputRef.value = null;
@@ -107,7 +108,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     //   if(!this.$store.getters.getColorsFromRecent)
     //     //this.getLogoColors()
     // }
-  }
+  }*/
 
   public uploadLogoBtn() {
     if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
@@ -136,9 +137,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     return this.$store.getters.getLogoUrl
   }
 
-  get manageComponents(): [] {
+/*  get manageComponents(): [] {
     return this.$store.getters.getManageComponents
-  }
+  }*/
 
   public modalHandler() {
     if (this.open_modal) {
@@ -149,7 +150,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
 
-  public customLogoInit(customLogoIndex: number | null = null) {
+  /*public customLogoInit(customLogoIndex: number | null = null) {
     if (this.selectedProduct && this.selectedProduct.is_logo_allowed == 1) {
       let logoSetting = this.selectedProduct.logos_setting[0]
       if(customLogoIndex) {
@@ -181,7 +182,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       }
       this.$store.dispatch('setCustomLogos', logo)
     }
-  }
+  }*/
 
   public uploadLogoImage(e: any) {
     let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
@@ -204,7 +205,8 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
     fd.append('file', img)
     fd.append('product_id', this.selectedProduct.product_id)
-    http.post('/customer/upload/logo', fd, header)
+    this.showLoader = true;
+      http.post('/customer/upload/logo', fd, header)
       .then(resp => {
         this.colors = resp.data.colors;
         const inputRef = this.$refs.fileInput as Record<any, any>
@@ -221,18 +223,19 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(getLogos)), action: 'customLogos' })
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
         this.$store.commit('customLogos', custom_logo)
-        console.log("sdfsdfdsf", custom_logo)
         this.hideModal()
         this.getLogoColors()
-        this.$store.commit('SET_RECENT_LOGOS')
+        this.$store.commit('SET_RECENT_LOGOS');
+        this.showLoader = false;
       })
       .catch((error: any) => {
         console.log(error)
+        this.showLoader = false;
         this.showError(error);
       })
   }
 
-  public uploadLogoImage_back(e: any) {
+  /*public uploadLogoImage_back(e: any) {
     if (!this.customLogos[this.customLogoIndex]) {
       this.customLogoInit(this.customLogoIndex)
     }
@@ -312,7 +315,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         console.log(error)
         this.showError(error);
       })
-  }
+  }*/
 
   public hasExtension(fileName : string, exts: any) : boolean {
 
@@ -348,6 +351,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
+    if(uniqueColors.length < 4) {
+      this.imageColors.push({hex: null, pantone: null, name: null})
+    }
     //only set logo colors if index is 0
     if(this.customLogoIndex == 0) {
       await this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
@@ -358,11 +364,10 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public deleteLogo() {
     let inputRef = this.$refs.fileInput as Record<any, any>
     inputRef.value = null;
-
-    let payload = {
-      index: this.customLogoIndex
-    }
-    this.$store.dispatch('deleteCustomLogo', payload)
+    console.log("before", this.customLogos[this.customLogoIndex])
+    let logo = setLogoSettings(this.customLogoIndex);
+    logo.logoIndex = this.customLogoIndex;
+    this.$store.commit('customLogos', logo)
     this.$store.commit('SET_LOGO_COLORS', []);
     this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
   }

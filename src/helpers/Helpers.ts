@@ -10,8 +10,8 @@ const getLogoSettingsObject = () => {
     height: 0,
     name_of_placement: "chest",
     side: "front",
-    x_axis: 150,
-    y_axis: 190,
+    x_axis: 300,
+    y_axis: 300,
     is_locked: false
   }
 }
@@ -83,7 +83,10 @@ const getLogoSettings = (index = -1, default_obj = true) => {
   }
 }
 
-const setLogoSettings = (logo: Record<any, any>, logo_index: number) => {
+const setLogoSettings = (logo_index: number, logo: Record<any, any> | null = null ) => {
+  if(logo == null) {
+    logo = getLogoObject();
+  }
   const logo_settings = getLogoSettings(logo_index, true);
   logo.width =  logo_settings.width;
   logo.height =  logo_settings.height;
@@ -94,13 +97,12 @@ const setLogoSettings = (logo: Record<any, any>, logo_index: number) => {
   logo.originalWidth =  logo_settings.width;
   logo.originalHeight =  logo_settings.height;
   return logo;
-
 }
 
 const getCustomLogos = (default_obj = true, sync_with_store = true) => {
   const custom_logos = Store.getters.getCustomLogos;
   if(custom_logos.length <= 0 && default_obj) {
-    const logo = setLogoSettings(getLogoObject(), 0)
+    const logo = setLogoSettings(0, getLogoObject())
     if(sync_with_store) {
       logo["logoIndex"] =  0,
       Store.commit('customLogos', logo)
