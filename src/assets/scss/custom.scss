@@ -2948,3 +2948,13 @@ $fontSize: 0.5;
 [v-cloak] {
     display: none;
 }
+
+.hover_tooltip{
+    position: fixed;
+    white-space: nowrap;
+    padding: 5px 10px;
+    background: #333;
+    color: #fff;
+    border-radius: 99px;
+    opacity: 0;
+}
