@@ -487,7 +487,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         is_transparent: false
       }
       if(index == 0) {
-        if (logo.logo_color != null){
+        if (currentLogo.logo_colors != null){
           this.processColorsCustom(JSON.parse(currentLogo.logo_colors))
         }
       }
