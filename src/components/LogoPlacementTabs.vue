@@ -13,12 +13,15 @@
 
         <div class="tabs-logo-container">
             <div class="logo-placement-area mb-3 mb-lg-4 pt-2">
-              <div class="logo-placement-holder mb-lg-3">
+              <div class="logo-placement-holder mb-lg-3" :class="logo_tab.url ? 'hasLogo': 'noLogo'">
                 <div class="logo-holder">
                   <UploadLogo :customLogoIndex="ltIdx" :showImage="true" :showActions="true"
-                              :ref="'logoUploadModalOpener'+ltIdx" :key="'top'+ltIdx"/>
+                              :ref="'logoUploadModalOpener'+ltIdx" :key="'top'+ltIdx">
+                    <span slot="upload_text">Click to upload logo or drag a file here</span>
+                  </UploadLogo>
                 </div>
-                <div class="logo-placemet-content">
+
+                <div class="logo-placemet-content" v-if="logo_tab.url">
                   <h4>Logo Placement</h4>
                   <b-form-select @change="changeSide(ltIdx, $event)" :value="logo_tab.side"
                                  :options="options"></b-form-select>

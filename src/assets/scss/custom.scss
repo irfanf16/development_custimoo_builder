@@ -320,6 +320,9 @@ button{
         bottom: 0;
         z-index: 9;
         background: #fff;
+        display: flex;
+        row-gap: 10px;
+
         @media only screen and (min-width: 992px){
             position: static;
             background: none;
@@ -536,7 +539,6 @@ button{
         }
         .logo-placement-holder{
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             .logo-holder{
@@ -1114,7 +1116,35 @@ button{
         //    background: #219F84;
         //}
     }
+
+    .logo-placement-holder{
+        display: flex;
+        gap: 15px;
+
+        .logo-holder{
+            width: 100%;
+            flex-shrink: 1;
+
+            .upload-logo-opener{
+                .upload-box, .btn{
+                    width: 100% !important;
+                    max-width: 100% !important;
+                }
+            }
+        }
+
+        &.hasLogo{
+            .logo-holder{
+                max-width: 110px;
+            }
+        }
+
+        .logo-placemet-content{
+            width: 100%;
+        }
+    }
 }
+
 .color-holder{
     margin: 20px 0 0;
     background: #fff;

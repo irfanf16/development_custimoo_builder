@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper m-lg-4" v-cloak>
     <meta name="viewport" content="width=device-width">
-    <div class="loader" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
         <template v-if="manageComponents.BasicCustomization">

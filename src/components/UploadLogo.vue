@@ -16,7 +16,7 @@
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
           </div>
-          Upload Logo
+          <slot name="upload_text">Upload Logo</slot>
         </div>
         <div class="remove-img" v-if="showActions && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <a  @click="deleteLogo">
