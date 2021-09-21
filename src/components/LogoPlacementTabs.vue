@@ -51,7 +51,14 @@
                          @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name"
                          :class="{'active-swatch' : icIdx==selectedSwatchIndex}"
                          :style="{background: imageColor.hex ? imageColor.hex : '#fff'}" :key="icIdx">
-                      {{ imageColor.name ? '' : '+'}}
+                      <template v-if="imageColor.hex">
+                        <span class="removeColor" @click="deleteLogoColor(icIdx)">
+                          <BIconX />
+                        </span>
+                      </template>
+                      <template v-else>
+                        <BIconPlus class="addColor" />
+                      </template>
                     </div>
                     <LogoColorTabs v-if="showLogoColors" @setSwatchColor="setSwatchColor"
                                    :swatchPantone="defSwatchPantone"
@@ -448,6 +455,12 @@ export default class LogoPlacementTabs extends Vue {
     this.$store.dispatch('setDefaultColor', { index: this.selectedSwatchIndex, color: color.hex, pantone: color.pantone, name: color.name })
     console.log("shaha", color)
     this.$store.commit('SET_LOGO_COLOR', payload)
+  }
+
+  public deleteLogoColor(index: number) {
+    this.imageColors[index].hex = null
+    this.imageColors[index].name = null
+    this.imageColors[index].pantone = null
   }
 
 }

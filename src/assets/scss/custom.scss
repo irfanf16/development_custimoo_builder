@@ -1123,6 +1123,7 @@ button{
     box-shadow: 0 0 5px rgba(0,0,0,0.1);
     border-radius: 15px;
     max-height: 300px;
+    width: 100%;
     overflow-y: auto;
     
     a.close{
@@ -2987,4 +2988,36 @@ $fontSize: 0.5;
     color: #fff;
     border-radius: 99px;
     opacity: 0;
+}
+
+.color-box{
+    .addColor{
+        position: absolute;
+        z-index: 100;
+        font-size: 2em;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        color: #999;
+        cursor: pointer;
+    }
+
+    .removeColor{
+        position: absolute;
+        z-index: 100;
+        font-size: 1.2em;
+        display: flex;
+        height: 15px;
+        width: 15px;
+        align-items: center;
+        justify-content: center;
+        background: #c80b0b;
+        color: #fff;
+        right: 0px;
+        top: 0px;
+        border-radius: 99px;
+        cursor: pointer;
+    }
 }
