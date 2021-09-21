@@ -17,13 +17,13 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" v-model="lockerActiveTabIndex">
                 <b-tab title="Products">
-<!--                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">-->
-                  <draggable v-model="room.product" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true"
+                  <draggable  v-model="room.product" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true"
                              :options="{animation: 250, delayOnTouchOnly: true, delay: 500}" @change="lockerProductsMoved">
                     <div v-for="(product, ind) in room.product" :key="ind" class="products-block">
                       <label :key="ind" class="w-100" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                         <div class="image-holder">
                           <div>
+
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <img :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
                           </div>
@@ -506,12 +506,13 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.$store.commit("Change_Locker_Active_Tab", tab_info);
   }
 
-  public lockerProductsMoved(payload:Record<string, Record<string, any>>) {
+  public lockerProductsMoved(payload:any) {
    let moved_info = payload.moved;
    let old_index = moved_info.oldIndex;
    let new_index = moved_info.newIndex;
    let re_arranged_products = [];
-   let products = this.getLockerProducts[0].product;
+   console.log('lockerActiveTabIndex',this.lockerActiveTabIndex)
+   let products = this.getLockerProducts[this.tabIndex].product;
    let start_form = old_index > new_index ? new_index : old_index;
    let end_at = old_index > new_index ? old_index : new_index;
    for(let i=start_form; i<=end_at ;i++ ) {
@@ -532,7 +533,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public swapDesign(lockerIndex: number, productIndex: number){
-
     let product: Record<any, any> = this.getLockerProducts[lockerIndex].product[productIndex];
 
     if(product.is_back_img==0){
@@ -546,6 +546,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public lockerChanged(newTabIndex: number,  prevTabIndex: number, bvEvent: Record<any, any>) {
+    this.tabIndex = newTabIndex
     /*
     * If locker collection tab is active and user switch to the locker then activate first tab (product tab)
     * */
