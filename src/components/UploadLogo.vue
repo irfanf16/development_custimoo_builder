@@ -2,7 +2,7 @@
   <div class="upload-logo-opener" v-if="customLogos">
     <div class="logo-option-area mb-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
       <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground">
-        Remove Logo Backgroundss
+        Remove Logo Background
       </b-form-checkbox>
     </div>
 

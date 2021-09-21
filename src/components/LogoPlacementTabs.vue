@@ -27,7 +27,7 @@
                                  :options="options"></b-form-select>
                 </div>
               </div>
-             <template v-if="logo_tab.url">
+<!--             <template v-if="logo_tab.url">
                <template v-if="isCustomerAuthenticated">
                  <b-button :key="'saveLogoModal'" v-if="logo_tab.url"
                            class="btn btn-secondary w-100 fw-bold save-logo-btn" v-b-modal.modal-center-savelogomodal>
@@ -40,7 +40,7 @@
                  </b-button>
                </template>
              </template>
-              <SaveLogoModal :logoIndex="ltIdx"/>
+              <SaveLogoModal :logoIndex="ltIdx"/>-->
             </div>
             <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url">
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
@@ -72,7 +72,7 @@
                           variant="outline-secondary">Shuffle
                 </b-button>
               </div>
-              <template v-if="isCustomerAuthenticated">
+<!--              <template v-if="isCustomerAuthenticated">
                 <button :key="'saveLogoColorModal'" v-if="customLogos[0] && customLogos[0].url"
                         class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal
                         @click="callRooms">Save Color
@@ -83,7 +83,7 @@
                           v-b-modal.modal-login>Save Color
                 </b-button>
               </template>
-              <SaveColorModal/>
+              <SaveColorModal/>-->
             </div>
         </div>
         <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
