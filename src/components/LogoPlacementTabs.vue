@@ -1,8 +1,5 @@
 <template>
   <div v-if="selectedProduct">
-    <b-button class="add-logo-btn" v-if="customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
-      +
-    </b-button>
     <b-tabs>
       <b-tab v-for="(logo_tab, ltIdx) in customLogos" :key="ltIdx" :active="tabIndex === ltIdx" @click="changeTab(ltIdx)">
         <template #title>
@@ -49,7 +46,7 @@
                   <div class="color-container">
                     <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
                          @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name"
-                         :class="{'active-swatch' : icIdx==selectedSwatchIndex}"
+                         :class="{'active-swatch' : icIdx==selectedSwatchIndex, 'noColor': !imageColor.hex}"
                          :style="{background: imageColor.hex ? imageColor.hex : '#fff'}" :key="icIdx">
                       <template v-if="imageColor.hex">
                         <span class="removeColor" @click="deleteLogoColor(icIdx)">
@@ -59,6 +56,9 @@
                       <template v-else>
                         <BIconPlus class="addColor" />
                       </template>
+                      <span class="selected" @click="deleteLogoColor(icIdx)">
+                          <BIconCheck />
+                        </span>
                     </div>
                     <LogoColorTabs v-if="showLogoColors" @setSwatchColor="setSwatchColor"
                                    :swatchPantone="defSwatchPantone"
@@ -95,12 +95,13 @@
         </div>
         <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
       </b-tab>
+      <template #tabs-end>
+        <b-button class="light ml-1" v-if="customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
+          <BIconPlus />
+        </b-button>
+      </template>
     </b-tabs>
-
-
-
   </div>
-
 </template>
 
 <script lang="ts">
