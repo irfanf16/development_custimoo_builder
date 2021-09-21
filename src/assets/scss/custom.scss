@@ -2775,8 +2775,8 @@ $fontSize: 0.5;
     }
     .modal-content {
         width: calc(100% - 2rem);
-        min-height: 100%;
-        height: auto;
+        min-height: calc(100% - 2rem);
+        height: auto !important;
         margin: 1rem;
     }
 }
@@ -2943,4 +2943,18 @@ $fontSize: 0.5;
     100%{
         background-position: 468px 0
     }
+}
+
+[v-cloak] {
+    display: none;
+}
+
+.hover_tooltip{
+    position: fixed;
+    white-space: nowrap;
+    padding: 5px 10px;
+    background: #333;
+    color: #fff;
+    border-radius: 99px;
+    opacity: 0;
 }

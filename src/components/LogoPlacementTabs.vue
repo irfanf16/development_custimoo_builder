@@ -4,7 +4,7 @@
       +
     </b-button>
     <b-tabs>
-      <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index">
+      <b-tab v-for="(n, index) in customLogos" :key="index" :active="tabIndex === index" @click="changeTab(index)">
         <template #title>
           <span>{{ index == 0 ? 'Team Logo' : 'logo ' + index  }}</span>
           <div v-if="index === customLogos.length - 1 && index != 0">
@@ -132,7 +132,6 @@ export default class LogoPlacementTabs extends Vue {
   public allowedLogosLimit = 1000
 
   get imageColors(): any[] {
-    console.log('getimageColors',this.$store.getters.getLogosColors)
     return this.$store.getters.getLogosColors
   }
 
@@ -154,7 +153,9 @@ export default class LogoPlacementTabs extends Vue {
   get defaultColors() : [Record<any, any>] {
     return this.$store.getters.getDefaultColors
   }
-
+ public changeTab(index:number){
+   this.$store.dispatch('setLogoTab', index)
+ }
   public async initFirstLogoTab(index: number){
     if(this.$store.getters.getCustomLogos.length < 1){
       if(this.numberOfLogos < this.allowedLogosLimit) {
@@ -323,7 +324,8 @@ export default class LogoPlacementTabs extends Vue {
 <style lang="scss" scoped>
 .tabs-logo-container{
   @media only screen and (min-width: 992px){
-    padding: 0 0 150px;
+    //padding: 0 0 150px;
+    padding: 0 0 50px;
   }
   .upload-logo-opener{
     box-shadow: none;

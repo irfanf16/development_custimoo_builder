@@ -1,6 +1,6 @@
 <template>
   <span>
-  <b-tabs content-class="mt-3">
+  <b-tabs content-class="mt-3" @activate-tab="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
       <b-tab  :key="i" :active="tabIndex === i">
         <template #title>
@@ -17,13 +17,13 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" v-model="lockerActiveTabIndex">
                 <b-tab title="Products">
-<!--                  <draggable class="products-holder draggable d-lg-flex flex-lg-wrap mb-4" :multiDrag="true" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}">-->
-                  <draggable v-model="room.product" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true"
+                  <draggable  v-model="room.product" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true"
                              :options="{animation: 250, delayOnTouchOnly: true, delay: 500}" @change="lockerProductsMoved">
                     <div v-for="(product, ind) in room.product" :key="ind" class="products-block">
                       <label :key="ind" class="w-100" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                         <div class="image-holder">
                           <div>
+
                             <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <img :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
                           </div>
@@ -34,35 +34,35 @@
                       </label>
 
                       <ul class="product-icons">
-                            <li>
-                              <a v-b-tooltip.hover.right title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
-                            </li>
-                            <li>
-                              <a v-b-tooltip.hover.right title="Edit design" @click="editProduct(i, ind)"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            </li>
-                            <li>
-                              <b-button v-b-tooltip.hover.right title="Share design" :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
-                              <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
-                                <div class="share-holder">
-                                  <h3>Copy link
-                                    ..and Share</h3>
-                                  <div class="share-form">
-                                    <b-form inline>
-                                      <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
+                        <li>
+                          <a data-title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)" @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
+                        </li>
+                        <li>
+                          <a data-title="Edit design" @click="editProduct(i, ind)" @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                        </li>
+                        <li>
+                          <b-button data-title="Share design" :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''" @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                          <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
+                            <div class="share-holder">
+                              <h3>Copy link
+                                ..and Share</h3>
+                              <div class="share-form">
+                                <b-form inline>
+                                  <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
 
-                                      ></b-form-input>
-                                      <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
-                                    </b-form>
-                                  </div>
-                                </div>
-                              </b-tooltip>
-                            </li>
-                            <li class="swap">
-                              <a v-if="product.design.back_design_count > 0" v-b-tooltip.right  :title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
-                              </a>
-                            </li>
-                          </ul>
+                                  ></b-form-input>
+                                  <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
+                                </b-form>
+                              </div>
+                            </div>
+                          </b-tooltip>
+                        </li>
+                        <li class="swap">
+                          <a v-if="product.design.back_design_count > 0"  @mouseleave="hideTooltip" @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
+                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
+                          </a>
+                        </li>
+                      </ul>
                     </div>
                   </draggable>
 
@@ -161,6 +161,8 @@
   </b-tabs>
 
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
+
+    <span class="hover_tooltip"></span>
   </span>
 
 </template>
@@ -208,6 +210,21 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 
   private setSelected(e:Record<any, any>){
     console.log('ev', e.target)
+  }
+
+  private showTooltip(e:Record<any, any>){
+    document.querySelector('.hover_tooltip').style.opacity = '1'
+    document.querySelector('.hover_tooltip').style.zIndex = '100'
+    document.querySelector('.hover_tooltip').style.left = (e.clientX + 10)+'px'
+    document.querySelector('.hover_tooltip').style.top = (e.clientY + 17)+'px'
+    document.querySelector('.hover_tooltip').innerHTML = e.target.getAttribute('data-title')
+    // alert(e.target.getAttribute('title'))
+  }
+  private hideTooltip(e:Record<any, any>){
+    document.querySelector('.hover_tooltip').style.opacity = '0'
+    document.querySelector('.hover_tooltip').style.left = '0'
+    document.querySelector('.hover_tooltip').style.top = '0'
+    document.querySelector('.hover_tooltip').style.zIndex = '-10'
   }
 
   public showConfirm(){
@@ -295,6 +312,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
+  }
+  get logoTabIndex():number{
+    return this.$store.getters.getActiveLogoIndex
   }
 
   public lockerAdded(){
@@ -411,6 +431,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     if (ok) {
       let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
       if (res == true){
+        this.$store.commit('SET_RECENT_LOGOS')
         this.showToast('Product Deleted', 'SUCCESS')
       }else{
         this.showError(res)
@@ -447,9 +468,10 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.colors = []
   }
   public addToCustomLogos(currentLogo:Record<any, any>){
-    if (this.customLogos.length  < this.selectedProduct.allowed_logos_count){
-      let index = this.customLogos.length
+    let index = this.logoTabIndex
+    if (this.selectedProduct.is_logo_allowed && this.selectedProduct.logos_setting[index]){
       let logo = {
+        logoIndex: index,
         id: currentLogo.id,
         url: currentLogo.logo_url,
         width: this.selectedProduct.logos_setting[index].width,
@@ -463,8 +485,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         is_transparent: false
       }
       this.$store.dispatch('setCustomLogos', logo)
-    }else{
-      alert("logo upload limit exceed")
     }
     this.$emit('hideLockerRoomModal')
   }
@@ -505,12 +525,13 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.$store.commit("Change_Locker_Active_Tab", tab_info);
   }
 
-  public lockerProductsMoved(payload:Record<string, Record<string, any>>) {
+  public lockerProductsMoved(payload:any) {
    let moved_info = payload.moved;
    let old_index = moved_info.oldIndex;
    let new_index = moved_info.newIndex;
    let re_arranged_products = [];
-   let products = this.getLockerProducts[0].product;
+   console.log('lockerActiveTabIndex',this.lockerActiveTabIndex)
+   let products = this.getLockerProducts[this.tabIndex].product;
    let start_form = old_index > new_index ? new_index : old_index;
    let end_at = old_index > new_index ? old_index : new_index;
    for(let i=start_form; i<=end_at ;i++ ) {
@@ -531,7 +552,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public swapDesign(lockerIndex: number, productIndex: number){
-
     let product: Record<any, any> = this.getLockerProducts[lockerIndex].product[productIndex];
 
     if(product.is_back_img==0){
@@ -542,6 +562,16 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       product.product_url = product.product_front_url
     }
     this.getLockerProducts[lockerIndex].product[productIndex] = product;
+  }
+
+  public lockerChanged(newTabIndex: number,  prevTabIndex: number, bvEvent: Record<any, any>) {
+    this.tabIndex = newTabIndex
+    /*
+    * If locker collection tab is active and user switch to the locker then activate first tab (product tab)
+    * */
+    if(this.lockerActiveTabIndex == 3) {
+      this.lockerActiveTabIndex = 0
+    }
   }
 }
 </script>
@@ -705,6 +735,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         width: 100%;
         margin: 0 auto;
         height: auto;
+        min-height: 100px;
       }
     }
 

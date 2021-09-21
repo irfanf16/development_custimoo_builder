@@ -319,7 +319,7 @@ const ProductAttributes:Module<any, any> = {
     },
     ADD_LOCKER_ROOM_COLORS(state:Record<any, any>, payload:Record<any, any>){
       payload = payload.map((item: Record<any, any>) => {
-         item.color_text = JSON.parse(item.color_text)
+         item.color_text = JSON.parse(JSON.stringify(item.color_text))
         return item
       })
       state.lockerColors = payload

@@ -1,16 +1,17 @@
 <template>
-  <div>
+  <div style="position:relative;">
     <h4 v-if="getRecentLogos.length > 0" class="mb-3 mb-lg-4" style="font-weight: 700">Recent Logos</h4>
     <div  class="grid grid-4 gap-2">
       <div style="position:relative;"  class="d-flex align-items-center justify-content-center" v-for="(logo, index) in getRecentLogos" :key="index">
-        <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo.id)">
+        <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo)">
           <font-awesome-icon :icon="['fas', 'trash-alt']"/>
         </a>
-        <img @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="Image 1" />
-        <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+        <img crossorigin="anonymous"   @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
       </div>
 
     </div>
+    <confirm-modal popup_icon="info" message="This logo cannot be deleted as it is using in one of your locker product" cancel_text="" confirm_text="" ref="delete-logo-ref"></confirm-modal>
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 
 </template>
@@ -22,10 +23,13 @@ import {http} from "@/httpCommon"
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
+import ConfirmModal from "@/components/ConfirmModal.vue";
 import {log} from "fabric/fabric-impl";
 
 @Component<RecentLogos>({
-
+  components: {
+    ConfirmModal
+  }
 })
 
 
@@ -47,7 +51,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   public open_modal!: boolean
   public mounted!: boolean
   public colors: any = [];
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
+  public storageUrl = process.env.VUE_APP_STORAGE_URL
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
   public showLoader = false
@@ -67,15 +71,22 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   //   alert()
   // }
 
-  public async deleteRecentLogo(id:number) {
+  public async deleteRecentLogo(recentLogo:any) {
     try {
-      const resp = await http.delete(`recent/logos/delete/${id}`);
+      // if(!recentLogo.canLogoDelete) {
+      //   const ok = await this.ref['delete-logo-ref'].showConfirm()
+      //   if (ok) {
+      //     await this.$store.dispatch('logoutCustomer');
+      //     await this.$store.commit('SET_RECENT_LOGOS')
+      //   }
+      // }
+      // return false
+      const resp = await http.delete(`recent/logos/delete/${recentLogo.id}`);
       this.showToast(resp.data.message,'SUCCESS')
-      let updated_logos = this.$store.getters.getRecentLogos.filter((recent_logo:any) => {
-        return recent_logo.id != id
-      })
-      console.log('updated_logos',updated_logos)
-      this.$store.commit('SET_RECENT_LOGOS',updated_logos)
+      // let updated_logos = this.$store.getters.getRecentLogos.filter((recent_logo:any) => {
+      //   return recent_logo.id != recentLogo.id
+      // })
+      this.$store.commit('SET_RECENT_LOGOS')
     }
     catch (e){
       this.showError(e.response.data.message)
@@ -88,14 +99,15 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
       if(logo)
         return logo.id == recentLogo.id
     })
-    if(logo_exists || !recentLogo.canLogoDelete)
+  //  if(logo_exists || !recentLogo.canLogoDelete)
+    if(logo_exists)
       return false
 
     return true
   }
 
   public async setLogo(index:number,logo:any) {
-
+    this.showLoader = true;
     const customTabIndex = this.customLogoIndex
     let custom_logos = this.$store.getters.getCustomLogos
     let logo_url = '';
@@ -162,9 +174,12 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
         this.processColorsCustom(JSON.parse(logo.logo_colors),customTabIndex)
       }
     }
-
+    setTimeout(() => {
+      this.showLoader = false;
+    },1000)
 
   }
+
    public async addLogoObject(index:number):Promise<void> {
     let logoSetting: Record<any, any>
     if(this.logosSetting[index]) {
@@ -207,7 +222,6 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     })
     let deletedCount = uniqueColors.length - 4
     uniqueColors.splice(4, deletedCount)
-    console.log('uniqueColors',uniqueColors)
     uniqueColors.forEach((color: string) => {
       // console.log(color)
       let pantoneColor = getClosestColor(color)
@@ -216,7 +230,6 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     })
     //only set logo colors if index is 0
     if(customLogoIndex == 0) {
-      console.log('here',imageColors)
       this.$store.dispatch("SET_LOGO_COLORS", imageColors);
     }
   }
@@ -244,7 +257,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   background: rgba(255,255,255,0.9);
   z-index: 1030;
 img{
-  max-width: 40%;
+  max-width: 30%;
   display: block;
   margin: 0 auto;
   height: auto;
