@@ -2,6 +2,8 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
+
+import {getLogoObject, setLogoSettings} from "../../helpers/Helpers"
 const ProductAttributes:Module<any, any> = {
   state: {
     lockerActiveTabIndex:0,
@@ -141,7 +143,7 @@ const ProductAttributes:Module<any, any> = {
       if(categories){
         state.categories = categories
       }
-      
+
     },
     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
       // Vue.set(state.customLogos, state.customLogos.length, customLogo)
@@ -343,6 +345,9 @@ const ProductAttributes:Module<any, any> = {
       state.using_logo_colors = false;
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
+
+        /*
+
         let logoSetting = selectedProduct.logos_setting[0]
 
         if(!logoSetting) {
@@ -367,8 +372,8 @@ const ProductAttributes:Module<any, any> = {
           side: logoSetting.side,
           customLogo: true,
           is_transparent: false
-        }
-        state.customLogos.push(logo);
+        }*/
+        state.customLogos.push(setLogoSettings(0));
         state.logoTabIndex = 0;
       }
     },

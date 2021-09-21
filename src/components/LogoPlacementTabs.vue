@@ -166,7 +166,7 @@ export default class LogoPlacementTabs extends Vue {
   public selectedSwatchIndex = -1
   public defSwatchColor = '#ffffff'
   public defSwatchPantone = '11-0601'
-  public custom_logo_tabs = getCustomLogos(true, true)
+  /*public custom_logo_tabs = getCustomLogos(true, true)*/
 
 
 
@@ -239,7 +239,7 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public async addTab(index: number) {
-    let new_tab_index = this.custom_logo_tabs.length;
+    let new_tab_index = this.customLogos.length;
     let logo = setLogoSettings(new_tab_index);
     await this.$store.dispatch('setCustomLogos', logo)
     this.tabIndex = this.customLogos.length - 1
