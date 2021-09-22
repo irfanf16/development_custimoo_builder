@@ -44,7 +44,7 @@
             </div>
             <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url">
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
-              <div class="logo-placement-holder mb-lg-3">
+              <div class="mb-lg-3 w-100">
                 <div class="color-holder">
                   <div class="color-container">
                     <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
@@ -71,16 +71,18 @@
                     />
                   </div>
                 </div>
-                <b-button @click="useLogoColors()" class="use-btn" v-if="imageColors.length > 1">
-                  <template v-if="usingColorLogos"> Use Original Colors</template>
-                  <template v-else> Use Logo Colors</template>
-                </b-button>
-                <b-button @click="rollbackPreviousColors()" v-if="previousImageColors.length && usingColorLogos" class="reset">
-                  <font-awesome-icon :icon="['fas', 'redo-alt']"/>
-                </b-button>
-                <b-button @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1 && usingColorLogos"
-                          variant="outline-secondary">Shuffle
-                </b-button>
+                <div class="d-flex align-items-center justify-content-center gap-1">
+                  <b-button @click="useLogoColors()" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px" v-if="imageColors.length > 1">
+                    <template v-if="usingColorLogos"> Use Original Colors</template>
+                    <template v-else> Use Logo Colors</template>
+                  </b-button>
+                  <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1 && usingColorLogos"
+                            variant="secondary">Shuffle
+                  </b-button>
+                  <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" v-if="previousImageColors.length && usingColorLogos" variant="secondary">
+                    <font-awesome-icon :icon="['fas', 'redo-alt']"/>
+                  </b-button>
+                </div>
               </div>
 <!--              <template v-if="isCustomerAuthenticated">
                 <button :key="'saveLogoColorModal'" v-if="customLogos[0] && customLogos[0].url"
@@ -540,18 +542,18 @@ export default class LogoPlacementTabs extends Vue {
         flex: none;
         color: #03142E;
         &.use-btn{
-          margin: 0;
+          margin: 10px 0 0 0;
           border: none;
           color: #fff;
           font-size: 14px;
-          max-width: 50%;
+          max-width: 100%;
           width: 100%;
           @media only screen and (min-width: 1024px){
             font-size: 12px;
-            max-width: 35%;
+            max-width: 100%;
           }
           @media only screen and (min-width: 1367px){
-            max-width: 40%;
+            max-width: 100%;
           }
           &:focus{
             box-shadow: none;
