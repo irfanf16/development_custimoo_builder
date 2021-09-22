@@ -1,17 +1,17 @@
 <template>
-  <div>
+  <div style="position:relative;">
     <h4 v-if="getRecentLogos.length > 0" class="mb-3 mb-lg-4" style="font-weight: 700">Recent Logos</h4>
     <div  class="grid grid-4 gap-2">
       <div style="position:relative;"  class="d-flex align-items-center justify-content-center" v-for="(logo, index) in getRecentLogos" :key="index">
         <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo)">
           <font-awesome-icon :icon="['fas', 'trash-alt']"/>
         </a>
-        <img crossorigin="anonymous" @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
-        <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+        <img crossorigin="anonymous"   @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
       </div>
 
     </div>
     <confirm-modal popup_icon="info" message="This logo cannot be deleted as it is using in one of your locker product" cancel_text="" confirm_text="" ref="delete-logo-ref"></confirm-modal>
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 
 </template>
@@ -84,11 +84,10 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
       // return false
       const resp = await http.delete(`recent/logos/delete/${recentLogo.id}`);
       this.showToast(resp.data.message,'SUCCESS')
-      let updated_logos = this.$store.getters.getRecentLogos.filter((recent_logo:any) => {
-        return recent_logo.id != recentLogo.id
-      })
-      console.log('updated_logos',updated_logos)
-      this.$store.commit('SET_RECENT_LOGOS',updated_logos)
+      // let updated_logos = this.$store.getters.getRecentLogos.filter((recent_logo:any) => {
+      //   return recent_logo.id != recentLogo.id
+      // })
+      this.$store.commit('SET_RECENT_LOGOS')
     }
     catch (e){
       this.showError(e.response.data.message)
@@ -109,7 +108,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   }
 
   public async setLogo(index:number,logo:any) {
-
+    this.showLoader = true;
     const customTabIndex = this.customLogoIndex
     let custom_logos = this.$store.getters.getCustomLogos
     let logo_url = '';
@@ -186,6 +185,10 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
         }
       }
     }
+
+    setTimeout(() => {
+      this.showLoader = false;
+    },1000)
   }
 
    public async addLogoObject(index:number):Promise<void> {
@@ -238,7 +241,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   background: rgba(255,255,255,0.9);
   z-index: 1030;
 img{
-  max-width: 40%;
+  max-width: 30%;
   display: block;
   margin: 0 auto;
   height: auto;
