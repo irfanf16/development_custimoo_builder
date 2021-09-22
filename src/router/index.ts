@@ -28,6 +28,11 @@ const routes: Array<RouteConfig> = [
     path:'/collection/:collection_file_name/view',
     name: 'CollectionUrl',
     component: CollectionViewPDF
+  },
+  {
+    path:'/admin/login',
+    name:'LoginAsAdmin',
+    component: Home,
   }
 ]
 
