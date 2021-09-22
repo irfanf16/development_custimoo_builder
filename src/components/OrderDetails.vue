@@ -135,24 +135,34 @@ export default class OrderDetails extends Vue {
   }
 
   public  generateProductionPdf() {
-
     this.showLoader = true;
-    this.pdf_front_image = document.getElementById("scene-front").toDataURL("image/png")
-    this.pdf_back_image = document.getElementById("scene-back").toDataURL("image/png")
-    const element = document.getElementById("production-pdf-html")
-    const opt = {
-      margin: [0, 0, 0, 0],
-      filename: 'production.pdf',
-      image: {type: "jpeg", quality: 1},
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    let that = this;
 
-      jsPDF: {
-        unit: "in",
-        format: "letter",
-        orientation: 'landscape'
+    var p2 = new Promise(function (resolve, reject) {
+      that.pdf_front_image = document.getElementById("scene-front").toDataURL("image/png")
+      that.pdf_back_image = document.getElementById("scene-back").toDataURL("image/png")
+      const element = document.getElementById("production-pdf-html")
+      const opt = {
+        margin: [0, 0, 0, 0],
+        filename: 'production.pdf',
+        image: {type: "jpeg", quality: 1},
+
+        jsPDF: {
+          unit: "in",
+          format: "letter",
+          orientation: 'landscape'
+        }
+      };
+      html2pdf().set(opt).from(element).toPdf().save('datauristring');
+      resolve(1);
+    });
+
+    p2.then(function (value){
+      if(value){
+        that.showLoader = false
       }
-    };
-     html2pdf().set(opt).from(element).toPdf().save('datauristring');
-     this.showLoader = false;
+    })
   }
 
   public generateProductionPdf_back(e: any) {
