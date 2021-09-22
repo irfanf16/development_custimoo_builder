@@ -364,7 +364,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public deleteLogo() {
     let inputRef = this.$refs.fileInput as Record<any, any>
     inputRef.value = null;
-    console.log("before", this.customLogos[this.customLogoIndex])
     let logo = setLogoSettings(this.customLogoIndex);
     logo.logoIndex = this.customLogoIndex;
     this.$store.commit('customLogos', logo)
