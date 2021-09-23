@@ -297,6 +297,7 @@ button{
     background: #fff;
     z-index: 999;
     max-height: 50vh;
+    height: 100%;
     overflow-y: auto;
     padding-bottom: 100px;
     border-radius: 25px 25px 0 0;
@@ -1152,9 +1153,54 @@ button{
     z-index: 2;
     box-shadow: 0 0 5px rgba(0,0,0,0.1);
     border-radius: 15px;
-    max-height: 300px;
     width: 100%;
     overflow-y: auto;
+
+    /*logo uploader changes*/
+    .accordion{
+        width: 100%;
+
+        .color-holder{
+            max-height: 300px;
+            overflow-y: auto;
+
+            .color-container{
+                .custom-color-picker{
+                    width: 100%;
+
+                    .hu-color-picker{
+                        width: 100% !important;
+
+                        .color-set{
+                            .saturation{
+                                //width: 100%;
+
+                                &>canvas{
+                                    //width: 100%;
+                                }
+                            }
+                        }
+                    }
+
+                    .pantone-color-field{
+                        display: flex;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 15px;
+                        align-items: center;
+
+                        input{
+                            width: auto;
+                        }
+
+                        .pantone-message{
+                            flex-basis: 100%;
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     a.close{
         width: auto;
@@ -2121,7 +2167,7 @@ button{
 
 .custom-color-picker {
     .colors .item:nth-child(8n + 1){margin-left: 10px !important;}
-    .color-type{display: none !important;}
+    .color-type, .color-type~div{display: none !important;}
 }
 
 #modal-center-savecolormodal___BV_modal_body_{

@@ -9,7 +9,7 @@
             <div class="color-container">
               <div v-if="showOther" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
-                  <label class="mb-2" for="inline-form-input-pantone-color">Pantone: (TCX Colors)</label>
+                  <label for="inline-form-input-pantone-color">Pantone: (TCX Colors)</label>
                   <b-form-input
                     v-model="pantoneColorVal"
                     class="mb-2 mr-sm-2 mb-sm-0"
@@ -20,7 +20,7 @@
                     {{ pantoneMessage }}
                   </div>
                 </b-form>
-                <color-picker @changeColor="changeColor" theme="light" :color="swatchcolor" :key="swatchPantone"/>
+                <color-picker @changeColor="changeColor" ref="colorPicker" theme="light" :color="swatchcolor" :colors-history="false" :colors-default="[]" :key="swatchPantone"/>
               </div>
               <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
                    :title="color.name" :style="{background: color.value}" :key="index">
@@ -52,7 +52,17 @@ import {getClosestColor, getPantoneColor} from '@/pantoneColor'
   mounted(){
    setTimeout(() => {
       this.selectType(this.selectTypeIndex)
-    }, 300)
+
+     if(this.$refs.colorPicker){
+       console.log('found')
+       this.set(this.$refs.colorPicker.hueHeight, 500)
+     }else{
+       console.log('notfound')
+     }
+
+    }, 300);
+
+   // this.$refs['colorPicker'].data.hueHeight = 500;
   }
 })
 export default class LogoColorTabs extends Vue {
@@ -71,6 +81,16 @@ export default class LogoColorTabs extends Vue {
   public pantoneMessage = ''
   public isActive = false
   public othersActive = false
+
+  @Watch('showOther')
+  onShowOther(val: string) {
+    if(this.showOther){
+      console.log('found')
+      this.$refs['colorPicker'].data.hueHeight = 500
+    }else{
+      console.log('notfound')
+    }
+  }
 
   @Watch('swatchPantone')
   onSwatchPantoneChanged(val: string) {
