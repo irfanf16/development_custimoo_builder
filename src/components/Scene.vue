@@ -219,7 +219,7 @@ export default class Scene extends Vue {
       if(this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
         let deleteIndex: number[] = []
         this.customLogoObjects.forEach((item: Record<any, any>, index: number) => {
-          if(item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '')) {
+          if(item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '' || this.customLogos[item.logoIndex].url == null)) {
             this.frontCanvas.remove(this.customLogoObjects[item.logoIndex])
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
