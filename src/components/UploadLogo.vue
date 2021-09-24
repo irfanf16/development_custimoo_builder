@@ -27,7 +27,7 @@
                 type="file"
                 name="logos" ref="fileInput"
                 @change="uploadLogoImage"
-                @click="checkConfirmLogo"
+                @click="onClickUpload"
                 @drop="onDragUpload"
                 class="fileLoader"
                accept="image/*,application/postscript,application/pdf">
@@ -60,7 +60,8 @@
       </div>
       <div class="upload-logo-buttons">
         <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
-        <b-button class="btn-upload" @click="uploadLogoBtn">Confirm and Upload logo</b-button>
+        <b-button v-if="this.uploadType=='click'" class="btn-upload" @click="uploadLogoBtn">Confirm and Upload logo</b-button>
+        <b-button v-if="this.uploadType=='drag'" class="btn-upload" @click="uploadLogoDraged">Confirm and Upload logo</b-button>
       </div>
     </b-modal>
   </div>
@@ -82,7 +83,7 @@ import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
       } else {
         this.open_modal = false
       }
-  }
+ }
 })
 export default class UploadLogo extends Mixins(ErrorMessages) {
   public status = 'accepted'
@@ -94,6 +95,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   public imageColors: any[] = []
   public showLoader = false;
 
+  public fileObject: Record<any, any> = {}
+  public uploadType = 'click'
+
   @Prop({ required: true }) customLogoIndex!: number
   @Prop({ required: false, default: true }) showImage!: boolean
   @Prop({ required: false, default: true }) showActions!: boolean
@@ -102,13 +106,10 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     return this.$store.getters.getSelectedProduct
   }
 
-  @Watch('customLogos', {
-    deep: true
-  })
-  dummy(){
-    console.log('dummy')
-  }
- /* customLogosChanged(newVal: [Record<any, any>]) {
+  // @Watch('customLogos', {
+  //   deep: true
+  // })
+  /* customLogosChanged(newVal: [Record<any, any>]) {
     if (this.customLogos[0] && !this.customLogos[0].url) {
       let inputRef = this.$refs.fileInput as Record<any, any>
       inputRef.value = null;
@@ -129,6 +130,17 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     if(this.ref.fileInput) {
       this.ref.fileInput.click()
     }
+  }
+
+  public uploadLogoDraged() {
+    if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
+      localStorage.setItem('logo_modal_status', 'false')
+      this.open_modal = false
+      this.hideModal();
+    }
+
+    this.processLogoImage();
+
   }
 
 
@@ -160,17 +172,22 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
-  public checkConfirmLogo(e){
-    if (this.open_modal) {
+  public onClickUpload(e){
+    this.uploadType = 'click'
+    if ((localStorage.getItem('logo_modal_status') == null)) {
       e.preventDefault()
       this.showModal()
     }
   }
 
   public onDragUpload(e: any) {
-    if (this.open_modal) {
-      e.preventDefault()
+    e.preventDefault()
+    this.fileObject = e.dataTransfer.files[0];
+    this.uploadType = 'drag';
+    if ((localStorage.getItem('logo_modal_status') == null)) {
       this.showModal()
+    }else{
+      this.processLogoImage();
     }
   }
 
@@ -209,10 +226,15 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }*/
 
   public uploadLogoImage(e: any) {
+    this.fileObject = e.target.files[0];
+    this.processLogoImage();
+  }
+
+  public processLogoImage() {
 
     let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
     custom_logo.logoIndex = this.customLogoIndex;
-    let img = e.target.files[0]
+    let img = this.fileObject
     let file_extension = img.name.toLowerCase();
     if (!this.hasExtension(file_extension, ['.jpg','.gif','.png','jpeg','pdf','eps','ai'])) {
       this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','Error');
