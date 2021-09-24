@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="position:relative;">
     <h4 v-if="getRecentLogos.length > 0" class="mb-3 mb-lg-4" style="font-weight: 700">Recent Logos</h4>
     <div  class="grid grid-4 gap-2">
       <div style="position:relative;"  class="d-flex align-items-center justify-content-center" v-for="(logo, index) in getRecentLogos" :key="index">
@@ -7,11 +7,11 @@
           <font-awesome-icon :icon="['fas', 'trash-alt']"/>
         </a>
         <img crossorigin="anonymous"   @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
-        <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
       </div>
 
     </div>
     <confirm-modal popup_icon="info" message="This logo cannot be deleted as it is using in one of your locker product" cancel_text="" confirm_text="" ref="delete-logo-ref"></confirm-modal>
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 
 </template>
@@ -25,6 +25,7 @@ import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {log} from "fabric/fabric-impl";
+import {processColorsCustom} from "../helpers/Helpers"
 
 @Component<RecentLogos>({
   components: {
@@ -83,11 +84,10 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
       // return false
       const resp = await http.delete(`recent/logos/delete/${recentLogo.id}`);
       this.showToast(resp.data.message,'SUCCESS')
-      let updated_logos = this.$store.getters.getRecentLogos.filter((recent_logo:any) => {
-        return recent_logo.id != recentLogo.id
-      })
-      console.log('updated_logos',updated_logos)
-      this.$store.commit('SET_RECENT_LOGOS',updated_logos)
+      // let updated_logos = this.$store.getters.getRecentLogos.filter((recent_logo:any) => {
+      //   return recent_logo.id != recentLogo.id
+      // })
+      this.$store.commit('SET_RECENT_LOGOS')
     }
     catch (e){
       this.showError(e.response.data.message)
@@ -108,7 +108,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   }
 
   public async setLogo(index:number,logo:any) {
-
+    this.showLoader = true;
     const customTabIndex = this.customLogoIndex
     let custom_logos = this.$store.getters.getCustomLogos
     let logo_url = '';
@@ -172,12 +172,25 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     }
     else {
       if(customTabIndex == 0) {
-        this.processColorsCustom(JSON.parse(logo.logo_colors),customTabIndex)
+        if(logo.logo_colors != null) {
+          let image_colors = processColorsCustom(JSON.parse(logo.logo_colors))
+          let image_color_count = image_colors.length;
+          while(image_color_count < 4 ) {
+            image_colors.push({hex: null, pantone: null, name: null});
+            ++image_color_count;
+          }
+          this.$store.dispatch("SET_LOGO_COLORS", image_colors);
+          this.$store.dispatch("initialLogoColors", JSON.stringify(image_colors));
+          this.$store.commit("UPDATE_USING_COLOR_LOGOS", false);
+        }
       }
     }
 
-
+    setTimeout(() => {
+      this.showLoader = false;
+    },1000)
   }
+
    public async addLogoObject(index:number):Promise<void> {
     let logoSetting: Record<any, any>
     if(this.logosSetting[index]) {
@@ -208,33 +221,6 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
      logo.logoIndex = index
     await this.$store.dispatch('setCustomLogos', logo)
   }
-
-  public processColorsCustom(colors: [],customLogoIndex:number):void {
-    let imageColors: any[] = []
-    let uniqueColors: string[] = []
-    colors.forEach((color: number[]) => {
-      const hex = rgbHex(color[0], color[1], color[2])
-      if ((!uniqueColors.includes(hex))) {
-        uniqueColors.push(hex)
-      }
-    })
-    let deletedCount = uniqueColors.length - 4
-    uniqueColors.splice(4, deletedCount)
-    uniqueColors.forEach((color: string) => {
-      // console.log(color)
-      let pantoneColor = getClosestColor(color)
-      //console.log(JSON.parse(JSON.stringify(pantoneColor)))
-      imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
-    })
-    //only set logo colors if index is 0
-    if(customLogoIndex == 0) {
-      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
-    }
-  }
-
-
-
-
 }
 
 </script>
@@ -255,7 +241,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   background: rgba(255,255,255,0.9);
   z-index: 1030;
 img{
-  max-width: 40%;
+  max-width: 30%;
   display: block;
   margin: 0 auto;
   height: auto;

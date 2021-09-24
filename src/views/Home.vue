@@ -1,38 +1,15 @@
 <template>
   <div class="page-wrapper m-lg-4" v-cloak>
     <meta name="viewport" content="width=device-width">
-    <div class="loader" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
-        <template v-if="manageComponents.BasicCustomization">
-          <b-col cols="12" lg="3" class="text-left home-color-area" :class="extractedcolorclass">
-            <div class="py-2 py-md-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
-              <ChooseColor :colors="colors"/>
-            </div>
-            <template v-if="manageComponents.ExtractedColors">
-              <div class="mb-3 mb-lg-0" v-if="customLogos[0] && customLogos[0].url" :class="extractedcolorclass">
-                <ExtractedColors v-if="!hideColorSection" />
-              </div>
-            </template>
-
-            <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
-              <template v-if="manageComponents.LogoArea">
-                <UploadLogo  :customLogoIndex="0"/>
-              </template>
-            </template>
-            <template v-if="manageComponents.ChooseInterest">
-              <ChooseInterest :categories="categories" @search="getSearchQuery" @additionalClassTrigger="additionalClass"/>
-            </template>
-          </b-col>
-
-        </template>
-        <template v-if="manageComponents.AdvanceCustomization">
-          <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
+        <template v-if="selectedProduct">
+          <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
           </b-col>
-        </template>
+
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column">
-          <!-- <template v-if="manageComponents.AdvanceCustomization"> -->
           <template>
             <div class="customization-preview-process w-100">
               <header class="preview-area-header py-2 py-lg-4">
@@ -122,22 +99,16 @@
                   </template>
                 </div>
               </div>
-              <template v-if="manageComponents.BasicCustomization">
-                <b-button @click="showAdvanceCustomization()" class="d-none d-lg-inline-block mt-5" variant="secondary">Continue</b-button>
-              </template>
-              <template v-if="manageComponents.AdvanceCustomization">
-                <div class="d-none d-lg-block continue-btn-holder pt-5">
-                  <b-button v-if="tabIndex == 0" @click="showBasicCustomization()" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                  <b-button v-else @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                  <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= 2) || (!hideColorSection && tabIndex <= 3)">Next</b-button>
-                  <template v-if="isCustomerAuthenticated">
-                    <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
-                  </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('summary')" v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
-                  </template>
-                </div>
-              </template>
+              <div class="d-none d-lg-block continue-btn-holder pt-5">
+                <b-button v-if="tabIndex > 0" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
+                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= 2) || (!hideColorSection && tabIndex <= 3)">Next</b-button>
+                <template v-if="isCustomerAuthenticated">
+                  <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
+                </template>
+                <template v-else>
+                  <b-button @click="setActionBeforeLogin('summary')" v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
+                </template>
+              </div>
             </div>
           </div>
         </b-col>
@@ -145,6 +116,7 @@
           <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
           <button class="backtohome-btn d-lg-none" @click="showHomeLanding()"><font-awesome-icon :icon="['fas', 'arrow-left']"/></button>
         </b-col>
+        </template>
       </b-row>
     </b-container>
     <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
@@ -231,7 +203,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       }, 2000)
       setTimeout(() => {
         this.showLoader = false
-        console.log(this.showLoader)
         this.productUpdated = true
       }, 10000)
     }
@@ -271,7 +242,7 @@ export default class Home extends Mixins(ErrorMessages) {
   public shared_link = ''
   public extractedcolorclass = ""
 
-  public showLoader = false;
+  public showLoader = true;
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   public setRecentLogos() {
@@ -541,44 +512,24 @@ export default class Home extends Mixins(ErrorMessages) {
       }
     }
   }
-  public showAdvanceCustomization() {
-    if (this.isCustomerAuthenticated){
-      this.$store.dispatch("getLockers");
-    }
-    this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
-    this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
-    this.$store.dispatch('setWindowView', 2)
-  }
   public undoAction(){
     this.$store.dispatch('undoAction')
   }
   public redoAction(){
     this.$store.dispatch('redoAction');
   }
-  public showBasicCustomization() {
-    this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
-    this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
-    this.$store.dispatch('setWindowView', 1)
-  }
   public showDesign() {
     if(this.manageComponents.mobileScreen){
       this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
       this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
-      this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
-      this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
-      this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
-      this.$store.dispatch('setManageComponents', {index: 'DefaultColorShuffleBtn', value: true})
+      this.$store.dispatch('setManageComponents', {index: 'CustomizationTabs', value: false})
     }
   }
 
   public showHomeLanding() {
+    this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
     this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
-    this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: true})
-    this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
-    this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: true})
-    this.$store.dispatch('setManageComponents', {index: 'DefaultColorShuffleBtn', value: false})
-    this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: true})
-    this.extractedcolorclass = ""
+    this.$store.dispatch('setManageComponents', {index: 'CustomizationTabs', value: true})
   }
   public additionalClass(additionalClassTrigger: string) {
     if(additionalClassTrigger){
@@ -634,6 +585,7 @@ export default class Home extends Mixins(ErrorMessages) {
         if(windowView == 2){
           this.showAdvanceCustomization();
         }
+        this.showLoader = false;
       }).catch((e: any) => {
         console.log(e)
         // console.log('in catch')
@@ -786,6 +738,7 @@ export default class Home extends Mixins(ErrorMessages) {
     if (ok) {
       this.$store.dispatch('resetStore')
       this.$store.dispatch('SET_LOGO_COLORS', [])
+      this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
     }
   }
 

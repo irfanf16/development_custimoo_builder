@@ -19,6 +19,7 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
+import {setLogoSettings} from "@/helpers/Helpers";
 
 @Component<Scene>({
   mounted() {
@@ -113,7 +114,11 @@ import rgbHex from 'rgb-hex'
       if('textIndex' in target) {
         self.$store.dispatch('updateCustomTextAttribute', {index: target.textIndex, attribute: 'text', value: ''})
       }else {
-        self.$store.dispatch('deleteCustomLogo', {index: target.logoIndex})
+        let logo = setLogoSettings(target.logoIndex);
+        logo.logoIndex = target.logoIndex;
+        self.$store.commit('customLogos', logo)
+        self.$store.commit('SET_LOGO_COLORS', []);
+        self.$store.commit('SET_INITIAL_LOGO_COLORS', []);
       }
       canvas.remove(target);
       canvas.requestRenderAll();
@@ -214,7 +219,7 @@ export default class Scene extends Vue {
       if(this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
         let deleteIndex: number[] = []
         this.customLogoObjects.forEach((item: Record<any, any>, index: number) => {
-          if(item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '')) {
+          if(item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '' || this.customLogos[item.logoIndex].url == null)) {
             this.frontCanvas.remove(this.customLogoObjects[item.logoIndex])
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
@@ -223,9 +228,9 @@ export default class Scene extends Vue {
             deleteIndex.push(index)
           }
         })
-        deleteIndex.forEach((item: number) => {
+       /* deleteIndex.forEach((item: number) => {
           Vue.delete(this.customLogoObjects, item)
-        })
+        })*/
       }
       newVal.forEach((logo: Record<any, any>, index: number) => {
         let logoUrl = logo? (this.storageUrl + logo.url).trim().split(' ').join('%20') : ''
@@ -1350,7 +1355,7 @@ export default class Scene extends Vue {
 
          // console.log('selectable',selectable);
 
-          fabric.Image.fromURL(logoUrl + "?not-from-cache-please", (img: any) => {
+          fabric.Image.fromURL(logoUrl, (img: any) => {
             img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
             img.set({
               left: self.canvasWidth / self.mainCanvasWidth * logo.x_axis,

@@ -2,6 +2,8 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
+
+import {getLogoObject, setLogoSettings} from "../../helpers/Helpers"
 const ProductAttributes:Module<any, any> = {
   state: {
     lockerActiveTabIndex:0,
@@ -44,7 +46,8 @@ const ProductAttributes:Module<any, any> = {
       editDesignId: 0,
       mainProductId: 0,
       editStatus: false
-    }
+    },
+    using_logo_colors: false
   },
   mutations: {
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
@@ -140,6 +143,7 @@ const ProductAttributes:Module<any, any> = {
       if(categories){
         state.categories = categories
       }
+
     },
     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
       // Vue.set(state.customLogos, state.customLogos.length, customLogo)
@@ -187,6 +191,9 @@ const ProductAttributes:Module<any, any> = {
       if(delCustomTabLogo){
         // state.customLogos.splice(delCustomLogo.index, 1)
         Vue.delete(state.customLogos, delCustomTabLogo.index)
+        state.customLogos.forEach((custom_logo, clIdx) => {
+          Vue.set(state.customLogos[clIdx], "logoIndex", clIdx)
+        })
       }
     },
     setLogoTabMutation(state: Record<any, any>, logoIndex:number) {
@@ -319,7 +326,7 @@ const ProductAttributes:Module<any, any> = {
     },
     ADD_LOCKER_ROOM_COLORS(state:Record<any, any>, payload:Record<any, any>){
       payload = payload.map((item: Record<any, any>) => {
-         item.color_text = JSON.parse(item.color_text)
+         item.color_text = JSON.parse(JSON.stringify(item.color_text))
         return item
       })
       state.lockerColors = payload
@@ -338,8 +345,12 @@ const ProductAttributes:Module<any, any> = {
       state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
+      state.using_logo_colors = false;
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
+
+        /*
+
         let logoSetting = selectedProduct.logos_setting[0]
 
         if(!logoSetting) {
@@ -364,8 +375,8 @@ const ProductAttributes:Module<any, any> = {
           side: logoSetting.side,
           customLogo: true,
           is_transparent: false
-        }
-        state.customLogos.push(logo);
+        }*/
+        state.customLogos.push(setLogoSettings(0));
         state.logoTabIndex = 0;
       }
     },
@@ -458,6 +469,9 @@ const ProductAttributes:Module<any, any> = {
     },
     DELETE_COLLECTION(state:Record<any, any>, payload){
       state.collections.splice(payload.index, 1);
+    },
+    UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
+      state.using_logo_colors = payload
     },
   },
   getters: {
@@ -563,6 +577,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getDesignCollections(state:Record<any, any>){
       return state.designCollections
+    },
+    getUsingColorLogos(state:Record<any, any>){
+      return state.using_logo_colors
     }
   },
   actions: {
