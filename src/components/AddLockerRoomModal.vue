@@ -188,6 +188,9 @@ import LockerRoom from "@/components/LockerRoom.vue";
             this.showLoader = false
             this.showToast('Design saved successfully', 'SUCCESS')
             this.product_name = ''
+            this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
+            this.ref['my-modal'].hide();
+            this.$emit('open-locker-room');
           }else{
             this.showLoader = false
             this.showError(res);

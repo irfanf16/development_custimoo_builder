@@ -5,6 +5,7 @@ import get = Reflect.get;
 const ProductAttributes:Module<any, any> = {
   state: {
     lockerActiveTabIndex:0,
+    lockerTabsIndex:0,
     products:[],
     selectedIndex: 0,
     categories: [],
@@ -49,6 +50,9 @@ const ProductAttributes:Module<any, any> = {
   mutations: {
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
       state.lockerActiveTabIndex = payload
+    },
+    Change_Locker_Tabs_Index(state:Record<any, any>, payload) {
+      state.lockerTabsIndex = payload
     },
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
       if (payload.status == true || payload.status == false){
@@ -463,6 +467,9 @@ const ProductAttributes:Module<any, any> = {
   getters: {
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
+    },
+    getLockerTabsIndex: state => {
+      return state.lockerTabsIndex
     },
     getColorsFromRecent: state => {
       return state.colorsFromRecent
