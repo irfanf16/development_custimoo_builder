@@ -6,7 +6,7 @@
       </b-form-checkbox>
     </div>
 
-    <div class="btn btn-secondary modal-handler" @click="modalHandler">
+    <div class="btn btn-secondary modal-handler" >
       <div class="upload-box position-relative" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
         <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
@@ -23,7 +23,13 @@
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <input  :style="{display: customLogos[customLogoIndex].url ? 'none' : 'block'}" type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
+        <input  :style="{display: customLogos[customLogoIndex].url ? 'none' : 'block'}"
+                type="file"
+                name="logos" ref="fileInput"
+                @change="uploadLogoImage"
+                @click="checkConfirmLogo"
+                @drop="onDragUpload"
+                class="fileLoader"
                accept="image/*,application/postscript,application/pdf">
       </div>
 
@@ -71,11 +77,11 @@ import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
 
 @Component<UploadLogo>({
   mounted() {
-    if (localStorage.getItem('logo_modal_status') == null) {
-      this.open_modal = true
-    } else {
-      this.open_modal = false
-    }
+      if (localStorage.getItem('logo_modal_status') == null) {
+        this.open_modal = true
+      } else {
+        this.open_modal = false
+      }
   }
 })
 export default class UploadLogo extends Mixins(ErrorMessages) {
@@ -99,6 +105,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   @Watch('customLogos', {
     deep: true
   })
+  dummy(){
+    console.log('dummy')
+  }
  /* customLogosChanged(newVal: [Record<any, any>]) {
     if (this.customLogos[0] && !this.customLogos[0].url) {
       let inputRef = this.$refs.fileInput as Record<any, any>
@@ -114,9 +123,11 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
       localStorage.setItem('logo_modal_status', 'false')
       this.open_modal = false
+      this.hideModal();
     }
+
     if(this.ref.fileInput) {
-      //this.ref.fileInput.click()
+      this.ref.fileInput.click()
     }
   }
 
@@ -149,6 +160,19 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
+  public checkConfirmLogo(e){
+    if (this.open_modal) {
+      e.preventDefault()
+      this.showModal()
+    }
+  }
+
+  public onDragUpload(e: any) {
+    if (this.open_modal) {
+      e.preventDefault()
+      this.showModal()
+    }
+  }
 
   /*public customLogoInit(customLogoIndex: number | null = null) {
     if (this.selectedProduct && this.selectedProduct.is_logo_allowed == 1) {
@@ -185,6 +209,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }*/
 
   public uploadLogoImage(e: any) {
+
     let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
     custom_logo.logoIndex = this.customLogoIndex;
     let img = e.target.files[0]
