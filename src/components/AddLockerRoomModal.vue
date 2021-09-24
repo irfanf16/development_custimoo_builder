@@ -51,8 +51,7 @@
 </template>
 
 <script lang="ts">
-
-import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -67,6 +66,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
         },
     })
     export default class AddLockerRoomModal extends Mixins(ErrorMessages) {
+      @Prop({required: false, default: true}) readonly close_on_add !: boolean
       async recallProducts(){
         await this.$store.dispatch('GET_LOCKER_PRODUCTS')
         if (this.roomWithProducts.length){
@@ -185,12 +185,16 @@ import LockerRoom from "@/components/LockerRoom.vue";
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res.status == 201){
-            this.showLoader = false
             this.showToast('Design saved successfully', 'SUCCESS')
             this.product_name = ''
             this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
-            this.ref['my-modal'].hide();
-            this.$emit('open-locker-room');
+            if(this.close_on_add) {
+              this.ref['my-modal'].hide();
+              this.showLoader = false
+            } else {
+              this.$emit('open-locker-room');
+            }
+
           }else{
             this.showLoader = false
             this.showError(res);

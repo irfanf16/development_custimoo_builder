@@ -28,7 +28,7 @@
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
                   </template>
-                  <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" />
+                  <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
                   </template>
@@ -652,6 +652,8 @@ export default class Home extends Mixins(ErrorMessages) {
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       if (res == true){
         this.showLockerRoomModal()
+        this.ref.saveToLockerModal.ref['my-modal'].hide();
+        this.ref.saveToLockerModal.showLoader = false;
       }
     }
   }
