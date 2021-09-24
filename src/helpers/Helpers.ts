@@ -59,7 +59,8 @@ const getLogoObject = () => {
     transparent_logo: null,
     base64_logo: null,
     originalWidth: logo_settings_object.width,
-    originalHeight: logo_settings_object.height
+    originalHeight: logo_settings_object.height,
+    logoIndex:0
   }
 }
 
@@ -98,6 +99,7 @@ const setLogoSettings = (logo_index: number, logo: Record<any, any> | null = nul
   logo.haveControls =  !logo_settings.is_locked;
   logo.originalWidth =  logo_settings.width;
   logo.originalHeight =  logo_settings.height;
+  logo.logoIndex =  logo_index;
   return logo;
 }
 

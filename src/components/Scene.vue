@@ -228,9 +228,9 @@ export default class Scene extends Vue {
             deleteIndex.push(index)
           }
         })
-        deleteIndex.forEach((item: number) => {
+       /* deleteIndex.forEach((item: number) => {
           Vue.delete(this.customLogoObjects, item)
-        })
+        })*/
       }
       newVal.forEach((logo: Record<any, any>, index: number) => {
         let logoUrl = logo? (this.storageUrl + logo.url).trim().split(' ').join('%20') : ''
