@@ -302,7 +302,9 @@ export default class LogoPlacementTabs extends Vue {
     let logo = setLogoSettings(index);
     logo.logoIndex = index;
     this.$store.commit('customLogos', logo)
-    this.$store.dispatch('deleteCustomLogoTab', payload)
+    setTimeout(() => {
+      this.$store.dispatch('deleteCustomLogoTab', payload)
+    }, 500)
   }
 
   public deleteLogo(index: number) {
