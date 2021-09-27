@@ -1299,8 +1299,8 @@ export default class Scene extends Vue {
           }
         }
 
-        let front_logo_setting = null
-        let back_logo_setting = null;
+        let front_logo_setting!: Record<any, any>
+        let back_logo_setting!: Record<any, any>
         if(this.logosSettings.length > 0) {
           this.logosSettings.forEach((logo_Setting,lindex) => {
             if(lindex == logoIndex){

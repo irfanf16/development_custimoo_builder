@@ -49,7 +49,7 @@ import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
-import DesignPdfView from "./DesignPdfView";
+import DesignPdfView from "@/components/DesignPdfView.vue";
 
 @Component<OrderDetails>({
   components: {
@@ -137,8 +137,10 @@ export default class OrderDetails extends Vue {
   public  generateProductionPdf() {
 
     this.showLoader = true;
-    this.pdf_front_image = document.getElementById("scene-front").toDataURL("image/png")
-    this.pdf_back_image = document.getElementById("scene-back").toDataURL("image/png")
+    let frontElement = document.getElementById("scene-front") as Record<any, any>
+    let backElement = document.getElementById("scene-back") as Record<any, any>
+    this.pdf_front_image = frontElement.toDataURL("image/png")
+    this.pdf_back_image = backElement.toDataURL("image/png")
     const element = document.getElementById("production-pdf-html")
     const opt = {
       margin: [0, 0, 0, 0],
