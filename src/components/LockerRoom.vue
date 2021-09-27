@@ -70,7 +70,7 @@
                 <b-tab v-if="!getAddMoreCollectionStatus" title="Assets" class="assets-file">
                   <template v-for="(logo, inda) in room.logos">
                     <div :key="inda" class="assets-logo-block">
-                      <img :src="storageUrl+logo.logo_url "/>
+                      <img  :src="storageUrl+logo.logo_url " crossorigin="anonymous"/>
                       <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
                     </div>
                   </template>
@@ -91,7 +91,7 @@
                     <div class="color-holder" v-if="colors">
                       <div class="color-container">
                         <template v-for="(item, ix) in colors">
-                          <div :key="`item_${ix}`">
+                          <div :key="`item_${ix}`" v-if="item.value">
                             <div class="color-box"
                                  :style="{backgroundColor: item.value}" :key="`${ix}`">
                             </div>
@@ -179,6 +179,9 @@ import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {getRandom} from "@/helpers/Helpers";
+import rgbHex from "rgb-hex";
+import {getClosestColor} from "@/pantoneColor";
+import {processColorsCustom} from "../helpers/Helpers"
 
 @Component<LockerRoom>({
   components: {
@@ -201,7 +204,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   private baseUrl = location.host+"/#/"
   public ref = this.$refs as Record<any, any>
   public colors : [] = []
-  public tabIndex = 0
+  public tabIndex = this.$store.getters.getLockerTabsIndex;
   public url = ''
   public group = ''
   public collection_available = false;
@@ -484,6 +487,20 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         customLogo: true,
         is_transparent: false
       }
+      if(index == 0) {
+        if (currentLogo.logo_colors != null){
+          let image_colors = processColorsCustom(JSON.parse(currentLogo.logo_colors))
+          let image_color_count = image_colors.length;
+          while(image_color_count < 4 ) {
+            image_colors.push({hex: null, pantone: null, name: null});
+            ++image_color_count;
+          }
+          this.$store.dispatch("SET_LOGO_COLORS", image_colors);
+          this.$store.dispatch("initialLogoColors", JSON.stringify(image_colors))
+          this.$store.commit("UPDATE_USING_COLOR_LOGOS", false);
+          /*this.processColorsCustom(JSON.parse(currentLogo.logo_colors))*/
+        }
+      }
       this.$store.dispatch('setCustomLogos', logo)
     }
     this.$emit('hideLockerRoomModal')
@@ -573,6 +590,29 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       this.lockerActiveTabIndex = 0
     }
   }
+  // public processColorsCustom(colors: [],customLogoIndex:number):void {
+  //   let imageColors: any[] = []
+  //   let uniqueColors: string[] = []
+  //   colors.forEach((color: number[]) => {
+  //     const hex = rgbHex(color[0], color[1], color[2])
+  //     if ((!uniqueColors.includes(hex))) {
+  //       uniqueColors.push(hex)
+  //     }
+  //   })
+  //   let deletedCount = uniqueColors.length - 4
+  //   uniqueColors.splice(4, deletedCount)
+  //   uniqueColors.forEach((color: string) => {
+  //     // console.log(color)
+  //     let pantoneColor = getClosestColor(color)
+  //     //console.log(JSON.parse(JSON.stringify(pantoneColor)))
+  //     imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
+  //   })
+  //   //only set logo colors if index is 0
+  //   if(customLogoIndex == 0) {
+  //     this.$store.dispatch("SET_LOGO_COLORS", imageColors);
+  //     this.$store.dispatch("initialLogoColors", JSON.stringify(imageColors));
+  //   }
+  // }
 }
 </script>
 

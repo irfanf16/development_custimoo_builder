@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+  <div class="h-100">
+<!--    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>-->
     <div class="customization-tabs">
       <b-tabs v-model="tabIndex">
         <b-tab v-if="selectedProduct.is_logo_allowed == 1">

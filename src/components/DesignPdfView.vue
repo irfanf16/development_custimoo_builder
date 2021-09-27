@@ -51,9 +51,9 @@
               <img :src="pdf_back_image" alt="" style="width: 100%; max-width: 100%">
             </div>
           </div>
-          <div class="two-columns" style="page-break-inside: avoid; padding-top: 0.5in">
+          <div class="two-columns">
             <div class="left-col">
-              <div class="product-details-area">
+              <div class="product-details-area" style="padding-top: 0.5in; page-break-inside: avoid;">
                 <template v-if="productType">
                   <template v-if="productType == 'customized'">
                     <div class="details-col">
@@ -117,8 +117,24 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="details-col">
+                  <div class="logo-area">
+                    <h2>Logos</h2>
+                    <div class="logo-holder">
+                      <div class="logo-block" v-for="(logo, index) in customLogos" :key="index">
+                        <!--                    <img :src="`${storageUrl}${logo.url}`" height="80" width="80">-->
+                        <div class="logo">
+                          <img :src="logo.base64_logo" height="80" width="80">
+                          <!--                      <img src="../assets/images/logo.svg">-->
+                        </div>
+                        <p>Size: {{ `${logo.originalHeight}cm x ${logo.originalWidth}cm` }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="logo-area">
+              <div class="logo-area" style="page-break-inside: avoid; padding-top: 0.5in;">
                 <h2>Team Roster</h2>
                 <div class="roster-details">
                   <table>
@@ -140,7 +156,7 @@
                 </div>
               </div>
             </div>
-            <div class="right-col">
+            <div v-if="false" class="right-col" style="page-break-inside: avoid">
               <div class="logo-area">
                 <h2>Logos</h2>
                 <div class="logo-holder">
@@ -200,9 +216,11 @@ export default class DesignPdfView extends Vue {
     let storage_url = self.storageUrl;
     let custom_logos =  self.$store.getters.getCustomLogos.filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
     custom_logos = custom_logos.map((custom_logo: Record<any, any>) => {
-      self.getUrlContent(storage_url+custom_logo.url, (dataUrl: any) => {
-        custom_logo.base64_logo = dataUrl;
-      })
+      if(custom_logo.url) {
+        self.getUrlContent(storage_url+custom_logo.url, (dataUrl: any) => {
+          custom_logo.base64_logo = dataUrl;
+        })
+      }
       return custom_logo;
     })
     return custom_logos;
@@ -382,11 +400,14 @@ a {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  gap: 0.3in;
 }
 
 .two-columns .left-col {
-  flex: 0 0 65%;
-  max-width: 65%;
+  /*flex: 0 0 65%;*/
+  /*max-width: 65%;*/
+  flex: 0 0 100%;
+  max-width: 100%;
 }
 
 .two-columns .product-details-area {
@@ -399,8 +420,8 @@ a {
 }
 
 .two-columns .details-col {
-  flex: 0 0 48%;
-  max-width: 48%;
+  flex: 0 0 calc(33.3333% - 0.1in);
+  max-width: calc(33.3333% - 0.1in);
 }
 
 .two-columns h2 {

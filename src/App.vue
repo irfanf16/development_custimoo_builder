@@ -12,6 +12,23 @@ export default{
   name: 'App',
   components: {
     Header
+  },
+  async mounted() {
+    const token = this.$router.currentRoute.query.token
+    if (token){
+      let customer = await this.$store.dispatch('getCustomerFromToken', token)
+      if (customer){
+        let payload = {
+          access_token: token,
+          user: customer
+        }
+        this.$store.commit('SET_CUSTOMER', payload)
+        this.$router.push({name: 'Home'})
+        this.$store.commit('RESET_STORE')
+      }else{
+        alert('no customer')
+      }
+    }
   }
 }
 </script>

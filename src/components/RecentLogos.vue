@@ -25,6 +25,7 @@ import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {log} from "fabric/fabric-impl";
+import {processColorsCustom} from "../helpers/Helpers"
 
 @Component<RecentLogos>({
   components: {
@@ -112,6 +113,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     let custom_logos = this.$store.getters.getCustomLogos
     let logo_url = '';
     let transparent_logo = logo.transparent_logo_url;
+    let smart_transparent_logo = logo.smart_transparent_logo_url;
     let original_logo = logo.logo_url;
     let is_transparent = false;
     await this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customLogos)), action: 'customLogos' })
@@ -133,7 +135,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     },{
       index: customTabIndex,
       attribute: 'is_transparent',
-      value: is_transparent
+      value: false
     },
       {
         index: customTabIndex,
@@ -144,6 +146,16 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
         index: customTabIndex,
         attribute: 'transparent_logo',
         value: transparent_logo
+      },
+      {
+        index: customTabIndex,
+        attribute: 'smart_transparent_logo',
+        value: smart_transparent_logo
+      },
+      {
+        index: customTabIndex,
+        attribute: 'is_smart_transparent',
+        value: false
       }
 
     ];
@@ -171,13 +183,23 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     }
     else {
       if(customTabIndex == 0) {
-        this.processColorsCustom(JSON.parse(logo.logo_colors),customTabIndex)
+        if(logo.logo_colors != null) {
+          let image_colors = processColorsCustom(JSON.parse(logo.logo_colors))
+          let image_color_count = image_colors.length;
+          while(image_color_count < 4 ) {
+            image_colors.push({hex: null, pantone: null, name: null});
+            ++image_color_count;
+          }
+          this.$store.dispatch("SET_LOGO_COLORS", image_colors);
+          this.$store.dispatch("initialLogoColors", JSON.stringify(image_colors));
+          this.$store.commit("UPDATE_USING_COLOR_LOGOS", false);
+        }
       }
     }
+
     setTimeout(() => {
       this.showLoader = false;
     },1000)
-
   }
 
    public async addLogoObject(index:number):Promise<void> {
@@ -210,33 +232,6 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
      logo.logoIndex = index
     await this.$store.dispatch('setCustomLogos', logo)
   }
-
-  public processColorsCustom(colors: [],customLogoIndex:number):void {
-    let imageColors: any[] = []
-    let uniqueColors: string[] = []
-    colors.forEach((color: number[]) => {
-      const hex = rgbHex(color[0], color[1], color[2])
-      if ((!uniqueColors.includes(hex))) {
-        uniqueColors.push(hex)
-      }
-    })
-    let deletedCount = uniqueColors.length - 4
-    uniqueColors.splice(4, deletedCount)
-    uniqueColors.forEach((color: string) => {
-      // console.log(color)
-      let pantoneColor = getClosestColor(color)
-      //console.log(JSON.parse(JSON.stringify(pantoneColor)))
-      imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
-    })
-    //only set logo colors if index is 0
-    if(customLogoIndex == 0) {
-      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
-    }
-  }
-
-
-
-
 }
 
 </script>
