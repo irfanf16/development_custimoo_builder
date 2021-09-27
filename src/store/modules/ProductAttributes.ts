@@ -200,18 +200,46 @@ const ProductAttributes:Module<any, any> = {
       state.logoTabIndex = logoIndex;
       // Vue.set(state.logoTabIndex, logoIndex, logoIndex)
     },
-    toggleLogoBackgroudMutation(state: Record<any, any>, logoIndex:number) {
-     const logo = state.customLogos[logoIndex];
+    toggleLogoBackgroudMutation(state: Record<any, any>, payload:any) {
+
+      const logo = state.customLogos[payload.index];
       const original_logo = logo.original_logo;
       const transparent_logo = logo.transparent_logo;
+      const smart_transparent_logo = logo.smart_transparent_logo;
       let logo_url = '';
 
-     if(logo.is_transparent===true){
-        logo_url = transparent_logo;
-      }else{
-        logo_url = original_logo;
+      if(payload.type == 'transparent') {
+        if(payload.val) {
+          Vue.set(state.customLogos[payload.index], 'is_transparent', true )
+          Vue.set(state.customLogos[payload.index], 'is_smart_transparent', false )
+        } else {
+          Vue.set(state.customLogos[payload.index], 'is_transparent', false )
+        }
       }
-      Vue.set(state.customLogos[logoIndex], 'url', logo_url )
+      else {
+        if(payload.val) {
+          Vue.set(state.customLogos[payload.index], 'is_smart_transparent', true )
+          Vue.set(state.customLogos[payload.index], 'is_transparent', false )
+        } else {
+          Vue.set(state.customLogos[payload.index], 'is_smart_transparent', false )
+        }
+      }
+      const changed_logo = state.customLogos[payload.index];
+      if(changed_logo.is_transparent) {
+        logo_url = transparent_logo
+      } else if (changed_logo.is_smart_transparent) {
+        logo_url = smart_transparent_logo
+      }
+      else {
+        logo_url = original_logo
+      }
+      Vue.set(state.customLogos[payload.index], 'url', logo_url )
+     // if(logo.is_transparent===true){
+     //    logo_url = transparent_logo;
+     //  }else{
+     //    logo_url = original_logo;
+     //  }
+     // Vue.set(state.customLogos[payload.index], 'url', logo_url )
 
     },
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
