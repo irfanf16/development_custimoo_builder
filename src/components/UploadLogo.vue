@@ -1,9 +1,18 @@
 <template>
-  <div class="upload-logo-opener" v-if="customLogos">
-    <div class="logo-option-area mb-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground">
-        Remove Logo Background
+  <div style="padding-bottom: 5px" class="upload-logo-opener" v-if="customLogos">
+    <div class="logo-option-area mb-3 mt-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
+      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">
+        Remove background color
       </b-form-checkbox>
+      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">
+        Smart remove background from logo
+      </b-form-checkbox>
+
+<!--      <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
+        <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="A">Remove Logo Background</b-form-radio>
+        <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="B">Remove Smart Logo Background</b-form-radio>
+      </b-form-group>-->
+
     </div>
 
     <div class="btn btn-secondary modal-handler" >
@@ -260,6 +269,8 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         inputRef.value = null;
         custom_logo.original_logo = resp.data.file.logo_url;
         custom_logo.transparent_logo = resp.data.file.transparent_logo_url;
+        custom_logo.smart_transparent_logo = resp.data.file.smart_transparent_logo_url;
+        custom_logo.is_smart_transparent = false;
         custom_logo.url = resp.data.file.logo_url;
         let getLogos = []
         if (this.customLogos.length > 1){
@@ -422,11 +433,15 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
   }
 
-  public toggleLogoBackground() {
+  public toggleLogoBackground(type:string,val:boolean) {
+    let payload = {index:this.customLogoIndex,type,val}
     if(this.customLogos[this.customLogoIndex]){
-      this.$store.dispatch('toggleLogoBackgroud', this.customLogoIndex)
+      this.$store.dispatch('toggleLogoBackgroud', payload)
     }
   }
+  // public changeLogoBackground(val) {
+  //
+  // }
 }
 
 </script>

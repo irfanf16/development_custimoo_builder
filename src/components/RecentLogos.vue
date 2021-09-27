@@ -113,6 +113,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     let custom_logos = this.$store.getters.getCustomLogos
     let logo_url = '';
     let transparent_logo = logo.transparent_logo_url;
+    let smart_transparent_logo = logo.smart_transparent_logo_url;
     let original_logo = logo.logo_url;
     let is_transparent = false;
     await this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customLogos)), action: 'customLogos' })
@@ -134,7 +135,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     },{
       index: customTabIndex,
       attribute: 'is_transparent',
-      value: is_transparent
+      value: false
     },
       {
         index: customTabIndex,
@@ -145,6 +146,16 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
         index: customTabIndex,
         attribute: 'transparent_logo',
         value: transparent_logo
+      },
+      {
+        index: customTabIndex,
+        attribute: 'smart_transparent_logo',
+        value: smart_transparent_logo
+      },
+      {
+        index: customTabIndex,
+        attribute: 'is_smart_transparent',
+        value: false
       }
 
     ];

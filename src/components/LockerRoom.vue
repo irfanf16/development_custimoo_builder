@@ -204,7 +204,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   private baseUrl = location.host+"/#/"
   public ref = this.$refs as Record<any, any>
   public colors : [] = []
-  public tabIndex = 0
+  public tabIndex = this.$store.getters.getLockerTabsIndex;
   public url = ''
   public group = ''
   public collection_available = false;
