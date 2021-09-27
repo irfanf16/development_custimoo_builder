@@ -2,7 +2,7 @@
   <div style="padding-bottom: 5px" class="upload-logo-opener" v-if="customLogos">
     <div class="logo-option-area mb-3 mt-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
       <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">
-        Remove all white from logo
+        Remove background color
       </b-form-checkbox>
       <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">
         Smart remove background from logo
