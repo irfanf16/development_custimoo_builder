@@ -27,20 +27,6 @@
                                  :options="options"></b-form-select>
                 </div>
               </div>
-<!--             <template v-if="logo_tab.url">
-               <template v-if="isCustomerAuthenticated">
-                 <b-button :key="'saveLogoModal'" v-if="logo_tab.url"
-                           class="btn btn-secondary w-100 fw-bold save-logo-btn" v-b-modal.modal-center-savelogomodal>
-                   Save Logo
-                 </b-button>
-               </template>
-               <template v-else>
-                 <b-button :key="'saveLogoLogin'" class="btn btn-secondary w-100 fw-bold save-logo-btn"
-                           v-b-modal.modal-login>Save Logo
-                 </b-button>
-               </template>
-             </template>
-              <SaveLogoModal :logoIndex="ltIdx"/>-->
             </div>
             <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url">
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
@@ -84,18 +70,6 @@
                   </b-button>
                 </div>
               </div>
-<!--              <template v-if="isCustomerAuthenticated">
-                <button :key="'saveLogoColorModal'" v-if="customLogos[0] && customLogos[0].url"
-                        class="btn btn-secondary w-100 fw-bold btn-save-color" v-b-modal.modal-center-savecolormodal
-                        @click="callRooms">Save Color
-                </button>
-              </template>
-              <template v-else>
-                <b-button :key="'saveLogoColorLogin'" class="btn btn-secondary w-100 fw-bold btn-save-color"
-                          v-b-modal.modal-login>Save Color
-                </b-button>
-              </template>
-              <SaveColorModal/>-->
             </div>
         </div>
         <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
@@ -352,16 +326,18 @@ export default class LogoPlacementTabs extends Vue {
 
   shuffleLogoColors() {
     if(this.imageColors && this.imageColors.length > 1) {
-      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>, icIdx) => {
+      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
+        /*.filter((imageColor: Record<any, any>, icIdx) => {
         return imageColor.hex
-      });
-      let empty_logo_indexes: any = [];
-      let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>, icIdx) => {
+      })*/;
+    /*  let empty_logo_indexes: any = [];*/
+      let imageColors = JSON.parse(JSON.stringify(this.imageColors))
+        /*.filter((imageColor: Record<any, any>, icIdx) => {
         if(imageColor.hex == null) {
           empty_logo_indexes.push(icIdx);
         }
         return imageColor.hex
-      })
+      })*/
 
       let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
         if (currentIndex !== 1) return previousValue;
@@ -375,9 +351,9 @@ export default class LogoPlacementTabs extends Vue {
           imageColors.reduce(shuffle)
         }
       }
-      empty_logo_indexes.forEach((emptyLogoIndex: number) => {
+     /* empty_logo_indexes.forEach((emptyLogoIndex: number) => {
         imageColors[emptyLogoIndex] = {hex: null, pantone: null, name: null};
-      });
+      });*/
 
 
       this.$store.dispatch("SET_LOGO_COLORS", imageColors);
