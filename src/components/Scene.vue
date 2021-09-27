@@ -219,7 +219,13 @@ export default class Scene extends Vue {
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
             }
-            this.otherSideLogos[item.logoIndex] = null
+            if(this.otherSideLogos[item.logoIndex]) {
+              this.frontCanvas.remove(this.otherSideLogos[item.logoIndex])
+              if (this.backCanvas) {
+                this.backCanvas.remove(this.otherSideLogos[item.logoIndex])
+              }
+              this.otherSideLogos[item.logoIndex] = null
+            }
             deleteIndex.push(index)
           }
         })
