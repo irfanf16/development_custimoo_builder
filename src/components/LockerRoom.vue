@@ -367,11 +367,11 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       return false
     }
     this.viewLoader = true
-   let res = await this.$store.dispatch('copyProductDesign', {id: this.copiedProductId, name: this.copiedProductName, room_id: this.copiedProductLockerId})
+    this.ref['copy-product-modal'].hide()
+    let res = await this.$store.dispatch('copyProductDesign', {id: this.copiedProductId, name: this.copiedProductName, room_id: this.copiedProductLockerId})
     if (res.status == 201){
       this.copiedProductId = 0
       this.copiedProductName = ""
-      this.ref['copy-product-modal'].hide()
       this.viewLoader = false
     }else{
       this.showError(res)
