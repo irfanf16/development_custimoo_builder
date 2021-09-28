@@ -181,7 +181,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
-  public onClickUpload(e){
+  public onClickUpload(e: Event){
     this.uploadType = 'click'
     if ((localStorage.getItem('logo_modal_status') == null)) {
       e.preventDefault()
@@ -259,7 +259,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         'Content-Type': 'multipart/form-data'
       }
     }
-    fd.append('file', img)
+    fd.append('file', img as Blob)
     fd.append('product_id', this.selectedProduct.product_id)
     this.showLoader = true;
       http.post('/customer/upload/logo', fd, header)

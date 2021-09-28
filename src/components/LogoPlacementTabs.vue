@@ -384,7 +384,7 @@ export default class LogoPlacementTabs extends Vue {
     return matched
   }
 
-  public async rollbackPreviousColors (): void {
+  public async rollbackPreviousColors () {
     this.initialExtractedColors.forEach((defaultColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
     })
@@ -424,7 +424,7 @@ export default class LogoPlacementTabs extends Vue {
 
   }
 
-  public selectLogoColor(index, imageColor){
+  public selectLogoColor(index: number, imageColor: Record<any, any>){
     if(index==this.selectedSwatchIndex) {
       this.showLogoColors = false;
       this.selectedSwatchIndex = -1;
@@ -440,7 +440,6 @@ export default class LogoPlacementTabs extends Vue {
   public setSwatchColor(color: Record<any, any>) {
     let payload = {color_info : color , index : this.selectedSwatchIndex}
     this.$store.dispatch('setDefaultColor', { index: this.selectedSwatchIndex, color: color.hex, pantone: color.pantone, name: color.name })
-    console.log("shaha", color)
     this.$store.commit('SET_LOGO_COLOR', payload)
   }
 
