@@ -75,7 +75,7 @@
         <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
       </b-tab>
       <template #tabs-end>
-        <b-button class="light ml-1" v-if="customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
+        <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
           <BIconPlus />
         </b-button>
       </template>
