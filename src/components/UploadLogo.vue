@@ -7,7 +7,7 @@
         <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="B">Remove Smart Logo Background</b-form-radio>
       </b-form-group>-->
 
-      <div class="w-100 text-left pl-2" style="margin-top: 6rem">
+      <div class="w-100 text-left pl-2 position-relative" style="top: 6rem">
         <div>
           <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">
             Remove background color
