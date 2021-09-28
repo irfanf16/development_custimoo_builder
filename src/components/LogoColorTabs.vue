@@ -55,7 +55,7 @@ import {getClosestColor, getPantoneColor} from '@/pantoneColor'
 
      if(this.$refs.colorPicker){
        console.log('found')
-       this.set(this.$refs.colorPicker.hueHeight, 500)
+       Vue.set(this.$refs.colorPicker, 'hueHeight', 500)
      }else{
        console.log('notfound')
      }
@@ -83,21 +83,19 @@ export default class LogoColorTabs extends Vue {
   public othersActive = false
 
   @Watch('showOther')
-  onShowOther(val: string) {
+  showOtherChanged(val: string) {
     if(this.showOther){
-      console.log('found')
-      this.$refs['colorPicker'].data.hueHeight = 500
+      let colorPicker = this.$refs['colorPicker'] as Record<any, any>
+      colorPicker.data.hueHeight = 500
     }else{
       console.log('notfound')
     }
   }
 
   @Watch('swatchPantone')
-  onSwatchPantoneChanged(val: string) {
+  swatchPantoneChanged(val: string) {
     this.pantoneColorVal = val
   }
-
-
 
   get svgGroups() {
     return this.$store.getters.getSvgGroups

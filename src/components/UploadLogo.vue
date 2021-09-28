@@ -7,7 +7,7 @@
         <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="B">Remove Smart Logo Background</b-form-radio>
       </b-form-group>-->
 
-      <div class="w-100 text-left pl-2" style="margin-top: 6rem">
+      <div class="w-100 text-left pl-2 position-relative" style="top: 6rem">
         <div>
           <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">
             Remove background color
@@ -190,7 +190,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
-  public onClickUpload(e){
+  public onClickUpload(e: Event){
     this.uploadType = 'click'
     if ((localStorage.getItem('logo_modal_status') == null)) {
       e.preventDefault()
@@ -268,7 +268,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         'Content-Type': 'multipart/form-data'
       }
     }
-    fd.append('file', img)
+    fd.append('file', img as Blob)
     fd.append('product_id', this.selectedProduct.product_id)
     this.showLoader = true;
       http.post('/customer/upload/logo', fd, header)

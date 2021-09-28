@@ -224,7 +224,13 @@ export default class Scene extends Vue {
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
             }
-            this.otherSideLogos[item.logoIndex] = null
+            if(this.otherSideLogos[item.logoIndex]) {
+              this.frontCanvas.remove(this.otherSideLogos[item.logoIndex])
+              if (this.backCanvas) {
+                this.backCanvas.remove(this.otherSideLogos[item.logoIndex])
+              }
+              this.otherSideLogos[item.logoIndex] = null
+            }
             deleteIndex.push(index)
           }
         })
@@ -1257,7 +1263,9 @@ export default class Scene extends Vue {
 
   public addTexture (textureUrl: string, side: string): void {
     const self = this
+    console.log("shshs", textureUrl);
     fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
+      console.log("options", options)
       options.crossOrigin = 'Anonymous'
       const img = fabric.util.groupSVGElements(objects) as fabric.Group
       img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
@@ -1304,8 +1312,8 @@ export default class Scene extends Vue {
           }
         }
 
-        let front_logo_setting = null
-        let back_logo_setting = null;
+        let front_logo_setting!: Record<any, any>
+        let back_logo_setting!: Record<any, any>
         if(this.logosSettings.length > 0) {
           this.logosSettings.forEach((logo_Setting,lindex) => {
             if(lindex == logoIndex){

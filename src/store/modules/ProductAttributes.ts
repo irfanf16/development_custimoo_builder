@@ -195,7 +195,7 @@ const ProductAttributes:Module<any, any> = {
       if(delCustomTabLogo){
         // state.customLogos.splice(delCustomLogo.index, 1)
         Vue.delete(state.customLogos, delCustomTabLogo.index)
-        state.customLogos.forEach((custom_logo, clIdx) => {
+        state.customLogos.forEach((custom_logo: Record<any, any>, clIdx: number) => {
           Vue.set(state.customLogos[clIdx], "logoIndex", clIdx)
         })
       }
