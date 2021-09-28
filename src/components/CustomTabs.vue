@@ -2,28 +2,31 @@
   <div>
     <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 1">
       <span class="close" @click="hideAll"><BIconX /></span>
-      <div class="grid grid-mobile-2 gap-1 text-left">
-        <div class="mobile_controls">
-          <label>Apply to</label>
-          <b-form-select class="mt-1" v-model="selected">
-            <b-form-select-option :value="null">Collar</b-form-select-option>
-            <b-form-select-option value="Logo">Logo</b-form-select-option>
-            <b-form-select-option value="Logo">Front</b-form-select-option>
-            <b-form-select-option value="Logo">Back</b-form-select-option>
-          </b-form-select>
+      <div class="grid gap-1 text-left">
+<!--        <div class="mobile_controls">-->
+<!--          <label>Color C</label>-->
+<!--        </div>-->
+<!--        <div class="mobile_controls">-->
+<!--          <label>Apply to</label>-->
+<!--        </div>-->
+
+        <div class="overflow-hidden fade-right">
+          <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
+            <li v-for="(item, index) in [1,2,3,4,5,6,7,8,9]" :key="index">
+              <a :class="activePart == index ? 'active_line' : ''" @click="setActivePart(index)">Coat {{item}}</a>
+            </li>
+          </ul>
         </div>
-        <div class="mobile_controls">
-          <label>Color Category</label>
-          <b-form-select class="mt-1" v-model="selected">
-            <b-form-select-option :value="null">Category 1</b-form-select-option>
-            <b-form-select-option value="Category 2">Category 2</b-form-select-option>
-            <b-form-select-option value="Category 3">Category 3</b-form-select-option>
-            <b-form-select-option value="Category 4">Category 4</b-form-select-option>
-          </b-form-select>
+        <div class="overflow-hidden fade-right">
+          <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
+            <li v-for="(item, index) in [1,2,3,4,5,6,7,8,9]" :key="index">
+              <a class="faded_text" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">Collection {{item}}</a>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
+      <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
         <div class="color_circle"></div>
         <div class="color_circle"></div>
         <div class="color_circle"></div>
@@ -334,7 +337,15 @@ import {default as $} from 'jquery';
 })
 export default class CustomizationProcess extends Vue {
   @Prop() activeTab!: number
-  private items = [1,2,3,4]
+  private activePart = 0;
+  private activeCollection = 0;
+
+  private setActivePart(index:number){
+    this.activePart = index;
+  }
+  private setActiveCollection(index:number){
+    this.activeCollection = index;
+  }
 
   private selected = null
   private options = [

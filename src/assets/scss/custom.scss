@@ -3270,3 +3270,110 @@ $fontSize: 0.5;
         }
     }
 }
+
+.mobile-nav{
+    &.horizontal{
+        display: flex;
+        overflow-y: auto;
+
+        li{
+            a{
+                white-space: nowrap;
+                position: relative;
+                padding-bottom: 5px;
+                display: inline-block;
+                color: #545b62;
+                text-decoration: none;
+
+                &:after{
+                    content: "";
+                    display: block;
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    height: 0;
+                    background: #777;
+                }
+
+                &.faded_text{
+                    color: #aaa;
+                    font-weight: 500;
+                }
+
+                &.active_line{
+                    color: #121212;
+                    &:after{
+                        height: 2px;
+                        background: #121212;
+                    }
+                }
+
+                &.active_dark{
+                    color: #121212;
+                }
+            }
+
+            &+li{
+                margin-left: 20px;
+            }
+        }
+    }
+}
+
+.hide-scroll {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.player_text{
+    .nav-tabs{
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+}
+
+.fade-left{
+    position: relative;
+
+    &:before{
+        position: absolute;
+        z-index: 100;
+        content: "";
+        left: 0;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        width: 30px;
+        background: -moz-linear-gradient(left,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+        background: -webkit-linear-gradient(left,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+        background: linear-gradient(to right,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=1 );
+    }
+}
+.fade-right{
+    position: relative;
+
+    &:after{
+        position: absolute;
+        z-index: 100;
+        content: "";
+        right: 0;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        width: 30px;
+        background: -moz-linear-gradient(left,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+        background: -webkit-linear-gradient(left,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+        background: linear-gradient(to right,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=1 );
+    }
+}
