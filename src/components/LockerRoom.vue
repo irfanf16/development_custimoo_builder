@@ -371,6 +371,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     let res = await this.$store.dispatch('copyProductDesign', {id: this.copiedProductId, name: this.copiedProductName, room_id: this.copiedProductLockerId})
     if (res.status == 201){
       this.copiedProductId = 0
+      this.copiedProductLockerId = this.lockers[0].id
       this.copiedProductName = ""
       this.viewLoader = false
     }else{
