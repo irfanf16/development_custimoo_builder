@@ -164,7 +164,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
               locker_back_png = parent.$refs.product_preview.$refs.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
             }
           }else if(parent.ref.mainScene !==undefined){
-            locker_front_png = parent.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
+            locker_front_png = parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
             if(this.mainProductType == "front_back") {
               locker_back_png = parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
             }
