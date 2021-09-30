@@ -168,7 +168,7 @@
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
 
     <span class="hover_tooltip"></span>
-          <b-modal ref="copy-product-modal" hide-footer id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
+          <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
         <div class="pt-4 design-name-form">
             <b-form inline>
 <!--                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Design Name</label>-->
@@ -357,9 +357,13 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public showDesignModal(id:number){
     this.copiedProductId = 0
     this.copiedProductId = id
-    // this.copiedProductLockerId = this.lockers[this.tabIndex].id
-    console.log(this.copiedProductLockerId)
+    this.copiedProductLockerId = this.lockers[this.tabIndex].id
     this.ref['copy-product-modal'].show()
+  }
+  public resetModal(){
+    this.copiedProductId = 0
+    this.copiedProductName = ""
+    this.copiedProductLockerId = this.lockers[this.tabIndex].id
   }
   public async copyProductDesign(){
     if(this.copiedProductName ==  ""){
