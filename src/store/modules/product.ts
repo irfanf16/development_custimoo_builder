@@ -71,9 +71,15 @@ const Product:Module<any, any> = {
     ADD_PRODUCT_TO_LOCKER(state:Record<any, any>, payload){
       const room_index = state.locker_products.findIndex((room:Record<any, any>) => room.id == payload.room_id)
       Vue.set(state.locker_products[room_index].product, state.locker_products[room_index].product.length, payload.data);
+    },
+    UPDATE_COPY_COUNT(state:Record<any, any>, payload){
+      state.locker_products[payload.room_ind].product.forEach((element:Record<any, any>) =>{
+        if (element.id === payload.id){
+          const count = element.copy_count +1
+          Vue.set(element, 'copy_count', count)
+        }
+      })
     }
-
-
   },
   actions: {
     async getModels({commit}, paylod:number){
