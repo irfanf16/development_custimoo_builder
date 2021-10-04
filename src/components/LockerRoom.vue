@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <span class="asdasd">
   <b-tabs content-class="mt-3" @activate-tab="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
       <b-tab  :key="i" :active="tabIndex === i">
@@ -168,7 +168,7 @@
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
 
     <span class="hover_tooltip"></span>
-          <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
+    <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
         <div class="pt-4 design-name-form">
             <b-form inline>
 <!--                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Design Name</label>-->
@@ -181,9 +181,10 @@
                     <b-button variant="primary" @click="copyProductDesign">Copy</b-button>
                 </div>
             </b-form>
+
+          <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
         </div>
     </b-modal>
- <div class="loader" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </span>
 
 </template>
