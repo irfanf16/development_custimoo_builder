@@ -20,6 +20,7 @@ export default new Vuex.Store({
     paths: [
       'ProductAttributes.styleIndex',
       'ProductAttributes.selectedIndex',
+      'ProductAttributes.selectedPrdId',
       'ProductAttributes.customLogos',
       'ProductAttributes.customTexts',
       'ProductAttributes.defaultColors',

@@ -69,7 +69,15 @@ const getLogoObject = () => {
 * Index = -1 means we are getting all settings rather that getting settings at specific index.When index is given then the return type will be object or null. Otherwise return type will be array. That could be empty
 * */
 
-const getLogoSettings = (index = -1, default_obj = true) => {
+const getLogoSettings = (index = -1, default_obj = true,product_id = 0) => {
+
+  //get logo settings based on product id
+  if(product_id > 0) {
+    const product = Store.getters.getProducts.find((prd:any) => {
+      return prd.id == product_id
+    })
+    return product ? product.logos_setting[index] : {}
+  }
   const logo_settings = Store.getters.getSelectedProduct ? Store.getters.getSelectedProduct.logos_setting : [];
   if (logo_settings.length > 0) {
     if (index < 0) {
@@ -104,15 +112,19 @@ const setLogoSettings = (logo_index: number, logo: Record<any, any> | null = nul
 }
 
 const getCustomLogos = (default_obj = true, sync_with_store = true) => {
-  const custom_logos = Store.getters.getCustomLogos;
+  const custom_logos = Store.getters.getCustomLogos();
+  console.log('custom_logosaaaaa',custom_logos)
   if(custom_logos.length <= 0 && default_obj) {
     const logo = setLogoSettings(0, getLogoObject())
+    console.log('logo',logo)
     if(sync_with_store) {
       logo["logoIndex"] =  0,
+        console.log('tooooooooooo')
       Store.commit('customLogos', logo)
     }
     return [logo];
   } else {
+    console.log('custom_logos',custom_logos)
     return custom_logos;
   }
 }

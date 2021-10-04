@@ -187,7 +187,7 @@ export default class Scene extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos()
   }
 
   get customTexts(): [Record<any, any>] {
@@ -214,6 +214,7 @@ export default class Scene extends Vue {
     deep: true
   })
   customLogosChanged(newVal: [Record<any, any>]) {
+    console.log('watcher')
     if(this.mounted && this.logoAllowed) {
       const self = this
       if(this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {

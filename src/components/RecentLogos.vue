@@ -58,7 +58,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   public showLoader = false
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos()
   }
 
 
@@ -95,7 +95,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   }
 
   public addDeleteIconOnLogo(recentLogo:any) {
-    let custom_logos = this.$store.getters.getCustomLogos
+    let custom_logos = this.$store.getters.getCustomLogos()
     let logo_exists = custom_logos.find((logo:any) => {
       if(logo)
         return logo.id == recentLogo.id
@@ -110,7 +110,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   public async setLogo(index:number,logo:any) {
     this.showLoader = true;
     const customTabIndex = this.customLogoIndex
-    let custom_logos = this.$store.getters.getCustomLogos
+    let custom_logos = this.$store.getters.getCustomLogos()
     let logo_url = '';
     let transparent_logo = logo.transparent_logo_url;
     let smart_transparent_logo = logo.smart_transparent_logo_url;
