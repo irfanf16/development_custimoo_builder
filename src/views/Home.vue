@@ -596,16 +596,11 @@ export default class Home extends Mixins(ErrorMessages) {
         this.$store.dispatch('setSelectedProductDesign')
         this.$store.dispatch('setColorSectionVisibility')
         this.$store.dispatch("getModels", this.selectedProduct.product_id);
-        let windowView = this.$store.getters.getWindowView;
 
         this.$root.$emit('sliderEvent');
-        if(windowView == 2){
-          this.showAdvanceCustomization();
-        }
         this.showLoader = false;
       }).catch((e: any) => {
         console.log(e)
-        // console.log('in catch')
       });
     }
   }
@@ -1122,6 +1117,9 @@ export default class Home extends Mixins(ErrorMessages) {
     display: block;
     margin: 0 auto;
     height: auto;
+  }
+  [v-cloak] {
+    display: none !important;
   }
 }
 

@@ -1,19 +1,26 @@
 <template>
   <div style="padding-bottom: 10px" class="upload-logo-opener" v-if="customLogos">
     <div class="logo-option-area mb-3 mt-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">
-        Remove all white from logo
-      </b-form-checkbox>
-      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">
-        Smart remove background from logo
-      </b-form-checkbox>
 
 <!--      <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
         <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="A">Remove Logo Background</b-form-radio>
         <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="B">Remove Smart Logo Background</b-form-radio>
       </b-form-group>-->
 
+      <div class="w-100 text-left pl-2 position-relative" style="top: 6rem">
+        <div>
+          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">
+            Remove background color
+          </b-form-checkbox>
+        </div>
+        <div class="mt-2">
+          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">
+            Smart remove background from logo
+          </b-form-checkbox>
+        </div>
+      </div>
     </div>
+
 
     <div class="btn btn-secondary modal-handler" >
       <div class="upload-box position-relative" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
@@ -53,6 +60,8 @@
         <p>Need High Res Image</p>
       </div>
     </div>
+
+
     <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
       <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or
         laws. You may
@@ -181,7 +190,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
-  public onClickUpload(e){
+  public onClickUpload(e: Event){
     this.uploadType = 'click'
     if ((localStorage.getItem('logo_modal_status') == null)) {
       e.preventDefault()
@@ -258,7 +267,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         'Content-Type': 'multipart/form-data'
       }
     }
-    fd.append('file', img)
+    fd.append('file', img as Blob)
     fd.append('product_id', this.selectedProduct.product_id)
     this.showLoader = true;
       http.post('/customer/upload/logo', fd, header)
@@ -415,11 +424,11 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
-    let unique_colors_count = uniqueColors.length;
-    if(unique_colors_count < 4) {
-      while(unique_colors_count > 0 ) {
+    let add_extra_colors = 4 - uniqueColors.length;
+    if(uniqueColors.length < 4) {
+      while(add_extra_colors > 0 ) {
         this.imageColors.push({hex: null, pantone: null, name: null})
-        --unique_colors_count;
+        --add_extra_colors;
       }
     }
     //only set logo colors if index is 0

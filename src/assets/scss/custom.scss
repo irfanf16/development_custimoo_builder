@@ -301,7 +301,12 @@ button{
     overflow-y: auto;
     padding-bottom: 100px;
     border-radius: 25px 25px 0 0;
-    border-top: 2px solid #EDF2F6; 
+    border-top: 2px solid #EDF2F6;
+
+    &.is-mobile{
+        height: auto;
+    }
+
     @media only screen and (min-width: 992px){
         position: static;
         background: none;
@@ -2459,7 +2464,6 @@ button{
             position: absolute;
             left: 0;
             right: 0;
-            bottom: 0;
             margin: 0 !important;
             text-align: center;
             max-width: 100%;
