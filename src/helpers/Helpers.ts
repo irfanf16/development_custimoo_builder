@@ -113,18 +113,16 @@ const setLogoSettings = (logo_index: number, logo: Record<any, any> | null = nul
 
 const getCustomLogos = (default_obj = true, sync_with_store = true) => {
   const custom_logos = Store.getters.getCustomLogos();
-  console.log('custom_logosaaaaa',custom_logos)
   if(custom_logos.length <= 0 && default_obj) {
     const logo = setLogoSettings(0, getLogoObject())
     console.log('logo',logo)
     if(sync_with_store) {
-      logo["logoIndex"] =  0,
+      logo["logoIndex"] =  0
         console.log('tooooooooooo')
       Store.commit('customLogos', logo)
     }
     return [logo];
   } else {
-    console.log('custom_logos',custom_logos)
     return custom_logos;
   }
 }

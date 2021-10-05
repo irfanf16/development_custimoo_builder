@@ -112,11 +112,10 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     const customTabIndex = this.customLogoIndex
     let custom_logos = this.$store.getters.getCustomLogos()
     let logo_url = '';
-    let transparent_logo = logo.transparent_logo_url;
+    let transparent_logo =  logo.transparent_logo_url;
     let smart_transparent_logo = logo.smart_transparent_logo_url;
     let original_logo = logo.logo_url;
     let is_transparent = false;
-    await this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customLogos)), action: 'customLogos' })
     if(custom_logos[this.customLogoIndex] && custom_logos[this.customLogoIndex].is_transparent===true){
       logo_url = transparent_logo;
       is_transparent = true;
@@ -173,11 +172,24 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     }else{
       getLogos = custom_logos
     }
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(getLogos)), action: 'customLogos' })
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
     this.$store.commit('SET_COLORS_FROM_RECENT',true)
-    payload.forEach((data) => {
-      this.$store.dispatch('updateCustomLogoAttribute', data)
+    payload.forEach(async (data) => {
+       await this.$store.dispatch('updateCustomLogoAttribute', data)
     })
+  ')
+
+    if(customTabIndex == 0) {
+      //update team logo url in all product logos
+      logo.original_logo = original_logo
+      logo.transparent_logo = transparent_logo
+      logo.smart_transparent_logo = smart_transparent_logo
+      logo.transparent_logo = transparent_logo
+      logo.is_smart_transparent = false
+      logo.is_transparent = false
+      logo.url = logo_url
+      await this.$store.dispatch('setTeamLogoUrl',logo)
+    }
     if(!logo.logo_colors) {
       this.$store.dispatch("SET_LOGO_COLORS", []);
     }

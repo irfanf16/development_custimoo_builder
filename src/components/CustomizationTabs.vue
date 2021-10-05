@@ -14,7 +14,7 @@
             </a>
           </template>
           <div class="logo-placement-tabs" v-if="hideTab.logoHide">
-            <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
+            <LogoPlacementTabs v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
                                :logosSetting="selectedProduct.logos_setting"/>
           </div>
 
@@ -165,6 +165,10 @@ export default class CustomizationProcess extends Vue {
     return this.$store.getters.getSelectedProduct
   }
 
+  get customLogos(): Record<any, any> {
+    return this.$store.getters.getCustomLogos()
+  }
+
   get productModels(): Record<any, any> {
     return this.$store.getters.getProductModels;
   }
@@ -172,6 +176,8 @@ export default class CustomizationProcess extends Vue {
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts
   }
+
+
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;

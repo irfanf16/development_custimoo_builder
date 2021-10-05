@@ -287,7 +287,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         }else{
           getLogos = this.customLogos
         }
-        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(getLogos)), action: 'customLogos' })
+        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
         this.$store.commit('customLogos', custom_logo)
         this.hideModal()

@@ -214,7 +214,6 @@ export default class Scene extends Vue {
     deep: true
   })
   customLogosChanged(newVal: [Record<any, any>]) {
-    console.log('watcher')
     if(this.mounted && this.logoAllowed) {
       const self = this
       if(this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
@@ -1264,9 +1263,7 @@ export default class Scene extends Vue {
 
   public addTexture (textureUrl: string, side: string): void {
     const self = this
-    console.log("shshs", textureUrl);
     fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
-      console.log("options", options)
       options.crossOrigin = 'Anonymous'
       const img = fabric.util.groupSVGElements(objects) as fabric.Group
       img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({

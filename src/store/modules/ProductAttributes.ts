@@ -163,7 +163,6 @@ const ProductAttributes:Module<any, any> = {
 
     },
     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
-      console.log("inside commit", customLogo)
       if(customLogo){
         if('logoIndex' in customLogo && customLogo.logoIndex != null) {
 
@@ -193,7 +192,6 @@ const ProductAttributes:Module<any, any> = {
 
     },
     customLogoAttribute(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
-      console.log('customLogoAttribute',customLogoAttribute)
       if(customLogoAttribute){
         Vue.set(state.customLogos[state.selectedPrdId][customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
       }
@@ -268,37 +266,19 @@ const ProductAttributes:Module<any, any> = {
       state.styleIndex = payload;
     },
     SET_CUSTOM_OBJ(state:  Record<any, any>,prd_id:number){
-      //const selected_prd_id = state.products[state.selectedIndex].id
-      //const selected_prd_id = state.products[state.selectedIndex].id
-
       const arr = []
       arr.push(setLogoSettings(0))
-      Object.assign(state.customLogos,prd_id)
-      state.customLogos[prd_id] = arr
-
+      Vue.set(state.customLogos,prd_id,arr)
+      // Object.assign(state.customLogos,prd_id)
+      //  state.customLogos[prd_id] = arr
     },
     SET_TEAM_LOGO_URL(state:  Record<any, any>,logo:any){
-      console.log('payload',logo)
-      const custom_obj = state.customLogos
-
-
+      const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
       Object.keys(custom_obj).map(function(key, index) {
         let logo_ = custom_obj[key][0];
         logo_ = {...logo_,...logo}
-        custom_obj[key][0] = logo_
+        Vue.set(state.customLogos[key],0,logo_)
       });
-
-      // for (const key in custom_obj) {
-      //   if (custom_obj.hasOwnProperty(key)) {
-      //     let logo_ = custom_obj[key][0]
-      //     logo_ = {...logo_, logo};
-      //     custom_obj[key][0] = logo_
-      //   }
-      // }
-
-      console.log('changed',custom_obj)
-
-
     },
     customTexts(state: Record<any, any>, customText: Record<any, any>) {
       if(customText){
@@ -384,12 +364,15 @@ const ProductAttributes:Module<any, any> = {
       const locker_logos = JSON.parse(payload.custom_logos)
       Object.keys(state.customLogos).map(function(key:any, index:any) {
         if(key == payload.product_id) {
-          state.customLogos[key] = locker_logos
+          //state.customLogos[key] = locker_logos
+          Vue.set(state.customLogos,key,locker_logos)
         }
         else {
           const logo_setting = getLogoSettings(0,false,key)
           const final_logo = {...logo_setting,...locker_logos[0]}
-          state.customLogos[key] = [final_logo]
+
+          //state.customLogos[key] = [final_logo]
+          Vue.set(state.customLogos,key,[final_logo])
         }
       });
      // state.customLogos = payload;
@@ -476,8 +459,9 @@ const ProductAttributes:Module<any, any> = {
         let arr:any = []
         state.products.forEach(async (product:any) => {
           arr.push(setLogoSettings(0))
-            Object.assign(state.customLogos,product.id)
-          state.customLogos[product.id] = arr
+          Vue.set(state.customLogos,product.id,arr)
+          // Object.assign(state.customLogos,product.id)
+          // state.customLogos[product.id] = arr
           arr = []
         })
 
@@ -635,7 +619,7 @@ const ProductAttributes:Module<any, any> = {
       // return []
      // console.log('getter',state.customLogos[prd_id])
       if(!state.customLogos[prd_id]) {
-        console.log('null')
+        return []
       }
 
         return state.customLogos[prd_id]
