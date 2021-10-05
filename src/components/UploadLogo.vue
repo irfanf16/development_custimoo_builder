@@ -1,5 +1,5 @@
 <template>
-  <div style="padding-bottom: 5px" class="upload-logo-opener" v-if="customLogos">
+  <div style="padding-bottom: 10px" class="upload-logo-opener" v-if="customLogos">
     <div class="logo-option-area mb-3 mt-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
 
 <!--      <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
@@ -171,7 +171,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   get customLogos(): Record<any, any>[] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos()
   }
 
   get logoUrl(): Record<any, any>[] {
@@ -249,7 +249,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   public processLogoImage() {
-
     let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
     custom_logo.logoIndex = this.customLogoIndex;
     let img = this.fileObject
@@ -281,19 +280,26 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         custom_logo.smart_transparent_logo = resp.data.file.smart_transparent_logo_url;
         custom_logo.is_smart_transparent = false;
         custom_logo.url = resp.data.file.logo_url;
+        custom_logo.id = resp.data.file.id;
         let getLogos = []
         if (this.customLogos.length > 1){
           getLogos = this.customLogos.slice(0, -1)
         }else{
           getLogos = this.customLogos
         }
-        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(getLogos)), action: 'customLogos' })
+        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
         this.$store.commit('customLogos', custom_logo)
         this.hideModal()
         this.getLogoColors()
         this.$store.commit('SET_RECENT_LOGOS');
         this.showLoader = false;
+
+        if(this.customLogoIndex == 0) {
+          //update team logo url in all product logos
+          this.$store.dispatch('setTeamLogoUrl',custom_logo)
+        }
+
       })
       .catch((error: any) => {
         console.log(error)
@@ -431,6 +437,8 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       await this.$store.dispatch("initialLogoColors", JSON.stringify(this.imageColors));
     }
   }
+
+
 
   public deleteLogo() {
     let inputRef = this.$refs.fileInput as Record<any, any>

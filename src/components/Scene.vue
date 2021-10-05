@@ -187,7 +187,7 @@ export default class Scene extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos()
   }
 
   get customTexts(): [Record<any, any>] {
@@ -1263,9 +1263,7 @@ export default class Scene extends Vue {
 
   public addTexture (textureUrl: string, side: string): void {
     const self = this
-    console.log("shshs", textureUrl);
     fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
-      console.log("options", options)
       options.crossOrigin = 'Anonymous'
       const img = fabric.util.groupSVGElements(objects) as fabric.Group
       img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
