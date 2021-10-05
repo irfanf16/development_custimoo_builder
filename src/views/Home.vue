@@ -175,6 +175,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     if (this.isAuthenticated) {
       await this.retrieveProducts()
       await this.getFillColors()
+      await this.$store.dispatch("getLockers");
     }
     if (this.$route.params.name) {
       this.showLoader = true
@@ -469,7 +470,6 @@ export default class Home extends Mixins(ErrorMessages) {
   }
 
   public async getLockers(){
-    await this.$store.dispatch("getLockers");
     if (!this.editStatus){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     }

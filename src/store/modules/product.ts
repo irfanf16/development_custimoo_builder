@@ -82,6 +82,14 @@ const Product:Module<any, any> = {
     },
     SET_INITIAL_LOGO_COLORS(state:Record<any, any>, payload){
       state.initialExtractedColors = payload
+    },
+    UPDATE_COPY_COUNT(state:Record<any, any>, payload){
+      state.locker_products[payload.room_ind].product.forEach((element:Record<any, any>) =>{
+        if (element.id === payload.id){
+          const count = element.copy_count +1
+          Vue.set(element, 'copy_count', count)
+        }
+      })
     }
   },
   actions: {

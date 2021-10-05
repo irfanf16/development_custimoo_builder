@@ -418,11 +418,11 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
-    let unique_colors_count = uniqueColors.length;
-    if(unique_colors_count < 4) {
-      while(unique_colors_count > 0 ) {
+    let add_extra_colors = 4 - uniqueColors.length;
+    if(uniqueColors.length < 4) {
+      while(add_extra_colors > 0 ) {
         this.imageColors.push({hex: null, pantone: null, name: null})
-        --unique_colors_count;
+        --add_extra_colors;
       }
     }
     //only set logo colors if index is 0
