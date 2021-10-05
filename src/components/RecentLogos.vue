@@ -177,7 +177,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     payload.forEach(async (data) => {
        await this.$store.dispatch('updateCustomLogoAttribute', data)
     })
-  ')
+
 
     if(customTabIndex == 0) {
       //update team logo url in all product logos
