@@ -50,37 +50,22 @@
             </template>
             <div class="grid mobile-cols-2 gap-1">
               <div class="mobile_controls">
-                <label>Back Name</label>
-                <b-form-input class="mt-1"></b-form-input>
+                <b-form-input style="margin-top: 12px" placeholder="Back Name"></b-form-input>
               </div>
-              <div class="mobile_controls">
-                <label>Back Style</label>
-                <b-form-select class="mt-1" v-model="selected">
-                  <b-form-select-option :value="null">Style 1</b-form-select-option>
-                  <b-form-select-option value="Style 2">Style 2</b-form-select-option>
-                  <b-form-select-option value="Style 3">Style 3</b-form-select-option>
-                  <b-form-select-option value="Style 4">Style 4</b-form-select-option>
-                </b-form-select>
-              </div>
-            </div>
-            <div class="grid mobile-cols-2 gap-1">
+
               <div class="mt-2 mobile_controls">
                 <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
                 <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
               </div>
-
-              <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
+            </div>
+            <div class="fade-right py-1">
+              <div class="overflow-auto d-flex align-items-center gap-2 hide-scroll fontList">
+                <div v-for="(item, i) in 20" :key="i" style="white-space: nowrap" :class="{'pr-3': item == 20, 'activeFont': activeFont == i}" @click="setActiveFont(i)">Style {{item}}</div>
+              </div>
+            </div>
+            <div class="fade-right">
+              <div class="mt-2 overflow-auto d-flex gap-1 hide-scroll" style="padding:6px">
+                <div v-for="(item, i) in 20" :key="i" class="color_circle" :class="{'mr-3': item == 20}"></div>
               </div>
             </div>
           </b-tab>
@@ -211,34 +196,22 @@
       <span class="close" @click="hideAll"><BIconX /></span>
       <div>
         <div class="font-weight-bold fs-2">Choose Product</div>
-        <div class="d-flex align-items-center gap-2 pt-1 pb-2" style="overflow-x: auto;">
-          <label class="button_radio">
-            <input checked type="radio" name="style" />
-            <span>
+        <div class="fade-right">
+          <div class="d-flex align-items-center gap-1 pt-1 pb-2 hide-scroll" style="overflow-x: auto;">
+            <label class="button_radio" v-for="item in 10" :key="item" :class="{'mr-4': item == 10}">
+              <input checked type="radio" name="style" />
+              <span>
               <BIconCheckCircleFill />
               <span>Jensen Cut</span>
             </span>
-          </label>
-          <label class="button_radio">
-            <input type="radio" name="style" />
-            <span>
-              <BIconCheckCircleFill />
-              <span>Jensen Cut</span>
-            </span>
-          </label>
-          <label class="button_radio">
-            <input type="radio" name="style" />
-            <span>
-              <BIconCheckCircleFill />
-              <span>Jensen Cut</span>
-            </span>
-          </label>
+            </label>
+          </div>
         </div>
 
         <div>
-          <template v-for="(item, index) in items">
+          <template v-for="(item, index) in 10">
             <div :key="index" v-if="index===0">
-              <div><span class="font-weight-bold fs-2">* Jensen cut</span> <span class="read_more" @click="toggle_read(index)" :data-index="item"><BIconChevronDown /></span></div>
+              <div><span class="font-weight-bold fs-2">Product Info</span> <span class="read_more" @click="toggle_read(index)" :data-index="item"><BIconChevronDown /></span></div>
               <div style="display: none">
                 Fashioned from performance enhancing fabrics, the Hummel Beespoke Jensen Jersey feels as light as a
                 feather and provides maximum ventilation.
@@ -249,57 +222,48 @@
 
         <div class="pt-1 mt-1" style="border-top: 1px solid #eee">
           <div class="font-weight-bold fs-2">Choose Stuff</div>
-          <div class="pt-1 d-flex align-items-center gap-1" style="overflow-x: auto">
-            <label class="button_checkbox">
-              <input type="checkbox" name="style" />
-              <span>
-              <BIconCheckCircleFill />
-              <span>Jensen Cut</span>
-              <span class="mx-1">-</span>
-              <span>$12</span>
-            </span>
-            </label>
-            <label class="button_checkbox">
-              <input type="checkbox" name="style" />
-              <span>
-              <BIconCheckCircleFill />
-              <span>Jensen Cut</span>
-              <span class="mx-1">-</span>
-              <span>$12</span>
-            </span>
-            </label>
-            <label class="button_checkbox">
-              <input type="checkbox" name="style" />
-              <span>
-              <BIconCheckCircleFill />
-              <span>Jensen Cut</span>
-              <span class="mx-1">-</span>
-              <span>$12</span>
-            </span>
-            </label>
+          <div class="fade-right">
+            <div class="pt-1 d-flex align-items-center gap-1 hide-scroll" style="overflow-x: auto">
+              <label class="button_checkbox" v-for="item in 10" :key="item" :class="{'mr-4': item == 10}">
+                <input type="checkbox" name="style"/>
+                <span>
+                  <BIconCheckCircleFill/>
+                  <span>Jensen Cut</span>
+                  <span class="mx-1">-</span>
+                  <span>$12</span>
+                </span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="customize_controls players-data" v-if="this.$store.getters.getActiveTab === 4">
+    <div class="customize_controls players-data pt-4" v-if="this.$store.getters.getActiveTab === 4">
       <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="dragControl" v-touch:start="setPlayersDataHeight" v-touch:moving="logit"></span>
 
       <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
         <span>Team Players</span>
-        <span class="addPlayer"><span class="fs-3 icon position-absolute"><BIconPlus /></span> Add Player</span>
+        <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Link</span></span>
       </div>
-      <div class="players-table mt-2">
+      <div class="players-table mt-2 hide-scroll">
         <table class="table table-bordered">
           <tbody>
-            <tr v-for="item in [1,2,3,4,5,6,7]" :key="item">
-              <td style="width: 45%">Gulzar</td>
+            <tr v-for="item in 9" :key="item">
+              <td style="width: 10%; text-align: center" :class="{'activeEye': activeEye == item}" @click="setActiveEye(item)"><BIconEye /></td>
+              <td style="width: 50%">Gulzar</td>
               <td style="width: 10%; text-align: center">11</td>
               <td style="width: 10%; text-align: center">xl</td>
               <td style="width: 10%; text-align: center">1</td>
-              <td style="width: 25%; word-spacing: 10px; text-align: center"><BIconEye class="text-secondary" /> <BIconPencil class="text-secondary" /> <BIconTrash class="text-secondary" /></td>
+              <td class="fs-2" style="width: 10%; word-spacing: 10px; text-align: center; color: #fff; background: rgba(250,0,0,0.7)"><BIconX /></td>
             </tr>
           </tbody>
         </table>
+        <div class="text-right mt-2">
+          <button class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
+            <BIconPlus />
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -339,12 +303,56 @@ export default class CustomizationProcess extends Vue {
   @Prop() activeTab!: number
   private activePart = 0;
   private activeCollection = 0;
+  private activeFont = 0;
+  private activeEye = -1;
+  private playersDataHeight = 0;
+  private oldCursor = 0;
+  private direction = ''
 
+  private setPlayersDataHeight(e:Record<any, any>){
+    let element = document.querySelector('.players-data') as Record<any, any>;
+    this.playersDataHeight = element.clientHeight;
+    this.oldCursor = e.changedTouches[0].clientY;
+  }
+
+  private logit(e:Record<any, any>){
+    let cursorPosition = e.changedTouches[0].clientY;
+    if (cursorPosition < this.oldCursor) {
+      this.direction = "up"
+    } else if (cursorPosition > this.oldCursor) {
+      this.direction = "down"
+    }
+    let element = document.querySelector('.players-data') as Record<any, any>;
+    let cursorValue = (this.playersDataHeight  - cursorPosition)
+
+    // element.style.height = element.offsetHeight + cursorValue + 'px';
+    let elemHt = ((this.playersDataHeight * 2) + cursorValue) + 'px';
+
+    console.log('cursor: ', cursorPosition)
+
+    element.style.height = elemHt;
+
+    console.log(cursorValue)
+
+    this.oldCursor = cursorPosition;
+
+  }
   private setActivePart(index:number){
     this.activePart = index;
   }
   private setActiveCollection(index:number){
     this.activeCollection = index;
+  }
+  private setActiveFont(index:number){
+    this.activeFont = index;
+  }
+
+  private setActiveEye(index:number){
+    if (this.activeEye == index){
+      this.activeEye = -1
+    }else{
+      this.activeEye = index;
+    }
   }
 
   private selected = null
@@ -613,5 +621,34 @@ export default class CustomizationProcess extends Vue {
 
 .read_more{
   transform: rotate(0deg); transition: 0.2s all ease; display: inline-block;
+}
+
+.fontList{
+  div{
+    color: #999;
+
+    &.activeFont{
+      color: #121212;
+      font-weight: bold;
+    }
+  }
+}
+
+.activeEye{
+  background: #189076;
+  color: #fff;
+}
+
+.dragControl{
+  position: absolute;
+  height: 10px;
+  width: 100px;
+  top: 7px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  background: #dbdbdb;
+  border-radius: 10px;
+  box-shadow: 1px 1px 0 0px #ccc, inset 0 0 2px 1px #eee;
 }
 </style>

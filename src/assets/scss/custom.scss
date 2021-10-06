@@ -3254,6 +3254,7 @@ $fontSize: 0.5;
         table-layout: fixed;
         width: 100%;
         border: none;
+        margin-bottom: 0;
 
         tbody{
             tr{
@@ -3284,6 +3285,7 @@ $fontSize: 0.5;
                 display: inline-block;
                 color: #545b62;
                 text-decoration: none;
+                transition: none;
 
                 &:after{
                     content: "";
@@ -3297,8 +3299,7 @@ $fontSize: 0.5;
                 }
 
                 &.faded_text{
-                    color: #aaa;
-                    font-weight: 500;
+                    color: #999;
                 }
 
                 &.active_line{
@@ -3311,6 +3312,7 @@ $fontSize: 0.5;
 
                 &.active_dark{
                     color: #121212;
+                    font-weight: 600;
                 }
             }
 
@@ -3375,5 +3377,33 @@ $fontSize: 0.5;
         background: -webkit-linear-gradient(left,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
         background: linear-gradient(to right,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
         filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=1 );
+    }
+}
+
+.customize_controls{
+    .tabs > div:first-child{
+        position: relative;
+        padding-right: 0px;
+
+        &:after{
+            position: absolute;
+            z-index: 100;
+            content: "";
+            right: 0px;
+            top: 0;
+            bottom: 0;
+            height: 100%;
+            width: 30px;
+            background: -moz-linear-gradient(left,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+            background: -webkit-linear-gradient(left,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+            background: linear-gradient(to right,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=1 );
+        }
+
+        li{
+            &:last-child{
+                padding-right: 20px;
+            }
+        }
     }
 }
