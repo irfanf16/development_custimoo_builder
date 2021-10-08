@@ -216,14 +216,12 @@ import {getRandom} from "@/helpers/Helpers";
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
     this.setCollections()
-  }
-})
-export default class LockerRoom extends Mixins(ErrorMessages) {
-  mounted(){
     if (this.lockers.length >0 ){
       this.copiedProductLockerId = this.lockers[0].id
     }
   }
+})
+export default class LockerRoom extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private baseUrl = location.host+"/#/"
   public ref = this.$refs as Record<any, any>
