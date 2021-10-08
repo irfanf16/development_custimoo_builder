@@ -3043,6 +3043,7 @@ $fontSize: 0.5;
     right: 0;
     bottom: 0;
     padding: 15px;
+    top: auto;
     text-align: center;
     color: #808895;
     //border-radius: 20px 20px 0 0;
@@ -3231,7 +3232,7 @@ $fontSize: 0.5;
 
 .players-data{
     .players-table{
-        max-height: 150px;
+        //max-height: 150px;
         overflow-y: auto;
     }
     .addPlayer{

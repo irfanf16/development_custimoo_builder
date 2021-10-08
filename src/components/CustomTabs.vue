@@ -1,7 +1,9 @@
 <template>
   <div>
-    <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 1">
+    <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 1" >
       <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="dragControl" @dblclick="setMinMax" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
+
       <div class="grid gap-1 text-left">
 <!--        <div class="mobile_controls">-->
 <!--          <label>Color C</label>-->
@@ -40,8 +42,10 @@
         <div class="color_circle"></div>
       </div>
     </div>
-    <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 2">
+    <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 2" >
       <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="dragControl" @dblclick="setMinMax" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
+
       <div>
         <b-tabs class="player_text">
           <b-tab>
@@ -192,8 +196,10 @@
         </b-tabs>
       </div>
     </div>
-    <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 3">
+    <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 3" >
       <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="dragControl" @dblclick="setMinMax" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
+
       <div>
         <div class="font-weight-bold fs-2">Choose Product</div>
         <div class="fade-right">
@@ -240,15 +246,17 @@
     </div>
     <div class="customize_controls players-data pt-4" v-if="this.$store.getters.getActiveTab === 4">
       <span class="close" @click="hideAll"><BIconX /></span>
-      <span class="dragControl" v-touch:start="setPlayersDataHeight" v-touch:moving="logit"></span>
+      <span class="dragControl" @dblclick="setMinMax" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
-      <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
-        <span>Team Players</span>
-        <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Link</span></span>
-      </div>
-      <div class="players-table mt-2 hide-scroll">
-        <table class="table table-bordered">
-          <tbody>
+      <div class="d-flex flex-column h-100">
+        <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
+<!--          <span>Team Players</span>-->
+          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconCloudUpload /></span> <span class="d-inline-block ml-1">Upload / Download Roster</span></span>
+          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Link</span></span>
+        </div>
+        <div class="players-table mt-2 hide-scroll h-100">
+          <table class="table table-bordered">
+            <tbody>
             <tr v-for="item in 9" :key="item">
               <td style="width: 10%; text-align: center" :class="{'activeEye': activeEye == item}" @click="setActiveEye(item)"><BIconEye /></td>
               <td style="width: 50%">Gulzar</td>
@@ -257,12 +265,13 @@
               <td style="width: 10%; text-align: center">1</td>
               <td class="fs-2" style="width: 10%; word-spacing: 10px; text-align: center; color: #fff; background: rgba(250,0,0,0.7)"><BIconX /></td>
             </tr>
-          </tbody>
-        </table>
-        <div class="text-right mt-2">
-          <button class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
-            <BIconPlus />
-          </button>
+            </tbody>
+          </table>
+          <div class="text-right mt-2">
+            <button class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
+              <BIconPlus />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -307,35 +316,42 @@ export default class CustomizationProcess extends Vue {
   private activeEye = -1;
   private playersDataHeight = 0;
   private oldCursor = 0;
-  private direction = ''
+  // private tabTop = window.screen.availHeight - 190;
 
-  private setPlayersDataHeight(e:Record<any, any>){
-    let element = document.querySelector('.players-data') as Record<any, any>;
-    this.playersDataHeight = element.clientHeight;
-    this.oldCursor = e.changedTouches[0].clientY;
+  private setPlayersDataHeight = () => {
+    return (e:Record<any, any>) => {
+      let element = document.querySelector('.customize_controls') as Record<any, any>;
+      this.playersDataHeight = element.clientHeight;
+      this.oldCursor = e.changedTouches[0].clientY;
+    }
   }
 
-  private logit(e:Record<any, any>){
-    let cursorPosition = e.changedTouches[0].clientY;
-    if (cursorPosition < this.oldCursor) {
-      this.direction = "up"
-    } else if (cursorPosition > this.oldCursor) {
-      this.direction = "down"
+  private setMinMax = () => {
+    let element = document.querySelector('.customize_controls') as Record<any, any>;
+    if(this.playersDataHeight <= (window.screen.availHeight/2)){
+      element.style.top = 15 + 'px';
+    }else{
+      element.style.top = 'auto';
     }
-    let element = document.querySelector('.players-data') as Record<any, any>;
-    let cursorValue = (this.playersDataHeight  - cursorPosition)
+  }
 
-    // element.style.height = element.offsetHeight + cursorValue + 'px';
-    let elemHt = ((this.playersDataHeight * 2) + cursorValue) + 'px';
-
-    console.log('cursor: ', cursorPosition)
-
-    element.style.height = elemHt;
-
-    console.log(cursorValue)
-
-    this.oldCursor = cursorPosition;
-
+  private resizeTab(){
+    return (e:Record<any, any>) => {
+      let cursorPosition = e.changedTouches[0].clientY;
+      if(cursorPosition <= 15){
+        cursorPosition = 15
+      }else if(cursorPosition >= window.screen.availHeight - 190){
+        cursorPosition = window.screen.availHeight - 190
+      }
+      // if (cursorPosition < this.oldCursor) {
+      //   this.direction = "up"
+      // } else if (cursorPosition > this.oldCursor) {
+      //   this.direction = "down"
+      // }
+      // this.tabTop = cursorPosition;
+      let element = document.querySelector('.customize_controls') as Record<any, any>;
+      element.style.top = cursorPosition + 'px';
+    }
   }
   private setActivePart(index:number){
     this.activePart = index;
@@ -649,6 +665,10 @@ export default class CustomizationProcess extends Vue {
   margin: 0 auto;
   background: #dbdbdb;
   border-radius: 10px;
-  box-shadow: 1px 1px 0 0px #ccc, inset 0 0 2px 1px #eee;
+  box-shadow: 1px 1px 0 0px #ccc, inset 0 0 3px 1px #eee;
+}
+.dragControl.active{
+  background: lightblue;
+  box-shadow: 1px 1px 0 0px #ccc, inset 0 0 3px 1px aliceblue;
 }
 </style>
