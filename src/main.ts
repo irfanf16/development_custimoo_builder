@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import VueToast from 'vue-toast-notification';
