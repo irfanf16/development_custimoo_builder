@@ -46,7 +46,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       @Prop({required: true}) logoIndex!: number
 
       get customLogos(): [Record<any, any>] {
-        return this.$store.getters.getCustomLogos
+        return this.$store.getters.getCustomLogos()
       }
       get customTexts(): [Record<any, any>] {
         return this.$store.getters.getCustomTexts

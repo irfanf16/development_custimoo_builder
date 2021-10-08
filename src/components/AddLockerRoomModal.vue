@@ -112,7 +112,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
         return  this.$store.getters.getCurrentStyleIndex;
       }
       get customLogos(): [] {
-        return this.$store.getters.getCustomLogos
+        return this.$store.getters.getCustomLogos()
       }
       get defaultColors() : [Record<any, any>] {
         return this.$store.getters.getDefaultColors

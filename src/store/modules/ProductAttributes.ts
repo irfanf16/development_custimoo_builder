@@ -3,16 +3,18 @@ import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
 
-import {getLogoObject, setLogoSettings} from "../../helpers/Helpers"
+import {getLogoObject, getLogoSettings, setLogoSettings} from "../../helpers/Helpers"
+import {log} from "fabric/fabric-impl";
 const ProductAttributes:Module<any, any> = {
   state: {
     lockerActiveTabIndex:0,
     lockerTabsIndex:0,
     products:[],
     selectedIndex: 0,
+    selectedPrdId:0,
     categories: [],
     colorsFromRecent: false,
-    customLogos: [],
+    customLogos: {},
     recentLogos: [],
     defaultcustomLogos: false,
     addMoreCollection: false,
@@ -93,8 +95,14 @@ const ProductAttributes:Module<any, any> = {
         state.products = []
       }
     },
+    // DELETE_PRODUCT(state: Record<any, any>, logoIndex: number){
+    //   console.log("deleteeeeeee", state.products, state.selectedIndex)
+    //   Vue.delete(state.products[state.selectedIndex]["customLogos"], logoIndex)
+    //   console.log("afet", state.products[state.selectedIndex]["customLogos"])
+    // },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
+      state.selectedPrdId = state.products[payload.selectedIndex].id;
     },
     SET_PRODUCT_TYPE(state: Record<any, any>, payload: Record<any, any>){
       Vue.set(state, payload.prd_type, payload.value)
@@ -117,6 +125,11 @@ const ProductAttributes:Module<any, any> = {
             state.selectedDesignId =0;
           }
         }
+    },
+    SET_SELECTED_PRODUCT_CUSTOM_LOGO(state: Record<any, any>,payload:any) {
+      if(state.products[state.selectedIndex]) {
+        state.products[state.selectedIndex].customLogos = payload;
+      }
     },
     SET_SELECTED_PRODUCT_DESIGN(state: Record<any, any>) {
       if (state.selectedDesignId > 0) {
@@ -150,12 +163,16 @@ const ProductAttributes:Module<any, any> = {
 
     },
     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
-      // Vue.set(state.customLogos, state.customLogos.length, customLogo)
       if(customLogo){
         if('logoIndex' in customLogo && customLogo.logoIndex != null) {
-         Vue.set(state.customLogos, customLogo.logoIndex, customLogo)
+
+          Vue.set(state.customLogos[state.selectedPrdId], customLogo.logoIndex, customLogo)
+          // Vue.set(state.customLogos, customLogo.logoIndex, customLogo)
         } else {
-          Vue.set(state.customLogos, state.customLogos.length, customLogo)
+          console.log('else')
+
+          Vue.set(state.customLogos[state.selectedPrdId], state.customLogos[state.selectedPrdId].length, customLogo)
+         // Vue.set(state.customLogos, state.customLogos.length, customLogo)
         }
       }
     },
@@ -176,7 +193,7 @@ const ProductAttributes:Module<any, any> = {
     },
     customLogoAttribute(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
-        Vue.set(state.customLogos[customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
+        Vue.set(state.customLogos[state.selectedPrdId][customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
       }
     },
     CUSTOM_LOGO_WITHOUT_TRIGGER(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
@@ -194,9 +211,9 @@ const ProductAttributes:Module<any, any> = {
     customLogoTabDelete(state: Record<any, any>, delCustomTabLogo: Record<any, any>) {
       if(delCustomTabLogo){
         // state.customLogos.splice(delCustomLogo.index, 1)
-        Vue.delete(state.customLogos, delCustomTabLogo.index)
-        state.customLogos.forEach((custom_logo: Record<any, any>, clIdx: number) => {
-          Vue.set(state.customLogos[clIdx], "logoIndex", clIdx)
+        Vue.delete(state.customLogos[state.selectedPrdId], delCustomTabLogo.index)
+        state.customLogos[state.selectedPrdId].forEach((custom_logo:any, clIdx:any) => {
+          Vue.set(state.customLogos[state.selectedPrdId][clIdx], "logoIndex", clIdx)
         })
       }
     },
@@ -206,29 +223,28 @@ const ProductAttributes:Module<any, any> = {
     },
     toggleLogoBackgroudMutation(state: Record<any, any>, payload:any) {
 
-      const logo = state.customLogos[payload.index];
+      const logo = state.customLogos[state.selectedPrdId][payload.index];
       const original_logo = logo.original_logo;
       const transparent_logo = logo.transparent_logo;
       const smart_transparent_logo = logo.smart_transparent_logo;
       let logo_url = '';
-
       if(payload.type == 'transparent') {
         if(payload.val) {
-          Vue.set(state.customLogos[payload.index], 'is_transparent', true )
-          Vue.set(state.customLogos[payload.index], 'is_smart_transparent', false )
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_transparent', true )
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_smart_transparent', false )
         } else {
-          Vue.set(state.customLogos[payload.index], 'is_transparent', false )
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_transparent', false )
         }
       }
       else {
         if(payload.val) {
-          Vue.set(state.customLogos[payload.index], 'is_smart_transparent', true )
-          Vue.set(state.customLogos[payload.index], 'is_transparent', false )
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_smart_transparent', true )
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_transparent', false )
         } else {
-          Vue.set(state.customLogos[payload.index], 'is_smart_transparent', false )
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_smart_transparent', false )
         }
       }
-      const changed_logo = state.customLogos[payload.index];
+      const changed_logo = state.customLogos[state.selectedPrdId][payload.index];
       if(changed_logo.is_transparent) {
         logo_url = transparent_logo
       } else if (changed_logo.is_smart_transparent) {
@@ -237,7 +253,7 @@ const ProductAttributes:Module<any, any> = {
       else {
         logo_url = original_logo
       }
-      Vue.set(state.customLogos[payload.index], 'url', logo_url )
+      Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'url', logo_url )
      // if(logo.is_transparent===true){
      //    logo_url = transparent_logo;
      //  }else{
@@ -248,6 +264,21 @@ const ProductAttributes:Module<any, any> = {
     },
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
+    },
+    SET_CUSTOM_OBJ(state:  Record<any, any>,prd_id:number){
+      const arr = []
+      arr.push(setLogoSettings(0))
+      Vue.set(state.customLogos,prd_id,arr)
+      // Object.assign(state.customLogos,prd_id)
+      //  state.customLogos[prd_id] = arr
+    },
+    SET_TEAM_LOGO_URL(state:  Record<any, any>,logo:any){
+      const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
+      Object.keys(custom_obj).map(function(key, index) {
+        let logo_ = custom_obj[key][0];
+        logo_ = {...logo_,...logo}
+        Vue.set(state.customLogos[key],0,logo_)
+      });
     },
     customTexts(state: Record<any, any>, customText: Record<any, any>) {
       if(customText){
@@ -329,7 +360,22 @@ const ProductAttributes:Module<any, any> = {
       state.products.push(payload);
     },
     OVERRIDE_LOGOS(state:Record<any, any>, payload){
-      state.customLogos = payload;
+
+      const locker_logos = JSON.parse(payload.custom_logos)
+      Object.keys(state.customLogos).map(function(key:any, index:any) {
+        if(key == payload.product_id) {
+          //state.customLogos[key] = locker_logos
+          Vue.set(state.customLogos,key,locker_logos)
+        }
+        else {
+          const logo_setting = getLogoSettings(0,false,key)
+          const final_logo = {...logo_setting,...locker_logos[0]}
+
+          //state.customLogos[key] = [final_logo]
+          Vue.set(state.customLogos,key,[final_logo])
+        }
+      });
+     // state.customLogos = payload;
     },
     OVERRIDE_TEXT(state:Record<any, any>, payload){
       state.customTexts = payload;
@@ -373,11 +419,12 @@ const ProductAttributes:Module<any, any> = {
     RESET_STORE(state: Record<any, any>){
       state.undoItems = []
       state.redoItems = []
-      state.customLogos = [];
+      state.customLogos = {};
       state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
       state.using_logo_colors = false;
+     // state.products.customLogos.map((item:any) => item.customLogos = []);
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
 
@@ -408,7 +455,17 @@ const ProductAttributes:Module<any, any> = {
           customLogo: true,
           is_transparent: false
         }*/
-        state.customLogos.push(setLogoSettings(0));
+
+        let arr:any = []
+        state.products.forEach(async (product:any) => {
+          arr.push(setLogoSettings(0))
+          Vue.set(state.customLogos,product.id,arr)
+          // Object.assign(state.customLogos,product.id)
+          // state.customLogos[product.id] = arr
+          arr = []
+        })
+
+        //state.customLogos.push(setLogoSettings(0));
         state.logoTabIndex = 0;
       }
     },
@@ -552,8 +609,23 @@ const ProductAttributes:Module<any, any> = {
     getCategories: state => {
       return state.categories
     },
-    getCustomLogos: state => {
-      return state.customLogos
+
+    getCustomLogos: state => (prd_id = state.selectedPrdId) => {
+      // if(state.products[state.selectedIndex]) {
+      //   const selected_prd_id = state.products[state.selectedIndex].id
+      //   return state.customLogos[selected_prd_id] ? state.customLogos[selected_prd_id] : []
+      //
+      // }
+      // return []
+     // console.log('getter',state.customLogos[prd_id])
+      if(!state.customLogos[prd_id]) {
+        return []
+      }
+
+        return state.customLogos[prd_id]
+    },
+    getCustomLogoObject: state => {
+    return state.customLogos
     },
     getActiveLogoIndex: (state: any) => state.logoTabIndex,
     getCurrentStyleIndex: state => {
@@ -618,8 +690,15 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   actions: {
+
     setSelectedIndex({commit}, payload) {
       commit('SET_SELECTED', payload)
+    },
+    setCustomObj({commit},payload) {
+      commit('SET_CUSTOM_OBJ',payload)
+    },
+    setTeamLogoUrl({commit},payload) {
+      commit('SET_TEAM_LOGO_URL',payload)
     },
     setProductType({commit}, payload) {
       commit('SET_PRODUCT_TYPE', payload)
@@ -704,6 +783,9 @@ const ProductAttributes:Module<any, any> = {
     },
     async setSelectedProductAndStyle({commit}){
       await commit('SET_SELECTED_PRODUCT_AND_STYLE');
+    },
+    async setSelectedProductCustomLogo({commit},payload){
+      await commit('SET_SELECTED_PRODUCT_CUSTOM_LOGO',payload);
     },
     async setSelectedProductDesign({commit}){
       await commit('SET_SELECTED_PRODUCT_DESIGN');

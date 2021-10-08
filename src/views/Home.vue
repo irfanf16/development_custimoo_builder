@@ -170,6 +170,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     if (this.hideColorSection){
       this.$store.commit('hideColorSection', false)
     }
+
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
     if (this.isAuthenticated) {
@@ -278,7 +279,7 @@ export default class Home extends Mixins(ErrorMessages) {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos()
   }
 
   get editProductStatus():boolean{
@@ -488,6 +489,7 @@ export default class Home extends Mixins(ErrorMessages) {
       locker_back_png =  main_scene.backCanvas.toDataURL("image/png").split(',')[1];
     }
     let locker = {
+
       product_id: this.selectedProduct.product_id,
       style_id: this.selectedProduct.productstyles[this.styleIndex].id,
       design_id: currentDesign[0].id,
@@ -562,11 +564,26 @@ export default class Home extends Mixins(ErrorMessages) {
       http.get(url).then(async (response: any) => {
         if (searchCall || productType) {
           this.$store.commit('SET_PRODUCTS', []);
-          this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
+         // await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
         }
 
         let product_data = this.products.concat(response.data.products.data)
         await this.$store.commit('SET_PRODUCTS', product_data);
+
+
+        await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
+
+         let customLogos = this.$store.getters.getCustomLogoObject
+        product_data.forEach(async (product:any) => {
+          if(!customLogos[product.id]) {
+            await this.$store.dispatch('setCustomObj',product.id)
+          }
+        })
+        //
+        // const length = Object.keys(customLogos).length
+        // if(length <= 0) {
+        //  await this.$store.dispatch('setCustomLogoObj',0)
+        // }
 
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
