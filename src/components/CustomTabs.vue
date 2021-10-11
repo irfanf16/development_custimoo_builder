@@ -2,7 +2,7 @@
   <div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 1" >
       <span class="close" @click="hideAll"><BIconX /></span>
-      <span class="dragControl" @dblclick="setMinMax" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
+      <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div class="grid gap-1 text-left">
 <!--        <div class="mobile_controls">-->
@@ -44,7 +44,7 @@
     </div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 2" >
       <span class="close" @click="hideAll"><BIconX /></span>
-      <span class="dragControl" @dblclick="setMinMax" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
+      <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
       <div>
         <b-tabs class="player_text">
@@ -198,7 +198,7 @@
     </div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 3" >
       <span class="close" @click="hideAll"><BIconX /></span>
-      <span class="dragControl" @dblclick="setMinMax" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
+      <span class="dragControl" @dblclick="setMinMax(2)" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
 
       <div>
         <div class="font-weight-bold fs-2">Choose Product</div>
@@ -244,9 +244,9 @@
         </div>
       </div>
     </div>
-    <div class="customize_controls players-data pt-4" v-if="this.$store.getters.getActiveTab === 4">
+    <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-if="this.$store.getters.getActiveTab === 4">
       <span class="close" @click="hideAll"><BIconX /></span>
-      <span class="dragControl" @dblclick="setMinMax" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
+      <span class="dragControl" @dblclick="setMinMax(3)" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
       <div class="d-flex flex-column h-100">
         <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
@@ -262,7 +262,7 @@
               <td style="width: 50%">Gulzar</td>
               <td style="width: 10%; text-align: center">11</td>
               <td style="width: 10%; text-align: center">xl</td>
-              <td style="width: 10%; text-align: center">1</td>
+              <td style="width: 10%; text-align: center">{{ item }}</td>
               <td class="fs-2" style="width: 10%; word-spacing: 10px; text-align: center; color: #fff; background: rgba(250,0,0,0.7)"><BIconX /></td>
             </tr>
             </tbody>
@@ -315,27 +315,27 @@ export default class CustomizationProcess extends Vue {
   private activeFont = 0;
   private activeEye = -1;
   private playersDataHeight = 0;
-  private oldCursor = 0;
   // private tabTop = window.screen.availHeight - 190;
 
-  private setPlayersDataHeight = () => {
+  private setPlayersDataHeight = (idx: number) => {
     return (e:Record<any, any>) => {
-      let element = document.querySelector('.customize_controls') as Record<any, any>;
-      this.playersDataHeight = element.clientHeight;
-      this.oldCursor = e.changedTouches[0].clientY;
+      let element = document.querySelectorAll('.customize_controls') as Record<any, any>;
     }
   }
 
-  private setMinMax = () => {
+  private setMinMax = (idx: number) => {
     let element = document.querySelector('.customize_controls') as Record<any, any>;
-    if(this.playersDataHeight <= (window.screen.availHeight/2)){
+
+    if(element.clientHeight <= (window.screen.availHeight/2)){
       element.style.top = 15 + 'px';
+      element.classList.remove('setMax')
     }else{
       element.style.top = 'auto';
+      element.classList.add('setMax')
     }
   }
 
-  private resizeTab(){
+  private resizeTab(idx: number){
     return (e:Record<any, any>) => {
       let cursorPosition = e.changedTouches[0].clientY;
       if(cursorPosition <= 15){
@@ -343,6 +343,7 @@ export default class CustomizationProcess extends Vue {
       }else if(cursorPosition >= window.screen.availHeight - 190){
         cursorPosition = window.screen.availHeight - 190
       }
+      this.playersDataHeight = cursorPosition;
       // if (cursorPosition < this.oldCursor) {
       //   this.direction = "up"
       // } else if (cursorPosition > this.oldCursor) {
@@ -353,6 +354,7 @@ export default class CustomizationProcess extends Vue {
       element.style.top = cursorPosition + 'px';
     }
   }
+
   private setActivePart(index:number){
     this.activePart = index;
   }

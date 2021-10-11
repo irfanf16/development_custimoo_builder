@@ -33,6 +33,11 @@ footer, header, hgroup, menu, nav, section {
 	display: block;
     box-sizing: border-box;
 }
+html{
+    @media screen and (max-width: 768px) {
+        overscroll-behavior: contain;
+    }
+}
 body {
     min-width: 320px;
     overflow-x: hidden;
@@ -42,6 +47,10 @@ body {
 	line-height: 1.286;
     background: #F9FBFD;
     color: #03142E;
+
+    @media screen and (max-width: 768px) {
+        overscroll-behavior: contain;
+    }
 }
 ol, ul {
 	list-style: none;
@@ -3382,6 +3391,10 @@ $fontSize: 0.5;
 }
 
 .customize_controls{
+    &.setMax{
+        max-height: 250px;
+    }
+
     .tabs > div:first-child{
         position: relative;
         padding-right: 0px;
