@@ -162,7 +162,8 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    return  getCustomLogos(true, true);
+    //return this.$store.getters.getCustomLogos()
+     return  getCustomLogos(true, true);
   }
 
   get manageComponents(): [] {
@@ -190,7 +191,7 @@ export default class LogoPlacementTabs extends Vue {
    this.$store.dispatch('setLogoTab', index)
  }
   public async initFirstLogoTab(index: number){
-    if(this.$store.getters.getCustomLogos.length < 1){
+    if(this.$store.getters.getCustomLogos().length < 1){
       if(this.numberOfLogos < this.allowedLogosLimit) {
         let logoSetting: Record<any, any>
         if(this.logosSetting[index]) {

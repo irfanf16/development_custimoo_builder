@@ -303,7 +303,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     return this.$store.getters.getProducts
   }
   get customLogos():[Record<any, any>] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos()
   }
   get lockers():Record<any, any>{
     return  this.$store.getters.getLockers;
@@ -377,7 +377,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     await this.$store.dispatch('setSelectedIndex', {selectedIndex:ind});
     let selectedIndex = this.selectedProduct.productstyles.findIndex((x:Record<any, any>) => x.id === element.style_id);
     await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-    await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
+    console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
+    // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
+    await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
     await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
