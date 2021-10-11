@@ -130,6 +130,7 @@ export default class Scene extends Vue {
   @Prop({required: true}) readonly front!: Record<string, unknown>;
   @Prop({required: false}) readonly back!: Record<string, unknown>;
   @Prop({required: false}) readonly backTextureUrl!: string;
+  @Prop({required: false}) readonly backTextrueExtension !: string;
   @Prop({required: false}) readonly logos !: [Record<string, any>];
   @Prop({required: false, default: () => { return [] }}) readonly texts !: [Record<string, any>];
   @Prop({required: false, default: () => { return [] }}) readonly lockerDefaultColors !: [Record<string, any>];
@@ -786,10 +787,11 @@ export default class Scene extends Vue {
       model = true
     }
 
-    this.addTexture(ImageData.textureUrl, side)
+
+    this.addTexture(ImageData.textureUrl, side, ImageData.file_extension)
 
     if(this.backTextureUrl && side == 'front') {
-      this.addTexture(this.storageUrl + this.backTextureUrl, 'back')
+      this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension)
     }
 
     const self = this
@@ -800,7 +802,7 @@ export default class Scene extends Vue {
         texture = this.backTexture
       }
       if (model && texture && (!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
-        if (this.productType == 'customized' && (!this.back || (this.back && side == 'back'))) {
+        if (ImageData.file_extension == 'svg' && this.productType == 'customized' && (!this.back || (this.back && side == 'back'))) {
           this.getSvgGroups()
         }
         canvas.add(texture)
@@ -1261,32 +1263,54 @@ export default class Scene extends Vue {
     }
   }
 
-  public addTexture (textureUrl: string, side: string): void {
+  public addTexture (textureUrl: string, side: string, file_ext: string): void {
     const self = this
-    fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
-      options.crossOrigin = 'Anonymous'
-      const img = fabric.util.groupSVGElements(objects) as fabric.Group
-      img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
-        hasControls: false,
-        selectable: false,
-        evented: false,
-        lockMovementX: true,
-        lockMovementY: true,
+    if(file_ext == 'svg'){
+      fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
+        options.crossOrigin = 'Anonymous'
+        const img = fabric.util.groupSVGElements(objects) as fabric.Group
+        img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          lockMovementX: true,
+          lockMovementY: true,
+        })
+
+        // img._objects.forEach((element: any) => {
+        //   if(element.id === 'Laces') {
+        //     element.globalCompositeOperation = 'destination-out'
+        //   }
+        // })
+        img.center().setCoords();
+
+        if (side == 'back') {
+          this.backTexture = img
+        } else {
+          this.frontTexture = img
+        }
       })
+    }else{
+      fabric.Image.fromURL(textureUrl, (img: any) => {
+       // console.log(img)
+        img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          lockMovementX: true,
+          lockMovementY: true
+        })
+        img.center().setCoords()
 
-      // img._objects.forEach((element: any) => {
-      //   if(element.id === 'Laces') {
-      //     element.globalCompositeOperation = 'destination-out'
-      //   }
-      // })
-      img.center().setCoords();
 
-      if (side == 'back') {
-        self.backTexture = img
-      } else {
-        self.frontTexture = img
-      }
-    })
+        if (side == 'back') {
+          this.backTexture = img
+        } else {
+          this.frontTexture = img
+        }
+      }, { crossOrigin: 'Anonymous' })
+    }
+
   }
 
   public addLogos(logos: [Record<any, any>], logoIndex: null|number = null) {
