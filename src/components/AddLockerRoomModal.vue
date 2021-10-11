@@ -155,17 +155,18 @@ import LockerRoom from "@/components/LockerRoom.vue";
             this.showError('product name is required')
             return false
           }
-        let locker_front_png = null
+          let parent = this.$parent as Record<any, any>
+          let locker_front_png = null
           let locker_back_png = null;
           if (this.$parent.$refs.product_preview !==undefined){
-            locker_front_png = this.$parent.$refs.product_preview.$refs.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1]
+            locker_front_png = parent.$refs.product_preview.$refs.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1]
             if(this.mainProductType == "front_back") {
-              locker_back_png = this.$parent.$refs.product_preview.$refs.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+              locker_back_png = parent.$refs.product_preview.$refs.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
             }
-          }else if(this.$parent.ref.mainScene !==undefined){
-            locker_front_png = this.$parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
+          }else if(parent.ref.mainScene !==undefined){
+            locker_front_png = parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
             if(this.mainProductType == "front_back") {
-              locker_back_png = this.$parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
+              locker_back_png = parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
             }
           }
           let locker = {

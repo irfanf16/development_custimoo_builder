@@ -225,7 +225,13 @@ export default class Scene extends Vue {
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
             }
-            this.otherSideLogos[item.logoIndex] = null
+            if(this.otherSideLogos[item.logoIndex]) {
+              this.frontCanvas.remove(this.otherSideLogos[item.logoIndex])
+              if (this.backCanvas) {
+                this.backCanvas.remove(this.otherSideLogos[item.logoIndex])
+              }
+              this.otherSideLogos[item.logoIndex] = null
+            }
             deleteIndex.push(index)
           }
         })
@@ -1328,8 +1334,8 @@ export default class Scene extends Vue {
           }
         }
 
-        let front_logo_setting = null
-        let back_logo_setting = null;
+        let front_logo_setting!: Record<any, any>
+        let back_logo_setting!: Record<any, any>
         if(this.logosSettings.length > 0) {
           this.logosSettings.forEach((logo_Setting,lindex) => {
             if(lindex == logoIndex){

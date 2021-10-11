@@ -120,9 +120,9 @@
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`collection_${index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`collection_${i+''+index}`" :target="`collection_${index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
 <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
-                            <b-tooltip :target="`collection_${index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
+                            <b-tooltip :target="`collection_${i+''+index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
                               <div class="share-holder">
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
@@ -215,26 +215,24 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     console.log('ev', e.target)
   }
 
-  private showTooltip(e:Record<any, any>){
-    document.querySelector('.hover_tooltip').style.opacity = '1'
-    document.querySelector('.hover_tooltip').style.zIndex = '100'
-    document.querySelector('.hover_tooltip').style.left = (e.clientX + 10)+'px'
-    document.querySelector('.hover_tooltip').style.top = (e.clientY + 17)+'px'
-    document.querySelector('.hover_tooltip').innerHTML = e.target.getAttribute('data-title')
-    // alert(e.target.getAttribute('title'))
+  private showTooltip(e: Record<any, any>){
+    let element = document.querySelector('.hover_tooltip') as Record<any, any>
+    element.style.opacity = '1'
+    element.style.zIndex = '100'
+    element.style.left = (e.clientX + 10)+'px'
+    element.style.top = (e.clientY + 17)+'px'
+    element.innerHTML = e.target.getAttribute('data-title')
   }
-  private hideTooltip(e:Record<any, any>){
-    document.querySelector('.hover_tooltip').style.opacity = '0'
-    document.querySelector('.hover_tooltip').style.left = '0'
-    document.querySelector('.hover_tooltip').style.top = '0'
-    document.querySelector('.hover_tooltip').style.zIndex = '-10'
+  private hideTooltip(){
+    let element = document.querySelector('.hover_tooltip') as Record<any, any>
+    element.style.opacity = '0'
+    element.style.left = '0'
+    element.style.top = '0'
+    element.style.zIndex = '-10'
   }
 
-  public showConfirm(){
+  public showConfirm() {
     this.ref['reset-modal'].showConfirm()
-  }
-  public chose(evt:Record<any, any>) {
-    console.log('element index within parent: ',evt.oldIndex)
   }
 
   public collectionData = {}

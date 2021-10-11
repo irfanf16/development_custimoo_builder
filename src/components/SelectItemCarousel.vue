@@ -35,12 +35,12 @@ export default {
       multipleLogo:false
     }
   },
-  mounted() {
-    this.$root.$on('sliderEvent', () => { // here you need to use the arrow function
-     if(this.$refs && this.$refs.slider)
-      this.$refs.slider.goToIndex(0);
-    })
-  },
+  // mounted() {
+    // this.$root.$on('sliderEvent', () => { // here you need to use the arrow function
+    //  if(this.$refs && this.$refs.slider)
+    //   this.$refs.slider.goToIndex(0);
+    // })
+  // },
   computed: {
     products: function() {
       return this.$store.getters.getProducts
@@ -52,6 +52,10 @@ export default {
       this.$store.dispatch("getModels", this.products[index].product_id);
       this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
       this.$store.dispatch('setColorSectionVisibility')
+    },
+    setSliderIndex: function() {
+      if(this.$refs && this.$refs.slider)
+          this.$refs.slider.goToIndex(0);
     },
     loadMoreProduct: function (currentIndex) {
       if(this.$store.getters.getProducts.length - 5 <= currentIndex){

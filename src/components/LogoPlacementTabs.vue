@@ -28,7 +28,7 @@
                 </div>
               </div>
             </div>
-            <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url">
+            <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url && selectedProduct.product_type == 'customized'">
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
               <div class="mb-lg-3 w-100">
                 <div class="color-holder">
@@ -62,10 +62,10 @@
                     <template v-if="usingColorLogos"> Use Original Colors</template>
                     <template v-else> Use Logo Colors</template>
                   </b-button>
-                  <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" v-if="logoColorUsed && imageColors.length > 1 && usingColorLogos"
+                  <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" :class="{'invisible': !(logoColorUsed && imageColors.length > 1 && usingColorLogos)}"
                             variant="secondary">Shuffle
                   </b-button>
-                  <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" v-if="previousImageColors.length && usingColorLogos" variant="secondary">
+                  <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
                     <font-awesome-icon :icon="['fas', 'redo-alt']"/>
                   </b-button>
                 </div>
@@ -384,7 +384,7 @@ export default class LogoPlacementTabs extends Vue {
     return matched
   }
 
-  public async rollbackPreviousColors (): void {
+  public async rollbackPreviousColors () {
     this.initialExtractedColors.forEach((defaultColor: Record<any, any>, index: number) => {
       this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
     })
@@ -424,7 +424,7 @@ export default class LogoPlacementTabs extends Vue {
 
   }
 
-  public selectLogoColor(index, imageColor){
+  public selectLogoColor(index: number, imageColor: Record<any, any>){
     if(index==this.selectedSwatchIndex) {
       this.showLogoColors = false;
       this.selectedSwatchIndex = -1;

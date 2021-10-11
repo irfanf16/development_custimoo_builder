@@ -1,7 +1,7 @@
 <template>
   <div class="h-100">
 <!--    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>-->
-    <div class="customization-tabs">
+    <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex">
         <b-tab v-if="selectedProduct.is_logo_allowed == 1">
           <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
@@ -152,6 +152,7 @@ import RecentLogos from "@/components/RecentLogos.vue";
   },
 })
 export default class CustomizationProcess extends Vue {
+  private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
   @Prop({required: false, default:0}) tabIndexNew!: number
   public fontOptions: Record<any, any>[] = []
