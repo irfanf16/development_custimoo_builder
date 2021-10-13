@@ -1,6 +1,5 @@
 <template>
   <div class="h-100">
-<!--    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>-->
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex">
         <b-tab v-if="selectedProduct.is_logo_allowed == 1">
@@ -128,7 +127,6 @@ import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 import {getClosestColor} from '@/pantoneColor'
-import { log } from 'fabric/fabric-impl'
 import RecentLogos from "@/components/RecentLogos.vue";
 
 @Component<CustomizationProcess>({
@@ -372,7 +370,6 @@ export default class CustomizationProcess extends Vue {
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
     productFonts.forEach((fonts: any, key: number) => {
-      this.showLoader = true
       let fontNameParam = fonts.file_url.split('/').reverse()
       fontNameParam = fontNameParam[0].split('.')
       let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
@@ -382,15 +379,10 @@ export default class CustomizationProcess extends Vue {
       }
       this.fontOptions = this.fontOptions.concat([font])
       let fontUrl = this.storageUrl + fonts.file_url
-      const headElement = document.querySelector('head') as HTMLHeadElement
-      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}</style>";
-      $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
-      setTimeout(() => {
-        $("#delete_after_load").remove()
-      }, 1000)
-      setTimeout(() => {
-        this.showLoader = false
-      }, 2000)
+      const headElement = document.querySelector('head') as Record<any, any>
+      let style_tag = document.createElement('style')
+      style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
+      headElement.appendChild(style_tag)
     })
   }
 
