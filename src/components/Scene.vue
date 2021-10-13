@@ -134,7 +134,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: () => { return [] }}) readonly texts !: [Record<string, any>];
   @Prop({required: false, default: () => { return [] }}) readonly lockerDefaultColors !: [Record<string, any>];
   @Prop({required: false, default:  () => { return {} }}) readonly lockerGroupColors !: Record<string, any>;
-  @Prop({required: false, default: () => { return [] }}) readonly logosSettings !: [Record<any, any>]
+  @Prop({required: false}) readonly product_id !: number
   @Prop({required: false, default: () => { return [] }}) readonly productNamesSetting !: [Record<any, any>]
   @Prop({required: false, default: false}) readonly logoAllowed !: boolean
   @Prop({required: false, default: false}) readonly preSetData !: boolean
@@ -187,7 +187,8 @@ export default class Scene extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos()
+    let product_id = this.product_id? this.product_id : this.selectedProductId
+    return this.$store.getters.getCustomLogos(product_id)
   }
 
   get customTexts(): [Record<any, any>] {
@@ -208,6 +209,10 @@ export default class Scene extends Vue {
 
   get mainSvgGroups(): [Record<any, any>] {
     return this.$store.getters.getSvgGroups
+  }
+
+  get selectedProductId(): number {
+    return this.$store.getters.getSelectedProductId
   }
 
   @Watch('customLogos', {
@@ -279,23 +284,13 @@ export default class Scene extends Vue {
               const logoObject = this.customLogoObjects[logo.logoIndex]
               const otherSideObject = this.otherSideLogos[logo.logoIndex]
 
-              if(!this.logosSettings[index] || (this.logosSettings[index] && !this.logosSettings[index].is_locked)) {
+              if(logo.haveControls) {
                 this.eventAction(logo, logoObject, otherSideObject)
               }
               addLogo = false
             }
 
             if (addLogo && logo.url) {
-              const finalLogo = JSON.parse(JSON.stringify(logo))
-
-              if (!logo.action && self.logosSettings[index]) {
-                finalLogo.width = self.logosSettings[index].width
-                finalLogo.height = self.logosSettings[index].height
-                finalLogo.x_axis = self.logosSettings[index].x_axis
-                finalLogo.y_axis = self.logosSettings[index].y_axis
-                finalLogo.rotation = self.logosSettings[index].rotation
-              }
-
               let backLogosCount = 0
               if (!this.backCanvas) {
                 backLogosCount = self.customLogos.filter((item: Record<any, any>) => {
@@ -304,9 +299,9 @@ export default class Scene extends Vue {
               }
 
               if (self.logosLimit && self.customLogoObjects.filter((item: Record<any, any>) => item).length < self.logosLimit - backLogosCount) {
-                self.addLogos([finalLogo], index)
+                self.addLogos([logo], index)
               } else if (!self.logosLimit) {
-                self.addLogos([finalLogo], index)
+                self.addLogos([logo], index)
               }
             }
           }
@@ -838,31 +833,6 @@ export default class Scene extends Vue {
               if (self.logosLimit) {
                 customLogos = self.customLogos.slice(0, self.logosLimit) as [Record<any, any>]
               }
-              customLogos.forEach((item: Record<any, any>, index: number) => {
-                if (item && (!item.action && self.logosSettings[index])) {
-                  item.width = self.logosSettings[index].width
-                  item.height = self.logosSettings[index].height
-                  item.x_axis = self.logosSettings[index].x_axis
-                  item.y_axis = self.logosSettings[index].y_axis
-                  item.rotation = self.logosSettings[index].rotation
-                  item.haveControls = self.logosSettings[index].is_locked
-                  // console.log(this.logosSettings) to-do here
-
-                  if (self.mainPreview) {
-                    self.$store.dispatch('updateCustomLogoWithoutTrigger', {
-                      index: index,
-                      data: {
-                        width: self.logosSettings[index].width,
-                        height: self.logosSettings[index].height,
-                        x_axis: self.logosSettings[index].x_axis,
-                        y_axis: self.logosSettings[index].y_axis,
-                        rotation: self.logosSettings[index].rotation,
-                        haveControls: self.logosSettings[index].is_locked
-                      }
-                    })
-                  }
-                }
-              })
               logos = logos.concat(customLogos) as [Record<any, any>]
             }
             if (logos.length) {
@@ -1310,20 +1280,6 @@ export default class Scene extends Vue {
           }
         }
 
-        let front_logo_setting!: Record<any, any>
-        let back_logo_setting!: Record<any, any>
-        if(this.logosSettings.length > 0) {
-          this.logosSettings.forEach((logo_Setting,lindex) => {
-            if(lindex == logoIndex){
-              if(logo_Setting.side == "front") {
-                front_logo_setting = logo_Setting
-              } else {
-                back_logo_setting = logo_Setting
-              }
-            }
-           })
-        }
-
 
         if ((logo.side == 'front' || (logo.side == 'back' && self.back)) && (this.multipleLogo || (!this.multipleLogo && logoIndex as number == 0)) && !this.customLogoObjects[logoIndex as number]) {
           if (logo.customLogo) {
@@ -1332,35 +1288,6 @@ export default class Scene extends Vue {
           logo.haveControls = Boolean(logo.haveControls)
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
 
-          //console.log(front_logo_setting);
-
-          let selectable = front_logo_setting ? !front_logo_setting.is_locked : true;
-
-          if(front_logo_setting){
-            logo.haveControls = !front_logo_setting.is_locked;
-            if(front_logo_setting.is_locked){
-              logo.x_axis = front_logo_setting.x_axis
-              logo.y_axis = front_logo_setting.y_axis;
-              logo.rotation = front_logo_setting.rotation;
-            }
-          }
-
-          if(logo.side == "back") {
-            selectable = back_logo_setting ? !back_logo_setting.is_locked : true;
-
-            if(back_logo_setting){
-              logo.haveControls = !back_logo_setting.is_locked;
-              if(back_logo_setting.is_locked){
-                logo.x_axis = back_logo_setting.x_axis
-                logo.y_axis = back_logo_setting.y_axis;
-                logo.rotation = back_logo_setting.rotation;
-              }
-
-            }
-          }
-
-         // console.log('selectable',selectable);
-
           fabric.Image.fromURL(logoUrl, (img: any) => {
             img.scaleToWidth(self.canvasWidth / self.mainCanvasWidth * logo.width as number)
             img.set({
@@ -1368,7 +1295,7 @@ export default class Scene extends Vue {
               top: self.canvasHeight / self.mainCanvasHeight * logo.y_axis,
               angle: logo.rotation as number,
               centeredScaling: true,
-              selectable: selectable,
+              selectable: this.canvasSelection,
               //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
               hasControls: logo.haveControls,
               hasBorders: false,

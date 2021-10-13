@@ -276,8 +276,8 @@ const ProductAttributes:Module<any, any> = {
       const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
       Object.keys(custom_obj).map(function(key, index) {
         let logo_ = custom_obj[key][0];
-        logo_ = {...logo_,...logo}
-        Vue.set(state.customLogos[key],0,logo_)
+        logo_ = {...logo_, ...logo}
+        Vue.set(state.customLogos[key],0, logo_)
       });
     },
     customTexts(state: Record<any, any>, customText: Record<any, any>) {
@@ -606,23 +606,16 @@ const ProductAttributes:Module<any, any> = {
         return false
       }
     }),
+    getSelectedProductId: (state: any) => state.selectedPrdId,
     getCategories: state => {
       return state.categories
     },
 
     getCustomLogos: state => (prd_id = state.selectedPrdId) => {
-      // if(state.products[state.selectedIndex]) {
-      //   const selected_prd_id = state.products[state.selectedIndex].id
-      //   return state.customLogos[selected_prd_id] ? state.customLogos[selected_prd_id] : []
-      //
-      // }
-      // return []
-     // console.log('getter',state.customLogos[prd_id])
       if(!state.customLogos[prd_id]) {
         return []
       }
-
-        return state.customLogos[prd_id]
+      return state.customLogos[prd_id]
     },
     getCustomLogoObject: state => {
     return state.customLogos
