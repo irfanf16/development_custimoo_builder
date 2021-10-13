@@ -46,7 +46,11 @@ const Product:Module<any, any> = {
       state.selectedModelIndex = selectedModelIndex;
     },
     SET_LOCKER_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
-      Vue.set(state, 'locker_products', payload)
+      if(payload.locker_index >= 0) {
+        Vue.set(state.locker_products[payload.locker_index], 'product', payload.products)
+      } else {
+        Vue.set(state, 'locker_products', payload)
+      }
     },
     SET_LOCKERS(state:Record<any, any>, payload:Record<any, any>){
       state.lockers = []
