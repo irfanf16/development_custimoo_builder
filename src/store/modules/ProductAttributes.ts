@@ -267,7 +267,10 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_CUSTOM_OBJ(state:  Record<any, any>,prd_id:number){
       const arr = []
-      arr.push(setLogoSettings(0))
+      const default_setting = setLogoSettings(0)
+      const prod_logo_setting = getLogoSettings(0,false,prd_id)
+      const logo_setting = {...default_setting,...prod_logo_setting}
+      arr.push(logo_setting)
       Vue.set(state.customLogos,prd_id,arr)
       // Object.assign(state.customLogos,prd_id)
       //  state.customLogos[prd_id] = arr
@@ -428,37 +431,14 @@ const ProductAttributes:Module<any, any> = {
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
 
-        /*
-
-        let logoSetting = selectedProduct.logos_setting[0]
-
-        if(!logoSetting) {
-          logoSetting = {
-            width: 200,
-            x_axis: 150,
-            y_axis: 190,
-            rotation: 0,
-            haveControls: true,
-            side: 'front'
-          }
-        }
-
-        const logo = {
-          url: '',
-          width: logoSetting.width,
-          height: logoSetting.height,
-          x_axis: logoSetting.x_axis,
-          y_axis: logoSetting.y_axis,
-          rotation: logoSetting.rotation,
-          haveControls: Boolean(!logoSetting.is_locked),
-          side: logoSetting.side,
-          customLogo: true,
-          is_transparent: false
-        }*/
 
         let arr:any = []
         state.products.forEach(async (product:any) => {
-          arr.push(setLogoSettings(0))
+          const default_setting = setLogoSettings(0)
+          const prod_logo_setting = getLogoSettings(0,false,product.id)
+          const logo_setting = {...default_setting,...prod_logo_setting}
+           arr.push(logo_setting)
+          //arr.push(getLogoSettings(0,false,product.id))
           Vue.set(state.customLogos,product.id,arr)
           // Object.assign(state.customLogos,product.id)
           // state.customLogos[product.id] = arr
