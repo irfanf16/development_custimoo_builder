@@ -27,7 +27,7 @@
                     <template v-for="(product, ind) in room.product">
                       <div :key="`${ind}-${product.id}`" class="products-block" :data-room-id="room.id"
                            :data-room-index="i"
-                           :data-product-locker-room="product.id" :data-customer-id="product.customer_id"
+                           :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                            :data-product-index="ind">
                       <label :key="ind" class="w-100" :class="product.class ? 'selected': ''"
                              @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
@@ -222,7 +222,7 @@ import {getRandom} from "@/helpers/Helpers";
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {processColorsCustom} from "../helpers/Helpers"
-import {differenceBy} from 'lodash';
+import {differenceBy, intersectionBy, union, includes} from 'lodash';
 
 @Component<LockerRoom>({
   components: {
@@ -640,20 +640,39 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public productsAddedToLocker(payload: Record<any, any>) {
     let clones = payload.clone ? [payload.clone] : payload.clones;
     let added_locker_room_products_ids: number[] = [];
-    let customer_id = 0;
-    let old_room_index = 0;
-    let old_room_id = 0;
+    let customer_id = 0, old_room_index = 0, old_room_id = 0;
     let new_room_index = payload.to.getAttribute("data-room-index")
     let new_room_id = payload.to.getAttribute("data-room-id")
     clones.forEach((clone: Record<any, any>, clIdx: number) => {
+      //as each object have same value that's why we initialize variables in first loop
       if (clIdx == 0) {
         customer_id = clone.getAttribute("data-customer-id");
         old_room_index = clone.getAttribute("data-room-index");
         old_room_id = clone.getAttribute("data-room-id");
       }
-      added_locker_room_products_ids.push(clone.getAttribute("data-product-locker-room"));
+      added_locker_room_products_ids.push(clone.getAttribute("data-product-locker-room-id"));
     })
-    let added_products_data = {
+    let new_locker_products = this.getLockerProducts[new_room_index].product;
+    let old_locker_products = this.getLockerProducts[old_room_index].product;
+    // added_products are those that have been moved from active locker and added to new locker
+    let added_products = old_locker_products.filter((old_locker_product: Record<any, any>) => {
+      return includes(added_locker_room_products_ids, old_locker_product.id.toString())
+    });
+    new_locker_products = union(added_products, new_locker_products);
+    new_locker_products = new_locker_products.map((new_locker_product: Record<any, any>, nlpIdx: number) => {
+      new_locker_product.sort_order = nlpIdx + 1;
+      return new_locker_product;
+    });
+    //updating new locker products
+    this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: new_room_index, products: new_locker_products})
+    let old_locker_new_products = differenceBy(old_locker_products, added_products, "id")
+    old_locker_new_products = old_locker_new_products.map((old_locker_product: Record<any, any>, olpIdx: number) => {
+      old_locker_product.sort_order = olpIdx + 1;
+      return old_locker_product;
+    });
+    //updating active locker products
+    this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: this.tabIndex, products: old_locker_new_products})
+    return {
       customer_id: customer_id,
       old_room_index: old_room_index,
       old_room_id: old_room_id,
@@ -661,29 +680,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       new_room_index: new_room_index,
       new_room_id: new_room_id
     };
-    let new_locker_products = this.getLockerProducts[new_room_index].product;
-    let added_products = this.getLockerProducts[old_room_index].product.filter((product: Record<any, any>) => {
-      let is_moved = added_locker_room_products_ids.some((added_locker_room_products_id) => {
-        let is_added = product.id == added_locker_room_products_id;
-        if (is_added) {
-          new_locker_products.unshift(product);
-        }
-        return is_added;
-      })
-      return is_moved;
-    })
-    new_locker_products = new_locker_products.map((new_locker_product: Record<any, any>, nlpIdx) => {
-      new_locker_product.sort_order = nlpIdx + 1;
-      return new_locker_product;
-    });
-    this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: new_room_index, products: new_locker_products})
-    let old_locker_products = differenceBy(this.getLockerProducts[old_room_index].product, added_products, "id")
-    old_locker_products = old_locker_products.map((old_locker_product: Record<any, any>, olpIdx) => {
-      old_locker_product.sort_order = olpIdx + 1;
-      return old_locker_product;
-    });
-    this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: this.tabIndex, products: old_locker_products})
-    return added_products_data;
   }
 
   public reArrangeLockerProducts(payload: Record<any, any>) {
