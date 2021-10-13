@@ -8,16 +8,20 @@
       </b-form-group>-->
 
       <div class="w-100 text-left pl-2 position-relative" style="top: 6rem">
-        <div>
-          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">
-            Remove background color
-          </b-form-checkbox>
+        <div class="d-none d-lg-block continue-btn-holder pt-5">
+          <b-button @click="openLogoEditor"  class="mx-2 px-5" variant="secondary">Logo Editor</b-button>
+          <LogoEditorModal ref="logoEditorModal" :logo_id="customLogos[customLogoIndex].id" />
         </div>
-        <div class="mt-2">
-          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">
-            Smart remove background from logo
-          </b-form-checkbox>
-        </div>
+<!--        <div>-->
+<!--          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">-->
+<!--            Remove background color-->
+<!--          </b-form-checkbox>-->
+<!--        </div>-->
+<!--        <div class="mt-2">-->
+<!--          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">-->
+<!--            Smart remove background from logo-->
+<!--          </b-form-checkbox>-->
+<!--        </div>-->
       </div>
     </div>
 
@@ -93,8 +97,10 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
+import LogoEditorModal from "@/components/LogoEditorModal.vue";
 
 @Component<UploadLogo>({
+  components: {LogoEditorModal},
   mounted() {
       if (localStorage.getItem('logo_modal_status') == null) {
         this.open_modal = true
@@ -160,7 +166,13 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     this.processLogoImage();
 
   }
-
+  public openLogoEditor() {
+    //set logo id and default image of logo
+    this.$store.dispatch('editLogo',{key:'id',value:this.customLogos[this.customLogoIndex].id,api_call:false})
+    this.$store.dispatch('editLogo',{key:'base64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
+    this.$store.dispatch('editLogo',{key:'originalBase64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
+    this.ref.logoEditorModal.showLogoModal()
+  }
 
   public showModal() {
     this.ref.myModal.show()

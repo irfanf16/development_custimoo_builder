@@ -85,3 +85,15 @@
     font-style: italic;
     font-display: swap;
 }
+
+
+.color-tab-active a {
+    color: #219F84;
+    border-bottom: 1px solid #219F84;
+}
+
+.color-circle {
+    width: 36px;
+    height: 36px;
+    margin: 0 5px 10px;
+}

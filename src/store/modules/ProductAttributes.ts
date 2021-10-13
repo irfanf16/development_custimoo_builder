@@ -50,9 +50,22 @@ const ProductAttributes:Module<any, any> = {
       mainProductId: 0,
       editStatus: false
     },
-    using_logo_colors: false
+    using_logo_colors: false,
+    backgroundCheck: false,
+    colorCheck: false,
+    showColorsLogoEditor:false,
+    logoEditor: {
+      id:0,
+      base64:"",
+      originalBase64:"",
+      remove_background:'',
+      color:'',
+      flood_fill:false
+
+    }
   },
   mutations: {
+
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
       state.lockerActiveTabIndex = payload
     },
@@ -262,6 +275,35 @@ const ProductAttributes:Module<any, any> = {
      // Vue.set(state.customLogos[payload.index], 'url', logo_url )
 
     },
+    TOGGLE_LOGO_CHECK(state: Record<any, any>, payload:any) {
+      if(payload.type == 'background') {
+        if(payload.val) {
+          state.backgroundCheck = true
+          state.colorCheck = false
+        }
+        else {
+          state.backgroundCheck = false
+        }
+
+        Vue.set(state.logoEditor,'base64',state.logoEditor.originalBase64)
+        Vue.set(state.logoEditor,'remove_background','')
+
+      }
+      else if(payload.type == 'color') {
+        if(payload.val) {
+          state.colorCheck = true
+          state.backgroundCheck = false
+        }
+        else {
+          state.colorCheck = false
+        }
+      }
+
+
+    },
+    EDIT_LOGO(state: Record<any, any>, payload:any) {
+      Vue.set(state.logoEditor,payload.key,payload.value)
+    },
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
     },
@@ -424,6 +466,15 @@ const ProductAttributes:Module<any, any> = {
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
       state.using_logo_colors = false;
+      state.logoEditor = {
+        id:0,
+        base64:"",
+        originalBase64:"",
+        remove_background:'',
+        color:'',
+        flood_fill:false
+      }
+
      // state.products.customLogos.map((item:any) => item.customLogos = []);
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
@@ -567,6 +618,21 @@ const ProductAttributes:Module<any, any> = {
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
     },
+    getRemoveBackgroundRadio: state => {
+      return state.logoEditor.remove_background
+    },
+    getLogoEditor: state => {
+      return state.logoEditor
+    },
+    getBackgroundCheck: state => {
+      return state.backgroundCheck
+    },
+    getColorCheck: state => {
+      return state.colorCheck
+    },
+    getShowColorsLogoEditor: state => {
+      return state.showColorsLogoEditor
+    },
     getLockerTabsIndex: state => {
       return state.lockerTabsIndex
     },
@@ -694,6 +760,9 @@ const ProductAttributes:Module<any, any> = {
     setSelectedIndex({commit}, payload) {
       commit('SET_SELECTED', payload)
     },
+    async editLogo({commit}, payload) {
+      commit('EDIT_LOGO', {key:payload.key,value:payload.value})
+    },
     setCustomObj({commit},payload) {
       commit('SET_CUSTOM_OBJ',payload)
     },
@@ -740,6 +809,9 @@ const ProductAttributes:Module<any, any> = {
     },
     toggleLogoBackgroud({commit}, index){
       commit('toggleLogoBackgroudMutation', index)
+    },
+    toggleLogoCheck({commit}, payload){
+      commit('TOGGLE_LOGO_CHECK', payload)
     },
     setCustomTexts({commit}, payload){
       commit('customTexts', payload)
