@@ -5,7 +5,10 @@
       <b-tab  :key="i" :active="tabIndex === i">
         <template #title>
 <!--          <span @drop="dropped" @dragover="allowDrop" @click="changeColor">{{room.room_name}}</span>-->
-          <draggable :list="getLockerProducts" :options="{disabled:true}"><span @click="changeColor">{{room.room_name}}</span></draggable>
+          <draggable :group="{name: `people-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
+                     @add="lockerProductsChanged($event, i)">
+            <span @click="changeColor" >{{room.room_name}}</span>
+          </draggable>
           <a class="remove-tab" @click="deleteRoom(room.id, i)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
@@ -17,9 +20,12 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" v-model="lockerActiveTabIndex">
                 <b-tab title="Products">
-                  <draggable  v-model="room.product" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true"
-                             :options="{animation: 250, delayOnTouchOnly: true, delay: 500}" @change="lockerProductsMoved">
-                    <div v-for="(product, ind) in room.product" :key="ind" class="products-block">
+                  <draggable selectedClass="sortable-selected"  :group="{name: 'people', pull: ['people-0','people-1','people-2']}"
+                             :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true"
+                             :options="{animation: 250, delayOnTouchOnly: true, delay: 500}" @update="lockerProductsChanged($event)">
+                    <template v-for="(product, ind) in room.product">
+                      <div :key="`${ind}-${product.id}`" class="products-block" :data-room-id="room.id" :data-room-index="i"
+                           :data-product-locker-room="product.id" :data-customer-id="product.customer_id" :data-product-index="ind" >
                       <label :key="ind" class="w-100" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                         <div class="image-holder">
                           <div>
@@ -64,6 +70,7 @@
                         </li>
                       </ul>
                     </div>
+                    </template>
                   </draggable>
 
                 </b-tab>
@@ -182,6 +189,7 @@ import {getRandom} from "@/helpers/Helpers";
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {processColorsCustom} from "../helpers/Helpers"
+import {differenceBy} from 'lodash';
 
 @Component<LockerRoom>({
   components: {
@@ -540,31 +548,111 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.$store.commit("Change_Locker_Active_Tab", tab_info);
   }
 
-  public lockerProductsMoved(payload:any) {
-   let moved_info = payload.moved;
-   let old_index = moved_info.oldIndex;
-   let new_index = moved_info.newIndex;
-   let re_arranged_products = [];
-   console.log('lockerActiveTabIndex',this.lockerActiveTabIndex)
-   let products = this.getLockerProducts[this.tabIndex].product;
-   let start_form = old_index > new_index ? new_index : old_index;
-   let end_at = old_index > new_index ? old_index : new_index;
-   for(let i=start_form; i<=end_at ;i++ ) {
-      let product  = products[i];
-      product.sort_order = i;
-     re_arranged_products.push({
-       id: product.id,
-       sort_order: i + 1
-     });
-   }
-   http.put(`locker/products/re_arrange`, {re_arranged_products: re_arranged_products}).then((res) => {
-     console.log("response", res.data);
+  public lockerProductsChanged(payload:any, index=null) {
+    let action = payload.type;
+    let data: Record<any, any> = {};
+    data.action = action;
+    let clones = payload.clone ? [payload.clone] : payload.clones;
+    if(action == "add") {
+      data.action_data = this.productsAddedToLocker(payload);
+    } else if(action == "update") {
+      data.action_data = this.reArrangeLockerProducts(payload);
+    }
+    http.put(`locker/products/changed`, data).then((res) => {
+      console.log("");
     }).catch(err => {
+      console.log("error", err)
       if(err.response.status){
         //resp = {status:false,message:err.response.data.errors};
       }
     })
   }
+
+  public productsAddedToLocker(payload: Record<any, any>) {
+    let clones = payload.clone ? [payload.clone] : payload.clones;
+    let added_locker_room_products_ids: number[] = [];
+    let customer_id = 0;
+    let old_room_index = 0;
+    let old_room_id = 0;
+    let new_room_index = payload.to.getAttribute("data-room-index")
+    let new_room_id = payload.to.getAttribute("data-room-id")
+    clones.forEach((clone: Record<any, any>, clIdx: number) => {
+      if(clIdx == 0) {
+        customer_id = clone.getAttribute("data-customer-id");
+        old_room_index = clone.getAttribute("data-room-index");
+        old_room_id = clone.getAttribute("data-room-id");
+      }
+      added_locker_room_products_ids.push(clone.getAttribute("data-product-locker-room"));
+    })
+    let added_products_data =  {
+      customer_id: customer_id,
+      old_room_index: old_room_index,
+      old_room_id: old_room_id,
+      added_locker_room_products_ids: added_locker_room_products_ids,
+      new_room_index: new_room_index,
+      new_room_id: new_room_id
+    };
+    let new_locker_products = this.getLockerProducts[new_room_index].product;
+    let added_products = this.getLockerProducts[old_room_index].product.filter((product: Record<any, any>) => {
+      let is_moved =  added_locker_room_products_ids.some((added_locker_room_products_id) => {
+        let is_added = product.id == added_locker_room_products_id;
+        if(is_added) {
+          new_locker_products.unshift(product);
+        }
+        return is_added;
+      })
+      return is_moved;
+    })
+    new_locker_products = new_locker_products.map((new_locker_product:Record<any, any>, nlpIdx) => {
+      new_locker_product.sort_order = nlpIdx + 1;
+      return new_locker_product;
+    });
+    this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: new_room_index, products: new_locker_products})
+    let old_locker_products = differenceBy(this.getLockerProducts[old_room_index].product, added_products, "id")
+    old_locker_products = old_locker_products.map((old_locker_product:Record<any, any>, olpIdx) => {
+      old_locker_product.sort_order = olpIdx + 1;
+      return old_locker_product;
+    });
+    this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: this.tabIndex, products: old_locker_products})
+    return added_products_data;
+  }
+
+  public reArrangeLockerProducts(payload: Record<any, any>) {
+    let old_indicies = payload.oldIndicies.length > 0 ? payload.oldIndicies : [{
+      multiDragElement : null, index: payload.oldIndex
+    }];
+    let new_indicies = payload.newIndicies.length > 0 ? payload.newIndicies : [{
+      multiDragElement : null, index: payload.newIndex
+    }];
+    let moved_products: {old_index: number, new_index: number}[] = [];
+    old_indicies.forEach((old_index:Record<any, any>, oiIdx:number) => {
+      moved_products.push({
+        old_index: old_index.index, new_index: new_indicies[oiIdx].index
+      });
+    })
+    let active_locker_products = JSON.parse(JSON.stringify(this.getLockerProducts[this.tabIndex].product));
+    moved_products.forEach((moved_product) => {
+      let old_index = moved_product.old_index;
+      let new_index = moved_product.new_index;
+      let old_index_product = active_locker_products[old_index];
+      let new_index_product = active_locker_products[new_index];
+      active_locker_products[old_index] = new_index_product;
+      active_locker_products[new_index] = old_index_product;
+    })
+    let product_ids_with_sort_order: {id: number, sort_order: number}[] = [];
+    active_locker_products = active_locker_products.map((active_locker_product: Record<any, any>, alpIdx: number) => {
+      let sort_order = alpIdx + 1;
+      active_locker_product.sort_order = sort_order;
+      product_ids_with_sort_order.push({
+        id: active_locker_product.id,
+        sort_order: sort_order
+      });
+      return active_locker_product;
+    })
+    this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: this.tabIndex, products: active_locker_products})
+    return product_ids_with_sort_order;
+  }
+
 
   public swapDesign(lockerIndex: number, productIndex: number){
     let product: Record<any, any> = this.getLockerProducts[lockerIndex].product[productIndex];
