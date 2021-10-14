@@ -841,7 +841,6 @@ export default class Scene extends Vue {
               logos = logos.concat(customLogos) as [Record<any, any>]
             }
             if (logos.length) {
-              console.log('cccccccccccccccccccc')
               logos.forEach((logo: Record<any, any>, index: number) => {
                 if(logo && logo.url) {
                   this.addLogos(logo, index)
