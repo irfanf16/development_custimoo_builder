@@ -4,8 +4,8 @@
     <template v-for="(room, i) in getLockerProducts">
       <b-tab :key="i" :active="tabIndex === i">
         <template #title>
-          <draggable :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
-                     @add="lockerProductsChanged($event, i)">
+          <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
+                     @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
             <span @click="changeColor">{{ room.room_name }}</span>
           </draggable>
           <a class="remove-tab" @click="deleteRoom(room.id, i)">
@@ -22,7 +22,7 @@
                   <draggable selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
                              :multiDrag="true"
-                             :options="{animation: 250, delayOnTouchOnly: true, delay: 500}"
+                             v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}"
                              @update="lockerProductsChanged($event)">
                     <template v-for="(product, ind) in room.product">
                       <div :key="`${ind}-${product.id}`" class="products-block" :data-room-id="room.id"
@@ -1273,6 +1273,14 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   transform: scale(0);
   width: 100%;
   border: none;
+}
+.sortable-selected {
+  background: lightgrey;
+}
+
+.locker-tab-ghost {
+  display: none !important;
+  background: #C8EBFB;
 }
 
 .loader{
