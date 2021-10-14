@@ -198,8 +198,10 @@ const ProductAttributes:Module<any, any> = {
     },
     CUSTOM_LOGO_WITHOUT_TRIGGER(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
-        if(state.customLogos[state.selectedPrdId] && state.customLogos[state.selectedPrdId][customLogoAttribute.index]) {
-          Object.assign(state.customLogos[state.selectedPrdId][customLogoAttribute.index], customLogoAttribute.data)
+        if(customLogoAttribute.data.length && state.customLogos[state.selectedPrdId] && state.customLogos[state.selectedPrdId][customLogoAttribute.index]) {
+          customLogoAttribute.data.forEach((item: Record<any, any>, key: string) => {
+            state.customLogos[state.selectedPrdId][customLogoAttribute.index][key] = item
+          })
         }
       }
     },
@@ -267,7 +269,10 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_CUSTOM_OBJ(state:  Record<any, any>,prd_id:number){
       const arr = []
-      arr.push(setLogoSettings(0))
+      const default_setting = setLogoSettings(0)
+      const prod_logo_setting = getLogoSettings(0,false,prd_id)
+      const logo_setting = {...default_setting,...prod_logo_setting}
+      arr.push(logo_setting)
       Vue.set(state.customLogos,prd_id,arr)
       // Object.assign(state.customLogos,prd_id)
       //  state.customLogos[prd_id] = arr
@@ -276,8 +281,8 @@ const ProductAttributes:Module<any, any> = {
       const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
       Object.keys(custom_obj).map(function(key, index) {
         let logo_ = custom_obj[key][0];
-        logo_ = {...logo_,...logo}
-        Vue.set(state.customLogos[key],0,logo_)
+        logo_ = {...logo_, ...logo}
+        Vue.set(state.customLogos[key],0, logo_)
       });
     },
     customTexts(state: Record<any, any>, customText: Record<any, any>) {
@@ -428,37 +433,14 @@ const ProductAttributes:Module<any, any> = {
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
 
-        /*
-
-        let logoSetting = selectedProduct.logos_setting[0]
-
-        if(!logoSetting) {
-          logoSetting = {
-            width: 200,
-            x_axis: 150,
-            y_axis: 190,
-            rotation: 0,
-            haveControls: true,
-            side: 'front'
-          }
-        }
-
-        const logo = {
-          url: '',
-          width: logoSetting.width,
-          height: logoSetting.height,
-          x_axis: logoSetting.x_axis,
-          y_axis: logoSetting.y_axis,
-          rotation: logoSetting.rotation,
-          haveControls: Boolean(!logoSetting.is_locked),
-          side: logoSetting.side,
-          customLogo: true,
-          is_transparent: false
-        }*/
 
         let arr:any = []
         state.products.forEach(async (product:any) => {
-          arr.push(setLogoSettings(0))
+          const default_setting = setLogoSettings(0)
+          const prod_logo_setting = getLogoSettings(0,false,product.id)
+          const logo_setting = {...default_setting,...prod_logo_setting}
+           arr.push(logo_setting)
+          //arr.push(getLogoSettings(0,false,product.id))
           Vue.set(state.customLogos,product.id,arr)
           // Object.assign(state.customLogos,product.id)
           // state.customLogos[product.id] = arr
@@ -606,23 +588,16 @@ const ProductAttributes:Module<any, any> = {
         return false
       }
     }),
+    getSelectedProductId: (state: any) => state.selectedPrdId,
     getCategories: state => {
       return state.categories
     },
 
     getCustomLogos: state => (prd_id = state.selectedPrdId) => {
-      // if(state.products[state.selectedIndex]) {
-      //   const selected_prd_id = state.products[state.selectedIndex].id
-      //   return state.customLogos[selected_prd_id] ? state.customLogos[selected_prd_id] : []
-      //
-      // }
-      // return []
-     // console.log('getter',state.customLogos[prd_id])
       if(!state.customLogos[prd_id]) {
         return []
       }
-
-        return state.customLogos[prd_id]
+      return state.customLogos[prd_id]
     },
     getCustomLogoObject: state => {
     return state.customLogos
