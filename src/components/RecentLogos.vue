@@ -181,14 +181,15 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
 
     if(customTabIndex == 0) {
       //update team logo url in all product logos
-      logo.original_logo = original_logo
-      logo.transparent_logo = transparent_logo
-      logo.smart_transparent_logo = smart_transparent_logo
-      logo.transparent_logo = transparent_logo
-      logo.is_smart_transparent = false
-      logo.is_transparent = false
-      logo.url = logo_url
-      await this.$store.dispatch('setTeamLogoUrl',logo)
+      let logo_:any = {}
+      logo_.original_logo = original_logo
+      logo_.transparent_logo = transparent_logo
+      logo_.smart_transparent_logo = smart_transparent_logo
+      logo_.is_smart_transparent = false
+      logo_.is_transparent = false
+      logo_.url = logo_url
+      logo_.id = logo.id;
+      await this.$store.dispatch('setTeamLogoUrl',logo_)
     }
     if(!logo.logo_colors) {
       this.$store.dispatch("SET_LOGO_COLORS", []);
