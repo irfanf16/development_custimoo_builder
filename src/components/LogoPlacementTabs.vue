@@ -62,7 +62,7 @@
                     <template v-if="usingColorLogos"> Use Original Colors</template>
                     <template v-else> Use Logo Colors</template>
                   </b-button>
-                  <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" :class="{'invisible': !(logoColorUsed && imageColors.length > 1 && usingColorLogos)}"
+                  <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" :class="{'invisible': !(imageColors.length > 1 && usingColorLogos)}"
                             variant="secondary">Shuffle
                   </b-button>
                   <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
