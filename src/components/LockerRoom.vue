@@ -19,7 +19,7 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" v-model="lockerActiveTabIndex">
                 <b-tab title="Products">
-                  <draggable selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
+                  <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
                              :multiDrag="true"
                              v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}"
@@ -251,7 +251,41 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public collection_available = false;
   public lockerActiveTabIndex = this.$store.getters.getLockerActiveTabIndex;
   public collection_base_url = ''
+  private observerCallback = (mutationsList:any, observer:any) => {
+    // Use traditional 'for loops' for IE 11
+    for(const mutation of mutationsList) {
+      if (mutation.addedNodes.length) {
+        console.log('A child node has been added or removed.', mutation);
+        console.log('Nodes added', mutation.addedNodes.length);
 
+        mutation.target.classList.add('dropping')
+      }else if(mutation.removedNodes.length){
+        console.log('Nodes removed', mutation.removedNodes.length);
+
+        mutation.target.classList.remove('dropping')
+      }
+      else if (mutation.type === 'attributes') {
+        // console.log('The ' + mutation.attributeName + ' attribute was modified.');
+      }
+    }
+  }
+
+  private observer:any = new MutationObserver(this.observerCallback);
+
+  private setObserver = (targetNode:Record<any, any>) => {
+    targetNode.forEach((elem:Record<any, any>)=>{
+      const config = { attributes: true, childList: true, subtree: true };
+      this.observer.observe(elem, config);
+    })
+  }
+
+  private dragStart = () =>{
+    let elements = document.querySelectorAll('ul.nav-tabs [data-room-index]') as Record<any, any>
+    this.setObserver(elements);
+  }
+  private dragEnd = () =>{
+    console.log('started')
+  }
   private setSelected(e: Record<any, any>) {
     console.log('ev', e.target)
   }
@@ -1209,13 +1243,11 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   border: none;
 }
 .sortable-selected {
-  background: lightgrey;
+  background: #eee;
 }
 
 .locker-tab-ghost {
   display: none !important;
   background: #C8EBFB;
 }
-
-
 </style>

@@ -3161,3 +3161,126 @@ $fontSize: 0.5;
         }
     }
 }
+
+.dropping{
+    position: relative;
+    overflow: hidden;
+
+    &:after{
+        content: "";
+        display: block;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        margin: auto;
+        height: 0;
+        width: 0;
+        z-index: 10;
+        border-radius: 900px;
+        background: #999;
+        animation: animateChild 1.3s ease-out infinite;
+    }
+    &:before{
+        content: "";
+        display: block;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        margin: auto;
+        height: 0;
+        width: 0;
+        z-index: 10;
+        border-radius: 900px;
+        background: #999;
+        animation: animateChild2 1.3s ease-out infinite;
+    }
+
+    span{
+        position: relative;
+        z-index: 100;
+    }
+}
+
+@keyframes animateChild {
+    0%{
+        height: 0;
+        width: 0;
+        opacity: 1;
+    }
+    30%{
+        height: 200px;
+        width: 200px;
+        opacity: 0.5;
+    }
+    80%{
+        height: 250px;
+        width: 250px;
+        opacity: 0;
+    }
+    100%{
+        height: 250px;
+        width: 250px;
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes animateChild2 {
+    10%{
+        height: 0;
+        width: 0;
+        opacity: 1;
+    }
+    40%{
+        height: 200px;
+        width: 200px;
+        opacity: 0.5;
+    }
+    90%{
+        height: 250px;
+        width: 250px;
+        opacity: 0;
+    }
+    100%{
+        height: 250px;
+        width: 250px;
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+//.dropping{
+//    position: relative;
+//
+//    &:after{
+//        content: "";
+//        display: block;
+//        position: absolute;
+//        left: 4px;
+//        top: 4px;
+//        right: 4px;
+//        bottom: 4px;
+//        z-index: 10;
+//        border: 1px dashed gray;
+//        border-radius: 3px;
+//        animation: 0.5s ease-in-out animateChild infinite alternate;
+//    }
+//
+//    span{
+//        position: relative;
+//        z-index: 100;
+//    }
+//}
+//
+//@keyframes animateChild {
+//    from{
+//        border-color: lightgray;
+//    }
+//    to{
+//        border-color: #219F84;
+//    }
+//}
