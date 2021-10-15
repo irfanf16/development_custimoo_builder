@@ -1,55 +1,70 @@
 <template>
     <b-modal ref="logo-modal" hide-footer id="modal-center-savecolormodal" centered scrollable size="xl" title="Logo Editor" content-class="lockerroom-modal">
 
-      <div>
-        <b-form-checkbox :checked="this.$store.getters.getBackgroundCheck"  @change="toggleLogoCheck('background',$event)">
-                      Remove background
-        </b-form-checkbox>
+        <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+        <div>
+          <b-form-checkbox :checked="this.$store.getters.getBackgroundCheck"  @change="toggleLogoCheck('background',$event)">
+            Remove background
+          </b-form-checkbox>
 
-        <div  class="child-check" v-if="this.$store.getters.getBackgroundCheck">
-          <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
-            <b-form-radio v-model="removeBackgroundRadio"  :aria-describedby="ariaDescribedby" name="logo-background" value="transparent" @change="toggleRadio" >Remove Logo Background</b-form-radio>
-            <b-form-radio v-model="removeBackgroundRadio"  :aria-describedby="ariaDescribedby" name="logo-background" value="smart_transparent" @change="toggleRadio" >Remove Smart Logo Background</b-form-radio>
-          </b-form-group>
-        </div>
-
-      </div>
-
-
-      <div>
-        <b-form-checkbox :checked="this.$store.getters.getColorCheck"  @change="toggleLogoCheck('color',$event)">
-          Recolor Logo
-        </b-form-checkbox>
-
-        <div style="width: 50%"  class="child-check" v-if="this.$store.getters.getColorCheck">
-          <div>
-            <div  class="color-circle"  @click="toggleColorTabs()"
-                 :style="{background: '#000000'}" >
-            </div>
-            <ColorTabs v-if="this.colorTabClick" :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
+          <div  class="child-check" v-if="this.$store.getters.getBackgroundCheck">
+            <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
+              <b-form-radio v-model="removeBackgroundRadio"  :aria-describedby="ariaDescribedby" name="logo-background" value="transparent" @change="toggleRadio" >Remove Logo Background</b-form-radio>
+              <b-form-radio v-model="removeBackgroundRadio"  :aria-describedby="ariaDescribedby" name="logo-background" value="smart_transparent" @change="toggleRadio" >Remove Smart Logo Background</b-form-radio>
+            </b-form-group>
           </div>
 
         </div>
 
 
+        <div>
+          <b-form-checkbox :checked="this.$store.getters.getColorCheck"  @change="toggleLogoCheck('color',$event)">
+            Recolor Logo
+          </b-form-checkbox>
 
-      </div>
+          <div style="width: 50%"  class="child-check" v-if="this.$store.getters.getColorCheck">
+            <div>
+              <div  class="color-circle"  @click="toggleColorTabs()"
+                    :style="{background: '#000000'}" >
+              </div>
+              <ColorTabs v-if="this.colorTabClick" :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
+            </div>
 
-      <div style="width: 350px;background: #3E5C9A;float: right">
-        <img :src="logoEditorObj.base64"/>
-      </div>
+          </div>
+
+
+
+        </div>
+
+        <div style="width: 350px;background: #3E5C9A;float: right">
+          <img :src="logoEditorObj.base64"/>
+        </div>
+
+        <div>
+          <b-button @click="cancelEditing" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px">
+            <template>Cancel</template>
+          </b-button>
+          <b-button @click="useLogo()" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px">
+            <template> Save and use this Logo</template>
+          </b-button>
+        </div>
+
+
 
     </b-modal>
 </template>
 
 <script lang="ts">
 
-import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/LogoEditorModal.vue'
 
 import ColorTabs from "@/components/ColorTabs.vue";
 import {http} from "@/httpCommon";
+import rgbHex from "rgb-hex";
+import {getClosestColor} from "@/pantoneColor";
+import ErrorMessages from "@/mixins/ErrorMessages";
     @Component<LogoEditorModal>({
         components: {
           ColorTabs,
@@ -60,15 +75,19 @@ import {http} from "@/httpCommon";
         this.getColors()
       }
     })
-    export default class LogoEditorModal extends Vue {
+    export default class LogoEditorModal extends Mixins(ErrorMessages) {
 
       public locker_selected = true;
       public colorTabClick = false;
       public room_id = 0;
       public folder_name = '';
       public ref = this.$refs as Record<any, any>
+      public imageColors: any[] = []
+      public colors: any = [];
       public productColors: any[] = []
+      public showLoader = false;
       @Prop({ required: true }) logo_id!: number
+      @Prop({ required: true }) customLogoIndex!: number
 
 
       public showButton(id:number){
@@ -83,10 +102,95 @@ import {http} from "@/httpCommon";
       }
 
       public async setColorOfLogo(color:string) {
-        console.log('in aaaa',color)
         let res = await this.getLogoFromServer(this.logo_id,'floodfill',this.$store.getters.getLogoEditor.base64,color)
-        console.log('ressss',res)
-        //await this.$store.dispatch('editLogo',{key:'base64',value:res.data.logo})
+        await this.$store.dispatch('editLogo',{key:'base64',value:res.data.logo})
+      }
+      public  cancelEditing() {
+        this.$store.dispatch('unsetLogoEditor')
+        this.ref['logo-modal'].hide();
+      }
+      public  useLogo() {
+        this.showLoader = true
+        let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
+        let data = new FormData();
+        data.append("logo" , this.$store.getters.getLogoEditor.base64);
+        data.append("product_id" , this.$store.getters.getSelectedProduct.id);
+        http.post('/customer/update/logo', data)
+          .then(resp => {
+            this.colors = resp.data.colors;
+            custom_logo.original_logo = resp.data.file.logo_url;
+            custom_logo.transparent_logo = resp.data.file.transparent_logo_url;
+            custom_logo.smart_transparent_logo = resp.data.file.smart_transparent_logo_url;
+            custom_logo.is_smart_transparent = false;
+            custom_logo.url = resp.data.file.logo_url;
+            custom_logo.id = resp.data.file.id;
+            let getLogos = []
+            if (this.customLogos.length > 1){
+              getLogos = this.customLogos.slice(0, -1)
+            }else{
+              getLogos = this.customLogos
+            }
+            this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
+            this.$store.commit('SET_COLORS_FROM_RECENT',false)
+            this.$store.commit('customLogos', custom_logo)
+            this.getLogoColors()
+            this.$store.commit('SET_RECENT_LOGOS');
+
+
+            if(this.customLogoIndex == 0) {
+              //update team logo url in all product logos
+              this.$store.dispatch('setTeamLogoUrl',custom_logo)
+            }
+            this.showToast('Logo Applied','SUCCESS')
+            this.showLoader = false
+            this.ref['logo-modal'].hide();
+          }).catch((e) => {
+          this.showLoader = false
+          this.showError('Something went wrong')
+            console.log('exception',e)
+        })
+      }
+      public getLogoColors() {
+        if (this.customLogos.length) {
+          if (this.customLogos[0] && this.customLogos[0].url) {
+            this.$store.dispatch("SET_LOGO_URL", {logoUrl: this.customLogos[0].url})
+            if (this.colors.length){
+              this.processColors(this.colors)
+            }
+          }
+        }
+      }
+
+      async processColors(colors: []) {
+        this.imageColors = []
+        let uniqueColors: string[] = []
+        colors.forEach((color: number[]) => {
+          const hex = rgbHex(color[0], color[1], color[2])
+          if ((!uniqueColors.includes(hex))) {
+            uniqueColors.push(hex)
+          }
+        })
+        let deletedCount = uniqueColors.length - 4
+        uniqueColors.splice(4, deletedCount)
+
+        uniqueColors.forEach((color: string) => {
+          // console.log(color)
+          let pantoneColor = getClosestColor(color)
+          //console.log(JSON.parse(JSON.stringify(pantoneColor)))
+          this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
+        })
+        let add_extra_colors = 4 - uniqueColors.length;
+        if(uniqueColors.length < 4) {
+          while(add_extra_colors > 0 ) {
+            this.imageColors.push({hex: null, pantone: null, name: null})
+            --add_extra_colors;
+          }
+        }
+        //only set logo colors if index is 0
+        if(this.customLogoIndex == 0) {
+          await this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
+          await this.$store.dispatch("initialLogoColors", JSON.stringify(this.imageColors));
+        }
       }
 
       public showLogoModal() {
@@ -116,13 +220,16 @@ import {http} from "@/httpCommon";
       get logoEditorObj() {
         return this.$store.getters.getLogoEditor
       }
+      get customLogos(): Record<any, any>[] {
+        return this.$store.getters.getCustomLogos()
+      }
 
 
       public async toggleRadio(type:string) {
 
         console.log('type',type)
 
-        let res = await this.getLogoFromServer(this.logo_id,type)
+        let res = await this.getLogoFromServer(this.logo_id,type,this.$store.getters.getLogoEditor.originalBase64)
         await this.$store.dispatch('editLogo',{key:'base64',value:res.data.logo})
 
       }
@@ -144,7 +251,6 @@ import {http} from "@/httpCommon";
           return locker_color
         })
         this.productColors = this.productColors.concat(locker_colors)
-        console.log('yooo',this.productColors)
 
       }
 

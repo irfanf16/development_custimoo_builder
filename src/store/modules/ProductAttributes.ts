@@ -279,7 +279,7 @@ const ProductAttributes:Module<any, any> = {
       if(payload.type == 'background') {
         if(payload.val) {
           state.backgroundCheck = true
-          state.colorCheck = false
+          //state.colorCheck = false
         }
         else {
           state.backgroundCheck = false
@@ -292,17 +292,21 @@ const ProductAttributes:Module<any, any> = {
       else if(payload.type == 'color') {
         if(payload.val) {
           state.colorCheck = true
-          state.backgroundCheck = false
+          //state.backgroundCheck = false
         }
         else {
           state.colorCheck = false
+          Vue.set(state.logoEditor,'base64',state.logoEditor.originalBase64)
         }
       }
-
-
     },
     EDIT_LOGO(state: Record<any, any>, payload:any) {
       Vue.set(state.logoEditor,payload.key,payload.value)
+    },
+    UNSET_LOGO_EDITOR(state: Record<any, any>, payload:any) {
+      Vue.set(state.logoEditor,'remove_background','')
+      state.backgroundCheck = false
+      state.colorCheck = true
     },
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
@@ -762,6 +766,9 @@ const ProductAttributes:Module<any, any> = {
     },
     async editLogo({commit}, payload) {
       commit('EDIT_LOGO', {key:payload.key,value:payload.value})
+    },
+    async unsetLogoEditor({commit}, payload) {
+      commit('UNSET_LOGO_EDITOR', {})
     },
     setCustomObj({commit},payload) {
       commit('SET_CUSTOM_OBJ',payload)

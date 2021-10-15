@@ -98,6 +98,8 @@ export default class ColorTabs extends Vue {
   public selectType(index: number, showOther = false) {
 
     console.log('asdasd',this.productColors)
+    console.log('index',index)
+    console.log('showOther',showOther)
     if (showOther){
       this.othersActive = true;
     }
@@ -105,7 +107,8 @@ export default class ColorTabs extends Vue {
       this.othersActive = false;
     }
 
-    this.selectTypeIndex = index
+    if(index)
+      this.selectTypeIndex = index
     this.showOther = showOther
     if(!showOther)
       this.productColor = this.productColors[this.selectTypeIndex].color_text
