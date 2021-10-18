@@ -1397,12 +1397,20 @@ export default class Scene extends Vue {
 
   public showDimensions(e: any, dimText: Record<any, any>) {
     let object = e.target;
-    dimText.set({
-      left: object.left,
-      top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-      text: 'Size '+ (object.width * object.scaleX * this.measurementRatio).toFixed(1) + 'cm x ' + (object.height * object.scaleY * this.measurementRatio).toFixed(1) + 'cm',
-      visible: true
-    }).bringToFront()
+
+    let width = object.width * object.scaleX * this.measurementRatio;
+    let height = object.height * object.scaleY * this.measurementRatio;
+
+    if(width != 0 || height != 0){
+      dimText.set({
+        left: object.left,
+        top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
+        text: 'Size '+ width.toFixed(1) + 'cm x ' + height.toFixed(1) + 'cm',
+        visible: true
+      }).bringToFront()
+    }
+
+
   }
 
   public addTexts(texts: [Record<any, any>], textIndex: null | number = null) {
