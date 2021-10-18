@@ -197,7 +197,7 @@ export default class DesignPdfView extends Vue {
     let selected_product = this.$store.getters.getSelectedProduct;
     let style_index = this.$store.getters.getCurrentStyleIndex;
     let product_design = selected_product.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>) => product_design.design_show == 1)[0];
-    this.getUrlContent(this.storageUrl+product_design.front_design.file_url, (dataUrl: any) => {
+    this.getUrlContent(this.storageUrl+product_design.front_design.file_base_url, (dataUrl: any) => {
       product_design.front_design.base64_image = dataUrl;
     })
     return product_design;
