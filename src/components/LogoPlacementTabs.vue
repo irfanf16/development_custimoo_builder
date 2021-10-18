@@ -414,7 +414,14 @@ export default class LogoPlacementTabs extends Vue {
     return this.$store.getters.getLogosColors
   }
   public getColors() {
-
+    this.productColors = []
+    let colors = this.selectedProduct.colors.concat(this.lockerColors);
+    colors.forEach((color: any, key: number) => {
+      let name = Object.prototype.hasOwnProperty.call(color, 'file_name') ? color.file_name.substr(0, color.file_name.indexOf('.')) : color.name;
+      this.productColors.push({color_text: JSON.parse(color.color_text), selectedColor: "", name: name});
+    })
+  }
+  public getColors_ramzan() {
     this.productColors = []
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}

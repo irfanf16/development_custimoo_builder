@@ -84,11 +84,20 @@ export default class LogoColorTabs extends Vue {
 
   @Watch('showOther')
   showOtherChanged(val: string) {
-    if(this.showOther){
-      let colorPicker = this.$refs['colorPicker'] as Record<any, any>
-      colorPicker.data.hueHeight = 500
-    }else{
-      console.log('notfound')
+    if(this.showOther) {
+      setTimeout(() => {
+        let colorPicker = this.$refs['colorPicker'] as Record<any, any>
+        if(colorPicker) {
+          this.$set(colorPicker, "hueHeight", 200)
+          this.$set(colorPicker, "previewHeight", 30)
+          colorPicker.selectHue(colorPicker.rgba)
+         setTimeout(() =>  {
+           colorPicker.$refs.hue.renderColor();
+         }, 200)
+        } else {
+          console.log("color picker not found")
+        }
+      }, 100)
     }
   }
 
