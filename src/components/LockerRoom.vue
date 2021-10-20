@@ -2,7 +2,7 @@
   <span>
   <b-tabs content-class="mt-3" @activate-tab="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
-      <b-tab  :key="i" :active="tabIndex === i">
+      <b-tab :key="i" :active="tabIndex === i" @click="hideAll">
         <template #title>
 <!--          <span @drop="dropped" @dragover="allowDrop" @click="changeColor">{{room.room_name}}</span>-->
           <draggable :list="getLockerProducts" :options="{disabled:true}"><span @click="changeColor">{{room.room_name}}</span></draggable>
@@ -16,7 +16,7 @@
           <div>
             <b-card no-body>
               <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" v-model="lockerActiveTabIndex">
-                <b-tab title="Products">
+                <b-tab title="Products" @click="hideAll">
                   <draggable  v-model="room.product" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true"
                               :options="{animation: 250, delayOnTouchOnly: true, delay: 500}" @change="lockerProductsMoved">
                     <div v-for="(product, ind) in room.product" :key="ind" class="products-block">
@@ -41,21 +41,27 @@
                           <a data-title="Edit design" @click="editProduct(i, ind)" @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']" /></a>
                         </li>
                         <li>
-                          <b-button data-title="Share design" :id="'share'+i+''+ind" @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''" @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
-                          <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom" triggers="focus">
-                            <div class="share-holder">
-                              <h3>Copy link
-                                ..and Share</h3>
-                              <div class="share-form">
-                                <b-form inline>
-                                  <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
+                          <b-button data-title="Share design" class="shareBtn"
+                                    @click="(e)=>product.shared_url === undefined || product.shared_url === null  ? shareProduct(e, product, ind, i, 'share'+i+''+ind): toggleShare(e, 'share'+i+''+ind)"
+                                    @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
+                            :icon="['fas', 'share-alt']"/></b-button>
 
-                                  ></b-form-input>
-                                  <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
-                                </b-form>
+                          <div :id="'share'+i+''+ind" class="tooltip b-tooltip share-tooltip" @click="(e)=>e.stopPropagation()" style="display: none; position: fixed; width: 100%; max-width: 303px">
+                              <div class="tooltip-inner">
+                                <div class="share-holder">
+                                  <h3>Copy link and Share</h3>
+                                  <div class="share-form">
+                                    <b-form inline>
+                                      <b-form-input :id="'copy-'+ind"
+                                                    :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
+
+                                      ></b-form-input>
+                                      <b-button variant="primary" style="border-radius: 4px; padding: 0 0 0 13px; line-height: 1; text-align: center; font-size: 1em; width: 100px !important; color: #fff" @click="copyLink(product, ind) ">Copy Link</b-button>
+                                    </b-form>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          </b-tooltip>
                         </li>
                         <li class="swap">
                           <a v-if="product.design.back_design_count > 0"  @mouseleave="hideTooltip" @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
@@ -120,20 +126,23 @@
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`share_collection_${i+''+index}`" class="light rounded-circle"  custom-class="share-tooltip"><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+                            <b-button title="Share collection" @click="(e)=>toggleShare(e,`share_collection_${i+''+index}`)" class="light shareBtn rounded-circle" ><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
                             <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
-                            <b-tooltip :target="`share_collection_${i+''+index}`" custom-class="share-tooltip" placement="bottom" triggers="focus">
-                              <div class="share-holder">
-                                <h3>Copy link and Share</h3>
-                                <div class="share-form">
-                                  <b-form inline>
-                                    <b-form-input :ref="'copylink_'+index" :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}/view`  : ''"
-                                    ></b-form-input>
-                                    <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
-                                  </b-form>
+                            <div :id="`share_collection_${i+''+index}`" class="tooltip b-tooltip share-tooltip" @click="(e)=>e.stopPropagation()" style="display: none; position: fixed; width: 100%; max-width: 303px">
+                              <div class="tooltip-inner">
+                                <div class="share-holder">
+                                  <h3>Copy link and Share</h3>
+                                  <div class="share-form">
+                                    <b-form inline>
+                                      <b-form-input :ref="'copylink_'+index"
+                                                    :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}/view`  : ''"
+                                      ></b-form-input>
+                                      <b-button variant="primary" style="width: 100px !important; line-height: 1" @click="copyCollectionLink(index)">Copy Link</b-button>
+                                    </b-form>
+                                  </div>
                                 </div>
                               </div>
-                            </b-tooltip>
+                            </div>
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -197,8 +206,13 @@ import {processColorsCustom} from "../helpers/Helpers"
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
     this.setCollections()
-    if (this.lockers.length >0 ){
+
+    if (this.lockers.length >0 ) {
       this.copiedProductLockerId = this.lockers[0].id
+    }
+
+    document.body.onclick = () => {
+      this.hideAll();
     }
   }
 })
@@ -213,9 +227,29 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public collection_available = false;
   public lockerActiveTabIndex = this.$store.getters.getLockerActiveTabIndex;
   public collection_base_url = ''
+  private copiedProductLockerId = 0;
 
-  private setSelected(e:Record<any, any>){
-    console.log('ev', e.target)
+  private hideAll = () => {
+    let elements = document.querySelectorAll('.share-tooltip');
+    elements.forEach((element: Record<any, any>)=>{
+      element.style.display = 'none';
+    });
+  }
+
+
+  private toggleShare(e:Record<any, any>, targetID:string) {
+    e.stopPropagation();
+    let elementOffset = e.currentTarget.getBoundingClientRect();
+
+    let elements = document.querySelectorAll('.share-tooltip');
+    elements.forEach((element: Record<any, any>)=>{
+      element.style.display = 'none';
+    });
+
+    let element = document.getElementById(targetID) as Record<any, any>;
+    element.style.display = 'flex';
+    element.style.top = (elementOffset.top + e.currentTarget.clientHeight + 10)+'px';
+    element.style.left = (elementOffset.left - (element.clientWidth/2)) + 'px';
   }
 
   private showTooltip(e: Record<any, any>){
@@ -397,7 +431,8 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.$emit('hideLockerRoomModal')
   }
 
-  public async shareProduct(product:Record<any, any>, ind:number, lockerIndex:number){
+  public async shareProduct(e:Record<any, any>, product: Record<any, any>, ind: number, lockerIndex: number, targetID:string) {
+    this.toggleShare(e, targetID);
     try {
       let payload = { type: 'locker', id: product.id , customer_id :  this.customer ? this.customer.id : '', product_id: this.selectedProduct.product_id}
       let shared_url = "";
