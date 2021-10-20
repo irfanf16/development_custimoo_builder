@@ -197,6 +197,9 @@ import {processColorsCustom} from "../helpers/Helpers"
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
     this.setCollections()
+    if (this.lockers.length >0 ){
+      this.copiedProductLockerId = this.lockers[0].id
+    }
   }
 })
 export default class LockerRoom extends Mixins(ErrorMessages) {
@@ -393,6 +396,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     });
     this.$emit('hideLockerRoomModal')
   }
+
   public async shareProduct(product:Record<any, any>, ind:number, lockerIndex:number){
     try {
       let payload = { type: 'locker', id: product.id , customer_id :  this.customer ? this.customer.id : '', product_id: this.selectedProduct.product_id}
