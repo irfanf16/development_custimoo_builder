@@ -11,7 +11,7 @@
             <b-form-input
               type="email"
               v-model="email"
-              placeholder="Enter email"
+              placeholder="Enter Email Address"
               required
             ></b-form-input>
           </b-form-group>
@@ -20,7 +20,7 @@
             <b-form-input
               type="password"
               v-model="password"
-              placeholder="Password"
+              placeholder="Enter Password"
               required
             ></b-form-input>
           </b-form-group>
@@ -93,7 +93,7 @@
             <b-form-input
               v-model="form.password_confirmation"
                type="password"
-              placeholder="Confirm Password"
+              placeholder="Enter Confirm Password"
               required
             ></b-form-input>
           </b-form-group>
@@ -108,7 +108,7 @@
 <!--            </b-form-checkbox>-->
 <!--          </b-form-group>-->
 
-          <div class="pb-3">By creating an account, I acknowledge that I have read and agree with the <a href="/" class="login-remember" style="color: #219F84;">Terms of Use.</a></div>
+          <div class="pb-3">By creating an account, I acknowledge that I have read and agreed with the <a href="/" class="login-remember" style="color: #219F84;">Terms of Use.</a></div>
 
           <b-button @click="signUp" variant="primary">Create Account and Login</b-button>
 
@@ -117,7 +117,8 @@
       <div class="signup-section p-4 pt-lg-5">
         <div>
           <div class="signup-text-header">
-            <span>Need an account?</span>
+            <span class="text-join">Need an account?</span>
+            <span class="text-signin">Already have an account?</span>
             <h2 @click="additionClass()">
               <span class="text-join">Join Customizer!</span>
               <span class="text-signin">Login Now!</span>
