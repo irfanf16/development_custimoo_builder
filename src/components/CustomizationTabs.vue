@@ -383,6 +383,10 @@ export default class CustomizationProcess extends Vue {
       let style_tag = document.createElement('style')
       style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
       headElement.appendChild(style_tag)
+      $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
+      setTimeout(() => {
+        $("#delete_after_load").remove()
+      }, 100)
     })
   }
 
