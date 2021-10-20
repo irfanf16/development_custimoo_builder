@@ -2041,6 +2041,8 @@ button{
             text-align: left;
         }
         .form-inline{
+            flex-wrap: nowrap;
+
             .form-control{
                 margin: 0;
                 background: #F0F0F0;

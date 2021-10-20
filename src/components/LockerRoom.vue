@@ -137,7 +137,7 @@
                                       <b-form-input :ref="'copylink_'+index"
                                                     :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}/view`  : ''"
                                       ></b-form-input>
-                                      <b-button variant="primary" style="width: 100px !important; line-height: 1" @click="copyCollectionLink(index)">Copy Link</b-button>
+                                      <b-button variant="primary" style="width: 100px !important; line-height: 1; padding: 0 0 0 13px" @click="copyCollectionLink(index)">Copy Link</b-button>
                                     </b-form>
                                   </div>
                                 </div>
