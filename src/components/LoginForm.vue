@@ -20,7 +20,7 @@
             <b-form-input
               type="password"
               v-model="password"
-              placeholder="Password"
+              placeholder="Enter password"
               required
             ></b-form-input>
           </b-form-group>
@@ -93,7 +93,7 @@
             <b-form-input
               v-model="form.password_confirmation"
                type="password"
-              placeholder="Confirm Password"
+              placeholder="Enter Confirm Password"
               required
             ></b-form-input>
           </b-form-group>
