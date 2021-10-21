@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import VueToast from 'vue-toast-notification';
@@ -88,6 +87,11 @@ if (store.getters.isAuthenticated) {
 }
 
 function app_instance(){
+  navigator.serviceWorker.getRegistrations().then((registrations) => { // todo will remove this code after couple of days
+    for(const registration of registrations) {
+      registration.unregister();
+    }
+  });
   return new Vue({
     router,
     store,

@@ -130,20 +130,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     return this.$store.getters.getSelectedProduct
   }
 
-  // @Watch('customLogos', {
-  //   deep: true
-  // })
-  /* customLogosChanged(newVal: [Record<any, any>]) {
-    if (this.customLogos[0] && !this.customLogos[0].url) {
-      let inputRef = this.$refs.fileInput as Record<any, any>
-      inputRef.value = null;
-    }
-    // if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
-    //   if(!this.$store.getters.getColorsFromRecent)
-    //     //this.getLogoColors()
-    // }
-  }*/
-
   public uploadLogoBtn() {
     if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
       localStorage.setItem('logo_modal_status', 'false')
@@ -221,40 +207,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
-  /*public customLogoInit(customLogoIndex: number | null = null) {
-    if (this.selectedProduct && this.selectedProduct.is_logo_allowed == 1) {
-      let logoSetting = this.selectedProduct.logos_setting[0]
-      if(customLogoIndex) {
-        logoSetting = this.selectedProduct.logos_setting[customLogoIndex]
-      }
-      if(!logoSetting) {
-        logoSetting = {
-          width: 200,
-          x_axis: 150,
-          y_axis: 190,
-          rotation: 0,
-          haveControls: true,
-          side: 'front'
-        }
-      }
-
-      let logo = {
-        url: '',
-        width: logoSetting.width,
-        height: logoSetting.height,
-        x_axis: logoSetting.x_axis,
-        y_axis: logoSetting.y_axis,
-        rotation: logoSetting.rotation,
-        haveControls: Boolean(!logoSetting.is_locked),
-        side: logoSetting.side,
-        customLogo: true,
-        logoIndex: customLogoIndex,
-        is_transparent: false
-      }
-      this.$store.dispatch('setCustomLogos', logo)
-    }
-  }*/
-
   public uploadLogoImage(e: any) {
     this.fileObject = e.target.files[0];
     this.processLogoImage();
@@ -319,88 +271,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         this.showError(error);
       })
   }
-
-  /*public uploadLogoImage_back(e: any) {
-    if (!this.customLogos[this.customLogoIndex]) {
-      this.customLogoInit(this.customLogoIndex)
-    }
-    let img = e.target.files[0]
-    let file_extension = img.name.toLowerCase();
-    if (!this.hasExtension(file_extension, ['.jpg','.gif','.png','jpeg','pdf','eps','ai'])) {
-      this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','Error');
-      return false;
-    }
-
-    let fd = new FormData()
-    let header = {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    }
-    fd.append('file', img)
-    fd.append('product_id', this.selectedProduct.product_id)
-    http.post('/customer/upload/logo', fd, header)
-      .then(resp => {
-        this.colors = resp.data.colors;
-        const inputRef = this.$refs.fileInput as Record<any, any>
-        inputRef.value = null;
-
-        const original_logo = resp.data.file.logo_url;
-        const transparent_logo = resp.data.file.transparent_logo_url;
-        let logo_url = '';
-        let is_transparent = false;
-
-        if(this.customLogos[this.customLogoIndex].is_transparent===true){
-          logo_url = transparent_logo;
-          is_transparent = true;
-        }else{
-          logo_url = original_logo;
-        }
-        let getLogos = []
-        if (this.customLogos.length > 1){
-          getLogos = this.customLogos.slice(0, -1)
-        }else{
-          getLogos = this.customLogos
-        }
-        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(getLogos)), action: 'customLogos' })
-        let payload = [{
-          index: this.customLogoIndex,
-          attribute: 'url',
-          value: logo_url
-        },{
-          index: this.customLogoIndex,
-          attribute: 'id',
-          value: resp.data.file.id
-        },{
-            index: this.customLogoIndex,
-            attribute: 'is_transparent',
-            value: is_transparent
-          },
-          {
-            index: this.customLogoIndex,
-            attribute: 'original_logo',
-            value: original_logo
-          },
-          {
-            index: this.customLogoIndex,
-            attribute: 'transparent_logo',
-            value: transparent_logo
-          }
-
-        ];
-        this.$store.commit('SET_COLORS_FROM_RECENT',false)
-        payload.forEach((data) => {
-          this.$store.dispatch('updateCustomLogoAttribute', data)
-        })
-        this.hideModal()
-        this.getLogoColors()
-        this.$store.commit('SET_RECENT_LOGOS')
-      })
-      .catch((error: any) => {
-        console.log(error)
-        this.showError(error);
-      })
-  }*/
 
   public hasExtension(fileName : string, exts: any) : boolean {
 
@@ -468,6 +338,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       this.$store.dispatch('toggleLogoBackgroud', payload)
     }
   }
+
   // public changeLogoBackground(val) {
   //
   // }
@@ -476,6 +347,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     this.colors = colors
     this.getLogoColors()
   }
+
 }
 
 </script>
