@@ -8,8 +8,8 @@
       </b-form-group>-->
 
       <div class="w-100 text-left pl-2 position-relative" style="top: 6rem">
-        <div class="d-none d-lg-block continue-btn-holder pt-5">
-          <b-button @click="openLogoEditor"  class="mx-2 px-5" variant="secondary">Logo Editor</b-button>
+        <div class="d-none d-lg-block continue-btn-holder pt-1" style="padding: 0">
+          <b-button @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
           <LogoEditorModal @updateLogoFromLogoEditor="updateLogoFromLogoEditor" :customLogoIndex="this.customLogoIndex" ref="logoEditorModal" :logo_id="customLogos[customLogoIndex].id" />
         </div>
 <!--        <div>-->
@@ -726,5 +726,15 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   max-width: 285px;
   margin: 0 auto;
   text-align: left;
+}
+
+.upload-logo-opener .logo-editor-button{
+  background: #219F84 !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  padding: 10px 20px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
