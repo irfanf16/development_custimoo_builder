@@ -228,6 +228,7 @@ export default class CustomizationProcess extends Vue {
     deep: false
   })
 
+
   lockerColorsChanged() {
     this.productColorsManipulation()
   }
