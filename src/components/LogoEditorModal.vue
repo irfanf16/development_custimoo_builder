@@ -2,50 +2,53 @@
     <b-modal  ref="logo-modal" hide-footer id="modal-center-savecolormodal" centered scrollable size="xl" title="Logo Editor" content-class="lockerroom-modal">
 
         <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
-
-      <div style="width: 50%;float: left">
-        <div>
-          <b-form-checkbox :checked="this.$store.getters.getBackgroundCheck"  @change="toggleLogoCheck('background',$event)">
-            Remove background
-          </b-form-checkbox>
-
-          <div  class="child-check" v-if="this.$store.getters.getBackgroundCheck">
-            <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
-              <b-form-radio v-model="removeBackgroundRadio"  :aria-describedby="ariaDescribedby" name="logo-background" value="transparent" @change="toggleRadio" >Remove Logo Background</b-form-radio>
-              <b-form-radio v-model="removeBackgroundRadio"  :aria-describedby="ariaDescribedby" name="logo-background" value="smart_transparent" @change="toggleRadio" >Remove Smart Logo Background</b-form-radio>
-            </b-form-group>
-          </div>
-
-        </div>
-
-
-        <div>
-          <b-form-checkbox :checked="this.$store.getters.getColorCheck"  @change="toggleLogoCheck('color',$event)">
-            Recolor Logo
-          </b-form-checkbox>
-
-          <div style="width: 50%"  class="child-check" v-if="this.$store.getters.getColorCheck">
+      <div class="container">
+        <div class="d-flex w-100">
+          <div style="flex-basis: 50%">
             <div>
-              <div  class="color-circle"  @click="toggleColorTabs()"
-                    :style="{background: '#000000'}" >
+              <b-form-checkbox :checked="this.$store.getters.getBackgroundCheck"  @change="toggleLogoCheck('background',$event)">
+                Remove background
+              </b-form-checkbox>
+
+              <div  class="child-check" v-if="this.$store.getters.getBackgroundCheck">
+                <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
+                  <b-form-radio v-model="removeBackgroundRadio"  :aria-describedby="ariaDescribedby" name="logo-background" value="transparent" @change="toggleRadio" >Remove Logo Background</b-form-radio>
+                  <b-form-radio v-model="removeBackgroundRadio"  :aria-describedby="ariaDescribedby" name="logo-background" value="smart_transparent" @change="toggleRadio" >Remove Smart Logo Background</b-form-radio>
+                </b-form-group>
               </div>
-              <ColorTabs v-if="this.colorTabClick" :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
+
             </div>
 
+
+            <div>
+              <b-form-checkbox :checked="this.$store.getters.getColorCheck"  @change="toggleLogoCheck('color',$event)">
+                Recolor Logo
+              </b-form-checkbox>
+
+              <div style="width: 50%"  class="child-check" v-if="this.$store.getters.getColorCheck">
+                <div>
+                  <div  class="color-circle"  @click="toggleColorTabs()"
+                        :style="{background: '#000000'}" >
+                  </div>
+                  <ColorTabs v-if="this.colorTabClick" :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
+                </div>
+
+              </div>
+
+
+
+            </div>
           </div>
 
-
-
-        </div>
-      </div>
-
-
-        <div style="width: 50%;float: right">
-          <img :src="logoEditorObj.base64"/>
+          <div style="background: #CDCDCD;text-align: center; flex-basis: 50%;height: 206px">
+            <img :src="logoEditorObj.base64"/>
+          </div>
         </div>
 
-        <div style="width: 100%">
-          <b-button @click="cancelEditing" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px">
+
+
+        <div class="d-flex align-items-center justify-content-center mt-3 gap-2">
+          <b-button @click="cancelEditing" variant="secondary" class="use-btn light flex-shrink-1" style="white-space: nowrap; max-width: 200px">
             <template>Cancel</template>
           </b-button>
           <b-button @click="useLogo()" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px">
@@ -53,9 +56,10 @@
           </b-button>
         </div>
 
-
+      </div>
 
     </b-modal>
+
 </template>
 
 <script lang="ts">
