@@ -98,7 +98,7 @@
     margin: 0 5px 10px;
 }
 .loader {
-    position: fixed;
+    position: absolute;
     left: 0;
     right: 0;
     top: 0;

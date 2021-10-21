@@ -10,7 +10,7 @@
             <b-nav-item v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
               {{ colorType.name | capitalize}}
             </b-nav-item>
-            <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
+            <b-nav-item @click="selectType(null, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
@@ -33,7 +33,7 @@
         <b-nav-item v-bind:class="{ 'color-tab-active' : index == selectTypeIndex && !othersActive}" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
           {{ colorType.name | capitalize}}
         </b-nav-item>
-        <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
+        <b-nav-item @click="selectType(null, true)">Others</b-nav-item>
       </b-nav>
       <div class="color-holder">
         <div class="color-container">
@@ -97,9 +97,7 @@ export default class ColorTabs extends Vue {
 
   public selectType(index: number, showOther = false) {
 
-    console.log('asdasd',this.productColors)
-    console.log('index',index)
-    console.log('showOther',showOther)
+
     if (showOther){
       this.othersActive = true;
     }
@@ -109,6 +107,7 @@ export default class ColorTabs extends Vue {
 
     if(index)
       this.selectTypeIndex = index
+
     this.showOther = showOther
     if(!showOther)
       this.productColor = this.productColors[this.selectTypeIndex].color_text

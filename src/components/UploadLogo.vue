@@ -10,7 +10,7 @@
       <div class="w-100 text-left pl-2 position-relative" style="top: 6rem">
         <div class="d-none d-lg-block continue-btn-holder pt-5">
           <b-button @click="openLogoEditor"  class="mx-2 px-5" variant="secondary">Logo Editor</b-button>
-          <LogoEditorModal :customLogoIndex="this.customLogoIndex" ref="logoEditorModal" :logo_id="customLogos[customLogoIndex].id" />
+          <LogoEditorModal @updateLogoFromLogoEditor="updateLogoFromLogoEditor" :customLogoIndex="this.customLogoIndex" ref="logoEditorModal" :logo_id="customLogos[customLogoIndex].id" />
         </div>
 <!--        <div>-->
 <!--          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">-->
@@ -471,6 +471,11 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   // public changeLogoBackground(val) {
   //
   // }
+
+  public updateLogoFromLogoEditor(colors = []) {
+    this.colors = colors
+    this.getLogoColors()
+  }
 }
 
 </script>

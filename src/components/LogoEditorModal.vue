@@ -1,7 +1,9 @@
 <template>
-    <b-modal ref="logo-modal" hide-footer id="modal-center-savecolormodal" centered scrollable size="xl" title="Logo Editor" content-class="lockerroom-modal">
+    <b-modal  ref="logo-modal" hide-footer id="modal-center-savecolormodal" centered scrollable size="xl" title="Logo Editor" content-class="lockerroom-modal">
 
         <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+
+      <div style="width: 50%;float: left">
         <div>
           <b-form-checkbox :checked="this.$store.getters.getBackgroundCheck"  @change="toggleLogoCheck('background',$event)">
             Remove background
@@ -35,12 +37,14 @@
 
 
         </div>
+      </div>
 
-        <div style="width: 350px;background: #3E5C9A;float: right">
+
+        <div style="width: 50%;float: right">
           <img :src="logoEditorObj.base64"/>
         </div>
 
-        <div>
+        <div style="width: 100%">
           <b-button @click="cancelEditing" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px">
             <template>Cancel</template>
           </b-button>
@@ -76,7 +80,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       }
     })
     export default class LogoEditorModal extends Mixins(ErrorMessages) {
-
+      public timeout =  0;
       public locker_selected = true;
       public colorTabClick = false;
       public room_id = 0;
@@ -102,8 +106,13 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       }
 
       public async setColorOfLogo(color:string) {
-        let res = await this.getLogoFromServer(this.logo_id,'floodfill',this.$store.getters.getLogoEditor.base64,color)
-        await this.$store.dispatch('editLogo',{key:'base64',value:res.data.logo})
+        if(this.timeout) clearTimeout(this.timeout);
+        this.timeout = setTimeout(async () => {
+          //search function
+          let res = await this.getLogoFromServer(this.logo_id,'floodfill',this.$store.getters.getLogoEditor.base64,color)
+          await this.$store.dispatch('editLogo',{key:'base64',value:res.data.logo})
+        }, 300);
+
       }
       public  cancelEditing() {
         this.$store.dispatch('unsetLogoEditor')
@@ -133,7 +142,8 @@ import ErrorMessages from "@/mixins/ErrorMessages";
             this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
             this.$store.commit('SET_COLORS_FROM_RECENT',false)
             this.$store.commit('customLogos', custom_logo)
-            this.getLogoColors()
+            this.$emit('updateLogoFromLogoEditor',this.colors)
+            //this.getLogoColors()
             this.$store.commit('SET_RECENT_LOGOS');
 
 
@@ -150,48 +160,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
             console.log('exception',e)
         })
       }
-      public getLogoColors() {
-        if (this.customLogos.length) {
-          if (this.customLogos[0] && this.customLogos[0].url) {
-            this.$store.dispatch("SET_LOGO_URL", {logoUrl: this.customLogos[0].url})
-            if (this.colors.length){
-              this.processColors(this.colors)
-            }
-          }
-        }
-      }
 
-      async processColors(colors: []) {
-        this.imageColors = []
-        let uniqueColors: string[] = []
-        colors.forEach((color: number[]) => {
-          const hex = rgbHex(color[0], color[1], color[2])
-          if ((!uniqueColors.includes(hex))) {
-            uniqueColors.push(hex)
-          }
-        })
-        let deletedCount = uniqueColors.length - 4
-        uniqueColors.splice(4, deletedCount)
-
-        uniqueColors.forEach((color: string) => {
-          // console.log(color)
-          let pantoneColor = getClosestColor(color)
-          //console.log(JSON.parse(JSON.stringify(pantoneColor)))
-          this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
-        })
-        let add_extra_colors = 4 - uniqueColors.length;
-        if(uniqueColors.length < 4) {
-          while(add_extra_colors > 0 ) {
-            this.imageColors.push({hex: null, pantone: null, name: null})
-            --add_extra_colors;
-          }
-        }
-        //only set logo colors if index is 0
-        if(this.customLogoIndex == 0) {
-          await this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
-          await this.$store.dispatch("initialLogoColors", JSON.stringify(this.imageColors));
-        }
-      }
 
       public showLogoModal() {
         this.ref['logo-modal'].show();
@@ -226,9 +195,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 
 
       public async toggleRadio(type:string) {
-
-        console.log('type',type)
-
         let res = await this.getLogoFromServer(this.logo_id,type,this.$store.getters.getLogoEditor.originalBase64)
         await this.$store.dispatch('editLogo',{key:'base64',value:res.data.logo})
 
@@ -246,7 +212,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
           this.productColors = this.productColors.concat(finalColor)
         })
         let locker_colors = this.lockerColors
-        locker_colors = locker_colors.map((locker_color) => {
+        locker_colors = locker_colors.map((locker_color:any) => {
           locker_color.color_text = JSON.parse(locker_color.color_text)
           return locker_color
         })
@@ -259,26 +225,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       }
 
 
-      public async saveFolder(){
-        if (this.room_id == 0){
-          alert('select room first');
-          return false;
-        }
-        let productColors = []
-        this.logoColors.forEach((item:Record<any, any>) => {
-          let obj = {
-            name: item.pantone, value: item.hex
-          }
-          productColors.push(obj)
-        })
-
-       let saved = await this.$store.dispatch('storeFolder', {folder_name: this.folder_name, room_id: this.room_id, colors: this.logoColors});
-        if (saved == true){
-          await this.$store.dispatch('getLockerRoomColors')
-          this.folder_name = ''
-          this.ref['my-modal'].hide();
-        }
-      }
     }
 </script>
 
