@@ -1177,6 +1177,7 @@ button{
                         width: 100% !important;
 
                         .color-set{
+                            justify-content: space-around;
                             .saturation{
                                 //width: 100%;
 
@@ -3158,6 +3159,16 @@ $fontSize: 0.5;
         .selected{
             opacity: 0;
             z-index: -1;
+        }
+    }
+}
+
+.custom-color-picker{
+    .hu-color-picker{
+        .color-show{
+            canvas{
+                width: 100%;
+            }
         }
     }
 }
