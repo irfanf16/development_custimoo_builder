@@ -55,7 +55,8 @@ import {getClosestColor, getPantoneColor} from '@/pantoneColor'
 
      if(this.$refs.colorPicker){
        console.log('found')
-       Vue.set(this.$refs.colorPicker, 'hueHeight', 500)
+       let container = document.querySelector('.color-container') as Record<any, any>
+       Vue.set(this.$refs.colorPicker, 'hueHeight', (container.clientWidth - 60))
      }else{
        console.log('notfound')
      }
@@ -63,6 +64,9 @@ import {getClosestColor, getPantoneColor} from '@/pantoneColor'
     }, 300);
 
    // this.$refs['colorPicker'].data.hueHeight = 500;
+    window.onresize = () =>{
+      this.showOtherChanged()
+    }
   }
 })
 export default class LogoColorTabs extends Vue {
@@ -83,12 +87,29 @@ export default class LogoColorTabs extends Vue {
   public othersActive = false
 
   @Watch('showOther')
-  showOtherChanged(val: string) {
-    if(this.showOther){
-      let colorPicker = this.$refs['colorPicker'] as Record<any, any>
-      colorPicker.data.hueHeight = 500
-    }else{
-      console.log('notfound')
+  showOtherChanged() {
+    if(this.showOther) {
+      setTimeout(() => {
+        let color_holder = document.querySelector('.accordion .card-body .color-holder') as Record<any, any>;
+        let color_container = document.querySelector('.accordion .card-body .color-holder .color-container') as Record<any, any>;
+        color_holder.style.maxHeight = '10000px'
+        setTimeout(()=>{
+          color_holder.style.maxHeight = color_container.offsetHeight + 'px'
+        })
+
+        let colorPicker = this.$refs['colorPicker'] as Record<any, any>
+        if(colorPicker) {
+          let container = document.querySelector('.color-container') as Record<any, any>
+          this.$set(colorPicker, "hueHeight", (container.clientWidth - 60))
+          this.$set(colorPicker, "previewHeight", 30)
+          colorPicker.selectHue(colorPicker.rgba)
+         setTimeout(() =>  {
+           colorPicker.$refs.hue.renderColor();
+         }, 15)
+        } else {
+          console.log("color picker not found")
+        }
+      }, 10)
     }
   }
 
