@@ -11,8 +11,8 @@ b, u, i, center,
 dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend,
 table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
 	margin: 0;
@@ -28,7 +28,7 @@ time, mark, audio, video {
     scroll-behavior: smooth;
 }
 
-article, aside, details, figcaption, figure, 
+article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
 	display: block;
     box-sizing: border-box;
@@ -278,7 +278,7 @@ button{
         }
         .nav-link{
             font-size: 12px;
-            padding: 0.5rem; 
+            padding: 0.5rem;
             color: #03142E;
             font-weight: 600;
             border-bottom: 1px solid #EFF2F4;
@@ -342,7 +342,7 @@ button{
             border-radius: 5px;
             color: #808895;
             font-size: 12px;
-            
+
             a{
                 display: block;
             }
@@ -471,7 +471,7 @@ button{
         }
         .nav-link{
             font-size: 12px;
-            padding: 0.5rem; 
+            padding: 0.5rem;
             color: #03142E;
             font-weight: 600;
             border-bottom: 1px solid #EFF2F4;
@@ -780,7 +780,7 @@ button{
                     margin: 0 10px 0 0;
                     background: #000;
                     border-radius: 50%;
-                    border: 1px solid #EFF2F4; 
+                    border: 1px solid #EFF2F4;
                     position: relative;
                     @media only screen and (min-width: 1024px){
                         width: 26px;
@@ -1207,7 +1207,7 @@ button{
             }
         }
     }
-    
+
     a.close{
         width: auto;
         height: auto;
@@ -1251,7 +1251,7 @@ button{
         @media only screen and (min-width: 1600px){
             gap: 2.2%;
         }
-        
+
         .color-box{
             width: 34px;
             height: 34px;
@@ -1531,7 +1531,7 @@ button{
             }
         }
         .hide-show{
-            flex: 0 0 20px; 
+            flex: 0 0 20px;
             max-width: 20px;
         }
         .roster-name{
@@ -1570,7 +1570,7 @@ button{
         .qty{
             flex: 0 0 58%;
             max-width: 58%;
-            
+
             input{
                 @media only screen and (max-width: 992px){
                     border-right: 1px solid #ced4da;
@@ -2015,7 +2015,7 @@ button{
         }
     }
     &.create-lockerroom-modal{max-width: 500px;}
-    
+
 }
 .bs-tooltip-top{
     .arrow{
@@ -2034,8 +2034,8 @@ button{
         box-shadow: 0 0 8px rgba(0,0,0,0.2);
     }
     .share-holder{
-        h3{ 
-            color: #000; 
+        h3{
+            color: #000;
             font-size: 14px;
             font-weight: 600;
             margin: 0 0 10px;
@@ -2167,7 +2167,7 @@ button{
     width: 100% !important;
     box-shadow: none;
     div:nth-child(4){display: none;}
-    
+
     // .saturation{
     //     width: 100% !important;
     // }
@@ -3176,3 +3176,62 @@ $fontSize: 0.5;
         }
     }
 }
+.checkboxes_container{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    &>div{
+        border: 1px solid #ccc;
+        padding: 7px 10px;
+        border-radius: 4px;
+
+        &:hover{
+            background: #f5f5f5;
+        }
+    }
+
+    .child-check{
+        padding: 7px 7px 7px 25px ;
+    }
+}
+
+.modal-close{
+    position: absolute;
+    line-height: 1;
+    color: #999;
+    font-size: 1.5rem;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+
+    &:hover{
+        color: #666;
+    }
+}
+
+.edit-logo-modal{
+    overflow: visible !important;
+
+    .popover-body{
+        .card-body{
+            padding: 0 !important;
+        }
+
+        .color-holder{
+            box-shadow: none;
+            border-top: 1px solid #ccc;
+            border-radius: 0;
+            padding-top: 10px;
+
+            .color-container{
+                padding: 0;
+            }
+        }
+    }
+
+    .modal-body{
+        overflow-x: visible;
+    }
+}
+>>>>>>> SAN-467

@@ -1,17 +1,25 @@
 <template>
-    <b-modal  ref="logo-modal" hide-footer id="modal-center-savecolormodal" centered scrollable size="xl" title="Logo Editor" content-class="lockerroom-modal">
-
+    <b-modal  ref="logo-modal" hide-footer id="modal-center-savecolormodal" centered scrollable size="xl" content-class="edit-logo-modal">
+      <template #modal-header>
+        <div class="w-100">
+          <div class="fs-5 text-center font-weight-bold">Logo Editor</div>
+          <div class="text-center">
+            You can alter the appearance of a logo, select a function from the list on the left
+          </div>
+          <span @click="cancelEditing" class="modal-close"><BIconX /></span>
+        </div>
+      </template>
         <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
       <div class="container">
-        <div class="d-flex w-100">
-          <div style="flex-basis: 50%">
+        <div class="d-flex w-100 gap-3">
+          <div style="flex-basis: 50%; padding-top: 27px" class="checkboxes_container">
             <div>
               <b-form-checkbox :checked="this.$store.getters.getBackgroundCheck"  @change="toggleLogoCheck('background',$event)">
                 Remove background
               </b-form-checkbox>
 
               <div  class="child-check" v-if="this.$store.getters.getBackgroundCheck">
-                <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
+                <b-form-group v-slot="{ ariaDescribedby }">
                   <b-form-radio v-model="removeBackgroundRadio"  :aria-describedby="ariaDescribedby" name="logo-background" value="transparent" @change="toggleRadio" >Remove Logo Background</b-form-radio>
                   <b-form-radio v-model="removeBackgroundRadio"  :aria-describedby="ariaDescribedby" name="logo-background" value="smart_transparent" @change="toggleRadio" >Remove Smart Logo Background</b-form-radio>
                 </b-form-group>
@@ -27,10 +35,13 @@
 
               <div style="width: 50%"  class="child-check" v-if="this.$store.getters.getColorCheck">
                 <div>
-                  <div  class="color-circle"  @click="toggleColorTabs()"
+                  <b-button  class="color-circle" :id="'colors'" @click="toggleColorTabs()"
                         :style="{background: '#000000'}" >
-                  </div>
-                  <ColorTabs v-if="this.colorTabClick" :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
+                  </b-button>
+
+                  <b-popover  :show.sync="colorTabClick" :target="'colors'" custom-class="share-tooltip" triggers="click">
+                    <ColorTabs  :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
+                  </b-popover>
                 </div>
 
               </div>
@@ -40,8 +51,11 @@
             </div>
           </div>
 
-          <div style="background: #CDCDCD;text-align: center; flex-basis: 50%;height: 206px">
-            <img :src="logoEditorObj.base64"/>
+          <div style="flex-basis: 50%">
+            <div class="text-center fs-3" style="line-height: 1">Preview</div>
+            <div class="d-flex align-items-center justify-content-center mt-2 p-3" style="background: #cdcdcd; flex-basis: 50%;height: 206px">
+              <img :src="logoEditorObj.base64" style="max-height: 100%; max-width: 100%"/>
+            </div>
           </div>
         </div>
 
@@ -397,7 +411,5 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         }
       }
     }
-
-
 
 </style>
