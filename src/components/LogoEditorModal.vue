@@ -39,8 +39,8 @@
                         :style="{background: '#000000'}" >
                   </b-button>
 
-                  <b-popover :target="'colors'" custom-class="share-tooltip" triggers="focus">
-                    <ColorTabs v-if="this.colorTabClick" :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
+                  <b-popover  :show.sync="colorTabClick" :target="'colors'" custom-class="share-tooltip" triggers="click">
+                    <ColorTabs  :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
                   </b-popover>
                 </div>
 
