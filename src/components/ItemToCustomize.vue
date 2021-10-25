@@ -28,13 +28,19 @@
     <div class="select-designs" :class="showDesigns ? 'opened' : ''">
       <DesignAvailable />
     </div>
+
+    <SelectItemCarousel ref="itemsCarousel" @retrieveProductsC="retrieveProductsC"/>
+    <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>
+    <DesignAvailable />
   </div>
 </template>
 
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator'
   import Search from '@/components/Search.vue'
-  // import SelectItemCarousel from '../components/SelectItemCarousel.vue'
+
+  // import ItemsCarousel from '@/components/ItemsCarousel.vue'
+  import SelectItemCarousel from '../components/SelectItemCarousel.vue'
   import DesignAvailable from '../components/DesignAvailable.vue'
   import ItemsGrid from "@/components/ItemsGrid.vue";
 
@@ -67,7 +73,8 @@ export default class ItemToCustomize extends Vue {
   }
 
   public retrieveProductsC(index :number){
-    this.$emit('retrieveProducts', index)
+    //this.$emit('retrieveProducts', index)
+    this.$emit('retrieveProducts','/list/products',false,true)
   }
   public searchProduct(param: string, type: string){
     this.$emit('search', param, type)
@@ -80,13 +87,16 @@ export default class ItemToCustomize extends Vue {
       if(self.customized || self.personalized) {
         await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
         this.$emit('retrieveProducts','/list/products',false,true)
+        this.$refs['itemsCarousel'].setSliderIndex();
       } else {
         await this.$store.dispatch('setProductType', {prd_type: prd_type, value: old_val});
         self[prd_type] = prd_type == "personalized" ? self.$store.getters.getPersonalized : this.$store.getters.getCustomized;
+        this.$refs['itemsCarousel'].setSliderIndex();
       }
     } else {
       await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
       this.$emit('retrieveProducts','/list/products',false,true)
+      this.$refs['itemsCarousel'].setSliderIndex();
     }
   }
   public async changeProductType_back(prd_type :any){

@@ -1,40 +1,13 @@
 <template>
-<!--  <div class="upload-logo-opener">-->
-<!--    <span class="close" @click="hideAll"><BIconX /></span>-->
-
-<!--    <div class="logo-option-area mb-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">-->
-<!--      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground">-->
-<!--        Remove Logo Background-->
-<!--      </b-form-checkbox>-->
-
-  <div style="padding-bottom: 10px" class="upload-logo-opener" v-if="customLogos">
-    <span class="close" @click="hideAll"><BIconX /></span>
-
-    <div class="logo-option-area mb-3 mt-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-
-<!--      <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
-        <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="A">Remove Logo Background</b-form-radio>
-        <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="B">Remove Smart Logo Background</b-form-radio>
-      </b-form-group>-->
-
-      <div class="w-100 text-left pl-2 position-relative" style="top: 6rem">
-        <div>
-          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">
-            Remove background color
-          </b-form-checkbox>
-        </div>
-        <div class="mt-2">
-          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">
-            Smart remove background from logo
-          </b-form-checkbox>
-        </div>
-      </div>
+  <div class="upload-logo-opener" >
+    <div class="logo-option-area mb-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
+      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground">
+        Remove Logo Background
+      </b-form-checkbox>
     </div>
 
-
-    <div class="btn btn-secondary modal-handler" >
-      <div class="upload-box position-relative" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
-        <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="btn btn-secondary modal-handler" @click="modalHandler">
+      <div class="upload-box">
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url+'?not-from-cache-please'" width="100%"/>
         </div>
@@ -42,21 +15,13 @@
           <div class="icon-holder">
             <font-awesome-icon :icon="['fas', 'image']"/>
           </div>
-          <slot name="upload_text">Upload Logo</slot>
+          Upload Logo
         </div>
         <div class="remove-img" v-if="showActions && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <a  @click="deleteLogo">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <input  :style="{display: customLogos[customLogoIndex].url ? 'none' : 'block'}"
-                type="file"
-                name="logos" ref="fileInput"
-                @change="uploadLogoImage"
-                @click="onClickUpload"
-                @drop="onDragUpload"
-                class="fileLoader"
-               accept="image/*,application/postscript,application/pdf">
       </div>
 
       <div class="upload-logo-content">
@@ -70,8 +35,8 @@
         <p>Need High Res Image</p>
       </div>
     </div>
-
-
+    <input type="file" name="logos" ref="fileInput" @change="uploadLogoImage" class="fileLoader"
+           accept="image/*,application/postscript,application/pdf">
     <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
       <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or
         laws. You may
@@ -88,8 +53,7 @@
       </div>
       <div class="upload-logo-buttons">
         <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
-        <b-button v-if="this.uploadType=='click'" class="btn-upload" @click="uploadLogoBtn">Confirm and Upload logo</b-button>
-        <b-button v-if="this.uploadType=='drag'" class="btn-upload" @click="uploadLogoDraged">Confirm and Upload logo</b-button>
+        <b-button class="btn-upload" @click="uploadLogoBtn">Confirm and Upload logo</b-button>
       </div>
     </b-modal>
   </div>
@@ -102,17 +66,15 @@ import {http} from "@/httpCommon"
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import $ from "jquery";
-import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
 
 @Component<UploadLogo>({
   mounted() {
-      if (localStorage.getItem('logo_modal_status') == null) {
-        this.open_modal = true
-      } else {
-        this.open_modal = false
-      }
- }
+    if (localStorage.getItem('logo_modal_status') == null) {
+      this.open_modal = true
+    } else {
+      this.open_modal = false
+    }
+  }
 })
 export default class UploadLogo extends Mixins(ErrorMessages) {
   public status = 'accepted'
@@ -122,10 +84,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
-  public showLoader = false;
-
-  public fileObject: Record<any, any> = {}
-  public uploadType = 'click'
 
   @Prop({ required: true }) customLogoIndex!: number
   @Prop({ required: false, default: true }) showImage!: boolean
@@ -133,11 +91,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
-  }
-
-  private hideAll(){
-    this.$store.dispatch('setActiveTab', -1);
-    $(".sideNav li a").removeClass('active')
   }
 
   @Watch('customLogos', {
@@ -148,32 +101,20 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       let inputRef = this.$refs.fileInput as Record<any, any>
       inputRef.value = null;
     }
-    if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
-      this.getLogoColors()
-    }
+    // if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
+    //   if(!this.$store.getters.getColorsFromRecent)
+    //     //this.getLogoColors()
+    // }
   }
 
   public uploadLogoBtn() {
     if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
       localStorage.setItem('logo_modal_status', 'false')
       this.open_modal = false
-      this.hideModal();
     }
-
     if(this.ref.fileInput) {
       this.ref.fileInput.click()
     }
-  }
-
-  public uploadLogoDraged() {
-    if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
-      localStorage.setItem('logo_modal_status', 'false')
-      this.open_modal = false
-      this.hideModal();
-    }
-
-    this.processLogoImage();
-
   }
 
 
@@ -186,16 +127,16 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   }
 
   get customLogos(): Record<any, any>[] {
-    return this.$store.getters.getCustomLogos()
+    return this.$store.getters.getCustomLogos
   }
 
   get logoUrl(): Record<any, any>[] {
     return this.$store.getters.getLogoUrl
   }
 
-/*  get manageComponents(): [] {
+  get manageComponents(): [] {
     return this.$store.getters.getManageComponents
-  }*/
+  }
 
   public modalHandler() {
     if (this.open_modal) {
@@ -205,42 +146,51 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
-  public onClickUpload(e: Event){
-    this.uploadType = 'click'
-    if ((localStorage.getItem('logo_modal_status') == null)) {
-      e.preventDefault()
-      this.showModal()
-    }
-  }
 
-  public onDragUpload(e: any) {
-    e.preventDefault()
-    this.fileObject = e.dataTransfer.files[0];
-    this.uploadType = 'drag';
-    if ((localStorage.getItem('logo_modal_status') == null)) {
-      this.showModal()
-    }else{
-      this.processLogoImage();
+  public customLogoInit(customLogoIndex: number | null = null) {
+    if (this.selectedProduct && this.selectedProduct.is_logo_allowed == 1) {
+      let logoSetting = this.selectedProduct.logos_setting[0]
+      if(customLogoIndex) {
+        logoSetting = this.selectedProduct.logos_setting[customLogoIndex]
+      }
+      if(!logoSetting) {
+        logoSetting = {
+          width: 200,
+          x_axis: 150,
+          y_axis: 190,
+          rotation: 0,
+          haveControls: true,
+          side: 'front'
+        }
+      }
+
+      let logo = {
+        url: '',
+        width: logoSetting.width,
+        height: logoSetting.height,
+        x_axis: logoSetting.x_axis,
+        y_axis: logoSetting.y_axis,
+        rotation: logoSetting.rotation,
+        haveControls: Boolean(!logoSetting.is_locked),
+        side: logoSetting.side,
+        customLogo: true,
+        logoIndex: customLogoIndex,
+        is_transparent: false
+      }
+      this.$store.dispatch('setCustomLogos', logo)
     }
   }
 
   public uploadLogoImage(e: any) {
-    this.fileObject = e.target.files[0];
-    this.processLogoImage();
-  }
-
-  public processLogoImage() {
-    let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
-    custom_logo.logoIndex = this.customLogoIndex;
-    let img = this.fileObject
+    if (!this.customLogos[this.customLogoIndex]) {
+      this.customLogoInit(this.customLogoIndex)
+    }
+    let img = e.target.files[0]
     let file_extension = img.name.toLowerCase();
     if (!this.hasExtension(file_extension, ['.jpg','.gif','.png','jpeg','pdf','eps','ai'])) {
       this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','Error');
       return false;
     }
-    fileToBase64(img).then(base64_string => {
-      custom_logo.base64_logo = base64_string
-    })
 
     let fd = new FormData()
     let header = {
@@ -248,43 +198,67 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
         'Content-Type': 'multipart/form-data'
       }
     }
-    fd.append('file', img as Blob)
+    fd.append('file', img)
     fd.append('product_id', this.selectedProduct.product_id)
-    this.showLoader = true;
-      http.post('/customer/upload/logo', fd, header)
+    http.post('/customer/upload/logo', fd, header)
       .then(resp => {
         this.colors = resp.data.colors;
         const inputRef = this.$refs.fileInput as Record<any, any>
         inputRef.value = null;
-        custom_logo.original_logo = resp.data.file.logo_url;
-        custom_logo.transparent_logo = resp.data.file.transparent_logo_url;
-        custom_logo.smart_transparent_logo = resp.data.file.smart_transparent_logo_url;
-        custom_logo.is_smart_transparent = false;
-        custom_logo.url = resp.data.file.logo_url;
-        custom_logo.id = resp.data.file.id;
+
+        const original_logo = resp.data.file.logo_url;
+        const transparent_logo = resp.data.file.transparent_logo_url;
+        let logo_url = '';
+        let is_transparent = false;
+
+        if(this.customLogos[this.customLogoIndex].is_transparent===true){
+          logo_url = transparent_logo;
+          is_transparent = true;
+        }else{
+          logo_url = original_logo;
+        }
         let getLogos = []
         if (this.customLogos.length > 1){
           getLogos = this.customLogos.slice(0, -1)
         }else{
           getLogos = this.customLogos
         }
-        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
+        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(getLogos)), action: 'customLogos' })
+        let payload = [{
+          index: this.customLogoIndex,
+          attribute: 'url',
+          value: logo_url
+        },{
+          index: this.customLogoIndex,
+          attribute: 'id',
+          value: resp.data.file.id
+        },{
+            index: this.customLogoIndex,
+            attribute: 'is_transparent',
+            value: is_transparent
+          },
+          {
+            index: this.customLogoIndex,
+            attribute: 'original_logo',
+            value: original_logo
+          },
+          {
+            index: this.customLogoIndex,
+            attribute: 'transparent_logo',
+            value: transparent_logo
+          }
+
+        ];
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
-        this.$store.commit('customLogos', custom_logo)
+        payload.forEach((data) => {
+          this.$store.dispatch('updateCustomLogoAttribute', data)
+        })
         this.hideModal()
         this.getLogoColors()
-        this.$store.commit('SET_RECENT_LOGOS');
-        this.showLoader = false;
-
-        if(this.customLogoIndex == 0) {
-          //update team logo url in all product logos
-          this.$store.dispatch('setTeamLogoUrl',custom_logo)
-        }
-
+        this.$store.commit('SET_RECENT_LOGOS')
       })
       .catch((error: any) => {
         console.log(error)
-        this.showLoader = false;
         this.showError(error);
       })
   }
@@ -323,13 +297,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
-    let add_extra_colors = 4 - uniqueColors.length;
-    if(uniqueColors.length < 4) {
-      while(add_extra_colors > 0 ) {
-        this.imageColors.push({hex: null, pantone: null, name: null})
-        --add_extra_colors;
-      }
-    }
     //only set logo colors if index is 0
     if(this.customLogoIndex == 0) {
       await this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
@@ -337,22 +304,21 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     }
   }
 
-
-
   public deleteLogo() {
     let inputRef = this.$refs.fileInput as Record<any, any>
     inputRef.value = null;
-    let logo = setLogoSettings(this.customLogoIndex);
-    logo.logoIndex = this.customLogoIndex;
-    this.$store.commit('customLogos', logo)
+
+    let payload = {
+      index: this.customLogoIndex
+    }
+    this.$store.dispatch('deleteCustomLogo', payload)
     this.$store.commit('SET_LOGO_COLORS', []);
     this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
   }
 
-  public toggleLogoBackground(type:string,val:boolean) {
-    let payload = {index:this.customLogoIndex,type,val}
+  public toggleLogoBackground() {
     if(this.customLogos[this.customLogoIndex]){
-      this.$store.dispatch('toggleLogoBackgroud', payload)
+      this.$store.dispatch('toggleLogoBackgroud', this.customLogoIndex)
     }
   }
 }
@@ -368,9 +334,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   padding: 15px;
   text-align: center;
   color: #808895;
-  //border-radius: 20px 20px 0 0;
+  border-radius: 20px 20px 0 0;
   background: #fff;
-  box-shadow: 0 0 7px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   z-index: 9;
   @media only screen and (min-width: 992px) {
     position: absolute;
@@ -591,15 +557,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
 }
 
 .fileLoader {
-  display: block;
-  position: absolute;
-  appearance: none;
-  width: 1000px;
-  height: 1000px;
-  left: 0;
-  top: 0;
-  z-index: 50;
-  opacity: 0;
+  display: none;
 }
 .logo-option-area{
   max-width: 285px;

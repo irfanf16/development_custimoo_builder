@@ -1,7 +1,6 @@
 <template>
-  <div>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
-    <div class="customization-tabs">
+  <div class="h-100">
+    <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex">
         <b-tab v-if="selectedProduct.is_logo_allowed == 1">
           <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
@@ -14,9 +13,11 @@
             </a>
           </template>
           <div class="logo-placement-tabs" v-if="hideTab.logoHide">
-            <LogoPlacementTabs :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
+            <LogoPlacementTabs v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
                                :logosSetting="selectedProduct.logos_setting"/>
           </div>
+
+
         </b-tab>
         <b-tab v-if="selectedProduct.product_type !== 'personalized'">
           <button @click="setHideTab('colorHide', !hideTab.colorHide)" class="tab-close-btn d-lg-none"></button>
@@ -111,6 +112,7 @@
         </b-tab>
       </b-tabs>
     </div>
+
   </div>
 </template>
 
@@ -124,10 +126,12 @@ import EditRosterArea from '@/components/EditRosterArea.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
-import { log } from 'fabric/fabric-impl'
+import {getClosestColor} from '@/pantoneColor'
+import RecentLogos from "@/components/RecentLogos.vue";
 
 @Component<CustomizationProcess>({
   components: {
+    RecentLogos,
     ColorAccordion,
     LogoPlacementTabs,
     CustomizationText,
@@ -146,6 +150,7 @@ import { log } from 'fabric/fabric-impl'
   },
 })
 export default class CustomizationProcess extends Vue {
+  private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
   @Prop({required: false, default:0}) tabIndexNew!: number
   public fontOptions: Record<any, any>[] = []
@@ -158,6 +163,10 @@ export default class CustomizationProcess extends Vue {
     return this.$store.getters.getSelectedProduct
   }
 
+  get customLogos(): Record<any, any> {
+    return this.$store.getters.getCustomLogos()
+  }
+
   get productModels(): Record<any, any> {
     return this.$store.getters.getProductModels;
   }
@@ -165,6 +174,8 @@ export default class CustomizationProcess extends Vue {
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts
   }
+
+
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
@@ -263,6 +274,38 @@ export default class CustomizationProcess extends Vue {
   public customTextInit() {
     this.productNames.forEach((productName: Record<any, any>, index: number) => {
       if (this.customTexts[index] && !this.customTexts[index].action) {
+
+        //calculate colors pantone on init
+        let fill_color_pantone = this.firstColor.name;
+        let fill_hex_color = '';
+        if(this.customTexts[index].fillColor){
+          fill_hex_color = this.customTexts[index].fillColor;
+        }else if(this.firstColor.value){
+          fill_hex_color = this.firstColor.value;
+        }
+        if(fill_hex_color != ''){
+          let pantone = getClosestColor(fill_hex_color);
+          if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+            fill_color_pantone = pantone.pantone;
+          }
+        }
+
+        let outLine_color_pantone = this.secondColor.name;
+        let outLine_hex_color = '';
+        if(this.customTexts[index].outLineColor){
+          outLine_hex_color = this.customTexts[index].outLineColor;
+        }else if(this.secondColor.value){
+          outLine_hex_color = this.secondColor.value;
+        }
+        if(outLine_hex_color != ''){
+          let opantone = getClosestColor(outLine_hex_color);
+          if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+            outLine_color_pantone = opantone.pantone;
+          }
+        }
+
+
+
         let text = {
           text: this.customTexts[index].text,
           type: productName.type,
@@ -276,14 +319,30 @@ export default class CustomizationProcess extends Vue {
           side: productName.side,
           fontFamily: this.customTexts[index].fontFamily ? this.customTexts[index].fontFamily : this.fontOptions[0].value,
           fillColor: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.value,
-          fillColorPantone: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.name,
+          fillColorPantone: fill_color_pantone,
           outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.value,
-          outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
+          //outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
+          outLineColorPantone: outLine_color_pantone,
           outLineWidth: this.customTexts[index].outLineWidth ? this.customTexts[index].outLineWidth : 0,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
       } else if (!this.customTexts[index]) {
+
+        //calculate colors pantone on init
+        let fill_color_pantone = this.firstColor.name;
+        let pantone = getClosestColor(this.firstColor.value);
+        if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+          fill_color_pantone = pantone.pantone;
+        }
+
+        let outLine_color_pantone = this.secondColor.name;
+        let opantone = getClosestColor(this.secondColor.value);
+        if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+          outLine_color_pantone = opantone.pantone;
+        }
+
+
         let text = {
           text: '',
           type: productName.type,
@@ -297,9 +356,9 @@ export default class CustomizationProcess extends Vue {
           side: productName.side,
           fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
           fillColor: this.firstColor.value,
-          fillColorPantone: this.firstColor.name,
+          fillColorPantone: fill_color_pantone,
           outLineColor: this.secondColor.value,
-          outLineColorPantone: this.secondColor.name,
+          outLineColorPantone: outLine_color_pantone,
           outLineWidth: 0,
           selectColor: false
         }
@@ -311,7 +370,6 @@ export default class CustomizationProcess extends Vue {
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
     productFonts.forEach((fonts: any, key: number) => {
-      this.showLoader = true
       let fontNameParam = fonts.file_url.split('/').reverse()
       fontNameParam = fontNameParam[0].split('.')
       let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
@@ -321,15 +379,10 @@ export default class CustomizationProcess extends Vue {
       }
       this.fontOptions = this.fontOptions.concat([font])
       let fontUrl = this.storageUrl + fonts.file_url
-      const headElement = document.querySelector('head') as HTMLHeadElement
-      headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}</style>";
-      $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
-      setTimeout(() => {
-        $("#delete_after_load").remove()
-      }, 1000)
-      setTimeout(() => {
-        this.showLoader = false
-      }, 2000)
+      const headElement = document.querySelector('head') as Record<any, any>
+      let style_tag = document.createElement('style')
+      style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
+      headElement.appendChild(style_tag)
     })
   }
 

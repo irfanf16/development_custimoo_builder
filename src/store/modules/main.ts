@@ -6,15 +6,11 @@ const Main:Module<any, any> = {
   state: {
     manageComponents: {
       mobileScreen: mobileScreen,
-      ChooseColor: true,
-      LogoArea: true,
-      ChooseInterest: mobileScreen,
       CustomizationPreview: !mobileScreen,
-      ItemToCustomize: !mobileScreen,
-      DefaultColorShuffleBtn: !mobileScreen,
-      BasicCustomization: true,
-      AdvanceCustomization: false,
-      ExtractedColors: true,
+      ItemToCustomize: true,
+      DefaultColorShuffleBtn: true,
+      ExtractedColors: false,
+      CustomizationTabs: !mobileScreen
     },
     hideTab: {
       logoHide: !mobileScreen,
@@ -23,16 +19,12 @@ const Main:Module<any, any> = {
       styleHide: !mobileScreen,
       teamHide: !mobileScreen
     },
-    tabIndexMain: 0,
-    windowView:1
+    tabIndexMain: 0
 
   },
   mutations: {
     manageComponents(state: Record<any, any>, payload: Record<any, any>) {
       state.manageComponents[payload.index] = payload.value
-    },
-    setWindowView(state: Record<any, any>, payload: Record<any, any>) {
-      state.windowView = payload
     },
     SET_HIDE_TAB(state: Record<any, any>, payload: Record<any, any>) {
       state.hideTab = {
@@ -57,17 +49,11 @@ const Main:Module<any, any> = {
     },
     getMainTab: state => {
       return state.tabIndexMain
-    },
-    getWindowView: state => {
-      return state.windowView
     }
   },
   actions: {
     setManageComponents({ commit }, payload) {
       commit('manageComponents', payload)
-    },
-    setWindowView({ commit }, payload) {
-      commit('setWindowView', payload)
     },
     async setHideTab({ commit }, payload) {
       commit('SET_HIDE_TAB', payload)
@@ -94,6 +80,13 @@ const Main:Module<any, any> = {
         });
       }
     },
+    setBrowserToken(){
+      let browserTokenString = ''
+      for (let i = 0; i < 8; i++) {
+        browserTokenString += Math.random().toString(16).slice(-4)
+      }
+      localStorage.setItem('browserToken', browserTokenString)
+     }
   }
 }
 export default Main;

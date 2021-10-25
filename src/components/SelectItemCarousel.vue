@@ -5,11 +5,12 @@
         <template v-for="design in product.productstyles[0].productdesigns">
           <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
             <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
-              :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_url : ''}"
-                   :backTextureUrl="design.back_design? design.back_design.file_url: ''"
+              :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : ''}"
+                   :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
+                   :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
                    :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
                    :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
-                   :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type"/>
+                   :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id"/>
           </div>
         </template>
         <h3 class="text-center">{{ product.product_name }}</h3>
@@ -34,23 +35,38 @@ export default {
       multipleLogo:false
     }
   },
-  mounted() {
-    this.$root.$on('sliderEvent', () => { // here you need to use the arrow function
-     if(this.$refs && this.$refs.slider)
-      this.$refs.slider.goToIndex(0);
-    })
-  },
+  // mounted() {
+    // this.$root.$on('sliderEvent', () => { // here you need to use the arrow function
+    //  if(this.$refs && this.$refs.slider)
+    //   this.$refs.slider.goToIndex(0);
+    // })
+  // },
   computed: {
     products: function() {
       return this.$store.getters.getProducts
     }
   },
   methods: {
-    productDesigns: function (index) {
+    productDesigns: async function(index) {
+
+      await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
+
+      // let logos = this.$store.getters.getCustomLogos
+      // console.log('yooooooooooooooo',logos)
+      // if(logos.length == 0) {
+      //   alert('if')
+      //   await this.$store.dispatch('setCustomObj')
+      // }
+
       this.$store.commit('CHANGE_STYLE_INDEX', 0);
       this.$store.dispatch("getModels", this.products[index].product_id);
-      this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
       this.$store.dispatch('setColorSectionVisibility')
+
+
+    },
+    setSliderIndex: function() {
+      if(this.$refs && this.$refs.slider)
+          this.$refs.slider.goToIndex(0);
     },
     loadMoreProduct: function (currentIndex) {
       if(this.$store.getters.getProducts.length - 5 <= currentIndex){

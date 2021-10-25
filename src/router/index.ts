@@ -34,6 +34,11 @@ const routes: Array<RouteConfig> = [
     path:'/shareRoster',
     name: 'ShareRoster',
     component: ShareRoster
+  },
+  {
+    path:'/admin/login',
+    name:'LoginAsAdmin',
+    component: Home,
   }
 ]
 

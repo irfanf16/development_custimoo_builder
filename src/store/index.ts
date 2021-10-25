@@ -20,12 +20,16 @@ export default new Vuex.Store({
     paths: [
       'ProductAttributes.styleIndex',
       'ProductAttributes.selectedIndex',
+      'ProductAttributes.selectedPrdId',
       'ProductAttributes.customLogos',
       'ProductAttributes.customTexts',
       'ProductAttributes.defaultColors',
       'ProductAttributes.groupColors',
       'ProductAttributes.selectedDesignId',
       'ProductAttributes.rosterDetails',
+      'ProductAttributes.using_logo_colors',
+      'Product.logoColors',
+      'Product.initialExtractedColors',
       'Main.windowView',
       'Main.tabIndexMain',
      ]

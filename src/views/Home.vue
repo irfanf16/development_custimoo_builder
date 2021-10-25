@@ -1,43 +1,49 @@
 <template>
-  <div class="page-wrapper m-lg-4">
+  <div class="page-wrapper m-lg-4" v-cloak>
     <meta name="viewport" content="width=device-width">
-    <div class="loader" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
-        <template v-if="manageComponents.BasicCustomization">
-          <b-col cols="12" lg="3" class="text-left home-color-area" :class="extractedcolorclass">
-            <div v-if="this.$store.getters.getShuffle" class="py-2 py-md-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">
-              <ChooseColor :colors="colors"/>
-            </div>
-            <template v-if="manageComponents.ExtractedColors">
-              <div class="mb-3 mb-lg-0" v-if="customLogos[0] && customLogos[0].url" :class="extractedcolorclass">
-                <ExtractedColors v-if="!hideColorSection" />
-              </div>
-            </template>
+<!--        <template v-if="manageComponents.BasicCustomization">-->
+<!--          <b-col cols="12" lg="3" class="text-left home-color-area" :class="extractedcolorclass">-->
+<!--            <div v-if="this.$store.getters.getShuffle" class="py-2 py-md-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">-->
+<!--              <ChooseColor :colors="colors"/>-->
+<!--            </div>-->
+<!--            <template v-if="manageComponents.ExtractedColors">-->
+<!--              <div class="mb-3 mb-lg-0" v-if="customLogos[0] && customLogos[0].url" :class="extractedcolorclass">-->
+<!--                <ExtractedColors v-if="!hideColorSection" />-->
+<!--              </div>-->
+<!--            </template>-->
 
-            <template v-if="this.$store.getters.getActiveTab === 0">
-              <template v-if="products.length && selectedProduct.is_logo_allowed == 1">
-                <template v-if="manageComponents.LogoArea">
-                  <UploadLogo :customLogoIndex="0"/>
-                </template>
-              </template>
-            </template>
-            <template v-if="manageComponents.ChooseInterest">
-              <ChooseInterest :categories="categories" @search="getSearchQuery" @additionalClassTrigger="additionalClass"/>
-            </template>
+<!--            <template v-if="this.$store.getters.getActiveTab === 0">-->
+<!--              <template v-if="products.length && selectedProduct.is_logo_allowed == 1">-->
+<!--                <template v-if="manageComponents.LogoArea">-->
+<!--                  <UploadLogo :customLogoIndex="0"/>-->
+<!--                </template>-->
+<!--              </template>-->
+<!--            </template>-->
+<!--            <template v-if="manageComponents.ChooseInterest">-->
+<!--              <ChooseInterest :categories="categories" @search="getSearchQuery" @additionalClassTrigger="additionalClass"/>-->
+<!--            </template>-->
+<!--          </b-col>-->
+
+<!--        </template>-->
+<!--        <template v-if="manageComponents.AdvanceCustomization">-->
+<!--          <b-col v-if="false" cols="12" lg="3" class="text-left border-right py-lg-3">-->
+<!--            <CustomizationTabs :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>-->
+<!--          </b-col>-->
+<!--        </template>-->
+
+<!--        <CustomTabs />-->
+
+          <!-- <template v-if="manageComponents.AdvanceCustomization"> -->
+        <template v-if="selectedProduct">
+          <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
+<!--            <CustomizationTabs :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>-->
+            <CustomTabs />
           </b-col>
-
-        </template>
-        <template v-if="manageComponents.AdvanceCustomization">
-          <b-col v-if="false" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
-          </b-col>
-        </template>
-
-        <CustomTabs />
 
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column position-relative">
-          <!-- <template v-if="manageComponents.AdvanceCustomization"> -->
           <template>
             <div class="customization-preview-process w-100">
               <header v-if="false" class="preview-area-header py-2 py-lg-4">
@@ -56,7 +62,7 @@
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
                   </template>
-                  <AddLockerRoomModal v-if="!editProductStatus" ref="saveToLockerModal" />
+                  <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
                   </template>
@@ -134,14 +140,14 @@
                   <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
                     <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
                       <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
-                             :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                             :back="{textureUrl: storageUrl+design.back_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
+                             :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
+                             :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
                              :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                              :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
                              :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
 
                       <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio" ref="mainScene"
-                             :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
+                             :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                              :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                              :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
                              :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
@@ -151,22 +157,16 @@
                   <div class="swap-mobile fs-4" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                 </div>
               </div>
-              <template v-if="manageComponents.BasicCustomization">
-                <b-button @click="showAdvanceCustomization()" class="d-none d-lg-inline-block mt-5" variant="secondary">Continue</b-button>
-              </template>
-              <template v-if="manageComponents.AdvanceCustomization">
-                <div class="d-none d-lg-block continue-btn-holder pt-5">
-                  <b-button v-if="tabIndex == 0" @click="showBasicCustomization()" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                  <b-button v-else @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                  <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= 2) || (!hideColorSection && tabIndex <= 3)">Next</b-button>
-                  <template v-if="isCustomerAuthenticated">
-                    <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
-                  </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('summary')" v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
-                  </template>
-                </div>
-              </template>
+              <div class="d-none d-lg-block continue-btn-holder pt-5">
+                <b-button v-if="tabIndex > 0" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
+                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= 2) || (!hideColorSection && tabIndex <= 3)">Next</b-button>
+                <template v-if="isCustomerAuthenticated">
+                  <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
+                </template>
+                <template v-else>
+                  <b-button @click="setActionBeforeLogin('summary')" v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
+                </template>
+              </div>
             </div>
           </div>
 
@@ -218,15 +218,18 @@
           <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
           <button class="backtohome-btn d-lg-none" @click="showHomeLanding()"><font-awesome-icon :icon="['fas', 'arrow-left']"/></button>
         </b-col>
+        </template>
       </b-row>
     </b-container>
     <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
+    <confirm-modal message="This will reset everything. All design changes will be lost.
+ Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes"></confirm-modal>
   </div>
 </template>
 
 <script lang="ts">
 
-import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
+import {Component, Prop, Mixins, Vue, Watch} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
@@ -244,6 +247,7 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
 import Scene from "@/components/Scene.vue";
 import $ from 'jquery';
 import CustomTabs from "@/components/CustomTabs.vue";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<Home>({
   components: {
@@ -266,13 +270,13 @@ import CustomTabs from "@/components/CustomTabs.vue";
 
   async mounted() {
 
-    // this.$root.$on('customEvent', (text:any) => { // here you need to use the arrow function
-    //   this.retrieveProducts()
-    // })
+    //get recent logos
+    this.setRecentLogos()
 
     if (this.hideColorSection){
       this.$store.commit('hideColorSection', false)
     }
+
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
     if (this.isAuthenticated) {
@@ -306,7 +310,6 @@ import CustomTabs from "@/components/CustomTabs.vue";
       }, 2000)
       setTimeout(() => {
         this.showLoader = false
-        console.log(this.showLoader)
         this.productUpdated = true
       }, 10000)
     }
@@ -314,13 +317,16 @@ import CustomTabs from "@/components/CustomTabs.vue";
     this.jwtToken = localStorage.getItem('jwtToken') as string
     await this.$store.dispatch('setCategories')
     // await this.$store.dispatch('setJwtToken')
+    if(!localStorage.getItem('browserToken')){
+      await this.$store.dispatch('setBrowserToken')
+    }
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getLockerRoomColors')
     }
   }
 })
 
-export default class Home extends Vue {
+export default class Home extends Mixins(ErrorMessages) {
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -357,8 +363,12 @@ export default class Home extends Vue {
     })
   }
 
-  public showLoader = false;
+  public showLoader = true;
   private storageUrl = process.env.VUE_APP_STORAGE_URL
+
+  public setRecentLogos() {
+    this.$store.commit('SET_RECENT_LOGOS')
+  }
 
   public showConfirm(){
     this.ref['reset-modal'].showConfirm()
@@ -388,7 +398,7 @@ export default class Home extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos
+    return this.$store.getters.getCustomLogos()
   }
 
   get editProductStatus():boolean{
@@ -591,12 +601,15 @@ export default class Home extends Vue {
       this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
     }
     let main_scene = this.ref.mainScene[0];
-    let locker_front_png = main_scene.$refs.front.toDataURL("image/png").split(',')[1];
+    main_scene.frontCanvas.discardActiveObject().renderAll();
+    main_scene.backCanvas.discardActiveObject().renderAll();
+    let locker_front_png = main_scene.frontCanvas.toDataURL("image/png").split(',')[1];
     let locker_back_png = null;
     if(this.mainProductType == "front_back") {
-      locker_back_png = main_scene.$refs.back.toDataURL("image/png").split(',')[1];
+      locker_back_png =  main_scene.backCanvas.toDataURL("image/png").split(',')[1];
     }
     let locker = {
+
       product_id: this.selectedProduct.product_id,
       style_id: this.selectedProduct.productstyles[this.styleIndex].id,
       design_id: currentDesign[0].id,
@@ -610,16 +623,16 @@ export default class Home extends Vue {
       locker_back_png: locker_back_png
     }
     if (this.editStatus){
-      await this.$store.dispatch('overRideLockerProduct', locker)
+      this.showLoader = true
+      let res = await this.$store.dispatch('overRideLockerProduct', locker)
+      if (res.status == 201){
+        this.showLoader = false
+        this.showToast(res.data.message, 'SUCCESS')
+      }else{
+        this.showError(res)
+        this.showLoader = false
+      }
     }
-  }
-  public showAdvanceCustomization() {
-    if (this.isCustomerAuthenticated){
-      this.$store.dispatch("getLockers");
-    }
-    this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: false})
-    this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
-    this.$store.dispatch('setWindowView', 2)
   }
   public undoAction(){
     this.$store.dispatch('undoAction')
@@ -627,12 +640,14 @@ export default class Home extends Vue {
   public redoAction(){
     this.$store.dispatch('redoAction');
   }
+  
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
     this.$store.dispatch('setWindowView', 1)
     this.$store.dispatch('setActiveTab', 0)
   }
+
   public showDesign() {
     if(this.manageComponents.mobileScreen){
       this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
@@ -642,17 +657,14 @@ export default class Home extends Vue {
       this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
       this.$store.dispatch('setManageComponents', {index: 'DefaultColorShuffleBtn', value: true})
       this.$store.dispatch('setActiveTab', -1)
+      this.$store.dispatch('setManageComponents', {index: 'CustomizationTabs', value: false})
     }
   }
 
   public showHomeLanding() {
+    this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
     this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
-    this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: true})
-    this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
-    this.$store.dispatch('setManageComponents', {index: 'ChooseInterest', value: true})
-    this.$store.dispatch('setManageComponents', {index: 'DefaultColorShuffleBtn', value: false})
-    this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: true})
-    this.extractedcolorclass = ""
+    this.$store.dispatch('setManageComponents', {index: 'CustomizationTabs', value: true})
   }
   public additionalClass(additionalClassTrigger: string) {
     if(additionalClassTrigger){
@@ -663,11 +675,11 @@ export default class Home extends Vue {
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
       await this.$store.dispatch('logoutCustomer');
+      await this.$store.commit('SET_RECENT_LOGOS')
     }
-    console.log('isCustomerAuthenticated',this.isCustomerAuthenticated)
   }
 
-  public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): void {
+  public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): Promise<void> {
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -679,17 +691,32 @@ export default class Home extends Vue {
     let personalized = this.$store.getters.getPersonalized
 
     url += `?customized=${customized}&personalized=${personalized}`
-    console.log('urlll',url)
+
 
     if (this.hasProducts) {
       http.get(url).then(async (response: any) => {
         if (searchCall || productType) {
           this.$store.commit('SET_PRODUCTS', []);
-          this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
+         // await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
         }
 
         let product_data = this.products.concat(response.data.products.data)
         await this.$store.commit('SET_PRODUCTS', product_data);
+
+
+        await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
+
+         let customLogos = this.$store.getters.getCustomLogoObject
+        product_data.forEach(async (product:any) => {
+          if(!customLogos[product.id]) {
+            await this.$store.dispatch('setCustomObj',product.id)
+          }
+        })
+        //
+        // const length = Object.keys(customLogos).length
+        // if(length <= 0) {
+        //  await this.$store.dispatch('setCustomLogoObj',0)
+        // }
 
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
@@ -702,15 +729,11 @@ export default class Home extends Vue {
         this.$store.dispatch('setSelectedProductDesign')
         this.$store.dispatch('setColorSectionVisibility')
         this.$store.dispatch("getModels", this.selectedProduct.product_id);
-        let windowView = this.$store.getters.getWindowView;
 
         this.$root.$emit('sliderEvent');
-        if(windowView == 2){
-          this.showAdvanceCustomization();
-        }
+        this.showLoader = false;
       }).catch((e: any) => {
         console.log(e)
-        // console.log('in catch')
       });
     }
   }
@@ -774,6 +797,8 @@ export default class Home extends Vue {
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       if (res == true){
         this.showLockerRoomModal()
+        this.ref.saveToLockerModal.ref['my-modal'].hide();
+        this.ref.saveToLockerModal.showLoader = false;
       }
     }
   }
@@ -843,7 +868,6 @@ export default class Home extends Vue {
     }
     this.tabIndex = index
     this.$store.dispatch('setTabMain',{value:index})
-    console.log('index',index)
   }
 
   public buyNow() {
@@ -856,23 +880,17 @@ export default class Home extends Vue {
     this.isActive = !this.isActive
   }
 
-  public resetStore(){
-    this.$store.dispatch('resetStore')
-    this.$store.dispatch('SET_LOGO_COLORS', [])
+  public async resetStore(){
+    const ok = await this.ref['reset-changes'].showConfirm()
+    if (ok) {
+      this.$store.dispatch('resetStore')
+      this.$store.dispatch('SET_LOGO_COLORS', [])
+      this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+    }
   }
 
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
-  }
-
-  async getMainProductPngs(convert_to="png") {
-    let self = this;
-    let main_scene = this.ref.mainScene[0];
-    let product_pngs = {front_png: "", back_png: ""};
-    product_pngs.front_png = main_scene.$refs.front.toDataURL("image/png").split(',')[1];
-    product_pngs.back_png = main_scene.$refs.back.toDataURL("image/png").split(',')[1];
-    console.log("pngs", product_pngs.front_png)
-    return product_pngs;
   }
 
 
@@ -1232,6 +1250,9 @@ export default class Home extends Vue {
     display: block;
     margin: 0 auto;
     height: auto;
+  }
+  [v-cloak] {
+    display: none !important;
   }
 }
 </style>

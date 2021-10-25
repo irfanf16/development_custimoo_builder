@@ -271,8 +271,8 @@ export default class ChooseColor extends Vue {
   z-index: 10;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   border-radius: 15px 15px 0 0;
-  max-height: 300px;
-  overflow-y: auto;
+  //max-height: 300px;
+  //overflow-y: auto;
   @media only screen and (min-width: 768px){
     position: absolute;
   }

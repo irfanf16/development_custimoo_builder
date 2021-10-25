@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import VueToast from 'vue-toast-notification';
@@ -7,6 +6,9 @@ import 'vue-toast-notification/dist/theme-sugar.css';
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
 Vue.use(VueToast);
+// Vue.directive('tooltip', VTooltip)
+// Vue.directive('close-popover', VClosePopover)
+// Vue.component('v-popover', VPopover)
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
   faArrowLeft,
@@ -86,6 +88,11 @@ if (store.getters.isAuthenticated) {
 }
 
 function app_instance(){
+  navigator.serviceWorker.getRegistrations().then((registrations) => { // todo will remove this code after couple of days
+    for(const registration of registrations) {
+      registration.unregister();
+    }
+  });
   return new Vue({
     router,
     store,

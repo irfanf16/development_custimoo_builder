@@ -1,10 +1,11 @@
 <template>
   <div class="available-designs-section px-3 px-lg-0" v-if="selectedProduct">
     <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id">
-      <a @click="changeDesign(index); showDesign()">
+      <a @click="changeDesign(index); showPreview()">
         <Scene canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
-          :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-           :backTextureUrl="design.back_design? design.back_design.file_url: ''"
+           :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_thumbnail_url : ''}"
+           :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
+           :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
            :logos="selectedProduct.productstyles[styleIndex].logo"
            :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
            :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"/>
@@ -52,14 +53,11 @@ export default class DesignAvailable extends Vue {
     })
   }
 
-  public showDesign() {
+  public showPreview() {
     if(this.manageComponents.mobileScreen){
-      this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
-      this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: true})
       this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
-      this.$store.dispatch('setManageComponents', {index: 'showAdvanceCustomization', value: true})
-      this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: true})
-      // this.$store.dispatch('setManageComponents', {index: 'ExtractedColors', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
+      this.$store.dispatch('setManageComponents', {index: 'CustomizationTabs', value: true})
     }
   }
 }

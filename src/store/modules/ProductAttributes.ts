@@ -2,13 +2,20 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
+
+import {getLogoObject, getLogoSettings, setLogoSettings} from "../../helpers/Helpers"
+import {log} from "fabric/fabric-impl";
 const ProductAttributes:Module<any, any> = {
   state: {
     lockerActiveTabIndex:0,
+    lockerTabsIndex:0,
     products:[],
     selectedIndex: 0,
+    selectedPrdId:0,
     categories: [],
-    customLogos: [],
+    colorsFromRecent: false,
+    customLogos: {},
+    recentLogos: [],
     defaultcustomLogos: false,
     addMoreCollection: false,
     customTexts: [],
@@ -45,10 +52,14 @@ const ProductAttributes:Module<any, any> = {
     },
     activeTab : 0,
     showShuffle : true,
+    using_logo_colors: false
   },
   mutations: {
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
       state.lockerActiveTabIndex = payload
+    },
+    Change_Locker_Tabs_Index(state:Record<any, any>, payload) {
+      state.lockerTabsIndex = payload
     },
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
       if (payload.status == true || payload.status == false){
@@ -70,6 +81,9 @@ const ProductAttributes:Module<any, any> = {
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
     },
+    SET_COLORS_FROM_RECENT(state: Record<any, any>, payload: boolean){
+      state.colorsFromRecent = payload
+    },
     SET_ADD_MORE_COLLECTION(state: Record<any, any>, payload: boolean){
       state.addMoreCollection = payload
     },
@@ -83,8 +97,14 @@ const ProductAttributes:Module<any, any> = {
         state.products = []
       }
     },
+    // DELETE_PRODUCT(state: Record<any, any>, logoIndex: number){
+    //   console.log("deleteeeeeee", state.products, state.selectedIndex)
+    //   Vue.delete(state.products[state.selectedIndex]["customLogos"], logoIndex)
+    //   console.log("afet", state.products[state.selectedIndex]["customLogos"])
+    // },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
+      state.selectedPrdId = state.products[payload.selectedIndex].id;
     },
     SET_PRODUCT_TYPE(state: Record<any, any>, payload: Record<any, any>){
       Vue.set(state, payload.prd_type, payload.value)
@@ -107,6 +127,11 @@ const ProductAttributes:Module<any, any> = {
             state.selectedDesignId =0;
           }
         }
+    },
+    SET_SELECTED_PRODUCT_CUSTOM_LOGO(state: Record<any, any>,payload:any) {
+      if(state.products[state.selectedIndex]) {
+        state.products[state.selectedIndex].customLogos = payload;
+      }
     },
     SET_SELECTED_PRODUCT_DESIGN(state: Record<any, any>) {
       if (state.selectedDesignId > 0) {
@@ -137,26 +162,48 @@ const ProductAttributes:Module<any, any> = {
       if(categories){
         state.categories = categories
       }
+
     },
     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
-      // Vue.set(state.customLogos, state.customLogos.length, customLogo)
       if(customLogo){
         if('logoIndex' in customLogo && customLogo.logoIndex != null) {
-         Vue.set(state.customLogos, customLogo.logoIndex, customLogo)
+
+          Vue.set(state.customLogos[state.selectedPrdId], customLogo.logoIndex, customLogo)
+          // Vue.set(state.customLogos, customLogo.logoIndex, customLogo)
         } else {
-          Vue.set(state.customLogos, state.customLogos.length, customLogo)
+          console.log('else')
+
+          Vue.set(state.customLogos[state.selectedPrdId], state.customLogos[state.selectedPrdId].length, customLogo)
+         // Vue.set(state.customLogos, state.customLogos.length, customLogo)
         }
       }
     },
+    SET_RECENT_LOGOS(state: Record<any, any>,payload = []) {
+      if(payload.length > 0) {
+        state.recentLogos = []
+        state.recentLogos = payload
+      }
+      else {
+        http.get('logos/recent').then((res) => {
+          state.recentLogos = []
+          state.recentLogos = res.data.data
+        }).catch((e) => {
+          console.log('e',e)
+        })
+      }
+
+    },
     customLogoAttribute(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
-        Vue.set(state.customLogos[customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
+        Vue.set(state.customLogos[state.selectedPrdId][customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
       }
     },
     CUSTOM_LOGO_WITHOUT_TRIGGER(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
-        if(state.customLogos[customLogoAttribute.index]) {
-          Object.assign(state.customLogos[customLogoAttribute.index], customLogoAttribute.data)
+        if(customLogoAttribute.data.length && state.customLogos[state.selectedPrdId] && state.customLogos[state.selectedPrdId][customLogoAttribute.index]) {
+          customLogoAttribute.data.forEach((item: Record<any, any>, key: string) => {
+            state.customLogos[state.selectedPrdId][customLogoAttribute.index][key] = item
+          })
         }
       }
     },
@@ -168,29 +215,77 @@ const ProductAttributes:Module<any, any> = {
     customLogoTabDelete(state: Record<any, any>, delCustomTabLogo: Record<any, any>) {
       if(delCustomTabLogo){
         // state.customLogos.splice(delCustomLogo.index, 1)
-        Vue.delete(state.customLogos, delCustomTabLogo.index)
+        Vue.delete(state.customLogos[state.selectedPrdId], delCustomTabLogo.index)
+        state.customLogos[state.selectedPrdId].forEach((custom_logo:any, clIdx:any) => {
+          Vue.set(state.customLogos[state.selectedPrdId][clIdx], "logoIndex", clIdx)
+        })
       }
     },
     setLogoTabMutation(state: Record<any, any>, logoIndex:number) {
       state.logoTabIndex = logoIndex;
       // Vue.set(state.logoTabIndex, logoIndex, logoIndex)
     },
-    toggleLogoBackgroudMutation(state: Record<any, any>, logoIndex:number) {
-     const logo = state.customLogos[logoIndex];
+    toggleLogoBackgroudMutation(state: Record<any, any>, payload:any) {
+
+      const logo = state.customLogos[state.selectedPrdId][payload.index];
       const original_logo = logo.original_logo;
       const transparent_logo = logo.transparent_logo;
+      const smart_transparent_logo = logo.smart_transparent_logo;
       let logo_url = '';
-
-     if(logo.is_transparent===true){
-        logo_url = transparent_logo;
-      }else{
-        logo_url = original_logo;
+      if(payload.type == 'transparent') {
+        if(payload.val) {
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_transparent', true )
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_smart_transparent', false )
+        } else {
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_transparent', false )
+        }
       }
-      Vue.set(state.customLogos[logoIndex], 'url', logo_url )
+      else {
+        if(payload.val) {
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_smart_transparent', true )
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_transparent', false )
+        } else {
+          Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'is_smart_transparent', false )
+        }
+      }
+      const changed_logo = state.customLogos[state.selectedPrdId][payload.index];
+      if(changed_logo.is_transparent) {
+        logo_url = transparent_logo
+      } else if (changed_logo.is_smart_transparent) {
+        logo_url = smart_transparent_logo
+      }
+      else {
+        logo_url = original_logo
+      }
+      Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'url', logo_url )
+     // if(logo.is_transparent===true){
+     //    logo_url = transparent_logo;
+     //  }else{
+     //    logo_url = original_logo;
+     //  }
+     // Vue.set(state.customLogos[payload.index], 'url', logo_url )
 
     },
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
+    },
+    SET_CUSTOM_OBJ(state:  Record<any, any>,prd_id:number){
+      const arr = []
+      const default_setting = setLogoSettings(0)
+      const prod_logo_setting = getLogoSettings(0,false,prd_id)
+      const logo_setting = {...default_setting,...prod_logo_setting}
+      arr.push(logo_setting)
+      Vue.set(state.customLogos,prd_id,arr)
+      // Object.assign(state.customLogos,prd_id)
+      //  state.customLogos[prd_id] = arr
+    },
+    SET_TEAM_LOGO_URL(state:  Record<any, any>,logo:any){
+      const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
+      Object.keys(custom_obj).map(function(key, index) {
+        let logo_ = custom_obj[key][0];
+        logo_ = {...logo_, ...logo}
+        Vue.set(state.customLogos[key],0, logo_)
+      });
     },
     customTexts(state: Record<any, any>, customText: Record<any, any>) {
       if(customText){
@@ -272,7 +367,22 @@ const ProductAttributes:Module<any, any> = {
       state.products.push(payload);
     },
     OVERRIDE_LOGOS(state:Record<any, any>, payload){
-      state.customLogos = payload;
+
+      const locker_logos = JSON.parse(payload.custom_logos)
+      Object.keys(state.customLogos).map(function(key:any, index:any) {
+        if(key == payload.product_id) {
+          //state.customLogos[key] = locker_logos
+          Vue.set(state.customLogos,key,locker_logos)
+        }
+        else {
+          const logo_setting = getLogoSettings(0,false,key)
+          const final_logo = {...logo_setting,...locker_logos[0]}
+
+          //state.customLogos[key] = [final_logo]
+          Vue.set(state.customLogos,key,[final_logo])
+        }
+      });
+     // state.customLogos = payload;
     },
     OVERRIDE_TEXT(state:Record<any, any>, payload){
       state.customTexts = payload;
@@ -301,7 +411,7 @@ const ProductAttributes:Module<any, any> = {
     },
     ADD_LOCKER_ROOM_COLORS(state:Record<any, any>, payload:Record<any, any>){
       payload = payload.map((item: Record<any, any>) => {
-         item.color_text = JSON.parse(item.color_text)
+         item.color_text = JSON.parse(JSON.stringify(item.color_text))
         return item
       })
       state.lockerColors = payload
@@ -314,38 +424,32 @@ const ProductAttributes:Module<any, any> = {
 
     },
     RESET_STORE(state: Record<any, any>){
-      state.customLogos = [];
+      state.undoItems = []
+      state.redoItems = []
+      state.customLogos = {};
       state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
+      state.using_logo_colors = false;
+     // state.products.customLogos.map((item:any) => item.customLogos = []);
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
-        let logoSetting = selectedProduct.logos_setting[0]
 
-        if(!logoSetting) {
-          logoSetting = {
-            width: 200,
-            x_axis: 150,
-            y_axis: 190,
-            rotation: 0,
-            haveControls: true,
-            side: 'front'
-          }
-        }
 
-        const logo = {
-          url: '',
-          width: logoSetting.width,
-          height: logoSetting.height,
-          x_axis: logoSetting.x_axis,
-          y_axis: logoSetting.y_axis,
-          rotation: logoSetting.rotation,
-          haveControls: Boolean(!logoSetting.is_locked),
-          side: logoSetting.side,
-          customLogo: true,
-          is_transparent: false
-        }
-        state.customLogos.push(logo);
+        let arr:any = []
+        state.products.forEach(async (product:any) => {
+          const default_setting = setLogoSettings(0)
+          const prod_logo_setting = getLogoSettings(0,false,product.id)
+          const logo_setting = {...default_setting,...prod_logo_setting}
+           arr.push(logo_setting)
+          //arr.push(getLogoSettings(0,false,product.id))
+          Vue.set(state.customLogos,product.id,arr)
+          // Object.assign(state.customLogos,product.id)
+          // state.customLogos[product.id] = arr
+          arr = []
+        })
+
+        //state.customLogos.push(setLogoSettings(0));
         state.logoTabIndex = 0;
       }
     },
@@ -442,8 +546,11 @@ const ProductAttributes:Module<any, any> = {
     SET_ACTIVE_TAB(state:Record<any, any>, payload){
       state.activeTab = payload
     },
-    SET_SUFFLE(state:Record<any, any>, payload){
+    SET_SUFFLE(state:Record<any, any>, payload) {
       state.showShuffle = payload
+    },
+    UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
+      state.using_logo_colors = payload
     },
   },
   getters: {
@@ -455,6 +562,15 @@ const ProductAttributes:Module<any, any> = {
     },
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
+    },
+    getLockerTabsIndex: state => {
+      return state.lockerTabsIndex
+    },
+    getColorsFromRecent: state => {
+      return state.colorsFromRecent
+    },
+    getRecentLogos: state => {
+      return state.recentLogos
     },
     getAddMoreCollectionStatus: state => {
       return state.addMoreCollection
@@ -486,11 +602,19 @@ const ProductAttributes:Module<any, any> = {
         return false
       }
     }),
+    getSelectedProductId: (state: any) => state.selectedPrdId,
     getCategories: state => {
       return state.categories
     },
-    getCustomLogos: state => {
-      return state.customLogos
+
+    getCustomLogos: state => (prd_id = state.selectedPrdId) => {
+      if(!state.customLogos[prd_id]) {
+        return []
+      }
+      return state.customLogos[prd_id]
+    },
+    getCustomLogoObject: state => {
+    return state.customLogos
     },
     getActiveLogoIndex: (state: any) => state.logoTabIndex,
     getCurrentStyleIndex: state => {
@@ -549,6 +673,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getDesignCollections(state:Record<any, any>){
       return state.designCollections
+    },
+    getUsingColorLogos(state:Record<any, any>){
+      return state.using_logo_colors
     }
   },
   actions: {
@@ -557,6 +684,12 @@ const ProductAttributes:Module<any, any> = {
     },
     setSelectedIndex({commit}, payload) {
       commit('SET_SELECTED', payload)
+    },
+    setCustomObj({commit},payload) {
+      commit('SET_CUSTOM_OBJ',payload)
+    },
+    setTeamLogoUrl({commit},payload) {
+      commit('SET_TEAM_LOGO_URL',payload)
     },
     setProductType({commit}, payload) {
       commit('SET_PRODUCT_TYPE', payload)
@@ -642,6 +775,9 @@ const ProductAttributes:Module<any, any> = {
     async setSelectedProductAndStyle({commit}){
       await commit('SET_SELECTED_PRODUCT_AND_STYLE');
     },
+    async setSelectedProductCustomLogo({commit},payload){
+      await commit('SET_SELECTED_PRODUCT_CUSTOM_LOGO',payload);
+    },
     async setSelectedProductDesign({commit}){
       await commit('SET_SELECTED_PRODUCT_DESIGN');
     },
@@ -709,16 +845,16 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     async overRideLockerProduct({commit}, payload){
-      await http.post('updatelockerproduct', payload).then((res) => {
+      return await http.post('updatelockerproduct', payload).then((res) => {
         if (res.status == 201){
-          alert(res.data.message)
+          return res
         }else if (res.status == 404){
           alert(res.data.message)
         }
       }).catch(err => {
         if(err.response.status){
-          alert(err.response.data.message)
-          commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+          return err.response.data.message
+          // commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
         }
       })
     },

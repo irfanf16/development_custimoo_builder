@@ -9,19 +9,18 @@
             <div class="color-container">
               <div v-if="showOther" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
-                  <label class="mb-2" for="inline-form-input-pantone-color">Pantone: (TCX Colors)</label>
+                  <label for="inline-form-input-pantone-color">Pantone: (TCX Colors)</label>
                   <b-form-input
                     v-model="pantoneColorVal"
                     class="mb-2 mr-sm-2 mb-sm-0"
                     placeholder="XX-XXXX"
-                    readonly
-                    @input="changePantoneColor"
+                    @input="changePantoneColor" readonly
                   ></b-form-input>
                   <div class="pantone-message">
                     {{ pantoneMessage }}
                   </div>
                 </b-form>
-                <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true" />
+                <color-picker @changeColor="changeColor" ref="colorPicker" theme="light" :color="swatchcolor" :colors-history="false" :colors-default="[]" :key="swatchPantone"/>
               </div>
               <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
                    :title="color.name" :style="{background: color.value}" :key="index">
@@ -37,9 +36,9 @@
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
-import {getClosestColor, pantones, getPantoneColor} from '@/pantoneColor'
+import {getClosestColor, getPantoneColor} from '@/pantoneColor'
 
-@Component<TextColorTabs>({
+@Component<LogoColorTabs>({
   components: {
     colorPicker
   },
@@ -51,16 +50,28 @@ import {getClosestColor, pantones, getPantoneColor} from '@/pantoneColor'
     }
   },
   mounted(){
-    setTimeout(() => {
+   setTimeout(() => {
       this.selectType(this.selectTypeIndex)
-    }, 300)
+
+     if(this.$refs.colorPicker){
+       console.log('found')
+       Vue.set(this.$refs.colorPicker, 'hueHeight', 500)
+     }else{
+       console.log('notfound')
+     }
+
+    }, 300);
+
+   // this.$refs['colorPicker'].data.hueHeight = 500;
   }
 })
-export default class TextColorTabs extends Vue {
+export default class LogoColorTabs extends Vue {
   @Prop({required: true}) productColors!: any
+  @Prop({required: true}) swatchcolor!: any
+  @Prop({required: false}) swatchPantone!: any
 
-  public color= '#59c7f9'
-  public pantoneColorVal= '13-4411'
+  public color= this.swatchcolor
+  public pantoneColorVal= this.swatchPantone
   public showOther = false
   public selectAccordionIndex = 0
   public selectTypeIndex = 0
@@ -70,6 +81,21 @@ export default class TextColorTabs extends Vue {
   public pantoneMessage = ''
   public isActive = false
   public othersActive = false
+
+  @Watch('showOther')
+  showOtherChanged(val: string) {
+    if(this.showOther){
+      let colorPicker = this.$refs['colorPicker'] as Record<any, any>
+      colorPicker.data.hueHeight = 500
+    }else{
+      console.log('notfound')
+    }
+  }
+
+  @Watch('swatchPantone')
+  swatchPantoneChanged(val: string) {
+    this.pantoneColorVal = val
+  }
 
   get svgGroups() {
     return this.$store.getters.getSvgGroups
@@ -100,41 +126,35 @@ export default class TextColorTabs extends Vue {
     else {
       this.isActive = false
     }
-    //this.$store.commit('SET_TEXT_COLOR_TAB', 0);
   }
 
-  public setColor(color: Record<any, any>) {
-   // console.log('color',color)
-    this.$emit('setColors',color)
-    // this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
-    // this.$store.dispatch('updateGroupColors',
-    //   {
-    //     index: this.svgGroups[this.selectAccordionIndex].id,
-    //     color: color.value,
-    //     pantone: color.pantone,
-    //     name: color.name
-    //   })
+  public setSwatchColor(color: Record<any, any>) {
+    this.$emit('setSwatchColor',color)
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantone = getClosestColor(color.hex);
-    if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-      this.pantoneColorVal = pantone.pantone;
-    }
-
     let pantoneColor = getClosestColor(color.hex)
-    this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
+    this.setSwatchColor({hex: pantoneColor.hex.toUpperCase(), name: pantoneColor.name, pantone: pantoneColor.pantone})
+    this.pantoneColorVal = pantoneColor.pantone
   }
 
   public changePantoneColor() {
-    let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
+    let pantoneColor = getPantoneColor(this.pantoneColorVal)
     if (pantoneColor) {
-      this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
+      this.setSwatchColor({hex: pantoneColor.hex.toUpperCase(), name: pantoneColor.name, pantone: pantoneColor.pantone })
+      this.$emit('update:defSwatchColor',  pantoneColor.hex)
       this.pantoneMessage = ''
     }
     else {
       this.pantoneMessage = 'Color Not in List.'
     }
+  }
+
+  public setColor(color: Record<any, any>) {
+    let pantoneColor = getClosestColor(color.value)
+    this.$emit('update:defSwatchColor',  color.value)
+    this.pantoneColorVal = pantoneColor.pantone
+    this.setSwatchColor({hex: color.value, name: color.name, pantone: pantoneColor.pantone})
   }
 }
 </script>

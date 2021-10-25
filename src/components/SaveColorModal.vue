@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="my-modal" id="modal-center-savecolormodal" centered scrollable size="xl" title="Add Color to Locker Room" content-class="lockerroom-modal">
+    <b-modal ref="my-modal" hide-footer id="modal-center-savecolormodal" centered scrollable size="xl" title="Add Color to Locker Room" content-class="lockerroom-modal">
       <b-tabs content-class="mt-3">
         <template v-for="(room, i) in getLockerProducts">
         <b-tab :key="i">

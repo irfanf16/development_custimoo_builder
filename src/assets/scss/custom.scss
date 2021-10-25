@@ -147,6 +147,7 @@ button{
                 top: 50%;
                 transform: translateY(-50%);
                 background: rgba(0,0,0,0.5) url('~@/assets/images/arrow-left.svg') no-repeat 50% 50% / 13px;
+                //background: rgba(0,0,0,0.5) url('./src/assets/images/arrow-left.svg') no-repeat 50% 50% / 13px;
                 width: 26px;
                 height: 26px;
                 z-index: 1;
@@ -169,6 +170,7 @@ button{
             top: 50%;
             transform: translateY(-50%);
             background: rgba(0,0,0,0.5) url('~@/assets/images/arrow-left.svg') no-repeat 50% 50% / 13px;
+            //background: rgba(0,0,0,0.5) url('./src/assets/images/arrow-left.svg') no-repeat 50% 50% / 13px;
             width: 26px;
             height: 26px;
             z-index: 1;
@@ -306,10 +308,16 @@ button{
     background: #fff;
     z-index: 999;
     max-height: 50vh;
+    height: 100%;
     overflow-y: auto;
     padding-bottom: 100px;
     border-radius: 25px 25px 0 0;
-    border-top: 2px solid #EDF2F6; 
+    border-top: 2px solid #EDF2F6;
+
+    &.is-mobile{
+        height: auto;
+    }
+
     @media only screen and (min-width: 992px){
         position: static;
         background: none;
@@ -329,6 +337,9 @@ button{
         bottom: 0;
         z-index: 9;
         background: #fff;
+        display: flex;
+        row-gap: 10px;
+
         @media only screen and (min-width: 992px){
             position: static;
             background: none;
@@ -495,10 +506,10 @@ button{
         overflow: hidden;
         @media only screen and (min-width: 720px){
             padding: 0 10px;
-            max-width: 400px;
+            //max-width: 400px;
         }
         @media only screen and (min-width: 992px){
-            max-width: 340px;
+            //max-width: 340px;
         }
         .nav-tabs{
             padding: 15px 0;
@@ -527,7 +538,7 @@ button{
                 position: relative;
                 @media only screen and (min-width: 992px){
                     font-size: 12px;
-                    margin-bottom: 10px;
+                    margin-bottom: 0;
                 }
                 @media only screen and (min-width: 1360px){
                     font-size: 14px;
@@ -545,7 +556,6 @@ button{
         }
         .logo-placement-holder{
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             .logo-holder{
@@ -1123,7 +1133,35 @@ button{
         //    background: #219F84;
         //}
     }
+
+    .logo-placement-holder{
+        display: flex;
+        gap: 15px;
+
+        .logo-holder{
+            width: 100%;
+            flex-shrink: 1;
+
+            .upload-logo-opener{
+                .upload-box, .btn{
+                    width: 100% !important;
+                    max-width: 100% !important;
+                }
+            }
+        }
+
+        &.hasLogo{
+            .logo-holder{
+                max-width: 110px;
+            }
+        }
+
+        .logo-placemet-content{
+            width: 100%;
+        }
+    }
 }
+
 .color-holder{
     margin: 20px 0 0;
     background: #fff;
@@ -1131,8 +1169,54 @@ button{
     z-index: 2;
     box-shadow: 0 0 5px rgba(0,0,0,0.1);
     border-radius: 15px;
-    max-height: 300px;
+    width: 100%;
     overflow-y: auto;
+
+    /*logo uploader changes*/
+    .accordion{
+        width: 100%;
+
+        .color-holder{
+            max-height: 300px;
+            overflow-y: auto;
+
+            .color-container{
+                .custom-color-picker{
+                    width: 100%;
+
+                    .hu-color-picker{
+                        width: 100% !important;
+
+                        .color-set{
+                            .saturation{
+                                //width: 100%;
+
+                                &>canvas{
+                                    //width: 100%;
+                                }
+                            }
+                        }
+                    }
+
+                    .pantone-color-field{
+                        display: flex;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 15px;
+                        align-items: center;
+
+                        input{
+                            width: auto;
+                        }
+
+                        .pantone-message{
+                            flex-basis: 100%;
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     a.close{
         width: auto;
@@ -1641,6 +1725,23 @@ button{
             height: 100%;
         }
     }
+
+    .modal-footer{
+        &>div{
+            @media screen and (max-width: 600px) {
+                justify-content: center;
+                gap: 10px;
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .btn{
+                @media screen and (max-width: 600px) {
+                    margin: 0 !important;
+                }
+            }
+        }
+    }
 }
 #modal-center-addlockerroom{
     .lockerroom-header{
@@ -1951,6 +2052,8 @@ button{
             text-align: left;
         }
         .form-inline{
+            flex-wrap: nowrap;
+
             .form-control{
                 margin: 0;
                 background: #F0F0F0;
@@ -2054,6 +2157,7 @@ button{
                         left: 0;
                         top: 0;
                         background: #DCF0EC url('~@/assets/images/sync-alt.png') no-repeat 50% 50% / 10px;
+                        //background: #DCF0EC url('./src/assets/images/sync-alt.png') no-repeat 50% 50% / 10px;
                         width: 20px;
                         height: 20px;
                         border-radius: 50%;
@@ -2082,7 +2186,7 @@ button{
 
 .custom-color-picker {
     .colors .item:nth-child(8n + 1){margin-left: 10px !important;}
-    .color-type{display: none !important;}
+    .color-type, .color-type~div{display: none !important;}
 }
 
 #modal-center-savecolormodal___BV_modal_body_{
@@ -2375,7 +2479,6 @@ button{
             position: absolute;
             left: 0;
             right: 0;
-            bottom: 0;
             margin: 0 !important;
             text-align: center;
             max-width: 100%;
@@ -2774,22 +2877,25 @@ $fontSize: 0.5;
 }
 
 .modal-fullscreen2 {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: start;
+    justify-content: center;
     padding-left: 0 !important;
-
+    //padding-top: 60px;
     .modal {
         padding: 0 !important;
     }
     .modal-dialog {
         max-width: 100%;
+        width: 99%;
         min-height: calc(100% - 2rem);
         margin: 0;
+
     }
     .modal-content {
         width: calc(100% - 2rem);
-        min-height: 100%;
-        height: auto;
+        min-height: calc(100% - 2rem);
+        height: auto !important;
         margin: 1rem;
     }
 }
@@ -3390,16 +3496,16 @@ $fontSize: 0.5;
     }
 }
 
-.customize_controls{
-    &.setMax{
+.customize_controls {
+    &.setMax {
         max-height: 250px;
     }
 
-    .tabs > div:first-child{
+    .tabs > div:first-child {
         position: relative;
         padding-right: 0px;
 
-        &:after{
+        &:after {
             position: absolute;
             z-index: 100;
             content: "";
@@ -3408,15 +3514,137 @@ $fontSize: 0.5;
             bottom: 0;
             height: 100%;
             width: 30px;
-            background: -moz-linear-gradient(left,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
-            background: -webkit-linear-gradient(left,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
-            background: linear-gradient(to right,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
-            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=1 );
+            background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+            background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00ffffff', endColorstr='#ffffff', GradientType=1);
         }
 
-        li{
-            &:last-child{
+        li {
+            &:last-child {
                 padding-right: 20px;
+            }
+        }
+    }
+
+    [v-cloak] {
+        display: none;
+    }
+
+    .loader {
+        &.relative {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1070;
+            height: 100%;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+        }
+
+        &.global {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 99999;
+            height: 100%;
+            width: 100%;
+            background: rgba(255, 255, 255, 1);
+        }
+    }
+
+    .hover_tooltip {
+        position: fixed;
+        white-space: nowrap;
+        padding: 5px 10px;
+        background: #333;
+        color: #fff;
+        border-radius: 99px;
+        opacity: 0;
+    }
+
+    .color-box {
+        .addColor {
+            position: absolute;
+            z-index: 100;
+            font-size: 2em;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            color: #999;
+            cursor: pointer;
+        }
+
+        .removeColor {
+            position: absolute;
+            z-index: 100;
+            font-size: 1.2em;
+            display: flex;
+            height: 15px;
+            width: 15px;
+            align-items: center;
+            justify-content: center;
+            background: #c80b0b;
+            color: #fff;
+            right: 0px;
+            top: 0px;
+            border-radius: 99px;
+            cursor: pointer;
+            opacity: 0;
+            z-index: -1;
+            transition: 0.3s all ease;
+        }
+
+        .selected {
+            position: absolute;
+            z-index: 100;
+            font-size: 1.2em;
+            display: flex;
+            height: 15px;
+            width: 15px;
+            align-items: center;
+            justify-content: center;
+            background: #219F84;
+            color: #fff;
+            right: 0px;
+            top: 0px;
+            border-radius: 99px;
+            cursor: pointer;
+            opacity: 0;
+            z-index: -1;
+            transition: 0.3s all ease;
+        }
+
+        &.active-swatch {
+            .selected {
+                opacity: 1;
+                z-index: 99;
+            }
+
+            &.noColor:hover {
+                .selected {
+                    opacity: 1;
+                    z-index: 99;
+                }
+            }
+        }
+
+        &:hover {
+            .removeColor {
+                opacity: 1;
+                z-index: 100;
+            }
+
+            .selected {
+                opacity: 0;
+                z-index: -1;
             }
         }
     }
