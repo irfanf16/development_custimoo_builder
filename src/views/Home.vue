@@ -39,8 +39,8 @@
           <!-- <template v-if="manageComponents.AdvanceCustomization"> -->
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-<!--            <CustomizationTabs :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>-->
-            <CustomTabs />
+            <CustomizationTabs v-if="!mobileScreen" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
+            <CustomTabs v-else />
           </b-col>
 
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column position-relative">
@@ -170,7 +170,7 @@
             </div>
           </div>
 
-          <div class="sideNav">
+          <div class="sideNav" v-if="mobileScreen">
             <ul>
               <li>
                 <a @click="switchTabs">
@@ -338,7 +338,7 @@ export default class Home extends Mixins(ErrorMessages) {
   public provider_id = 'oVXYIzKY'
   public logoUrl = ''
   public ref = this.$refs as Record<any, any>
-  public mobileScreen = this.$store.state.mobileScreen
+  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   private jwtToken !: string
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public mounted = false
@@ -640,7 +640,7 @@ export default class Home extends Mixins(ErrorMessages) {
   public redoAction(){
     this.$store.dispatch('redoAction');
   }
-  
+
   public showBasicCustomization() {
     this.$store.dispatch('setManageComponents', {index: 'BasicCustomization', value: true})
     this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})

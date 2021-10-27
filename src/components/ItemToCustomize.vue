@@ -5,10 +5,10 @@
 <!--    </div>-->
 <!--    <items-carousel @retrieveProductsC="retrieveProductsC"></items-carousel>-->
 <!--    <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>-->
-    <div class="p-3" style="border-bottom: 1px solid #eee">
+    <div class="p-3" style="border-bottom: 1px solid #eee" v-if="mobileScreen" >
       <h2 class="fw-bold p-lg-0 mb-lg-4 fz-18 bg-transparent d-flex align-items-center justify-content-between" @click="toggleItems">
         <span>Select Item to Customize</span>
-        <span class="mt-1 toggleArrow" :class="showItems ? 'opened' : ''"><BIconChevronDown /></span>
+        <span v-if="mobileScreen" class="mt-1 toggleArrow" :class="showItems ? 'opened' : ''"><BIconChevronDown /></span>
       </h2>
 
       <div class="select-items" :class="showItems ? 'opened' : ''">
@@ -21,6 +21,8 @@
       </div>
     </div>
 
+    <SelectItemCarousel v-else ref="itemsCarousel" @retrieveProductsC="retrieveProductsC"/>
+
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
       <span>Designs Available</span>
       <span class="mt-1 toggleArrow" :class="showDesigns ? 'opened' : ''"><BIconChevronDown /></span>
@@ -28,10 +30,6 @@
     <div class="select-designs" :class="showDesigns ? 'opened' : ''">
       <DesignAvailable />
     </div>
-
-    <SelectItemCarousel ref="itemsCarousel" @retrieveProductsC="retrieveProductsC"/>
-    <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading">Designs Available</h2>
-    <DesignAvailable />
   </div>
 </template>
 
@@ -49,7 +47,7 @@
     ItemsGrid,
     Search,
     // ItemsCarousel,
-    // SelectItemCarousel,
+    SelectItemCarousel,
     DesignAvailable
   }
 })
@@ -61,6 +59,7 @@ export default class ItemToCustomize extends Vue {
 
   private showItems = false;
   private showDesigns = true;
+  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   public personalized = this.$store.getters.getPersonalized
   public customized = this.$store.getters.getCustomized

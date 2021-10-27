@@ -1,5 +1,13 @@
 <template>
   <div>
+    <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 0" >
+      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
+
+      <div>
+        logo editors
+      </div>
+    </div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 1" >
       <span class="close" @click="hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
@@ -18,6 +26,14 @@
               <a :class="activePart == index ? 'active_line' : ''" @click="setActivePart(index)">Coat {{item}}</a>
             </li>
           </ul>
+        </div>
+        <div>
+          <div>Selected color:</div>
+          <div class="d-flex align-items-center">
+            <div>
+              <span class=""></span>
+            </div>
+          </div>
         </div>
         <div class="overflow-hidden fade-right">
           <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">

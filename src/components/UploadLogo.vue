@@ -8,7 +8,6 @@
 <!--      </b-form-checkbox>-->
 
   <div style="padding-bottom: 10px" class="upload-logo-opener" v-if="customLogos">
-    <span class="close" @click="hideAll"><BIconX /></span>
 
     <div class="logo-option-area mb-3 mt-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
 
