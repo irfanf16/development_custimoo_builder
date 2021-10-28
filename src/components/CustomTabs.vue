@@ -22,25 +22,28 @@
 
         <div class="overflow-hidden fade-right">
           <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
-            <li v-for="(item, index) in [1,2,3,4,5,6,7,8,9]" :key="index">
-              <a :class="activePart == index ? 'active_line' : ''" @click="setActivePart(index)">Coat {{item}}</a>
+            <li v-for="(svgColor, index) in svgGroups" :key="index">
+              <a style="text-transform: capitalize" :class="activePart == index ? 'active_line' : ''" @click="setActivePart(index)">{{ svgColor.id }}</a>
             </li>
           </ul>
         </div>
-        <div>
-          <div>Selected color:</div>
+        <div class="d-flex align-items-center">
+          <div style="color: #666;">Selected color:</div>
           <div class="d-flex align-items-center">
-            <div>
-              <span class=""></span>
+            <span class="selected-color ml-2 flex-shrink-0" :style="{background: svgGroups[activePart].color}"></span>
+            <div class="m-1 text-muted">
+              <span>{{ svgGroups[activePart].pantone }}</span>
+              <span style="text-transform: capitalize" class="ml-1">{{ svgGroups[activePart].name }}</span>
             </div>
           </div>
         </div>
         <div class="overflow-hidden fade-right">
-          <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
-            <li v-for="(item, index) in [1,2,3,4,5,6,7,8,9]" :key="index">
-              <a class="faded_text" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">Collection {{item}}</a>
-            </li>
-          </ul>
+<!--          <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />-->
+<!--          <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">-->
+<!--            <li v-for="(item, index) in [1,2,3,4,5,6,7,8,9]" :key="index">-->
+<!--              <a class="faded_text" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">Collection {{item}}</a>-->
+<!--            </li>-->
+<!--          </ul>-->
         </div>
       </div>
 
@@ -305,7 +308,7 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 // import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 
-@Component<CustomizationProcess>({
+@Component<CustomTabs>({
   components: {
     // ColorAccordion,
     // LogoPlacementTabs,
@@ -317,20 +320,21 @@ import {default as $} from 'jquery';
   },
   mounted() {
     // this.$store.dispatch('setCustomLogos')
-    // this.productColorsManipulation()
+    this.productColorsManipulation()
     // this.fontsColorsManipulation()
     // this.fontsList()
     // this.customTextInit()
-   // console.log('customTexts',this.customTexts)
+   console.log('customTexts', this.productColors)
   },
 })
-export default class CustomizationProcess extends Vue {
+export default class CustomTabs extends Vue {
   @Prop() activeTab!: number
   private activePart = 0;
   private activeCollection = 0;
   private activeFont = 0;
   private activeEye = -1;
   private playersDataHeight = 0;
+  public productColors: any[] = []
   // private tabTop = window.screen.availHeight - 190;
 
   private setPlayersDataHeight = (idx: number) => {
@@ -408,6 +412,55 @@ export default class CustomizationProcess extends Vue {
     $(`.read_more:eq(${index})`).parent("div").next("div").slideToggle('fast')
   }
 
+  get svgGroups() {
+    return this.$store.getters.getSvgGroups
+  }
+  get groupColors(){
+    return this.$store.getters.getGroupColors
+  }
+  public showColor(index: number) {
+    this.selectAccordionIndex = index
+  }
+
+  @Watch('lockerColors', {
+    deep: false
+  })
+
+  lockerColorsChanged() {
+    this.productColorsManipulation()
+  }
+
+  public productColorsManipulation() {
+    this.productColors = []
+    this.selectedProduct.colors.forEach((colors: any, key: number) => {
+      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
+      finalColor.color_text = JSON.parse(colors.color_text)
+      this.productColors = this.productColors.concat(finalColor)
+    })
+    this.productColors = this.productColors.concat(this.lockerColors)
+
+    if(this.logoColors.length){
+      let logoColorsNew: any[] = []
+      this.logoColors.forEach((color: any, index: number) => {
+        logoColorsNew = logoColorsNew.concat([{name: color.pantone, value: color.hex, position: index+1}])
+      })
+      let teamLogoColors = [{name: 'Team Logo Colors', color_text: logoColorsNew, selectedColor: ''}]
+      this.productColors = this.productColors.concat(teamLogoColors)
+    }
+  }
+
+  public fontsColorsManipulation() {
+    this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
+      let finalColor = {color_text: []}
+      finalColor.color_text = JSON.parse(colors.color_text)
+      this.fontsColors = this.fontsColors.concat(finalColor)
+    })
+    if (this.fontsColors.length) {
+      this.firstColor = this.fontsColors[0].color_text[0]
+      this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1] : this.fontsColors[0].color_text[0]
+    }
+  }
+
   // public showLoader = false
   // @Prop({required: false, default:0}) tabIndexNew!: number
   // @Prop({required: false, default:0}) activeTab!: number
@@ -417,9 +470,9 @@ export default class CustomizationProcess extends Vue {
   //   return this.$store.getters.getManageComponents
   // }
   //
-  // get selectedProduct(): Record<any, any> {
-  //   return this.$store.getters.getSelectedProduct
-  // }
+  get selectedProduct(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct
+  }
   //
   // get productModels(): Record<any, any> {
   //   return this.$store.getters.getProductModels;
@@ -688,5 +741,12 @@ export default class CustomizationProcess extends Vue {
 .dragControl.active{
   background: lightblue;
   box-shadow: 1px 1px 0 0px #ccc, inset 0 0 3px 1px aliceblue;
+}
+.selected-color{
+  height: 15px;
+  width: 15px;
+  border-radius: 10000px;
+  background: #ff0000;
+  display: inline-block;
 }
 </style>

@@ -345,6 +345,7 @@ export default class ShareRoster extends Vue {
 }
 
 .players-data {
+  width: 100%;
   .addPlayer{
     font-size: 16px;
   }
