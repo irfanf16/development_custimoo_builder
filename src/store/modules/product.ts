@@ -132,6 +132,17 @@ const Product:Module<any, any> = {
         }
       })
     },
+    async getLockerProductDetail({commit}, id){
+      return await http.get('locker/product/detail/'+id).then((res) => {
+        if (res.status == 200){
+          return res
+        }
+      }).catch(err => {
+        if(err.response.status){
+          return err.response.data.message
+        }
+      })
+    },
    async createLocker({commit}, payload:string){
      let err = '';
       const res = await http.post("locker/create", {name:payload}).then((res:Record<any, any>) =>{

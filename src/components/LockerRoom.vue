@@ -400,12 +400,18 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public lockerStatus = 'not_accepted'
 
   public async editProduct(lockerIndex: number, productIndex: number){
+
     const id = this.getLockerProducts[lockerIndex].product[productIndex].id
+    let prod_res = await this.$store.dispatch('getLockerProductDetail', id);
+    Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
+
     const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
     const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
     this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
     const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
+
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
+
     if (product_id != this.$store.getters.getEditMainProductId){
       await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
       this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
