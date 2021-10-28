@@ -4,8 +4,10 @@
     <template v-for="(room, i) in getLockerProducts">
       <b-tab :key="i" :active="tabIndex === i" @click="hideAll">
         <template #title>
-<!--          <span @drop="dropped" @dragover="allowDrop" @click="changeColor">{{room.room_name}}</span>-->
-          <draggable :list="getLockerProducts" :options="{disabled:true}"><span @click="changeColor">{{room.room_name}}</span></draggable>
+          <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
+            @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
+            <span @click="changeColor">{{ room.room_name }}</span>
+          </draggable>
           <a class="remove-tab" @click="deleteRoom(room.id, i)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
@@ -17,15 +19,25 @@
             <b-card no-body>
               <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" v-model="lockerActiveTabIndex">
                 <b-tab title="Products" @click="hideAll">
-                  <draggable  v-model="room.product" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6" :multiDrag="true"
-                              :options="{animation: 250, delayOnTouchOnly: true, delay: 500}" @change="lockerProductsMoved">
-                    <div v-for="(product, ind) in room.product" :key="ind" class="products-block">
-                      <label :key="ind" class="w-100" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
+                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
+                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
+                              :multiDrag="true"
+                              v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}"
+                              @update="lockerProductsChanged($event)">
+                    <template v-for="(product, ind) in room.product">
+                      <div :key="`${ind}-${product.id}`" class="products-block" :data-room-id="room.id"
+                           :data-room-index="i"
+                           :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
+                           :data-product-index="ind">
+                      <label :key="ind" class="w-100" :class="product.class ? 'selected': ''"
+                             @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                         <div class="image-holder">
                           <div>
 
-                            <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <img :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                            <b-form-checkbox :disabled="getDisabled(product.id)" v-model="selectedCollectionProducts"
+                                             v-bind:value="product.id"></b-form-checkbox>
+                            <img :src="`${product.product_url}?q=${product.random_string}`"
+                                 :class="product.product_url ? '' : 'placeholder'" alt="">
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -35,41 +47,49 @@
 
                       <ul class="product-icons">
                         <li>
-                          <a data-title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)" @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
+                          <a data-title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"
+                             @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
+                            :icon="['fas', 'trash-alt']"/></a>
                         </li>
                         <li>
-                          <a data-title="Edit design" @click="editProduct(i, ind)" @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']" /></a>
+                          <a data-title="Edit design" @click="editProduct(i, ind)" @mouseleave="hideTooltip"
+                             @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li>
-                          <b-button data-title="Share design" class="shareBtn"
-                                    @click="(e)=>product.shared_url === undefined || product.shared_url === null  ? shareProduct(e, product, ind, i, 'share'+i+''+ind): toggleShare(e, 'share'+i+''+ind)"
+                          <b-button data-title="Share design" :id="'share'+i+''+ind"
+                                    @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"
                                     @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
                             :icon="['fas', 'share-alt']"/></b-button>
+                          <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom"
+                                     triggers="focus">
+                            <div class="share-holder">
+                              <h3>Copy link
+                                ..and Share</h3>
+                              <div class="share-form">
+                                <b-form inline>
+                                  <b-form-input :id="'copy-'+ind"
+                                                :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
 
-                          <div :id="'share'+i+''+ind" class="tooltip b-tooltip share-tooltip" @click="(e)=>e.stopPropagation()" style="display: none; position: fixed; width: 100%; max-width: 303px">
-                              <div class="tooltip-inner">
-                                <div class="share-holder">
-                                  <h3>Copy link and Share</h3>
-                                  <div class="share-form">
-                                    <b-form inline>
-                                      <b-form-input :id="'copy-'+ind"
-                                                    :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
-
-                                      ></b-form-input>
-                                      <b-button variant="primary" style="border-radius: 4px; padding: 0 0 0 13px; line-height: 1; text-align: center; font-size: 1em; width: 100px !important; color: #fff" @click="copyLink(product, ind) ">Copy Link</b-button>
-                                    </b-form>
-                                  </div>
-                                </div>
+                                  ></b-form-input>
+                                  <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
+                                </b-form>
                               </div>
                             </div>
+                          </b-tooltip>
                         </li>
                         <li class="swap">
-                          <a v-if="product.design && product.design.back_design_count > 0"  @mouseleave="hideTooltip" @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
+                          <a v-if="product.design.back_design_count > 0" @mouseleave="hideTooltip"
+                             @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' "
+                             @click="swapDesign(i, ind)" style="font-size: 1em">
+                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate"
+                                 class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img"
+                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor"
+                                                                                                d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
                           </a>
                         </li>
                       </ul>
                     </div>
+                    </template>
                   </draggable>
 
                 </b-tab>
@@ -191,6 +211,7 @@ import {getRandom} from "@/helpers/Helpers";
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {processColorsCustom} from "../helpers/Helpers"
+import {differenceBy, intersectionBy, union, includes} from 'lodash';
 
 @Component<LockerRoom>({
   components: {
@@ -234,6 +255,44 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     elements.forEach((element: Record<any, any>)=>{
       element.style.display = 'none';
     });
+    }
+  private observerCallback = (mutationsList:any, observer:any) => {
+    // Use traditional 'for loops' for IE 11
+    for(const mutation of mutationsList) {
+      if (mutation.addedNodes.length) {
+        console.log('A child node has been added or removed.', mutation);
+        console.log('Nodes added', mutation.addedNodes.length);
+
+        mutation.target.classList.add('dropping')
+      }else if(mutation.removedNodes.length){
+        console.log('Nodes removed', mutation.removedNodes.length);
+
+        mutation.target.classList.remove('dropping')
+      }
+      else if (mutation.type === 'attributes') {
+        // console.log('The ' + mutation.attributeName + ' attribute was modified.');
+      }
+    }
+  }
+
+  private observer:any = new MutationObserver(this.observerCallback);
+
+  private setObserver = (targetNode:Record<any, any>) => {
+    targetNode.forEach((elem:Record<any, any>)=>{
+      const config = { attributes: true, childList: true, subtree: true };
+      this.observer.observe(elem, config);
+    })
+  }
+
+  private dragStart = () =>{
+    let elements = document.querySelectorAll('ul.nav-tabs [data-room-index]') as Record<any, any>
+    this.setObserver(elements);
+  }
+  private dragEnd = () =>{
+    console.log('started')
+  }
+  private setSelected(e: Record<any, any>) {
+    console.log('ev', e.target)
   }
 
 
@@ -587,30 +646,106 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.$store.commit("Change_Locker_Active_Tab", tab_info);
   }
 
-  public lockerProductsMoved(payload:any) {
-    let moved_info = payload.moved;
-    let old_index = moved_info.oldIndex;
-    let new_index = moved_info.newIndex;
-    let re_arranged_products = [];
-    console.log('lockerActiveTabIndex',this.lockerActiveTabIndex)
-    let products = this.getLockerProducts[this.tabIndex].product;
-    let start_form = old_index > new_index ? new_index : old_index;
-    let end_at = old_index > new_index ? old_index : new_index;
-    for(let i=start_form; i<=end_at ;i++ ) {
-      let product  = products[i];
-      product.sort_order = i;
-      re_arranged_products.push({
-        id: product.id,
-        sort_order: i + 1
-      });
+
+  public lockerProductsChanged(payload: any, index = null) {
+    let action = payload.type;
+    let data: Record<any, any> = {};
+    data.action = action;
+    let clones = payload.clone ? [payload.clone] : payload.clones;
+    if (action == "add") {
+      data.action_data = this.productsAddedToLocker(payload);
+    } else if (action == "update") {
+      data.action_data = this.reArrangeLockerProducts(payload);
     }
-    http.put(`locker/products/re_arrange`, {re_arranged_products: re_arranged_products}).then((res) => {
-      console.log("response", res.data);
+    http.put(`locker/products/changed`, data).then((res) => {
+      console.log("");
     }).catch(err => {
-      if(err.response.status){
+      console.log("error", err)
+      if (err.response.status) {
         //resp = {status:false,message:err.response.data.errors};
       }
     })
+  }
+
+  public productsAddedToLocker(payload: Record<any, any>) {
+    let clones = payload.clone ? [payload.clone] : payload.clones;
+    let added_locker_room_products_ids: number[] = [];
+    let customer_id = 0, old_room_index = 0, old_room_id = 0;
+    let new_room_index = payload.to.getAttribute("data-room-index")
+    let new_room_id = payload.to.getAttribute("data-room-id")
+    clones.forEach((clone: Record<any, any>, clIdx: number) => {
+      //as each object have same value that's why we initialize variables in first loop
+      if (clIdx == 0) {
+        customer_id = clone.getAttribute("data-customer-id");
+        old_room_index = clone.getAttribute("data-room-index");
+        old_room_id = clone.getAttribute("data-room-id");
+      }
+      added_locker_room_products_ids.push(clone.getAttribute("data-product-locker-room-id"));
+    })
+    let new_locker_products = this.getLockerProducts[new_room_index].product;
+    let old_locker_products = this.getLockerProducts[old_room_index].product;
+    // added_products are those that have been moved from active locker and added to new locker
+    let added_products = old_locker_products.filter((old_locker_product: Record<any, any>) => {
+      return includes(added_locker_room_products_ids, old_locker_product.id.toString())
+    });
+    new_locker_products = union(added_products, new_locker_products);
+    new_locker_products = new_locker_products.map((new_locker_product: Record<any, any>, nlpIdx: number) => {
+      new_locker_product.sort_order = nlpIdx + 1;
+      return new_locker_product;
+    });
+    //updating new locker products
+    this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: new_room_index, products: new_locker_products})
+    let old_locker_new_products = differenceBy(old_locker_products, added_products, "id")
+    old_locker_new_products = old_locker_new_products.map((old_locker_product: Record<any, any>, olpIdx: number) => {
+      old_locker_product.sort_order = olpIdx + 1;
+      return old_locker_product;
+    });
+    //updating active locker products
+    this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: this.tabIndex, products: old_locker_new_products})
+    return {
+      customer_id: customer_id,
+      old_room_index: old_room_index,
+      old_room_id: old_room_id,
+      added_locker_room_products_ids: added_locker_room_products_ids,
+      new_room_index: new_room_index,
+      new_room_id: new_room_id
+    };
+  }
+
+  public reArrangeLockerProducts(payload: Record<any, any>) {
+    let old_indicies = payload.oldIndicies.length > 0 ? payload.oldIndicies : [{
+      multiDragElement: null, index: payload.oldIndex
+    }];
+    let new_indicies = payload.newIndicies.length > 0 ? payload.newIndicies : [{
+      multiDragElement: null, index: payload.newIndex
+    }];
+    let moved_products: { old_index: number, new_index: number }[] = [];
+    old_indicies.forEach((old_index: Record<any, any>, oiIdx: number) => {
+      moved_products.push({
+        old_index: old_index.index, new_index: new_indicies[oiIdx].index
+      });
+    })
+    let active_locker_products = JSON.parse(JSON.stringify(this.getLockerProducts[this.tabIndex].product));
+    moved_products.forEach((moved_product) => {
+      let old_index = moved_product.old_index;
+      let new_index = moved_product.new_index;
+      let old_index_product = active_locker_products[old_index];
+      let new_index_product = active_locker_products[new_index];
+      active_locker_products[old_index] = new_index_product;
+      active_locker_products[new_index] = old_index_product;
+    })
+    let product_ids_with_sort_order: { id: number, sort_order: number }[] = [];
+    active_locker_products = active_locker_products.map((active_locker_product: Record<any, any>, alpIdx: number) => {
+      let sort_order = alpIdx + 1;
+      active_locker_product.sort_order = sort_order;
+      product_ids_with_sort_order.push({
+        id: active_locker_product.id,
+        sort_order: sort_order
+      });
+      return active_locker_product;
+    })
+    this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: this.tabIndex, products: active_locker_products})
+    return product_ids_with_sort_order;
   }
 
   public swapDesign(lockerIndex: number, productIndex: number){
@@ -1076,8 +1211,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   border: none;
 }
 
+.sortable-selected {
+  background: #eee;
+}
 
-
-
-
+.locker-tab-ghost {
+  display: none !important;
+  background: #C8EBFB;
+}
 </style>
