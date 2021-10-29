@@ -18,12 +18,12 @@
           <div>
             <b-card no-body>
               <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" v-model="lockerActiveTabIndex">
-                <b-tab title="Products" @click="hideAll">
-                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
-                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
-                              :multiDrag="true"
-                              v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}"
-                              @update="lockerProductsChanged($event)">
+                <b-tab title="Products"  @click="hideAll">
+                  <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
+                             :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
+                             :multiDrag="true"
+                             v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}"
+                             @update="lockerProductsChanged($event)">
                     <template v-for="(product, ind) in room.product">
                       <div :key="`${ind}-${product.id}`" class="products-block" :data-room-id="room.id"
                            :data-room-index="i"
@@ -78,7 +78,7 @@
                           </b-tooltip>
                         </li>
                         <li class="swap">
-                          <a v-if="product.design.back_design_count > 0" @mouseleave="hideTooltip"
+                          <a v-if="product.design && product.design.back_design_count > 0" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' "
                              @click="swapDesign(i, ind)" style="font-size: 1em">
                             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate"
