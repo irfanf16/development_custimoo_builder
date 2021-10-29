@@ -78,7 +78,7 @@
                           </b-tooltip>
                         </li>
                         <li class="swap">
-                          <a v-if="product.design.back_design_count > 0" @mouseleave="hideTooltip"
+                          <a v-if="product.design && product.design.back_design_count > 0" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' "
                              @click="swapDesign(i, ind)" style="font-size: 1em">
                             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate"
