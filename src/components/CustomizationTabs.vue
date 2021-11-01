@@ -128,6 +128,7 @@ import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 import {getClosestColor} from '@/pantoneColor'
 import RecentLogos from "@/components/RecentLogos.vue";
+import {sortTextsArray} from "@/helpers/Helpers";
 
 @Component<CustomizationProcess>({
   components: {
@@ -282,7 +283,7 @@ export default class CustomizationProcess extends Vue {
       if(!this.customTexts[product.id]) {
 
 
-        product.productnames =  this.sortTextsArray(product.productnames);
+        product.productnames =  sortTextsArray(product.productnames);
 
         product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
           if (this.customTexts[index] && !this.customTexts[index].action) {
@@ -383,12 +384,6 @@ export default class CustomizationProcess extends Vue {
 
     });
 
-
-
-  }
-
-  public sortTextsArray(product_names:any) {
-    return product_names.sort((a:string,b:string)=> (a.type > b.type ? 1 : -1));
   }
 
   public fontsList(): void {
