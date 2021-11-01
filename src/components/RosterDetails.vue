@@ -107,7 +107,7 @@ export default class RosterDetails extends Vue {
     return this.$store.getters.getRosterDetails
   }
   get customText():Record<any, any>[]{
-    return this.$store.getters.getCustomTexts;
+    return this.$store.getters.getCustomTexts();
   }
   get eyeIndex():number{
     return this.$store.getters.getEyeIndex;

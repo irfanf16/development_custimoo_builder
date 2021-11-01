@@ -193,7 +193,7 @@ export default class Scene extends Vue {
   }
 
   get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts
+    return this.$store.getters.getCustomTexts()
   }
 
   get manageComponents(): Record<any, any> {

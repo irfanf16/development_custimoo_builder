@@ -131,7 +131,7 @@ export default class CustomizationText extends Vue {
   }
 
   get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts
+    return this.$store.getters.getCustomTexts()
   }
 
   get selectedProduct(): Record<any, any> {

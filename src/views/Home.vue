@@ -337,7 +337,7 @@ export default class Home extends Mixins(ErrorMessages) {
     return this.$store.getters.getLogosColors
   }
   get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts
+    return this.$store.getters.getCustomTexts()
   }
   @Watch('customTexts', {
     deep: true

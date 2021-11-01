@@ -84,7 +84,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
       public productData: any[] = []
 
       get customTexts(): [Record<any, any>] {
-        return this.$store.getters.getCustomTexts
+        return this.$store.getters.getCustomTexts()
       }
       get lockers():[Record<any, any>]{
         return this.$store.getters.getLockers;
