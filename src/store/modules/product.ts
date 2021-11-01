@@ -48,6 +48,9 @@ const Product:Module<any, any> = {
     SET_LOCKER_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
       Vue.set(state, 'locker_products', payload)
     },
+    SET_LOCKER_ATTRIBUTE(state:Record<any, any>, payload:Record<any, any>){
+      Vue.set(state.locker_products[payload.index],payload.attribute , payload.value);
+    },
     SET_LOCKERS(state:Record<any, any>, payload:Record<any, any>){
       state.lockers = []
       state.lockers = payload;
