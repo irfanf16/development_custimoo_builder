@@ -33,187 +33,31 @@
             <span class="selected-color ml-2 flex-shrink-0" :style="{background: svgGroups[activePart].color}"></span>
             <div class="m-1 text-muted">
               <span>{{ svgGroups[activePart].pantone }}</span>
-              <span style="text-transform: capitalize" class="ml-1">{{ svgGroups[activePart].name }}</span>
+              <span style="text-transform: uppercase" class="ml-1">{{ svgGroups[activePart].name }}</span>
             </div>
           </div>
         </div>
         <div class="overflow-hidden fade-right">
 <!--          <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />-->
-<!--          <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">-->
-<!--            <li v-for="(item, index) in [1,2,3,4,5,6,7,8,9]" :key="index">-->
-<!--              <a class="faded_text" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">Collection {{item}}</a>-->
-<!--            </li>-->
-<!--          </ul>-->
+          <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
+            <li v-for="(colorName, index) in productColors" :key="index">
+              <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
+            </li>
+          </ul>
         </div>
       </div>
 
       <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
-        <div class="color_circle"></div>
-        <div class="color_circle"></div>
-        <div class="color_circle"></div>
-        <div class="color_circle"></div>
-        <div class="color_circle"></div>
-        <div class="color_circle"></div>
-        <div class="color_circle"></div>
-        <div class="color_circle"></div>
-        <div class="color_circle"></div>
-        <div class="color_circle"></div>
-        <div class="color_circle"></div>
+        <div class="color_circle" :key="index" v-for="(color, index) in (typeof productColors[activeCollection].color_text === 'string' ? JSON.parse(productColors[activeCollection].color_text) : productColors[activeCollection].color_text)" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
       </div>
     </div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 2" >
       <span class="close" @click="hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
-      <div>
-        <b-tabs class="player_text">
-          <b-tab>
-            <template #title>
-              Back Name
-            </template>
-            <div class="grid mobile-cols-2 gap-1">
-              <div class="mobile_controls">
-                <b-form-input style="margin-top: 12px" placeholder="Back Name"></b-form-input>
-              </div>
-
-              <div class="mt-2 mobile_controls">
-                <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
-                <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
-              </div>
-            </div>
-            <div class="fade-right py-1">
-              <div class="overflow-auto d-flex align-items-center gap-2 hide-scroll fontList">
-                <div v-for="(item, i) in 20" :key="i" style="white-space: nowrap" :class="{'pr-3': item == 20, 'activeFont': activeFont == i}" @click="setActiveFont(i)">Style {{item}}</div>
-              </div>
-            </div>
-            <div class="fade-right">
-              <div class="mt-2 overflow-auto d-flex gap-1 hide-scroll" style="padding:6px">
-                <div v-for="(item, i) in 20" :key="i" class="color_circle" :class="{'mr-3': item == 20}"></div>
-              </div>
-            </div>
-          </b-tab>
-          <b-tab>
-            <template #title>
-              Front Name
-            </template>
-            <div class="grid mobile-cols-2 gap-1">
-              <div class="mobile_controls">
-                <label>Front Name</label>
-                <b-form-input class="mt-1"></b-form-input>
-              </div>
-              <div class="mobile_controls">
-                <label>Font Style</label>
-                <b-form-select class="mt-1" v-model="selected">
-                  <b-form-select-option :value="null">Style 1</b-form-select-option>
-                  <b-form-select-option value="Style 2">Style 2</b-form-select-option>
-                  <b-form-select-option value="Style 3">Style 3</b-form-select-option>
-                  <b-form-select-option value="Style 4">Style 4</b-form-select-option>
-                </b-form-select>
-              </div>
-            </div>
-            <div class="grid mobile-cols-2 gap-1">
-              <div class="mt-2 mobile_controls">
-                <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
-                <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
-              </div>
-
-              <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-              </div>
-            </div>
-          </b-tab>
-          <b-tab>
-            <template #title>
-              Back Number
-            </template>
-            <div class="grid mobile-cols-2 gap-1">
-              <div class="mobile_controls">
-                <label>Back Number</label>
-                <b-form-input class="mt-1"></b-form-input>
-              </div>
-              <div class="mobile_controls">
-                <label>Font Style</label>
-                <b-form-select class="mt-1" v-model="selected">
-                  <b-form-select-option :value="null">Style 1</b-form-select-option>
-                  <b-form-select-option value="Style 2">Style 2</b-form-select-option>
-                  <b-form-select-option value="Style 3">Style 3</b-form-select-option>
-                  <b-form-select-option value="Style 4">Style 4</b-form-select-option>
-                </b-form-select>
-              </div>
-            </div>
-            <div class="grid mobile-cols-2 gap-1">
-              <div class="mt-2 mobile_controls">
-                <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
-                <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
-              </div>
-
-              <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-              </div>
-            </div>
-          </b-tab>
-          <b-tab>
-            <template #title>
-              Front Number
-            </template>
-            <div class="grid mobile-cols-2 gap-1">
-              <div class="mobile_controls">
-                <label>Front Number</label>
-                <b-form-input class="mt-1"></b-form-input>
-              </div>
-              <div class="mobile_controls">
-                <label>Font Style</label>
-                <b-form-select class="mt-1" v-model="selected">
-                  <b-form-select-option :value="null">Style 1</b-form-select-option>
-                  <b-form-select-option value="Style 2">Style 2</b-form-select-option>
-                  <b-form-select-option value="Style 3">Style 3</b-form-select-option>
-                  <b-form-select-option value="Style 4">Style 4</b-form-select-option>
-                </b-form-select>
-              </div>
-            </div>
-            <div class="grid mobile-cols-2 gap-1">
-              <div class="mt-2 mobile_controls">
-                <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
-                <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
-              </div>
-
-              <div class="mt-2 overflow-auto d-flex gap-1" style="padding:6px">
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-                <div class="color_circle"></div>
-              </div>
-            </div>
-          </b-tab>
-        </b-tabs>
-      </div>
+      <TextCustomization
+        :productFonts="selectedProduct.namefonts" :customTextIndex="index"
+        :fontsColors="fontsColors" :fontOptions="fontOptions" />
     </div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 3" >
       <span class="close" @click="hideAll"><BIconX /></span>
@@ -307,9 +151,11 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 // import UploadLogo from '@/components/UploadLogo.vue'
 // import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
+import TextCustomization from "@/components/mobile/TextCustomization.vue";
 
 @Component<CustomTabs>({
   components: {
+    TextCustomization
     // ColorAccordion,
     // LogoPlacementTabs,
     // CustomizationText,
@@ -327,6 +173,7 @@ import {default as $} from 'jquery';
    console.log('customTexts', this.productColors)
   },
 })
+
 export default class CustomTabs extends Vue {
   @Prop() activeTab!: number
   private activePart = 0;
@@ -335,6 +182,10 @@ export default class CustomTabs extends Vue {
   private activeEye = -1;
   private playersDataHeight = 0;
   public productColors: any[] = []
+  public fontsColors: any[] = []
+  public firstColor!: Record<any, any>
+  public secondColor!: Record<any, any>
+  public fontOptions: Record<any, any>[] = []
   // private tabTop = window.screen.availHeight - 190;
 
   private setPlayersDataHeight = (idx: number) => {
@@ -353,6 +204,17 @@ export default class CustomTabs extends Vue {
       element.style.top = 'auto';
       element.classList.add('setMax')
     }
+  }
+
+  public setColor(color: Record<any, any>) {
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
+    this.$store.dispatch('updateGroupColors',
+      {
+        index: this.svgGroups[this.activePart].id,
+        color: color.value,
+        pantone: color.pantone,
+        name: color.name
+      })
   }
 
   private resizeTab(idx: number){
@@ -478,17 +340,17 @@ export default class CustomTabs extends Vue {
   //   return this.$store.getters.getProductModels;
   // }
   //
-  // get customTexts(): [Record<any, any>] {
-  //   return this.$store.getters.getCustomTexts
-  // }
+  get customTexts(): [Record<any, any>] {
+    return this.$store.getters.getCustomTexts
+  }
   //
   // get productNames() {
   //   return this.$store.getters.getSelectedProduct.productnames;
   // }
   //
-  // get logoColors(): [] {
-  //   return this.$store.getters.getLogosColors
-  // }
+  get logoColors(): [] {
+    return this.$store.getters.getLogosColors
+  }
   //
   // public tabIndex = 0
   //
@@ -501,9 +363,9 @@ export default class CustomTabs extends Vue {
   // get hideTab(): Record<any, any> {
   //   return this.$store.getters.getHideTab
   // }
-  // get lockerColors(){
-  //   return this.$store.getters.getLockerColors
-  // }
+  get lockerColors(){
+    return this.$store.getters.getLockerColors
+  }
   //
   // @Watch('tabIndexNew', {
   //   immediate: true, deep: true
@@ -746,7 +608,8 @@ export default class CustomTabs extends Vue {
   height: 15px;
   width: 15px;
   border-radius: 10000px;
-  background: #ff0000;
+  background: transparent;
   display: inline-block;
+  box-shadow: 0px 1px 5px rgba(0,0,0,0.4);
 }
 </style>
