@@ -1,12 +1,13 @@
 <template>
-  <b-modal ref="my-modal" id="modal-center-addlockerroom" hide-footer centered scrollable size="xl" title="Add to Locker Room" modal-class="add_locker" content-class="lockerroom-modal">
+  <b-modal ref="my-modal" id="modal-center-addlockerroom" hide-footer centered scrollable size="xl" title="Add to Locker Room"  modal-class="add_locker" content-class="lockerroom-modal">
         <div class="lockerroom-header">
             <div class="locker-opener">
               <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
+              <span class="btn btn-secondary light add_new_locker_btn" v-b-modal.modal-center-createlockerroom>Add <BIconPlus /></span>
             </div>
-            <div class="add_new_locker">
-              <span class="btn btn-secondary light" v-b-modal.modal-center-createlockerroom>Add <BIconPlus /></span>
-            </div>
+<!--            <div class="add_new_locker">-->
+<!--              -->
+<!--            </div>-->
 <!--                <b-button class="create-btn" variant="secondary" ><span>Create New </span>+</b-button>-->
                 <CreateLockerRoomModal @lockerAdded="lockerAdded" />
         </div>

@@ -2236,6 +2236,25 @@ button{
     .lockerroom-modal .nav-tabs .nav-link{padding: 0.5rem 1rem;}
 }
 
+#modal-center-addlockerroom.add_locker{
+    .lockerroom-header{
+        .locker-opener{
+            flex-wrap: wrap;
+            max-height: 100000px;
+            overflow: visible;
+            max-width: 100%;
+
+            .btn-secondary{
+                &.light.add_new_locker_btn{
+                    background: #E7F4F1;
+                    color: #219F84;
+                    border-color: #E7F4F1;
+                }
+            }
+        }
+    }
+}
+
 .home-color-area{
     .extracted-color-shuffle-btn{display: none;}
     .additional-class{
