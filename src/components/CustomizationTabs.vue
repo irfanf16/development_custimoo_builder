@@ -281,7 +281,10 @@ export default class CustomizationProcess extends Vue {
 
       if(!this.customTexts[product.id]) {
 
-        product.productnames.forEach((productName: Record<any, any>, index: number) => {
+
+        product.productnames =  this.sortTextsArray(product.productnames);
+
+        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
           if (this.customTexts[index] && !this.customTexts[index].action) {
 
             //calculate colors pantone on init
@@ -335,7 +338,7 @@ export default class CustomizationProcess extends Vue {
               outLineWidth: this.customTexts[index].outLineWidth ? this.customTexts[index].outLineWidth : 0,
               selectColor: false
             }
-            this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
+            await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
           }
           else if (!this.customTexts[index]) {
 
@@ -372,7 +375,7 @@ export default class CustomizationProcess extends Vue {
               outLineWidth: 0,
               selectColor: false
             }
-            this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
+            await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
           }
         })
       }
@@ -382,6 +385,10 @@ export default class CustomizationProcess extends Vue {
 
 
 
+  }
+
+  public sortTextsArray(product_names:any) {
+    return product_names.sort((a:string,b:string)=> (a.type > b.type ? 1 : -1));
   }
 
   public fontsList(): void {
