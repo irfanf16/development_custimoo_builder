@@ -82,7 +82,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
       public room_id = 0;
       public product_name = '';
       public ref = this.$refs as Record<any, any>
-      public tabIndex = 0
+      public tabIndex = this.$store.getters.getLockerActiveTabIndex
       public productData: any[] = []
 
       get customTexts(): [Record<any, any>] {
