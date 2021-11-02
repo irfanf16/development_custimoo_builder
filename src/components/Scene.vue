@@ -758,7 +758,7 @@ export default class Scene extends Vue {
       this.frontCanvas = canvas
     }
 
-    fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
+    //fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
     let model: any
     if(this.productType == 'customized') {
