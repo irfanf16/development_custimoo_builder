@@ -33,6 +33,9 @@
         </div>
       </div>
     </div>
+    <div class="d-none">
+      <ProductionScene ref="production-scene"/>
+    </div>
 
 <!--    <div class="d-none">
       <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
@@ -50,10 +53,11 @@ import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
 import DesignPdfView from "@/components/DesignPdfView.vue";
+import ProductionScene from "@/components/ProductionScene.vue";
 
 @Component<OrderDetails>({
   components: {
-    DesignPdfView
+    DesignPdfView, ProductionScene
   }
 })
 
@@ -136,6 +140,7 @@ export default class OrderDetails extends Vue {
 
   public  generateProductionPdf() {
     this.showLoader = true;
+    this.$refs["production-scene"].canvasToImage("png", true);
     let p2 = new Promise((resolve) => {
       const frontElement = document.getElementById("scene-front") as Record<any, any>
       this.pdf_front_image = frontElement.toDataURL("image/png")

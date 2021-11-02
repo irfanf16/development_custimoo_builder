@@ -118,11 +118,6 @@
         </b-col>
         </template>
       </b-row>
-      <b-row>
-        <div>
-          <ProductionScene />
-        </div>
-      </b-row>
     </b-container>
     <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
     <confirm-modal message="This will reset everything. All design changes will be lost.
@@ -149,7 +144,6 @@ import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import Scene from "@/components/Scene.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import ProductionScene from "@/components/ProductionScene.vue";
 
 @Component<Home>({
   components: {
@@ -166,8 +160,7 @@ import ProductionScene from "@/components/ProductionScene.vue";
     SaveColorModal,
     ExtractedColors,
     LoginForm,
-    Scene,
-    ProductionScene
+    Scene
   },
   async mounted() {
 

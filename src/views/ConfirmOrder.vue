@@ -26,9 +26,6 @@
                     </div>
                 </b-col>
             </b-row>
-          <b-row>
-            <ProductionScene />
-          </b-row>
         </b-container>
     </div>
 </template>
@@ -41,7 +38,7 @@
     import SaveDesignModal from '@/components/SaveDesignModal.vue'
     import {http} from "@/httpCommon";
     import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
-    import ProductionScene from "@/components/ProductionScene.vue";
+
 
 
     @Component<ConfirmOrder>({
@@ -50,8 +47,7 @@
           OrderAccordion,
           CustomizationPreview,
           OrderDetails,
-          SaveDesignModal,
-          ProductionScene
+          SaveDesignModal
         },
         mounted() {
             // this.retrieveProducts()

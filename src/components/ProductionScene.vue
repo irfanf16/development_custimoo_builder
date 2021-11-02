@@ -6,10 +6,11 @@
 
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
-import {fabric} from 'fabric'
+import {fabric as fabrics} from 'fabric'
 
 @Component<ProductionScene>({
   mounted() {
+    console.log("mounted")
     let self = this;
     self.initializeCanvas();
   }
@@ -17,11 +18,11 @@ import {fabric} from 'fabric'
 
 export default class ProductionScene extends Vue {
 
-  @Prop({required: false, default: 600}) readonly canvasWidth!: number;
-  @Prop({required: false, default: 600}) readonly canvasHeight!: number;
-  private factory_cuttings_canvas: null|fabric.Canvas = null;
+  @Prop({required: false, default: 500}) readonly canvasWidth!: number;
+  @Prop({required: false, default: 500}) readonly canvasHeight!: number;
+  private factory_cuttings_canvas: null|fabrics.Canvas = null;
   private svg_elems_group: null|Record<any, any> = null;
-  private production_svg_url = null;
+  private production_svg_url: string|null = null;
   private storage_url = process.env.VUE_APP_STORAGE_URL;
 
   //computed values starts
@@ -49,9 +50,8 @@ export default class ProductionScene extends Vue {
   @Watch('selectedProduct', {immediate: true, deep: true })
   onSelectedProductChanged(newVal:Record<any, any>, oldVal:Record<any, any>) {
     let self = this;
-    console.log("newval before", newVal, oldVal)
+    console.log("onSelectedProductChanged", newVal, oldVal)
     if(newVal && self.selectedProduct) {
-      console.log("newval", newVal.id)
       if(self.factory_cuttings_canvas) {
         self.setProductionSvgUrl(newVal);
         self.loadSvgFromUrl();
@@ -65,27 +65,31 @@ export default class ProductionScene extends Vue {
   //watchers ends
 
   initializeCanvas() {
-    console.log("initializeCanvas")
     let self = this;
     let factory_cuttings_elem = self.$refs.factory_cuttings as HTMLCanvasElement
-    self.factory_cuttings_canvas = new fabric.Canvas(factory_cuttings_elem);
+    self.factory_cuttings_canvas = new fabrics.Canvas(factory_cuttings_elem);
   }
 
   loadSvgFromUrl(url=null) {
     let self = this;
-    console.log("loading svg", self.factory_cuttings_canvas)
-    let factory_cuttings_canvas = self.factory_cuttings_canvas;
-    factory_cuttings_canvas.clear();
-    console.log("loading svg if")
-    fabric.loadSVGFromURL(`${self.production_svg_url}`, (objects: any, options: any) => {
-      options.crossOrigin = 'Anonymous'
-      let svg_elems_group = self.svg_elems_group = fabric.util.groupSVGElements(objects) as fabric.canvas
-      self.svg_elems_group?.scaleToWidth(factory_cuttings_canvas.getWidth() - 10)
-      self.factory_cuttings_canvas?.add(svg_elems_group);
-      factory_cuttings_canvas.renderAll();
-      this.setFactoryCuttingColors();
-    })
-
+    if(self.production_svg_url) {
+      fabrics.loadSVGFromURL(`${self.production_svg_url}`, (objects: any, options: any) => {
+        console.log("options", options)
+        options.crossOrigin = 'Anonymous'
+        let svg_elems_group = self.svg_elems_group = fabrics.util.groupSVGElements(objects) as fabrics.canvas
+        let svg_elems_group_scaled_width = self.factory_cuttings_canvas?.getHeight() - 50;
+        self.svg_elems_group?.scaleToWidth(svg_elems_group_scaled_width).set({
+          hasControls: false,
+          selectable: false,
+          evented: false
+        })
+        self.factory_cuttings_canvas?.clear();
+        self.factory_cuttings_canvas?.add(svg_elems_group);
+        self.svg_elems_group?.center();
+        self.factory_cuttings_canvas?.renderAll();
+        this.setFactoryCuttingColors();
+      })
+    }
   }
 
   setFactoryCuttingColors() {
@@ -102,16 +106,15 @@ export default class ProductionScene extends Vue {
           }
         }
       })
-      self.factory_cuttings_canvas.renderAll();
+      self.factory_cuttings_canvas?.renderAll();
     }
 
   }
 
-  setProductionSvgUrl(selected_product) {
+  setProductionSvgUrl(selected_product: Record<any, any>) {
     let self = this;
-    console.log("setProductionSvgUrl", selected_product)
     let product_style = selected_product.productstyles[self.productStyleIndex];
-    let product_style_active_design = product_style.productdesigns.filter((product_design) => {
+    let product_style_active_design = product_style.productdesigns.filter((product_design:Record<any, any>) => {
       return product_design.design_show;
     });
     if(product_style_active_design.length > 0) {
@@ -121,6 +124,24 @@ export default class ProductionScene extends Vue {
     }
     if(product_style_active_design && product_style_active_design.production_design) {
       self.production_svg_url = `${self.storage_url}${product_style_active_design.production_design.file_url}.svg`;
+    } else {
+      self.production_svg_url = null;
+      self.svg_elems_group = null;
+      self.factory_cuttings_canvas?.clear();
+    }
+  }
+
+  canvasToImage(type = 'png', download = false, download_as = 'factory_cuttings') {
+    let self = this;
+    let base_64_image = self.$refs.factory_cuttings.toDataURL(type)
+    console.log("base", base_64_image)
+    if(download) {
+      let a = document.createElement("a");
+      a.href =  base_64_image;
+      a.download = `${download_as}.${type}`;
+      a.click();
+    } else {
+      return base_64_image;
     }
   }
 
