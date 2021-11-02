@@ -1,7 +1,7 @@
 <template>
     <b-modal ref="create-modal" hide-footer id="modal-center-createlockerroom" centered scrollable size="xl" title="Create Locker Room" content-class="lockerroom-modal create-lockerroom-modal">
         <div class="pt-4 design-name-form">
-            <b-form inline>
+            <b-form inline @submit.prevent="createLocker">
                 <label for="inline-form-input-productname" class="w-100 d-block mb-2">Name</label>
                 <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
                     <b-input-group>
