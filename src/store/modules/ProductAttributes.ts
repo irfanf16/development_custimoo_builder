@@ -1004,8 +1004,18 @@ const ProductAttributes:Module<any, any> = {
       return await  http.post('collection-data', {collection_id: payload}).then((res) =>{
         return res.data
       })
-    }
-
+    },
+    async copyProductDesign({commit}, payload){
+     return  await http.post('duplicateProduct', payload).then((res) => {
+        if (res.status == 201){
+          commit('ADD_PRODUCT_TO_LOCKER', {room_id : payload.room_id, data: res.data.data})
+          return res;
+        }
+      }).catch(err => {
+       console.log(err.response)
+        return err.response.data.message
+      })
+    },
   }
 }
 export default ProductAttributes;
