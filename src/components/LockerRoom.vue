@@ -1,11 +1,11 @@
 <template>
-  <span>
+  <span class="asdasd">
   <b-tabs content-class="mt-3" @activate-tab="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
-      <b-tab :key="i" :active="tabIndex === i" @click="hideAll">
+      <b-tab :key="i" :active="tabIndex === i">
         <template #title>
           <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
-            @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
+                     @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
             <span @click="changeColor">{{ room.room_name }}</span>
           </draggable>
           <a class="remove-tab" @click="deleteRoom(room.id, i)">
@@ -17,8 +17,8 @@
         <div class="lockerroom-tabs">
           <div>
             <b-card no-body>
-              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" value="lockerActiveTabIndex">
-                <b-tab title="Products"  @click="hideAll">
+              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" :value="lockerActiveTabIndex">
+                <b-tab title="Products">
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
                              :multiDrag="true"
@@ -75,6 +75,11 @@
                             </div>
                           </b-tooltip>
                         </li>
+                        <li>
+                          <a  @click="showDesignModal(product)">
+                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy" class="svg-inline--fa fa-copy" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path></svg>
+                          </a>
+                        </li>
                         <li class="swap">
                           <a v-if="product.design && product.design.back_design_count > 0" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' "
@@ -94,7 +99,7 @@
                 <b-tab v-if="!getAddMoreCollectionStatus" title="Assets" class="assets-file">
                   <template v-for="(logo, inda) in room.logos">
                     <div :key="inda" class="assets-logo-block">
-                      <img  :src="storageUrl+logo.logo_url " crossorigin="anonymous"/>
+                      <img :src="storageUrl+logo.logo_url " crossorigin="anonymous"/>
                       <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
                     </div>
                   </template>
@@ -126,21 +131,26 @@
                     </div>
                   </div>
                 </b-tab>
-                <b-tab v-if="!getAddMoreCollectionStatus && getCollections.length > 0"  title="Collections" class="designCollections">
+                <b-tab v-if="!getAddMoreCollectionStatus && getCollections.length > 0" title="Collections"
+                       class="designCollections">
                   <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
                     <template v-for="(collection, index) in getCollections">
-                      <div  :key="index" class="products-block">
+                      <div :key="index" class="products-block">
                         <div class="image-holder">
 
-                          <div class="convas_container" :key="collection_product_index" v-for="(collection_product,collection_product_index) in collection.collection_products">
+                          <div class="convas_container" :key="collection_product_index"
+                               v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
                             <template v-if="collection_product_index < 3">
-                              <img :src="collection_product.product_locker_room.product_url" :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'" alt="">
+                              <img :src="collection_product.product_locker_room.product_url"
+                                   :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'"
+                                   alt="">
                             </template>
                           </div>
 
                           <div class="controls">
-                            <a v-b-tooltip.hover.right title="Delete collection" @click="deleteCollection(collection.id,index)" class="remove btn">
+                            <a v-b-tooltip.hover.right title="Delete collection"
+                               @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
 
@@ -165,7 +175,7 @@
                                   </b-form>
                                 </div>
                               </div>
-                            </div>
+                            </b-tooltip>
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -183,18 +193,37 @@
     </template>
 
     <template #tabs-end>
-      <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getAddMoreCollectionStatus" role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
-        <span class="btn btn-secondary light">Add <BIconPlus /></span>
+      <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getAddMoreCollectionStatus"
+                  role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
+        <span class="btn btn-secondary light">Add <BIconPlus/></span>
       </b-nav-item>
     </template>
 
-    <CreateLockerRoomModal @lockerAdded="lockerAdded" />
-    <ExistingCollectionModal @existingCollection="existingCollection" />
+    <CreateLockerRoomModal @lockerAdded="lockerAdded"/>
+    <ExistingCollectionModal @existingCollection="existingCollection"/>
   </b-tabs>
 
-     <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
+     <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
+                    ref="reset-modal"></confirm-modal>
 
     <span class="hover_tooltip"></span>
+    <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
+        <div class="pt-4 design-name-form">
+            <b-form inline>
+<!--                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Design Name</label>-->
+                <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
+                    <b-input-group>
+                        <b-form-input v-model="copiedProductName"   placeholder="Design Name"></b-form-input>
+                    </b-input-group>
+                  <b-form-select  v-model="copiedProductLockerId"   :options="lockers" value-field="id"
+                                  text-field="room_name"></b-form-select>
+                    <b-button variant="primary" @click="copyProductDesign">Copy</b-button>
+                </div>
+            </b-form>
+
+          <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+        </div>
+    </b-modal>
   </span>
 
 </template>
@@ -226,42 +255,30 @@ import {differenceBy, intersectionBy, union, includes} from 'lodash';
     draggable
   },
   mounted() {
-    let href:any = location.href;
+    let href: any = location.href;
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
     this.setCollections()
-
-    if (this.lockers.length >0 ) {
+    if (this.lockers.length >0 ){
       this.copiedProductLockerId = this.lockers[0].id
-    }
-
-    document.body.onclick = () => {
-      this.hideAll();
     }
   }
 })
 export default class LockerRoom extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
-  private baseUrl = location.host+"/#/"
+  private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
   public colors : [] = []
   public tabIndex = 0
   public viewLoader = false
   public copiedProductId = 0
   public copiedProductName = ''
+  public copiedProductLockerId = 0
   public url = ''
   public group = ''
   public collection_available = false;
   public lockerActiveTabIndex = this.$store.getters.getLockerActiveTabIndex;
   public collection_base_url = ''
-  private copiedProductLockerId = 0;
-
-  private hideAll = () => {
-    let elements = document.querySelectorAll('.share-tooltip');
-    elements.forEach((element: Record<any, any>)=>{
-      element.style.display = 'none';
-    });
-    }
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
     for(const mutation of mutationsList) {
@@ -301,31 +318,16 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     console.log('ev', e.target)
   }
 
-
-  private toggleShare(e:Record<any, any>, targetID:string) {
-    e.stopPropagation();
-    let elementOffset = e.currentTarget.getBoundingClientRect();
-
-    let elements = document.querySelectorAll('.share-tooltip');
-    elements.forEach((element: Record<any, any>)=>{
-      element.style.display = 'none';
-    });
-
-    let element = document.getElementById(targetID) as Record<any, any>;
-    element.style.display = 'flex';
-    element.style.top = (elementOffset.top + e.currentTarget.clientHeight + 10)+'px';
-    element.style.left = (elementOffset.left - (element.clientWidth/2)) + 'px';
-  }
-
-  private showTooltip(e: Record<any, any>){
+  private showTooltip(e: Record<any, any>) {
     let element = document.querySelector('.hover_tooltip') as Record<any, any>
     element.style.opacity = '1'
     element.style.zIndex = '100'
-    element.style.left = (e.clientX + 10)+'px'
-    element.style.top = (e.clientY + 17)+'px'
+    element.style.left = (e.clientX + 10) + 'px'
+    element.style.top = (e.clientY + 17) + 'px'
     element.innerHTML = e.target.getAttribute('data-title')
   }
-  private hideTooltip(){
+
+  private hideTooltip() {
     let element = document.querySelector('.hover_tooltip') as Record<any, any>
     element.style.opacity = '0'
     element.style.left = '0'
@@ -342,14 +344,26 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public async setCollections() {
     await this.$store.dispatch('getCollections')
   }
-  get getAddMoreCollectionStatus(){
+
+  get getAddMoreCollectionStatus() {
     return this.$store.getters.getAddMoreCollectionStatus;
   }
-  get getLockerProducts():Record<any, any>{
+
+  get getLockerProducts(): Record<any, any> {
     let main_product_id = this.$store.getters.getEditProductId;
-    let locker_products = this.$store.getters.getLockerProducts.map((item: Record<any, any>) => {
-      item.product = item.product.map((locker_product:Record<any, any>) =>{
-        if(main_product_id == locker_product.id) {
+    let locker_products = this.$store.getters.getLockerProducts;
+    let locker_products_count = locker_products.length
+    locker_products = locker_products.map((item: Record<any, any>, lpIdx: number) => {
+      //locker_pull_groups contains the locker group names where products can be moved. This array is make sure user can not drop product to same locker.
+      let locker_pull_groups = [];
+      for (let i = 0; i < locker_products_count; i++) {
+        if (lpIdx != i) {
+          locker_pull_groups.push(`locker-${i}`);
+        }
+      }
+      locker_products[lpIdx].locker_pull_groups = locker_pull_groups
+      item.product = item.product.map((locker_product: Record<any, any>) => {
+        if (main_product_id == locker_product.id) {
           let random = getRandom();
           locker_product.product_url = `${locker_product.product_url}?${random}`;
         }
@@ -363,11 +377,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   get mainproductId():number{
     return this.$store.getters.getEditMainProductId
   }
-  get getCollections():Record<any, any>{
+
+  get getCollections(): Record<any, any> {
     let main_product_id = this.$store.getters.getEditProductId;
     let collections = this.$store.getters.getCollections.map((item: Record<any, any>) => {
-      item.collection_products = item.collection_products.map((collection:Record<any, any>) =>{
-        if (collection.product_locker_room.id == main_product_id){
+      item.collection_products = item.collection_products.map((collection: Record<any, any>) => {
+        if (collection.product_locker_room.id == main_product_id) {
           let random = getRandom()
           collection.product_locker_room.product_url = `${collection.product_locker_room.product_url}?${random}`
         }
@@ -377,12 +392,13 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     })
     return collections
   }
+
   @Watch('getCollections', {
     deep: true
   })
   getCollectionsChanged(collections: [Record<any, any>]) {
     collections.forEach((collection: Record<any, any>, index: number) => {
-      if(!collection.link) {
+      if (!collection.link) {
         this.generateCollectionPdf(collection, index)
       }
     })
@@ -394,36 +410,40 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
 
-  get selected(){
+  get selected() {
     return this.group;
   }
 
-  set selected(val){
+  set selected(val) {
     this.group = val;
   }
 
-  get products():[Record<any, any>]{
+  get products(): [Record<any, any>] {
     return this.$store.getters.getProducts
   }
   get customLogos():[Record<any, any>] {
     return this.$store.getters.getCustomLogos()
   }
-  get lockers():Record<any, any>{
-    return  this.$store.getters.getLockers;
+
+  get lockers(): Record<any, any> {
+    return this.$store.getters.getLockers;
   }
-  get selectedProduct(): Record<any, any>{
+
+  get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-  get customer():Record<any, any>{
-    return  this.$store.getters.getCustomer
+
+  get customer(): Record<any, any> {
+    return this.$store.getters.getCustomer
   }
-  get logoTabIndex():number{
+
+  get logoTabIndex(): number {
     return this.$store.getters.getActiveLogoIndex
   }
 
-  public lockerAdded(){
+  public lockerAdded() {
     setTimeout(() => {
-      let index = this.getLockerProducts.length -1
+      let index = this.getLockerProducts.length - 1
       this.tabIndex = index
     }, 1000)
   }
@@ -468,7 +488,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     let res = await this.$store.dispatch('getCollection', collection.id)
     this.collection_available = true;
     this.collectionData = res
-    setTimeout(()=>{
+    setTimeout(() => {
       const element = document.getElementById("collectionPdfContainer")
       const opt = {
         margin: [15, 10, 15, 10],
@@ -486,12 +506,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
           orientation: 'landscape'
         }
       };
-      html2pdf().set(opt).from(element).output('datauristring').then((pdf:any)=>{
+      html2pdf().set(opt).from(element).output('datauristring').then((pdf: any) => {
         let arr = pdf.split(',');
         pdf = arr[1];
         let data = new FormData();
-        data.append("data" , pdf);
-        data.append('id' , collection.id);
+        data.append("data", pdf);
+        data.append('id', collection.id);
         http.post('savepdf', data).then(res => {
           Vue.set(this.getCollections[index], 'link', res.data.link)
         })
@@ -518,8 +538,8 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
     }
     let ind = this.products.length - 1;
-    await this.$store.dispatch('setSelectedIndex', {selectedIndex:ind});
-    let selectedIndex = this.selectedProduct.productstyles.findIndex((x:Record<any, any>) => x.id === element.style_id);
+    await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
+    let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
     await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
     console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
     // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
@@ -528,34 +548,39 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
     this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-      if (item.id == element.design_id){
+      if (item.id == element.design_id) {
         Vue.set(item, 'design_show', 1)
-        this.$store.dispatch('setSelectedProductDesignID',item.id)
-      }else{
+        this.$store.dispatch('setSelectedProductDesignID', item.id)
+      } else {
         Vue.set(item, 'design_show', 0)
       }
     });
     this.$emit('hideLockerRoomModal')
   }
 
-  public async shareProduct(e:Record<any, any>, product: Record<any, any>, ind: number, lockerIndex: number, targetID:string) {
-    this.toggleShare(e, targetID);
+  public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {
-      let payload = { type: 'locker', id: product.id , customer_id :  this.customer ? this.customer.id : '', product_id: this.selectedProduct.product_id}
+      let payload = {
+        type: 'locker',
+        id: product.id,
+        customer_id: this.customer ? this.customer.id : '',
+        product_id: this.selectedProduct.product_id
+      }
       let shared_url = "";
-      if (product.shared_url){
+      if (product.shared_url) {
         shared_url += product.shared_url;
-      }else{
+      } else {
         let res = await this.$store.dispatch('shareProduct', payload);
         shared_url += res.data.url;
-        Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url',  shared_url)
+        Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url', shared_url)
       }
-    }catch (error){
+    } catch (error) {
       console.log(error)
     }
   }
-  public copyCollectionLink(ind:number){
-    let toCopy = this.$refs['copylink_'+ind] as Record<any, any>
+
+  public copyCollectionLink(ind: number) {
+    let toCopy = this.$refs['copylink_' + ind] as Record<any, any>
     toCopy = toCopy[0].$el as Record<any, any>
     toCopy.select()
     try {
@@ -565,8 +590,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       alert('Oops, unable to copy');
     }
   }
-  public copyLink(product:Record<any, any>, ind:number){
-    let testingCodeToCopy = document.querySelector('#copy-'+ind)  as Record<any, any>
+
+  public copyLink(product: Record<any, any>, ind: number) {
+    let testingCodeToCopy = document.querySelector('#copy-' + ind) as Record<any, any>
     testingCodeToCopy.select()
     try {
       document.execCommand('copy');
@@ -575,50 +601,54 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       alert('Oops, unable to copy');
     }
   }
-  public async deleteProduct(i:number, ind:number, id:number){
+
+  public async deleteProduct(i: number, ind: number, id: number) {
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
-      let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id:id});
-      if (res == true){
+      let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id: id});
+      if (res == true) {
         this.$store.commit('SET_RECENT_LOGOS')
         this.showToast('Product Deleted', 'SUCCESS')
-      }else{
+      } else {
         this.showError(res)
       }
     }
   }
-  public async deleteCollection(id:number,index:number){
-    try{
+
+  public async deleteCollection(id: number, index: number) {
+    try {
       const ok = await this.ref['reset-modal'].showConfirm()
       if (ok) {
         let res = await this.$store.dispatch('deleteCollection', {id: id, index: index});
         this.showToast(res.data.message, 'SUCCESS');
       }
-    }
-    catch (e) {
+    } catch (e) {
       this.showError(e);
     }
   }
-  public async deleteRoom(id:number, index:number){
+
+  public async deleteRoom(id: number, index: number) {
     if (confirm('You are going to delete associated product')) {
       let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
-      if (res == true){
+      if (res == true) {
         this.showToast('room deleted', 'SUCCESS')
-      }else{
+      } else {
         this.showError(res);
       }
     }
   }
 
-  public fetchColors(i:number, ind:number){
+  public fetchColors(i: number, ind: number) {
     this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
   }
-  public changeColor(){
+
+  public changeColor() {
     this.colors = []
   }
-  public addToCustomLogos(currentLogo:Record<any, any>){
+
+  public addToCustomLogos(currentLogo: Record<any, any>) {
     let index = this.logoTabIndex
-    if (this.selectedProduct.is_logo_allowed && this.selectedProduct.logos_setting[index]){
+    if (this.selectedProduct.is_logo_allowed && this.selectedProduct.logos_setting[index]) {
       let logo = {
         logoIndex: index,
         id: currentLogo.id,
@@ -633,11 +663,11 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         customLogo: true,
         is_transparent: false
       }
-      if(index == 0) {
-        if (currentLogo.logo_colors != null){
+      if (index == 0) {
+        if (currentLogo.logo_colors != null) {
           let image_colors = processColorsCustom(JSON.parse(currentLogo.logo_colors))
           let image_color_count = image_colors.length;
-          while(image_color_count < 4 ) {
+          while (image_color_count < 4) {
             image_colors.push({hex: null, pantone: null, name: null});
             ++image_color_count;
           }
@@ -657,25 +687,28 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
 
-  public set selectedCollectionProducts(val : Record<any, any>) {
-    const payload = {"attribute":"locker_products","value":val};
-    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
+  public set selectedCollectionProducts(val: Record<any, any>) {
+    const payload = {"attribute": "locker_products", "value": val};
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
   }
-  public editCollection(collection_id: number){
-    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute":"collection_id","value": collection_id})
-    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute":"locker_products","value": []})
+
+  public editCollection(collection_id: number) {
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {"attribute": "collection_id", "value": collection_id})
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {"attribute": "locker_products", "value": []})
     this.$emit('editCollectionModal')
     this.$emit('hideLockerRoomModal')
   }
-  public existingCollection(){
+
+  public existingCollection() {
     this.$emit('editCollectionModal')
     this.$emit('hideLockerRoomModal')
   }
-  public getDisabled(locker_prd_id:number):boolean {
-    if(this.getAddMoreCollectionStatus) {
+
+  public getDisabled(locker_prd_id: number): boolean {
+    if (this.getAddMoreCollectionStatus) {
       //let selected = this.$store.getters.getSelectedCollectionProducts
       let disabled = this.$store.getters.getDisabledProducts
-      let res = disabled.find((id:number) => {
+      let res = disabled.find((id: number) => {
         return id == locker_prd_id
       })
       return !!res;
@@ -688,7 +721,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.lockerActiveTabIndex = newTabIndex;
     this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
   }
-
 
   public lockerProductsChanged(payload: any, index = null) {
     let action = payload.type;
@@ -791,31 +823,33 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     return product_ids_with_sort_order;
   }
 
-  public swapDesign(lockerIndex: number, productIndex: number){
+
+  public swapDesign(lockerIndex: number, productIndex: number) {
     let product: Record<any, any> = this.getLockerProducts[lockerIndex].product[productIndex];
 
-    if(product.is_back_img==0){
+    if (product.is_back_img == 0) {
       product.is_back_img = 1
       product.product_url = product.product_back_url
-    }else{
+    } else {
       product.is_back_img = 0
       product.product_url = product.product_front_url
     }
     this.getLockerProducts[lockerIndex].product[productIndex] = product;
   }
 
-  public lockerChanged(newTabIndex: number,  prevTabIndex: number, bvEvent: Record<any, any>) {
+  public lockerChanged(newTabIndex: number, prevTabIndex: number, bvEvent: Record<any, any>) {
     this.tabIndex = newTabIndex
     /*
     * If locker collection tab is active and user switch to the locker then activate first tab (product tab)
     * */
-    if(this.lockerActiveTabIndex == 3) {
+    if (this.lockerActiveTabIndex == 3) {
       this.lockerActiveTabIndex = 0
     }
 
     let payload = {index:this.tabIndex, attribute: 'active_tab', value:true}
     this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
   }
+
   // public processColorsCustom(colors: [],customLogoIndex:number):void {
   //   let imageColors: any[] = []
   //   let uniqueColors: string[] = []
@@ -843,52 +877,57 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 </script>
 
 <style lang="scss" scoped>
-.lockerroom-modal .nav-tabs .add_new_locker .nav-link{
+.lockerroom-modal .nav-tabs .add_new_locker .nav-link {
   border: none !important;
   padding: 0;
+
   .btn {
     font-size: 1em !important;
     line-height: normal;
   }
 }
 
-.lockerroom-header{
+.lockerroom-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  .locker-opener{
+
+  .locker-opener {
     max-width: 90%;
     padding: 15px;
     font-size: 18px;
     position: relative;
     overflow-x: auto;
     white-space: nowrap;
-    @media only screen and (min-width: 992px){
+    @media only screen and (min-width: 992px) {
       max-width: 100%;
       padding: 14px 30px;
       max-width: 80%;
     }
-    .btn{
+
+    .btn {
       padding: 5px 10px;
       margin: 0 5px 10px;
       position: relative;
       background: none;
-      border-color: rgba(3,20,46,0.13);
+      border-color: rgba(3, 20, 46, 0.13);
       color: #03142E;
       font-size: 0.8rem;
-      @media only screen and (min-width: 992px){
+      @media only screen and (min-width: 992px) {
         padding: 10px 30px;
         margin: 0 10px 10px;
         font-size: 1rem;
       }
+
       &.active,
-      &:hover{
+      &:hover {
         background: #219f84;
         color: #fff;
         border-color: #219f84;
       }
-      .remove{
+
+      .remove {
         position: absolute;
         right: -10px;
         top: -14px;
@@ -902,14 +941,15 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        @media only screen and (min-width: 992px){
+        @media only screen and (min-width: 992px) {
           width: 30px;
           height: 30px;
           font-size: 12px;
         }
       }
     }
-    .arrow{
+
+    .arrow {
       position: absolute;
       left: 0;
       top: 50%;
@@ -918,10 +958,11 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       color: #219f84;
       font-size: 15px;
       display: none;
-      @media only screen and (min-width: 992px){
+      @media only screen and (min-width: 992px) {
         display: inline-block;
       }
-      &.arrow-right{
+
+      &.arrow-right {
         left: auto;
         right: 0;
       }
@@ -929,6 +970,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
 }
+
 //.create-lockerroom{
 //  .btn{
 //    padding: 0;
@@ -993,9 +1035,11 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       @media only screen and (min-width: 992px) {
         overflow: hidden;
       }
-      &>div{
+
+      & > div {
         width: 100%;
       }
+
       img {
         display: block;
         width: 100%;
@@ -1017,9 +1061,10 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       display: flex;
       flex-direction: column;
 
-      .swap{
+      .swap {
         margin-top: auto;
       }
+
       @media only screen and (min-width: 992px) {
         right: 5px;
         top: 5px;
@@ -1047,7 +1092,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         border: 1px solid transparent;
         padding: 0;
 
-        &:hover{
+        &:hover {
           border-color: #219f84;
         }
 
@@ -1061,7 +1106,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
           background: #F8E1E2;
           color: #D53943;
 
-          &:hover{
+          &:hover {
             border-color: #D53943;
           }
         }
@@ -1144,49 +1189,55 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   //    }
   //}
 }
-.lockerroom-color-folders{
+
+.lockerroom-color-folders {
   position: relative;
-  .folder-wrapper{
+
+  .folder-wrapper {
     flex: 0 0 50%;
     max-width: 50%;
-    @media only screen and (min-width: 1200px){
+    @media only screen and (min-width: 1200px) {
       flex: 0 0 70%;
       max-width: 70%;
     }
-    h3{
+
+    h3 {
       font-weight: 600;
-      @media only screen and (min-width: 992px){
+      @media only screen and (min-width: 992px) {
         font-size: 20px;
       }
     }
-    a{
+
+    a {
       margin: 0 10px 12px;
       font-size: 10px;
       flex: 0 0 38%;
       max-width: 38%;
-      @media only screen and (min-width: 768px){
+      @media only screen and (min-width: 768px) {
         font-size: 10px;
         flex: 0 0 19%;
         max-width: 19%;
       }
-      @media only screen and (min-width: 1200px){
+      @media only screen and (min-width: 1200px) {
         font-size: 14px;
         flex: 0 0 13%;
         max-width: 13%;
       }
-      svg{
+
+      svg {
         font-size: 32px;
         display: block;
         margin: 0 auto 10px;
         fill: #219f84;
         color: #219f84;
-        @media only screen and (min-width: 768px){
+        @media only screen and (min-width: 768px) {
           font-size: 46px;
         }
       }
     }
   }
-  .color-holder{
+
+  .color-holder {
     flex: 0 0 45%;
     max-width: 45%;
     position: absolute;
@@ -1195,58 +1246,67 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     width: 100%;
     height: 100%;
     max-height: 180px;
-    @media only screen and (min-width: 768px){
+    @media only screen and (min-width: 768px) {
       max-height: 300px;
       top: 50%;
       transform: translateY(-50%);
     }
-    @media only screen and (min-width: 1200px){
+    @media only screen and (min-width: 1200px) {
       flex: 0 0 25%;
       max-width: 25%;
     }
-    &::-webkit-scrollbar{
+
+    &::-webkit-scrollbar {
       display: none;
     }
-    .color-container{
+
+    .color-container {
       gap: 7px;
-      @media only screen and (min-width: 410px){
+      @media only screen and (min-width: 410px) {
         gap: 35px;
       }
-      @media only screen and (min-width: 768px){
+      @media only screen and (min-width: 768px) {
         gap: 25px;
       }
-      @media only screen and (min-width: 1200px){
+      @media only screen and (min-width: 1200px) {
         gap: 7px;
       }
-      @media only screen and (min-width: 1274px){
+      @media only screen and (min-width: 1274px) {
         gap: 7px;
       }
-      .color-box{
+
+      .color-box {
         margin: 0 auto 5px;
       }
     }
   }
-  .color-folder-holder{
+
+  .color-folder-holder {
     overflow-y: auto;
     max-height: 20vh;
-    @media only screen and (min-width: 768px){max-height: 50vh;}
+    @media only screen and (min-width: 768px) {
+      max-height: 50vh;
+    }
   }
 }
 
-.assets-logo-block{
+.assets-logo-block {
   position: relative;
-  &:hover{
-    .use-logo-btn{transform: scale(1);}
+
+  &:hover {
+    .use-logo-btn {
+      transform: scale(1);
+    }
   }
 }
 
-.use-logo-btn{
+.use-logo-btn {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   z-index: 1;
   color: #fff;
   text-transform: uppercase;
@@ -1256,7 +1316,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   width: 100%;
   border: none;
 }
-
 .sortable-selected {
   background: #eee;
 }
