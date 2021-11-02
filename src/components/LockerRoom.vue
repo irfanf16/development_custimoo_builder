@@ -34,10 +34,8 @@
                         <div class="image-holder">
                           <div>
 
-                            <b-form-checkbox :disabled="getDisabled(product.id)" v-model="selectedCollectionProducts"
-                                             v-bind:value="product.id"></b-form-checkbox>
-                            <img v-if="room.active_tab" :src="`${product.product_url}?q=${product.random_string}`"
-                                 :class="product.product_url ? '' : 'placeholder'" alt="">
+                            <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
+                            <img v-if="room.active_tab" :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -145,21 +143,26 @@
                             <a v-b-tooltip.hover.right title="Delete collection" @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
-                            <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'edit']" /></a>
-                            <b-button title="Share collection" @click="(e)=>toggleShare(e,`share_collection_${i+''+index}`)" class="light shareBtn rounded-circle" ><font-awesome-icon :icon="['fas', 'share-alt']" /></b-button>
+
+                            <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
+                               class="btn light btn-secondary rounded-circle"><font-awesome-icon
+                              :icon="['fas', 'edit']"/></a>
+                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`collection_${i+''+index}`"
+                                      :target="`collection_${index}`" class="light rounded-circle"
+                                      custom-class="share-tooltip"><font-awesome-icon
+                              :icon="['fas', 'share-alt']"/></b-button>
                             <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
-                            <div :id="`share_collection_${i+''+index}`" class="tooltip b-tooltip share-tooltip" @click="(e)=>e.stopPropagation()" style="display: none; position: fixed; width: 100%; max-width: 303px">
-                              <div class="tooltip-inner">
-                                <div class="share-holder">
-                                  <h3>Copy link and Share</h3>
-                                  <div class="share-form">
-                                    <b-form inline>
-                                      <b-form-input :ref="'copylink_'+index"
-                                                    :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}/view`  : ''"
-                                      ></b-form-input>
-                                      <b-button variant="primary" style="width: 100px !important; line-height: 1; padding: 0 0 0 13px" @click="copyCollectionLink(index)">Copy Link</b-button>
-                                    </b-form>
-                                  </div>
+                            <b-tooltip :target="`collection_${i+''+index}`" custom-class="share-tooltip"
+                                       placement="bottom" triggers="focus">
+                              <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                  <b-form inline>
+                                    <b-form-input :ref="'copylink_'+index"
+                                                  :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}/view`  : ''"
+                                    ></b-form-input>
+                                    <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
+                                  </b-form>
                                 </div>
                               </div>
                             </div>
@@ -458,8 +461,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 
   public lockerStatus = 'not_accepted'
 
-  public async editProduct(lockerIndex: number, productIndex: number){
-
+  public async editProduct(lockerIndex: number, productIndex: number) {
     const id = this.getLockerProducts[lockerIndex].product[productIndex].id
     let prod_res = await this.$store.dispatch('getLockerProductDetail', id);
     Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
@@ -471,7 +473,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
 
-    if (product_id != this.$store.getters.getEditMainProductId){
+    if (product_id != this.$store.getters.getEditMainProductId) {
       await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
       this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
     }
