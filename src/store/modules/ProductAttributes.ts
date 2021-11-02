@@ -50,6 +50,12 @@ const ProductAttributes:Module<any, any> = {
       mainProductId: 0,
       editStatus: false
     },
+    canvasImage:{
+      ref_front:'',
+      ref_back:'',
+      front:'',
+      back:''
+    },
     using_logo_colors: false
   },
   mutations: {
@@ -544,8 +550,15 @@ const ProductAttributes:Module<any, any> = {
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
       state.using_logo_colors = payload
     },
+    STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
+      state.canvasImage.ref_front = payload.front
+      state.canvasImage.ref_back = payload.back
+    }
   },
   getters: {
+    getCanvasImage: state => {
+      return state.canvasImage
+    },
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
     },

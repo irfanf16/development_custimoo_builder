@@ -31,7 +31,7 @@ const routes: Array<RouteConfig> = [
     component: CollectionViewPDF
   },
   {
-    path:'/shareRoster',
+    path:'/shareRoster/:urlstring',
     name: 'ShareRoster',
     component: ShareRoster
   },

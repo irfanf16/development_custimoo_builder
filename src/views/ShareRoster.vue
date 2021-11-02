@@ -39,8 +39,8 @@
   <div class="p-3 d-flex gap-3">
     <div class="d-flex flex-column align-items-center">
       <div class="d-flex align-items-center justify-content-center gap-2">
-        <img style="max-height: 300px" src="https://santa-backend.s3.eu-central-1.amazonaws.com/files/locker_products/223/front.png?q=30092021065643908384" alt="">
-        <img style="max-height: 300px" src="https://santa-backend.s3.eu-central-1.amazonaws.com/files/locker_products/128/front.png?q=" alt="">
+        <img style="max-height: 300px" :src="frontImage" alt="">
+        <img style="max-height: 300px" :src="backImage" alt="">
       </div>
 
       <div class="mt-3 text-left">
@@ -92,7 +92,15 @@ import RosterTable from "@/components/RosterTable.vue";
     OrderDetails,
     Scene
   },
-  mounted() {
+  async mounted() {
+    if (this.$route.params.urlstring) {
+      let url = 'shareRoster/' + this.$route.params.urlstring
+      let res = await this.$store.dispatch('getShareProductDetails', url)
+      if (res){
+        this.frontImage = res.product_front_url
+        this.backImage  = res.product_back_url
+      }
+    }
     this.setProductSizes()
     this.$nextTick(() => {
       if (!this.rosterDetails.length) {
@@ -103,7 +111,7 @@ import RosterTable from "@/components/RosterTable.vue";
 })
 
 export default class ShareRoster extends Vue {
-  // @Prop({required: true}) productSizes!: any
+  @Prop({required: true}) productSizes!: any
   private products: any[] = []
   private company_id !: string
   private product_id !: string
@@ -112,6 +120,8 @@ export default class ShareRoster extends Vue {
   public fileData: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
   private activeEye = -1;
+  public frontImage = ''
+  public backImage = ''
 
   private setActiveEye(index:number){
     if (this.activeEye == index){
