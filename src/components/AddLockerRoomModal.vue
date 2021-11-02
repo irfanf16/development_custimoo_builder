@@ -169,7 +169,6 @@ import LockerRoom from "@/components/LockerRoom.vue";
           this.canvasImage.back = this.canvasImage.ref_back.toDataURL("image/png").split(',')[1]
           let locker_front_png = this.canvasImage.front
           let locker_back_png = this.canvasImage.back
-
           let locker = {
             roster_url: this.rosterUrl,
             room_id: this.room_id,

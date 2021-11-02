@@ -52,7 +52,7 @@
       <div class="fs-3 font-weight-bold text-left">Insert details manually below</div>
 
       <div class="d-flex flex-column h-100">
-        <RosterTable :productSizes="selectedProduct.sizes" @addPlayer="rosterDetailsInit"/>
+        <RosterTable v-if="custom_arr.length" :productSizes="sizeOptions" :rosterDetails="custom_arr" @addPlayer="rosterDetailsInit"/>
         <!--        <RosterTable @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>-->
       </div>
     </div>
@@ -97,24 +97,22 @@ import RosterTable from "@/components/RosterTable.vue";
       let url = 'shareRoster/' + this.$route.params.urlstring
       let res = await this.$store.dispatch('getShareProductDetails', url)
       if (res){
+        this.custom_arr = JSON.parse(res.roster_detail)
+        this.productSizes = res.sizes
         this.frontImage = res.product_front_url
         this.backImage  = res.product_back_url
       }
     }
     this.setProductSizes()
-    this.$nextTick(() => {
-      if (!this.rosterDetails.length) {
-        this.rosterDetailsInit()
-      }
-    })
   }
 })
 
 export default class ShareRoster extends Vue {
-  @Prop({required: true}) productSizes!: any
+  // @Prop({required: true}) productSizes!: any
   private products: any[] = []
-  private company_id !: string
-  private product_id !: string
+
+  public custom_arr: Record<any, any>[] = [];
+  public productSizes : any[] = []
   public designsIndex = 0
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
@@ -130,32 +128,6 @@ export default class ShareRoster extends Vue {
       this.activeEye = index;
     }
   }
-
-  get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
-  }
-
-  get selectedProduct(): Record<any, any> {
-    return this.$store.getters.getSelectedProduct
-  }
-
-  get styleIndex(): number {
-    return this.$store.getters.getCurrentStyleIndex;
-  }
-
-  retrieveProducts(): void {
-    this.product_id = '1'
-    this.company_id = '1'
-    let param = '?product_id=' + this.product_id + '&company_id=' + this.company_id
-    http.get(param)
-      .then((response: any) => {
-        this.products = response.data.products.data;
-      })
-      .catch((e: any) => {
-        console.log(e)
-      });
-  }
-
   public rosterDetailsInit() {
     let payload = {
       text: '',
@@ -164,7 +136,10 @@ export default class ShareRoster extends Vue {
       quantity: 1,
       information: ''
     }
-    this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
+    console.log('ok')
+    // Vue.set(this.custom_arr, this.custom_arr.length, payload )
+    this.custom_arr.push(payload)
+    console.log('dsf', this.custom_arr)
   }
 
   public setProductSizes() {

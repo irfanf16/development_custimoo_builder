@@ -136,7 +136,7 @@
                   <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
                     <template v-for="(collection, index) in getCollections">
                       <div :key="index" class="products-block">
-                        <div class="image-holder">
+                        <div class="image-holder">product_back_url
 
                           <div class="convas_container" :key="collection_product_index"
                                v-for="(collection_product,collection_product_index) in collection.collection_products">
