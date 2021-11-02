@@ -18,7 +18,7 @@
                     <b-input-group>
                         <b-form-input id="inline-form-input-productname" v-model="product_name"  placeholder="Type Here"></b-form-input>
                     </b-input-group>
-                  <b-button variant="primary" :disabled="locker_selected" @click="saveToLocker()">Save Design</b-button>
+                  <b-button variant="primary" @click="saveToLocker()">Save Design</b-button>
                 </div>
             </b-form>
         </div>
@@ -77,8 +77,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
       }
       public showLoader = false
       private baseUrl = location.host+"/#/"
-      public locker_selected = true;
-      public room_id = 0;
+      public room_id = this.lockers.length? this.lockers[0].id : 0
       public product_name = '';
       public ref = this.$refs as Record<any, any>
       public tabIndex = this.$store.getters.getLockerActiveTabIndex
@@ -100,7 +99,6 @@ import LockerRoom from "@/components/LockerRoom.vue";
       lockersChanged() {
         if (this.lockers.length > 0 && !this.room_id){
           this.room_id = this.lockers[0].id
-          this.locker_selected = false
         }
       }
       get isCustomerAuthenticated(): boolean {
@@ -132,7 +130,6 @@ import LockerRoom from "@/components/LockerRoom.vue";
         return selected_product.back_design ?  "front_back" : "front";
       }
       public showButton(id:number, index:number){
-        this.locker_selected = false;
         this.room_id = id;
         this.tabIndex = index
         this.productData = this.roomWithProducts[index].product
