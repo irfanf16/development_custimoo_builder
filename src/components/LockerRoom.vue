@@ -17,7 +17,7 @@
         <div class="lockerroom-tabs">
           <div>
             <b-card no-body>
-              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" v-model="lockerActiveTabIndex">
+              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" :value="lockerActiveTabIndex">
                 <b-tab title="Products">
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
@@ -34,10 +34,8 @@
                         <div class="image-holder">
                           <div>
 
-                            <b-form-checkbox :disabled="getDisabled(product.id)" v-model="selectedCollectionProducts"
-                                             v-bind:value="product.id"></b-form-checkbox>
-                            <img :src="`${product.product_url}?q=${product.random_string}`"
-                                 :class="product.product_url ? '' : 'placeholder'" alt="">
+                            <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
+                            <img v-if="room.active_tab" :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -654,8 +652,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 
   }
 
-  public lockerTabUpdated(tab_info: []) {
-    this.$store.commit("Change_Locker_Active_Tab", tab_info);
+  public lockerTabUpdated(newTabIndex:number , prevTabIndex: number, bvEvent:Record<any, any> ) {
+    this.lockerActiveTabIndex = newTabIndex;
+    this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
   }
 
   public lockerProductsChanged(payload: any, index = null) {
@@ -781,6 +780,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     if (this.lockerActiveTabIndex == 3) {
       this.lockerActiveTabIndex = 0
     }
+
+    let payload = {index:this.tabIndex, attribute: 'active_tab', value:true}
+    this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
   }
 
   // public processColorsCustom(colors: [],customLogoIndex:number):void {
