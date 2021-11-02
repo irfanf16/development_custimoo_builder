@@ -245,7 +245,10 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   private baseUrl = location.host+"/#/"
   public ref = this.$refs as Record<any, any>
   public colors : [] = []
-  public tabIndex = this.$store.getters.getLockerTabsIndex;
+  public tabIndex = 0
+  public viewLoader = false
+  public copiedProductId = 0
+  public copiedProductName = ''
   public url = ''
   public group = ''
   public collection_available = false;
@@ -356,6 +359,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     })
     return locker_products;
   }
+
   get mainproductId():number{
     return this.$store.getters.getEditMainProductId
   }
@@ -424,6 +428,42 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }, 1000)
   }
 
+  public showDesignModal(product:Record<any, any>){
+    this.copiedProductId = 0
+    this.copiedProductId = product.id
+    this.copiedProductLockerId = this.lockers[this.tabIndex].id
+    let count = 0
+    if (product.copy_count){
+      count = product.copy_count + 1
+    }
+    this.copiedProductName = product.product_name + '(copy)'+(count == 1 || count == 0 ?  '' : count)
+    this.ref['copy-product-modal'].show()
+  }
+  public resetModal(){
+    this.copiedProductId = 0
+    this.copiedProductName = ""
+    this.copiedProductLockerId = this.lockers[this.tabIndex].id
+  }
+  public async copyProductDesign(){
+    if(this.copiedProductName ==  ""){
+      this.showError("please enter the design name")
+      return false
+    }
+    this.viewLoader = true
+    let res = await this.$store.dispatch('copyProductDesign', {id: this.copiedProductId, name: this.copiedProductName, room_id: this.copiedProductLockerId})
+    if (res.status == 201){
+      let room_ind = await this.lockers.findIndex((element:Record<any, any>) => element.id === this.copiedProductLockerId)
+      this.$store.commit('UPDATE_COPY_COUNT', {room_ind: room_ind, id: this.copiedProductId})
+      this.ref['copy-product-modal'].hide()
+      this.copiedProductId = 0
+      this.copiedProductLockerId = this.lockers[0].id
+      this.copiedProductName = ""
+      this.viewLoader = false
+    }else{
+      this.showError(res)
+      this.viewLoader = false
+    }
+  }
   public async generateCollectionPdf(collection:Record<any, any>, index:number) {
     let res = await this.$store.dispatch('getCollection', collection.id)
     this.collection_available = true;
@@ -1225,4 +1265,30 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   display: none !important;
   background: #C8EBFB;
 }
+.loader{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.9);
+  z-index: 1030;
+  img{
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
+}
+
+
+
+
+
 </style>
