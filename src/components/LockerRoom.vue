@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <span class="asdasd">
   <b-tabs content-class="mt-3" @activate-tab="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
       <b-tab :key="i" :active="tabIndex === i">
@@ -74,6 +74,11 @@
                               </div>
                             </div>
                           </b-tooltip>
+                        </li>
+                        <li>
+                          <a  @click="showDesignModal(product)">
+                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy" class="svg-inline--fa fa-copy" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path></svg>
+                          </a>
                         </li>
                         <li class="swap">
                           <a v-if="product.design && product.design.back_design_count > 0" @mouseleave="hideTooltip"
@@ -202,6 +207,23 @@
                     ref="reset-modal"></confirm-modal>
 
     <span class="hover_tooltip"></span>
+    <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
+        <div class="pt-4 design-name-form">
+            <b-form inline>
+<!--                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Design Name</label>-->
+                <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
+                    <b-input-group>
+                        <b-form-input v-model="copiedProductName"   placeholder="Design Name"></b-form-input>
+                    </b-input-group>
+                  <b-form-select  v-model="copiedProductLockerId"   :options="lockers" value-field="id"
+                                  text-field="room_name"></b-form-select>
+                    <b-button variant="primary" @click="copyProductDesign">Copy</b-button>
+                </div>
+            </b-form>
+
+          <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+        </div>
+    </b-modal>
   </span>
 
 </template>
@@ -237,14 +259,21 @@ import {differenceBy, intersectionBy, union, includes} from 'lodash';
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
     this.setCollections()
+    if (this.lockers.length >0 ){
+      this.copiedProductLockerId = this.lockers[0].id
+    }
   }
 })
 export default class LockerRoom extends Mixins(ErrorMessages) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
-  public colors: [] = []
-  public tabIndex = this.$store.getters.getLockerTabsIndex;
+  public colors : [] = []
+  public tabIndex = 0
+  public viewLoader = false
+  public copiedProductId = 0
+  public copiedProductName = ''
+  public copiedProductLockerId = 0
   public url = ''
   public group = ''
   public collection_available = false;
@@ -345,7 +374,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     return locker_products;
   }
 
-  get mainproductId(): number {
+  get mainproductId():number{
     return this.$store.getters.getEditMainProductId
   }
 
@@ -419,7 +448,43 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }, 1000)
   }
 
-  public async generateCollectionPdf(collection: Record<any, any>, index: number) {
+  public showDesignModal(product:Record<any, any>){
+    this.copiedProductId = 0
+    this.copiedProductId = product.id
+    this.copiedProductLockerId = this.lockers[this.tabIndex].id
+    let count = 0
+    if (product.copy_count){
+      count = product.copy_count + 1
+    }
+    this.copiedProductName = product.product_name + '(copy)'+(count == 1 || count == 0 ?  '' : count)
+    this.ref['copy-product-modal'].show()
+  }
+  public resetModal(){
+    this.copiedProductId = 0
+    this.copiedProductName = ""
+    this.copiedProductLockerId = this.lockers[this.tabIndex].id
+  }
+  public async copyProductDesign(){
+    if(this.copiedProductName ==  ""){
+      this.showError("please enter the design name")
+      return false
+    }
+    this.viewLoader = true
+    let res = await this.$store.dispatch('copyProductDesign', {id: this.copiedProductId, name: this.copiedProductName, room_id: this.copiedProductLockerId})
+    if (res.status == 201){
+      let room_ind = await this.lockers.findIndex((element:Record<any, any>) => element.id === this.copiedProductLockerId)
+      this.$store.commit('UPDATE_COPY_COUNT', {room_ind: room_ind, id: this.copiedProductId})
+      this.ref['copy-product-modal'].hide()
+      this.copiedProductId = 0
+      this.copiedProductLockerId = this.lockers[0].id
+      this.copiedProductName = ""
+      this.viewLoader = false
+    }else{
+      this.showError(res)
+      this.viewLoader = false
+    }
+  }
+  public async generateCollectionPdf(collection:Record<any, any>, index:number) {
     let res = await this.$store.dispatch('getCollection', collection.id)
     this.collection_available = true;
     this.collectionData = res
@@ -1259,4 +1324,30 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   display: none !important;
   background: #C8EBFB;
 }
+.loader{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.9);
+  z-index: 1030;
+  img{
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
+}
+
+
+
+
+
 </style>
