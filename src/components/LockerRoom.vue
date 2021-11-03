@@ -544,7 +544,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
     // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
-    await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
+    await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
     this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
