@@ -144,6 +144,8 @@ import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import Scene from "@/components/Scene.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
+import {fontsColorsManipulation, fontsList, sortTextsArray} from "@/helpers/Helpers";
+import {getClosestColor} from "@/pantoneColor";
 
 @Component<Home>({
   components: {
@@ -579,11 +581,53 @@ export default class Home extends Mixins(ErrorMessages) {
             await this.$store.dispatch('setCustomObj',product.id)
           }
         })
-        //
-        // const length = Object.keys(customLogos).length
-        // if(length <= 0) {
-        //  await this.$store.dispatch('setCustomLogoObj',0)
-        // }
+
+        //set custom text objects for new products
+        let customTexts = this.$store.getters.getCustomTextObject
+        product_data.forEach((product:any) => {
+          if(!customTexts[product.id]) {
+            product.productnames =  sortTextsArray(product.productnames);
+            product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
+
+              const obj = fontsColorsManipulation(product)
+              //calculate colors pantone on init
+              let fill_color_pantone = obj.firstColor.name;
+              const pantone = getClosestColor(obj.firstColor.value);
+              if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+                fill_color_pantone = pantone.pantone;
+              }
+              let outLine_color_pantone = obj.secondColor.name;
+              const opantone = getClosestColor(obj.secondColor.value);
+              if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+                outLine_color_pantone = opantone.pantone;
+              }
+              const already_added_text_str = this.customTexts[index] ? this.customTexts[index]['text'] : ''
+              const text = {
+                text: already_added_text_str,
+                type: productName.type,
+                width: productName.width,
+                height: productName.height,
+                x_axis: productName.x_axis,
+                y_axis: productName.y_axis,
+                rotation: productName.rotation,
+                haveControls: Boolean(!productName.is_locked),
+                outlineEnabled: Boolean(productName.outline_enabled),
+                side: productName.side,
+                fontFamily: fontsList(product)[0].value,
+                fillColor: obj.firstColor.value,
+                fillColorPantone: fill_color_pantone,
+                outLineColor: obj.secondColor.value,
+                outLineColorPantone: outLine_color_pantone,
+                outLineWidth: 0,
+                textIndex: index,
+                selectColor: false
+              }
+              await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
+
+            })
+          }
+        });
+
 
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {

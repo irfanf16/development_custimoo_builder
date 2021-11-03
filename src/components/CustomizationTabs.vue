@@ -279,10 +279,7 @@ export default class CustomizationProcess extends Vue {
   public customTextInit() {
 
     this.products.forEach((product:any) => {
-
       if(!this.customTexts[product.id]) {
-
-
         product.productnames =  sortTextsArray(product.productnames);
 
         product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
@@ -316,9 +313,6 @@ export default class CustomizationProcess extends Vue {
                 outLine_color_pantone = opantone.pantone;
               }
             }
-
-
-
             let text = {
               text: this.customTexts[index].text,
               type: productName.type,

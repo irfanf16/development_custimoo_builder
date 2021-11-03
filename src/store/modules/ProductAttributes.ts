@@ -297,7 +297,6 @@ const ProductAttributes:Module<any, any> = {
         if(!state.customTexts[customText.prd_id]) {
           Vue.set(state.customTexts, customText.prd_id, [])
         }
-        // Vue.set(state.customTexts, customText.index, customText.text)
         Vue.set(state.customTexts[customText.prd_id], customText.index, customText.text)
       }
     },
@@ -732,6 +731,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getCustomLogoObject: state => {
     return state.customLogos
+    },
+    getCustomTextObject: state => {
+      return state.customTexts
     },
     getActiveLogoIndex: (state: any) => state.logoTabIndex,
     getCurrentStyleIndex: state => {
