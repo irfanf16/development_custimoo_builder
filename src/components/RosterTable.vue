@@ -32,7 +32,7 @@
             placeholder="0" v-model="roster.quantity"
           ></b-form-input>
         </td>
-        <td class="fs-2" style="width: 40px; word-spacing: 10px; text-align: center; color: #fff; background: rgba(250,0,0,0.7)"><BIconX /></td>
+        <td  class="fs-2" style="width: 40px; word-spacing: 10px; text-align: center; color: #fff; background: rgba(250,0,0,0.7)"><BIconX v-if="rosterDetails.length > 1" @click="removeIndex(index)" /></td>
       </tr>
       </template>
       </tbody>
@@ -41,6 +41,7 @@
       <button @click="addPlayers(roster)" class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
         <BIconPlus />
       </button>
+      <b-button variant="primary"  @click="saveRoster(productId)">Save Roster</b-button>
     </div>
   </div>
 </template>
@@ -58,6 +59,7 @@ import {http} from "@/httpCommon";
 })
 export default class RosterTable extends Vue {
   @Prop({required: true}) productSizes!: any
+  @Prop({required: true, default: 0}) productId!: number
   @Prop({required: true, default: []}) rosterDetails: Record<any, any>;
   private roster: any[] = []
   public fileData: Record<any, any>[] = []
@@ -95,16 +97,16 @@ export default class RosterTable extends Vue {
   public myFilter() {
     this.isActive = !this.isActive
   }
-  public removeIndex(ind:number, text:string, num:number){
-    if (this.customText.length > 0){
-      if (this.customText[0]){
-        this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: ''})
-      }
-      if (this.customText[1]){
-        this.$store.dispatch('updateCustomTextAttribute', {index: 1, attribute: 'text', value: ''})
-      }
-    }
-    this.$store.dispatch('removeRoster', ind);
+
+  public removeIndex(ind:number){
+    this.rosterDetails.splice(ind, 1)
+  }
+  public saveRoster(id:number){
+    http.post('update/roster', {id:id, roster: this.rosterDetails}).then((res) => {
+      console.log(res)
+    }).catch((err)=>{
+      console.log(err)
+    })
   }
 
 }

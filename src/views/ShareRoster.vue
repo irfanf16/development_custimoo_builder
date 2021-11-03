@@ -50,9 +50,9 @@
     </div>
     <div class="players-data pt-4">
       <div class="fs-3 font-weight-bold text-left">Insert details manually below</div>
-
+      <b-button @click="homeScreen" variant="outline-secondary">Back to Design</b-button>
       <div class="d-flex flex-column h-100">
-        <RosterTable v-if="custom_arr.length" :productSizes="sizeOptions" :rosterDetails="custom_arr" @addPlayer="rosterDetailsInit"/>
+        <RosterTable v-if="custom_arr.length" :productId="id" :productSizes="sizeOptions" :rosterDetails="custom_arr" @addPlayer="rosterDetailsInit"/>
         <!--        <RosterTable @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>-->
       </div>
     </div>
@@ -99,8 +99,10 @@ import RosterTable from "@/components/RosterTable.vue";
       if (res){
         this.custom_arr = JSON.parse(res.roster_detail)
         this.productSizes = res.sizes
+        this.id = res.id
         this.frontImage = res.product_front_url
         this.backImage  = res.product_back_url
+        this.productName = res.product_name
       }
     }
     this.setProductSizes()
@@ -108,18 +110,16 @@ import RosterTable from "@/components/RosterTable.vue";
 })
 
 export default class ShareRoster extends Vue {
-  // @Prop({required: true}) productSizes!: any
-  private products: any[] = []
-
+  public id = 0
   public custom_arr: Record<any, any>[] = [];
   public productSizes : any[] = []
-  public designsIndex = 0
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
   private activeEye = -1;
   public frontImage = ''
   public backImage = ''
+  public productName = ''
 
   private setActiveEye(index:number){
     if (this.activeEye == index){
@@ -136,10 +136,7 @@ export default class ShareRoster extends Vue {
       quantity: 1,
       information: ''
     }
-    console.log('ok')
-    // Vue.set(this.custom_arr, this.custom_arr.length, payload )
     this.custom_arr.push(payload)
-    console.log('dsf', this.custom_arr)
   }
 
   public setProductSizes() {
@@ -208,7 +205,8 @@ export default class ShareRoster extends Vue {
           }
           let objStatus = false;
           for (let i in rows[row]) {
-            if (rows[row][2] && this.selectedProduct.product_name == rows[row][2]) {
+            console.log(rows[row])
+            if (rows[row][2] && this.productName == rows[row][2]) {
               objStatus = true
               if (i == '3') {
                 obj.size = rows[row][i];
@@ -232,7 +230,7 @@ export default class ShareRoster extends Vue {
           }
         }
         if (loopStatus == true){
-          this.$store.dispatch('updateRoster', this.fileData);
+          this.custom_arr = this.fileData
           this.ref['myModal'].hide();
         }else{
           alert('Size is missing');
@@ -253,6 +251,9 @@ export default class ShareRoster extends Vue {
       link.download = 'roster_template.xlsx';
       link.click();
     })
+  }
+  public homeScreen(){
+    this.$router.push('/')
   }
 }
 </script>

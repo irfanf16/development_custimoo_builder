@@ -29,7 +29,7 @@
               <b-button class="btn btn-secondary fw-bold w-100 mb-2" v-b-modal.modal-login>Summary</b-button>
             </template>
             <template>
-              <b-button variant="outline-secondary"   @click="getLockers">Share roster url</b-button>
+              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share roster url</b-button>
               <AddLockerRoomModal :rosterUrl="true"  ref="share" />
             </template>
           </div>
