@@ -483,8 +483,6 @@ const ProductAttributes:Module<any, any> = {
         }
         product.productnames =  sortTextsArray(product.productnames);
 
-        console.log('fontsList(product)',fontsList(product))
-
           product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
 
             const obj = fontsColorsManipulation(product)
@@ -500,6 +498,10 @@ const ProductAttributes:Module<any, any> = {
             const opantone = getClosestColor(obj.secondColor.value);
             if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
               outLine_color_pantone = opantone.pantone;
+            }
+            let textIndex = index
+            if(state.customTexts[product.id] && state.customTexts[product.id][index]) {
+              textIndex = state.customTexts[product.id][index].textIndex
             }
             const text = {
               text: '',
@@ -518,6 +520,7 @@ const ProductAttributes:Module<any, any> = {
               outLineColor: obj.secondColor.value,
               outLineColorPantone: outLine_color_pantone,
               outLineWidth: 0,
+              textIndex: textIndex,
               selectColor: false
               }
             Vue.set(state.customTexts[product.id], index, text)
