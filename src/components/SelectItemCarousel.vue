@@ -50,14 +50,6 @@ export default {
     productDesigns: async function(index) {
 
       await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
-
-      // let logos = this.$store.getters.getCustomLogos
-      // console.log('yooooooooooooooo',logos)
-      // if(logos.length == 0) {
-      //   alert('if')
-      //   await this.$store.dispatch('setCustomObj')
-      // }
-
       this.$store.commit('CHANGE_STYLE_INDEX', 0);
       this.$store.dispatch("getModels", this.products[index].product_id);
       this.$store.dispatch('setColorSectionVisibility')

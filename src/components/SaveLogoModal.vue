@@ -49,7 +49,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         return this.$store.getters.getCustomLogos()
       }
       get customTexts(): [Record<any, any>] {
-        return this.$store.getters.getCustomTexts
+        return this.$store.getters.getCustomTexts()
       }
       get lockers():[Record<any, any>]{
         return this.$store.getters.getLockers;

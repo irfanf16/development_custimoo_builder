@@ -107,7 +107,7 @@ export default class RosterDetails extends Vue {
     return this.$store.getters.getRosterDetails
   }
   get customText():Record<any, any>[]{
-    return this.$store.getters.getCustomTexts;
+    return this.$store.getters.getCustomTexts();
   }
   get eyeIndex():number{
     return this.$store.getters.getEyeIndex;
@@ -123,10 +123,10 @@ export default class RosterDetails extends Vue {
   public removeIndex(ind:number, text:string, num:number){
     if (this.customText.length > 0){
       if (this.customText[0]){
-        this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: ''})
+        this.$store.dispatch('updateCustomTextAttribute', {index: 0, on_all: true, attribute: 'text', value: ''})
       }
        if (this.customText[1]){
-        this.$store.dispatch('updateCustomTextAttribute', {index: 1, attribute: 'text', value: ''})
+        this.$store.dispatch('updateCustomTextAttribute', {index: 1, on_all: true, attribute: 'text', value: ''})
       }
     }
     this.$store.dispatch('removeRoster', ind);
@@ -137,7 +137,7 @@ export default class RosterDetails extends Vue {
     let numberAdd = false
 
       if (this.customText[0]) {
-        this.$store.dispatch('updateCustomTextAttribute', {index: 0, attribute: 'text', value: text})
+        this.$store.dispatch('updateCustomTextAttribute', {index: 0, on_all: true, attribute: 'text', value: text})
         textAdd = true
       }
       if (!textAdd) {
@@ -184,7 +184,7 @@ export default class RosterDetails extends Vue {
         }
       }
     if (this.customText[1]) {
-      this.$store.dispatch('updateCustomTextAttribute', {index: 1, attribute: 'text', value: num.toString()})
+      this.$store.dispatch('updateCustomTextAttribute', {index: 1, on_all: true, attribute: 'text', value: num.toString()})
       numberAdd = true
     }
     if(!numberAdd) {

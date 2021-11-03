@@ -131,7 +131,7 @@ export default class CustomizationText extends Vue {
   }
 
   get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts
+    return this.$store.getters.getCustomTexts()
   }
 
   get selectedProduct(): Record<any, any> {
@@ -170,21 +170,21 @@ export default class CustomizationText extends Vue {
     this.fontColorIndex = fontColorIndex
     this.customTexts.forEach((customText: Record<any, any>, index: number) => {
       if(index == fontColorIndex) {
-        this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: !customText.selectColor})
+        this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'selectColor', value: !customText.selectColor})
       } else {
-        this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: false})
+        this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'selectColor', value: false})
       }
     })
   }
 
   public fontOptionChanged(index:number, event:any){
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
-    this.$store.dispatch('updateCustomTextAttribute', { index:index, attribute: 'fontFamily', value: event})
+    this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: true, attribute: 'fontFamily', value: event})
   }
 
   public changeSide(index:number, event:string){
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
-    this.$store.dispatch('updateCustomTextAttribute', { index:index, attribute: 'side', value: event})
+    this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: true, attribute: 'side', value: event})
   }
 
   public setColor(color: Record<any, any>) {
@@ -197,13 +197,12 @@ export default class CustomizationText extends Vue {
     }
 
     if (this.fontColorType == 'fill') {
-      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColor', value: color.value})
-      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColorPantone', value: color_pantone})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'fillColor', value: color.value})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'fillColorPantone', value: color_pantone})
     } else {
-      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColor', value: color.value})
-      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColorPantone', value: color_pantone})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'outLineColor', value: color.value})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'outLineColorPantone', value: color_pantone})
     }
-    //this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'selectColor', value: false})
   }
 
   public selectType(index: number) {
@@ -212,18 +211,14 @@ export default class CustomizationText extends Vue {
   }
 
   outLineWidthValueChanged(event:string) {
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
-    let payload = {index: this.customTextIndex, attribute: 'outLineWidth', value: event}
-    this.$store.commit('customTextAttribute', payload)
-   //this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: false})
-    //this.showColor('outline',this.customTextIndex)
-    //this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, attribute: 'selectColor', value: true})
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts'})
+    this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, on_all: true, attribute: 'outLineWidth', value: event})
   }
   public isHidden= false
 
   updateTextField(index: number, value: string) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
-    this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'text', value: value})
+    this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'text', value: value})
   }
 }
 </script>
