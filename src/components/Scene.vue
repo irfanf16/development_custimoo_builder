@@ -1090,7 +1090,7 @@ export default class Scene extends Vue {
       this.customTexts.forEach((text, index) => {
         if(e.target.textIndex == index) {
           if (e.action == 'drag') {
-            self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
+            this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               on_all: false,
@@ -1104,7 +1104,7 @@ export default class Scene extends Vue {
               value: e.target.top
             })
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-            self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
+            this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
             const width = e.target.width * e.target.scaleX;
             const height = e.target.height * e.target.scaleY;
             const outLineWidth = e.target.strokeWidth * e.target.scaleX
@@ -1139,7 +1139,7 @@ export default class Scene extends Vue {
               value: outLineWidth * this.measurementRatio
             })
           } else if (e.action == 'rotate') {
-            self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
+            this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               on_all: false,

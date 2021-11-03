@@ -178,17 +178,17 @@ export default class CustomizationText extends Vue {
   }
 
   public fontOptionChanged(index:number, event:any){
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: true, attribute: 'fontFamily', value: event})
   }
 
   public changeSide(index:number, event:string){
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: true, attribute: 'side', value: event})
   }
 
   public setColor(color: Record<any, any>) {
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     let pantone = getClosestColor(color.value);
     let color_pantone = color.name;
    // console.log(pantone.pantone);
@@ -211,13 +211,13 @@ export default class CustomizationText extends Vue {
   }
 
   outLineWidthValueChanged(event:string) {
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts'})
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, on_all: true, attribute: 'outLineWidth', value: event})
   }
   public isHidden= false
 
   updateTextField(index: number, value: string) {
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'text', value: value})
   }
 }
