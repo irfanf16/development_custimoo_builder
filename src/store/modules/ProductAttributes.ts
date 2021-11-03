@@ -284,14 +284,6 @@ const ProductAttributes:Module<any, any> = {
       // Object.assign(state.customLogos,prd_id)
       //  state.customLogos[prd_id] = arr
     },
-
-
-
-
-
-
-
-
     SET_TEAM_LOGO_URL(state:  Record<any, any>,logo:any){
       const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
       Object.keys(custom_obj).map(function(key, index) {
@@ -310,34 +302,26 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     customTextAttribute(state: Record<any, any>, customTextAttribute: Record<any, any>) {
-      //old
-      // if(customTextAttribute){
-      //   Vue.set(state.customTexts[customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
-      // }
-
-      if(customTextAttribute.attribute == 'side' || customTextAttribute.attribute == 'action' ) {
-        Vue.set(state.customTexts[state.selectedPrdId][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
-      }
-      else {
-        //update text on all
+      if(customTextAttribute.on_all) {
         const customTexts = JSON.parse(JSON.stringify(state.customTexts))
-        Object.keys(customTexts).map(function(key, index) {
+        Object.keys(customTexts).map((key: string) => {
           if(state.customTexts[key][customTextAttribute.index]) {
             Vue.set(state.customTexts[key][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
           }
-        });
+        })
       }
-
-
-
-
+      else {
+        Vue.set(state.customTexts[state.selectedPrdId][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
+      }
     },
     CUSTOM_TEXT_WITHOUT_TRIGGER(state: Record<any, any>, customTextsAttribute: Record<any, any>) {
-      // if(customTextsAttribute){
-      //   Object.assign(state.customTexts[customTextsAttribute.index], customTextsAttribute.data)
-      // }
       if(customTextsAttribute){
-        Object.assign(state.customTexts[state.selectedPrdId][customTextsAttribute.index], customTextsAttribute.data)
+        if(Object.keys(customTextsAttribute.data).length && state.customTexts[state.selectedPrdId] && state.customTexts[state.selectedPrdId][customTextsAttribute.index]) {
+          const product_id = customTextsAttribute.product_id? customTextsAttribute.product_id : state.selectedPrdId
+          Object.keys(customTextsAttribute.data).forEach((key: string) => {
+            state.customTexts[product_id][customTextsAttribute.index][key] = customTextsAttribute.data[key]
+          })
+        }
       }
     },
     customTextsDelete(state: Record<any, any>, delCustomText: Record<any, any>) {
