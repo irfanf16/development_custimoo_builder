@@ -112,7 +112,7 @@ import {setLogoSettings} from "@/helpers/Helpers";
       let target = transform.target;
       let canvas = target.canvas;
       if('textIndex' in target) {
-        self.$store.dispatch('updateCustomTextAttribute', {index: target.textIndex, attribute: 'text', value: ''})
+        self.$store.dispatch('updateCustomTextAttribute', {index: target.textIndex, on_all: true, attribute: 'text', value: ''})
       }else {
         let logo = setLogoSettings(target.logoIndex);
         logo.logoIndex = target.logoIndex;
@@ -136,6 +136,7 @@ export default class Scene extends Vue {
   @Prop({required: false, default: () => { return [] }}) readonly lockerDefaultColors !: [Record<string, any>];
   @Prop({required: false, default:  () => { return {} }}) readonly lockerGroupColors !: Record<string, any>;
   @Prop({required: false}) readonly product_id !: number
+  @Prop({required: false}) readonly carousel !: string
   @Prop({required: false, default: () => { return [] }}) readonly productNamesSetting !: [Record<any, any>]
   @Prop({required: false, default: false}) readonly logoAllowed !: boolean
   @Prop({required: false, default: false}) readonly preSetData !: boolean
@@ -193,7 +194,8 @@ export default class Scene extends Vue {
   }
 
   get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts
+    let product_id = this.product_id? this.product_id : this.selectedProductId
+    return this.$store.getters.getCustomTexts(product_id)
   }
 
   get manageComponents(): Record<any, any> {
@@ -364,7 +366,7 @@ export default class Scene extends Vue {
               finalText.y_axis = self.productNamesSetting[index].y_axis
               finalText.rotation = self.productNamesSetting[index].rotation
             }
-            self.addTexts([finalText], index)
+            self.addTexts(finalText, index)
           }
         }
       })
@@ -850,34 +852,10 @@ export default class Scene extends Vue {
           }
           if (this.customTexts.length || this.texts.length) {
             let texts = this.texts
-            if(!this.preSetData) {
-              this.customTexts.forEach((item: Record<any, any>, index: number) => {
-                if (!item.action && self.productNamesSetting[index]) {
-                  item.width = self.productNamesSetting[index].width
-                  item.height = self.productNamesSetting[index].height
-                  item.x_axis = self.productNamesSetting[index].x_axis
-                  item.y_axis = self.productNamesSetting[index].y_axis
-                  item.rotation = self.productNamesSetting[index].rotation
-
-                  if (self.mainPreview) {
-                    self.$store.dispatch('updateCustomTextWithoutTrigger', {
-                      index: index,
-                      data: {
-                        width: self.productNamesSetting[index].width,
-                        height: self.productNamesSetting[index].height,
-                        x_axis: self.productNamesSetting[index].x_axis,
-                        y_axis: self.productNamesSetting[index].y_axis,
-                        rotation: self.productNamesSetting[index].rotation
-                      }
-                    })
-                  }
-                }
-              })
-              texts = texts.concat(self.customTexts) as [Record<any, any>]
-            }
-            setTimeout(() => {
-              this.addTexts(texts)
-            }, 500)
+            texts = texts.concat(this.customTexts) as [Record<any, any>]
+            texts.forEach((text: Record<any, any>, index: number) => {
+              this.addTexts(text, index)
+            })
           }
           this.showLoader = false
           this.mounted = true
@@ -1116,11 +1094,13 @@ export default class Scene extends Vue {
             self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
+              on_all: false,
               attribute: 'x_axis',
               value: e.target.left
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
+              on_all: false,
               attribute: 'y_axis',
               value: e.target.top
             })
@@ -1131,26 +1111,31 @@ export default class Scene extends Vue {
             const outLineWidth = e.target.strokeWidth * e.target.scaleX
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
+              on_all: false,
               attribute: 'scaleX',
               value: e.target.scaleX
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
+              on_all: false,
               attribute: 'originalWidth',
               value: Math.floor(width * this.measurementRatio)
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
+              on_all: false,
               attribute: 'scaleY',
               value: e.target.scaleY
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
+              on_all: false,
               attribute: 'originalHeight',
               value: Math.floor(height * this.measurementRatio)
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
+              on_all: false,
               attribute: 'originalOutLineWidth',
               value: outLineWidth * this.measurementRatio
             })
@@ -1158,12 +1143,14 @@ export default class Scene extends Vue {
             self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customTexts)), action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
+              on_all: false,
               attribute: 'rotation',
               value: e.target.angle
             })
           }
           self.$store.dispatch('updateCustomTextAttribute', {
             index: index,
+            on_all: false,
             attribute: 'action',
             value: e.action
           })
@@ -1414,111 +1401,106 @@ export default class Scene extends Vue {
 
   }
 
-  public addTexts(texts: [Record<any, any>], textIndex: null | number = null) {
+  public addTexts(text: Record<any, any>, textIndex: null | number = null) {
     const self = this
-    texts.forEach((text: Record<any, any>, index: number) => {
-      if(textIndex == null) {
-        textIndex = index
-      }
-      if('textIndex' in text) {
-        textIndex = text.textIndex
-      } else {
-        if(this.mainPreview) {
-          self.$store.dispatch('updateCustomTextWithoutTrigger', {
-            index: textIndex,
-            data: {
-              textIndex: textIndex,
-            }
-          })
-        }
-      }
-      if(text.text && text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back)) && !this.customTextObjects[textIndex as number]) {
-        let textBox = new fabric.Text(text.text, {
-          left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
-          top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
-          angle: text.rotation as number,
-          centeredScaling: true,
-          selectable: this.canvasSelection,
-          hasControls: true,
-          hasBorders: false,
-          evented: true,
-          globalCompositeOperation: 'source-atop',
-          fontFamily: text.fontFamily,
-          fill: text.fillColor,
-          stroke: text.outLineColor,
-          strokeWidth: parseInt(text.outLineWidth),
-          paintFirst: 'stroke',
-          lockScalingFlip: true,
-          padding: 15,
-          cornerSize: 30,
-          fontSize: self.canvasHeight / self.mainCanvasHeight * text.width
-        })
-
-        textBox.set('height', self.canvasHeight / self.mainCanvasHeight * text.width)
-        if(text.scaleX && text.scaleY) {
-          textBox.scaleX = self.canvasWidth / self.mainCanvasWidth * text.scaleX
-          textBox.scaleY = self.canvasHeight / self.mainCanvasHeight * text.scaleY
-        }
-
-        let canvas = self.frontCanvas
-        let model = self.frontModel
-        let dimText = self.dimTextFront
-        if (text.side == 'back') {
-          canvas = self.backCanvas
-          model = self.backModel
-          dimText = self.dimTextBack
-        }
-        textBox.setControlsVisibility({
-          tl: false,
-          bl: false,
-          tr: true,
-          br: true,
-          ml: false,
-          mb: false,
-          mr: false,
-          mt: false,
-          mtr: false
-        })
-
-        Object.assign(textBox, {
+    if('textIndex' in text) {
+      textIndex = text.textIndex
+    } else {
+      let product_id = this.product_id? this.product_id : this.selectedProductId
+      this.$store.dispatch('updateCustomTextWithoutTrigger', {
+        index: textIndex,
+        product_id: product_id,
+        data: {
           textIndex: textIndex,
-          side: text.side
-        })
-        self.customTextObjects[textIndex as number] = textBox
-        canvas.add(textBox)
-        if(this.productType == 'customized') {
-          model.bringToFront()
         }
-        canvas.renderAll()
+      })
+    }
+    if(text.text && text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back)) && !this.customTextObjects[textIndex as number]) {
+      let textBox = new fabric.Text(text.text, {
+        left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
+        top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
+        angle: text.rotation as number,
+        centeredScaling: true,
+        selectable: this.canvasSelection,
+        hasControls: true,
+        hasBorders: false,
+        evented: true,
+        globalCompositeOperation: 'source-atop',
+        fontFamily: text.fontFamily,
+        fill: text.fillColor,
+        stroke: text.outLineColor,
+        strokeWidth: parseInt(text.outLineWidth),
+        paintFirst: 'stroke',
+        lockScalingFlip: true,
+        padding: 15,
+        cornerSize: 30,
+        fontSize: self.canvasHeight / self.mainCanvasHeight * text.width
+      })
 
-        this.addToOtherSide(textBox, text.side)
+      textBox.set('height', this.canvasWidth / this.mainCanvasWidth * text.width)
+      if(text.scaleX && text.scaleY) {
+        textBox.scaleX = this.canvasWidth / this.mainCanvasWidth * text.scaleX
+        textBox.scaleY = this.canvasHeight / this.mainCanvasHeight * text.scaleY
+      }
 
-        if(this.mainPreview) {
-          const scaleX = textBox.scaleX as number
-          const scaleY = textBox.scaleY as number
-          const width = Math.floor(textBox.width as number * scaleX * this.measurementRatio)
-          const height = Math.floor(textBox.height as number * scaleY * this.measurementRatio)
-          const outLineWidth = textBox.strokeWidth as number * this.measurementRatio
-          self.$store.dispatch('updateCustomTextWithoutTrigger', {
-            index: textIndex,
-            data: {
-              originalWidth: width,
-              originalHeight: height,
-              originalOutLineWidth: outLineWidth,
-            }
-          })
-        }
+      let canvas = self.frontCanvas
+      let model = self.frontModel
+      let dimText = self.dimTextFront
+      if (text.side == 'back') {
+        canvas = self.backCanvas
+        model = self.backModel
+        dimText = self.dimTextBack
+      }
+      textBox.setControlsVisibility({
+        tl: false,
+        bl: false,
+        tr: true,
+        br: true,
+        ml: false,
+        mb: false,
+        mr: false,
+        mt: false,
+        mtr: false
+      })
 
-        textBox.on('selected', (e: Record<any, any>) => {
-          this.showDimensions(e, dimText)
-        })
-        canvas.on('selection:cleared', () => {
-          dimText.set({
-            visible: false
-          })
+      Object.assign(textBox, {
+        textIndex: textIndex,
+        side: text.side
+      })
+      self.customTextObjects[textIndex as number] = textBox
+      canvas.add(textBox)
+      if(this.productType == 'customized') {
+        model.bringToFront()
+      }
+      canvas.renderAll()
+
+      this.addToOtherSide(textBox, text.side)
+
+      if(this.mainPreview) {
+        const scaleX = textBox.scaleX as number
+        const scaleY = textBox.scaleY as number
+        const width = Math.floor(textBox.width as number * scaleX * this.measurementRatio)
+        const height = Math.floor(textBox.height as number * scaleY * this.measurementRatio)
+        const outLineWidth = textBox.strokeWidth as number * this.measurementRatio
+        self.$store.dispatch('updateCustomTextWithoutTrigger', {
+          index: textIndex,
+          data: {
+            originalWidth: width,
+            originalHeight: height,
+            originalOutLineWidth: outLineWidth,
+          }
         })
       }
-    })
+
+      textBox.on('selected', (e: Record<any, any>) => {
+        this.showDimensions(e, dimText)
+      })
+      canvas.on('selection:cleared', () => {
+        dimText.set({
+          visible: false
+        })
+      })
+    }
   }
 
   public setShowSmall(side: string): void {
