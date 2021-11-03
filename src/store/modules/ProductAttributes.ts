@@ -69,6 +69,12 @@ const ProductAttributes:Module<any, any> = {
       color:'',
       flood_fill:false
 
+    },
+    canvasImage:{
+      ref_front:'',
+      ref_back:'',
+      front:'',
+      back:''
     }
   },
   mutations: {
@@ -537,7 +543,9 @@ const ProductAttributes:Module<any, any> = {
       state.rosterDetails.splice(payload, 1);
     },
     UPDATE_ROSTER(state:Record<any, any>, payload:Record<any, any>){
-      state.rosterDetails = payload;
+      if (payload){
+        state.rosterDetails = payload;
+      }
     },
     OVERRIDE_ROSTER(state:Record<any, any>){
       state.rosterDetails = [{
@@ -745,8 +753,15 @@ const ProductAttributes:Module<any, any> = {
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
       state.using_logo_colors = payload
     },
+    STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
+      state.canvasImage.ref_front = payload.front
+      state.canvasImage.ref_back = payload.back
+    }
   },
   getters: {
+    getCanvasImage: state => {
+      return state.canvasImage
+    },
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
     },

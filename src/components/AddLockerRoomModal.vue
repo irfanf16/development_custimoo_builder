@@ -68,6 +68,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
     })
     export default class AddLockerRoomModal extends Mixins(ErrorMessages) {
       @Prop({required: false, default: true}) readonly close_on_add !: boolean
+      @Prop({required: false, default: false}) readonly rosterUrl !: boolean
       async recallProducts(){
         await this.$store.dispatch('GET_LOCKER_PRODUCTS')
         if (this.roomWithProducts.length){
@@ -125,9 +126,15 @@ import LockerRoom from "@/components/LockerRoom.vue";
       get productModels(): Record<any, any> {
         return this.$store.getters.getProductModels;
       }
+      get rosterDetails(): [Record<any, any>] {
+        return this.$store.getters.getRosterDetails
+      }
       get mainProductType():string{
         let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
         return selected_product.back_design ?  "front_back" : "front";
+      }
+      get canvasImage() {
+        return this.$store.getters.getCanvasImage
       }
       public showButton(id:number, index:number){
         this.room_id = id;
@@ -151,23 +158,16 @@ import LockerRoom from "@/components/LockerRoom.vue";
           })
           if (this.product_name == ''){
             this.showError('product name is required')
+            this.showLoader = false
             return false
           }
           let parent = this.$parent as Record<any, any>
-          let locker_front_png = null
-          let locker_back_png = null;
-          if (this.$parent.$refs.product_preview !==undefined){
-            locker_front_png = parent.$refs.product_preview.$refs.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1]
-            if(this.mainProductType == "front_back") {
-              locker_back_png = parent.$refs.product_preview.$refs.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
-            }
-          }else if(parent.ref.mainScene !==undefined){
-            locker_front_png = parent.ref.mainScene[0].$refs.front.toDataURL("image/png").split(',')[1];
-            if(this.mainProductType == "front_back") {
-              locker_back_png = parent.ref.mainScene[0].$refs.back.toDataURL("image/png").split(',')[1]
-            }
-          }
+          this.canvasImage.front = this.canvasImage.ref_front.toDataURL("image/png").split(',')[1]
+          this.canvasImage.back = this.canvasImage.ref_back.toDataURL("image/png").split(',')[1]
+          let locker_front_png = this.canvasImage.front
+          let locker_back_png = this.canvasImage.back
           let locker = {
+            roster_url: this.rosterUrl,
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
             model_id: this.productModels[modelIndex].id,
@@ -180,7 +180,8 @@ import LockerRoom from "@/components/LockerRoom.vue";
             defaultcolors: this.defaultColors,
             groupcolors: this.groupColors,
             locker_front_png: locker_front_png,
-            locker_back_png: locker_back_png
+            locker_back_png: locker_back_png,
+            roster_details: this.rosterDetails
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res.status == 201){

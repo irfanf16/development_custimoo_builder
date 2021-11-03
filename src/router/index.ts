@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
 import ViewScene from '../views/ViewScene.vue'
+import ShareRoster from '../views/ShareRoster.vue'
 import CustomizationProcess from '../views/CustomizationProcess.vue'
 import ConfirmOrder from '../views/ConfirmOrder.vue'
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
@@ -28,6 +29,11 @@ const routes: Array<RouteConfig> = [
     path:'/collection/:collection_file_name/view',
     name: 'CollectionUrl',
     component: CollectionViewPDF
+  },
+  {
+    path:'/shareRoster/:urlstring',
+    name: 'ShareRoster',
+    component: ShareRoster
   },
   {
     path:'/admin/login',

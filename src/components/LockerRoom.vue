@@ -136,7 +136,7 @@
                   <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
                     <template v-for="(collection, index) in getCollections">
                       <div :key="index" class="products-block">
-                        <div class="image-holder">
+                        <div class="image-holder">product_back_url
 
                           <div class="convas_container" :key="collection_product_index"
                                v-for="(collection_product,collection_product_index) in collection.collection_products">
@@ -525,13 +525,14 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     const id = this.getLockerProducts[lockerIndex].product[productIndex].id
     let prod_res = await this.$store.dispatch('getLockerProductDetail', id);
     Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
-
+    this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
     const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
     const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
     this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
     const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
 
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
+    console.log(element)
 
     if (product_id != this.$store.getters.getEditMainProductId) {
       await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
@@ -539,7 +540,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }
     let ind = this.products.length - 1;
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
+    console.log(this.selectedProduct.productstyles)
     let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
+    console.log(selectedIndex)
     await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
     console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
     // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
@@ -547,6 +550,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
+    console.log(this.selectedProduct.productstyles[selectedIndex])
     this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
       if (item.id == element.design_id) {
         Vue.set(item, 'design_show', 1)

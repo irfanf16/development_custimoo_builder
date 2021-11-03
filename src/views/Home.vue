@@ -43,24 +43,24 @@
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
-                  <li>
-                    <b-button :id="'share'" @click="shareProduct(selectedProduct)">
-                      <font-awesome-icon :icon="['fas', 'share-alt']"/>
-                    </b-button>
-                    <b-tooltip :target="'share'" custom-class="share-tooltip home-sharing" placement="bottom" triggers="focus">
-                      <div class="share-holder">
-                        <h3>Copy link and Share</h3>
-                        <div class="share-form">
-                          <b-form inline>
-                            <!--                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>-->
-                            <b-form-input v-model="shared_link" id="copy-link"></b-form-input>
-                            <b-button variant="primary" @click="copyLink">Copy Link</b-button>
-                            <!--                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>-->
-                          </b-form>
-                        </div>
-                      </div>
-                    </b-tooltip>
-                  </li>
+<!--                  <li>-->
+<!--                    <b-button :id="'share'" @click="shareProduct(selectedProduct)">-->
+<!--                      <font-awesome-icon :icon="['fas', 'share-alt']"/>-->
+<!--                    </b-button>-->
+<!--                    <b-tooltip :target="'share'" custom-class="share-tooltip home-sharing" placement="bottom" triggers="focus">-->
+<!--                      <div class="share-holder">-->
+<!--                        <h3>Copy link and Share</h3>-->
+<!--                        <div class="share-form">-->
+<!--                          <b-form inline>-->
+<!--                            &lt;!&ndash;                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>&ndash;&gt;-->
+<!--                            <b-form-input v-model="shared_link" id="copy-link"></b-form-input>-->
+<!--                            <b-button variant="primary" @click="copyLink">Copy Link</b-button>-->
+<!--                            &lt;!&ndash;                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>&ndash;&gt;-->
+<!--                          </b-form>-->
+<!--                        </div>-->
+<!--                      </div>-->
+<!--                    </b-tooltip>-->
+<!--                  </li>-->
                   <li><a>
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
                   </a></li>
@@ -176,8 +176,11 @@ import {getClosestColor} from "@/pantoneColor";
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
     if (this.isAuthenticated) {
+
       await this.retrieveProducts()
       await this.getFillColors()
+    }
+    if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
     }
     if (this.$route.params.name) {
@@ -335,6 +338,9 @@ export default class Home extends Mixins(ErrorMessages) {
   }
   get selectedDesignId():number{
     return  this.$store.getters.getSelectedDesignId;
+  }
+  get rosterDetails(): [Record<any, any>] {
+    return this.$store.getters.getRosterDetails
   }
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
@@ -502,7 +508,8 @@ export default class Home extends Mixins(ErrorMessages) {
       groupcolors: this.groupColors,
       id: this.$store.getters.getEditProductId,
       locker_front_png: locker_front_png,
-      locker_back_png: locker_back_png
+      locker_back_png: locker_back_png,
+      roster: this.rosterDetails
     }
     if (this.editStatus){
       this.showLoader = true
@@ -649,29 +656,29 @@ export default class Home extends Mixins(ErrorMessages) {
     }
   }
 
-  public async shareProduct(){
-    try {
-      const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-        return item.design_show
-      })
-      let locker = {
-        customer_id: this.customer ? this.customer.id : '',
-        type: 'product',
-        product_id: this.selectedProduct.product_id,
-        style_id: this.selectedProduct.productstyles[this.styleIndex].id,
-        design_id: currentDesign[0].id,
-        custom_logos: this.customLogos,
-        text: this.customTexts,
-        colors: this.logoColors,
-        defaultcolors: this.defaultColors,
-        groupcolors: this.groupColors
-      }
-      let res = await this.$store.dispatch('shareProduct', locker)
-      this.shared_link = location.host+"/#/"+res.data.url
-    }catch (error){
-      console.log(error)
-    }
-  }
+  // public async shareProduct(){
+  //   try {
+  //     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+  //       return item.design_show
+  //     })
+  //     let locker = {
+  //       customer_id: this.customer ? this.customer.id : '',
+  //       type: 'product',
+  //       product_id: this.selectedProduct.product_id,
+  //       style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+  //       design_id: currentDesign[0].id,
+  //       custom_logos: this.customLogos,
+  //       text: this.customTexts,
+  //       colors: this.logoColors,
+  //       defaultcolors: this.defaultColors,
+  //       groupcolors: this.groupColors
+  //     }
+  //     let res = await this.$store.dispatch('shareProduct', locker)
+  //     this.shared_link = location.host+"/#/"+res.data.url
+  //   }catch (error){
+  //     console.log(error)
+  //   }
+  // }
   public copyLink(){
     let testingCodeToCopy = document.querySelector("#copy-link")  as Record<any, any>
     testingCodeToCopy.select()

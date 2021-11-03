@@ -28,6 +28,10 @@
             <template v-else>
               <b-button class="btn btn-secondary fw-bold w-100 mb-2" v-b-modal.modal-login>Summary</b-button>
             </template>
+            <template>
+              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share roster url</b-button>
+              <AddLockerRoomModal :rosterUrl="true"  ref="share" />
+            </template>
           </div>
           <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>
         </div>
@@ -50,19 +54,21 @@ import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
 import DesignPdfView from "@/components/DesignPdfView.vue";
-
+import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 @Component<OrderDetails>({
   components: {
-    DesignPdfView
+    DesignPdfView,
+    AddLockerRoomModal
   }
 })
 
 export default class OrderDetails extends Vue {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
-
+  public ref = this.$refs as Record<any, any>
   public pdf_front_image = null;
   public pdf_back_image = null;
+  public showModal = false
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -74,9 +80,11 @@ export default class OrderDetails extends Vue {
 
   get total(): number {
     let sum = 0;
-    this.rosterDetails.forEach((item) => {
-      sum += parseInt(item.quantity);
-    })
+    if (this.rosterDetails){
+      this.rosterDetails.forEach((item) => {
+        sum += parseInt(item.quantity);
+      })
+    }
     return sum;
   }
 
@@ -276,6 +284,10 @@ export default class OrderDetails extends Vue {
     xhr.open('GET', url)
     xhr.responseType = 'blob'
     xhr.send()
+  }
+  public async getLockers(){
+    await this.$store.dispatch("getLockers");
+    this.ref['share'].showSaveToLockerRoomModal()
   }
 }
 </script>
