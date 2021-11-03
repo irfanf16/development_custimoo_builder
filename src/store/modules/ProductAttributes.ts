@@ -426,8 +426,10 @@ const ProductAttributes:Module<any, any> = {
       state.rosterDetails.splice(payload, 1);
     },
     UPDATE_ROSTER(state:Record<any, any>, payload:Record<any, any>){
-      state.rosterDetails = payload;
-    },
+      if (payload){
+        state.rosterDetails = payload;
+      }
+      },
     OVERRIDE_ROSTER(state:Record<any, any>){
       state.rosterDetails = [{
         text: '',

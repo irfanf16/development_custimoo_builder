@@ -80,9 +80,11 @@ export default class OrderDetails extends Vue {
 
   get total(): number {
     let sum = 0;
-    this.rosterDetails.forEach((item) => {
-      sum += parseInt(item.quantity);
-    })
+    if (this.rosterDetails){
+      this.rosterDetails.forEach((item) => {
+        sum += parseInt(item.quantity);
+      })
+    }
     return sum;
   }
 

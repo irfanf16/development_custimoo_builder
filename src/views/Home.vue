@@ -177,6 +177,8 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 
       await this.retrieveProducts()
       await this.getFillColors()
+    }
+    if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
     }
     if (this.$route.params.name) {
@@ -334,6 +336,9 @@ export default class Home extends Mixins(ErrorMessages) {
   }
   get selectedDesignId():number{
     return  this.$store.getters.getSelectedDesignId;
+  }
+  get rosterDetails(): [Record<any, any>] {
+    return this.$store.getters.getRosterDetails
   }
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
@@ -501,7 +506,8 @@ export default class Home extends Mixins(ErrorMessages) {
       groupcolors: this.groupColors,
       id: this.$store.getters.getEditProductId,
       locker_front_png: locker_front_png,
-      locker_back_png: locker_back_png
+      locker_back_png: locker_back_png,
+      roster: this.rosterDetails
     }
     if (this.editStatus){
       this.showLoader = true

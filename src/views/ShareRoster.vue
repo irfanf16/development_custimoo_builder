@@ -52,7 +52,7 @@
       <div class="fs-3 font-weight-bold text-left">Insert details manually below</div>
       <b-button @click="homeScreen" variant="outline-secondary">Back to Design</b-button>
       <div class="d-flex flex-column h-100">
-        <RosterTable v-if="custom_arr.length" :productId="id" :productSizes="sizeOptions" :rosterDetails="custom_arr" @addPlayer="rosterDetailsInit"/>
+        <RosterTable  :productId="id" :productSizes="sizeOptions" :rosterDetails="custom_arr" @addPlayer="rosterDetailsInit"/>
         <!--        <RosterTable @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>-->
       </div>
     </div>
@@ -72,6 +72,8 @@
           </a></b-button>
       </div>
     </b-modal>
+    <div class="loader global" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+
   </div>
 </template>
 
@@ -94,6 +96,7 @@ import RosterTable from "@/components/RosterTable.vue";
   },
   async mounted() {
     if (this.$route.params.urlstring) {
+      this.showLoader = true
       let url = 'shareRoster/' + this.$route.params.urlstring
       let res = await this.$store.dispatch('getShareProductDetails', url)
       if (res){
@@ -103,6 +106,7 @@ import RosterTable from "@/components/RosterTable.vue";
         this.frontImage = res.product_front_url
         this.backImage  = res.product_back_url
         this.productName = res.product_name
+        this.showLoader = false
       }
     }
     this.setProductSizes()
@@ -120,6 +124,7 @@ export default class ShareRoster extends Vue {
   public frontImage = ''
   public backImage = ''
   public productName = ''
+  public showLoader = false
 
   private setActiveEye(index:number){
     if (this.activeEye == index){
