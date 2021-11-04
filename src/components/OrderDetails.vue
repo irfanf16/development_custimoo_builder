@@ -307,6 +307,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     testingCodeToCopy.select()
     try {
       document.execCommand('copy');
+      this.shared_url = ""
       this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
     } catch (err) {
       alert('Oops, unable to copy');
