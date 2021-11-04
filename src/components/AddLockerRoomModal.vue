@@ -186,7 +186,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res.status == 201){
             if (this.rosterUrl){
-              this.$root.$emit('rostershared', res.data.data.shared_url)
+              this.$root.$emit('rostershared', res.data.data.roster_shared_url)
             }
             this.showToast('Design saved successfully', 'SUCCESS')
             this.product_name = ''

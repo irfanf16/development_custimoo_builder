@@ -103,7 +103,9 @@ export default class RosterTable extends Vue {
   }
   public saveRoster(id:number){
     http.post('update/roster', {id:id, roster: this.rosterDetails}).then((res) => {
-      console.log(res)
+      if (res.status == 201){
+        this.$router.push('/')
+      }
     }).catch((err)=>{
       console.log(err)
     })

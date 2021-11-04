@@ -111,28 +111,25 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
   public buyNow() {
     this.$router.push('/confirm-order')
   }
+  get canvasImage() {
+    return this.$store.getters.getCanvasImage
+  }
 
   public showLoader = false
-
-  get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
-  }
-
-  get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts()
-  }
 
   get svgGroups(): [Record<any, any>] {
     return this.$store.getters.getSvgGroups
   }
 
-  get styleIndex(): number {
-    return this.$store.getters.getCurrentStyleIndex
-  }
 
   get productionSVGs(): Record<any, any> {
     return this.$store.getters.getProductionSVGs
   }
+
+  get editStatus():boolean{
+    return  this.$store.getters.getEditStatus
+  }
+
 
   public logosConversionToBase64() {
     const self = this
@@ -299,8 +296,13 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     xhr.send()
   }
   public async getLockers(){
-    await this.$store.dispatch("getLockers");
-    this.ref['share'].showSaveToLockerRoomModal()
+    if (!this.editStatus){
+      await this.$store.dispatch("getLockers");
+      this.ref['share'].showSaveToLockerRoomModal()
+    }else{
+      let res  = await this.$store.dispatch('regenerateRosterLink', { id: this.$store.getters.getEditProductId })
+      this.shared_url = res.data
+    }
   }
   public copyLink() {
     let testingCodeToCopy = document.querySelector("#shared_url_link") as Record<any, any>
