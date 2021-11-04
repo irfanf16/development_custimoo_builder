@@ -227,7 +227,7 @@ export default class DesignPdfView extends Vue {
   }
 
   get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts
+    return this.$store.getters.getCustomTexts()
   }
 
   get svgGroups(): [Record<any, any>] {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-tabs class="player_text">
+    <b-tabs class="player_text" v-if="this.selectedProductID">
       <b-tab v-for="(customText, tabIndex) in customTexts" :key="tabIndex" @click="setTextIndex(tabIndex)">
         <template #title>
           {{ customText.side | capitalize}} {{ customText.type | capitalize }}
@@ -98,7 +98,7 @@ import {getClosestColor} from "@/pantoneColor";
     // this.fontsColorsManipulation()
     // this.fontsList()
     // this.customTextInit()
-    // console.log('customTexts', this.fontOptions)
+    console.log('Text CUstomization', this.selectedProductID)
   },
   filters: {
     capitalize: (value: string) => {
@@ -120,6 +120,7 @@ export default class TextCustomization extends Vue {
   @Prop({required: true}) fontsColors!: any
   // @Prop({required: true}) customTextIndex!: any
   @Prop({required: true}) fontOptions!: any
+  @Prop({required: true}) selectedProductID!: any
   private customTextIndex!: any
   public selectedFont = null
   public colorImage = '/img/images/color-placeholder.png'
@@ -158,7 +159,7 @@ export default class TextCustomization extends Vue {
   }
 
   get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts
+    return this.$store.getters.getCustomTexts(this.selectedProductID)
   }
 
   public productColorsManipulation() {
@@ -179,11 +180,6 @@ export default class TextCustomization extends Vue {
       let teamLogoColors = [{name: 'Team Logo Colors', color_text: logoColorsNew, selectedColor: ''}]
       this.productColors = this.productColors.concat(teamLogoColors)
     }
-  }
-
-  private updateTextField(index: number, value: string) {
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
-    this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'text', value: value})
   }
 
   public addTab(index: number) {
@@ -211,8 +207,13 @@ export default class TextCustomization extends Vue {
   public fontOptionChanged(index:number, i:number, val:string){
     console.log(val)
     this.setActiveFont(i);
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
-    this.$store.dispatch('updateCustomTextAttribute', { index:index, attribute: 'fontFamily', value: val})
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
+    this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: true, attribute: 'fontFamily', value: event})
+  }
+
+  public changeSide(index:number, event:string){
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
+    this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: true, attribute: 'side', value: event})
   }
 
   public selectType(index: number) {
@@ -242,8 +243,7 @@ export default class TextCustomization extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
-    console.log('color', color)
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     let pantone = getClosestColor(color.value);
     let color_pantone = color.name;
     // console.log(pantone.pantone);
@@ -252,22 +252,22 @@ export default class TextCustomization extends Vue {
     }
 
     if (this.fontColorType == 'fill') {
-      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColor', value: color.value})
-      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'fillColorPantone', value: color_pantone})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'fillColor', value: color.value})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'fillColorPantone', value: color_pantone})
     } else {
-      // this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColor', value: color.value})
-      // this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'outLineColorPantone', value: color_pantone})
+      // this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'outLineColor', value: color.value})
+      // this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'outLineColorPantone', value: color_pantone})
     }
-    //this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, attribute: 'selectColor', value: false})
   }
 
-  private outLineWidthValueChanged(event:string) {
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
-    let payload = {index: this.customTextIndex, attribute: 'outLineWidth', value: event}
-    this.$store.commit('customTextAttribute', payload)
-    //this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'selectColor', value: false})
-    //this.showColor('outline',this.customTextIndex)
-    //this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, attribute: 'selectColor', value: true})
+  outLineWidthValueChanged(event:string) {
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
+    this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, on_all: true, attribute: 'outLineWidth', value: event})
+  }
+
+  updateTextField(index: number, value: string) {
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
+    this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'text', value: value})
   }
 
   private setTextIndex(index:number){

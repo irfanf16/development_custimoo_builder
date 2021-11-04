@@ -3,8 +3,15 @@ import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
 
-import {getLogoObject, getLogoSettings, setLogoSettings} from "../../helpers/Helpers"
+import {
+  fontsColorsManipulation, fontsList,
+  getLogoObject,
+  getLogoSettings,
+  setLogoSettings,
+  sortTextsArray
+} from "../../helpers/Helpers"
 import {log} from "fabric/fabric-impl";
+import {getClosestColor} from "@/pantoneColor";
 const ProductAttributes:Module<any, any> = {
   state: {
     lockerActiveTabIndex:0,
@@ -18,7 +25,7 @@ const ProductAttributes:Module<any, any> = {
     recentLogos: [],
     defaultcustomLogos: false,
     addMoreCollection: false,
-    customTexts: [],
+    customTexts: {},
     styleIndex: 0,
     defaultColors: [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}],
     groupColors: {},
@@ -289,17 +296,33 @@ const ProductAttributes:Module<any, any> = {
     },
     customTexts(state: Record<any, any>, customText: Record<any, any>) {
       if(customText){
-        Vue.set(state.customTexts, customText.index, customText.text)
+        if(!state.customTexts[customText.prd_id]) {
+          Vue.set(state.customTexts, customText.prd_id, [])
+        }
+        Vue.set(state.customTexts[customText.prd_id], customText.index, customText.text)
       }
     },
     customTextAttribute(state: Record<any, any>, customTextAttribute: Record<any, any>) {
-      if(customTextAttribute){
-        Vue.set(state.customTexts[customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
+      if(customTextAttribute.on_all) {
+        const customTexts = JSON.parse(JSON.stringify(state.customTexts))
+        Object.keys(customTexts).map((key: string) => {
+          if(state.customTexts[key][customTextAttribute.index]) {
+            Vue.set(state.customTexts[key][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
+          }
+        })
+      }
+      else {
+        Vue.set(state.customTexts[state.selectedPrdId][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
       }
     },
     CUSTOM_TEXT_WITHOUT_TRIGGER(state: Record<any, any>, customTextsAttribute: Record<any, any>) {
       if(customTextsAttribute){
-        Object.assign(state.customTexts[customTextsAttribute.index], customTextsAttribute.data)
+        if(Object.keys(customTextsAttribute.data).length && state.customTexts[state.selectedPrdId] && state.customTexts[state.selectedPrdId][customTextsAttribute.index]) {
+          const product_id = customTextsAttribute.product_id? customTextsAttribute.product_id : state.selectedPrdId
+          Object.keys(customTextsAttribute.data).forEach((key: string) => {
+            state.customTexts[product_id][customTextsAttribute.index][key] = customTextsAttribute.data[key]
+          })
+        }
       }
     },
     customTextsDelete(state: Record<any, any>, delCustomText: Record<any, any>) {
@@ -385,7 +408,63 @@ const ProductAttributes:Module<any, any> = {
      // state.customLogos = payload;
     },
     OVERRIDE_TEXT(state:Record<any, any>, payload){
-      state.customTexts = payload;
+      state.customTexts = {};
+
+      const locker_texts = JSON.parse(payload.text)
+
+      state.products.forEach((product: Record<any, any>) => {
+        if(!state.customTexts[product.id]) {
+          Vue.set(state.customTexts, product.id, [])
+        }
+        product.productnames =  sortTextsArray(product.productnames);
+
+        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
+
+          const obj = fontsColorsManipulation(product)
+
+          //calculate colors pantone on init
+          let fill_color_pantone = obj.firstColor.name;
+          const pantone = getClosestColor(obj.firstColor.value);
+          if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+            fill_color_pantone = pantone.pantone;
+          }
+
+          let outLine_color_pantone = obj.secondColor.name;
+          const opantone = getClosestColor(obj.secondColor.value);
+          if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+            outLine_color_pantone = opantone.pantone;
+          }
+
+          if(product.id == payload.product_id) {
+            if(locker_texts[index])
+              Vue.set(state.customTexts[product.id], index, locker_texts[index])
+          }
+
+          else {
+            const locker_text_str = locker_texts[index] ? locker_texts[index]['text'] : ''
+            const text = {
+              text: locker_text_str,
+              type: productName.type,
+              width: productName.width,
+              height: productName.height,
+              x_axis: productName.x_axis,
+              y_axis: productName.y_axis,
+              rotation: productName.rotation,
+              haveControls: Boolean(!productName.is_locked),
+              outlineEnabled: Boolean(productName.outline_enabled),
+              side: productName.side,
+              fontFamily: fontsList(product)[0].value,
+              fillColor: obj.firstColor.value,
+              fillColorPantone: fill_color_pantone,
+              outLineColor: obj.secondColor.value,
+              outLineColorPantone: outLine_color_pantone,
+              outLineWidth: 0,
+              selectColor: false
+            }
+            Vue.set(state.customTexts[product.id], index, text)
+          }
+        })
+      })
     },
     OVERRIDE_DEFAULT_COLOR(state:Record<any, any>, payload){
       state.defaultColors = payload;
@@ -426,7 +505,7 @@ const ProductAttributes:Module<any, any> = {
       state.undoItems = []
       state.redoItems = []
       state.customLogos = {};
-      state.customTexts.map((item:Record<any, any>) => item.text = '' );
+      //state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
       state.using_logo_colors = false;
@@ -451,6 +530,57 @@ const ProductAttributes:Module<any, any> = {
         //state.customLogos.push(setLogoSettings(0));
         state.logoTabIndex = 0;
       }
+
+      //rest custom texts
+      state.customTexts = {}
+      state.products.forEach((product:any) => {
+        if(!state.customTexts[product.id]) {
+          Vue.set(state.customTexts, product.id, [])
+        }
+        product.productnames =  sortTextsArray(product.productnames);
+
+        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
+          const obj = fontsColorsManipulation(product)
+
+          //calculate colors pantone on init
+          let fill_color_pantone = obj.firstColor.name;
+          const pantone = getClosestColor(obj.firstColor.value);
+          if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+            fill_color_pantone = pantone.pantone;
+          }
+
+          let outLine_color_pantone = obj.secondColor.name;
+          const opantone = getClosestColor(obj.secondColor.value);
+          if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+            outLine_color_pantone = opantone.pantone;
+          }
+          let textIndex = index
+          if(state.customTexts[product.id] && state.customTexts[product.id][index]) {
+            textIndex = state.customTexts[product.id][index].textIndex
+          }
+          const text = {
+            text: '',
+            type: productName.type,
+            width: productName.width,
+            height: productName.height,
+            x_axis: productName.x_axis,
+            y_axis: productName.y_axis,
+            rotation: productName.rotation,
+            haveControls: Boolean(!productName.is_locked),
+            outlineEnabled: Boolean(productName.outline_enabled),
+            side: productName.side,
+            fontFamily: fontsList(product)[0].value,
+            fillColor: obj.firstColor.value,
+            fillColorPantone: fill_color_pantone,
+            outLineColor: obj.secondColor.value,
+            outLineColorPantone: outLine_color_pantone,
+            outLineWidth: 0,
+            textIndex: textIndex,
+            selectColor: false
+            }
+          Vue.set(state.customTexts[product.id], index, text)
+        })
+      })
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       state.undoItems.push(payload)
@@ -615,6 +745,9 @@ const ProductAttributes:Module<any, any> = {
     getCustomLogoObject: state => {
     return state.customLogos
     },
+    getCustomTextObject: state => {
+      return state.customTexts
+    },
     getActiveLogoIndex: (state: any) => state.logoTabIndex,
     getCurrentStyleIndex: state => {
       return state.styleIndex
@@ -622,9 +755,17 @@ const ProductAttributes:Module<any, any> = {
     getSelectedDesignId: state => {
       return state.selectedDesignId
     },
-    getCustomTexts: state => {
-      return state.customTexts
+    // getCustomTexts: state => {
+    //   return state.customTexts
+    // },
+
+    getCustomTexts: state => (prd_id = state.selectedPrdId) => {
+      if(!state.customTexts[prd_id]) {
+        return []
+      }
+      return state.customTexts[prd_id]
     },
+
     getDefaultColors: state => {
       return state.defaultColors
     },
@@ -906,8 +1047,18 @@ const ProductAttributes:Module<any, any> = {
       return await  http.post('collection-data', {collection_id: payload}).then((res) =>{
         return res.data
       })
-    }
-
+    },
+    async copyProductDesign({commit}, payload){
+     return  await http.post('duplicateProduct', payload).then((res) => {
+        if (res.status == 201){
+          commit('ADD_PRODUCT_TO_LOCKER', {room_id : payload.room_id, data: res.data.data})
+          return res;
+        }
+      }).catch(err => {
+       console.log(err.response)
+        return err.response.data.message
+      })
+    },
   }
 }
 export default ProductAttributes;

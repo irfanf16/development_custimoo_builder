@@ -46,7 +46,14 @@ const Product:Module<any, any> = {
       state.selectedModelIndex = selectedModelIndex;
     },
     SET_LOCKER_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
-      Vue.set(state, 'locker_products', payload)
+      if(payload.locker_index >= 0) {
+        Vue.set(state.locker_products[payload.locker_index], 'product', payload.products)
+      } else {
+        Vue.set(state, 'locker_products', payload)
+      }
+    },
+    SET_LOCKER_ATTRIBUTE(state:Record<any, any>, payload:Record<any, any>){
+      Vue.set(state.locker_products[payload.index],payload.attribute , payload.value);
     },
     SET_LOCKERS(state:Record<any, any>, payload:Record<any, any>){
       state.lockers = []
@@ -80,8 +87,16 @@ const Product:Module<any, any> = {
       const room_index = state.locker_products.findIndex((room:Record<any, any>) => room.id == payload.room_id)
       Vue.set(state.locker_products[room_index].product, state.locker_products[room_index].product.length, payload.data);
     },
-    SET_INITIAL_LOGO_COLORS(state:Record<any, any>, payload){
+    SET_INITIAL_LOGO_COLORS(state:Record<any, any>, payload) {
       state.initialExtractedColors = payload
+    },
+    UPDATE_COPY_COUNT(state:Record<any, any>, payload){
+      state.locker_products[payload.room_ind].product.forEach((element:Record<any, any>) =>{
+        if (element.id === payload.id){
+          const count = element.copy_count +1
+          Vue.set(element, 'copy_count', count)
+        }
+      })
     }
   },
   actions: {
@@ -117,6 +132,17 @@ const Product:Module<any, any> = {
       http.get("lockers").then((res) =>{
         if (res.status == 200){
           commit('SET_LOCKERS', res.data);
+        }
+      })
+    },
+    async getLockerProductDetail({commit}, id){
+      return await http.get('locker/product/detail/'+id).then((res) => {
+        if (res.status == 200){
+          return res
+        }
+      }).catch(err => {
+        if(err.response.status){
+          return err.response.data.message
         }
       })
     },

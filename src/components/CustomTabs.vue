@@ -56,7 +56,7 @@
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
       <TextCustomization
-        :productFonts="selectedProduct.namefonts"
+        :productFonts="selectedProduct.namefonts" :selectedProductID="selectedProduct.id"
         :fontsColors="fontsColors" :fontOptions="fontOptions" />
     </div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 3" >
@@ -169,8 +169,8 @@ import TextCustomization from "@/components/mobile/TextCustomization.vue";
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
-    this.customTextInit()
-   console.log('customTexts', this.productColors)
+    // this.customTextInit()
+   console.log('customTexts', this.selectedProduct)
   },
 })
 
@@ -280,9 +280,9 @@ export default class CustomTabs extends Vue {
   get groupColors(){
     return this.$store.getters.getGroupColors
   }
-  public showColor(index: number) {
-    this.selectAccordionIndex = index
-  }
+  // public showColor(index: number) {
+  //   this.selectAccordionIndex = index
+  // }
 
   @Watch('lockerColors', {
     deep: false
