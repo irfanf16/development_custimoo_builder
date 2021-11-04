@@ -358,7 +358,7 @@ export default class CustomTabs extends Vue {
   // public fontsColors: any[] = []
   // public firstColor!: Record<any, any>
   // public secondColor!: Record<any, any>
-  // private storageUrl = process.env.VUE_APP_STORAGE_URL
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
   //
   // get hideTab(): Record<any, any> {
   //   return this.$store.getters.getHideTab

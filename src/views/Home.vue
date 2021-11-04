@@ -125,7 +125,7 @@
                     <b-dropdown-item href="#">Open locker room</b-dropdown-item>
                     <b-dropdown-item href="#">Summary</b-dropdown-item>
                     <b-dropdown-item href="#">Share</b-dropdown-item>
-                    <b-dropdown-item href="#">Reset</b-dropdown-item>
+                    <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
                     <b-dropdown-item href="#">Logout</b-dropdown-item>
                   </b-dropdown>
                 </div>

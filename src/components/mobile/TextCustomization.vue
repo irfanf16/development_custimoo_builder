@@ -17,9 +17,12 @@
             ></b-form-input>
           </div>
 
-          <div class="mt-2 mobile_controls">
+          <div class="mt-2 mobile_controls" v-if="customTextIndex != '' || customTextIndex != undefined">
             <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
-            <input type="range" class="custom-range mt-1" value="0" min="0" max="100" />
+            <b-form-input class="mt-2" id="range-2"  :value="customTexts[customTextIndex].outLineWidth" @change="outLineWidthValueChanged($event)" type="range" min="0" max="10" step="1"></b-form-input>
+          </div>
+          <div v-else>
+            {{customTextIndex}}
           </div>
         </div>
         <div class="fade-right py-1">
@@ -98,7 +101,7 @@ import {getClosestColor} from "@/pantoneColor";
     // this.fontsColorsManipulation()
     // this.fontsList()
     // this.customTextInit()
-    console.log('Text CUstomization', this.selectedProductID)
+    console.log('Text CUstomization', this.customTextIndex)
   },
   filters: {
     capitalize: (value: string) => {
@@ -121,7 +124,7 @@ export default class TextCustomization extends Vue {
   // @Prop({required: true}) customTextIndex!: any
   @Prop({required: true}) fontOptions!: any
   @Prop({required: true}) selectedProductID!: any
-  private customTextIndex!: any
+  private customTextIndex: any = 0
   public selectedFont = null
   public colorImage = '/img/images/color-placeholder.png'
   public fontColorType = 'fill'
@@ -205,10 +208,10 @@ export default class TextCustomization extends Vue {
   }
 
   public fontOptionChanged(index:number, i:number, val:string){
-    console.log(val)
     this.setActiveFont(i);
+
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
-    this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: true, attribute: 'fontFamily', value: event})
+    this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: true, attribute: 'fontFamily', value: val})
   }
 
   public changeSide(index:number, event:string){
