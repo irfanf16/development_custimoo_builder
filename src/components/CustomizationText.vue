@@ -177,6 +177,7 @@ export default class CustomizationText extends Vue {
   }
 
   public fontOptionChanged(index:number, event:any){
+    console.log('event', event)
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customTexts)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', { index:index, attribute: 'fontFamily', value: event})
   }

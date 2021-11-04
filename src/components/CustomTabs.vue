@@ -56,7 +56,7 @@
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
       <TextCustomization
-        :productFonts="selectedProduct.namefonts" :customTextIndex="index"
+        :productFonts="selectedProduct.namefonts"
         :fontsColors="fontsColors" :fontOptions="fontOptions" />
     </div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 3" >
@@ -167,9 +167,9 @@ import TextCustomization from "@/components/mobile/TextCustomization.vue";
   mounted() {
     // this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
-    // this.fontsColorsManipulation()
-    // this.fontsList()
-    // this.customTextInit()
+    this.fontsColorsManipulation()
+    this.fontsList()
+    this.customTextInit()
    console.log('customTexts', this.productColors)
   },
 })
@@ -344,9 +344,9 @@ export default class CustomTabs extends Vue {
     return this.$store.getters.getCustomTexts
   }
   //
-  // get productNames() {
-  //   return this.$store.getters.getSelectedProduct.productnames;
-  // }
+  get productNames() {
+    return this.$store.getters.getSelectedProduct.productnames;
+  }
   //
   get logoColors(): [] {
     return this.$store.getters.getLogosColors
@@ -438,78 +438,72 @@ export default class CustomTabs extends Vue {
   //   this.$store.dispatch('setHideTab', {index: index, value: value})
   // }
   //
-  // public customTextInit() {
-  //   this.productNames.forEach((productName: Record<any, any>, index: number) => {
-  //     if (this.customTexts[index] && !this.customTexts[index].action) {
-  //       let text = {
-  //         text: this.customTexts[index].text,
-  //         type: productName.type,
-  //         width: productName.width,
-  //         height: productName.height,
-  //         x_axis: productName.x_axis,
-  //         y_axis: productName.y_axis,
-  //         rotation: productName.rotation,
-  //         haveControls: Boolean(!productName.is_locked),
-  //         outlineEnabled: Boolean(productName.outline_enabled),
-  //         side: productName.side,
-  //         fontFamily: this.customTexts[index].fontFamily ? this.customTexts[index].fontFamily : this.fontOptions[0].value,
-  //         fillColor: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.value,
-  //         fillColorPantone: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.name,
-  //         outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.value,
-  //         outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
-  //         outLineWidth: this.customTexts[index].outLineWidth ? this.customTexts[index].outLineWidth : 0,
-  //         selectColor: false
-  //       }
-  //       this.$store.dispatch('setCustomTexts', {index: index, text: text})
-  //     } else if (!this.customTexts[index]) {
-  //       let text = {
-  //         text: '',
-  //         type: productName.type,
-  //         width: productName.width,
-  //         height: productName.height,
-  //         x_axis: productName.x_axis,
-  //         y_axis: productName.y_axis,
-  //         rotation: productName.rotation,
-  //         haveControls: Boolean(!productName.is_locked),
-  //         outlineEnabled: Boolean(productName.outline_enabled),
-  //         side: productName.side,
-  //         fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-  //         fillColor: this.firstColor.value,
-  //         fillColorPantone: this.firstColor.name,
-  //         outLineColor: this.secondColor.value,
-  //         outLineColorPantone: this.secondColor.name,
-  //         outLineWidth: 0,
-  //         selectColor: false
-  //       }
-  //       this.$store.dispatch('setCustomTexts', {index: index, text: text})
-  //     }
-  //   })
-  // }
-  //
-  // public fontsList(): void {
-  //   let productFonts = this.selectedProduct.namefonts
-  //   productFonts.forEach((fonts: any, key: number) => {
-  //     this.showLoader = true
-  //     let fontNameParam = fonts.file_url.split('/').reverse()
-  //     fontNameParam = fontNameParam[0].split('.')
-  //     let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-  //     let font = {
-  //       value: fontNameParam[0] as string,
-  //       text: fontName as string
-  //     }
-  //     this.fontOptions = this.fontOptions.concat([font])
-  //     let fontUrl = this.storageUrl + fonts.file_url
-  //     const headElement = document.querySelector('head') as HTMLHeadElement
-  //     headElement.innerHTML += "<style type='text/css'> @font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}</style>";
-  //     $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
-  //     setTimeout(() => {
-  //       $("#delete_after_load").remove()
-  //     }, 1000)
-  //     setTimeout(() => {
-  //       this.showLoader = false
-  //     }, 2000)
-  //   })
-  // }
+  public customTextInit() {
+    this.productNames.forEach((productName: Record<any, any>, index: number) => {
+      if (this.customTexts[index] && !this.customTexts[index].action) {
+        let text = {
+          text: this.customTexts[index].text,
+          type: productName.type,
+          width: productName.width,
+          height: productName.height,
+          x_axis: productName.x_axis,
+          y_axis: productName.y_axis,
+          rotation: productName.rotation,
+          haveControls: Boolean(!productName.is_locked),
+          outlineEnabled: Boolean(productName.outline_enabled),
+          side: productName.side,
+          fontFamily: this.customTexts[index].fontFamily ? this.customTexts[index].fontFamily : this.fontOptions[0].value,
+          fillColor: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.value,
+          fillColorPantone: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.name,
+          outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.value,
+          outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
+          outLineWidth: this.customTexts[index].outLineWidth ? this.customTexts[index].outLineWidth : 0,
+          selectColor: false
+        }
+        this.$store.dispatch('setCustomTexts', {index: index, text: text})
+      } else if (!this.customTexts[index]) {
+        let text = {
+          text: '',
+          type: productName.type,
+          width: productName.width,
+          height: productName.height,
+          x_axis: productName.x_axis,
+          y_axis: productName.y_axis,
+          rotation: productName.rotation,
+          haveControls: Boolean(!productName.is_locked),
+          outlineEnabled: Boolean(productName.outline_enabled),
+          side: productName.side,
+          fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+          fillColor: this.firstColor.value,
+          fillColorPantone: this.firstColor.name,
+          outLineColor: this.secondColor.value,
+          outLineColorPantone: this.secondColor.name,
+          outLineWidth: 0,
+          selectColor: false
+        }
+        this.$store.dispatch('setCustomTexts', {index: index, text: text})
+      }
+    })
+  }
+
+  public fontsList(): void {
+    let productFonts = this.selectedProduct.namefonts
+    productFonts.forEach((fonts: any, key: number) => {
+      let fontNameParam = fonts.file_url.split('/').reverse()
+      fontNameParam = fontNameParam[0].split('.')
+      let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+      let font = {
+        value: fontNameParam[0] as string,
+        text: fontName as string
+      }
+      this.fontOptions = this.fontOptions.concat([font])
+      let fontUrl = this.storageUrl + fonts.file_url
+      const headElement = document.querySelector('head') as Record<any, any>
+      let style_tag = document.createElement('style')
+      style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
+      headElement.appendChild(style_tag)
+    })
+  }
   //
   // public addTab(index: number) {
   //   let text = {

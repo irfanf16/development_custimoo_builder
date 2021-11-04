@@ -394,7 +394,6 @@ const ProductAttributes:Module<any, any> = {
       state.groupColors = payload;
     },
     REMOVE_ROSTER(state:Record<any, any>, payload:number){
-      console.log(payload);
       state.rosterDetails.splice(payload, 1);
     },
     UPDATE_ROSTER(state:Record<any, any>, payload:Record<any, any>){
