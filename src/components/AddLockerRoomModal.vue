@@ -68,7 +68,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
     })
     export default class AddLockerRoomModal extends Mixins(ErrorMessages) {
       @Prop({required: false, default: true}) readonly close_on_add !: boolean
-      @Prop({required: false, default: false}) readonly rosterUrl !: boolean
+      @Prop({required: false, default: false})  rosterUrl !: boolean
       async recallProducts(){
         await this.$store.dispatch('GET_LOCKER_PRODUCTS')
         if (this.roomWithProducts.length){
@@ -185,6 +185,9 @@ import LockerRoom from "@/components/LockerRoom.vue";
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res.status == 201){
+            if (this.rosterUrl){
+              this.$root.$emit('rostershared', res.data.data.roster_shared_url)
+            }
             this.showToast('Design saved successfully', 'SUCCESS')
             this.product_name = ''
             this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)

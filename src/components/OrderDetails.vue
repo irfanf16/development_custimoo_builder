@@ -32,6 +32,12 @@
               <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share roster url</b-button>
               <AddLockerRoomModal :rosterUrl="true"  ref="share" />
             </template>
+            <template v-if="shared_url">
+              <b-input-group>
+                <b-form-input id="shared_url_link"   v-model="shared_url" ></b-form-input>
+              </b-input-group>
+              <b-button class="btn btn-secondary fw-bold w-100 mb-2" @click="copyLink">copy url</b-button>
+            </template>
           </div>
           <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>
         </div>
@@ -48,27 +54,34 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
 import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
+import ErrorMessages from "@/mixins/ErrorMessages";
 @Component<OrderDetails>({
   components: {
     DesignPdfView,
     AddLockerRoomModal
+  },
+  mounted(){
+    this.$root.$on('rostershared', (val:string) =>{
+      this.shared_url = val
+    })
   }
 })
 
-export default class OrderDetails extends Vue {
+export default class OrderDetails extends Mixins(ErrorMessages)  {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>
   public pdf_front_image = null;
   public pdf_back_image = null;
   public showModal = false
+  public shared_url = ""
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -98,28 +111,25 @@ export default class OrderDetails extends Vue {
   public buyNow() {
     this.$router.push('/confirm-order')
   }
+  get canvasImage() {
+    return this.$store.getters.getCanvasImage
+  }
 
   public showLoader = false
-
-  get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
-  }
-
-  get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts()
-  }
 
   get svgGroups(): [Record<any, any>] {
     return this.$store.getters.getSvgGroups
   }
 
-  get styleIndex(): number {
-    return this.$store.getters.getCurrentStyleIndex
-  }
 
   get productionSVGs(): Record<any, any> {
     return this.$store.getters.getProductionSVGs
   }
+
+  get editStatus():boolean{
+    return  this.$store.getters.getEditStatus
+  }
+
 
   public logosConversionToBase64() {
     const self = this
@@ -286,8 +296,24 @@ export default class OrderDetails extends Vue {
     xhr.send()
   }
   public async getLockers(){
-    await this.$store.dispatch("getLockers");
-    this.ref['share'].showSaveToLockerRoomModal()
+    if (!this.editStatus){
+      await this.$store.dispatch("getLockers");
+      this.ref['share'].showSaveToLockerRoomModal()
+    }else{
+      let res  = await this.$store.dispatch('regenerateRosterLink', { id: this.$store.getters.getEditProductId })
+      this.shared_url = res.data
+    }
+  }
+  public copyLink() {
+    let testingCodeToCopy = document.querySelector("#shared_url_link") as Record<any, any>
+    testingCodeToCopy.select()
+    try {
+      document.execCommand('copy');
+      this.shared_url = ""
+      this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
+    } catch (err) {
+      alert('Oops, unable to copy');
+    }
   }
 }
 </script>

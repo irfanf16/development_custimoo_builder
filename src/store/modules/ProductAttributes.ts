@@ -1154,6 +1154,15 @@ const ProductAttributes:Module<any, any> = {
         return err.response.data.message
       })
     },
+    async regenerateRosterLink({commit}, payload){
+      return await http.post('regenerate/link', payload).then((res) => {
+        if (res.status == 201){
+          return res.data
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    }
   }
 }
 export default ProductAttributes;
