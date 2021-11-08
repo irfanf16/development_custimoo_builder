@@ -192,7 +192,11 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         await this.$store.dispatch('setSelectedIndex', { selectedIndex: ind});
         let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.style_id);
         await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-        await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(res.custom_logos));
+        let logoObj = {
+          custom_logos: res.custom_logos,
+          product_id: res.product_id
+        }
+        await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logoObj);
         await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(res.text));
         await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.defaultcolors));
         await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.groupcolors));
@@ -612,29 +616,6 @@ export default class Home extends Mixins(ErrorMessages) {
     }
   }
 
-  // public async shareProduct(){
-  //   try {
-  //     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-  //       return item.design_show
-  //     })
-  //     let locker = {
-  //       customer_id: this.customer ? this.customer.id : '',
-  //       type: 'product',
-  //       product_id: this.selectedProduct.product_id,
-  //       style_id: this.selectedProduct.productstyles[this.styleIndex].id,
-  //       design_id: currentDesign[0].id,
-  //       custom_logos: this.customLogos,
-  //       text: this.customTexts,
-  //       colors: this.logoColors,
-  //       defaultcolors: this.defaultColors,
-  //       groupcolors: this.groupColors
-  //     }
-  //     let res = await this.$store.dispatch('shareProduct', locker)
-  //     this.shared_link = location.host+"/#/"+res.data.url
-  //   }catch (error){
-  //     console.log(error)
-  //   }
-  // }
   public copyLink(){
     let testingCodeToCopy = document.querySelector("#copy-link")  as Record<any, any>
     testingCodeToCopy.select()

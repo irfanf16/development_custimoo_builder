@@ -55,7 +55,7 @@
                         </li>
                         <li>
                           <b-button data-title="Share design" :id="'share'+i+''+ind"
-                                    @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"
+                                    @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"
                                     @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
                             :icon="['fas', 'share-alt']"/></b-button>
                           <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom"
@@ -66,7 +66,7 @@
                               <div class="share-form">
                                 <b-form inline>
                                   <b-form-input :id="'copy-'+ind"
-                                                :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
+                                                :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
                                   ></b-form-input>
                                   <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
@@ -289,7 +289,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         mutation.target.classList.add('dropping')
       }else if(mutation.removedNodes.length){
         console.log('Nodes removed', mutation.removedNodes.length);
-
         mutation.target.classList.remove('dropping')
       }
       else if (mutation.type === 'attributes') {
@@ -526,6 +525,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     let prod_res = await this.$store.dispatch('getLockerProductDetail', id);
     Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
     this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
+    this.$root.$emit('rostershared', '')
     const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
     const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
     this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
