@@ -51,7 +51,7 @@ const ProductAttributes:Module<any, any> = {
       editStatus: false
     },
     using_logo_colors: false,
-    backgroundCheck: false,
+    backgroundCheck: true,
     colorCheck: false,
     showColorsLogoEditor:false,
     logoEditor: {
