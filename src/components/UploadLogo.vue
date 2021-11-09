@@ -157,6 +157,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     this.$store.dispatch('editLogo',{key:'id',value:this.customLogos[this.customLogoIndex].id,api_call:false})
     this.$store.dispatch('editLogo',{key:'base64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
     this.$store.dispatch('editLogo',{key:'originalBase64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
+    this.$store.dispatch('toggleLogoCheck', {type:'background',val:true})
     this.ref.logoEditorModal.showLogoModal()
   }
 
