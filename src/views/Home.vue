@@ -186,23 +186,23 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       setTimeout(async () => {
         let url = 'share/' + this.$route.params.product + '/' + this.$route.params.name
         let res = await this.$store.dispatch('getShareProductDetails', url)
-        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.product_id);
+        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.data.product_id);
         // let ind = this.products.findIndex(x => x.product_id == res.product_id)
         let ind = this.products.length -1
         await this.$store.dispatch('setSelectedIndex', { selectedIndex: ind});
-        let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.style_id);
+        let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.data.style_id);
         await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
         let logoObj = {
-          custom_logos: res.custom_logos,
-          product_id: res.product_id
+          custom_logos: res.data.custom_logos,
+          product_id: res.data.product_id
         }
         await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logoObj);
-        await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(res.text));
-        await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.defaultcolors));
-        await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.groupcolors));
+        await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(res.data.text));
+        await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.data.defaultcolors));
+        await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.data.groupcolors));
         await  this.$store.dispatch('setColorSectionVisibility')
         this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-          if (item.id == res.design_id){
+          if (item.id == res.data.design_id){
             Vue.set(item, 'design_show', 1)
             this.$store.dispatch('setSelectedProductDesignID',item.id)
           }else{
@@ -363,7 +363,6 @@ export default class Home extends Mixins(ErrorMessages) {
           url: query
         }
         let res = await this.$store.dispatch('updateSharedProduct', param)
-        console.log(res)
       }
     }catch (error){
       console.log(error)

@@ -136,8 +136,7 @@
                   <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
                     <template v-for="(collection, index) in getCollections">
                       <div :key="index" class="products-block">
-                        <div class="image-holder">product_back_url
-
+                        <div class="image-holder">
                           <div class="convas_container" :key="collection_product_index"
                                v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
@@ -147,13 +146,11 @@
                                    alt="">
                             </template>
                           </div>
-
                           <div class="controls">
                             <a v-b-tooltip.hover.right title="Delete collection"
                                @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
-
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
                                class="btn light btn-secondary rounded-circle"><font-awesome-icon
                               :icon="['fas', 'edit']"/></a>

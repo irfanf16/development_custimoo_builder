@@ -78,13 +78,14 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import OrderDetails from '@/components/OrderDetails.vue'
 import {http} from "@/httpCommon";
 import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
 import RosterTable from "@/components/RosterTable.vue";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 
 @Component<ShareRoster >({
@@ -99,21 +100,25 @@ import RosterTable from "@/components/RosterTable.vue";
       this.showLoader = true
       let url = 'shareRoster/' + this.$route.params.urlstring
       let res = await this.$store.dispatch('getShareProductDetails', url)
-      if (res){
-        this.custom_arr = JSON.parse(res.roster_detail)
-        this.productSizes = res.sizes
-        this.id = res.id
-        this.frontImage = res.product_front_url
-        this.backImage  = res.product_back_url
-        this.productName = res.product_name
+      if (res.status ==200){
+        this.custom_arr = JSON.parse(res.data.roster_detail)
+        this.productSizes = res.data.sizes
+        this.id = res.data.id
+        this.frontImage = res.data.product_front_url
+        this.backImage  = res.data.product_back_url
+        this.productName = res.data.product_name
         this.showLoader = false
+      }else if(res.status == 404){
+        this.showError(res.data.message)
+        this.showLoader = false
+        this.$router.push('/')
       }
     }
     this.setProductSizes()
   }
 })
 
-export default class ShareRoster extends Vue {
+export default class ShareRoster extends Mixins(ErrorMessages) {
   public id = 0
   public custom_arr: Record<any, any>[] = [];
   public productSizes : any[] = []
