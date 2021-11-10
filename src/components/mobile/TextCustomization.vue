@@ -17,8 +17,8 @@
             ></b-form-input>
           </div>
 
-          <div class="mt-2 mobile_controls" v-if="customTextIndex != '' || customTextIndex != undefined">
-            <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span>0px</span></label>
+          <div cyhlass="mt-2 mobile_controls" v-if="customTextIndex != '' || customTextIndex != undefined">
+            <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span v-if="+customText.outLineWidth">{{ customText.outLineWidth }}px</span></label>
             <b-form-input class="mt-2" id="range-2"  :value="customTexts[customTextIndex].outLineWidth" @change="outLineWidthValueChanged($event)" type="range" min="0" max="10" step="1"></b-form-input>
           </div>
           <div v-else>
@@ -33,10 +33,10 @@
         </div>
 
         <b-tabs class="mt-1">
-          <b-tab>
+          <b-tab @click="setColorType('fill')">
             <template #title>
               <div class="d-flex align-items-center gap-1">
-                <span class="selected-color ml-2 flex-shrink-0" :style="{background: 'red'}"></span>
+                <span class="selected-color ml-2 flex-shrink-0" :style="{background: customText.fillColor}"></span>
                 <span>Fill Color</span>
               </div>
             </template>
@@ -52,10 +52,11 @@
               <div class="color_circle" :key="index" v-for="(color, index) in productColors[activeCollection].color_text" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
             </div>
           </b-tab>
-          <b-tab>
+
+          <b-tab @click="setColorType('outline')" v-if="+customText.outLineWidth">
             <template #title>
               <div class="d-flex align-items-center gap-1">
-                <span class="selected-color ml-2 flex-shrink-0" :style="{background: 'blue'}"></span>
+                <span class="selected-color ml-2 flex-shrink-0" :style="{background: customText.outLineColor}"></span>
                 <span>Outline Color</span>
               </div>
             </template>
@@ -101,7 +102,7 @@ import {getClosestColor} from "@/pantoneColor";
     // this.fontsColorsManipulation()
     // this.fontsList()
     // this.customTextInit()
-    console.log('Text CUstomization', this.customTextIndex)
+    console.log('customTexts', this.customTexts)
   },
   filters: {
     capitalize: (value: string) => {
@@ -134,6 +135,7 @@ export default class TextCustomization extends Vue {
   public outLineWidthValue = 0
   public showSVGs = false
   public isHidden = false
+  private activeColors: any[] = []
 
   private setActiveCollection(index: number) {
     this.activeCollection = index;
@@ -255,15 +257,18 @@ export default class TextCustomization extends Vue {
     }
 
     if (this.fontColorType == 'fill') {
+      this.activeColors[this.fontColorIndex] = {'fill': color.value};
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'fillColor', value: color.value})
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'fillColorPantone', value: color_pantone})
     } else {
-      // this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'outLineColor', value: color.value})
-      // this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'outLineColorPantone', value: color_pantone})
+      this.activeColors[this.fontColorIndex] = {'outline': color.value};
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'outLineColor', value: color.value})
+      this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'outLineColorPantone', value: color_pantone})
     }
   }
 
   outLineWidthValueChanged(event:string) {
+    this.outLineWidthValue = Number(event);
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, on_all: true, attribute: 'outLineWidth', value: event})
   }
@@ -276,6 +281,10 @@ export default class TextCustomization extends Vue {
   private setTextIndex(index:number){
     this.customTextIndex = index;
     this.fontColorIndex = index;
+  }
+
+  private setColorType(colorType:string){
+      this.fontColorType = colorType
   }
 }
 </script>

@@ -63,49 +63,7 @@
       <span class="close" @click="hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(2)" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
 
-      <div>
-        <div class="font-weight-bold fs-2">Choose Product</div>
-        <div class="fade-right">
-          <div class="d-flex align-items-center gap-1 pt-1 pb-2 hide-scroll" style="overflow-x: auto;">
-            <label class="button_radio" v-for="item in 10" :key="item" :class="{'mr-4': item == 10}">
-              <input checked type="radio" name="style" />
-              <span>
-              <BIconCheckCircleFill />
-              <span>Jensen Cut</span>
-            </span>
-            </label>
-          </div>
-        </div>
-
-        <div>
-          <template v-for="(item, index) in 10">
-            <div :key="index" v-if="index===0">
-              <div><span class="font-weight-bold fs-2">Product Info</span> <span class="read_more" @click="toggle_read(index)" :data-index="item"><BIconChevronDown /></span></div>
-              <div style="display: none">
-                Fashioned from performance enhancing fabrics, the Hummel Beespoke Jensen Jersey feels as light as a
-                feather and provides maximum ventilation.
-              </div>
-            </div>
-          </template>
-        </div>
-
-        <div class="pt-1 mt-1" style="border-top: 1px solid #eee">
-          <div class="font-weight-bold fs-2">Choose Stuff</div>
-          <div class="fade-right">
-            <div class="pt-1 d-flex align-items-center gap-1 hide-scroll" style="overflow-x: auto">
-              <label class="button_checkbox" v-for="item in 10" :key="item" :class="{'mr-4': item == 10}">
-                <input type="checkbox" name="style"/>
-                <span>
-                  <BIconCheckCircleFill/>
-                  <span>Jensen Cut</span>
-                  <span class="mx-1">-</span>
-                  <span>$12</span>
-                </span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Collars :productModels="productModels"/>
     </div>
     <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-if="this.$store.getters.getActiveTab === 4">
       <span class="close" @click="hideAll"><BIconX /></span>
@@ -152,10 +110,12 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 // import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 import TextCustomization from "@/components/mobile/TextCustomization.vue";
+import Collars from "@/components/mobile/Collars.vue";
 
 @Component<CustomTabs>({
   components: {
-    TextCustomization
+    TextCustomization,
+    Collars
     // ColorAccordion,
     // LogoPlacementTabs,
     // CustomizationText,
@@ -269,11 +229,6 @@ export default class CustomTabs extends Vue {
     $(".sideNav li a").removeClass('active')
   }
 
-  private toggle_read(index:number){
-    $(`.read_more:eq(${index})`).toggleClass('flip_vertical')
-    $(`.read_more:eq(${index})`).parent("div").next("div").slideToggle('fast')
-  }
-
   get svgGroups() {
     return this.$store.getters.getSvgGroups
   }
@@ -336,9 +291,9 @@ export default class CustomTabs extends Vue {
     return this.$store.getters.getSelectedProduct
   }
   //
-  // get productModels(): Record<any, any> {
-  //   return this.$store.getters.getProductModels;
-  // }
+  get productModels(): Record<any, any> {
+    return this.$store.getters.getProductModels;
+  }
   //
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts
@@ -504,28 +459,28 @@ export default class CustomTabs extends Vue {
       headElement.appendChild(style_tag)
     })
   }
-  //
-  // public addTab(index: number) {
-  //   let text = {
-  //     text: '',
-  //     type: 'name',
-  //     width: 50,
-  //     height: 50,
-  //     x_axis: 300,
-  //     y_axis: 180,
-  //     rotation: 0,
-  //     haveControls: true,
-  //     outlineEnabled: true,
-  //     side: 'back',
-  //     fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-  //     fillColor: this.firstColor.value,
-  //     fillColorPantone: this.firstColor.name,
-  //     outLineColor: this.secondColor.value,
-  //     outLineColorPantone: this.secondColor.name,
-  //     outLineWidth: 0
-  //   }
-  //   this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
-  // }
+
+  public addTab(index: number) {
+    let text = {
+      text: '',
+      type: 'name',
+      width: 50,
+      height: 50,
+      x_axis: 300,
+      y_axis: 180,
+      rotation: 0,
+      haveControls: true,
+      outlineEnabled: true,
+      side: 'back',
+      fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
+      fillColor: this.firstColor.value,
+      fillColorPantone: this.firstColor.name,
+      outLineColor: this.secondColor.value,
+      outLineColorPantone: this.secondColor.name,
+      outLineWidth: 0
+    }
+    this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
+  }
 }
 </script>
 
