@@ -52,7 +52,7 @@
       <div class="fs-3 font-weight-bold text-left">Insert details manually below</div>
       <b-button @click="homeScreen" variant="outline-secondary">Back to Design</b-button>
       <div class="d-flex flex-column h-100">
-        <RosterTable  :productId="id" :productSizes="sizeOptions" :rosterDetails="custom_arr" @addPlayer="rosterDetailsInit"/>
+        <RosterTable  :productId="id" :productSizes="sizeOptions" :roasterUrl="roasterUrl" :rosterDetails="custom_arr" @addPlayer="rosterDetailsInit"/>
         <!--        <RosterTable @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>-->
       </div>
     </div>
@@ -99,6 +99,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     if (this.$route.params.urlstring) {
       this.showLoader = true
       let url = 'shareRoster/' + this.$route.params.urlstring
+      this.roasterUrl = url
       let res = await this.$store.dispatch('getShareProductDetails', url)
       if (res.status ==200){
         this.custom_arr = JSON.parse(res.data.roster_detail)
@@ -109,7 +110,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         this.productName = res.data.product_name
         this.showLoader = false
       }else if(res.status == 404){
-        this.showError(res.data.message)
         this.showLoader = false
         this.$router.push('/')
       }
@@ -129,6 +129,7 @@ export default class ShareRoster extends Mixins(ErrorMessages) {
   public frontImage = ''
   public backImage = ''
   public productName = ''
+  public roasterUrl = ''
   public showLoader = false
 
   private setActiveEye(index:number){
@@ -156,9 +157,6 @@ export default class ShareRoster extends Mixins(ErrorMessages) {
     })
   }
 
-  public changeProduct(designsIndex: number) {
-    this.designsIndex = designsIndex
-  }
 
   public getOccurence(val: string) {
     let count = (val.match(/\*/g) || []).length;
