@@ -77,24 +77,24 @@
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
-                  <li>
-                    <b-button :id="'share'" @click="shareProduct(selectedProduct)">
-                      <font-awesome-icon :icon="['fas', 'share-alt']"/>
-                    </b-button>
-                    <b-tooltip :target="'share'" custom-class="share-tooltip home-sharing" placement="bottom" triggers="focus">
-                      <div class="share-holder">
-                        <h3>Copy link and Share</h3>
-                        <div class="share-form">
-                          <b-form inline>
-                            <!--                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>-->
-                            <b-form-input v-model="shared_link" id="copy-link"></b-form-input>
-                            <b-button variant="primary" @click="copyLink">Copy Link</b-button>
-                            <!--                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>-->
-                          </b-form>
-                        </div>
-                      </div>
-                    </b-tooltip>
-                  </li>
+<!--                  <li>-->
+<!--                    <b-button :id="'share'" @click="shareProduct(selectedProduct)">-->
+<!--                      <font-awesome-icon :icon="['fas', 'share-alt']"/>-->
+<!--                    </b-button>-->
+<!--                    <b-tooltip :target="'share'" custom-class="share-tooltip home-sharing" placement="bottom" triggers="focus">-->
+<!--                      <div class="share-holder">-->
+<!--                        <h3>Copy link and Share</h3>-->
+<!--                        <div class="share-form">-->
+<!--                          <b-form inline>-->
+<!--                            &lt;!&ndash;                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>&ndash;&gt;-->
+<!--                            <b-form-input v-model="shared_link" id="copy-link"></b-form-input>-->
+<!--                            <b-button variant="primary" @click="copyLink">Copy Link</b-button>-->
+<!--                            &lt;!&ndash;                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>&ndash;&gt;-->
+<!--                          </b-form>-->
+<!--                        </div>-->
+<!--                      </div>-->
+<!--                    </b-tooltip>-->
+<!--                  </li>-->
                   <li><a>
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
                   </a></li>
@@ -282,8 +282,11 @@ import {getClosestColor} from "@/pantoneColor";
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
     if (this.isAuthenticated) {
+
       await this.retrieveProducts()
       await this.getFillColors()
+    }
+    if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
     }
     if (this.$route.params.name) {
@@ -291,19 +294,23 @@ import {getClosestColor} from "@/pantoneColor";
       setTimeout(async () => {
         let url = 'share/' + this.$route.params.product + '/' + this.$route.params.name
         let res = await this.$store.dispatch('getShareProductDetails', url)
-        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.product_id);
+        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.data.product_id);
         // let ind = this.products.findIndex(x => x.product_id == res.product_id)
         let ind = this.products.length -1
         await this.$store.dispatch('setSelectedIndex', { selectedIndex: ind});
-        let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.style_id);
+        let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.data.style_id);
         await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-        await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(res.custom_logos));
-        await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(res.text));
-        await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.defaultcolors));
-        await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.groupcolors));
+        let logoObj = {
+          custom_logos: res.data.custom_logos,
+          product_id: res.data.product_id
+        }
+        await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logoObj);
+        await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(res.data.text));
+        await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.data.defaultcolors));
+        await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.data.groupcolors));
         await  this.$store.dispatch('setColorSectionVisibility')
         this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-          if (item.id == res.design_id){
+          if (item.id == res.data.design_id){
             Vue.set(item, 'design_show', 1)
             this.$store.dispatch('setSelectedProductDesignID',item.id)
           }else{
@@ -456,6 +463,9 @@ export default class Home extends Mixins(ErrorMessages) {
   get selectedDesignId():number{
     return  this.$store.getters.getSelectedDesignId;
   }
+  get rosterDetails(): [Record<any, any>] {
+    return this.$store.getters.getRosterDetails
+  }
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
   }
@@ -475,7 +485,6 @@ export default class Home extends Mixins(ErrorMessages) {
           url: query
         }
         let res = await this.$store.dispatch('updateSharedProduct', param)
-        console.log(res)
       }
     }catch (error){
       console.log(error)
@@ -622,7 +631,8 @@ export default class Home extends Mixins(ErrorMessages) {
       groupcolors: this.groupColors,
       id: this.$store.getters.getEditProductId,
       locker_front_png: locker_front_png,
-      locker_back_png: locker_back_png
+      locker_back_png: locker_back_png,
+      roster: this.rosterDetails
     }
     if (this.editStatus){
       this.showLoader = true
@@ -782,29 +792,6 @@ export default class Home extends Mixins(ErrorMessages) {
     }
   }
 
-  public async shareProduct(){
-    try {
-      const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-        return item.design_show
-      })
-      let locker = {
-        customer_id: this.customer ? this.customer.id : '',
-        type: 'product',
-        product_id: this.selectedProduct.product_id,
-        style_id: this.selectedProduct.productstyles[this.styleIndex].id,
-        design_id: currentDesign[0].id,
-        custom_logos: this.customLogos,
-        text: this.customTexts,
-        colors: this.logoColors,
-        defaultcolors: this.defaultColors,
-        groupcolors: this.groupColors
-      }
-      let res = await this.$store.dispatch('shareProduct', locker)
-      this.shared_link = location.host+"/#/"+res.data.url
-    }catch (error){
-      console.log(error)
-    }
-  }
   public copyLink(){
     let testingCodeToCopy = document.querySelector("#copy-link")  as Record<any, any>
     testingCodeToCopy.select()

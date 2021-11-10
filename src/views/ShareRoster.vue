@@ -1,46 +1,46 @@
 <template>
-<!--  <div>-->
-<!--    <b-button class="d-none d-lg-block" v-b-modal.modal-scrollable>Edit Roster</b-button>-->
+  <!--  <div>-->
+  <!--    <b-button class="d-none d-lg-block" v-b-modal.modal-scrollable>Edit Roster</b-button>-->
 
-<!--    <b-modal id="modal-scrollable" scrollable title="Roster" content-class="roster-modal" size="xl"-->
-<!--             footer-class="hide-modal-footer d-none">-->
-<!--      <div class="d-flex flex-wrap justify-content-between">-->
-<!--        <RosterDetails :productSizes="sizeOptions" @addPlayer="rosterDetailsInit"/>-->
-<!--        <div class="roster-preview-area">-->
-<!--          <CustomizationPreview :designs="products[designsIndex]"/>-->
-<!--          <OrderDetails/>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </b-modal>-->
-<!--    <b-modal ref="myModal" content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered scrollable size="lg" title="Upload Team Roster">-->
-<!--      <p class="mb-4">The Team Roster can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>-->
-<!--      <div class="roster-template-area">-->
-<!--        <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download Roster Template <a  v-b-tooltip.hover-->
-<!--                                                                                                           title="Enter roster in excel file">-->
-<!--          <font-awesome-icon :icon="['fas', 'info-circle']"/>-->
-<!--        </a></b-button>-->
+  <!--    <b-modal id="modal-scrollable" scrollable title="Roster" content-class="roster-modal" size="xl"-->
+  <!--             footer-class="hide-modal-footer d-none">-->
+  <!--      <div class="d-flex flex-wrap justify-content-between">-->
+  <!--        <RosterDetails :productSizes="sizeOptions" @addPlayer="rosterDetailsInit"/>-->
+  <!--        <div class="roster-preview-area">-->
+  <!--          <CustomizationPreview :designs="products[designsIndex]"/>-->
+  <!--          <OrderDetails/>-->
+  <!--        </div>-->
+  <!--      </div>-->
+  <!--    </b-modal>-->
+  <!--    <b-modal ref="myModal" content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered scrollable size="lg" title="Upload Team Roster">-->
+  <!--      <p class="mb-4">The Team Roster can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>-->
+  <!--      <div class="roster-template-area">-->
+  <!--        <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download Roster Template <a  v-b-tooltip.hover-->
+  <!--                                                                                                           title="Enter roster in excel file">-->
+  <!--          <font-awesome-icon :icon="['fas', 'info-circle']"/>-->
+  <!--        </a></b-button>-->
 
-<!--        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template-->
-<!--          <b-form-file  class="mb-2"></b-form-file>-->
-<!--          <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">-->
-<!--            <font-awesome-icon :icon="['fas', 'info-circle']"/>-->
-<!--          </a></b-button>-->
-<!--      </div>-->
-<!--    </b-modal>-->
+  <!--        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template-->
+  <!--          <b-form-file  class="mb-2"></b-form-file>-->
+  <!--          <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">-->
+  <!--            <font-awesome-icon :icon="['fas', 'info-circle']"/>-->
+  <!--          </a></b-button>-->
+  <!--      </div>-->
+  <!--    </b-modal>-->
 
-<!--    <div class="d-lg-none">-->
-<!--      <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>-->
-<!--    </div>-->
-<!--    <div class="team-order-details">-->
-<!--      <OrderDetails/>-->
-<!--    </div>-->
-<!--  </div>-->
+  <!--    <div class="d-lg-none">-->
+  <!--      <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>-->
+  <!--    </div>-->
+  <!--    <div class="team-order-details">-->
+  <!--      <OrderDetails/>-->
+  <!--    </div>-->
+  <!--  </div>-->
 
   <div class="p-3 d-flex gap-3">
     <div class="d-flex flex-column align-items-center">
       <div class="d-flex align-items-center justify-content-center gap-2">
-        <img style="max-height: 300px" src="https://santa-backend.s3.eu-central-1.amazonaws.com/files/locker_products/223/front.png?q=30092021065643908384" alt="">
-        <img style="max-height: 300px" src="https://santa-backend.s3.eu-central-1.amazonaws.com/files/locker_products/128/front.png?q=" alt="">
+        <img style="max-height: 300px" :src="frontImage" alt="">
+        <img style="max-height: 300px" :src="backImage" alt="">
       </div>
 
       <div class="mt-3 text-left">
@@ -50,10 +50,10 @@
     </div>
     <div class="players-data pt-4">
       <div class="fs-3 font-weight-bold text-left">Insert details manually below</div>
-
+      <b-button @click="homeScreen" variant="outline-secondary">Back to Design</b-button>
       <div class="d-flex flex-column h-100">
-        <RosterTable :productSizes="selectedProduct.sizes" @addPlayer="rosterDetailsInit"/>
-<!--        <RosterTable @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>-->
+        <RosterTable  :productId="id" :productSizes="sizeOptions" :rosterDetails="custom_arr" @addPlayer="rosterDetailsInit"/>
+        <!--        <RosterTable @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>-->
       </div>
     </div>
 
@@ -72,17 +72,20 @@
           </a></b-button>
       </div>
     </b-modal>
+    <div class="loader global" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import OrderDetails from '@/components/OrderDetails.vue'
 import {http} from "@/httpCommon";
 import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
 import RosterTable from "@/components/RosterTable.vue";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 
 @Component<ShareRoster >({
@@ -92,26 +95,41 @@ import RosterTable from "@/components/RosterTable.vue";
     OrderDetails,
     Scene
   },
-  mounted() {
-    this.setProductSizes()
-    this.$nextTick(() => {
-      if (!this.rosterDetails.length) {
-        this.rosterDetailsInit()
+  async mounted() {
+    if (this.$route.params.urlstring) {
+      this.showLoader = true
+      let url = 'shareRoster/' + this.$route.params.urlstring
+      let res = await this.$store.dispatch('getShareProductDetails', url)
+      if (res.status ==200){
+        this.custom_arr = JSON.parse(res.data.roster_detail)
+        this.productSizes = res.data.sizes
+        this.id = res.data.id
+        this.frontImage = res.data.product_front_url
+        this.backImage  = res.data.product_back_url
+        this.productName = res.data.product_name
+        this.showLoader = false
+      }else if(res.status == 404){
+        this.showError(res.data.message)
+        this.showLoader = false
+        this.$router.push('/')
       }
-    })
+    }
+    this.setProductSizes()
   }
 })
 
-export default class ShareRoster extends Vue {
-  // @Prop({required: true}) productSizes!: any
-  private products: any[] = []
-  private company_id !: string
-  private product_id !: string
-  public designsIndex = 0
+export default class ShareRoster extends Mixins(ErrorMessages) {
+  public id = 0
+  public custom_arr: Record<any, any>[] = [];
+  public productSizes : any[] = []
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
   private activeEye = -1;
+  public frontImage = ''
+  public backImage = ''
+  public productName = ''
+  public showLoader = false
 
   private setActiveEye(index:number){
     if (this.activeEye == index){
@@ -120,32 +138,6 @@ export default class ShareRoster extends Vue {
       this.activeEye = index;
     }
   }
-
-  get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
-  }
-
-  get selectedProduct(): Record<any, any> {
-    return this.$store.getters.getSelectedProduct
-  }
-
-  get styleIndex(): number {
-    return this.$store.getters.getCurrentStyleIndex;
-  }
-
-  retrieveProducts(): void {
-    this.product_id = '1'
-    this.company_id = '1'
-    let param = '?product_id=' + this.product_id + '&company_id=' + this.company_id
-    http.get(param)
-      .then((response: any) => {
-        this.products = response.data.products.data;
-      })
-      .catch((e: any) => {
-        console.log(e)
-      });
-  }
-
   public rosterDetailsInit() {
     let payload = {
       text: '',
@@ -154,7 +146,7 @@ export default class ShareRoster extends Vue {
       quantity: 1,
       information: ''
     }
-    this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
+    this.custom_arr.push(payload)
   }
 
   public setProductSizes() {
@@ -223,7 +215,8 @@ export default class ShareRoster extends Vue {
           }
           let objStatus = false;
           for (let i in rows[row]) {
-            if (rows[row][2] && this.selectedProduct.product_name == rows[row][2]) {
+            console.log(rows[row])
+            if (rows[row][2] && this.productName == rows[row][2]) {
               objStatus = true
               if (i == '3') {
                 obj.size = rows[row][i];
@@ -247,7 +240,7 @@ export default class ShareRoster extends Vue {
           }
         }
         if (loopStatus == true){
-          this.$store.dispatch('updateRoster', this.fileData);
+          this.custom_arr = this.fileData
           this.ref['myModal'].hide();
         }else{
           alert('Size is missing');
@@ -268,6 +261,9 @@ export default class ShareRoster extends Vue {
       link.download = 'roster_template.xlsx';
       link.click();
     })
+  }
+  public homeScreen(){
+    this.$router.push('/')
   }
 }
 </script>

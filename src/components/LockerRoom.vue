@@ -55,7 +55,7 @@
                         </li>
                         <li>
                           <b-button data-title="Share design" :id="'share'+i+''+ind"
-                                    @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"
+                                    @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"
                                     @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
                             :icon="['fas', 'share-alt']"/></b-button>
                           <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom"
@@ -66,7 +66,7 @@
                               <div class="share-form">
                                 <b-form inline>
                                   <b-form-input :id="'copy-'+ind"
-                                                :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
+                                                :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
                                   ></b-form-input>
                                   <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
@@ -137,7 +137,6 @@
                     <template v-for="(collection, index) in getCollections">
                       <div :key="index" class="products-block">
                         <div class="image-holder">
-
                           <div class="convas_container" :key="collection_product_index"
                                v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
@@ -147,13 +146,11 @@
                                    alt="">
                             </template>
                           </div>
-
                           <div class="controls">
                             <a v-b-tooltip.hover.right title="Delete collection"
                                @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
-
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
                                class="btn light btn-secondary rounded-circle"><font-awesome-icon
                               :icon="['fas', 'edit']"/></a>
@@ -289,7 +286,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         mutation.target.classList.add('dropping')
       }else if(mutation.removedNodes.length){
         console.log('Nodes removed', mutation.removedNodes.length);
-
         mutation.target.classList.remove('dropping')
       }
       else if (mutation.type === 'attributes') {
@@ -525,13 +521,15 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     const id = this.getLockerProducts[lockerIndex].product[productIndex].id
     let prod_res = await this.$store.dispatch('getLockerProductDetail', id);
     Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
-
+    this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
+    this.$root.$emit('rostershared', '')
     const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
     const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
     this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
     const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
 
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
+    console.log(element)
 
     if (product_id != this.$store.getters.getEditMainProductId) {
       await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
@@ -539,9 +537,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }
     let ind = this.products.length - 1;
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
+    console.log(this.selectedProduct.productstyles)
     let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
     await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-    console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
     // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
     await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);

@@ -59,6 +59,12 @@ const ProductAttributes:Module<any, any> = {
     },
     activeTab : 0,
     showShuffle : true,
+    canvasImage:{
+      ref_front:'',
+      ref_back:'',
+      front:'',
+      back:''
+    },
     using_logo_colors: false
   },
   mutations: {
@@ -390,19 +396,18 @@ const ProductAttributes:Module<any, any> = {
       state.products.push(payload);
     },
     OVERRIDE_LOGOS(state:Record<any, any>, payload){
-
       const locker_logos = JSON.parse(payload.custom_logos)
       Object.keys(state.customLogos).map(function(key:any, index:any) {
         if(key == payload.product_id) {
           //state.customLogos[key] = locker_logos
-          Vue.set(state.customLogos,key,locker_logos)
+          Vue.set(state.customLogos, key, locker_logos)
         }
         else {
           const logo_setting = getLogoSettings(0,false,key)
           const final_logo = {...logo_setting,...locker_logos[0]}
 
           //state.customLogos[key] = [final_logo]
-          Vue.set(state.customLogos,key,[final_logo])
+          Vue.set(state.customLogos, key,[final_logo])
         }
       });
      // state.customLogos = payload;
@@ -476,8 +481,10 @@ const ProductAttributes:Module<any, any> = {
       state.rosterDetails.splice(payload, 1);
     },
     UPDATE_ROSTER(state:Record<any, any>, payload:Record<any, any>){
-      state.rosterDetails = payload;
-    },
+      if (payload){
+        state.rosterDetails = payload;
+      }
+      },
     OVERRIDE_ROSTER(state:Record<any, any>){
       state.rosterDetails = [{
         text: '',
@@ -681,8 +688,15 @@ const ProductAttributes:Module<any, any> = {
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
       state.using_logo_colors = payload
     },
+    STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
+      state.canvasImage.ref_front = payload.front
+      state.canvasImage.ref_back = payload.back
+    }
   },
   getters: {
+    getCanvasImage: state => {
+      return state.canvasImage
+    },
     getShuffle: state => {
       return state.showShuffle
     },
@@ -1059,6 +1073,15 @@ const ProductAttributes:Module<any, any> = {
         return err.response.data.message
       })
     },
+    async regenerateRosterLink({commit}, payload){
+      return await http.post('regenerate/link', payload).then((res) => {
+        if (res.status == 201){
+          return res.data
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    }
   }
 }
 export default ProductAttributes;
