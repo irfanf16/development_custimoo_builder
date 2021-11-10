@@ -41,7 +41,7 @@
       <button @click="addPlayers(roster)" class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
         <BIconPlus />
       </button>
-      <b-button variant="primary"  @click="saveRoster(productId)">Save Roster</b-button>
+      <b-button variant="primary"  @click="saveRoster(productId, roasterUrl)">Save Roster</b-button>
     </div>
   </div>
 </template>
@@ -60,6 +60,7 @@ import {http} from "@/httpCommon";
 export default class RosterTable extends Vue {
   @Prop({required: true}) productSizes!: any
   @Prop({required: true, default: 0}) productId!: number
+  @Prop({required: true, default: ''}) roasterUrl!: string
   @Prop({required: true, default: []}) rosterDetails: Record<any, any>;
   private roster: any[] = []
   public fileData: Record<any, any>[] = []
@@ -101,8 +102,8 @@ export default class RosterTable extends Vue {
   public removeIndex(ind:number){
     this.rosterDetails.splice(ind, 1)
   }
-  public saveRoster(id:number){
-    http.post('update/roster', {id:id, roster: this.rosterDetails}).then((res) => {
+  public saveRoster(id:number, url:string){
+    http.post('update/roster', {id:id, roster: this.rosterDetails, url:url}).then((res) => {
       if (res.status == 201){
         this.$router.push('/')
       }
