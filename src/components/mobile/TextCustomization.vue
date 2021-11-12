@@ -3,7 +3,7 @@
     <b-tabs class="player_text" v-if="this.selectedProductID">
       <b-tab v-for="(customText, tabIndex) in customTexts" :key="tabIndex" @click="setTextIndex(tabIndex)">
         <template #title>
-          {{ customText.side | capitalize}} {{ customText.type | capitalize }}
+          {{ customText.side ? customText.side : 'text' | capitalize}} {{ customText.type | capitalize }}
         </template>
         <div class="grid mobile-cols-2 gap-1">
           <div class="mobile_controls">
@@ -74,6 +74,10 @@
           </b-tab>
         </b-tabs>
       </b-tab>
+
+      <template #tabs-end>
+          <span @click="addTab" style="font-size: 0.9em">Add <BIconPlus/></span>
+      </template>
     </b-tabs>
   </div>
 </template>
@@ -118,10 +122,12 @@ export default class TextCustomization extends Vue {
   private activeCollection = 0;
   private activeFont = 0;
   public productColors: any[] = []
-  public firstColor!: Record<any, any>
-  public secondColor!: Record<any, any>
+  // public firstColor!: Record<any, any>
+  // public secondColor!: Record<any, any>
   @Prop({required: true}) productFonts!: any
   @Prop({required: true}) fontsColors!: any
+  @Prop({required: true}) firstColor!: any
+  @Prop({required: true}) secondColor!: any
   // @Prop({required: true}) customTextIndex!: any
   @Prop({required: true}) fontOptions!: any
   @Prop({required: true}) selectedProductID!: any
@@ -164,7 +170,7 @@ export default class TextCustomization extends Vue {
   }
 
   get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts(this.selectedProductID)
+    return this.$store.getters.getCustomTexts()
   }
 
   public productColorsManipulation() {
@@ -187,7 +193,7 @@ export default class TextCustomization extends Vue {
     }
   }
 
-  public addTab(index: number) {
+  public addTab() {
     let text = {
       text: '',
       type: 'name',
@@ -206,7 +212,8 @@ export default class TextCustomization extends Vue {
       outLineColorPantone: this.secondColor.name,
       outLineWidth: 0
     }
-    this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
+    console.log('asdsd', {index: this.customTexts})
+    this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text, prd_id:this.selectedProduct.id})
   }
 
   public fontOptionChanged(index:number, i:number, val:string){

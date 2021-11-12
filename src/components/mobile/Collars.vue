@@ -2,8 +2,8 @@
   <div>
     <div class="font-weight-bold fs-2">Choose Product</div>
     <div class="fade-right">
-      <div class="d-flex align-items-center gap-1 pt-1 pb-2 hide-scroll" style="overflow-x: auto;">
-        <label class="button_radio" v-for="(item, index) in productModels" :key="index" :class="{'mr-4': item == 10}">
+      <div class="d-flex align-items-center gap-1 pt-1 pb-2 hide-scroll" v-if="productModels" style="overflow-x: auto;">
+        <label class="button_radio" v-for="(item, index) in productModels" :key="index" :class="{'mr-4': index == (productModels.length)-1}">
           <input checked type="radio" name="style" />
           <span>
               <BIconCheckCircleFill />
@@ -18,25 +18,34 @@
         <div>
           <div><span class="font-weight-bold fs-2">Product Info</span> <span class="read_more" @click="toggle_read(currentStyle)" :data-index="currentStyle"><BIconChevronDown /></span></div>
           <div style="display: none" v-html="productModels[currentStyle].product_model_description">
-            Fashioned from performance enhancing fabrics, the Hummel Beespoke Jensen Jersey feels as light as a
-            feather and provides maximum ventilation.
           </div>
         </div>
       </template>
     </div>
 
-    <div class="pt-1 mt-1" style="border-top: 1px solid #eee">
+    <div class="choose-collar mb-3">
+      <div class="collar-designs">
+        <template v-for="(style, i) in productModels[currentStyle].productstyles">
+          <template v-if="productModels[currentStyle].productstyles > 1">
+            <b-button :key="i"  v-if="model.model_styles.includes(style.id)" variant="outline-light" @click="changeStyleIndex(i)"><img :src="storageUrl+style.front.file_url " /></b-button>
+          </template>
+        </template>
+      </div>
+    </div>
+
+    <div class="pt-1 mt-1" style="border-top: 1px solid #eee" v-if="productModels[currentStyle].addons">
       <div class="font-weight-bold fs-2">Choose Stuff</div>
       <div class="fade-right">
         <div class="pt-1 d-flex align-items-center gap-1 hide-scroll" style="overflow-x: auto">
-          <label class="button_checkbox" v-for="item in 10" :key="item" :class="{'mr-4': item == 10}">
+          <label v-for="(item, i) in productModels[currentStyle].addons" :key="i">
+            <img :src="storageUrl+style.front.file_url " />
             <input type="checkbox" name="style"/>
             <span>
-                  <BIconCheckCircleFill/>
-                  <span>Jensen Cut</span>
-                  <span class="mx-1">-</span>
-                  <span>$12</span>
-                </span>
+              <BIconCheckCircleFill/>
+              <span>{{ item.addon.name }}</span>
+              <span class="mx-1">-</span>
+              <span>${{item.addon.price}}</span>
+            </span>
           </label>
         </div>
       </div>
@@ -50,7 +59,9 @@ import {http} from "@/httpCommon";
 import {default as $} from "jquery";
 
 @Component<Collars>({
-
+  mounted() {
+    console.log('productModels', this.productModels)
+  }
 })
 
 export default class Collars extends Vue {

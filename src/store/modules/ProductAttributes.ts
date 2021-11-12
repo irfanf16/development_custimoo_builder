@@ -302,10 +302,13 @@ const ProductAttributes:Module<any, any> = {
     },
     customTexts(state: Record<any, any>, customText: Record<any, any>) {
       if(customText){
-        if(!state.customTexts[customText.prd_id]) {
+        console.log('payload', customText)
+        if(!state.customTexts[state.customTexts]) {
           Vue.set(state.customTexts, customText.prd_id, [])
         }
         Vue.set(state.customTexts[customText.prd_id], customText.index, customText.text)
+
+        console.log('payload', state.customTexts)
       }
     },
     customTextAttribute(state: Record<any, any>, customTextAttribute: Record<any, any>) {

@@ -57,7 +57,7 @@
 
       <TextCustomization
         :productFonts="selectedProduct.namefonts" :selectedProductID="selectedProduct.id"
-        :fontsColors="fontsColors" :fontOptions="fontOptions" />
+        :fontsColors="fontsColors" :firstColor="firstColor" :secondColor="secondColor" :fontOptions="fontOptions" />
     </div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 3" >
       <span class="close" @click="hideAll"><BIconX /></span>
@@ -129,7 +129,7 @@ import Collars from "@/components/mobile/Collars.vue";
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
-    // this.customTextInit()
+    this.customTextInit()
    console.log('customTexts', this.selectedProduct)
   },
 })
