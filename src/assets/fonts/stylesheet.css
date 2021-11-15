@@ -85,3 +85,37 @@
     font-style: italic;
     font-display: swap;
 }
+
+
+.color-tab-active a {
+    color: #219F84;
+    border-bottom: 1px solid #219F84;
+}
+
+.color-circle {
+    width: 36px;
+    height: 36px;
+    margin: 0 5px 10px;
+}
+.loader {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    z-index: 1030;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.loader img {
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+}
