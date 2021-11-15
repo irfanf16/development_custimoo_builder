@@ -407,61 +407,83 @@ const ProductAttributes:Module<any, any> = {
     },
     OVERRIDE_TEXT(state:Record<any, any>, payload){
       state.customTexts = {};
-
       const locker_texts = JSON.parse(payload.text)
-
       state.products.forEach((product: Record<any, any>) => {
         if(!state.customTexts[product.id]) {
           Vue.set(state.customTexts, product.id, [])
         }
         product.productnames =  sortTextsArray(product.productnames);
-
-        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-
-          const obj = fontsColorsManipulation(product)
-
-          //calculate colors pantone on init
-          let fill_color_pantone = obj.firstColor.name;
-          const pantone = getClosestColor(obj.firstColor.value);
-          if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-            fill_color_pantone = pantone.pantone;
+        const obj = fontsColorsManipulation(product)
+        //calculate colors pantone on init
+        let fill_color_pantone = obj.firstColor.name;
+        const pantone = getClosestColor(obj.firstColor.value);
+        if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+          fill_color_pantone = pantone.pantone;
+        }
+        let outLine_color_pantone = obj.secondColor.name;
+        const opantone = getClosestColor(obj.secondColor.value);
+        if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+          outLine_color_pantone = opantone.pantone;
+        }
+        if(product.id == payload.product_id) {
+          const productTextsArr = product.productnames
+          locker_texts.forEach(async (lockerText: Record<any, any>, lockerTextIndex: number) => {
+            Vue.set(state.customTexts[product.id], lockerTextIndex, lockerText)
+            if(productTextsArr[lockerTextIndex])
+              productTextsArr.splice(lockerTextIndex,1)
+          })
+          if(productTextsArr.length > 0) {
+            let maxIndex = locker_texts.length - 1
+            productTextsArr.forEach(async (productText: Record<any, any>, productTextIndex: number) => {
+              maxIndex = maxIndex + 1
+              const text = {
+                text: '',
+                type: productText.type,
+                width: productText.width,
+                height: productText.height,
+                x_axis: productText.x_axis,
+                y_axis: productText.y_axis,
+                rotation: productText.rotation,
+                haveControls: Boolean(!productText.is_locked),
+                outlineEnabled: Boolean(productText.outline_enabled),
+                side: productText.side,
+                fontFamily: fontsList(product)[0].value,
+                fillColor: obj.firstColor.value,
+                fillColorPantone: fill_color_pantone,
+                outLineColor: obj.secondColor.value,
+                outLineColorPantone: outLine_color_pantone,
+                outLineWidth: 0,
+                selectColor: false
+              }
+              Vue.set(state.customTexts[product.id], maxIndex, text)
+            })
           }
-
-          let outLine_color_pantone = obj.secondColor.name;
-          const opantone = getClosestColor(obj.secondColor.value);
-          if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-            outLine_color_pantone = opantone.pantone;
-          }
-
-          if(product.id == payload.product_id) {
-            if(locker_texts[index])
-              Vue.set(state.customTexts[product.id], index, locker_texts[index])
-          }
-
-          else {
+        }
+        else {
+          product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
             const locker_text_str = locker_texts[index] ? locker_texts[index]['text'] : ''
-            const text = {
-              text: locker_text_str,
-              type: productName.type,
-              width: productName.width,
-              height: productName.height,
-              x_axis: productName.x_axis,
-              y_axis: productName.y_axis,
-              rotation: productName.rotation,
-              haveControls: Boolean(!productName.is_locked),
-              outlineEnabled: Boolean(productName.outline_enabled),
-              side: productName.side,
-              fontFamily: fontsList(product)[0].value,
-              fillColor: obj.firstColor.value,
-              fillColorPantone: fill_color_pantone,
-              outLineColor: obj.secondColor.value,
-              outLineColorPantone: outLine_color_pantone,
-              outLineWidth: 0,
-              selectColor: false
-            }
-            Vue.set(state.customTexts[product.id], index, text)
-          }
-        })
+              const text = {
+                text: locker_text_str,
+                type: productName.type,
+                width: productName.width,
+                height: productName.height,
+                x_axis: productName.x_axis,
+                y_axis: productName.y_axis,
+                rotation: productName.rotation,
+                haveControls: Boolean(!productName.is_locked),
+                outlineEnabled: Boolean(productName.outline_enabled),
+                side: productName.side,
+                fontFamily: fontsList(product)[0].value,
+                fillColor: obj.firstColor.value,
+                fillColorPantone: fill_color_pantone,
+                outLineColor: obj.secondColor.value,
+                outLineColorPantone: outLine_color_pantone,
+                outLineWidth: 0,
+                selectColor: false
+              }
+              Vue.set(state.customTexts[product.id], index, text)
+          })
+        }
       })
     },
     OVERRIDE_DEFAULT_COLOR(state:Record<any, any>, payload){
