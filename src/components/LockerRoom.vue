@@ -528,15 +528,27 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
 
+    let ind = 0
     if (product_id != this.$store.getters.getEditMainProductId) {
-      await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
+      const exist = this.products.find((prd:Record<any, any>) => {
+        return prd.id == product_id
+      })
+      if(!exist) {
+        this.$store.commit('CHANGE_EDIT_LOCKER_PRODUCT', {prd_id: product_id})
+        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
+        ind = this.products.length - 1;
+      }
+    else {
+        const index = this.products.findIndex((prd:Record<any, any>) => prd.id == product_id)
+        ind = index >= 0 ? index : 0
+      }
       this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
     }
-    let ind = this.products.length - 1;
+    // let ind = this.products.length - 1;
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
     let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
     await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-    console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
+    //console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
     // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
     await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);

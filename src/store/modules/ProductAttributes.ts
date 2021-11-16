@@ -69,7 +69,8 @@ const ProductAttributes:Module<any, any> = {
       color:'',
       flood_fill:false
 
-    }
+    },
+    editLockerProduct: []
   },
   mutations: {
 
@@ -95,6 +96,12 @@ const ProductAttributes:Module<any, any> = {
       if (payload.product_id){
         state.editProduct.mainProductId = payload.product_id
       }
+    },
+
+    CHANGE_EDIT_LOCKER_PRODUCT(state:Record<any, any>, payload){
+      const exist = state.editLockerProduct.find((x:number) => x == payload.prd_id)
+      if(!exist)
+        state.editLockerProduct.push(payload.prd_id)
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
@@ -458,7 +465,6 @@ const ProductAttributes:Module<any, any> = {
         if(!state.customTexts[product.id]) {
           Vue.set(state.customTexts, product.id, [])
         }
-        product.productnames =  sortTextsArray(product.productnames);
         const obj = fontsColorsManipulation(product)
         //calculate colors pantone on init
         let fill_color_pantone = obj.firstColor.name;
@@ -471,12 +477,11 @@ const ProductAttributes:Module<any, any> = {
         if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
           outLine_color_pantone = opantone.pantone;
         }
-        if(product.id == payload.product_id) {
-          const productTextsArr = product.productnames
-          locker_texts.forEach(async (lockerText: Record<any, any>, lockerTextIndex: number) => {
+        if(parseInt(product.id) == parseInt(payload.product_id)) {
+          const productTextsArr = JSON.parse(JSON.stringify(product.productnames))
+          locker_texts.forEach( (lockerText: Record<any, any>, lockerTextIndex: number) => {
             Vue.set(state.customTexts[product.id], lockerTextIndex, lockerText)
-            if(productTextsArr[lockerTextIndex])
-              productTextsArr.splice(lockerTextIndex,1)
+            productTextsArr.shift()
           })
           if(productTextsArr.length > 0) {
             let maxIndex = locker_texts.length - 1
@@ -508,26 +513,26 @@ const ProductAttributes:Module<any, any> = {
         else {
           product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
             const locker_text_str = locker_texts[index] ? locker_texts[index]['text'] : ''
-              const text = {
-                text: locker_text_str,
-                type: productName.type,
-                width: productName.width,
-                height: productName.height,
-                x_axis: productName.x_axis,
-                y_axis: productName.y_axis,
-                rotation: productName.rotation,
-                haveControls: Boolean(!productName.is_locked),
-                outlineEnabled: Boolean(productName.outline_enabled),
-                side: productName.side,
-                fontFamily: fontsList(product)[0].value,
-                fillColor: obj.firstColor.value,
-                fillColorPantone: fill_color_pantone,
-                outLineColor: obj.secondColor.value,
-                outLineColorPantone: outLine_color_pantone,
-                outLineWidth: 0,
-                selectColor: false
-              }
-              Vue.set(state.customTexts[product.id], index, text)
+            const text = {
+              text: locker_text_str,
+              type: productName.type,
+              width: productName.width,
+              height: productName.height,
+              x_axis: productName.x_axis,
+              y_axis: productName.y_axis,
+              rotation: productName.rotation,
+              haveControls: Boolean(!productName.is_locked),
+              outlineEnabled: Boolean(productName.outline_enabled),
+              side: productName.side,
+              fontFamily: fontsList(product)[0].value,
+              fillColor: obj.firstColor.value,
+              fillColorPantone: fill_color_pantone,
+              outLineColor: obj.secondColor.value,
+              outLineColorPantone: outLine_color_pantone,
+              outLineWidth: 0,
+              selectColor: false
+            }
+            Vue.set(state.customTexts[product.id], index, text)
           })
         }
       })
@@ -571,6 +576,7 @@ const ProductAttributes:Module<any, any> = {
     RESET_STORE(state: Record<any, any>){
       state.undoItems = []
       state.redoItems = []
+      state.edit_locker_product = []
       state.customLogos = {};
       //state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
@@ -753,6 +759,9 @@ const ProductAttributes:Module<any, any> = {
     },
   },
   getters: {
+    getEditLockerProduct: state => {
+      return state.editLockerProduct
+    },
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
     },
