@@ -300,15 +300,13 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.customLogos[key],0, logo_)
       });
     },
+
     customTexts(state: Record<any, any>, customText: Record<any, any>) {
       if(customText){
-        console.log('payload', customText)
-        if(!state.customTexts[state.customTexts]) {
+        if(!state.customTexts[customText.prd_id]) {
           Vue.set(state.customTexts, customText.prd_id, [])
         }
         Vue.set(state.customTexts[customText.prd_id], customText.index, customText.text)
-
-        console.log('payload', state.customTexts)
       }
     },
     customTextAttribute(state: Record<any, any>, customTextAttribute: Record<any, any>) {

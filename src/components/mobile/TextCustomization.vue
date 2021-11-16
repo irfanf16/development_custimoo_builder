@@ -8,6 +8,7 @@
         <div class="grid mobile-cols-2 gap-1">
           <div class="mobile_controls">
 <!--            <label class="d-flex align-items-center justify-content-between"><span>{{ customTexts[tabIndex].type | capitalize }} {{ customTexts[tabIndex].side }}</span></label>-->
+            <div>asd</div>
             <b-form-input
               @click="isHidden = !isHidden"
               class="mt-2"
