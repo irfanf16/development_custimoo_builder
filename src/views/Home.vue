@@ -574,31 +574,34 @@ export default class Home extends Mixins(ErrorMessages) {
 
     if (this.hasProducts) {
       http.get(url).then(async (response: any) => {
+        console.log(searchCall,productType)
         if (searchCall || productType) {
           this.$store.commit('SET_PRODUCTS', []);
-         // await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
         }
-
         let product_data = this.products.concat(response.data.products.data)
+        //remove product from product_data array because already added by locker
+        if(!productType) {
+          this.$store.getters.getEditLockerProduct.forEach((data_id:number) => {
+            const exist = product_data.find((prd:Record<any, any>) => prd.id == data_id)
+            if(exist) {
+              product_data = product_data.filter((product: Record<any, any>) => product.id != exist.id)
+            }
+          })
+        }
         await this.$store.commit('SET_PRODUCTS', product_data);
-
-
         await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
 
-         let customLogos = this.$store.getters.getCustomLogoObject
+        let customLogos = this.$store.getters.getCustomLogoObject
         product_data.forEach(async (product:any) => {
           if(!customLogos[product.id]) {
             await this.$store.dispatch('setCustomObj',product.id)
           }
         })
-
         //set custom text objects for new products
         let customTexts = this.$store.getters.getCustomTextObject
         product_data.forEach((product:any) => {
           if(!customTexts[product.id]) {
-            product.productnames =  sortTextsArray(product.productnames);
             product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-
               const obj = fontsColorsManipulation(product)
               //calculate colors pantone on init
               let fill_color_pantone = obj.firstColor.name;
@@ -633,12 +636,9 @@ export default class Home extends Mixins(ErrorMessages) {
                 selectColor: false
               }
               await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
-
             })
           }
         });
-
-
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
@@ -695,8 +695,13 @@ export default class Home extends Mixins(ErrorMessages) {
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       if (res == true){
         this.showLockerRoomModal()
-        this.ref.saveToLockerModal.ref['my-modal'].hide();
-        this.ref.saveToLockerModal.showLoader = false;
+        console.log()
+        if(this.ref.saveToLockerModal) {
+          this.ref.saveToLockerModal.ref['my-modal'].hide();
+          this.ref.saveToLockerModal.showLoader = false;
+        }
+
+
       }
     }
   }
