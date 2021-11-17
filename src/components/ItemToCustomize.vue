@@ -49,20 +49,21 @@ export default class ItemToCustomize extends Vue {
     let self:Record<string, any> = this;
     let old_val = self[prd_type];
     self[prd_type] = new_val;
+    const itemCarousel = this.$refs['itemsCarousel'] as Record<any, any>
     if(new_val == false) {
       if(self.customized || self.personalized) {
         await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
         this.$emit('retrieveProducts','/list/products',false,true)
-        this.$refs['itemsCarousel'].setSliderIndex();
+        itemCarousel.setSliderIndex();
       } else {
         await this.$store.dispatch('setProductType', {prd_type: prd_type, value: old_val});
         self[prd_type] = prd_type == "personalized" ? self.$store.getters.getPersonalized : this.$store.getters.getCustomized;
-        this.$refs['itemsCarousel'].setSliderIndex();
+        itemCarousel.setSliderIndex();
       }
     } else {
       await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
       this.$emit('retrieveProducts','/list/products',false,true)
-      this.$refs['itemsCarousel'].setSliderIndex();
+      itemCarousel.setSliderIndex();
     }
   }
   public async changeProductType_back(prd_type :any){

@@ -777,11 +777,11 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     });
     //updating new locker products
     this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: new_room_index, products: new_locker_products})
-    let old_locker_new_products = differenceBy(old_locker_products, added_products, "id")
+    let old_locker_new_products = differenceBy(old_locker_products, added_products, "id") as Record<any, any>
     old_locker_new_products = old_locker_new_products.map((old_locker_product: Record<any, any>, olpIdx: number) => {
       old_locker_product.sort_order = olpIdx + 1;
       return old_locker_product;
-    });
+    })
     //updating active locker products
     this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: this.tabIndex, products: old_locker_new_products})
     return {
