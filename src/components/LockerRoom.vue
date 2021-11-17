@@ -527,10 +527,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
     this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
     const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
-
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
-    console.log(element)
-
     if (product_id != this.$store.getters.getEditMainProductId) {
       await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
       this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})

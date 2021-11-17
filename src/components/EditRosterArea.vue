@@ -45,7 +45,21 @@ import RosterDetails from '@/components/RosterDetails.vue'
 import {http} from "@/httpCommon";
 import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
+import Echo from "laravel-echo"
+//import io from "socket.io-client"
 
+window.io = require('socket.io-client');
+// console.log(localStorage.getItem('access_tokens'))
+window.Echo = new Echo({
+  broadcaster: "socket.io",
+  transports: ['websocket', 'polling', 'flashsocket'],
+  host: window.location.hostname + ':6001',
+  auth: {
+    headers: {
+      Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+    },
+  },
+});
 
 @Component<EditRosterArea>({
   components: {
@@ -55,6 +69,7 @@ import Scene from "@/components/Scene.vue"
     Scene
   },
   mounted() {
+    this.listen()
     this.setProductSizes()
     this.$nextTick(() => {
       if (!this.rosterDetails.length) {
@@ -74,16 +89,22 @@ export default class EditRosterArea extends Vue {
   public fileData: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
 
+
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
-
+  get customer():Record<any, any>{
+    return  this.$store.getters.getCustomer
+  }
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
 
   get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex;
+  }
+  get notifications(){
+    return this.$store.getters.getNotifications
   }
 
   retrieveProducts(): void {
@@ -220,6 +241,11 @@ export default class EditRosterArea extends Vue {
       link.href = window.URL.createObjectURL(blob)
       link.download = 'roster_template.xlsx';
       link.click();
+    })
+  }
+  public listen(){
+    window.Echo.private(`notification.${this.customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
+      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
     })
   }
 

@@ -63,9 +63,18 @@ const ProductAttributes:Module<any, any> = {
       front:'',
       back:''
     },
-    using_logo_colors: false
+    using_logo_colors: false,
+    notifications:[]
   },
   mutations: {
+    SET_NOTIFICATIONS(state:Record<any, any>, payload) {
+      state.notifications  = payload
+    },
+    UPDATE_NOTIFICATIONS(state:Record<any, any>, payload){
+      if (payload){
+        Vue.set(state.notifications, state.notifications.length, payload)
+      }
+    },
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
       state.lockerActiveTabIndex = payload
     },
@@ -646,6 +655,9 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
+    getNotifications: state => {
+      return state.notifications
+    },
     getCanvasImage: state => {
       return state.canvasImage
     },
@@ -809,12 +821,9 @@ const ProductAttributes:Module<any, any> = {
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
     },
-
     deleteCustomLogoTab({commit}, payload){
       commit('customLogoTabDelete', payload)
     },
-
-
     async deleteCollection({commit}, payload){
       const resp = await http.delete("collection/"+payload.id);
       commit('DELETE_COLLECTION', payload);
@@ -1021,6 +1030,13 @@ const ProductAttributes:Module<any, any> = {
         }
       }).catch(err => {
         console.log(err)
+      })
+    },
+    async getNotifications({commit}){
+       await http.get('customer/notifications').then((res) => {
+        commit('SET_NOTIFICATIONS', res.data.data.data)
+      }).catch(e =>{
+        console.log(e)
       })
     }
   }
