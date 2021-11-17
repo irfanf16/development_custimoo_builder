@@ -5,7 +5,7 @@
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div>
-        logo editors
+        <LogoUploader :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
       </div>
     </div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 1" >
@@ -43,12 +43,21 @@
             <li v-for="(colorName, index) in productColors" :key="index">
               <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
             </li>
+
+            <li>
+              <a class="faded_text text-capitalize" @click="showOther">Other</a>
+            </li>
           </ul>
         </div>
       </div>
 
       <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
         <div class="color_circle" :key="index" v-for="(color, index) in (typeof productColors[activeCollection].color_text === 'string' ? JSON.parse(productColors[activeCollection].color_text) : productColors[activeCollection].color_text)" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
+      </div>
+
+      <div v-if="showOtherColors" class="mobile-other">
+        <span class="close" @click="hideOther"><BIconX /></span>
+        <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
       </div>
     </div>
     <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 2" >
@@ -111,11 +120,16 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import {default as $} from 'jquery';
 import TextCustomization from "@/components/mobile/TextCustomization.vue";
 import Collars from "@/components/mobile/Collars.vue";
+import {getClosestColor} from "@/pantoneColor";
+import colorPicker from '@caohenghu/vue-colorpicker'
+import LogoUploader from "@/components/mobile/LogoUploader.vue";
 
 @Component<CustomTabs>({
   components: {
+    LogoUploader,
     TextCustomization,
-    Collars
+    Collars,
+    colorPicker
     // ColorAccordion,
     // LogoPlacementTabs,
     // CustomizationText,
@@ -146,6 +160,9 @@ export default class CustomTabs extends Vue {
   public firstColor!: Record<any, any>
   public secondColor!: Record<any, any>
   public fontOptions: Record<any, any>[] = []
+  public color = '#59c7f9'
+  public showOtherColors = false
+  public pantoneColorVal= '13-4411'
   // private tabTop = window.screen.availHeight - 190;
 
   private setPlayersDataHeight = (idx: number) => {
@@ -227,6 +244,12 @@ export default class CustomTabs extends Vue {
   private hideAll(){
     this.$store.dispatch('setActiveTab', -1);
     $(".sideNav li a").removeClass('active')
+  }
+  private showOther(){
+    this.showOtherColors = true
+  }
+  private hideOther(){
+    this.showOtherColors = false
   }
 
   get svgGroups() {
@@ -480,6 +503,11 @@ export default class CustomTabs extends Vue {
       outLineWidth: 0
     }
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
+  }
+
+  public changeColor(color: Record<any, any>) {
+    let pantoneColor = getClosestColor(color.hex)
+    this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone})
   }
 }
 </script>

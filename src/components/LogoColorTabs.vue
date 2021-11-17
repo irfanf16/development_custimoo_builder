@@ -84,11 +84,11 @@ export default class LogoColorTabs extends Vue {
 
   @Watch('showOther')
   showOtherChanged(val: string) {
-    if(this.showOther){
-      let colorPicker = this.$refs['colorPicker'] as Record<any, any>
+    let colorPicker = this.$refs['colorPicker'] as Record<any, any>
+    if(this.showOther && colorPicker){
       colorPicker.data.hueHeight = 500
     }else{
-      console.log('notfound')
+      console.log('color picker not found')
     }
   }
 
@@ -171,5 +171,6 @@ export default class LogoColorTabs extends Vue {
     font-size: 0.8rem;
   }
   .hu-color-picker{box-shadow: none !important;}
+
 }
 </style>

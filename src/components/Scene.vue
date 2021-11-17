@@ -751,7 +751,7 @@ export default class Scene extends Vue {
     this.mounted = false
     let element = this.$refs.front as HTMLCanvasElement
     if (side === 'back') {
-      element = this.$refs.back as HTMLCanvasElement;
+      element = this.$refs.back as HTMLCanvasElement
     }
     let canvas = new fabric.Canvas(element)
     if (side == 'back') {
@@ -874,7 +874,7 @@ export default class Scene extends Vue {
     })
     canvas.on('object:moving', (e: Record<any, any>) => {
       self.objectScaling(e, side)
-    });
+    })
 
     canvas.on('object:scaling', (e: Record<any, any>) => {
       let dimText = this.dimTextFront

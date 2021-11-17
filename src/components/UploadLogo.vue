@@ -17,16 +17,20 @@
       </b-form-group>-->
 
       <div class="w-100 text-left pl-2 position-relative" style="top: 6rem">
-        <div>
-          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">
-            Remove background color
-          </b-form-checkbox>
+        <div class="d-none d-lg-block continue-btn-holder pt-1" style="padding: 0">
+          <b-button @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
+          <LogoEditorModal @updateLogoFromLogoEditor="updateLogoFromLogoEditor" :customLogoIndex="this.customLogoIndex" ref="logoEditorModal" :logo_id="customLogos[customLogoIndex].id" />
         </div>
-        <div class="mt-2">
-          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">
-            Smart remove background from logo
-          </b-form-checkbox>
-        </div>
+<!--        <div>-->
+<!--          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">-->
+<!--            Remove background color-->
+<!--          </b-form-checkbox>-->
+<!--        </div>-->
+<!--        <div class="mt-2">-->
+<!--          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">-->
+<!--            Smart remove background from logo-->
+<!--          </b-form-checkbox>-->
+<!--        </div>-->
       </div>
     </div>
 
@@ -103,8 +107,10 @@ import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
 import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
+import LogoEditorModal from "@/components/LogoEditorModal.vue";
 
 @Component<UploadLogo>({
+  components: {LogoEditorModal},
   mounted() {
       if (localStorage.getItem('logo_modal_status') == null) {
         this.open_modal = true
@@ -174,7 +180,15 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     this.processLogoImage();
 
   }
-
+  public openLogoEditor() {
+    //set logo id and default image of logo
+    this.$store.dispatch('editLogo',{key:'id',value:this.customLogos[this.customLogoIndex].id,api_call:false})
+    this.$store.dispatch('editLogo',{key:'base64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
+    this.$store.dispatch('editLogo',{key:'originalBase64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
+    this.$store.dispatch('toggleLogoCheck', {type:'color',val:false})
+    this.$store.dispatch('toggleLogoCheck', {type:'background',val:false})
+    this.ref.logoEditorModal.showLogoModal()
+  }
 
   public showModal() {
     this.ref.myModal.show()
@@ -354,6 +368,16 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
       this.$store.dispatch('toggleLogoBackgroud', payload)
     }
   }
+
+  // public changeLogoBackground(val) {
+  //
+  // }
+
+  public updateLogoFromLogoEditor(colors = []) {
+    this.colors = colors
+    this.getLogoColors()
+  }
+
 }
 
 </script>
@@ -604,5 +628,15 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   max-width: 285px;
   margin: 0 auto;
   text-align: left;
+}
+
+.upload-logo-opener .logo-editor-button{
+  background: #219F84 !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  padding: 10px 20px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

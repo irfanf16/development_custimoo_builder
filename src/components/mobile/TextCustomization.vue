@@ -1,26 +1,28 @@
 <template>
   <div>
-    <b-tabs class="player_text" v-if="this.selectedProductID">
+    <b-tabs class="player_text mobile" v-if="this.selectedProductID">
       <b-tab v-for="(customText, tabIndex) in customTexts" :key="tabIndex" @click="setTextIndex(tabIndex)">
         <template #title>
           {{ customText.side ? customText.side : 'text' | capitalize}} {{ customText.type | capitalize }}
         </template>
         <div class="grid mobile-cols-2 gap-1">
-          <div class="mobile_controls">
+          <div class="mobile_controls d-flex gap-1 align-items-center">
 <!--            <label class="d-flex align-items-center justify-content-between"><span>{{ customTexts[tabIndex].type | capitalize }} {{ customTexts[tabIndex].side }}</span></label>-->
-            <div>asd</div>
+            <div @click="changeSide(tabIndex, customText.side)" class="fs-3">
+              <BIconArrowRepeat style="margin-top: 8px" />
+            </div>
             <b-form-input
               @click="isHidden = !isHidden"
-              class="mt-2"
+              class="mt-1"
               :placeholder="customText.side + ' ' + customText.type | capitalize"
               :value="customText.text"
               @input="updateTextField(tabIndex, $event)"
             ></b-form-input>
           </div>
 
-          <div cyhlass="mt-2 mobile_controls" v-if="customTextIndex != '' || customTextIndex != undefined">
+          <div class="mt-2 mobile_controls" v-if="customTextIndex != '' || customTextIndex != undefined">
             <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span v-if="+customText.outLineWidth">{{ customText.outLineWidth }}px</span></label>
-            <b-form-input class="mt-2" id="range-2"  :value="customTexts[customTextIndex].outLineWidth" @change="outLineWidthValueChanged($event)" type="range" min="0" max="10" step="1"></b-form-input>
+            <b-form-input id="range-2" style="margin-top: 7px" :value="customTexts[customTextIndex].outLineWidth" @change="outLineWidthValueChanged($event)" type="range" min="0" max="10" step="1"></b-form-input>
           </div>
           <div v-else>
             {{customTextIndex}}
@@ -47,10 +49,19 @@
                 <li v-for="(colorName, index) in productColors" :key="index">
                   <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
                 </li>
+
+                <li>
+                  <a class="faded_text text-capitalize" @click="showOther">Other</a>
+                </li>
               </ul>
             </div>
             <div v-if="productColors[activeCollection]" class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
               <div class="color_circle" :key="index" v-for="(color, index) in productColors[activeCollection].color_text" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
+            </div>
+
+            <div v-if="showOtherColors" class="mobile-other">
+              <span class="close" @click="hideOther"><BIconX /></span>
+              <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
             </div>
           </b-tab>
 
@@ -77,7 +88,7 @@
       </b-tab>
 
       <template #tabs-end>
-          <span @click="addTab" style="font-size: 0.9em">Add <BIconPlus/></span>
+          <li @click="addTab" class="add_text_tab" style="font-size: 0.9em">Add <BIconPlus/></li>
       </template>
     </b-tabs>
   </div>
@@ -85,10 +96,11 @@
 
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
-import CustomTabs from "../CustomTabs.vue";
+import colorPicker from '@caohenghu/vue-colorpicker'
 import {getClosestColor} from "@/pantoneColor";
 @Component<TextCustomization>({
   components: {
+    colorPicker
     // ColorAccordion,
     // LogoPlacementTabs,
     // CustomizationText,
@@ -143,6 +155,27 @@ export default class TextCustomization extends Vue {
   public showSVGs = false
   public isHidden = false
   private activeColors: any[] = []
+  public showOtherColors = false
+  public pantoneColorVal= '13-4411'
+  public color= '#59c7f9'
+
+
+  private showOther(){
+    this.showOtherColors = true
+  }
+  private hideOther(){
+    this.showOtherColors = false
+  }
+
+  public changeColor(color: Record<any, any>) {
+    let pantone = getClosestColor(color.hex);
+    if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+      this.pantoneColorVal = pantone.pantone;
+    }
+
+    let pantoneColor = getClosestColor(color.hex)
+    this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
+  }
 
   private setActiveCollection(index: number) {
     this.activeCollection = index;
@@ -225,8 +258,9 @@ export default class TextCustomization extends Vue {
   }
 
   public changeSide(index:number, event:string){
+    let current_side = event == 'back' ? 'front': 'back';
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
-    this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: true, attribute: 'side', value: event})
+    this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: true, attribute: 'side', value: current_side})
   }
 
   public selectType(index: number) {
