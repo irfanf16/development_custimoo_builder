@@ -65,7 +65,7 @@
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
                   </a></li>
                 </ul>
-                <div class="icon" id="bell" @click="notificationsDropDown"> <img src="https://i.imgur.com/AC7dgLA.png" alt=""> </div>
+                <div v-if="isCustomerAuthenticated" class="icon" id="bell" @click="notificationsDropDown"> <img src="https://i.imgur.com/AC7dgLA.png" alt=""> </div>
                 <div v-if="notifications.length" class="notifications" :style="dropdownStyle" id="box">
                   <h2>Notifications - <span style="background-color: black"> {{ notificationsCounter}}</span></h2>
                   <template v-for="(notification, ind) in notifications" >
@@ -155,6 +155,7 @@ import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import Scene from "@/components/Scene.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
+import LockerProduct from "@/mixins/LockerProduct";
 
 @Component<Home>({
   components: {
@@ -240,7 +241,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
   }
 })
 
-export default class Home extends Mixins(ErrorMessages) {
+export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -481,6 +482,7 @@ export default class Home extends Mixins(ErrorMessages) {
   public down = false
   public notificationsDropDown(){
     // this.ref['lockerModal'].editProduct(0,1)
+    this.editProduct(6, 66)
     if(this.down){
       this.dropdownStyle = {'height': '0px', 'opacity': '0'}
         this.down = false;
