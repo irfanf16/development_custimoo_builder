@@ -111,13 +111,6 @@ export default class ColorTabs extends Vue {
     this.showOther = showOther
     if(!showOther)
       this.productColor = this.productColors[this.selectTypeIndex].color_text
-
-    if(this.selectTypeIndex){
-      this.isActive = !this.isActive
-    }
-    else {
-      this.isActive = false
-    }
   }
 
   public setColor(color: Record<any, any>) {

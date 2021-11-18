@@ -1,14 +1,14 @@
 <template>
   <div>
-    <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 0" >
+    <div class="customize_controls" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 0" >
       <span class="close" @click="hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div>
-        <LogoUploader :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
+        <LogoUploader @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
       </div>
     </div>
-    <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 1" >
+    <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 1" >
       <span class="close" @click="hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
@@ -60,7 +60,7 @@
         <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
       </div>
     </div>
-    <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 2" >
+    <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2" >
       <span class="close" @click="hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
@@ -68,7 +68,7 @@
         :productFonts="selectedProduct.namefonts" :selectedProductID="selectedProduct.id"
         :fontsColors="fontsColors" :firstColor="firstColor" :secondColor="secondColor" :fontOptions="fontOptions" />
     </div>
-    <div class="customize_controls pt-4" v-if="this.$store.getters.getActiveTab === 3" >
+    <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 3" >
       <span class="close" @click="hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(2)" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
 
@@ -109,7 +109,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
+import {Component, Prop, PropSync, Vue, Watch} from 'vue-property-decorator'
 // import ColorAccordion from '@/components/ColorAccordion.vue'
 // import LogoPlacementTabs from './LogoPlacementTabs.vue'
 // import CustomizationText from '@/components/CustomizationText.vue'
@@ -150,6 +150,7 @@ import LogoUploader from "@/components/mobile/LogoUploader.vue";
 
 export default class CustomTabs extends Vue {
   @Prop() activeTab!: number
+  private showOtherTab = false
   private activePart = 0;
   private activeCollection = 0;
   private activeFont = 0;
@@ -181,6 +182,10 @@ export default class CustomTabs extends Vue {
       element.style.top = 'auto';
       element.classList.add('setMax')
     }
+  }
+
+  private updateOtherTab(value:boolean){
+    this.showOtherTab = value
   }
 
   public setColor(color: Record<any, any>) {

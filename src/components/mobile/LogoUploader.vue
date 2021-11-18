@@ -36,7 +36,16 @@
         </div>
 
         <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url && selectedProduct.product_type == 'customized'">
-          <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
+          <h4 class="mb-3 d-flex align-items-center justify-content-between mb-lg-4">
+            <div>
+              Color Extracted from Logo
+            </div>
+
+            <div class="recent-logos">
+              <BIconFileEarmarkImage />
+              Recent Logos
+            </div>
+          </h4>
           <div class="mb-lg-3 w-100">
             <div class="color-holder">
               <div class="color-container">
@@ -59,8 +68,7 @@
 
                 <div v-if="showLogoColors" class="mobile-other">
                   <span class="close" @click="hideOther"><BIconX /></span>
-                  {{ showLogoColors }}
-
+                  <h2>Chose a color</h2>
                   <LogoColorTabs @setSwatchColor="setSwatchColor"
                                  :swatchPantone="defSwatchPantone"
                                  :swatchcolor="defSwatchColor"
@@ -302,19 +310,21 @@ export default class LogoUploader extends Vue {
     if(index==this.selectedSwatchIndex) {
       this.showLogoColors = false;
       this.selectedSwatchIndex = -1;
+      this.$emit('showOther', false);
     } else {
       this.selectedSwatchIndex = index
       this.defSwatchColor = imageColor.hex
       this.defSwatchPantone = imageColor.pantone
       this.getColors();
       this.showLogoColors = true
+      this.$emit('showOther', true);
     }
   }
 
   public hideOther() {
-    console.log('bef hide', this)
     this.showLogoColors = false
-    console.log('hide', this.showLogoColors)
+    this.$emit('showOther', this.showLogoColors);
+    this.selectedSwatchIndex = -1;
   }
 
   public removeLogoTab(index: number){

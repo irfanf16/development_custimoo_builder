@@ -69,6 +69,7 @@ export default class LogoColorTabs extends Vue {
   @Prop({required: true}) productColors!: any
   @Prop({required: true}) swatchcolor!: any
   @Prop({required: false}) swatchPantone!: any
+  @Prop({default: false}) showOtherTab!: boolean
 
   public color= this.swatchcolor
   public pantoneColorVal= this.swatchPantone

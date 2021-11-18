@@ -141,6 +141,7 @@
                                    alt="">
                             </template>
                           </div>
+
                           <div class="controls">
                             <a v-b-tooltip.hover.right title="Delete collection"
                                @click="deleteCollection(collection.id,index)" class="remove btn">
@@ -524,17 +525,28 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
 
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
-    console.log(element)
 
+    let ind = 0
     if (product_id != this.$store.getters.getEditMainProductId) {
-      await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
+      const exist = this.products.find((prd:Record<any, any>) => {
+        return prd.id == product_id
+      })
+      if(!exist) {
+        this.$store.commit('CHANGE_EDIT_LOCKER_PRODUCT', {prd_id: product_id})
+        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
+        ind = this.products.length - 1;
+      }
+    else {
+        const index = this.products.findIndex((prd:Record<any, any>) => prd.id == product_id)
+        ind = index >= 0 ? index : 0
+      }
       this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
     }
-    let ind = this.products.length - 1;
+    // let ind = this.products.length - 1;
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
-    console.log(this.selectedProduct.productstyles)
     let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
     await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+    //console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
     // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
     await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
@@ -763,11 +775,11 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     });
     //updating new locker products
     this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: new_room_index, products: new_locker_products})
-    let old_locker_new_products = differenceBy(old_locker_products, added_products, "id")
+    let old_locker_new_products = differenceBy(old_locker_products, added_products, "id") as Record<any, any>
     old_locker_new_products = old_locker_new_products.map((old_locker_product: Record<any, any>, olpIdx: number) => {
       old_locker_product.sort_order = olpIdx + 1;
       return old_locker_product;
-    });
+    })
     //updating active locker products
     this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: this.tabIndex, products: old_locker_new_products})
     return {
