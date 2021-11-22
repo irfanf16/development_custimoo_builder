@@ -50,7 +50,7 @@
                             :icon="['fas', 'trash-alt']"/></a>
                         </li>
                         <li>
-                          <a data-title="Edit design" @click="editProduct(i, ind)" @mouseleave="hideTooltip"
+                          <a data-title="Edit design" @click="editProduct(room.id, product.id)" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li>
@@ -81,13 +81,8 @@
                           </a>
                         </li>
                         <li class="swap">
-                          <a v-if="product.design && product.design.back_design_count > 0" @mouseleave="hideTooltip"
-                             @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' "
-                             @click="swapDesign(i, ind)" style="font-size: 1em">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate"
-                                 class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img"
-                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor"
-                                                                                                d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
+                          <a v-if="product.design && product.design.back_design_count > 0"  @mouseleave="hideTooltip" @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
+                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
                           </a>
                         </li>
                       </ul>
@@ -241,6 +236,7 @@ import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {processColorsCustom} from "../helpers/Helpers"
 import {differenceBy, intersectionBy, union, includes} from 'lodash';
+import LockerProduct from "@/mixins/LockerProduct";
 
 @Component<LockerRoom>({
   components: {
@@ -261,12 +257,12 @@ import {differenceBy, intersectionBy, union, includes} from 'lodash';
     }
   }
 })
-export default class LockerRoom extends Mixins(ErrorMessages) {
+export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
   public colors : [] = []
-  public tabIndex = 0
+  public tabIndex = this.$store.getters.getLockerTabsIndex;
   public viewLoader = false
   public copiedProductId = 0
   public copiedProductName = ''
@@ -516,42 +512,54 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public lockerStatus = 'not_accepted'
-
-  public async editProduct(lockerIndex: number, productIndex: number) {
-    const id = this.getLockerProducts[lockerIndex].product[productIndex].id
-    let prod_res = await this.$store.dispatch('getLockerProductDetail', id);
-    Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
-    this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
-    this.$root.$emit('rostershared', '')
-    const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
-    const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
-    this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
-    const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
-    const element = this.getLockerProducts[lockerIndex].product[productIndex];
-    if (product_id != this.$store.getters.getEditMainProductId) {
-      await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
-      this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
-    }
-    let ind = this.products.length - 1;
-    await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
-    console.log(this.selectedProduct.productstyles)
-    let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
-    await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-    // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
-    await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
-    await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(element.text));
-    await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
-    await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
-    this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-      if (item.id == element.design_id) {
-        Vue.set(item, 'design_show', 1)
-        this.$store.dispatch('setSelectedProductDesignID', item.id)
-      } else {
-        Vue.set(item, 'design_show', 0)
-      }
-    });
-    this.$emit('hideLockerRoomModal')
-  }
+  // public async editProduct(lockerIndex: number, productIndex: number) {
+  //   const id = this.getLockerProducts[lockerIndex].product[productIndex].id
+  //   let prod_res = await this.$store.dispatch('getLockerProductDetail', id);
+  //   Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
+  //   this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
+  //   this.$root.$emit('rostershared', '')
+  //   const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
+  //   const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
+  //   this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
+  //   const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
+  //   const element = this.getLockerProducts[lockerIndex].product[productIndex];
+  //   let ind = 0
+  //   if (product_id != this.$store.getters.getEditMainProductId) {
+  //     const exist = this.products.find((prd:Record<any, any>) => {
+  //       return prd.id == product_id
+  //     })
+  //     if(!exist) {
+  //       this.$store.commit('CHANGE_EDIT_LOCKER_PRODUCT', {prd_id: product_id})
+  //       await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
+  //       ind = this.products.length - 1;
+  //     }
+  //   else {
+  //       const index = this.products.findIndex((prd:Record<any, any>) => prd.id == product_id)
+  //       ind = index >= 0 ? index : 0
+  //     }
+  //     this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
+  //   }
+  //   // let ind = this.products.length - 1;
+  //   await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
+  //   let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
+  //   await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+  //   //console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
+  //   // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
+  //
+  //   await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
+  //   await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
+  //   await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
+  //   await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
+  //   this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
+  //     if (item.id == element.design_id) {
+  //       Vue.set(item, 'design_show', 1)
+  //       this.$store.dispatch('setSelectedProductDesignID', item.id)
+  //     } else {
+  //       Vue.set(item, 'design_show', 0)
+  //     }
+  //   });
+  //   this.$emit('hideLockerRoomModal')
+  // }
 
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {
@@ -765,11 +773,11 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     });
     //updating new locker products
     this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: new_room_index, products: new_locker_products})
-    let old_locker_new_products = differenceBy(old_locker_products, added_products, "id")
+    let old_locker_new_products = differenceBy(old_locker_products, added_products, "id") as Record<any, any>
     old_locker_new_products = old_locker_new_products.map((old_locker_product: Record<any, any>, olpIdx: number) => {
       old_locker_product.sort_order = olpIdx + 1;
       return old_locker_product;
-    });
+    })
     //updating active locker products
     this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: this.tabIndex, products: old_locker_new_products})
     return {

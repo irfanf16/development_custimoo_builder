@@ -71,7 +71,7 @@
                   <template v-for="(notification, ind) in notifications" >
                   <div   :key="ind" class="notifications-item">
                     <div class="text">
-                      <p>{{notification.description}}</p>
+                      <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
                     </div>
                   </div>
                   </template>
@@ -155,6 +155,8 @@ import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import Scene from "@/components/Scene.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
+import {fontsColorsManipulation, fontsList, sortTextsArray} from "@/helpers/Helpers";
+import {getClosestColor} from "@/pantoneColor";
 import LockerProduct from "@/mixins/LockerProduct";
 
 @Component<Home>({
@@ -186,7 +188,6 @@ import LockerProduct from "@/mixins/LockerProduct";
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
     if (this.isAuthenticated) {
-
       await this.retrieveProducts()
       await this.getFillColors()
     }
@@ -481,8 +482,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   public dropdownStyle = { } as any
   public down = false
   public notificationsDropDown(){
-    // this.ref['lockerModal'].editProduct(0,1)
-    this.editProduct(6, 66)
     if(this.down){
       this.dropdownStyle = {'height': '0px', 'opacity': '0'}
         this.down = false;
@@ -494,6 +493,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
       this.getLockerRoomProducts()
+      this.ref['lockerModal'].showLockerRoomModal()
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
@@ -616,27 +616,68 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
       http.get(url).then(async (response: any) => {
         if (searchCall || productType) {
           this.$store.commit('SET_PRODUCTS', []);
-         // await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
         }
-
         let product_data = this.products.concat(response.data.products.data)
+        //remove product from product_data array because already added by locker
+        if(!productType) {
+          this.$store.getters.getEditLockerProduct.forEach((data_id:number) => {
+            const exist = product_data.find((prd:Record<any, any>) => prd.id == data_id)
+            if(exist) {
+              product_data = product_data.filter((product: Record<any, any>) => product.id != exist.id)
+            }
+          })
+        }
         await this.$store.commit('SET_PRODUCTS', product_data);
-
-
         await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
 
-         let customLogos = this.$store.getters.getCustomLogoObject
+        let customLogos = this.$store.getters.getCustomLogoObject
         product_data.forEach(async (product:any) => {
           if(!customLogos[product.id]) {
             await this.$store.dispatch('setCustomObj',product.id)
           }
         })
-        //
-        // const length = Object.keys(customLogos).length
-        // if(length <= 0) {
-        //  await this.$store.dispatch('setCustomLogoObj',0)
-        // }
-
+        //set custom text objects for new products
+        let customTexts = this.$store.getters.getCustomTextObject
+        product_data.forEach((product:any) => {
+          if(!customTexts[product.id]) {
+            product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
+              const obj = fontsColorsManipulation(product)
+              //calculate colors pantone on init
+              let fill_color_pantone = obj.firstColor.name;
+              const pantone = getClosestColor(obj.firstColor.value);
+              if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+                fill_color_pantone = pantone.pantone;
+              }
+              let outLine_color_pantone = obj.secondColor.name;
+              const opantone = getClosestColor(obj.secondColor.value);
+              if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+                outLine_color_pantone = opantone.pantone;
+              }
+              const already_added_text_str = this.customTexts[index] ? this.customTexts[index]['text'] : ''
+              const text = {
+                text: already_added_text_str,
+                type: productName.type,
+                width: productName.width,
+                height: productName.height,
+                x_axis: productName.x_axis,
+                y_axis: productName.y_axis,
+                rotation: productName.rotation,
+                haveControls: Boolean(!productName.is_locked),
+                outlineEnabled: Boolean(productName.outline_enabled),
+                side: productName.side,
+                fontFamily: fontsList(product)[0].value,
+                fillColor: obj.firstColor.value,
+                fillColorPantone: fill_color_pantone,
+                outLineColor: obj.secondColor.value,
+                outLineColorPantone: outLine_color_pantone,
+                outLineWidth: 0,
+                textIndex: index,
+                selectColor: false
+              }
+              await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
+            })
+          }
+        });
         this.nextPageUrl = response.data.products.next_page_url
         if (!response.data.products.next_page_url) {
           this.hasProducts = false
@@ -693,8 +734,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       if (res == true){
         this.showLockerRoomModal()
-        this.ref.saveToLockerModal.ref['my-modal'].hide();
-        this.ref.saveToLockerModal.showLoader = false;
+        console.log()
+        if(this.ref.saveToLockerModal) {
+          this.ref.saveToLockerModal.ref['my-modal'].hide();
+          this.ref.saveToLockerModal.showLoader = false;
+        }
+
+
       }
     }
   }

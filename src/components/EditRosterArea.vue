@@ -45,21 +45,7 @@ import RosterDetails from '@/components/RosterDetails.vue'
 import {http} from "@/httpCommon";
 import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
-import Echo from "laravel-echo"
-//import io from "socket.io-client"
 
-window.io = require('socket.io-client');
-// console.log(localStorage.getItem('access_tokens'))
-window.Echo = new Echo({
-  broadcaster: "socket.io",
-  transports: ['websocket', 'polling', 'flashsocket'],
-  host: window.location.hostname + ':6001',
-  auth: {
-    headers: {
-      Authorization: 'Bearer ' + localStorage.getItem('access_token'),
-    },
-  },
-});
 
 @Component<EditRosterArea>({
   components: {
@@ -69,7 +55,6 @@ window.Echo = new Echo({
     Scene
   },
   mounted() {
-    this.listen()
     this.setProductSizes()
     this.$nextTick(() => {
       if (!this.rosterDetails.length) {
@@ -243,11 +228,7 @@ export default class EditRosterArea extends Vue {
       link.click();
     })
   }
-  public listen(){
-    window.Echo.private(`notification.${this.customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
-      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
-    })
-  }
+
 
 }
 

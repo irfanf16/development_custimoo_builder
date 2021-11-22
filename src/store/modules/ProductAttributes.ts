@@ -57,13 +57,26 @@ const ProductAttributes:Module<any, any> = {
       mainProductId: 0,
       editStatus: false
     },
+    using_logo_colors: false,
+    backgroundCheck: false,
+    colorCheck: false,
+    showColorsLogoEditor:false,
+    logoEditor: {
+      id:0,
+      base64:"",
+      originalBase64:"",
+      remove_background:'',
+      color:'',
+      flood_fill:false
+
+    },
+    editLockerProduct: [],
     canvasImage:{
       ref_front:'',
       ref_back:'',
       front:'',
       back:''
     },
-    using_logo_colors: false,
     notifications:[]
   },
   mutations: {
@@ -72,9 +85,11 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_NOTIFICATIONS(state:Record<any, any>, payload){
       if (payload){
-        Vue.set(state.notifications, state.notifications.length, payload)
+        state.notifications.unshift(payload)
+        // Vue.set(state.notifications, state.notifications.length, payload)
       }
     },
+
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
       state.lockerActiveTabIndex = payload
     },
@@ -97,6 +112,12 @@ const ProductAttributes:Module<any, any> = {
       if (payload.product_id){
         state.editProduct.mainProductId = payload.product_id
       }
+    },
+
+    CHANGE_EDIT_LOCKER_PRODUCT(state:Record<any, any>, payload){
+      const exist = state.editLockerProduct.find((x:number) => x == payload.prd_id)
+      if(!exist)
+        state.editLockerProduct.push(payload.prd_id)
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
@@ -286,6 +307,39 @@ const ProductAttributes:Module<any, any> = {
      // Vue.set(state.customLogos[payload.index], 'url', logo_url )
 
     },
+    TOGGLE_LOGO_CHECK(state: Record<any, any>, payload:any) {
+      if(payload.type == 'background') {
+        if(payload.val) {
+          state.backgroundCheck = true
+          //state.colorCheck = false
+        }
+        else {
+          state.backgroundCheck = false
+        }
+
+        Vue.set(state.logoEditor,'base64',state.logoEditor.originalBase64)
+        Vue.set(state.logoEditor,'remove_background','')
+
+      }
+      else if(payload.type == 'color') {
+        if(payload.val) {
+          state.colorCheck = true
+          //state.backgroundCheck = false
+        }
+        else {
+          state.colorCheck = false
+          Vue.set(state.logoEditor,'base64',state.logoEditor.originalBase64)
+        }
+      }
+    },
+    EDIT_LOGO(state: Record<any, any>, payload:any) {
+      Vue.set(state.logoEditor,payload.key,payload.value)
+    },
+    UNSET_LOGO_EDITOR(state: Record<any, any>, payload:any) {
+      Vue.set(state.logoEditor,'remove_background','')
+      state.backgroundCheck = false
+      state.colorCheck = true
+    },
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
     },
@@ -312,7 +366,6 @@ const ProductAttributes:Module<any, any> = {
         if(!state.customTexts[customText.prd_id]) {
           Vue.set(state.customTexts, customText.prd_id, [])
         }
-        // Vue.set(state.customTexts, customText.index, customText.text)
         Vue.set(state.customTexts[customText.prd_id], customText.index, customText.text)
       }
     },
@@ -404,24 +457,101 @@ const ProductAttributes:Module<any, any> = {
       state.products.push(payload);
     },
     OVERRIDE_LOGOS(state:Record<any, any>, payload){
+
       const locker_logos = JSON.parse(payload.custom_logos)
       Object.keys(state.customLogos).map(function(key:any, index:any) {
         if(key == payload.product_id) {
           //state.customLogos[key] = locker_logos
-          Vue.set(state.customLogos, key, locker_logos)
+          Vue.set(state.customLogos,key,locker_logos)
         }
         else {
           const logo_setting = getLogoSettings(0,false,key)
           const final_logo = {...logo_setting,...locker_logos[0]}
 
           //state.customLogos[key] = [final_logo]
-          Vue.set(state.customLogos, key,[final_logo])
+          Vue.set(state.customLogos,key,[final_logo])
         }
       });
      // state.customLogos = payload;
     },
     OVERRIDE_TEXT(state:Record<any, any>, payload){
-      state.customTexts = payload;
+      state.customTexts = {};
+      const locker_texts = JSON.parse(payload.text)
+      state.products.forEach((product: Record<any, any>) => {
+        if(!state.customTexts[product.id]) {
+          Vue.set(state.customTexts, product.id, [])
+        }
+        const obj = fontsColorsManipulation(product)
+        //calculate colors pantone on init
+        let fill_color_pantone = obj.firstColor.name;
+        const pantone = getClosestColor(obj.firstColor.value);
+        if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+          fill_color_pantone = pantone.pantone;
+        }
+        let outLine_color_pantone = obj.secondColor.name;
+        const opantone = getClosestColor(obj.secondColor.value);
+        if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+          outLine_color_pantone = opantone.pantone;
+        }
+        if(parseInt(product.id) == parseInt(payload.product_id)) {
+          const productTextsArr = JSON.parse(JSON.stringify(product.productnames))
+          locker_texts.forEach( (lockerText: Record<any, any>, lockerTextIndex: number) => {
+            Vue.set(state.customTexts[product.id], lockerTextIndex, lockerText)
+            productTextsArr.shift()
+          })
+          if(productTextsArr.length > 0) {
+            let maxIndex = locker_texts.length - 1
+            productTextsArr.forEach(async (productText: Record<any, any>, productTextIndex: number) => {
+              maxIndex = maxIndex + 1
+              const text = {
+                text: '',
+                type: productText.type,
+                width: productText.width,
+                height: productText.height,
+                x_axis: productText.x_axis,
+                y_axis: productText.y_axis,
+                rotation: productText.rotation,
+                haveControls: Boolean(!productText.is_locked),
+                outlineEnabled: Boolean(productText.outline_enabled),
+                side: productText.side,
+                fontFamily: fontsList(product)[0].value,
+                fillColor: obj.firstColor.value,
+                fillColorPantone: fill_color_pantone,
+                outLineColor: obj.secondColor.value,
+                outLineColorPantone: outLine_color_pantone,
+                outLineWidth: 0,
+                selectColor: false
+              }
+              Vue.set(state.customTexts[product.id], maxIndex, text)
+            })
+          }
+        }
+        else {
+          product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
+            const locker_text_str = locker_texts[index] ? locker_texts[index]['text'] : ''
+            const text = {
+              text: locker_text_str,
+              type: productName.type,
+              width: productName.width,
+              height: productName.height,
+              x_axis: productName.x_axis,
+              y_axis: productName.y_axis,
+              rotation: productName.rotation,
+              haveControls: Boolean(!productName.is_locked),
+              outlineEnabled: Boolean(productName.outline_enabled),
+              side: productName.side,
+              fontFamily: fontsList(product)[0].value,
+              fillColor: obj.firstColor.value,
+              fillColorPantone: fill_color_pantone,
+              outLineColor: obj.secondColor.value,
+              outLineColorPantone: outLine_color_pantone,
+              outLineWidth: 0,
+              selectColor: false
+            }
+            Vue.set(state.customTexts[product.id], index, text)
+          })
+        }
+      })
     },
     OVERRIDE_DEFAULT_COLOR(state:Record<any, any>, payload){
       state.defaultColors = payload;
@@ -464,11 +594,21 @@ const ProductAttributes:Module<any, any> = {
     RESET_STORE(state: Record<any, any>){
       state.undoItems = []
       state.redoItems = []
+      state.edit_locker_product = []
       state.customLogos = {};
       //state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
       state.using_logo_colors = false;
+      state.logoEditor = {
+        id:0,
+        base64:"",
+        originalBase64:"",
+        remove_background:'',
+        color:'',
+        flood_fill:false
+      }
+
      // state.products.customLogos.map((item:any) => item.customLogos = []);
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
@@ -499,62 +639,48 @@ const ProductAttributes:Module<any, any> = {
         }
         product.productnames =  sortTextsArray(product.productnames);
 
-        console.log('fontsList(product)',fontsList(product))
+        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
+          const obj = fontsColorsManipulation(product)
 
-          product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
+          //calculate colors pantone on init
+          let fill_color_pantone = obj.firstColor.name;
+          const pantone = getClosestColor(obj.firstColor.value);
+          if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+            fill_color_pantone = pantone.pantone;
+          }
 
-            const obj = fontsColorsManipulation(product)
-
-            //calculate colors pantone on init
-            let fill_color_pantone = obj.firstColor.name;
-            const pantone = getClosestColor(obj.firstColor.value);
-            if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-              fill_color_pantone = pantone.pantone;
+          let outLine_color_pantone = obj.secondColor.name;
+          const opantone = getClosestColor(obj.secondColor.value);
+          if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+            outLine_color_pantone = opantone.pantone;
+          }
+          let textIndex = index
+          if(state.customTexts[product.id] && state.customTexts[product.id][index]) {
+            textIndex = state.customTexts[product.id][index].textIndex
+          }
+          const text = {
+            text: '',
+            type: productName.type,
+            width: productName.width,
+            height: productName.height,
+            x_axis: productName.x_axis,
+            y_axis: productName.y_axis,
+            rotation: productName.rotation,
+            haveControls: Boolean(!productName.is_locked),
+            outlineEnabled: Boolean(productName.outline_enabled),
+            side: productName.side,
+            fontFamily: fontsList(product)[0].value,
+            fillColor: obj.firstColor.value,
+            fillColorPantone: fill_color_pantone,
+            outLineColor: obj.secondColor.value,
+            outLineColorPantone: outLine_color_pantone,
+            outLineWidth: 0,
+            textIndex: textIndex,
+            selectColor: false
             }
-
-            let outLine_color_pantone = obj.secondColor.name;
-            const opantone = getClosestColor(obj.secondColor.value);
-            if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-              outLine_color_pantone = opantone.pantone;
-            }
-            const text = {
-              text: '',
-              type: productName.type,
-              width: productName.width,
-              height: productName.height,
-              x_axis: productName.x_axis,
-              y_axis: productName.y_axis,
-              rotation: productName.rotation,
-              haveControls: Boolean(!productName.is_locked),
-              outlineEnabled: Boolean(productName.outline_enabled),
-              side: productName.side,
-              fontFamily: fontsList(product)[0].value,
-              fillColor: obj.firstColor.value,
-              fillColorPantone: fill_color_pantone,
-              outLineColor: obj.secondColor.value,
-              outLineColorPantone: outLine_color_pantone,
-              outLineWidth: 0,
-              selectColor: false
-              }
-            Vue.set(state.customTexts[product.id], index, text)
-          })
-      });
-
-
-
-      // const customTexts = JSON.parse(JSON.stringify(state.customTexts))
-      // Object.keys(customTexts).map(function(key, index) {
-      //   const product = state.products.find((prd:any) => {
-      //     return prd.id == key
-      //   })
-      //   if(product) {
-      //     customTexts[key].map((value,key) => {
-      //
-      //     })
-      //   }
-      //     Vue.set(state.customTexts, key, sortTextsArray(product.productnames))
-      // });
-
+          Vue.set(state.customTexts[product.id], index, text)
+        })
+      })
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       state.undoItems.push(payload)
@@ -655,6 +781,9 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
+    getEditLockerProduct: state => {
+      return state.editLockerProduct
+    },
     getNotifications: state => {
       return state.notifications
     },
@@ -663,6 +792,21 @@ const ProductAttributes:Module<any, any> = {
     },
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
+    },
+    getRemoveBackgroundRadio: state => {
+      return state.logoEditor.remove_background
+    },
+    getLogoEditor: state => {
+      return state.logoEditor
+    },
+    getBackgroundCheck: state => {
+      return state.backgroundCheck
+    },
+    getColorCheck: state => {
+      return state.colorCheck
+    },
+    getShowColorsLogoEditor: state => {
+      return state.showColorsLogoEditor
     },
     getLockerTabsIndex: state => {
       return state.lockerTabsIndex
@@ -716,6 +860,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getCustomLogoObject: state => {
     return state.customLogos
+    },
+    getCustomTextObject: state => {
+      return state.customTexts
     },
     getActiveLogoIndex: (state: any) => state.logoTabIndex,
     getCurrentStyleIndex: state => {
@@ -792,6 +939,12 @@ const ProductAttributes:Module<any, any> = {
     setSelectedIndex({commit}, payload) {
       commit('SET_SELECTED', payload)
     },
+    async editLogo({commit}, payload) {
+      commit('EDIT_LOGO', {key:payload.key,value:payload.value})
+    },
+    async unsetLogoEditor({commit}, payload) {
+      commit('UNSET_LOGO_EDITOR', {})
+    },
     setCustomObj({commit},payload) {
       commit('SET_CUSTOM_OBJ',payload)
     },
@@ -821,9 +974,12 @@ const ProductAttributes:Module<any, any> = {
     deleteCustomLogo({commit}, payload){
       commit('customLogoDelete', payload)
     },
+
     deleteCustomLogoTab({commit}, payload){
       commit('customLogoTabDelete', payload)
     },
+
+
     async deleteCollection({commit}, payload){
       const resp = await http.delete("collection/"+payload.id);
       commit('DELETE_COLLECTION', payload);
@@ -835,6 +991,9 @@ const ProductAttributes:Module<any, any> = {
     },
     toggleLogoBackgroud({commit}, index){
       commit('toggleLogoBackgroudMutation', index)
+    },
+    toggleLogoCheck({commit}, payload){
+      commit('TOGGLE_LOGO_CHECK', payload)
     },
     setCustomTexts({commit}, payload){
       commit('customTexts', payload)
@@ -886,6 +1045,7 @@ const ProductAttributes:Module<any, any> = {
       await commit('SET_SELECTED_PRODUCT_DESIGN');
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
+      console.log("sdfsdfdsf", payload)
       let done = false;
       await http.get("product?product_id="+payload).then((res) => {
         if (res.status == 200) {

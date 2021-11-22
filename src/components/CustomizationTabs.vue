@@ -233,6 +233,7 @@ export default class CustomizationProcess extends Vue {
     deep: false
   })
 
+
   lockerColorsChanged() {
     this.productColorsManipulation()
   }
@@ -279,15 +280,10 @@ export default class CustomizationProcess extends Vue {
   public customTextInit() {
 
     this.products.forEach((product:any) => {
-
       if(!this.customTexts[product.id]) {
-
-
-        product.productnames =  sortTextsArray(product.productnames);
-
+        //product.productnames =  sortTextsArray(product.productnames);
         product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
           if (this.customTexts[index] && !this.customTexts[index].action) {
-
             //calculate colors pantone on init
             let fill_color_pantone = this.firstColor.name;
             let fill_hex_color = '';
@@ -316,9 +312,6 @@ export default class CustomizationProcess extends Vue {
                 outLine_color_pantone = opantone.pantone;
               }
             }
-
-
-
             let text = {
               text: this.customTexts[index].text,
               type: productName.type,

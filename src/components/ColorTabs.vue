@@ -1,5 +1,5 @@
 <template>
-  <b-tabs>
+  <b-tabs v-if="!this.onlyColorsTabs">
     <b-tab v-for="(svgElement, index) in svgGroups" :key="index" @click="showColor(index)">
       <template #title>
         {{ svgElement.id }}
@@ -10,7 +10,7 @@
             <b-nav-item v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
               {{ colorType.name | capitalize}}
             </b-nav-item>
-            <b-nav-item @click="selectType(index, true)">Others</b-nav-item>
+            <b-nav-item @click="selectType(null, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
@@ -26,6 +26,27 @@
       </div>
     </b-tab>
   </b-tabs>
+
+  <div v-else>
+    <b-card-body>
+      <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
+        <b-nav-item v-bind:class="{ 'color-tab-active' : index == selectTypeIndex && !othersActive}" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
+          {{ colorType.name | capitalize}}
+        </b-nav-item>
+        <b-nav-item @click="selectType(null, true)">Others</b-nav-item>
+      </b-nav>
+      <div class="color-holder">
+        <div class="color-container">
+          <div v-if="showOther" class="custom-color-picker">
+            <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
+          </div>
+          <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
+               :title="color.name" :style="{background: color.value}" :key="index">
+          </div>
+        </div>
+      </div>
+    </b-card-body>
+  </div>
 </template>
 
 <script lang="ts">
@@ -53,12 +74,14 @@ import {getClosestColor} from '@/pantoneColor'
 
 export default class ColorTabs extends Vue {
   @Prop({required: true}) productColors!: any
+  @Prop({required: false}) onlyColorsTabs!: any
 
   public color = '#59c7f9'
   public showOther = false
   public selectTabIndex = 0
   public selectTypeIndex = 0
   public productColor: any[] = []
+  public othersActive = false
 
   get svgGroups() {
     return this.$store.getters.getSvgGroups
@@ -73,14 +96,32 @@ export default class ColorTabs extends Vue {
   }
 
   public selectType(index: number, showOther = false) {
-    this.selectTypeIndex = index
+
+
+    if (showOther){
+      this.othersActive = true;
+    }
+    else {
+      this.othersActive = false;
+    }
+
+    if(index)
+      this.selectTypeIndex = index
+
     this.showOther = showOther
-    this.productColor = this.productColors[this.selectTypeIndex].color_text
+    if(!showOther)
+      this.productColor = this.productColors[this.selectTypeIndex].color_text
   }
 
   public setColor(color: Record<any, any>) {
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.getGroupColors)), action: 'groupColor' })
-    this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectTabIndex].id, color: color.value, pantone: color.name })
+    if(this.onlyColorsTabs) {
+     this.$emit('setColorOfLogo',color.value)
+    }
+    else {
+      this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.getGroupColors)), action: 'groupColor' })
+      this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectTabIndex].id, color: color.value, pantone: color.name })
+    }
+
   }
 
   public changeColor(color: Record<any, any>) {
