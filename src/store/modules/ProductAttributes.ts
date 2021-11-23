@@ -70,15 +70,25 @@ const ProductAttributes:Module<any, any> = {
       flood_fill:false
 
     },
+    editLockerProduct: [],
     canvasImage:{
       ref_front:'',
       ref_back:'',
       front:'',
       back:''
     },
-    editLockerProduct: []
+    notifications:[]
   },
   mutations: {
+    SET_NOTIFICATIONS(state:Record<any, any>, payload) {
+      state.notifications  = payload
+    },
+    UPDATE_NOTIFICATIONS(state:Record<any, any>, payload){
+      if (payload){
+        state.notifications.unshift(payload)
+        // Vue.set(state.notifications, state.notifications.length, payload)
+      }
+    },
 
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
       state.lockerActiveTabIndex = payload
@@ -463,18 +473,19 @@ const ProductAttributes:Module<any, any> = {
       state.products.push(payload);
     },
     OVERRIDE_LOGOS(state:Record<any, any>, payload){
+
       const locker_logos = JSON.parse(payload.custom_logos)
       Object.keys(state.customLogos).map(function(key:any, index:any) {
         if(key == payload.product_id) {
           //state.customLogos[key] = locker_logos
-          Vue.set(state.customLogos, key, locker_logos)
+          Vue.set(state.customLogos,key,locker_logos)
         }
         else {
           const logo_setting = getLogoSettings(0,false,key)
           const final_logo = {...logo_setting,...locker_logos[0]}
 
           //state.customLogos[key] = [final_logo]
-          Vue.set(state.customLogos, key,[final_logo])
+          Vue.set(state.customLogos,key,[final_logo])
         }
       });
      // state.customLogos = payload;
@@ -792,6 +803,12 @@ const ProductAttributes:Module<any, any> = {
     getEditLockerProduct: state => {
       return state.editLockerProduct
     },
+    getNotifications: state => {
+      return state.notifications
+    },
+    getCanvasImage: state => {
+      return state.canvasImage
+    },
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
     },
@@ -1047,6 +1064,7 @@ const ProductAttributes:Module<any, any> = {
       await commit('SET_SELECTED_PRODUCT_DESIGN');
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
+      console.log("sdfsdfdsf", payload)
       let done = false;
       await http.get("product?product_id="+payload).then((res) => {
         if (res.status == 200) {
@@ -1191,6 +1209,13 @@ const ProductAttributes:Module<any, any> = {
         }
       }).catch(err => {
         console.log(err)
+      })
+    },
+    async getNotifications({commit}){
+       await http.get('customer/notifications').then((res) => {
+        commit('SET_NOTIFICATIONS', res.data.data.data)
+      }).catch(e =>{
+        console.log(e)
       })
     }
   }

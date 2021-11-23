@@ -65,6 +65,17 @@
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
                   </a></li>
                 </ul>
+                <div v-if="isCustomerAuthenticated" class="icon" id="bell" @click="notificationsDropDown"> <img src="https://i.imgur.com/AC7dgLA.png" alt=""> </div>
+                <div v-if="notifications.length" class="notifications" :style="dropdownStyle" id="box">
+                  <h2>Notifications - <span style="background-color: black"> {{ notificationsCounter}}</span></h2>
+                  <template v-for="(notification, ind) in notifications" >
+                  <div   :key="ind" class="notifications-item">
+                    <div class="text">
+                      <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                    </div>
+                  </div>
+                  </template>
+                </div>
                 <div class="change-product-area d-lg-none">
                   <h2>Change Product</h2>
                   <b-button @click="showDesign()" class="change-product-opener" variant="secondary"></b-button>
@@ -146,6 +157,7 @@ import Scene from "@/components/Scene.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {fontsColorsManipulation, fontsList, sortTextsArray} from "@/helpers/Helpers";
 import {getClosestColor} from "@/pantoneColor";
+import LockerProduct from "@/mixins/LockerProduct";
 
 @Component<Home>({
   components: {
@@ -176,7 +188,6 @@ import {getClosestColor} from "@/pantoneColor";
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
     if (this.isAuthenticated) {
-
       await this.retrieveProducts()
       await this.getFillColors()
     }
@@ -225,12 +236,13 @@ import {getClosestColor} from "@/pantoneColor";
       await this.$store.dispatch('setBrowserToken')
     }
     if (this.isCustomerAuthenticated){
+      await this.$store.dispatch('getNotifications')
       await this.$store.dispatch('getLockerRoomColors')
     }
   }
 })
 
-export default class Home extends Mixins(ErrorMessages) {
+export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -258,6 +270,23 @@ export default class Home extends Mixins(ErrorMessages) {
 
   public setRecentLogos() {
     this.$store.commit('SET_RECENT_LOGOS')
+  }
+
+  get notifications(){
+    return this.$store.getters.getNotifications
+  }
+
+  get notificationsCounter(){
+    // this.ref.lockerModal.$refs['lockerRoom'].editProduct()
+    let unread_notification_counter = 0
+    if (this.$store.getters.getNotifications.length){
+      this.$store.getters.getNotifications.forEach((notification:Record<any, any>) => {
+        if (notification.is_read == 0){
+          unread_notification_counter += 1
+        }
+      })
+    }
+    return unread_notification_counter
   }
 
   public showConfirm(){
@@ -450,6 +479,17 @@ export default class Home extends Mixins(ErrorMessages) {
       return  false
     }
   }
+  public dropdownStyle = { } as any
+  public down = false
+  public notificationsDropDown(){
+    if(this.down){
+      this.dropdownStyle = {'height': '0px', 'opacity': '0'}
+        this.down = false;
+      }else{
+      this.dropdownStyle = {'height' : 'auto', 'opacity': '1'}
+      this.down = true;
+      }
+  }
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
       this.getLockerRoomProducts()
@@ -574,7 +614,6 @@ export default class Home extends Mixins(ErrorMessages) {
 
     if (this.hasProducts) {
       http.get(url).then(async (response: any) => {
-        console.log(searchCall,productType)
         if (searchCall || productType) {
           this.$store.commit('SET_PRODUCTS', []);
         }
@@ -1157,6 +1196,101 @@ export default class Home extends Mixins(ErrorMessages) {
   [v-cloak] {
     display: none !important;
   }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200&display=swap');
+
+
+
+
+
+.icon {
+  cursor: pointer;
+  margin-right: 50px;
+  line-height: 60px
+}
+
+.icon span {
+  background: #f00;
+  padding: 7px;
+  border-radius: 50%;
+  color: #fff;
+  vertical-align: top;
+  margin-left: -25px
+}
+
+.icon img {
+  display: inline-block;
+  width: 26px;
+  margin-top: 4px;
+  background-color: purple;
+}
+
+.icon:hover {
+  opacity: .7
+}
+
+.logo {
+  flex: 1;
+  margin-left: 50px;
+  color: #eee;
+  font-size: 20px;
+  font-family: monospace
+}
+
+.notifications {
+  width: 300px;
+  height: 0px;
+  opacity: 0;
+  position: absolute;
+  top: 63px;
+  right: 62px;
+  border-radius: 5px 0px 5px 5px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)
+}
+
+.notifications h2 {
+  font-size: 14px;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  color: #999
+}
+
+.notifications h2 span {
+  color: #f00
+}
+
+.notifications-item {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  padding: 6px 9px;
+  margin-bottom: 0px;
+  cursor: pointer
+}
+
+.notifications-item:hover {
+  background-color: #eee
+}
+
+.notifications-item img {
+  display: block;
+  width: 50px;
+  height: 50px;
+  margin-right: 9px;
+  border-radius: 50%;
+  margin-top: 2px
+}
+
+.notifications-item .text h4 {
+  color: #777;
+  font-size: 16px;
+  margin-top: 3px
+}
+
+.notifications-item .text p {
+  color: #aaa;
+  font-size: 12px
 }
 
 

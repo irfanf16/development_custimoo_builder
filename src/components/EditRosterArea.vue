@@ -74,16 +74,22 @@ export default class EditRosterArea extends Vue {
   public fileData: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
 
+
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
-
+  get customer():Record<any, any>{
+    return  this.$store.getters.getCustomer
+  }
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
 
   get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex;
+  }
+  get notifications(){
+    return this.$store.getters.getNotifications
   }
 
   retrieveProducts(): void {
@@ -222,6 +228,7 @@ export default class EditRosterArea extends Vue {
       link.click();
     })
   }
+
 
 }
 
