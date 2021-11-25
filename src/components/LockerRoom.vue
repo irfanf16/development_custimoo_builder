@@ -8,7 +8,7 @@
                      @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
             <span @click="changeColor">{{ room.room_name }}</span>
           </draggable>
-          <a class="remove-tab" @click="deleteRoom(room.id, i)">
+          <a v-if="!getSelectionMode.readonly" class="remove-tab" @click="deleteRoom(room.id, i)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </template>
@@ -44,16 +44,16 @@
                       </label>
 
                       <ul class="product-icons">
-                        <li>
+                        <li v-if="!getSelectionMode.readonly">
                           <a data-title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"
                              @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
                             :icon="['fas', 'trash-alt']"/></a>
                         </li>
-                        <li>
+                        <li v-if="!getSelectionMode.readonly">
                           <a data-title="Edit design" @click="editProduct(i, ind)" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
-                        <li>
+                        <li v-if="!getSelectionMode.readonly">
                           <b-button data-title="Share design" :id="'share'+i+''+ind"
                                     @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"
                                     @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
@@ -75,7 +75,7 @@
                             </div>
                           </b-tooltip>
                         </li>
-                        <li>
+                        <li v-if="!getSelectionMode.readonly">
                           <a  @click="showDesignModal(product)">
                             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy" class="svg-inline--fa fa-copy" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path></svg>
                           </a>
@@ -96,7 +96,7 @@
                   </draggable>
 
                 </b-tab>
-                <b-tab v-if="!getAddMoreCollectionStatus" title="Assets" class="assets-file">
+                <b-tab v-if="!getSelectionMode.readonly" title="Assets" class="assets-file">
                   <template v-for="(logo, inda) in room.logos">
                     <div :key="inda" class="assets-logo-block">
                       <img :src="storageUrl+logo.logo_url " crossorigin="anonymous"/>
@@ -104,7 +104,7 @@
                     </div>
                   </template>
                 </b-tab>
-                <b-tab v-if="!getAddMoreCollectionStatus" title="Colors">
+                <b-tab v-if="!getSelectionMode.readonly" title="Colors">
                   <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
                     <div class="pt-lg-2 folder-wrapper">
                       <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
@@ -131,7 +131,7 @@
                     </div>
                   </div>
                 </b-tab>
-                <b-tab v-if="!getAddMoreCollectionStatus && getCollections.length > 0" title="Collections"
+                <b-tab v-if="!getSelectionMode.readonly && getCollections.length > 0" title="Collections"
                        class="designCollections">
                   <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
                     <template v-for="(collection, index) in getCollections">
@@ -185,6 +185,18 @@
                     </template>
                   </div>
                  </b-tab>
+                <b-tab v-if="!getSelectionMode.readonly"  title="Yearly Planner" class="designCollections">
+                  <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
+                    <template>
+                      <div v-if="!room.have_yearly_planner">
+                          <b-button variant="primary" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
+                      </div>
+                      <div v-else>
+                        <YearlyPlanner :room_id="room.id" :room_index="i" :key="room.id" />
+                      </div>
+                    </template>
+                  </div>
+                 </b-tab>
               </b-tabs>
             </b-card>
           </div>
@@ -193,14 +205,16 @@
     </template>
 
     <template #tabs-end>
-      <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getAddMoreCollectionStatus"
+      <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getSelectionMode.readonly"
                   role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
         <span class="btn btn-secondary light">Add <BIconPlus/></span>
       </b-nav-item>
-    </template>
+     </template>
+
 
     <CreateLockerRoomModal @lockerAdded="lockerAdded"/>
     <ExistingCollectionModal @existingCollection="existingCollection"/>
+    <EventModal ref="eventmodal"   />
   </b-tabs>
 
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
@@ -233,6 +247,8 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue'
+import YearlyPlanner from '@/components/YearlyPlanner.vue'
+import EventModal from "@/components/EventModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import Scene from "@/components/Scene.vue";
 import draggable from "vuedraggable";
@@ -252,6 +268,8 @@ import {differenceBy, intersectionBy, union, includes} from 'lodash';
     Scene,
     CreateLockerRoomModal,
     ExistingCollectionModal,
+    YearlyPlanner,
+    EventModal,
     draggable
   },
   mounted() {
@@ -345,8 +363,8 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     await this.$store.dispatch('getCollections')
   }
 
-  get getAddMoreCollectionStatus() {
-    return this.$store.getters.getAddMoreCollectionStatus;
+  get getSelectionMode() {
+    return this.$store.getters.getSelectionMode;
   }
 
   get getLockerProducts(): Record<any, any> {
@@ -705,7 +723,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public getDisabled(locker_prd_id: number): boolean {
-    if (this.getAddMoreCollectionStatus) {
+    if (this.getSelectionMode.readonly) {
       //let selected = this.$store.getters.getSelectedCollectionProducts
       let disabled = this.$store.getters.getDisabledProducts
       let res = disabled.find((id: number) => {
@@ -846,8 +864,10 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       this.lockerActiveTabIndex = 0
     }
 
+
     let payload = {index:this.tabIndex, attribute: 'active_tab', value:true}
     this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', newTabIndex)
   }
 
   // public processColorsCustom(colors: [],customLogoIndex:number):void {
@@ -873,6 +893,19 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   //     this.$store.dispatch("initialLogoColors", JSON.stringify(imageColors));
   //   }
   // }
+
+
+  public async createYearlyPlanner(locker_room_id, index){
+    let payload = {locker_id: locker_room_id, index};
+    this.viewLoader = true
+    let res = await this.$store.dispatch('createYearlyPlanner', payload)
+    this.viewLoader = false
+    if (res.status == 201){
+     this.showToast('Yearly planner has been created successfully for this locker.', 'SUCCESS');
+    }else{
+      this.showError(res)
+    }
+  }
 }
 </script>
 

@@ -354,7 +354,12 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
 
     this.$emit('showLockerRoomModal');
     if(add_more_status) {
-      this.$store.commit('SET_ADD_MORE_COLLECTION',true)
+      this.$store.commit('SET_SELECTION_MODE',{
+        readonly:true,
+        collectionAddmoreMode:true,
+        eventProductMode:false,
+        eventCollectionMode:false
+      })
       this.$store.commit('SET_DISABLED_PRODUCTS',true)
     }
 

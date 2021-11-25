@@ -7,12 +7,12 @@
       ></LockerRoom>
 
       <template #modal-footer>
-        <div v-if="!getAddMoreCollectionStatus && lockerActiveTabIndex == 0" class="text-right">
+        <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right">
           <b-button v-if="selectedCollectionProducts.length>0 && totalCollections > 0"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
           <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Create new collection</b-button>
         </div>
         <div v-else class="text-right">
-          <b-button v-if="selectedCollectionProducts.length>0 && $store.getters.getAddMoreCollectionStatus" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
+          <b-button v-if="selectedCollectionProducts.length > 0 && ($store.getters.getSelectionMode.readonly && $store.getters.getSelectionMode.collectionAddmoreMode)" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
         </div>
       </template>
     </b-modal>
@@ -46,7 +46,12 @@ export default class LockerRoomModal extends Vue {
   public addMoreCollectionModal = () => {
     this.$emit('editCollectionModal')
     this.ref['locker-modal'].hide()
-    this.$store.commit('SET_ADD_MORE_COLLECTION',false)
+    this.$store.commit('SET_SELECTION_MODE',{
+      readonly:false,
+      collectionAddmoreMode:false,
+      eventProductMode:false,
+      eventCollectionMode:false
+    })
   }
 
 
@@ -65,8 +70,9 @@ export default class LockerRoomModal extends Vue {
   get selectedCollectionProducts(){
     return this.$store.getters.getSelectedCollectionProducts;
   }
-  get getAddMoreCollectionStatus(){
-    return this.$store.getters.getAddMoreCollectionStatus;
+
+  get getSelectionMode() {
+    return this.$store.getters.getSelectionMode;
   }
 
   get lockerActiveTabIndex(){

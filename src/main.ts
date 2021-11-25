@@ -41,6 +41,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';
 import App from './App.vue'
 import {faFacebookF, faGooglePlusG, faLinkedinIn} from "@fortawesome/free-brands-svg-icons";
 Vue.use(BootstrapVue)
