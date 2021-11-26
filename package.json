@@ -32,7 +32,7 @@
     "register-service-worker": "^1.7.1",
     "rgb-hex": "^4.0.0",
     "slither-slider": "^2.8.3",
-    "socket.io-client": "^2.3.0",
+    "socket.io-client": "^2.4.0",
     "swiper": "^7.0.1",
     "v-tooltip": "^2.1.3",
     "vue": "^2.6.12",
