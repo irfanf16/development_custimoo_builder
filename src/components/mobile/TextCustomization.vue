@@ -162,9 +162,11 @@ export default class TextCustomization extends Vue {
 
   private showOther(){
     this.showOtherColors = true
+    this.$emit('showOther', true)
   }
   private hideOther(){
     this.showOtherColors = false
+    this.$emit('showOther', false)
   }
 
   public changeColor(color: Record<any, any>) {

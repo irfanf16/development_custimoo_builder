@@ -2623,13 +2623,13 @@ $fontSize: 0.5;
 }
 
 .btn.remove{
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     font-size: 12px;
     flex-shrink: 0;
-    color: #D53943;
-    background: #F8E1E2;
-    border: 1px solid #F8E1E2;
+    color: #F8E1E2;
+    background: #D53943;
+    border: 1px solid #D53943;
     border-radius: 50%;
     display: flex;
     flex-wrap: wrap;
@@ -3115,6 +3115,14 @@ $fontSize: 0.5;
         li{
             a{
                 font-size: smaller;
+
+                button{
+                    padding: 0;
+                    background: transparent;
+                    border: none;
+                    font-family: inherit;
+                    font-size: inherit;
+                }
             }
         }
     }
@@ -4000,6 +4008,28 @@ $fontSize: 0.5;
             }
             .color-holder{
                 padding: 10px 20px 15px 20px;
+            }
+        }
+
+        .recent-logos-mobile{
+            padding-top: 25px;
+
+            h4{
+                font-size: 1.2rem;
+                font-weight: 600;
+                padding: 0 15px;
+                color: #333;
+
+                &+div{
+                    height: 100%;
+                    max-height: 200px;
+                    overflow-y: auto;
+                }
+            }
+            .grid{
+                //gap: 10px;
+                padding: 10px;
+                grid-template-columns: repeat(5, 1fr);
             }
         }
     }

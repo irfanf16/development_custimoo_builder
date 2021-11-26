@@ -41,7 +41,7 @@
               Color Extracted from Logo
             </div>
 
-            <div class="recent-logos">
+            <div class="recent-logos" @click="showRecentLogosHandler">
               <BIconFileEarmarkImage />
               Recent Logos
             </div>
@@ -75,6 +75,13 @@
                                  :productColors="productColors"
                                  :showSVGS="Boolean(showSVGs)" :defSwatchColor.sync="defSwatchColor"
                   />
+                </div>
+
+                <div v-if="showRecentLogos" class="mobile-other recent-logos-mobile">
+                  <span class="close" @click="hideRecentLogosHandler"><BIconX /></span>
+                  <div>
+                    <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
+                  </div>
                 </div>
               </div>
             </div>
@@ -147,6 +154,7 @@ export default class LogoUploader extends Vue {
   public defSwatchColor = '#ffffff'
   public defSwatchPantone = '11-0601'
   public showSVGs = false
+  public showRecentLogos = false
   public options = [
     {value: 'front', text: 'Front'},
     {value: 'back', text: 'Back'}
@@ -325,6 +333,15 @@ export default class LogoUploader extends Vue {
     this.showLogoColors = false
     this.$emit('showOther', this.showLogoColors);
     this.selectedSwatchIndex = -1;
+  }
+
+  private showRecentLogosHandler(){
+    this.showRecentLogos = true
+    this.$emit('showOther', true);
+  }
+  private hideRecentLogosHandler(){
+    this.showRecentLogos = false
+    this.$emit('showOther', false);
   }
 
   public removeLogoTab(index: number){

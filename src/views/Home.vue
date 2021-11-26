@@ -46,7 +46,7 @@
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column position-relative">
           <template>
             <div class="customization-preview-process w-100">
-              <header v-if="false" class="preview-area-header py-2 py-lg-4">
+              <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'lockerRoom'" @click="getLockerRoomProducts" variant="outline-secondary">Locker room</b-button>
@@ -54,15 +54,12 @@
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                   </template>
-                  <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
-                  <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
                   </template>
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
                   </template>
-                  <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
                   <template v-if="isCustomerAuthenticated">
                     <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
                   </template>
@@ -70,12 +67,12 @@
                     <b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'" variant="outline-secondary" v-b-modal.modal-login>Summary</b-button>
                   </template>
                 </div>
+
                 <ul class="preview-header-icons">
                   <li class="d-flex flex-wrap align-items-center">
                     <b-button v-if="!isCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                     <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
-                    <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
 <!--                  <li>-->
 <!--                    <b-button :id="'share'" @click="shareProduct(selectedProduct)">-->
@@ -104,14 +101,29 @@
 <!--                  <button @click="showDesign()" class="change-product-opener btn btn-secondary light">Change Product</button>-->
                 </div>
               </header>
-              <div class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
+
+              <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
+              <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
+              <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
+              <LoginForm @actionAfterLogin="actionAfterLogin()" />
+
+              <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                 <div>
                   <b-button variant="outline-secondary mr-2" :disabled="undoItems.length < 1" @click="undoAction"><span class="d-sm-block d-none">Undo</span><span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span></b-button>
                   <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1"><span class="d-sm-block d-none">Redo</span><span class="d-sm-none d-block"><BIconReplyFill /></span></b-button>
-                  <button class="btn btn-secondary light" @click="redoAction">
-                    <span class="d-sm-block d-none">Save</span>
-                    <span class="d-sm-none d-block"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></span>
-                  </button>
+
+                  <template v-if="isCustomerAuthenticated">
+                    <button class="btn btn-secondary light" :key="'savetolocker'" @click="getLockers">
+                      <span class="d-sm-block d-none">Save</span>
+                      <span class="d-sm-none d-block"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></span>
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button class="btn btn-secondary light" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" v-b-modal.modal-login>
+                      <span class="d-sm-block d-none">Save</span>
+                      <span class="d-sm-none d-block"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></span>
+                    </button>
+                  </template>
                 </div>
 
                 <div class="mobile-nav">
@@ -121,12 +133,15 @@
                     <template #button-content>
                       <a class="custom-link fs-3"><BIconThreeDotsVertical /> </a>
                     </template>
-                    <b-dropdown-item href="#">Change Design / Item</b-dropdown-item>
-                    <b-dropdown-item href="#">Open locker room</b-dropdown-item>
-                    <b-dropdown-item href="#">Summary</b-dropdown-item>
-                    <b-dropdown-item href="#">Share</b-dropdown-item>
+                    <b-dropdown-item><button @click="showDesign">Change Design / Item</button></b-dropdown-item>
+                    <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'lockerRoom'" @click="getLockerRoomProducts">Open locker room</button></b-dropdown-item>
+                    <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" v-b-modal.modal-login>Open locker room</button></b-dropdown-item>
+                    <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'summarybutton'" @click="buyNow">Summary</button></b-dropdown-item>
+                    <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'" v-b-modal.modal-login>Summary</b-button></b-dropdown-item>
+<!--                    <b-dropdown-item>Share</b-dropdown-item>-->
                     <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
-                    <b-dropdown-item href="#">Logout</b-dropdown-item>
+                    <b-dropdown-item v-if="!isCustomerAuthenticated"><button v-b-modal.modal-login>Login</button></b-dropdown-item>
+                    <b-dropdown-item v-else><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                   </b-dropdown>
                 </div>
               </div>
@@ -136,7 +151,7 @@
             <div v-bind:class="{active: isActive}">
               <div class="twoD-view">
 <!--                <CustomizationPreview />-->
-                <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="isFront ? 'front': 'back'" v-if="selectedProduct">
+                <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
                   <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
                     <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
                       <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
@@ -154,7 +169,7 @@
                     </div>
                   </template>
 
-                  <div class="swap-mobile fs-4" @click="isFront = !isFront"><BIconArrowRepeat /></div>
+                  <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                 </div>
               </div>
               <div class="d-none d-lg-block continue-btn-holder pt-5">

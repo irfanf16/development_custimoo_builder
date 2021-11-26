@@ -65,6 +65,7 @@
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
       <TextCustomization
+        @showOther="updateOtherTab"
         :productFonts="selectedProduct.namefonts" :selectedProductID="selectedProduct.id"
         :fontsColors="fontsColors" :firstColor="firstColor" :secondColor="secondColor" :fontOptions="fontOptions" />
     </div>
@@ -81,27 +82,11 @@
       <div class="d-flex flex-column h-100">
         <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
 <!--          <span>Team Players</span>-->
-          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconCloudUpload /></span> <span class="d-inline-block ml-1">Upload / Download Roster</span></span>
+          <span class="addPlayer" v-b-modal.modal-center-uploadroster><span class="fs-2 icon position-absolute"><BIconCloudUpload /></span> <span class="d-inline-block ml-1">Upload / Download Roster</span></span>
           <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Link</span></span>
         </div>
         <div class="players-table mt-2 hide-scroll h-100">
-          <table class="table table-bordered">
-            <tbody>
-            <tr v-for="item in 9" :key="item">
-              <td style="width: 10%; text-align: center" :class="{'activeEye': activeEye == item}" @click="setActiveEye(item)"><BIconEye /></td>
-              <td style="width: 50%">Gulzar</td>
-              <td style="width: 10%; text-align: center">11</td>
-              <td style="width: 10%; text-align: center">xl</td>
-              <td style="width: 10%; text-align: center">{{ item }}</td>
-              <td class="fs-2" style="width: 10%; word-spacing: 10px; text-align: center; color: #fff; background: rgba(250,0,0,0.7)"><BIconX /></td>
-            </tr>
-            </tbody>
-          </table>
-          <div class="text-right mt-2">
-            <button class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
-              <BIconPlus />
-            </button>
-          </div>
+          <RosterTableMobile :productSizes="sizeOptions" @addPlayer="rosterDetailsInit" />
         </div>
       </div>
     </div>
@@ -122,14 +107,19 @@ import TextCustomization from "@/components/mobile/TextCustomization.vue";
 import Collars from "@/components/mobile/Collars.vue";
 import {getClosestColor} from "@/pantoneColor";
 import colorPicker from '@caohenghu/vue-colorpicker'
+import readXlsxFile from "read-excel-file";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
+import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
+import {http} from "@/httpCommon";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<CustomTabs>({
   components: {
     LogoUploader,
     TextCustomization,
     Collars,
-    colorPicker
+    colorPicker,
+    RosterTableMobile
     // ColorAccordion,
     // LogoPlacementTabs,
     // CustomizationText,
@@ -138,13 +128,16 @@ import LogoUploader from "@/components/mobile/LogoUploader.vue";
     // ColorTabs,
     // UploadLogo
   },
-  mounted() {
+  async mounted() {
     // this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
     this.customTextInit()
-   console.log('customTexts', this.selectedProduct)
+   // console.log('customTexts', this.selectedProduct)
+
+    this.productSizes = this.selectedProduct.sizes
+    this.setProductSizes()
   },
 })
 
@@ -165,6 +158,148 @@ export default class CustomTabs extends Vue {
   public showOtherColors = false
   public pantoneColorVal= '13-4411'
   // private tabTop = window.screen.availHeight - 190;
+  public id = 0
+  public custom_arr: Record<any, any>[] = [];
+  public productSizes : any[] = []
+  public sizeOptions: Record<any, any>[] = []
+  public fileData: Record<any, any>[] = []
+  public ref = this.$refs as Record<any, any>
+  public frontImage = ''
+  public backImage = ''
+  public productName = ''
+  public showLoader = false
+
+  get rosterDetails(): [Record<any, any>] {
+    return this.$store.getters.getRosterDetails
+  }
+
+  public rosterDetailsInit() {
+    let payload = {
+      text: '',
+      number: '',
+      size: this.sizeOptions[0] ? this.sizeOptions[0].value : '',
+      quantity: 1,
+      information: ''
+    }
+    this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
+  }
+
+  public setProductSizes() {
+    this.productSizes.forEach((size: any, key: number) => {
+      let sizes = {value: size.name, text: size.name}
+      this.sizeOptions = this.sizeOptions.concat([sizes])
+    })
+  }
+
+  public changeProduct(designsIndex: number) {
+    this.designsIndex = designsIndex
+  }
+
+  public getOccurence(val: string) {
+    let count = (val.match(/\*/g) || []).length;
+    return count
+  }
+  public onChange(event: Record<any, any>){
+    let status = true;
+    let loopStatus = true;
+    let files = event.target.files ? event.target.files[0] : null;
+    let ext = files.name.split('.').pop();
+    if (ext != 'xlsx'){
+      alert("please upload a valid excel file");
+      return false
+    }
+    readXlsxFile(files).then((rows: any[][]) => {
+      if (rows[0].length != 8){
+        alert("please upload valid file")
+        return false
+      }
+      for (let i in rows[0]){
+        if (i == '3'){
+          let count = this.getOccurence(rows[0][i]);
+          if (count != 1 || rows[0][i] != "2. SIZE*"){
+            status = false
+            break;
+          }
+        }
+        if (i == '4'){
+          let count = this.getOccurence(rows[0][i]);
+          if (count != 2 || rows[0][i] != "3. NAME ON PRODUCT**"){
+            status = false
+            break;
+          }
+        }
+        if (i == '6'){
+          let count = this.getOccurence(rows[0][i]);
+          if (count != 3 || rows[0][i] != "OTHER INFORMATION***"){
+            status = false
+            break;
+          }
+        }
+      }
+      if (status) {
+        for (let row in rows){
+          let obj = {
+            text: '',
+            number: '',
+            size: '',
+            quantity: 1,
+            information: ''
+          };
+          if (row == '0'){
+            continue
+          }
+          let objStatus = false;
+          for (let i in rows[row]) {
+            console.log(rows[row])
+            if (rows[row][2] && this.productName == rows[row][2]) {
+              objStatus = true
+              if (i == '3') {
+                obj.size = rows[row][i];
+              }
+              if (i == '4') {
+                obj.text = rows[row][i];
+              }
+              if (i == '5') {
+                obj.number = rows[row][i];
+              }
+              if (i == '6') {
+                obj.information = rows[row][i];
+              }
+            }
+            if (loopStatus == false) {
+              break
+            }
+          }
+          if (objStatus) {
+            this.fileData.push(obj);
+          }
+        }
+        if (loopStatus == true){
+          this.custom_arr = this.fileData
+          this.ref['myModal'].hide();
+        }else{
+          alert('Size is missing');
+          this.ref['myModal'].hide();
+        }
+      }else{
+        alert("please upload a valid file");
+      }
+    })
+  }
+  public async downloadTemplate(){
+    await http.get('template/download',{
+      responseType: 'blob',
+    }).then((res) => {
+      let blob = new Blob([res.data],{type:res.headers['content-type']})
+      let link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = 'roster_template.xlsx';
+      link.click();
+    })
+  }
+  public homeScreen(){
+    this.$router.push('/')
+  }
 
   private setPlayersDataHeight = (idx: number) => {
     return (e:Record<any, any>) => {
@@ -252,9 +387,11 @@ export default class CustomTabs extends Vue {
   }
   private showOther(){
     this.showOtherColors = true
+    this.showOtherTab = true
   }
   private hideOther(){
     this.showOtherColors = false
+    this.showOtherTab = false
   }
 
   get svgGroups() {
@@ -565,10 +702,6 @@ export default class CustomTabs extends Vue {
   }
 }
 
-.activeEye{
-  background: #189076;
-  color: #fff;
-}
 
 .dragControl{
   position: absolute;
