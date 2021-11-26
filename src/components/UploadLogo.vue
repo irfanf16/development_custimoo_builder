@@ -1,5 +1,14 @@
 <template>
+<!--  <div class="upload-logo-opener">-->
+<!--    <span class="close" @click="hideAll"><BIconX /></span>-->
+
+<!--    <div class="logo-option-area mb-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">-->
+<!--      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground">-->
+<!--        Remove Logo Background-->
+<!--      </b-form-checkbox>-->
+
   <div style="padding-bottom: 10px" class="upload-logo-opener" v-if="customLogos">
+
     <div class="logo-option-area mb-3 mt-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
 
 <!--      <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
@@ -96,6 +105,7 @@ import {http} from "@/httpCommon"
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
+import $ from "jquery";
 import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 
@@ -128,6 +138,24 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
+  }
+
+  private hideAll(){
+    this.$store.dispatch('setActiveTab', -1);
+    $(".sideNav li a").removeClass('active')
+  }
+
+  @Watch('customLogos', {
+    deep: true
+  })
+  customLogosChanged(newVal: [Record<any, any>]) {
+    if (this.customLogos[0] && !this.customLogos[0].url) {
+      let inputRef = this.$refs.fileInput as Record<any, any>
+      inputRef.value = null;
+    }
+    if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
+      this.getLogoColors()
+    }
   }
 
   public uploadLogoBtn() {
@@ -362,9 +390,9 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   padding: 15px;
   text-align: center;
   color: #808895;
-  border-radius: 20px 20px 0 0;
+  //border-radius: 20px 20px 0 0;
   background: #fff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 7px rgba(0, 0, 0, 0.1);
   z-index: 9;
   @media only screen and (min-width: 992px) {
     position: absolute;

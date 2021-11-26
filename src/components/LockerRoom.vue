@@ -2,10 +2,10 @@
   <span class="asdasd">
   <b-tabs content-class="mt-3" @activate-tab="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
-      <b-tab :key="i" :active="tabIndex === i">
+      <b-tab :key="i" :active="tabIndex === i" @click="hideAll">
         <template #title>
           <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
-                     @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
+                      @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
             <span @click="changeColor">{{ room.room_name }}</span>
           </draggable>
           <a class="remove-tab" @click="deleteRoom(room.id, i)">
@@ -141,6 +141,7 @@
                                    alt="">
                             </template>
                           </div>
+
                           <div class="controls">
                             <a v-b-tooltip.hover.right title="Delete collection"
                                @click="deleteCollection(collection.id,index)" class="remove btn">
