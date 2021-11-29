@@ -28,14 +28,14 @@
             {{customTextIndex}}
           </div>
         </div>
-        <div class="fade-right py-1">
+        <div class="fade-right py-2">
           <div class="overflow-auto d-flex align-items-center gap-2 hide-scroll fontList">
             <div v-for="(item, i) in fontOptions" :key="i" @click="fontOptionChanged(tabIndex, i, item.value)" style="white-space: nowrap" :class="{'pr-3': i+1 == fontOptions.length, 'activeFont': activeFont == i}">
               {{item.text}}</div>
           </div>
         </div>
 
-        <b-tabs class="mt-1">
+        <b-tabs class="mt-2">
           <b-tab @click="setColorType('fill')">
             <template #title>
               <div class="d-flex align-items-center gap-1">

@@ -20,7 +20,7 @@
 <!--          <label>Apply to</label>-->
 <!--        </div>-->
 
-        <div class="overflow-hidden fade-right">
+        <div class="overflow-hidden mt-2 fade-right">
           <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
             <li v-for="(svgColor, index) in svgGroups" :key="index">
               <a style="text-transform: capitalize" :class="activePart == index ? 'active_line' : ''" @click="setActivePart(index)">{{ svgColor.id }}</a>
@@ -64,6 +64,7 @@
       <span class="close" @click="hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
+      <div class="mt-2"></div>
       <TextCustomization
         @showOther="updateOtherTab"
         :productFonts="selectedProduct.namefonts" :selectedProductID="selectedProduct.id"
@@ -72,6 +73,7 @@
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 3" >
       <span class="close" @click="hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(2)" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
+      <div class="mt-2"></div>
 
       <Collars :productModels="productModels"/>
     </div>
@@ -79,7 +81,7 @@
       <span class="close" @click="hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(3)" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
-      <div class="d-flex flex-column h-100">
+      <div class="d-flex mt-2 flex-column h-100">
         <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
 <!--          <span>Team Players</span>-->
           <span class="addPlayer" v-b-modal.modal-center-uploadroster><span class="fs-2 icon position-absolute"><BIconCloudUpload /></span> <span class="d-inline-block ml-1">Upload / Download Roster</span></span>
@@ -705,7 +707,7 @@ export default class CustomTabs extends Vue {
 
 .dragControl{
   position: absolute;
-  height: 10px;
+  height: 13px;
   width: 100px;
   top: 7px;
   left: 0;
@@ -713,6 +715,7 @@ export default class CustomTabs extends Vue {
   margin: 0 auto;
   background: #dbdbdb;
   border-radius: 10px;
+  z-index: 10;
   box-shadow: 1px 1px 0 0px #ccc, inset 0 0 3px 1px #eee;
 }
 .dragControl.active{

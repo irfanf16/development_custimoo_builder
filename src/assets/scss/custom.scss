@@ -3913,6 +3913,20 @@ $fontSize: 0.5;
     z-index: 1000;
 }
 
+.tabs-logo-container{
+    .recent-logos {
+        color: #219F84;
+        font-weight: 500;
+        border: 1px solid #219F84;
+        padding: 7px 10px 7px 7px;
+        border-radius: 5px;
+
+        svg {
+            width: 20px;
+        }
+    }
+}
+
 .upload_logo {
     &.mobile{
         overflow-x: hidden;
