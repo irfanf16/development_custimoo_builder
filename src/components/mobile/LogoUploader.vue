@@ -17,7 +17,13 @@
 <!--        </div>-->
 
         <div class="tabs-logo-container">
-          <div class="logo-placement-area mb-3 mb-lg-4 pt-2">
+          <div class="d-flex justify-content-end w-100 mt-3">
+            <div class="recent-logos" @click="showRecentLogosHandler">
+              <BIconFileEarmarkImage />
+              Recent Logos
+            </div>
+          </div>
+          <div class="logo-placement-area mb-3 mb-lg-4 pt-0">
             <div class="logo-placement-holder mb-lg-3" :class="logo_tab.url ? 'hasLogo': 'noLogo'">
               <div class="logo-holder">
                 <UploadLogo :customLogoIndex="ltIdx" :showImage="true" :showActions="true"
@@ -39,11 +45,6 @@
           <h4 class="mb-3 d-flex align-items-center justify-content-between mb-lg-4">
             <div>
               Color Extracted from Logo
-            </div>
-
-            <div class="recent-logos" @click="showRecentLogosHandler">
-              <BIconFileEarmarkImage />
-              Recent Logos
             </div>
           </h4>
           <div class="mb-lg-3 w-100">
