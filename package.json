@@ -27,6 +27,7 @@
     "html2pdf.js": "^0.9.3",
     "jquery": "^3.6.0",
     "lodash": "^4.17.21",
+    "pc-bootstrap4-datetimepicker": "^4.17.51",
     "read-excel-file": "^5.2.9",
     "register-service-worker": "^1.7.1",
     "rgb-hex": "^4.0.0",

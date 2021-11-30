@@ -257,7 +257,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
   public ref = this.$refs as Record<any, any>
   public event_data: Record<any, any> = {
     locker_id:null,
-    id: '',
+    id: null,
     title: '',
     event_type: null,
     file_id: '',
@@ -427,7 +427,42 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
   public async editEvent(event_id:number){
     let res = await this.$store.dispatch('getEventById', event_id)
-    console.log(res);
+
+    this.event_data.id = res.id
+    this.event_data.title = res.title
+    this.event_data.event_type = res.event_type
+    this.event_data.description = res.description
+    this.event_data.event_time = res.event_time
+
+    if(res.is_reminder == 1){
+      this.event_data.is_reminder = true
+      this.event_data.before_time = res.reminder.before_time
+    }
+
+    if(res.to_emails !== null){
+      this.event_data.email_to_others = true
+      this.event_data.to_emails = JSON.parse(res.to_emails)
+    }
+
+    this.event_data.email_template_id = res.email_template_id
+    this.event_data.email_content = res.email_content
+    let emailTemplates = this.$store.getters.getEmailTemplates
+    this.email_template_index = emailTemplates.map(function(eTemplate) {return eTemplate.id; }).indexOf(res.email_template_id);
+
+    if(res.event_type == 'design'){
+
+      this.event_data.file_id = res.file.file_id
+      this.file_data = res.file.product_url
+      this.file_name = res.file.product_name
+    }else if(res.event_type == 'collection'){
+      this.event_data.file_id = res.file.file_id
+      this.file_data = res.file.collection_data.collection_products
+      this.file_name = res.file.collection_data.name
+    }else{
+      this.file_data = res.file.product_url
+    }
+
+
   }
 
   public async submitEvent(){
@@ -455,8 +490,15 @@ export default class EventModal extends Mixins(ErrorMessages) {
         }
 
       }
+
       let res;
-       res = await this.$store.dispatch('addEvent', form)
+
+      if (this.event_data.id === null) {
+        res = await this.$store.dispatch('addEvent', form)
+      }else{
+        res = await this.$store.dispatch('updateEvent', form)
+      }
+
 
       if (res.status) {
         this.showToast(res.message, 'SUCCESS')
@@ -476,7 +518,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
       this.event_data. description =  ''
       this.event_data.event_time =  ''
       this.event_data.is_reminder =  false
-      this.event_data.before_time =  0
+      this.event_data.before_time =  null
       this.event_data.email_to_others =  false
       this.event_data.to_emails =  []
       this.event_data.email_template_id =  null
