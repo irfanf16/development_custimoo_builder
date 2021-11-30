@@ -25,7 +25,15 @@
       >
        <ul>
          <li :key="locker_event.id" v-for="(locker_event) in event.events">
-          <span>{{`${locker_event.event_day}  : ${locker_event.title}` }}</span>
+
+          <span>
+             <a data-title="Edit Event"
+                @click="$emit('edit-event',locker_event.id)">
+             <font-awesome-icon
+               :icon="['fas', 'edit']"/>
+           </a>
+            {{`${locker_event.event_day}  : ${locker_event.title}` }}</span>
+
          </li>
        </ul>
 

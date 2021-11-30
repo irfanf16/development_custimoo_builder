@@ -196,7 +196,7 @@
                           <b-button variant="primary" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
                       </div>
                       <div v-else>
-                        <YearlyPlanner @init-event-contacts="initEventContacts" @getLockerEvents="getLockerEvents(room.id)" :room_id="room.id" :room_index="i" :key="room.id" />
+                        <YearlyPlanner @edit-event="editEvent" @init-event-contacts="initEventContacts" @getLockerEvents="getLockerEvents(room.id)" :room_id="room.id" :room_index="i" :key="room.id" />
                       </div>
                     </template>
                   </div>
@@ -932,6 +932,12 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
   public changeLockerTabIndex(lockerIndex: number){
     this.tabIndex = lockerIndex
+  }
+  public editEvent(event_id){
+    const room_index = this.$store.getters.getActiveLockerIndex;
+    this.$store.commit('SHOW_EVENT_POPUP', true)
+    this.$store.commit('SET_LOCKER_INDEX_FOR_EVENT', room_index)
+    this.ref['eventmodal'].editEvent(event_id);
   }
 }
 </script>
