@@ -39,6 +39,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     const room_index = this.$store.getters.getActiveLockerIndex;
     this.$store.commit('SHOW_EVENT_POPUP', true)
     this.$store.commit('SET_LOCKER_INDEX_FOR_EVENT', room_index)
+    this.$emit('init-event-contacts');
   }
   public showContactPopup(){
     this.ref['contactmodal'].showContactPopup()

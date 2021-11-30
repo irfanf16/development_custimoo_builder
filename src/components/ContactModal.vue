@@ -6,15 +6,15 @@
       <ValidationObserver v-slot="{ handleSubmit, invalid }">
         <b-form @submit.prevent="handleSubmit(saveContact)" >
         <div class="row" style="padding: 10px">
-          <label for="inline-form-input-productname" class="w-100 d-block mb-2">Contact Email</label>
-          <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
-            <validation-provider rules="required|email" v-slot="{ errors }">
-            <b-input-group>
-              <b-form-input placeholder="Enter contact email" v-model="email"  ></b-form-input>
-                <div class="error">{{ errors[0] }}</div>
-             </b-input-group>
-            </validation-provider>
-          </div>
+          <validation-provider rules="required|email" v-slot="{ errors }">
+            <label for="inline-form-input-productname" class="w-100 d-block mb-2">Contact Email</label>
+            <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
+              <b-input-group>
+                <b-form-input placeholder="Enter contact email" v-model="email"></b-form-input>
+              </b-input-group>
+            </div>
+            <span class="error">{{ errors[0] }}</span>
+          </validation-provider>
          </div>
         <div class="row">
           <div class="col-lg-12" style="text-align: right">
