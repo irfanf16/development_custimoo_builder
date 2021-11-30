@@ -438,7 +438,14 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
       let form = new FormData();
       for (const key in this.event_data) {
-        form.append(key, this.event_data[key]);
+        if(key == 'to_emails'){
+          for (var i = 0; i < this.event_data.to_emails.length; i++) {
+            form.append('to_emails[]', this.event_data.to_emails[i]);
+          }
+        }else{
+          form.append(key, this.event_data[key]);
+        }
+
       }
       let res;
        res = await this.$store.dispatch('addEvent', form)
