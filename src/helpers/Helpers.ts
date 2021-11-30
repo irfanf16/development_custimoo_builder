@@ -199,5 +199,16 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
    return fontOptions
 }
 
+const getReminderOptions = () => {
 
-export {getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList };
+  const optionArray = [];
+  optionArray[0] = {value: null, text: 'Choose an option'}
+  optionArray[1] = {value: 1440, text: '1 day before'}
+  optionArray[2] = {value: 4320, text: '3 days before'}
+  optionArray[3] = {value: 10080, text: '7 days before'}
+  optionArray[4] = {value: 43200, text: '1 month before'}
+  return optionArray;
+}
+
+
+export {getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions };

@@ -54,7 +54,7 @@
             <b-form-checkbox v-model="event_data.is_reminder"  :checked="event_data.is_reminder" ><span class="checked"></span> Send reminder</b-form-checkbox>
             <div v-if="event_data.is_reminder">
               <validation-provider rules="required" v-slot="{ errors }">
-                <b-form-select  v-model="event_data.before_time" :options="getReminderOptions" ></b-form-select>
+                <b-form-select  v-model="event_data.before_time" :options="getReminders" ></b-form-select>
                 <span class="error">{{ errors[0] }}</span>
               </validation-provider>
             </div >
@@ -221,6 +221,7 @@ import datePicker from 'vue-bootstrap-datetimepicker';
 import { ValidationProvider, ValidationObserver, extend  } from 'vee-validate';
 import { required, email, required_if, mimes } from 'vee-validate/dist/rules';
 import { VueEditor } from "vue2-editor";
+import {getReminderOptions} from '@/helpers/Helpers';
 
 extend('required', {
   ...required,
@@ -330,17 +331,11 @@ export default class EventModal extends Mixins(ErrorMessages) {
     optionArray[3] = {value: 'custom', text: 'Custom event'}
     return optionArray;
   }
-
-  get getReminderOptions() {
-
-    let optionArray: Array = [];
-    optionArray[0] = {value: null, text: 'Choose an option'}
-    optionArray[1] = {value: 1440, text: '1 day before'}
-    optionArray[2] = {value: 4320, text: '3 days before'}
-    optionArray[3] = {value: 10080, text: '7 days before'}
-    optionArray[3] = {value: 43200, text: '1 month before'}
-    return optionArray;
+  get getReminders() {
+    return getReminderOptions()
   }
+
+
 
   public setEventType(e : string) {
 

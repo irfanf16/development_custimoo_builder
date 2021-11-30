@@ -51,6 +51,7 @@
           <td>{{locker_event.event_time}}</td>
           <td>{{locker_event.title}}</td>
           <td>{{ locker_event.to_emails | eventEmails(locker_event.to_emails) }}</td>
+          <td>{{ locker_event.reminder.before_time | reminderTime(locker_event.reminder.before_time) }}</td>
         </tr>
       </table>
     </div>
@@ -73,7 +74,7 @@ import {Component, Mixins, Prop} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 
 import ContactModal from "@/components/ContactModal.vue";
-
+import {getReminderOptions} from '@/helpers/Helpers';
 
 @Component<YearlyPlanner>({
   components: {
@@ -82,6 +83,10 @@ import ContactModal from "@/components/ContactModal.vue";
   filters: {
     eventEmails: (value: string) => {
       return value ? JSON.parse(value).toString() : ''
+    },
+    reminderTime: (value: string) => {
+      let options = getReminderOptions()
+      return options.find((x:Record<any, any>) => x.value === value).text
     }
   },
   async mounted() {
