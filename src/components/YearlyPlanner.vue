@@ -42,7 +42,7 @@
         <tr>
           <td>{{locker_event.event_time}}</td>
           <td>{{locker_event.title}}</td>
-          <td>{{ getEmails(locker_event.to_emails) }}</td>
+          <td>{{ locker_event.to_emails | eventEmails(locker_event.to_emails) }}</td>
         </tr>
       </table>
     </div>
@@ -70,6 +70,11 @@ import ContactModal from "@/components/ContactModal.vue";
 @Component<YearlyPlanner>({
   components: {
     ContactModal
+  },
+  filters: {
+    eventEmails: (value: string) => {
+      return value ? JSON.parse(value).toString() : ''
+    }
   },
   async mounted() {
      //  let res =  this.$store.dispatch('getLockerEvents')
@@ -110,11 +115,6 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   public changeEventView(view_type:string) {
     this.event_view = view_type
   }
-  public getEmails(event_emails:string) {
-    console.log('event_emails',event_emails)
-    let email_str = event_emails ? JSON.parse(JSON.parse(event_emails)).toString() : ''
-    return email_str
-  }
 }
 
 </script>
@@ -136,5 +136,8 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   .calender_btn_inactive {
     color: black;
     background: white;
+  }
+  table, th, td {
+    border:1px solid black;
   }
 </style>
