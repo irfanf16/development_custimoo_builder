@@ -95,10 +95,17 @@ const Event:Module<any, any> = {
       return res;
     },
     async getLockerEvents({commit,state},room_id:number){
-      console.log('state.selected_year',state.selected_year)
       return  await http.get(`events/locker?year=${state.selected_year}&room_id=${room_id}`).then(async (res) => {
         if (res.status == 200){
           await commit('SET_LOCKER_EVENTS', res.data)
+          return res.data
+        }
+      })
+    },
+    async getEventById({commit},event_id:number){
+      return  await http.get(`events/${event_id}`).then(async (res) => {
+        if (res.status == 200){
+          console.log(commit)
           return res.data
         }
       })

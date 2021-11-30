@@ -305,7 +305,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.$store.commit('SHOW_EVENT_POPUP', true)
   }
 
-  public updateEmail(email, index) {
+  public updateEmail(email: string, index: number) {
     Vue.set(this.event_data.to_emails, index, email)
   }
 
@@ -313,7 +313,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.event_data.to_emails.push('')
   }
 
-  public deleteEmail(index) {
+  public deleteEmail(index:number) {
     this.event_data.to_emails.splice(index, 1);
   }
 
@@ -342,7 +342,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     return optionArray;
   }
 
-  public setEventType(e) {
+  public setEventType(e : string) {
 
     this.event_data.file_id = ''
     this.file_data = null
@@ -371,7 +371,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
   }
 
-  public setEventProduct(id, url, name) {
+  public setEventProduct(id: number, url:string, name: string) {
     this.event_data.file_id = id
     this.file_data = url
     this.file_name = name
@@ -386,7 +386,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.$emit('change-locker-tabindex', selected_locker_index)
   }
 
-  public setEventCollection(collection_index) {
+  public setEventCollection(collection_index: number) {
 
     let collection = this.$store.getters.getCollections[collection_index]
     this.event_data.file_id = collection.id
@@ -405,7 +405,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
   }
 
-  public setEventEmailTemplate(index){
+  public setEventEmailTemplate(index:any){
     if(index !== null){
       let template = this.$store.getters.getEmailTemplates[index];
       this.event_data.email_template_id = template.id
@@ -430,6 +430,11 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.file_name = this.event_data.file.name;
   }
 
+  public async editEvent(event_id:number){
+    let res = await this.$store.dispatch('getEventById', event_id)
+    console.log(res);
+  }
+
   public async submitEvent(){
 
       let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
@@ -442,7 +447,15 @@ export default class EventModal extends Mixins(ErrorMessages) {
           for (var i = 0; i < this.event_data.to_emails.length; i++) {
             form.append('to_emails[]', this.event_data.to_emails[i]);
           }
-        }else{
+        }else if(key == 'email_to_others' || key == 'is_reminder')
+        {
+          if(this.event_data[key]){
+            form.append(key, 1);
+          }else{
+            form.append(key, 0);
+          }
+        }
+      else{
           form.append(key, this.event_data[key]);
         }
 
