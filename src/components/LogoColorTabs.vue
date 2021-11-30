@@ -171,5 +171,6 @@ export default class LogoColorTabs extends Vue {
     font-size: 0.8rem;
   }
   .hu-color-picker{box-shadow: none !important;}
+
 }
 </style>

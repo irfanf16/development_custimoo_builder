@@ -1,6 +1,7 @@
 import Store from '../store'
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
+import {default as $} from "jquery";
 
 const getLogoSettingsObject = () => {
   return {
@@ -156,6 +157,47 @@ const processColorsCustom = (colors: []) => {
   return imageColors;
 
 }
+const sortTextsArray = (product_names: any) => {
+  return product_names.sort((a:any,b:any)=> (a.type > b.type ? 1 : -1));
+
+}
+
+const  fontsColorsManipulation = (selectedProduct:any) => {
+
+  let fontsColors:any = []
+  let  firstColor:any = ''
+  let  secondColor:any = ''
+
+  selectedProduct.namecolors.forEach((colors: any, key: number) => {
+    const finalColor = {color_text: []}
+    finalColor.color_text = JSON.parse(colors.color_text)
+    fontsColors = fontsColors.concat(finalColor)
+  })
+  if (fontsColors.length) {
+    firstColor = fontsColors[0].color_text[0]
+    secondColor = fontsColors[0].color_text? fontsColors[0].color_text[1] : fontsColors[0].color_text[0]
+  }
+
+  return {firstColor,secondColor}
+}
 
 
-export {getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom };
+ const fontsList = (product:any) :any=> {
+  const productFonts = product.namefonts;
+   let fontOptions:any = [];
+  productFonts.forEach((fonts: any, key: number) => {
+    let fontNameParam = fonts.file_url.split('/').reverse()
+    fontNameParam = fontNameParam[0].split('.')
+    const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+    const font = {
+      value: fontNameParam[0] as string,
+      text: fontName as string
+    }
+    fontOptions = fontOptions.concat([font])
+    return fontOptions
+  })
+   return fontOptions
+}
+
+
+export {getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList };
