@@ -17,7 +17,8 @@
         <div class="lockerroom-tabs">
           <div>
             <b-card no-body>
-              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" :value="lockerActiveTabIndex">
+<!--              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" :value="lockerActiveTabIndex">-->
+              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated">
                 <b-tab title="Products">
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
@@ -185,14 +186,14 @@
                     </template>
                   </div>
                  </b-tab>
-                <b-tab v-if="!getSelectionMode.readonly"  title="Yearly Planner" class="designCollections">
+                <b-tab  @click="clickYearlyTab(room.id)" v-if="!getSelectionMode.readonly"  title="Yearly Planner" class="designCollections">
                   <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
                     <template>
                       <div v-if="!room.have_yearly_planner">
                           <b-button variant="primary" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
                       </div>
                       <div v-else>
-                        <YearlyPlanner :room_id="room.id" :room_index="i" :key="room.id" />
+                        <YearlyPlanner @getLockerEvents="getLockerEvents(room.id)" :room_id="room.id" :room_index="i" :key="room.id" />
                       </div>
                     </template>
                   </div>
@@ -735,9 +736,15 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 
   }
 
-  public lockerTabUpdated(newTabIndex:number , prevTabIndex: number, bvEvent:Record<any, any> ) {
+  public async lockerTabUpdated(newTabIndex:number , prevTabIndex: number, bvEvent:Record<any, any> ) {
+    console.log('newTabIndex',newTabIndex)
     this.lockerActiveTabIndex = newTabIndex;
     this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
+  }
+
+  public async clickYearlyTab(room_id:number) {
+    this.getLockerEvents(room_id)
+
   }
 
   public lockerProductsChanged(payload: any, index = null) {
@@ -905,6 +912,10 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }else{
       this.showError(res)
     }
+  }
+
+   public async getLockerEvents(room_id:number) {
+    let res = await this.$store.dispatch('getLockerEvents',room_id)
   }
 }
 </script>
