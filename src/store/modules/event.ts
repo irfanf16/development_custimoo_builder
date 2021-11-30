@@ -82,6 +82,28 @@ const Event:Module<any, any> = {
 
       return resp;
     },
+    async updateEvent({commit}, payload: Record<any, any>) {
+      const header = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+
+      let resp =  {status:false,message:"",event:{}};
+      await http.post('events/update', payload, header).then((res) => {
+        if (res.status == 200){
+          resp = {status:true,message:"Event updated successfully", event: res.data.data};
+        }else if (res.status == 401){
+          resp = {status:false,message:"Event not updated", event: {}};
+        }
+      }).catch(err => {
+        if(err.response.status){
+          resp = {status:false,message:err.response.data.errors, event: {}};
+        }
+      })
+
+      return resp;
+    },
     async saveContact({commit}, paylod: Record<any, any>) {
       const res = await http.post("save/contact", paylod).then((res: any) => {
        return res;
