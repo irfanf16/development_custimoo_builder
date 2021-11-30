@@ -40,13 +40,14 @@
     import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 
 
+
     @Component<ConfirmOrder>({
         components: {
           AddLockerRoomModal,
-            OrderAccordion,
-            CustomizationPreview,
-            OrderDetails,
-            SaveDesignModal
+          OrderAccordion,
+          CustomizationPreview,
+          OrderDetails,
+          SaveDesignModal
         },
         mounted() {
             // this.retrieveProducts()

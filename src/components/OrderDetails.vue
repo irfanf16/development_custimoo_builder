@@ -43,6 +43,9 @@
         </div>
       </div>
     </div>
+    <div class="d-none">
+      <ProductionScene ref="production-scene"/>
+    </div>
 
 <!--    <div class="d-none">
       <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
@@ -62,9 +65,11 @@ import {http} from "@/httpCommon";
 import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
+import ProductionScene from '@/components/ProductionScene.vue'
 @Component<OrderDetails>({
   components: {
     DesignPdfView,
+    ProductionScene,
     AddLockerRoomModal
   },
   mounted(){
@@ -154,6 +159,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
 
   public  generateProductionPdf() {
     this.showLoader = true;
+    this.$refs["production-scene"].canvasToImage("png", true);
     let p2 = new Promise((resolve) => {
       const frontElement = document.getElementById("scene-front") as Record<any, any>
       this.pdf_front_image = frontElement.toDataURL("image/png")
