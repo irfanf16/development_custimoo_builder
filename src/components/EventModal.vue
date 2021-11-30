@@ -1,7 +1,7 @@
 <template>
   <b-modal size="lg" :visible="showEventPopup" hide-footer @hide="hideEventModal"  id="modal-center-event" centered scrollable
            title="Add Event" >
-    <ValidationObserver v-slot="{handleSubmit, invalid }">
+    <ValidationObserver v-slot="{handleSubmit }">
       <b-form @submit.prevent="handleSubmit(submitEvent)" >
     <div class="design-name-form">
 
@@ -199,7 +199,7 @@
       <div class="row">
         <div class="col-lg-12" style="text-align: right">
           <button type="button"  class="btn btn-secondary" @click="hideEventModal">Cancel</button>
-          <button :disabled="invalid" type="submit" class="btn btn-secondary" style="margin-left: 5px;" >Save</button>
+          <button  type="submit" class="btn btn-secondary" style="margin-left: 5px;" >Save</button>
         </div>
       </div>
 
