@@ -1,6 +1,6 @@
 <template>
   <span class="asdasd">
-  <b-tabs content-class="mt-3" @activate-tab="lockerChanged">
+  <b-tabs content-class="mt-3" v-model="tabIndex" @activate-tab="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
       <b-tab :key="i" :active="tabIndex === i">
         <template #title>
@@ -17,9 +17,8 @@
         <div class="lockerroom-tabs">
           <div>
             <b-card no-body>
-<!--              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" :value="lockerActiveTabIndex">-->
-              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated">
-                <b-tab title="Products">
+              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" :value="lockerActiveTabIndex">
+                <b-tab v-if="!getSelectionMode.eventCollectionMode" title="Products">
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
                              :multiDrag="true"
@@ -35,8 +34,12 @@
                         <div class="image-holder">
                           <div>
 
-                            <b-form-checkbox :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <img v-if="room.active_tab" :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                            <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
+                            <template v-if="room.active_tab">
+                              <img v-if="!getSelectionMode.eventProductMode"  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                              <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                            </template>
+
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -132,11 +135,11 @@
                     </div>
                   </div>
                 </b-tab>
-                <b-tab v-if="!getSelectionMode.readonly && getCollections.length > 0" title="Collections"
+                <b-tab v-if="(!getSelectionMode.readonly && getCollections.length > 0) || (getSelectionMode.readonly && getSelectionMode.eventCollectionMode)" title="Collections"
                        class="designCollections">
                   <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
                     <template v-for="(collection, index) in getCollections">
-                      <div :key="index" class="products-block">
+                      <div :key="index" @click="getSelectionMode.eventCollectionMode ? setEventCollection(index) : null" class="products-block" :style="getSelectionMode.eventCollectionMode ? 'cursor:pointer' : 'cursor:move' ">
                         <div class="image-holder">
 
                           <div class="convas_container" :key="collection_product_index"
@@ -149,7 +152,7 @@
                             </template>
                           </div>
 
-                          <div class="controls">
+                          <div class="controls" v-if="!getSelectionMode.readonly">
                             <a v-b-tooltip.hover.right title="Delete collection"
                                @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
@@ -193,7 +196,7 @@
                           <b-button variant="primary" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
                       </div>
                       <div v-else>
-                        <YearlyPlanner @getLockerEvents="getLockerEvents(room.id)" :room_id="room.id" :room_index="i" :key="room.id" />
+                        <YearlyPlanner @init-event-contacts="initEventContacts" @getLockerEvents="getLockerEvents(room.id)" :room_id="room.id" :room_index="i" :key="room.id" />
                       </div>
                     </template>
                   </div>
@@ -215,7 +218,7 @@
 
     <CreateLockerRoomModal @lockerAdded="lockerAdded"/>
     <ExistingCollectionModal @existingCollection="existingCollection"/>
-    <EventModal ref="eventmodal"   />
+    <EventModal ref="eventmodal" @change-locker-tabindex="changeLockerTabIndex"   />
   </b-tabs>
 
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
@@ -862,7 +865,8 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.getLockerProducts[lockerIndex].product[productIndex] = product;
   }
 
-  public lockerChanged(newTabIndex: number, prevTabIndex: number, bvEvent: Record<any, any>) {
+  public lockerChanged(newTabIndex: number ) {
+
     this.tabIndex = newTabIndex
     /*
     * If locker collection tab is active and user switch to the locker then activate first tab (product tab)
@@ -902,7 +906,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   // }
 
 
-  public async createYearlyPlanner(locker_room_id, index){
+  public async createYearlyPlanner(locker_room_id:number, index:number){
     let payload = {locker_id: locker_room_id, index};
     this.viewLoader = true
     let res = await this.$store.dispatch('createYearlyPlanner', payload)
@@ -913,9 +917,21 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       this.showError(res)
     }
   }
-
    public async getLockerEvents(room_id:number) {
     let res = await this.$store.dispatch('getLockerEvents',room_id)
+  }
+  public setEventProduct(id:number, url:string, name:string){
+    this.ref['eventmodal'].setEventProduct(id, url, name)
+  }
+
+  public setEventCollection(collection_index:number){
+    this.ref['eventmodal'].setEventCollection(collection_index)
+  }
+  public initEventContacts(){
+    this.ref['eventmodal'].initEventContacts();
+  }
+  public changeLockerTabIndex(lockerIndex: number){
+    this.tabIndex = lockerIndex
   }
 }
 </script>

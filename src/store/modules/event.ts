@@ -7,16 +7,32 @@ const Event:Module<any, any> = {
     show_event_popup:false,
     locker_events:[],
     selected_year: 2021,
+    emailTemplates: []
   },
   getters: {
     showEventPopup(state:Record<any, any>){
       return state.show_event_popup
     },
+
     getSelectedYear(state:Record<any, any>){
       return state.selected_year;
     },
     getEvents(state:Record<any, any>) {
       return state.locker_events
+    },
+    emailTemplateOptions(state:Record<any, any>){
+      const optionArray = [];
+      optionArray[0] = {value: null, text: 'Select an email template'}
+      state.emailTemplates.map(function (obj:Record<any, any>, index:number){
+        optionArray.push({value: index, text: obj.title});
+      })
+      return optionArray;
+    },
+    getEmailTemplates(state:Record<any, any>){
+      return state.emailTemplates
+    },
+    getLockerIndexForEvent(state:Record<any, any>){
+      return state.locker_index_for_event
     }
   },
   mutations: {
@@ -32,13 +48,39 @@ const Event:Module<any, any> = {
     SET_YEAR(state:Record<any, any>, payload:number){
       state.selected_year = payload
     },
-
+    SET_EMAIL_TEMPLATES(state:Record<any, any>, paylod:number){
+      state.emailTemplates = paylod;
+    }
   },
   actions: {
-    async addEvent({commit}, paylod: number) {
-      await http.get("style/information/" + paylod).then((res: any) => {
-        commit('SET_MODELS', res.data);
-      });
+    getEmailTemplates({commit}){
+      http.get("get-email-templates?type=event").then((res) =>{
+        if (res.status == 200){
+          commit('SET_EMAIL_TEMPLATES', res.data);
+        }
+      })
+    },
+    async addEvent({commit}, payload: Record<any, any>) {
+      const header = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+
+      let resp =  {status:false,message:"",event:{}};
+      await http.post('events/create', payload, header).then((res) => {
+        if (res.status == 200){
+          resp = {status:true,message:"Event added successfully", event: res.data.data};
+        }else if (res.status == 401){
+          resp = {status:false,message:"Event not added", event: {}};
+        }
+      }).catch(err => {
+        if(err.response.status){
+          resp = {status:false,message:err.response.data.errors, event: {}};
+        }
+      })
+
+      return resp;
     },
     async saveContact({commit}, paylod: Record<any, any>) {
       const res = await http.post("save/contact", paylod).then((res: any) => {
