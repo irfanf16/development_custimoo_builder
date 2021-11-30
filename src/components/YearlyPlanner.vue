@@ -42,7 +42,7 @@
         <tr>
           <td>{{locker_event.event_time}}</td>
           <td>{{locker_event.title}}</td>
-          <td>{{ (JSON.parse(locker_event.to_emails)).join() }}</td>
+          <td>{{ getEmails(locker_event.to_emails) }}</td>
         </tr>
       </table>
     </div>
@@ -109,6 +109,11 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
 
   public changeEventView(view_type:string) {
     this.event_view = view_type
+  }
+  public getEmails(event_emails:string) {
+    console.log('event_emails',event_emails)
+    let email_str = event_emails ? JSON.parse(JSON.parse(event_emails)).toString() : ''
+    return email_str
   }
 }
 
