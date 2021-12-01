@@ -13,9 +13,9 @@
 
   </div>
 </div>
-  <div v-if="event_view === 'month'" class="row">
+  <div v-if="event_view === 'month'" class="row mt-3">
 
-    <div  :key="event.month" v-for="(event) in getEvents" class="col-lg-2">
+    <div  :key="event.month" v-for="(event) in getEvents" class="col-md-4 col-lg-3 col-xl-2">
       <b-card
         :header="event.month"
         header-border-variant="secondary"
@@ -32,7 +32,8 @@
              <font-awesome-icon
                :icon="['fas', 'edit']"/>
            </a>
-            {{`${locker_event.event_day}  : ${locker_event.title}` }}</span>
+            {{`${locker_event.event_day}  : ${locker_event.title}` }}
+          </span>
 
          </li>
        </ul>
