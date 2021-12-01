@@ -14,7 +14,6 @@
   </div>
 </div>
   <div v-if="event_view === 'month'" class="row">
-
     <div  :key="event.month" v-for="(event) in getEvents" class="col-lg-2">
       <b-card
         :header="event.month"
@@ -25,18 +24,15 @@
       >
        <ul>
          <li :key="locker_event.id" v-for="(locker_event) in event.events">
-
-          <span>
+           <span>
              <a data-title="Edit Event"
                 @click="$emit('edit-event',locker_event.id)">
              <font-awesome-icon
                :icon="['fas', 'edit']"/>
            </a>
             {{`${locker_event.event_day}  : ${locker_event.title}` }}</span>
-
          </li>
        </ul>
-
         <button class="btn btn-secondary" @click="showEventPopup">Add Event</button>
       </b-card>
     </div>
@@ -51,7 +47,17 @@
           <td>{{locker_event.event_time}}</td>
           <td>{{locker_event.title}}</td>
           <td>{{ locker_event.to_emails | eventEmails(locker_event.to_emails) }}</td>
-          <td>{{ locker_event.reminder.before_time | reminderTime(locker_event.reminder.before_time) }}</td>
+          <td>{{ locker_event.reminder | reminderTime(locker_event.reminder) }}</td>
+          <td>  <a data-title="Edit Event"
+                   @click="$emit('edit-event',locker_event.id)">
+            <font-awesome-icon
+              :icon="['fas', 'edit']"/>
+          </a></td>
+          <td>  <a data-title="Edit Event"
+                   @click="deleteEvent(locker_event.id)">
+            <font-awesome-icon
+              :icon="['fas', 'trash-alt']"/>
+          </a></td>
         </tr>
       </table>
     </div>
@@ -63,6 +69,9 @@
       <button style="margin-left: 5px" class="btn btn-secondary" @click="showContactPopup">Add Contact</button>
     </div>
   </div>
+  <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+  <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
+                 ref="reset-modal"></confirm-modal>
 </div>
 
 
@@ -75,18 +84,24 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 
 import ContactModal from "@/components/ContactModal.vue";
 import {getReminderOptions} from '@/helpers/Helpers';
+import ConfirmModal from "@/components/ConfirmModal.vue";
 
 @Component<YearlyPlanner>({
   components: {
-    ContactModal
+    ContactModal,
+    ConfirmModal
   },
   filters: {
     eventEmails: (value: string) => {
-      return value ? JSON.parse(value).toString() : ''
+      return value ? JSON.parse(value).toString() : 'none'
     },
-    reminderTime: (value: string) => {
-      let options = getReminderOptions()
-      return options.find((x:Record<any, any>) => x.value === value).text
+    reminderTime: (reminder: Record<any, any>) => {
+      if(reminder) {
+        let options = getReminderOptions()
+        let text =  options.find((x:Record<any, any>) => x.value === reminder.before_time)
+        return text ? text.text : 'none'
+      }
+      return 'none'
     }
   },
   async mounted() {
@@ -100,6 +115,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   @Prop({required: true}) readonly room_index !: number
   public ref = this.$refs as Record<any, any>
   public event_view = 'month'
+  public viewLoader = false
 
   public showEventPopup(){
     const room_index = this.$store.getters.getActiveLockerIndex;
@@ -124,9 +140,24 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   get getSelectedYear() {
     return this.$store.getters.getSelectedYear;
   }
-
   public changeEventView(view_type:string) {
     this.event_view = view_type
+  }
+  public async deleteEvent(event_id:number) {
+    try {
+      const ok = await this.ref['reset-modal'].showConfirm()
+      if (ok) {
+        this.viewLoader = true
+        let res = await this.$store.dispatch('deleteEvent',event_id)
+        await this.$emit('getLockerEvents',this.room_id)
+        this.viewLoader = false
+        this.showToast(res.data.message,'SUCCESS')
+      }
+    }
+    catch (e) {
+      console.log('e',e)
+      this.showError(e.response.data.message)
+    }
   }
 }
 
@@ -152,5 +183,26 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   }
   table, th, td {
     border:1px solid black;
+  }
+  .loader{
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255,255,255,0.9);
+    z-index: 1030;
+    img{
+      max-width: 7%;
+      display: block;
+      margin: 0 auto;
+      height: auto;
+    }
   }
 </style>

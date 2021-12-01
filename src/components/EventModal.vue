@@ -1,6 +1,6 @@
 <template>
   <b-modal size="lg" :visible="showEventPopup" hide-footer @hide="hideEventModal"  id="modal-center-event" centered scrollable
-           title="Add Event" >
+           :title="event_data.id ? 'Edit Event' : 'Add Event' " >
     <ValidationObserver v-slot="{handleSubmit }">
       <b-form @submit.prevent="handleSubmit(submitEvent)" >
     <div class="design-name-form">
@@ -199,6 +199,7 @@
       <div class="row">
         <div class="col-lg-12" style="text-align: right">
           <button type="button"  class="btn btn-secondary" @click="hideEventModal">Cancel</button>
+          <button v-if="event_data.id" type="button"  class="btn btn-danger" @click="deleteEvent">Delete event</button>
           <button  type="submit" class="btn btn-secondary" style="margin-left: 5px;" >Save</button>
         </div>
       </div>
@@ -209,7 +210,9 @@
     <b-modal id="email-template-modal" title="Edit Email Template">
       <VueEditor v-model="event_data.email_content"  ></VueEditor>
     </b-modal>
-
+    <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
+                   ref="reset-modal"></confirm-modal>
   </b-modal>
 </template>
 
@@ -222,6 +225,7 @@ import { ValidationProvider, ValidationObserver, extend  } from 'vee-validate';
 import { required, email, required_if, mimes } from 'vee-validate/dist/rules';
 import { VueEditor } from "vue2-editor";
 import {getReminderOptions} from '@/helpers/Helpers';
+import ConfirmModal from "@/components/ConfirmModal.vue";
 
 extend('required', {
   ...required,
@@ -245,7 +249,8 @@ extend('mimes',{
     datePicker,
     ValidationObserver,
     ValidationProvider,
-    VueEditor
+    VueEditor,
+    ConfirmModal
  },
   mounted(){
     this.$store.dispatch('getEmailTemplates');
@@ -255,6 +260,7 @@ extend('mimes',{
 export default class EventModal extends Mixins(ErrorMessages) {
 
   public ref = this.$refs as Record<any, any>
+  public viewLoader = false
   public event_data: Record<any, any> = {
     locker_id:null,
     id: null,
@@ -528,6 +534,27 @@ export default class EventModal extends Mixins(ErrorMessages) {
       this.file_data = null
       this.file_name = null
   }
+  public async deleteEvent() {
+    try {
+      const ok = await this.ref['reset-modal'].showConfirm()
+      if (ok) {
+        let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
+        let selected_locker = this.$store.getters.getLockerProducts[selected_locker_index];
+        this.viewLoader = true
+        let res = await this.$store.dispatch('deleteEvent',this.event_data.id)
+        await this.$emit('getLockerEvents',selected_locker.id)
+        await this.$store.dispatch('getLockerEvents',selected_locker.id)
+        this.resetEventModal()
+        this.hideEventModal()
+        this.viewLoader = false
+        this.showToast(res.data.message,'SUCCESS')
+      }
+    }
+    catch (e) {
+      console.log('e',e)
+      this.showError(e.response.data.message)
+    }
+  }
 
 }
 
@@ -561,5 +588,26 @@ export default class EventModal extends Mixins(ErrorMessages) {
 .error{
   padding: 5px;
   color: red;
+}
+.loader{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.9);
+  z-index: 1030;
+  img{
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
 }
 </style>
