@@ -283,7 +283,18 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
   public datepickerOptions:Record<any, any> = {
     format: 'YYYY-MM-DD hh:mm:ss',
-    minDate: new Date()
+    minDate: new Date(),
+    icons: {
+      time: 'far fa-clock',
+      date: 'far fa-calendar',
+      up: 'fas fa-arrow-up',
+      down: 'fas fa-arrow-down',
+      previous: 'fas fa-chevron-left',
+      next: 'fas fa-chevron-right',
+      today: 'fas fa-calendar-check',
+      clear: 'far fa-trash-alt',
+      close: 'far fa-times-circle'
+    }
   }
 
 
@@ -292,7 +303,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
   }
 
   public initEventContacts() {
-
+    this.resetEventModal()
     this.event_data.to_emails = []
     const room_index = this.$store.getters.getLockerIndexForEvent;
     const lockerProducts = this.$store.getters.getLockerProducts;
@@ -519,6 +530,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
   public resetEventModal(){
       this.event_data.title = ''
+      this.event_data.id = null
       this.event_data.event_type =  null
       this.event_data.file_id =  ''
       this.event_data. description =  ''
@@ -560,34 +572,16 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
 </script>
 
-<style lang="scss" scoped>
-.remove {
-  margin-left: 10px;
-  width: 40px;
-  height: 40px;
-  color: #D53943;
-  background: #F8E1E2;
-  border-radius: 50%;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-}
+<style lang="scss">
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css");
+.event_form{
+  .modal-content{
+    overflow: visible;
 
-.add {
-  width: 40px;
-  height: 40px;
-  color: #00FF00;
-  background: #F0F0F0;
-  border-radius: 50%;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-}
-.error{
-  padding: 5px;
-  color: red;
+    .modal-body{
+      overflow: visible;
+    }
+  }
 }
 .loader{
   position: absolute;
