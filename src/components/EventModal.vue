@@ -465,6 +465,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
   }
 
   public async editEvent(event_id:number){
+    this.resetEventModal()
     let res = await this.$store.dispatch('getEventById', event_id)
 
     this.event_data.id = res.id
