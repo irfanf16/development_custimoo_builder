@@ -285,7 +285,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
   }
 
   public initEventContacts() {
-
+    this.resetEventModal()
     this.event_data.to_emails = []
     const room_index = this.$store.getters.getLockerIndexForEvent;
     const lockerProducts = this.$store.getters.getLockerProducts;
@@ -518,6 +518,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
   public resetEventModal(){
       this.event_data.title = ''
+      this.event_data.id = null
       this.event_data.event_type =  null
       this.event_data.file_id =  ''
       this.event_data. description =  ''
