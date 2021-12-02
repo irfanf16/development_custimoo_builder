@@ -349,6 +349,29 @@ export default class EventModal extends Mixins(ErrorMessages) {
     return optionArray;
   }
 
+  public userTimeZone(){
+    var timezone_offset_min = new Date().getTimezoneOffset(),
+      offset_hrs = parseInt(Math.abs(timezone_offset_min/60)),
+      offset_min = Math.abs(timezone_offset_min%60),
+      timezone_standard;
+
+    if(offset_hrs < 10)
+      offset_hrs = '0' + offset_hrs;
+
+    if(offset_min < 10)
+      offset_min = '0' + offset_min;
+
+    if(timezone_offset_min < 0)
+      timezone_standard = '+' + offset_hrs + ':' + offset_min;
+    else if(timezone_offset_min > 0)
+      timezone_standard = '-' + offset_hrs + ':' + offset_min;
+    else if(timezone_offset_min == 0)
+      timezone_standard = 'Z';
+
+    return timezone_standard
+
+  }
+
   public setEventType(e : string) {
 
     this.event_data.file_id = ''
@@ -438,6 +461,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
   }
 
   public async editEvent(event_id:number){
+    this.resetEventModal()
     let res = await this.$store.dispatch('getEventById', event_id)
 
     this.event_data.id = res.id
@@ -479,15 +503,17 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
   public async submitEvent(){
 
-      let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
-      let selected_locker = this.$store.getters.getLockerProducts[selected_locker_index];
+      let selected_locker_index = this.$store.getters.getLockerIndexForEvent
+      let selected_locker = this.$store.getters.getLockerProducts[selected_locker_index]
       this.event_data.locker_id = selected_locker.id
+      this.event_data.event_timezone  = this.userTimeZone();
 
-      let form = new FormData();
+
+      let form = new FormData()
       for (const key in this.event_data) {
         if(key == 'to_emails'){
           for (var i = 0; i < this.event_data.to_emails.length; i++) {
-            form.append('to_emails[]', this.event_data.to_emails[i]);
+            form.append('to_emails[]', this.event_data.to_emails[i])
           }
         }else if(key == 'email_to_others' || key == 'is_reminder')
         {
