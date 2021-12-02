@@ -189,7 +189,7 @@
                     </template>
                   </div>
                  </b-tab>
-                <b-tab  @click="clickYearlyTab(room.id)" v-if="!getSelectionMode.readonly"  title="Yearly Planner" class="designCollections">
+                <b-tab  @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly"  title="Yearly Planner" class="designCollections">
                   <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
                     <template>
                       <div v-if="!room.have_yearly_planner">
@@ -740,12 +740,14 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public async lockerTabUpdated(newTabIndex:number , prevTabIndex: number, bvEvent:Record<any, any> ) {
-    console.log('newTabIndex',newTabIndex)
     this.lockerActiveTabIndex = newTabIndex;
     this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
   }
 
-  public async clickYearlyTab(room_id:number) {
+  public async clickYearlyTab(evt:any,room_id:number) {
+    // console.log('evt',evt.target.className)
+    // console.table('evt active',evt.target.classList)
+    // console.table('evt asdasdasd',evt.target.classList)
     this.getLockerEvents(room_id)
 
   }
@@ -871,7 +873,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     /*
     * If locker collection tab is active and user switch to the locker then activate first tab (product tab)
     * */
-    if (this.lockerActiveTabIndex == 3) {
+    if (this.lockerActiveTabIndex == 3 || this.lockerActiveTabIndex == 4) {
       this.lockerActiveTabIndex = 0
     }
 
