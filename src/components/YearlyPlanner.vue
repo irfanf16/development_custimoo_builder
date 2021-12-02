@@ -54,7 +54,7 @@
             <font-awesome-icon
               :icon="['fas', 'edit']"/>
           </a></td>
-          <td>  <a data-title="Edit Event"
+          <td>  <a data-title="Delete Event"
                    @click="deleteEvent(locker_event.id)">
             <font-awesome-icon
               :icon="['fas', 'trash-alt']"/>
@@ -68,6 +68,7 @@
     <div class="col-lg-4">
       <button class="btn btn-secondary" @click="showEventPopup">Add Event</button>
       <button style="margin-left: 5px" class="btn btn-secondary" @click="showContactPopup">Add Contact</button>
+      <button style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show Emails</button>
     </div>
   </div>
   <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
@@ -117,6 +118,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   public ref = this.$refs as Record<any, any>
   public event_view = 'month'
   public viewLoader = false
+  public view_emails = false
 
   public showEventPopup(){
     const room_index = this.$store.getters.getActiveLockerIndex;
@@ -159,6 +161,9 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
       console.log('e',e)
       this.showError(e.response.data.message)
     }
+  }
+  public showEmail() {
+    this.view_emails  = !this.view_emails
   }
 }
 
