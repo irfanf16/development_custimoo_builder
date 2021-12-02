@@ -51,52 +51,53 @@
             </div>
           </span>
 
-        <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
-          <b-input-group>
-            <b-form-checkbox v-model="event_data.is_reminder"  :checked="event_data.is_reminder" ><span class="checked"></span> Send reminder</b-form-checkbox>
-            <div v-if="event_data.is_reminder">
-              <validation-provider rules="required" v-slot="{ errors }">
-                <b-form-select  v-model="event_data.before_time" :options="getReminderOptions" ></b-form-select>
-                <span class="error">{{ errors[0] }}</span>
-              </validation-provider>
-            </div >
-          </b-input-group>
+        <div class="w-100 d-flex flex-wrap align-items-center justify-content-between mt-3" style="min-height: 40px">
+          <b-form-checkbox v-model="event_data.is_reminder"  :checked="event_data.is_reminder" ><span class="d-inline-flex" style="padding-top: 2px">Send reminder</span></b-form-checkbox>
+
+          <div v-if="event_data.is_reminder">
+            <validation-provider rules="required" v-slot="{ errors }">
+              <b-form-select  v-model="event_data.before_time" :options="getReminderOptions" ></b-form-select>
+              <span class="error">{{ errors[0] }}</span>
+            </validation-provider>
+          </div >
         </div>
 
           <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
             <b-input-group>
-              <b-form-checkbox v-model="event_data.email_to_others" :checked="event_data.email_to_others"><span
-                class="checked"></span> Send to reminders to others:
+              <b-form-checkbox v-model="event_data.email_to_others" :checked="event_data.email_to_others">
+                <span class="d-inline-flex" style="padding-top: 2px">Send reminder to others:</span>
               </b-form-checkbox>
 
             </b-input-group>
-            <div style="display: block" v-if="event_data.email_to_others">
+            <div class="w-100 d-flex justify-content-start align-items-end gap-3" v-if="event_data.email_to_others">
 
-              <div  v-for="(email, i) in event_data.to_emails" :key="i">
-                <validation-provider rules="email" v-slot="{ errors }">
-                <b-input-group>
-                  <b-form-input @input="updateEmail($event, i)" :value="email"></b-form-input>
-                    <a data-title="Delete contact" class="remove"
-                       @click="deleteEmail(i)">
-                      <font-awesome-icon
-                        :icon="['fas', 'trash-alt']"/>
-                    </a>
-                 </b-input-group>
-                  <span class="error">{{ errors[0] }}</span>
-                </validation-provider>
+              <div class="w-100" v-if="event_data.to_emails && event_data.to_emails.length">
+                <div  v-for="(email, i) in event_data.to_emails" :key="i">
+                  <validation-provider rules="email" v-slot="{ errors }">
+                    <b-input-group class="mt-3">
+                      <b-form-input placeholder="Enter Email" @input="updateEmail($event, i)" :value="email"></b-form-input>
+                      <b-input-group-append>
+                        <b-button variant="danger" @click="deleteEmail(i)">
+                          <BIconX />
+                        </b-button>
+                      </b-input-group-append>
+                    </b-input-group>
+                    <div class="error">{{ errors[0] }}</div>
+                  </validation-provider>
+                </div>
               </div>
 
-
-
-              <a data-title="Add contact" class="add" @click="addEmptyEmail">
-                <BIconPlus/>
-              </a>
+              <div class="text-right mt-2">
+                <a data-title="Add contact" class="btn btn-dark rounded-circle light add fs-4 d-inline-flex align-items-center justify-content-center p-0" style="height: 40px; width: 40px" @click="addEmptyEmail">
+                  <BIconPlus/>
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
         <div class="col-lg-4" >
-          <div class="event-img">
+          <div class="event-img d-flex flex-column align-items-center justify-content-between" style="height: calc(100% - 120px)">
             <div class="design" v-if="event_data.event_type === 'design' ">
               <a class="remove" data-title="Delete file"
                  @click="deleteFile()" >
@@ -169,17 +170,18 @@
                 </div>
               </div>
           </div>
-          <div class="row" style="margin-top:50px">
-            <div class="col-lg-12">
-              <b-input-group>
-                <validation-provider rules="required" v-slot="{ errors }">
-                  <b-form-select v-model="email_template_index" @change="setEventEmailTemplate"
-                                 :options="getEmailTemplateOptions"></b-form-select>
-                  <span class="error">{{ errors[0] }}</span>
-                </validation-provider>
-              </b-input-group>
-              <b-button v-if="email_template_index !== null" v-b-modal.email-template-modal>Edit Template</b-button>
-            </div>
+          <div class="d-flex align-items-center gap-1">
+            <b-input-group class="w-100">
+              <validation-provider rules="required" v-slot="{ errors }">
+                <b-form-select class="w-100" v-model="email_template_index" @change="setEventEmailTemplate"
+                               :options="getEmailTemplateOptions"></b-form-select>
+                <span class="error">{{ errors[0] }}</span>
+              </validation-provider>
+            </b-input-group>
+            <b-button style="height: 40px; width: 40px; flex-shrink: 0;" variant="dark" class="rounded-circle fs-2 p-0 d-inline-flex align-items-center justify-content-center" v-if="email_template_index !== null" v-b-modal.email-template-modal>
+              <BIconPencil />
+            </b-button>
+          </div>
 
 <!--            <div class="col-lg-12">-->
 <!--              <b-input-group>-->
@@ -189,12 +191,11 @@
 
           </div>
         </div>
-        </div>
 
     </div>
       <div class="row">
         <div class="col-lg-12" style="text-align: right">
-          <button type="button"  class="btn btn-secondary" @click="hideEventModal">Cancel</button>
+          <button type="button"  class="btn light btn-secondary" @click="hideEventModal">Cancel</button>
           <button  type="submit" class="btn btn-secondary" style="margin-left: 5px;" >Save</button>
         </div>
       </div>
@@ -202,7 +203,7 @@
       </b-form>
     </ValidationObserver>
 
-    <b-modal id="email-template-modal" title="Edit Email Template">
+    <b-modal id="email-template-modal" modal-class="edit_template" title="Edit Email Template">
       <VueEditor v-model="event_data.email_content"  ></VueEditor>
     </b-modal>
 
@@ -681,6 +682,24 @@ export default class EventModal extends Mixins(ErrorMessages) {
       margin-top: 7px;
       font-size: 1rem;
       word-break: break-all;
+    }
+  }
+}
+
+.input-group{
+  .input-group-append{
+    .btn{
+      border-top-right-radius: 0.25rem;
+      border-bottom-right-radius: 0.25rem;
+    }
+  }
+}
+
+.edit_template {
+  .modal-header{
+    h5{
+      font-size: 1.5rem;
+      font-weight: 500;
     }
   }
 }
