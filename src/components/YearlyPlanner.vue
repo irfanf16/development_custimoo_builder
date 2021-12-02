@@ -30,8 +30,13 @@
              <font-awesome-icon
                :icon="['fas', 'edit']"/>
            </a>
-            {{`${locker_event.event_day}  : ${locker_event.title}` }}
           </span>
+           <div v-if="view_emails">
+             <span style="display: block" :key="index" v-for="(email, index) in getEventEmails(locker_event.to_emails) ">
+               <strong>{{email}}</strong>
+             </span>
+           </div>
+           <span v-else> {{`${locker_event.event_day}  : ${locker_event.title}` }}</span>
          </li>
        </ul>
         <button class="btn btn-secondary" @click="showEventPopup">Add Event</button>
@@ -65,10 +70,13 @@
   </div>
   <ContactModal ref="contactmodal"  :room_id="room_id" :room_index="room_index"   />
   <div class="row">
-    <div class="col-lg-4">
+    <div v-if="!view_emails" class="col-lg-4">
       <button class="btn btn-secondary" @click="showEventPopup">Add Event</button>
       <button style="margin-left: 5px" class="btn btn-secondary" @click="showContactPopup">Add Contact</button>
       <button style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show Emails</button>
+    </div>
+    <div v-else class="col-lg-4">
+      <button style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show event details</button>
     </div>
   </div>
   <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
@@ -142,6 +150,9 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   }
   get getSelectedYear() {
     return this.$store.getters.getSelectedYear;
+  }
+  public getEventEmails(value: string) {
+    return value ? JSON.parse(value) : []
   }
   public changeEventView(view_type:string) {
     this.event_view = view_type
