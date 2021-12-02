@@ -3273,6 +3273,16 @@ $fontSize: 0.5;
     }
 }
 
+.event_form{
+    .modal-content{
+        overflow: visible;
+
+        .modal-body{
+            overflow: visible;
+        }
+    }
+}
+
 //.dropping{
 //    position: relative;
 //

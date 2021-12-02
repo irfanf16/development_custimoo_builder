@@ -9,7 +9,7 @@
         <div class="col-lg-8">
 
           <validation-provider rules="required" v-slot="{ errors }">
-            <label for="inline-form-input-productname" class="w-100 d-block mb-2">Event title</label>
+            <label for="inline-form-input-productname" class="w-100 d-block mb-1">Event title</label>
             <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
 
               <b-input-group>
@@ -21,7 +21,7 @@
           </validation-provider>
 
           <validation-provider rules="required" vid="eventType" v-slot="{ errors }">
-            <label for="inline-form-input-productname" class="w-100 d-block mb-2">Event type</label>
+            <label for="inline-form-input-productname" class="w-100 d-block mb-1">Event type</label>
             <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
               <b-input-group>
                 <b-form-select v-model="event_data.event_type" @change="setEventType"
@@ -32,7 +32,7 @@
           </validation-provider>
 
           <validation-provider rules="required" v-slot="{ errors }">
-            <label for="inline-form-input-productname" class="w-100 d-block mb-2">Event Due</label>
+            <label for="inline-form-input-productname" class="w-100 d-block mb-1">Event Due</label>
             <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
               <b-input-group>
                 <date-picker :config="datepickerOptions" value="event_data.event_time"
@@ -42,12 +42,14 @@
             <span class="error">{{ errors[0] }}</span>
           </validation-provider>
 
-          <label for="inline-form-input-productname" class="w-100 d-block mb-2">Event description</label>
-        <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
-          <b-input-group>
-            <b-form-input v-model="event_data.description" ></b-form-input>
-        </b-input-group>
-        </div>
+          <span>
+            <label for="inline-form-input-productname" class="w-100 d-block mb-1">Event description</label>
+            <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
+              <b-input-group>
+                <b-form-input v-model="event_data.description" ></b-form-input>
+            </b-input-group>
+            </div>
+          </span>
 
         <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
           <b-input-group>
@@ -94,84 +96,78 @@
         </div>
 
         <div class="col-lg-4" >
-          <div class="img-thumbnail" style="height: 100px">
-            <template v-if="event_data.event_type === 'design' ">
-              <a data-title="Delete file"
-                 @click="deleteFile()" ><font-awesome-icon
-                :icon="['fas', 'trash-alt']"/></a>
-              <img :src="file_data" style="height: 80px"  />
-              <div>
+          <div class="event-img">
+            <div class="design" v-if="event_data.event_type === 'design' ">
+              <a class="remove" data-title="Delete file"
+                 @click="deleteFile()" >
+                <BIconX />
+              </a>
+              <img :src="file_data" style="width: 100%; max-width: 150px"  />
+              <div class="file_name">
                 <span>{{file_name}}</span>
               </div>
-            </template>
+            </div>
 
-            <template v-else-if="event_data.event_type === 'collection' ">
-              <a data-title="Delete file"
-                 @click="deleteFile()" ><font-awesome-icon
-                :icon="['fas', 'trash-alt']"/></a>
-              <div class="image-holder" style="height: 100px">
+            <div class="collection" v-else-if="event_data.event_type === 'collection' ">
+              <a class="remove" data-title="Delete file"
+                 @click="deleteFile()" >
+                <BIconX />
+              </a>
+              <div class="image-holder">
                 <div class="convas_container" :key="collection_product_index"
                      v-for="(collection_product,collection_product_index) in file_data">
                   <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
                   <template v-if="collection_product_index < 3">
-                    <img style="height: 80px" :src="collection_product.product_locker_room.product_url"
+                    <img style="width: 100%; max-width: 150px" :src="collection_product.product_locker_room.product_url"
                          :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'"
                          alt="">
                   </template>
                 </div>
               </div>
-              <div>
+              <div class="file_name mt-3">
                 <span>{{file_name}}</span>
               </div>
-            </template>
+            </div>
 
-            <template v-else-if="event_data.event_type === 'custom' ">
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="btn btn-secondary modal-handler" style="display: block" >
+            <div class="custom" v-else-if="event_data.event_type === 'custom'" :style="{overflow: file_data ? 'visible': 'hidden', padding: file_data ? '15px 10px': '0'}">
+              <a class="remove" v-if="file_data" @click="deleteFile">
+                <BIconX />
+              </a>
 
-                    <div class="upload-box position-relative" >
+              <div class="modal-handler">
 
-                      <template v-if="file_data">
-                        <div class="uploaded-logo-holder"   >
-                          <img style="height: 50px" crossorigin="anonymous" :src="file_data"  width="100%"/>
-                        </div>
-                        <span>{{file_name}}</span>
-                        <div class="remove-img"   >
-                          <a  @click="deleteFile">
-                            <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-                          </a>
-                        </div>
-                      </template>
-
-                      <div v-if="!file_data">
-                        <div class="icon-holder">
-                          <font-awesome-icon :icon="['fas', 'image']"/>
-                        </div>
-                        <slot name="upload_text">Upload File</slot>
-
-                        <validation-provider rules="required_if:eventType,custom|mimes:image/*" v-slot="{ errors }">
-                          <input
-                                  type="file"
-                                  name="file" ref="fileInput"
-                                  @change="uploadEventImage"
-                                  class="fileLoader"
-                                  accept="image/*" />
-                          <span class="error">{{ errors[0] }}</span>
-                        </validation-provider>
-
+                  <label class="upload-box position-relative" >
+                    <template v-if="file_data">
+                      <div class="uploaded-logo-holder"   >
+                        <img crossorigin="anonymous" :src="file_data" style="width: 100%; max-width: 150px"/>
                       </div>
+                      <span class="file_name">{{file_name}}</span>
+                    </template>
+
+                    <div v-if="!file_data">
+                      <div class="icon-holder fs-4">
+                        <BIconImage />
+                      </div>
+                      <slot name="upload_text"><div class="fs-2 mt-1">Upload File</div></slot>
+
+                      <validation-provider rules="required_if:eventType,custom|mimes:image/*" v-slot="{ errors }">
+                        <input
+                                type="file"
+                                name="file" ref="fileInput"
+                                @change="uploadEventImage"
+                                class="fileLoader"
+                                accept="image/*" />
+                        <span class="error">{{ errors[0] }}</span>
+                      </validation-provider>
 
                     </div>
 
+                  </label>
 
 
-                  </div>
+
                 </div>
               </div>
-
-            </template>
-
           </div>
           <div class="row" style="margin-top:50px">
             <div class="col-lg-12">
@@ -552,12 +548,113 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
 <style lang="scss">
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css");
-.event_form{
-  .modal-content{
-    overflow: visible;
 
-    .modal-body{
-      overflow: visible;
+.event_form{
+  .modal-title{
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+
+  .error{
+    color: lightcoral;
+  }
+
+  [class^=col-]{
+    label{
+      font-weight: 500;
+    }
+
+    &>span{
+      display: block;
+
+      &:not(:first-child){
+        margin-top: 1rem;
+      }
+    }
+  }
+}
+
+.event-img{
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  &>div{
+    text-align: center;
+    border: 1px solid #eee;
+    padding: 10px;
+    position: relative;
+    border-radius: 7px;
+
+    &.collection{
+      .convas_container{
+        &:nth-child(1){
+          position: relative;
+          left: -5px;
+          top: -2.5px;
+        }
+        &:nth-child(2){
+          position: absolute;
+          left: 10px;
+          top: 15px;
+        }
+        &:nth-child(3){
+          position: absolute;
+          left: 15px;
+          top: 20px;
+        }
+      }
+    }
+
+    &.custom{
+      width: 100%;
+      min-height: 70px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+
+      &:hover{
+        background: #f5f5f5;
+      }
+
+      .upload-box{
+        input[type=file]{
+          top: -250px;
+          left: -250px;
+          opacity: 0;
+          height: 500px;
+          width: 500px;
+          position: absolute;
+          z-index: 1000;
+          appearance: none;
+        }
+      }
+    }
+
+    .remove{
+      display: flex;
+      height: 20px;
+      width: 20px;
+      right: -10px;
+      top: -10px;
+      cursor: pointer;
+      border-radius: 1000px;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      position: absolute;
+      background: lightcoral;
+      color: white;
+    }
+
+    .file_name{
+      font-weight: 600;
+      margin-top: 7px;
+      font-size: 1rem;
+      word-break: break-all;
     }
   }
 }
