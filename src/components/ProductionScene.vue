@@ -10,7 +10,6 @@ import {fabric as fabrics} from 'fabric'
 
 @Component<ProductionScene>({
   mounted() {
-    console.log("mounted")
     let self = this;
     self.initializeCanvas();
   }
@@ -50,7 +49,6 @@ export default class ProductionScene extends Vue {
   @Watch('selectedProduct', {immediate: true, deep: true })
   onSelectedProductChanged(newVal:Record<any, any>, oldVal:Record<any, any>) {
     let self = this;
-    console.log("onSelectedProductChanged", newVal, oldVal)
     if(newVal && self.selectedProduct) {
       if(self.factory_cuttings_canvas) {
         self.setProductionSvgUrl(newVal);
@@ -74,7 +72,6 @@ export default class ProductionScene extends Vue {
     let self = this;
     if(self.production_svg_url) {
       fabrics.loadSVGFromURL(`${self.production_svg_url}`, (objects: any, options: any) => {
-        console.log("options", options)
         options.crossOrigin = 'Anonymous'
         let svg_elems_group = self.svg_elems_group = fabrics.util.groupSVGElements(objects) as fabrics.canvas
         let svg_elems_group_scaled_width = self.factory_cuttings_canvas?.getHeight() - 50;
@@ -134,7 +131,6 @@ export default class ProductionScene extends Vue {
   canvasToImage(type = 'png', download = false, download_as = 'factory_cuttings') {
     let self = this;
     let base_64_image = self.$refs.factory_cuttings.toDataURL(type)
-    console.log("base", base_64_image)
     if(download) {
       let a = document.createElement("a");
       a.href =  base_64_image;
@@ -142,6 +138,14 @@ export default class ProductionScene extends Vue {
       a.click();
     } else {
       return base_64_image;
+    }
+  }
+  async canvasToSvg() {
+    let self = this;
+    if(self.production_svg_url) {
+      return self.factory_cuttings_canvas?.toSVG();
+    } else {
+      return undefined;
     }
   }
 
