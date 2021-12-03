@@ -138,9 +138,47 @@ export default class OrderDetails extends Vue {
     })
   }
 
-  public  generateProductionPdf() {
+   public async  generateProductionPdf() {
     this.showLoader = true;
-    this.$refs["production-scene"].canvasToImage("png", true);
+    let style_index = this.$store.getters.getCurrentStyleIndex;
+    let selected_product = this.$store.getters.getSelectedProduct;
+    const product_id = selected_product.product_id;
+    let product_style = selected_product.productstyles[style_index];
+    const product_style_id = product_style.id;
+    let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
+    const product_design_id = selectedDesign[0].id;
+
+    let product_models = this.$store.getters.getProductModels;
+    let selected_model_index = this.$store.getters.getSelectedModelIndex;
+
+    let product_model_id = 0;
+    if(product_models.length > 0) {
+      const selected_model = product_models[selected_model_index];
+      product_model_id = selected_model.id;
+    }
+     let canvas_svg = await this.$refs["production-scene"].canvasToSvg();
+    let form_data = new FormData();
+    if(canvas_svg) {
+      form_data.append('original_file', new File([new Blob([canvas_svg])], "original_file.svg", {
+        type: "image/svg+xml",
+      }));
+    }
+    form_data.append("product_id", product_id);
+    form_data.append("product_style_id", product_style_id);
+    form_data.append("product_design_id", product_design_id);
+    form_data.append("product_model_id", product_model_id);
+    form_data.append("roster_detail", JSON.stringify(this.rosterDetails));
+
+
+
+     /*let order_payload = {
+      product_id,
+      product_style_id,
+      product_design_id,
+      product_model_id,
+      order_file: ''
+    }*/
+
     let p2 = new Promise((resolve) => {
       const frontElement = document.getElementById("scene-front") as Record<any, any>
       this.pdf_front_image = frontElement.toDataURL("image/png")
@@ -157,7 +195,12 @@ export default class OrderDetails extends Vue {
           orientation: 'landscape'
         }
       };
-      html2pdf().set(opt).from(element).toPdf().save('datauristring');
+      html2pdf().set(opt).from(element).toPdf().get("pdf")
+        .output('datauristring')
+        .then(function(pdfAsString: string) {
+          form_data.append("order_file", pdfAsString)
+          const res = http.post('orders/create', form_data);
+        }).save('datauristring');
       resolve(1);
     });
 
