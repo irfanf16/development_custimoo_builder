@@ -26,6 +26,7 @@
       </b-form>
       </ValidationObserver>
     </div>
+    <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </b-modal>
 </template>
 
@@ -87,41 +88,28 @@ export default class SelectYear extends Mixins(ErrorMessages) {
     return optionArray;
   }
 
-  public async copyEvents(){
+  public async copyEvents() {
+    try {
+      const payload = {
+        'to_year': this.selectedYear,
+        'from_year': this.$store.getters.getSelectedYear,
+        'room_id': this.room_id
+      }
+      this.viewLoader = true
 
-    const payload = {'email': this.email, room_id: this.room_id}
-
-    this.viewLoader = true
-    let res = await this.$store.dispatch('saveContact', payload)
-    this.viewLoader = false
-    if (res.status == 201){
-      this.showToast('Your contact saved successfully.', 'SUCCESS');
-      let payload = {'index':this.room_index, 'attribute':'contacts', value: res.data.data}
-      this.$store.commit('SET_LOCKER_ATTRIBUTE',payload)
-      this.email = '';
-    }else{
-      this.showError(res)
+      let res = await this.$store.dispatch('copyEvents', payload)
+      this.viewLoader = false
+      this.showToast('Events copied successfully.', 'SUCCESS');
+      this.hideModal()
+      this.selectedYear = null;
+    } catch (e) {
+      this.viewLoader = false
+      if (e.response)
+        this.showError(e.response.data.message)
+      else
+        this.showError(e)
     }
-
   }
-
-  public async deleteContact(contact_id){
-
-    const payload = {contact_id, room_id: this.room_id, _method:'DELETE'}
-    this.viewLoader = true
-    let res = await this.$store.dispatch('deleteContact', payload)
-    this.viewLoader = false
-    if (res.status == 201){
-      this.showToast('Your contact deleted successfully.', 'SUCCESS');
-      let payload = {'index':this.room_index, 'attribute':'contacts', value: res.data.data}
-      this.$store.commit('SET_LOCKER_ATTRIBUTE',payload)
-
-    }else{
-      this.showError(res)
-    }
-
-  }
-
 }
 
 </script>
@@ -154,5 +142,26 @@ export default class SelectYear extends Mixins(ErrorMessages) {
 .error{
   padding: 5px;
   color: red;
+}
+.loader{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.9);
+  z-index: 1030;
+  img{
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
 }
 </style>

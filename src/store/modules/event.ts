@@ -140,7 +140,7 @@ const Event:Module<any, any> = {
       commit('SET_YEAR', payload);
     },
     async copyEvents({commit}, payload){
-      return await http.post("locker/events/copy", payload)
+      return await http.post("events/copy", payload)
     },
 
   }
