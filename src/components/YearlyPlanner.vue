@@ -191,16 +191,23 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   .event_box {
     border: 1px solid rgba(0, 0, 0, 0.125) !important;
     border-radius: 0.25rem !important;
+
+    .card-header {
+      padding: 0.75rem 1.25rem !important;
+      margin-bottom: 0 !important;
+      font-weight: 500;
+      font-size: 1rem;
+      background-color: rgba(0, 0, 0, 0.03) !important;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.125) !important;
+    }
+
+    .card-body{
+      padding-top: 0.5rem;
+    }
   }
-  .event_box .card-header {
-    padding: 0.75rem 1.25rem !important;
-    margin-bottom: 0 !important;
-    background-color: rgba(0, 0, 0, 0.03) !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125) !important;
-  }
-  .event_box .border-secondary {
-    border-color: #6c757d !important;
-  }
+  //.event_box .border-secondary {
+  //  border-color: #6c757d !important;
+  //}
   .calender_btn_inactive {
     color: black;
     background: white;
