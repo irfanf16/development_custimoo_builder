@@ -196,6 +196,7 @@
                           <b-button variant="primary" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
                       </div>
                       <div v-else>
+                        <b-button variant="danger" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
                         <YearlyPlanner @edit-event="editEvent" @init-event-contacts="initEventContacts" @getLockerEvents="getLockerEvents(room.id)" :room_id="room.id" :room_index="i" :key="room.id" />
                       </div>
                     </template>
@@ -223,7 +224,7 @@
 
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
                     ref="reset-modal"></confirm-modal>
-
+<div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <span class="hover_tooltip"></span>
     <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
         <div class="pt-4 design-name-form">
@@ -918,6 +919,28 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }else{
       this.showError(res)
     }
+  }
+  public async deletePlanner(locker_room_id:number, index:number){
+    try {
+      const ok = await this.ref['reset-modal'].showConfirm()
+      if (ok) {
+        let payload = {locker_id: locker_room_id, index};
+        this.viewLoader = true
+        let res = await this.$store.dispatch('deletePlanner', payload)
+        this.viewLoader = false
+        this.$store.commit('SET_LOCKER_ATTRIBUTE', {index: payload.index, attribute:'have_yearly_planner', value:0 })
+        this.$store.dispatch('getLockerEvents',locker_room_id)
+        this.showToast('Yearly planner has been deleted successfully for this locker.', 'SUCCESS');
+      }
+    }
+    catch (e) {
+      if(e.response)
+        this.showError(e.response.data.message)
+      else
+        this.showError(e)
+    }
+
+
   }
    public async getLockerEvents(room_id:number) {
     let res = await this.$store.dispatch('getLockerEvents',room_id)
