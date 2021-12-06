@@ -138,8 +138,9 @@ export default class OrderDetails extends Vue {
     this.showLoader = true;
     let p2 = new Promise((resolve) => {
       const frontElement = document.getElementById("scene-front") as Record<any, any>
+      const backElement = document.getElementById("scene-back") as Record<any, any>
       this.pdf_front_image = frontElement.toDataURL("image/png")
-      this.pdf_back_image = frontElement.toDataURL("image/png")
+      this.pdf_back_image = backElement.toDataURL("image/png")
       const element = document.getElementById("production-pdf-html")
       const opt = {
         margin: [0, 0, 0, 0],
@@ -152,7 +153,7 @@ export default class OrderDetails extends Vue {
           orientation: 'landscape'
         }
       };
-      html2pdf().set(opt).from(element).toPdf().save('datauristring');
+      html2pdf().set(opt).from(element).toPdf().save('final_design');
       resolve(1);
     });
 
