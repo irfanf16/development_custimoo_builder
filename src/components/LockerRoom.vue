@@ -198,7 +198,12 @@
                       <div v-else>
                         <b-button variant="danger" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
                         <button class="btn btn-secondary" @click="getIcsFile(room.id,i)">Add to outlook calender</button>
-                        <YearlyPlanner @edit-event="editEvent" @init-event-contacts="initEventContacts" @getLockerEvents="getLockerEvents(room.id)" :room_id="room.id" :room_index="i" :key="room.id" />
+                        <YearlyPlanner @edit-event="editEvent"
+                                       @init-event-contacts="initEventContacts"
+                                       @getLockerEvents="getLockerEvents(room.id)"
+                                       @show-contact-modal="showContactPopup"
+                                       :room_id="room.id" :room_index="i" :key="room.id"
+                        />
                       </div>
                     </template>
                   </div>
@@ -221,6 +226,7 @@
     <CreateLockerRoomModal @lockerAdded="lockerAdded"/>
     <ExistingCollectionModal @existingCollection="existingCollection"/>
     <EventModal ref="eventmodal" @change-locker-tabindex="changeLockerTabIndex"   />
+    <ContactModal ref="contactmodal"   />
   </b-tabs>
 
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
@@ -266,6 +272,7 @@ import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {processColorsCustom} from "../helpers/Helpers"
 import {differenceBy, intersectionBy, union, includes} from 'lodash';
+import ContactModal from "@/components/ContactModal.vue";
 
 @Component<LockerRoom>({
   components: {
@@ -276,6 +283,7 @@ import {differenceBy, intersectionBy, union, includes} from 'lodash';
     ExistingCollectionModal,
     YearlyPlanner,
     EventModal,
+    ContactModal,
     draggable
   },
   mounted() {
@@ -982,6 +990,10 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.$store.commit('SHOW_EVENT_POPUP', true)
     this.$store.commit('SET_LOCKER_INDEX_FOR_EVENT', room_index)
     this.ref['eventmodal'].editEvent(event_id);
+  }
+
+  public showContactPopup(room_id, room_index){
+    this.ref['contactmodal'].showContactPopup(room_id, room_index)
   }
 }
 </script>

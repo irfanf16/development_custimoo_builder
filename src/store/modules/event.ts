@@ -60,62 +60,6 @@ const Event:Module<any, any> = {
         }
       })
     },
-    async addEvent({commit}, payload: Record<any, any>) {
-      const header = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-
-      let resp =  {status:false,message:"",event:{}};
-      await http.post('events/create', payload, header).then((res) => {
-        if (res.status == 200){
-          resp = {status:true,message:"Event added successfully", event: res.data.data};
-        }else if (res.status == 401){
-          resp = {status:false,message:"Event not added", event: {}};
-        }
-      }).catch(err => {
-        if(err.response.status){
-          resp = {status:false,message:err.response.data.errors, event: {}};
-        }
-      })
-
-      return resp;
-    },
-    async updateEvent({commit}, payload: Record<any, any>) {
-      const header = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-
-      let resp =  {status:false,message:"",event:{}};
-      await http.post('events/update', payload, header).then((res) => {
-        if (res.status == 200){
-          resp = {status:true,message:"Event updated successfully", event: res.data.data};
-        }else if (res.status == 401){
-          resp = {status:false,message:"Event not updated", event: {}};
-        }
-      }).catch(err => {
-        if(err.response.status){
-          resp = {status:false,message:err.response.data.errors, event: {}};
-        }
-      })
-
-      return resp;
-    },
-    async saveContact({commit}, paylod: Record<any, any>) {
-      const res = await http.post("save/contact", paylod).then((res: any) => {
-       return res;
-      });
-      return res;
-    },
-    async deleteContact({commit}, paylod: Record<any, any>) {
-      const res = await http.post("delete/contact", paylod).then((res: any) => {
-       return res;
-      });
-      return res;
-    },
     async deleteEvent({commit}, paylod: Record<any, any>) {
       return await http.post("events/delete", {id:paylod})
     },
@@ -123,14 +67,6 @@ const Event:Module<any, any> = {
       return  await http.get(`events/locker?year=${state.selected_year}&room_id=${room_id}`).then(async (res) => {
         if (res.status == 200){
           await commit('SET_LOCKER_EVENTS', res.data)
-          return res.data
-        }
-      })
-    },
-    async getEventById({commit},event_id:number){
-      return  await http.get(`events/${event_id}`).then(async (res) => {
-        if (res.status == 200){
-          console.log(commit)
           return res.data
         }
       })
