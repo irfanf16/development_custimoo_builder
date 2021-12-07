@@ -3977,16 +3977,98 @@ $fontSize: 0.5;
             }
         }
     }
-
-    .mobile-other {
-        position: fixed;
-        bottom: 0;
+}
+.color-box {
+    .addColor {
+        position: absolute;
+        z-index: 100;
+        font-size: 2em;
         left: 0;
         right: 0;
-        background: white;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        color: #999;
+        cursor: pointer;
     }
+
+    .removeColor {
+        position: absolute;
+        z-index: 100;
+        font-size: 1.2em;
+        display: flex;
+        height: 15px;
+        width: 15px;
+        align-items: center;
+        justify-content: center;
+        background: #c80b0b;
+        color: #fff;
+        right: 0px;
+        top: 0px;
+        border-radius: 99px;
+        cursor: pointer;
+        opacity: 0;
+        z-index: -1;
+        transition: 0.3s all ease;
+    }
+
+    .selected {
+        position: absolute;
+        z-index: 100;
+        font-size: 1.2em;
+        display: flex;
+        height: 15px;
+        width: 15px;
+        align-items: center;
+        justify-content: center;
+        background: #219F84;
+        color: #fff;
+        right: 0px;
+        top: 0px;
+        border-radius: 99px;
+        cursor: pointer;
+        opacity: 0;
+        z-index: -1;
+        transition: 0.3s all ease;
+    }
+
+    &.active-swatch {
+        .selected {
+            opacity: 1;
+            z-index: 99;
+        }
+
+        &.noColor:hover {
+            .selected {
+                opacity: 1;
+                z-index: 99;
+            }
+        }
+    }
+
+    &:hover {
+        .removeColor {
+            opacity: 1;
+            z-index: 100;
+        }
+
+        .selected {
+            opacity: 0;
+            z-index: -1;
+        }
+    }
+}
+
+
+.mobile-other{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
 
 .tabs-logo-container{
     .recent-logos {
@@ -4004,185 +4086,184 @@ $fontSize: 0.5;
 
 .upload_logo {
     &.mobile{
-        overflow-x: hidden;
+    overflow-x: hidden;
 
-            .upload-logo-content {
-                display: none;
-            }
+        .upload-logo-content {
+            display: none;
+        }
 
-            .extracted-color-area {
-                h4 {
-                    font-weight: 600;
+        .extracted-color-area {
+            h4 {
+                font-weight: 600;
 
-                    .recent-logos {
-                        color: #219F84;
+                .recent-logos {
+                    color: #219F84;
 
-                        svg {
-                            width: 20px;
-                        }
+                    svg {
+                        width: 20px;
                     }
-                }
-            }
-
-            .upload-logo-opener {
-                position: static;
-                box-shadow: none;
-
-                .modal-handler {
-                    width: 100%;
-
-                    .upload-box {
-                        width: 100%;
-                    }
-                }
-            }
-
-            .logo-placement-holder {
-                width: 100%;
-                padding-bottom: 0;
-
-                &.hasLogo {
-                    display: flex;
-                    align-items: center;
-
-                    .logo-placemet-content {
-                        width: 100%;
-                    }
-
-                    .upload-logo-opener {
-                        .modal-handler {
-                            .upload-box {
-                                width: 85px;
-                            }
-                        }
-                    }
-                }
-            }
-
-            .color-holder {
-                box-shadow: none;
-                margin-top: 0;
-
-                .color-container {
-                    padding: 0;
-
-                    .color-box {
-                        .removeColor {
-                            opacity: 1;
-                            z-index: 100;
-                        }
-
-                        .selected {
-                            display: none !important;
-                        }
-                    }
-                }
-
-                & + div {
-                    width: 100%;
-                    margin-top: 10px;
-
-                    button {
-                        width: 100%;
-                        font-size: 0.9em;
-                    }
-                }
-            }
-
-            .mobile-other {
-                h2 {
-                    font-size: 1.2rem;
-                    font-weight: 600;
-                    padding: 20px 15px 10px 15px;
-                    color: #333;
-                }
-
-                .color-holder {
-                    padding: 10px 20px 15px 20px;
-                }
-            }
-
-            .recent-logos-mobile {
-                padding-top: 25px;
-
-                h4 {
-                    font-size: 1.2rem;
-                    font-weight: 600;
-                    padding: 0 15px;
-                    color: #333;
-
-                    & + div {
-                        height: 100%;
-                        max-height: 200px;
-                        overflow-y: auto;
-                    }
-                }
-
-                .grid {
-                    //gap: 10px;
-                    padding: 10px;
-                    grid-template-columns: repeat(5, 1fr);
                 }
             }
         }
 
-        .nav-tabs {
-            gap: 15px;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            padding: 25px 20px 10px 0;
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
+        .upload-logo-opener {
+            position: static;
+            box-shadow: none;
 
-            &::-webkit-scrollbar {
-                display: none;
+            .modal-handler {
+                width: 100%;
+
+                .upload-box {
+                    width: 100%;
+                }
             }
+        }
 
-            .nav-item {
-                .nav-link {
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                    padding: 7px 10px;
-                    white-space: nowrap;
-                    position: relative;
+        .logo-placement-holder {
+            width: 100%;
+            padding-bottom: 0;
 
-                    &.active {
-                        border-color: #219F84;
-                        color: #219F84;
+            &.hasLogo {
+                display: flex;
+                align-items: center;
 
-                        .close {
-                            right: -10px;
-                            opacity: 1;
-                            background: #219F84;
-                            font-size: 18px;
+                .logo-placemet-content {
+                    width: 100%;
+                }
+
+                .upload-logo-opener {
+                    .modal-handler {
+                        .upload-box {
+                            width: 85px;
                         }
                     }
+                }
+            }
+        }
+
+        .color-holder {
+            box-shadow: none;
+            margin-top: 0;
+
+            .color-container {
+                padding: 0;
+
+                .color-box {
+                    .removeColor {
+                        opacity: 1;
+                        z-index: 100;
+                    }
+
+                    .selected {
+                        display: none !important;
+                    }
+                }
+            }
+
+            & + div {
+                width: 100%;
+                margin-top: 10px;
+
+                button {
+                    width: 100%;
+                    font-size: 0.9em;
+                }
+            }
+        }
+
+        .mobile-other {
+            h2 {
+                font-size: 1.2rem;
+                font-weight: 600;
+                padding: 20px 15px 10px 15px;
+                color: #333;
+            }
+
+            .color-holder {
+                padding: 10px 20px 15px 20px;
+            }
+        }
+
+        .recent-logos-mobile {
+            padding-top: 25px;
+
+            h4 {
+                font-size: 1.2rem;
+                font-weight: 600;
+                padding: 0 15px;
+                color: #333;
+
+                & + div {
+                    height: 100%;
+                    max-height: 200px;
+                    overflow-y: auto;
+                }
+            }
+
+            .grid {
+                //gap: 10px;
+                padding: 10px;
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+    }
+
+    .nav-tabs {
+        gap: 15px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 25px 20px 10px 0;
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-item {
+            .nav-link {
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                padding: 7px 10px;
+                white-space: nowrap;
+                position: relative;
+
+                &.active {
+                    border-color: #219F84;
+                    color: #219F84;
 
                     .close {
                         right: -10px;
                         opacity: 1;
-                        background: #999999;
+                        background: #219F84;
                         font-size: 18px;
                     }
                 }
-            }
 
-            .add_text_tab {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 2px;
-                border-radius: 4px;
-                background: rgba(24, 144, 118, 0.1);
-                color: #219F84;
-                padding-left: 10px !important;
-                padding-right: 10px !important;
-
-                svg {
-                    vertical-align: middle;
-                    font-size: 1.1em;
-                    margin-top: 2px;
+                .close {
+                    right: -10px;
+                    opacity: 1;
+                    background: #999999;
+                    font-size: 18px;
                 }
+            }
+        }
+
+        .add_text_tab {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            border-radius: 4px;
+            background: rgba(24, 144, 118, 0.1);
+            color: #219F84;
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+
+            svg {
+                vertical-align: middle;
+                font-size: 1.1em;
+                margin-top: 2px;
             }
         }
     }
