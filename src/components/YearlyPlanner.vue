@@ -13,67 +13,90 @@
 
   </div>
 </div>
-  <div v-if="event_view === 'month'" class="row mt-3">
-    <div  :key="event.month" v-for="(event) in getEvents" class="col-md-4 col-lg-3 col-xl-2">
+  <div v-if="event_view === 'month'" class="grid grid-6 gap-x-3 gap-y-2 mt-3">
+    <div style="max-width: 100%;" :key="event.month" v-for="(event) in getEvents" class="overflow-hidden">
       <b-card
-        :header="event.month"
         header-border-variant="secondary"
         tag="article"
-        style="max-width: 20rem;"
         class="mb-2 event_box"
       >
-       <ul>
-         <li :key="locker_event.id" v-for="(locker_event) in event.events">
-           <span>
-             <a data-title="Edit Event"
-                @click="$emit('edit-event',locker_event.id)">
-             <font-awesome-icon
-               :icon="['fas', 'edit']"/>
-           </a>
-          </span>
+        <template #header>
+          <div class="d-flex align-items-center position-relative justify-content-between">
+            <span>{{event.month}}</span>
+            <span style="right: 0" class="fs-4 cursor-pointer position-absolute" @click="showEventPopup"><BIconPlus /></span>
+          </div>
+        </template>
+       <ul class="events">
+         <li class="d-flex align-items-start gap-1" :key="locker_event.id" v-for="(locker_event) in event.events">
+           <div class="d-flex controls gap-1">
+             <a class="cursor-pointer" data-title="Edit Event"
+                  @click="$emit('edit-event',locker_event.id)">
+               <font-awesome-icon
+                 :icon="['fas', 'edit']"/>
+             </a>
+             <a class="cursor-pointer" data-title="Edit Event"
+                  @click="$emit('edit-event',locker_event.id)">
+               <font-awesome-icon
+                 :icon="['fas', 'trash-alt']"/>
+             </a>
+          </div>
            <div v-if="view_emails">
              <span style="display: block" :key="index" v-for="(email, index) in getEventEmails(locker_event.to_emails) ">
                <strong>{{email}}</strong>
              </span>
            </div>
-           <span v-else> {{`${locker_event.event_day}  : ${locker_event.title}` }}</span>
+           <span v-else>
+             <span class="event_day" style="color: #107BB7"><BIconCalendar style="color: #107BB7" /> {{ locker_event.event_day }}</span> {{ locker_event.title }}
+           </span>
          </li>
        </ul>
-        <button class="btn btn-secondary" @click="showEventPopup">Add Event</button>
+<!--        <button class="btn btn-secondary" @click="showEventPopup">Add Event</button>-->
       </b-card>
     </div>
 
   </div>
 
   <div v-else class="row">
-    <div :key="event.month" v-for="(event) in getEvents" class="col-lg-12">
-      <h2 style="font-weight: bold;display: inline-block;padding:10px">{{event.month}}</h2>
-      <table :key="locker_event.id" v-for="(locker_event) in event.events" style="width:30%">
-        <tr>
-          <td>{{locker_event.event_time}}</td>
-          <td>{{locker_event.title}}</td>
-          <td>{{ locker_event.to_emails | eventEmails(locker_event.to_emails) }}</td>
-          <td>{{ locker_event.reminder | reminderTime(locker_event.reminder) }}</td>
-          <td>  <a data-title="Edit Event"
-                   @click="$emit('edit-event',locker_event.id)">
-            <font-awesome-icon
-              :icon="['fas', 'edit']"/>
-          </a></td>
-          <td>  <a data-title="Delete Event"
-                   @click="deleteEvent(locker_event.id)">
-            <font-awesome-icon
-              :icon="['fas', 'trash-alt']"/>
-          </a></td>
-        </tr>
+    <div :key="event.month" v-for="(event) in getEvents" class="col-lg-12 mt-4">
+      <b-card
+        header-border-variant="secondary"
+        tag="article"
+        class="mb-2 event_box list"
+      >
+        <template #header>
+          <div class="d-flex align-items-center position-relative justify-content-between">
+            <span>{{event.month}}</span>
+            <span style="right: 0" class="fs-4 d-flex align-items-center cursor-pointer position-absolute" @click="showEventPopup"><BIconPlus /> <span class="fs-2">Add event</span></span>
+          </div>
+        </template>
+
+        <table class="table table-bordered b-table-fixed w-100">
+          <tr :key="locker_event.id" v-for="(locker_event) in event.events">
+            <td>{{locker_event.event_time}}</td>
+            <td>{{locker_event.title}}</td>
+            <td>{{ locker_event.to_emails | eventEmails(locker_event.to_emails) }}</td>
+            <td>{{ locker_event.reminder | reminderTime(locker_event.reminder) }}</td>
+            <td>  <a data-title="Edit Event"
+                     @click="$emit('edit-event',locker_event.id)">
+              <font-awesome-icon
+                :icon="['fas', 'edit']"/>
+            </a></td>
+            <td>  <a data-title="Delete Event"
+                     @click="deleteEvent(locker_event.id)">
+              <font-awesome-icon
+                :icon="['fas', 'trash-alt']"/>
+            </a></td>
+          </tr>
       </table>
+      </b-card>
     </div>
   </div>
   <ContactModal ref="contactmodal"  :room_id="room_id" :room_index="room_index"   />
 
   <div class="row">
-    <div v-if="!view_emails" class="col-lg-4">
-      <button class="btn btn-secondary" @click="showEventPopup">Add Event</button>
-      <button style="margin-left: 5px" class="btn btn-secondary" @click="showContactPopup">Add Contact</button>
+    <div v-if="!view_emails" class="col-lg-12 mt-4 text-right">
+      <button class="btn btn-dark" @click="showEventPopup">Add Event</button>
+      <button style="margin-left: 5px" class="btn btn-dark" @click="showContactPopup">Add Contact</button>
       <button style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show Emails</button>
     </div>
     <div v-else class="col-lg-4">
@@ -185,6 +208,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   .event_box {
     border: 1px solid rgba(0, 0, 0, 0.125) !important;
     border-radius: 0.25rem !important;
+    height: 100%;
 
     .card-header {
       padding: 0.75rem 1.25rem !important;
@@ -196,7 +220,48 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     }
 
     .card-body{
-      padding-top: 0.5rem;
+      padding: 0.7rem;
+    }
+
+    .event_day{
+      position: relative;
+      display: inline-flex;
+      align-items: start;
+      justify-content: center;
+      height: 22px;
+      width: 22px;
+      padding-top: 3.3px;
+      text-align: center;
+      color: #666;
+      font-weight: 600;
+
+      svg{
+        position: absolute;
+        color: #333;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: 0 auto;
+        font-size: 1.3rem;
+      }
+    }
+
+    &.list{
+      border: none !important;
+
+      .card-header{
+        border: 1px solid #dee2e6 !important;
+        border-bottom: none !important;
+      }
+
+      .card-body{
+        padding: 0;
+
+        .table{
+          margin-bottom: 0;
+        }
+      }
     }
   }
   //.event_box .border-secondary {
@@ -228,6 +293,34 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
       display: block;
       margin: 0 auto;
       height: auto;
+    }
+  }
+
+  .events{
+    li{
+      &+li{
+        margin-top: 0.7rem;
+      }
+
+      &:hover{
+        .controls{
+          max-width: 100px;
+        }
+      }
+      .controls{
+        overflow: hidden;
+        align-items: center;
+        max-width: 0;
+        transition: 0.3s ease all;
+        flex-shrink: 0;
+        margin-top: 3px;
+
+        &+span{
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
     }
   }
 </style>

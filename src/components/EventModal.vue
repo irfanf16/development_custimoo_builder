@@ -194,10 +194,10 @@
 
     </div>
       <div class="row">
-        <div class="col-lg-12" style="text-align: right">
+        <div class="col-lg-12 d-flex gap-1 justify-content-end mt-4" style="text-align: right">
           <button type="button"  class="btn light btn-secondary" @click="hideEventModal">Cancel</button>
-          <button v-if="event_data.id" type="button"  class="btn btn-danger" @click="deleteEvent">Delete event</button>
-          <button  type="submit" class="btn btn-secondary" style="margin-left: 5px;" >Save</button>
+          <button v-if="event_data.id" type="button"  class="btn light btn-secondary" @click="deleteEvent">Delete event</button>
+          <button  type="submit" class="btn btn-secondary" >Save</button>
         </div>
       </div>
 
@@ -711,8 +711,8 @@ export default class EventModal extends Mixins(ErrorMessages) {
 .input-group{
   .input-group-append{
     .btn{
-      border-top-right-radius: 0.25rem;
-      border-bottom-right-radius: 0.25rem;
+      border-top-right-radius: 0.25rem !important;
+      border-bottom-right-radius: 0.25rem !important;
     }
   }
 }
