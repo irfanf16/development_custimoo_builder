@@ -197,6 +197,7 @@
                       </div>
                       <div v-else>
                         <b-button variant="danger" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
+                        <button class="btn btn-secondary" @click="getIcsFile(room.id,i)">Add to outlook calender</button>
                         <YearlyPlanner @edit-event="editEvent" @init-event-contacts="initEventContacts" @getLockerEvents="getLockerEvents(room.id)" :room_id="room.id" :room_index="i" :key="room.id" />
                       </div>
                     </template>
@@ -939,8 +940,26 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
       else
         this.showError(e)
     }
-
-
+  }
+  public async getIcsFile(locker_room_id:number, index:number){
+    try {
+      let payload = {room_id: locker_room_id, event_year:this.$store.getters.getSelectedYear};
+      this.viewLoader = true
+      let res = await this.$store.dispatch('getIcsFile', payload)
+      let blob = new Blob([res.data], { type: 'text/calendar' })
+      let link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = 'calender_file.ics'
+      link.click()
+      this.viewLoader = false
+      this.showToast('Ics File created successfully', 'SUCCESS');
+    }
+    catch (e) {
+      if(e.response)
+        this.showError(e.response.data.message)
+      else
+        this.showError(e)
+    }
   }
    public async getLockerEvents(room_id:number) {
     let res = await this.$store.dispatch('getLockerEvents',room_id)
