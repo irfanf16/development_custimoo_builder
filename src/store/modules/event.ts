@@ -139,6 +139,9 @@ const Event:Module<any, any> = {
     async setYear({commit}, payload: number) {
       commit('SET_YEAR', payload);
     },
+    async copyEvents({commit}, payload){
+      return await http.post("events/copy", payload)
+    },
 
   }
 }

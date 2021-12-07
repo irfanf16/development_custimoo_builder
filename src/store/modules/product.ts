@@ -238,6 +238,12 @@ const Product:Module<any, any> = {
       })
       return res
     },
+    async deletePlanner({commit}, payload){
+     return await http.post("locker/planner/delete", payload)
+    },
+    async getIcsFile({commit}, payload){
+      return await http.post("events/create/ics/file", payload)
+    },
 
   }
 }

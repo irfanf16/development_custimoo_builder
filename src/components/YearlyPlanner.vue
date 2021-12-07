@@ -92,12 +92,13 @@
     </div>
   </div>
   <ContactModal ref="contactmodal"  :room_id="room_id" :room_index="room_index"   />
-
+  <SelectYear ref="selectYearModal"  :room_id="room_id" :room_index="room_index"   />
   <div class="row">
     <div v-if="!view_emails" class="col-lg-12 mt-4 text-right">
       <button class="btn btn-dark" @click="showEventPopup">Add Event</button>
       <button style="margin-left: 5px" class="btn btn-dark" @click="showContactPopup">Add Contact</button>
       <button style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show Emails</button>
+      <button style="margin-left: 5px" class="btn btn-secondary" @click="openYearModal">Copy all events to another year</button>
     </div>
     <div v-else class="col-lg-4">
       <button style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show event details</button>
@@ -119,9 +120,11 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ContactModal from "@/components/ContactModal.vue";
 import {getReminderOptions} from '@/helpers/Helpers';
 import ConfirmModal from "@/components/ConfirmModal.vue";
+import SelectYear from "@/components/SelectYear.vue";
 
 @Component<YearlyPlanner>({
   components: {
+    SelectYear,
     ContactModal,
     ConfirmModal
   },
@@ -161,6 +164,9 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   public showContactPopup(){
     this.ref['contactmodal'].showContactPopup()
    }
+  public openYearModal(){
+    this.ref['selectYearModal'].showPopup()
+  }
 
    public async changeYear(type:string) {
      let year = this.$store.getters.getSelectedYear
