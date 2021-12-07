@@ -137,6 +137,8 @@ export default class OrderDetails extends Vue {
   public  generateProductionPdf() {
     this.showLoader = true;
     let p2 = new Promise((resolve) => {
+      // this.pdf_front_image = this.canvasImage.ref_front.toDataURL("image/png") todo need use these lines to generate image when notification branch push
+      // this.pdf_back_image = this.canvasImage.ref_back.toDataURL("image/png")
       const frontElement = document.getElementById("scene-front") as Record<any, any>
       const backElement = document.getElementById("scene-back") as Record<any, any>
       this.pdf_front_image = frontElement.toDataURL("image/png")
