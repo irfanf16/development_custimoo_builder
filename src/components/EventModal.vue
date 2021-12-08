@@ -165,8 +165,6 @@
 
                   </label>
 
-
-
                 </div>
               </div>
           </div>
@@ -182,12 +180,6 @@
               <BIconPencil />
             </b-button>
           </div>
-
-<!--            <div class="col-lg-12">-->
-<!--              <b-input-group>-->
-<!--                <b-form-textarea v-model="event_data.email_content" placeholder="Description" class="w-100"></b-form-textarea>-->
-<!--              </b-input-group>-->
-<!--            </div>-->
 
           </div>
         </div>
@@ -223,6 +215,7 @@ import { required, email, required_if, mimes } from 'vee-validate/dist/rules';
 import { VueEditor } from "vue2-editor";
 import {getReminderOptions} from '@/helpers/Helpers';
 import ConfirmModal from "@/components/ConfirmModal.vue";
+import {http} from "@/httpCommon";
 
 extend('required', {
   ...required,
@@ -464,42 +457,56 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
   public async editEvent(event_id:number){
     this.resetEventModal()
-    let res = await this.$store.dispatch('getEventById', event_id)
+    this.viewLoader = true
 
-    this.event_data.id = res.id
-    this.event_data.title = res.title
-    this.event_data.event_type = res.event_type
-    this.event_data.description = res.description
-    this.event_data.event_time = res.event_time
+    let res =  await http.get(`events/${event_id}`).then(async (response) => {
+      if (response.status == 200){
+            return response.data
+      }else{
+        return null
+      }
+    })
 
-    if(res.is_reminder == 1){
-      this.event_data.is_reminder = true
-      this.event_data.before_time = res.reminder.before_time
-    }
+   if(res){
 
-    if(res.to_emails !== null){
-      this.event_data.email_to_others = true
-      this.event_data.to_emails = JSON.parse(res.to_emails)
-    }
+     this.event_data.id = res.id
+     this.event_data.title = res.title
+     this.event_data.event_type = res.event_type
+     this.event_data.description = res.description
+     this.event_data.event_time = res.event_time
 
-    this.event_data.email_template_id = res.email_template_id
-    this.event_data.email_content = res.email_content
-    let emailTemplates = this.$store.getters.getEmailTemplates
-    this.email_template_index = emailTemplates.map(function(eTemplate) {return eTemplate.id; }).indexOf(res.email_template_id);
+     if(res.is_reminder == 1){
+       this.event_data.is_reminder = true
+       this.event_data.before_time = res.reminder.before_time
+     }
 
-    if(res.event_type == 'design'){
+     if(res.to_emails !== null){
+       this.event_data.email_to_others = true
+       this.event_data.to_emails = JSON.parse(res.to_emails)
+     }
 
-      this.event_data.file_id = res.file.file_id
-      this.file_data = res.file.product_url
-      this.file_name = res.file.product_name
-    }else if(res.event_type == 'collection'){
-      this.event_data.file_id = res.file.file_id
-      this.file_data = res.file.collection_data.collection_products
-      this.file_name = res.file.collection_data.name
-    }else{
-      this.file_data = res.file.product_url
-    }
+     this.event_data.email_template_id = res.email_template_id
+     this.event_data.email_content = res.email_content
+     let emailTemplates = this.$store.getters.getEmailTemplates
+     this.email_template_index = emailTemplates.map(function(eTemplate) {return eTemplate.id; }).indexOf(res.email_template_id);
 
+     if(res.event_type == 'design'){
+
+       this.event_data.file_id = res.file.file_id
+       this.file_data = res.file.product_url
+       this.file_name = res.file.product_name
+     }else if(res.event_type == 'collection'){
+       this.event_data.file_id = res.file.file_id
+       this.file_data = res.file.collection_data.collection_products
+       this.file_name = res.file.collection_data.name
+     }else{
+       this.file_data = res.file.product_url
+     }
+
+   }else{
+     this.showToast('Event not found', 'Error')
+   }
+    this.viewLoader = false
 
   }
 
@@ -531,23 +538,36 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
       }
 
-      let res;
-
+      let url, res_msg ;
       if (this.event_data.id === null) {
-        res = await this.$store.dispatch('addEvent', form)
+        url = 'events/create'
       }else{
-        res = await this.$store.dispatch('updateEvent', form)
+        url = 'events/update'
       }
 
+    this.viewLoader = true
+    await http.post(url, form, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }).then((res) => {
 
-      if (res.status) {
-        this.showToast(res.message, 'SUCCESS')
+      this.viewLoader = false
+      if (res.status == 200){
+        this.showToast(res.data.message, 'SUCCESS')
         this.resetEventModal()
         this.hideEventModal()
-        this.$store.dispatch('getLockerEvents',selected_locker.id)
-      } else {
-        this.showErrorArr(res.message)
+
+      }else if (res.status == 401){
+        this.showErrorArr("Event not added")
       }
+    }).catch(err => {
+      this.viewLoader = false
+      if(err.response.status){
+        this.showErrorArr(err.response.data.errors)
+      }
+    })
+
 
   }
 

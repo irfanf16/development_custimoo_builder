@@ -93,6 +93,7 @@
   </div>
   <ContactModal ref="contactmodal"  :room_id="room_id" :room_index="room_index"   />
   <SelectYear ref="selectYearModal" :years="years" :room_id="room_id" :room_index="room_index"   />
+
   <div class="row">
     <div v-if="!view_emails" class="col-lg-12 mt-4 text-right">
       <button class="btn btn-dark" @click="showEventPopup">Add Event</button>
@@ -117,7 +118,6 @@
 import {Component, Mixins, Prop} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 
-import ContactModal from "@/components/ContactModal.vue";
 import {getReminderOptions} from '@/helpers/Helpers';
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import SelectYear from "@/components/SelectYear.vue";
@@ -125,7 +125,6 @@ import SelectYear from "@/components/SelectYear.vue";
 @Component<YearlyPlanner>({
   components: {
     SelectYear,
-    ContactModal,
     ConfirmModal
   },
   filters: {
@@ -162,8 +161,10 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     this.$store.commit('SET_LOCKER_INDEX_FOR_EVENT', room_index)
     this.$emit('init-event-contacts');
   }
+
   public showContactPopup(){
-    this.ref['contactmodal'].showContactPopup()
+    this.$emit('show-contact-modal',this.room_id, this.room_index);
+
    }
   public openYearModal(){
     let optionArray = [];

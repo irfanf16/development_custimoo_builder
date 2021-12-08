@@ -39,6 +39,7 @@
       </ul>
 
     </div>
+    <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </b-modal>
 </template>
 
@@ -48,6 +49,7 @@ import {Component, Mixins, Prop} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import { ValidationProvider, ValidationObserver, extend  } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
+import {http} from "@/httpCommon";
 
 extend('required', {
   ...required,
@@ -66,12 +68,15 @@ extend('email',{
 })
 
 export default class ContactModal extends Mixins(ErrorMessages) {
-  @Prop({required: true}) readonly room_id !: number
-  @Prop({required: true}) readonly room_index !: number
+  public room_id  = 0
+  public room_index = 0
   public ref = this.$refs as Record<any, any>
   private email  = '';
+  public viewLoader = false
 
-  public showContactPopup() {
+  public showContactPopup(room_id:number, room_index:number) {
+    this.room_id = room_id
+    this.room_index = room_index
     this.ref['contact-modal'].show()
   }
 
@@ -86,38 +91,48 @@ export default class ContactModal extends Mixins(ErrorMessages) {
     return contacts;
  }
 
-  public async saveContact(){
-
-    const payload = {'email': this.email, room_id: this.room_id}
+  public async saveContact() {
 
     this.viewLoader = true
-    let res = await this.$store.dispatch('saveContact', payload)
-    this.viewLoader = false
-    if (res.status == 201){
-      this.showToast('Your contact saved successfully.', 'SUCCESS');
-      let payload = {'index':this.room_index, 'attribute':'contacts', value: res.data.data}
-      this.$store.commit('SET_LOCKER_ATTRIBUTE',payload)
-      this.email = '';
-    }else{
-      this.showError(res)
-    }
+    await http.post("save/contact", {'email': this.email, room_id: this.room_id}).then((res: any) => {
+      this.viewLoader = false
+      if (res.status == 201){
+        this.showToast('Your contact saved successfully.', 'SUCCESS');
+        let payload = {'index':this.room_index, 'attribute':'contacts', value: res.data.data}
+        this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+        this.email = '';
+      }else{
+        this.showError(res)
+      }
+    }).catch(err => {
+      this.viewLoader = false
+      if(err.response.status){
+        this.showErrorArr(err.response.data.errors)
+      }
+    });
 
   }
 
-  public async deleteContact(contact_id){
+  public async deleteContact(contact_id:number){
 
-    const payload = {contact_id, room_id: this.room_id, _method:'DELETE'}
     this.viewLoader = true
-    let res = await this.$store.dispatch('deleteContact', payload)
-    this.viewLoader = false
-    if (res.status == 201){
-      this.showToast('Your contact deleted successfully.', 'SUCCESS');
-      let payload = {'index':this.room_index, 'attribute':'contacts', value: res.data.data}
-      this.$store.commit('SET_LOCKER_ATTRIBUTE',payload)
+    await http.post("delete/contact",
+      {contact_id, room_id: this.room_id, _method:'DELETE'}).then((res: any) => {
+      this.viewLoader = false
+      if (res.status == 201){
+        this.showToast('Your contact deleted successfully.', 'SUCCESS');
+        let payload = {'index':this.room_index, 'attribute':'contacts', value: res.data.data}
+        this.$store.commit('SET_LOCKER_ATTRIBUTE',payload)
 
-    }else{
-      this.showError(res)
-    }
+      }else{
+        this.showError(res)
+      }
+    }).catch(err => {
+      this.viewLoader = false
+      if(err.response.status){
+        this.showErrorArr(err.response.data.errors)
+      }
+    });
 
   }
 
