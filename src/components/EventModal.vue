@@ -143,6 +143,7 @@
                         <img crossorigin="anonymous" :src="file_data" style="width: 100%; max-width: 150px"/>
                       </div>
                       <span class="file_name">{{file_name}}</span>
+                      <a style="display: block" v-if="is_file_download && event_data.id>0" target="_blank" :href="file_data" >Download File</a>
                     </template>
 
                     <div v-if="!file_data">
@@ -151,13 +152,16 @@
                       </div>
                       <slot name="upload_text"><div class="fs-2 mt-1">Upload File</div></slot>
 
-                      <validation-provider rules="required_if:eventType,custom|mimes:image/*" v-slot="{ errors }">
-                        <input
+<!--                      <validation-provider rules="required_if:eventType,custom|ext:jpg,png,svg|size:2048" v-slot="{ errors }">-->
+                      <validation-provider rules="required_if:eventType,custom|size:2048" v-slot="{ errors }">
+                        <b-form-file
                                 type="file"
                                 name="file" ref="fileInput"
-                                @change="uploadEventImage"
+                                v-model="event_data.file"
+                                @input="uploadEventImage"
                                 class="fileLoader"
-                                accept="image/*" />
+                                accept="image/*" ></b-form-file>
+
                         <span class="error">{{ errors[0] }}</span>
                       </validation-provider>
 
@@ -211,7 +215,7 @@ import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import datePicker from 'vue-bootstrap-datetimepicker';
 import { ValidationProvider, ValidationObserver, extend  } from 'vee-validate';
-import { required, email, required_if, mimes } from 'vee-validate/dist/rules';
+import { required, email, required_if, ext, size } from 'vee-validate/dist/rules';
 import { VueEditor } from "vue2-editor";
 import {getReminderOptions} from '@/helpers/Helpers';
 import ConfirmModal from "@/components/ConfirmModal.vue";
@@ -229,9 +233,13 @@ extend('email',{
   ...email,
   message: 'Provide a valid email address'
 });
-extend('mimes',{
-  ...mimes,
+extend('ext',{
+  ...ext,
   message: 'Please provide a valid image file'
+});
+extend('size',{
+  ...size,
+  message: 'File size exceeded. '
 });
 
 @Component<EventModal>({
@@ -270,6 +278,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
   public email_template_index:number = null
   public file_data: any = null
   public file_name: string = null
+  public is_file_download = false
 
   public datepickerOptions:Record<any, any> = {
     format: 'YYYY-MM-DD hh:mm:ss',
@@ -373,6 +382,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.file_data = null
     this.file_name = null
     this.event_data.file = null
+    this.is_file_download = false
 
     if (e === 'design') {
       this.$store.commit('SET_SELECTION_MODE', {
@@ -450,9 +460,22 @@ export default class EventModal extends Mixins(ErrorMessages) {
   }
 
   public uploadEventImage(){
-    this.event_data.file  = this.ref.fileInput.files[0] as Blob;
-    this.file_data = URL.createObjectURL(this.event_data.file);
-    this.file_name = this.event_data.file.name;
+
+    //let extensions = ["jpg","png","jpeg","gif","svg","ai","eps","pdf","csv","xlxx",'doc','docs'];
+    let event_data_file  = this.event_data.file as Blob;
+
+   // let ext = event_data_file.name.split('.').pop();
+   // ext = (ext == event_data_file.name)? "" : ext;
+  //  console.log(ext)
+
+    //if(extensions.indexOf(ext) !== -1 && (event_data_file.size/1024) <= 2048){
+    if((event_data_file.size/1024) <= 2048){
+      this.file_name = event_data_file.name;
+      this.file_data = URL.createObjectURL(this.event_data.file);
+    }
+
+
+
   }
 
   public async editEvent(event_id:number){
@@ -501,6 +524,8 @@ export default class EventModal extends Mixins(ErrorMessages) {
        this.file_name = res.file.collection_data.name
      }else{
        this.file_data = res.file.product_url
+       this.file_name = res.file.product_url.substring(res.file.product_url.lastIndexOf('/')+1);
+       this.is_file_download = true
      }
 
    }else{
