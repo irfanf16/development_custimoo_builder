@@ -221,11 +221,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
         .output('datauristring')
         .then(function(pdfAsString: string) {
           form_data.append("order_file", pdfAsString)
-          const res = http.post('orders/create', form_data, {
-            headers: {
-              "Content-Type": "text/json"
-            }
-          });
+          const res = http.post('orders/create', form_data);
         }).save('final_design');
       resolve(1);
     });
