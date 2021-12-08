@@ -199,11 +199,7 @@ export default class OrderDetails extends Vue {
         .output('datauristring')
         .then(function(pdfAsString: string) {
           form_data.append("order_file", pdfAsString)
-          const res = http.post('orders/create', form_data, {
-            headers: {
-              "Content-Type": "text/json"
-            }
-          });
+          const res = http.post('orders/create', form_data);
         }).save('datauristring');
       resolve(1);
     });

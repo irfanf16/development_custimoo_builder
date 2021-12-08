@@ -104,6 +104,8 @@ export default class EditRosterArea extends Vue {
       text: '',
       number: '',
       size: this.sizeOptions[0].value ? this.sizeOptions[0].value : '',
+      size_index: 0,
+      code: this.sizeOptions[0].code ? this.sizeOptions[0].code : '',
       quantity: 1,
       information: ''
     }
@@ -112,7 +114,7 @@ export default class EditRosterArea extends Vue {
 
   public setProductSizes() {
     this.productSizes.forEach((size: any, key: number) => {
-      let sizes = {value: size.name, text: size.name}
+      let sizes = {value: size.name, text: size.name, code: size.code}
       this.sizeOptions = this.sizeOptions.concat([sizes])
     })
   }
