@@ -3,9 +3,9 @@
 
 <div class="row">
   <div class="col">
-    <b-icon-arrow-left @click="changeYear('minus')"></b-icon-arrow-left>
+    <b-icon-arrow-left class="cursor-pointer" @click="changeYear('minus')"></b-icon-arrow-left>
     <h3 style="font-weight: bold;display: inline-block;padding:10px">{{this.getSelectedYear}}</h3>
-    <b-icon-arrow-right @click="changeYear('add')"></b-icon-arrow-right>
+    <b-icon-arrow-right class="cursor-pointer" @click="changeYear('add')"></b-icon-arrow-right>
   </div>
   <div class="">
     <button class="mr-3 btn btn-secondary" v-bind:class="{ 'calender_btn_inactive': event_view === 'list' }" @click="changeEventView('month')">Monthly View</button>
@@ -23,7 +23,7 @@
         <template #header>
           <div class="d-flex align-items-center position-relative justify-content-between">
             <span>{{event.month}}</span>
-            <span style="right: 0" class="fs-4 cursor-pointer position-absolute" @click="showEventPopup"><BIconPlus /></span>
+            <span v-if="event.add_event" style="right: 0" class="fs-4 cursor-pointer position-absolute" @click="showEventPopup"><BIconPlus /></span>
           </div>
         </template>
        <ul class="events">
@@ -35,7 +35,7 @@
                  :icon="['fas', 'edit']"/>
              </a>
              <a class="cursor-pointer" data-title="Edit Event"
-                  @click="$emit('edit-event',locker_event.id)">
+                @click="deleteEvent(locker_event.id)">
                <font-awesome-icon
                  :icon="['fas', 'trash-alt']"/>
              </a>
@@ -66,22 +66,22 @@
         <template #header>
           <div class="d-flex align-items-center position-relative justify-content-between">
             <span>{{event.month}}</span>
-            <span style="right: 0" class="fs-4 d-flex align-items-center cursor-pointer position-absolute" @click="showEventPopup"><BIconPlus /> <span class="fs-2">Add event</span></span>
+            <span v-if="event.add_event" style="right: 0" class="fs-4 d-flex align-items-center cursor-pointer position-absolute" @click="showEventPopup"><BIconPlus /> <span class="fs-2">Add event</span></span>
           </div>
         </template>
 
         <table class="table table-bordered b-table-fixed w-100">
           <tr :key="locker_event.id" v-for="(locker_event) in event.events">
-            <td>{{locker_event.event_time}}</td>
+            <td>{{  `${locker_event.event_day} / ${locker_event.event_month} - ${locker_event.format_time}`}}</td>
             <td>{{locker_event.title}}</td>
             <td>{{ locker_event.to_emails | eventEmails(locker_event.to_emails) }}</td>
             <td>{{ locker_event.reminder | reminderTime(locker_event.reminder) }}</td>
-            <td>  <a data-title="Edit Event"
+            <td class="cursor-pointer">   <a data-title="Edit Event"
                      @click="$emit('edit-event',locker_event.id)">
               <font-awesome-icon
                 :icon="['fas', 'edit']"/>
             </a></td>
-            <td>  <a data-title="Delete Event"
+            <td class="cursor-pointer">  <a data-title="Delete Event"
                      @click="deleteEvent(locker_event.id)">
               <font-awesome-icon
                 :icon="['fas', 'trash-alt']"/>
@@ -92,7 +92,7 @@
     </div>
   </div>
   <ContactModal ref="contactmodal"  :room_id="room_id" :room_index="room_index"   />
-  <SelectYear ref="selectYearModal"  :room_id="room_id" :room_index="room_index"   />
+  <SelectYear ref="selectYearModal" :years="years" :room_id="room_id" :room_index="room_index"   />
   <div class="row">
     <div v-if="!view_emails" class="col-lg-12 mt-4 text-right">
       <button class="btn btn-dark" @click="showEventPopup">Add Event</button>
@@ -154,6 +154,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   public event_view = 'month'
   public viewLoader = false
   public view_emails = false
+  public years = []
 
   public showEventPopup(){
     const room_index = this.$store.getters.getActiveLockerIndex;
@@ -165,6 +166,20 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     this.ref['contactmodal'].showContactPopup()
    }
   public openYearModal(){
+    let optionArray = [];
+    let cur_year = new Date().getFullYear()
+    optionArray.push({
+      value: null,
+      text: 'Select Year'
+    })
+    for(let i = 0; i < 5; i++) {
+      cur_year++
+      optionArray.push({
+        value: cur_year,
+        text: cur_year
+      })
+    }
+    this.years = optionArray
     this.ref['selectYearModal'].showPopup()
   }
 
