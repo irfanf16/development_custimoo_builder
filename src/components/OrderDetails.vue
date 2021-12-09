@@ -158,6 +158,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
   }
 
    public async  generateProductionPdf() {
+    let self = this;
     this.showLoader = true;
     let style_index = this.$store.getters.getCurrentStyleIndex;
     let selected_product = this.$store.getters.getSelectedProduct;
@@ -175,10 +176,14 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
       const selected_model = product_models[selected_model_index];
       product_model_id = selected_model.id;
     }
-     let canvas_svg = await this.$refs["production-scene"].canvasToSvg();
+     let canvas_obj = await this.$refs["production-scene"].canvasToSvg();
     let form_data = new FormData();
-    if(canvas_svg) {
-      form_data.append('original_file', new File([new Blob([canvas_svg])], "original_file.svg", {
+    if(canvas_obj) {
+      let canvas_svg = canvas_obj.svg;
+      let svg_doc = await self.getDocFromString(canvas_svg);
+      $(svg_doc).find("svg").eq(0).attr(canvas_obj.options);
+      let svg_string = new XMLSerializer().serializeToString(svg_doc)
+      form_data.append('original_file', new File([new Blob([svg_string])], "original_file.svg", {
         type: "image/svg+xml",
       }));
     }
@@ -187,16 +192,6 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     form_data.append("product_design_id", product_design_id);
     form_data.append("product_model_id", product_model_id);
     form_data.append("roster_detail", JSON.stringify(this.rosterDetails));
-
-
-
-     /*let order_payload = {
-      product_id,
-      product_style_id,
-      product_design_id,
-      product_model_id,
-      order_file: ''
-    }*/
 
     let p2 = new Promise((resolve) => {
       // this.pdf_front_image = this.canvasImage.ref_front.toDataURL("image/png") todo need use these lines to generate image when notification branch push
@@ -231,6 +226,11 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
         this.showLoader = false
       }
     })
+  }
+
+  public async getDocFromString(doc_string: string, type="image/svg+xml") {
+    let parser = new DOMParser();
+    return  parser.parseFromString(doc_string, type);
   }
 
   public generateProductionPdf_back(e: any) {
