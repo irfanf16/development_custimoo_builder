@@ -193,17 +193,20 @@
                   <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
                     <template>
                       <div v-if="!room.have_yearly_planner">
-                          <b-button variant="primary" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
+                          <b-button variant="secondary" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
                       </div>
                       <div v-else>
-                        <b-button variant="danger" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
-                        <button class="btn btn-secondary" @click="getIcsFile(room.id,i)">Add to outlook calender</button>
                         <YearlyPlanner @edit-event="editEvent"
                                        @init-event-contacts="initEventContacts"
                                        @getLockerEvents="getLockerEvents(room.id)"
                                        @show-contact-modal="showContactPopup"
                                        :room_id="room.id" :room_index="i" :key="room.id"
-                        />
+                        >
+                          <template slot="actions">
+                            <b-button class="mr-3 light" variant="secondary" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
+                            <button class="btn mr-3 light btn-secondary" @click="getIcsFile(room.id,i)">Add to calender</button>
+                          </template>
+                        </YearlyPlanner>
                       </div>
                     </template>
                   </div>

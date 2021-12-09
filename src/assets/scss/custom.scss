@@ -3319,6 +3319,17 @@ $fontSize: 0.5;
     cursor: pointer !important;
 }
 
+.btn-dark.light{
+    border-color: #eee;
+    background-color: #eee;
+    color: #121212;
+
+    &:hover{
+        background-color: #ccc;
+        color: #000;
+    }
+}
+
 .ql-editor{
     strong{
         font-weight: bold;

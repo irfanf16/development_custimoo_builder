@@ -10,7 +10,7 @@
   <div class="">
     <button class="mr-3 btn btn-secondary" v-bind:class="{ 'calender_btn_inactive': event_view === 'list' }" @click="changeEventView('month')">Monthly View</button>
     <button class="mr-3 btn btn-secondary" v-bind:class="{ 'calender_btn_inactive': event_view === 'month' }" @click="changeEventView('list')">List View</button>
-
+    <slot name="actions"></slot>
   </div>
 </div>
   <div v-if="event_view === 'month'" class="grid grid-6 gap-x-3 gap-y-2 mt-3">
@@ -95,10 +95,10 @@
 
   <div class="row">
     <div v-if="!view_emails" class="col-lg-12 mt-4 text-right">
-      <button class="btn btn-dark" @click="showEventPopup">Add Event</button>
-      <button style="margin-left: 5px" class="btn btn-dark" @click="showContactPopup">Add Contact</button>
-      <button style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show Emails</button>
-      <button style="margin-left: 5px" class="btn btn-secondary" @click="openYearModal">Copy all events to another year</button>
+      <button class="btn btn-dark light" @click="showEventPopup">Add Event</button>
+      <button style="margin-left: 5px" class="btn btn-dark light" @click="showContactPopup">Add Contact</button>
+      <button style="margin-left: 5px" class="btn btn-secondary light" @click="showEmail">Show Emails</button>
+      <button style="margin-left: 5px" class="btn btn-secondary light" @click="openYearModal">Copy all events</button>
     </div>
     <div v-else class="col-lg-4">
       <button style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show event details</button>
@@ -242,6 +242,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
 
     .card-body{
       padding: 0.7rem;
+      min-height: 100px;
     }
 
     .event_day{
@@ -278,6 +279,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
 
       .card-body{
         padding: 0;
+        min-height: 0px;
 
         .table{
           margin-bottom: 0;

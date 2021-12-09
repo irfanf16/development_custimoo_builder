@@ -71,7 +71,7 @@
             </b-input-group>
             <div class="w-100 d-flex justify-content-start align-items-end gap-3" v-if="event_data.email_to_others">
 
-              <div class="w-100" v-if="event_data.to_emails && event_data.to_emails.length">
+              <div class="w-100" v-if="event_data.to_emails && event_data.to_emails.length" style="max-height: 200px; overflow-y: auto">
                 <div  v-for="(email, i) in event_data.to_emails" :key="i">
                   <validation-provider rules="email" v-slot="{ errors }">
                     <b-input-group class="mt-3">
@@ -88,7 +88,7 @@
               </div>
 
               <div class="text-right mt-2">
-                <a data-title="Add contact" class="btn btn-dark rounded-circle light add fs-4 d-inline-flex align-items-center justify-content-center p-0" style="height: 40px; width: 40px" @click="addEmptyEmail">
+                <a data-title="Add contact" class="btn btn-dark light rounded-circle light add fs-4 d-inline-flex align-items-center justify-content-center p-0" style="height: 40px; width: 40px" @click="addEmptyEmail">
                   <BIconPlus/>
                 </a>
               </div>
@@ -180,7 +180,7 @@
                 <span class="error">{{ errors[0] }}</span>
               </validation-provider>
             </b-input-group>
-            <b-button style="height: 40px; width: 40px; flex-shrink: 0;" variant="dark" class="rounded-circle fs-2 p-0 d-inline-flex align-items-center justify-content-center" v-if="email_template_index !== null" v-b-modal.email-template-modal>
+            <b-button style="height: 40px; width: 40px; flex-shrink: 0;" variant="dark" class="rounded-circle light fs-2 p-0 d-inline-flex align-items-center justify-content-center" v-if="email_template_index !== null" v-b-modal.email-template-modal>
               <BIconPencil />
             </b-button>
           </div>
