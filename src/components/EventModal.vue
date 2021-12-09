@@ -279,7 +279,9 @@ export default class EventModal extends Mixins(ErrorMessages) {
   public file_data: any = null
   public file_name: string = null
   public is_file_download = false
-  public email_tags:Array = ['locker_name','due_date','description','link']
+  public selected_collection_pdf_link:string = null
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
+
 
   public datepickerOptions:Record<any, any> = {
     format: 'YYYY-MM-DD hh:mm:ss',
@@ -429,6 +431,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     })
     let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
     this.$emit('change-locker-tabindex', selected_locker_index)
+    this.replaceEmailContentTags();
   }
 
   public setEventCollection(collection_index: number) {
@@ -437,6 +440,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.event_data.file_id = collection.id
     this.file_data = collection.collection_products
     this.file_name = collection.name
+    this.selected_collection_pdf_link = collection.link
 
     this.showEventModal();
     this.$store.commit('SET_SELECTION_MODE', {
@@ -447,6 +451,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     })
     let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
     this.$emit('change-locker-tabindex', selected_locker_index)
+    this.replaceEmailContentTags();
 
   }
 
@@ -455,9 +460,44 @@ export default class EventModal extends Mixins(ErrorMessages) {
       let template = this.$store.getters.getEmailTemplates[index];
       this.event_data.email_template_id = template.id
       this.event_data.email_content = template.content
+      this.replaceEmailContentTags();
     }else{
       this.event_data.email_template_id = null
       this.event_data.email_content = ''
+    }
+  }
+
+  public replaceEmailContentTags() {
+
+    if (this.email_template_index !== null) {
+
+      let template = this.$store.getters.getEmailTemplates[this.email_template_index];
+      let email_content = template.content
+
+      let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
+      let selected_locker = this.$store.getters.getLockerProducts[selected_locker_index]
+
+      email_content = email_content.replace(/\|\|locker_name\|\|/g, selected_locker.room_name)
+      email_content = email_content.replace(/\|\|due_date\|\|/g, this.event_data.event_time)
+      email_content = email_content.replace(/\|\|description\|\|/g, this.event_data.description)
+
+      let all_links = email_content.match(/{\|\|.*?\|\|}/g);
+      if (all_links) {
+        for (let link of all_links) {
+          let link_text = link.substring(3, link.length - 3)
+
+          let final_link = '';
+          if (this.event_data.event_type === 'design') {
+            final_link = `<a href="${this.file_data}" target="_blank">${link_text}</a>`
+          } else if (this.event_data.event_type === 'collection') {
+            final_link = `<a href="${this.storageUrl}/${this.selected_collection_pdf_link}" target="_blank">${link_text}</a>`
+          } else {
+            final_link = `<a href="{uploaded_file_link}" target="_blank">${link_text}</a>`
+          }
+          email_content = email_content.replace(link, final_link);
+        }
+      }
+      this.event_data.email_content = email_content
     }
   }
 
@@ -484,9 +524,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
       this.file_name = event_data_file.name;
       this.file_data = URL.createObjectURL(this.event_data.file);
     }
-
-
-
+    this.replaceEmailContentTags();
   }
 
   public async editEvent(event_id:number){

@@ -988,14 +988,14 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public changeLockerTabIndex(lockerIndex: number){
     this.tabIndex = lockerIndex
   }
-  public editEvent(event_id){
+  public editEvent(event_id:number){
     const room_index = this.$store.getters.getActiveLockerIndex;
     this.$store.commit('SHOW_EVENT_POPUP', true)
     this.$store.commit('SET_LOCKER_INDEX_FOR_EVENT', room_index)
     this.ref['eventmodal'].editEvent(event_id);
   }
 
-  public showContactPopup(room_id, room_index){
+  public showContactPopup(room_id:number, room_index:number){
     this.ref['contactmodal'].showContactPopup(room_id, room_index)
   }
 }
