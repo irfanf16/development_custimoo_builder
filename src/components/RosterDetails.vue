@@ -54,7 +54,7 @@
             placeholder="0" v-model="roster.quantity"
           ></b-form-input>
         </div>
-        <div class="remove" v-if="index != 0">
+        <div class="remove" v-if="rosterDetails.length > 1">
           <a @click="removeIndex(index, roster.text, roster.number)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>

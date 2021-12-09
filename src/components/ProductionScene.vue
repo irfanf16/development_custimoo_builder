@@ -23,6 +23,10 @@ export default class ProductionScene extends Vue {
   private svg_elems_group: null|Record<any, any> = null;
   private production_svg_url: string|null = null;
   private storage_url = process.env.VUE_APP_STORAGE_URL;
+  public svg_file_options: Record<any, any> = {
+    width: null,
+    height: null
+  };
 
   //computed values starts
   get groupColors(){
@@ -73,6 +77,8 @@ export default class ProductionScene extends Vue {
     if(self.production_svg_url) {
       fabrics.loadSVGFromURL(`${self.production_svg_url}`, (objects: any, options: any) => {
         options.crossOrigin = 'Anonymous'
+        self.svg_file_options.width = options.width;
+        self.svg_file_options.height = options.height;
         let svg_elems_group = self.svg_elems_group = fabrics.util.groupSVGElements(objects) as fabrics.canvas
         let svg_elems_group_scaled_width = self.factory_cuttings_canvas?.getHeight() - 50;
         self.svg_elems_group?.scaleToWidth(svg_elems_group_scaled_width).set({
@@ -143,7 +149,10 @@ export default class ProductionScene extends Vue {
   async canvasToSvg() {
     let self = this;
     if(self.production_svg_url) {
-      return self.factory_cuttings_canvas?.toSVG();
+      return {
+        svg: self.factory_cuttings_canvas?.toSVG(),
+        options: self.svg_file_options
+      };
     } else {
       return undefined;
     }
