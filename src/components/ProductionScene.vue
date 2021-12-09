@@ -19,7 +19,7 @@ export default class ProductionScene extends Vue {
 
   @Prop({required: false, default: 500}) readonly canvasWidth!: number;
   @Prop({required: false, default: 500}) readonly canvasHeight!: number;
-  private factory_cuttings_canvas: null|fabrics.Canvas = null;
+  private factory_cuttings_canvas!: fabrics.Canvas
   private svg_elems_group: null|Record<any, any> = null;
   private production_svg_url: string|null = null;
   private storage_url = process.env.VUE_APP_STORAGE_URL;
@@ -79,7 +79,7 @@ export default class ProductionScene extends Vue {
         options.crossOrigin = 'Anonymous'
         self.svg_file_options.width = options.width;
         self.svg_file_options.height = options.height;
-        let svg_elems_group = self.svg_elems_group = fabrics.util.groupSVGElements(objects) as fabrics.canvas
+        let svg_elems_group = self.svg_elems_group = fabrics.util.groupSVGElements(objects) as fabrics.Group
         let svg_elems_group_scaled_width = self.factory_cuttings_canvas?.getHeight() - 50;
         self.svg_elems_group?.scaleToWidth(svg_elems_group_scaled_width).set({
           hasControls: false,
@@ -88,7 +88,6 @@ export default class ProductionScene extends Vue {
         })
         self.factory_cuttings_canvas?.clear();
         self.factory_cuttings_canvas?.add(svg_elems_group);
-        self.svg_elems_group?.center();
         self.factory_cuttings_canvas?.renderAll();
         this.setFactoryCuttingColors();
       })
