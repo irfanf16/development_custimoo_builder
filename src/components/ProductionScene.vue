@@ -88,6 +88,7 @@ export default class ProductionScene extends Vue {
         })
         self.factory_cuttings_canvas?.clear();
         self.factory_cuttings_canvas?.add(svg_elems_group);
+        self.svg_elems_group?.center();
         self.factory_cuttings_canvas?.renderAll();
         this.setFactoryCuttingColors();
       })
