@@ -91,8 +91,7 @@
       </b-card>
     </div>
   </div>
-  <ContactModal ref="contactmodal"  :room_id="room_id" :room_index="room_index"   />
-  <SelectYear ref="selectYearModal" :years="years" :room_id="room_id" :room_index="room_index"   />
+   <SelectYear ref="selectYearModal" :years="years" :room_id="room_id" :room_index="room_index"   />
 
   <div class="row">
     <div v-if="!view_emails" class="col-lg-12 mt-4 text-right">

@@ -172,10 +172,10 @@
                 </div>
               </div>
           </div>
-          <div class="d-flex align-items-center gap-1">
+          <div class="d-flex align-items-center gap-1" >
             <b-input-group class="w-100">
               <validation-provider rules="required" v-slot="{ errors }">
-                <b-form-select class="w-100" v-model="email_template_index" @change="setEventEmailTemplate"
+                <b-form-select class="w-100" :disabled="!checkEmailTemplateDependency" v-model="email_template_index" @change="setEventEmailTemplate"
                                :options="getEmailTemplateOptions"></b-form-select>
                 <span class="error">{{ errors[0] }}</span>
               </validation-provider>
@@ -211,7 +211,7 @@
 
 <script lang="ts">
 
-import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import datePicker from 'vue-bootstrap-datetimepicker';
 import { ValidationProvider, ValidationObserver, extend  } from 'vee-validate';
@@ -279,6 +279,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
   public file_data: any = null
   public file_name: string = null
   public is_file_download = false
+  public email_tags:Array = ['locker_name','due_date','description','link']
 
   public datepickerOptions:Record<any, any> = {
     format: 'YYYY-MM-DD hh:mm:ss',
@@ -295,7 +296,20 @@ export default class EventModal extends Mixins(ErrorMessages) {
       close: 'far fa-times-circle'
     }
   }
-
+  //@Watch('checkEmailTemplateDependency')
+  get checkEmailTemplateDependency(){
+    let resp = true;
+    if(!this.event_data.event_time){
+      resp =  false
+    }
+    else if(this.event_data.event_type === null || this.file_data === null){
+      resp =  false
+    }
+    if(!resp){
+      this.email_template_index = null
+    }
+    return  resp
+  }
 
   get showEventPopup() {
     return this.$store.getters.showEventPopup
@@ -351,8 +365,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
     return getReminderOptions()
   }
 
-
-
   public userTimeZone(){
     var timezone_offset_min = new Date().getTimezoneOffset(),
       offset_hrs = parseInt(Math.abs(timezone_offset_min/60)),
@@ -402,8 +414,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
       })
       this.hideEventModal()
     }
-
-
   }
 
   public setEventProduct(id: number, url:string, name: string) {
@@ -457,10 +467,11 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.file_data = null
     this.file_name = null
     this.event_data.file = null
+    this.is_file_download = false
   }
 
   public uploadEventImage(){
-
+    //comment ext check code temporarily
     //let extensions = ["jpg","png","jpeg","gif","svg","ai","eps","pdf","csv","xlxx",'doc','docs'];
     let event_data_file  = this.event_data.file as Blob;
 
@@ -614,6 +625,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
       this.file_data = null
       this.file_name = null
   }
+
   public async deleteEvent() {
     try {
       const ok = await this.ref['reset-modal'].showConfirm()
@@ -633,6 +645,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     catch (e) {
       console.log('e',e)
       this.showError(e.response.data.message)
+
     }
   }
 
