@@ -407,14 +407,21 @@ export default class EventModal extends Mixins(ErrorMessages) {
       })
       this.hideEventModal()
     } else if (e === 'collection') {
-      this.file_data = [];
-      this.$store.commit('SET_SELECTION_MODE', {
-        readonly: true,
-        collectionAddmoreMode: false,
-        eventProductMode: false,
-        eventCollectionMode: true
-      })
-      this.hideEventModal()
+      let collections = this.$store.getters.getCollections
+      if(collections && collections.length > 0){
+        this.file_data = [];
+        this.$store.commit('SET_SELECTION_MODE', {
+          readonly: true,
+          collectionAddmoreMode: false,
+          eventProductMode: false,
+          eventCollectionMode: true
+        })
+        this.hideEventModal()
+      }else{
+        this.showToast('No collection found in locker.','Error')
+        this.event_data.event_type = null;
+      }
+
     }
   }
 
