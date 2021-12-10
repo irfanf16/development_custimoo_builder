@@ -657,7 +657,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
-    this.$store.commit('SET_ADD_MORE_COLLECTION',false)
+    this.$store.commit('SET_SELECTION_MODE',{
+      readonly:false,
+      collectionAddmoreMode:false,
+      eventProductMode:false,
+      eventCollectionMode:false
+    })
   }
 
   public async getLockers(){
@@ -881,7 +886,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     this.searchProducts()
   }
   public async getLockerRoomProducts(){
-    this.$store.commit('SET_ADD_MORE_COLLECTION',false)
+    this.$store.commit('SET_SELECTION_MODE',{
+      readonly:false,
+      collectionAddmoreMode:false,
+      eventProductMode:false,
+      eventCollectionMode:false
+    })
     if(this.isCustomerAuthenticated){
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       if (res == true){

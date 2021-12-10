@@ -4,6 +4,7 @@ import Auth from "@/store/modules/auth";
 import ProductAttributes from "@/store/modules/ProductAttributes";
 import Main from "@/store/modules/main";
 import Product from "@/store/modules/product";
+import Event from "@/store/modules/event";
 import createPersistedState from "vuex-persistedstate";
 
 Vue.use(Vuex)
@@ -13,7 +14,8 @@ export default new Vuex.Store({
     Auth,
     ProductAttributes,
     Main,
-    Product
+    Product,
+    Event
   },
   plugins: [createPersistedState({
     key: 'custimo',

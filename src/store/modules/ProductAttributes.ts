@@ -24,7 +24,12 @@ const ProductAttributes:Module<any, any> = {
     customLogos: {},
     recentLogos: [],
     defaultcustomLogos: false,
-    addMoreCollection: false,
+    selectionMode: {
+      readonly:false,
+      collectionAddmoreMode:false,
+      eventProductMode:false,
+      eventCollectionMode:false
+    },
     customTexts: {},
     styleIndex: 0,
     defaultColors: [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}],
@@ -127,8 +132,8 @@ const ProductAttributes:Module<any, any> = {
     SET_COLORS_FROM_RECENT(state: Record<any, any>, payload: boolean){
       state.colorsFromRecent = payload
     },
-    SET_ADD_MORE_COLLECTION(state: Record<any, any>, payload: boolean){
-      state.addMoreCollection = payload
+    SET_SELECTION_MODE(state: Record<any, any>, payload: boolean){
+      state.selectionMode = payload
     },
     SET_DISABLED_PRODUCTS(state: Record<any, any>, payload: boolean){
       state.selectedCollectionProducts.disabled_products = state.selectedCollectionProducts.locker_products
@@ -846,8 +851,8 @@ const ProductAttributes:Module<any, any> = {
     getRecentLogos: state => {
       return state.recentLogos
     },
-    getAddMoreCollectionStatus: state => {
-      return state.addMoreCollection
+    getSelectionMode: state => {
+      return state.selectionMode
     },
     getEditMainProductId: state => {
       return state.editProduct.mainProductId
