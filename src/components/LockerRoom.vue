@@ -17,6 +17,7 @@
         <div class="lockerroom-tabs">
           <div>
             <b-card no-body>
+              <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
               <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" :value="lockerActiveTabIndex">
                 <b-tab v-if="!getSelectionMode.eventCollectionMode" title="Products">
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
@@ -234,7 +235,7 @@
 
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
                     ref="reset-modal"></confirm-modal>
-<div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+
     <span class="hover_tooltip"></span>
     <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
         <div class="pt-4 design-name-form">
@@ -761,8 +762,8 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     // console.log('evt',evt.target.className)
     // console.table('evt active',evt.target.classList)
     // console.table('evt asdasdasd',evt.target.classList)
-    this.getLockerEvents(room_id)
 
+    await this.getLockerEvents(room_id)
   }
 
   public lockerProductsChanged(payload: any, index = null) {
@@ -973,7 +974,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     }
   }
    public async getLockerEvents(room_id:number) {
+     this.viewLoader = true
     let res = await this.$store.dispatch('getLockerEvents',room_id)
+     this.viewLoader = false
   }
   public setEventProduct(id:number, url:string, name:string){
     this.ref['eventmodal'].setEventProduct(id, url, name)

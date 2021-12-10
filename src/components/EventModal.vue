@@ -624,11 +624,12 @@ export default class EventModal extends Mixins(ErrorMessages) {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
-    }).then((res) => {
+    }).then(async (res) => {
 
       this.viewLoader = false
       if (res.status == 200){
         this.showToast(res.data.message, 'SUCCESS')
+        await this.$store.dispatch('getLockerEvents',selected_locker.id)
         this.resetEventModal()
         this.hideEventModal()
 
@@ -672,7 +673,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
         let selected_locker = this.$store.getters.getLockerProducts[selected_locker_index];
         this.viewLoader = true
         let res = await this.$store.dispatch('deleteEvent',this.event_data.id)
-        await this.$emit('getLockerEvents',selected_locker.id)
         await this.$store.dispatch('getLockerEvents',selected_locker.id)
         this.resetEventModal()
         this.hideEventModal()
