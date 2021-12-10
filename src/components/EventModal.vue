@@ -631,11 +631,12 @@ export default class EventModal extends Mixins(ErrorMessages) {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
-    }).then((res) => {
+    }).then(async (res) => {
 
       this.viewLoader = false
       if (res.status == 200){
         this.showToast(res.data.message, 'SUCCESS')
+        await this.$store.dispatch('getLockerEvents',selected_locker.id)
         this.resetEventModal()
         this.hideEventModal()
         let active_tab = 4;
@@ -643,8 +644,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
         if(collections && collections.length < 1){
           active_tab = 3
         }
-        this.$store.commit("Change_Locker_Active_Tab", active_tab);
-
+        this.$emit('yearlyPlannerTab',selected_locker.id)
       }else if (res.status == 401){
         this.showErrorArr("Event not added")
       }
@@ -685,7 +685,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
         let selected_locker = this.$store.getters.getLockerProducts[selected_locker_index];
         this.viewLoader = true
         let res = await this.$store.dispatch('deleteEvent',this.event_data.id)
-        await this.$emit('getLockerEvents',selected_locker.id)
         await this.$store.dispatch('getLockerEvents',selected_locker.id)
         this.resetEventModal()
         this.hideEventModal()
