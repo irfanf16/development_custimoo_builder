@@ -1,36 +1,33 @@
 <template>
   <div>
-    <canvas ref="factory_cuttings" id="factory-cuttings" :width="canvasWidth" :height="canvasHeight"></canvas>
+    <template v-if="production_file_obj.content != null">
+      <span  v-html="production_file_obj.content"></span>
+    </template>
   </div>
 </template>
 
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import {fabric as fabrics} from 'fabric'
+import $ from "jquery";
 
 @Component<ProductionScene>({
   mounted() {
-    let self = this;
-    self.initializeCanvas();
+    console.log("mounted")
   }
 })
 
 export default class ProductionScene extends Vue {
-
-  @Prop({required: false, default: 500}) readonly canvasWidth!: number;
-  @Prop({required: false, default: 500}) readonly canvasHeight!: number;
-  private factory_cuttings_canvas!: fabrics.Canvas
-  private svg_elems_group: null|Record<any, any> = null;
-  private production_svg_url: string|null = null;
-  private storage_url = process.env.VUE_APP_STORAGE_URL;
-  public svg_file_options: Record<any, any> = {
-    width: null,
-    height: null
+  private production_file_obj: Record<any, any> = {
+    url: null,
+    content: null
   };
+  private storage_url = process.env.VUE_APP_STORAGE_URL;
 
   //computed values starts
-  get groupColors(){
-    return this.$store.getters.getGroupColors
+
+  get svgGroups() {
+    return this.$store.getters.getSvgGroups
   }
 
   get selectedProduct(){
@@ -43,78 +40,24 @@ export default class ProductionScene extends Vue {
   //computed values ends
 
   //watchers starts
-  @Watch('groupColors', { deep: true })
-  onGroupColorsChanged(newVal:Record<any, any>, oldVal:Record<any, any>) {
-    //as in this case we are mutating array object instead of replacing with new object that's why newVal and oldVal have same values. This is Vue caveat
-    let self = this;
-    self.setFactoryCuttingColors();
+  @Watch('svgGroups', { deep: true })
+  async onSvgGroupsChanged(newVal:Record<any, any>, oldVal:Record<any, any>) {
+    if(this.production_file_obj.url) {
+      await this.parseSvgString(this.production_file_obj.content);
+    }
   }
 
   @Watch('selectedProduct', {immediate: true, deep: true })
   onSelectedProductChanged(newVal:Record<any, any>, oldVal:Record<any, any>) {
     let self = this;
     if(newVal && self.selectedProduct) {
-      if(self.factory_cuttings_canvas) {
-        self.setProductionSvgUrl(newVal);
-        self.loadSvgFromUrl();
-      } else {
-        self.initializeCanvas();
-        self.setProductionSvgUrl(newVal);
-        self.loadSvgFromUrl();
-      }
+      self.setProductionSvgUrl(newVal);
     }
   }
   //watchers ends
 
-  initializeCanvas() {
-    let self = this;
-    let factory_cuttings_elem = self.$refs.factory_cuttings as HTMLCanvasElement
-    self.factory_cuttings_canvas = new fabrics.Canvas(factory_cuttings_elem);
-  }
 
-  loadSvgFromUrl(url=null) {
-    let self = this;
-    if(self.production_svg_url) {
-      fabrics.loadSVGFromURL(`${self.production_svg_url}`, (objects: any, options: any) => {
-        options.crossOrigin = 'Anonymous'
-        self.svg_file_options.width = options.width;
-        self.svg_file_options.height = options.height;
-        let svg_elems_group = self.svg_elems_group = fabrics.util.groupSVGElements(objects) as fabrics.Group
-        let svg_elems_group_scaled_width = self.factory_cuttings_canvas?.getHeight() - 50;
-        self.svg_elems_group?.scaleToWidth(svg_elems_group_scaled_width).set({
-          hasControls: false,
-          selectable: false,
-          evented: false
-        })
-        self.factory_cuttings_canvas?.clear();
-        self.factory_cuttings_canvas?.add(svg_elems_group);
-        self.svg_elems_group?.center();
-        self.factory_cuttings_canvas?.renderAll();
-        this.setFactoryCuttingColors();
-      })
-    }
-  }
-
-  setFactoryCuttingColors() {
-    let self = this;
-    //as in this case we are mutating array object instead of replacing with new object that's why newVal and oldVal have same values. This is Vue caveat
-    if(self.svg_elems_group) {
-      self.svg_elems_group.getObjects().forEach((svg_elem:Record<any, any>) => {
-        let elem_id = svg_elem.id.toLowerCase();
-        if(elem_id) {
-          let elem_name = elem_id.search("_") >=0 ? elem_id.substring(0,elem_id.search("_")) : elem_id;
-          let color_group = self.groupColors[elem_name];
-          if(color_group) {
-            svg_elem.set("fill", color_group.color);
-          }
-        }
-      })
-      self.factory_cuttings_canvas?.renderAll();
-    }
-
-  }
-
-  setProductionSvgUrl(selected_product: Record<any, any>) {
+  public async setProductionSvgUrl(selected_product: Record<any, any>) {
     let self = this;
     let product_style = selected_product.productstyles[self.productStyleIndex];
     let product_style_active_design = product_style.productdesigns.filter((product_design:Record<any, any>) => {
@@ -126,39 +69,48 @@ export default class ProductionScene extends Vue {
       product_style_active_design = null;
     }
     if(product_style_active_design && product_style_active_design.production_design) {
-      self.production_svg_url = `${self.storage_url}${product_style_active_design.production_design.file_url}.svg`;
+      self.production_file_obj.url = `${self.storage_url}${product_style_active_design.production_design.file_url}.svg`;
+      self.production_file_obj.content = await self.fetchUrlContent(self.production_file_obj.url);
+      await self.parseSvgString(self.production_file_obj.content)
     } else {
-      self.production_svg_url = null;
-      self.svg_elems_group = null;
-      self.factory_cuttings_canvas?.clear();
+      await self.resetProductionFileObj();
     }
   }
 
-  canvasToImage(type = 'png', download = false, download_as = 'factory_cuttings') {
+  public async parseSvgString(svg_string: string) {
     let self = this;
-    let base_64_image = self.$refs.factory_cuttings.toDataURL(type)
-    if(download) {
-      let a = document.createElement("a");
-      a.href =  base_64_image;
-      a.download = `${download_as}.${type}`;
-      a.click();
-    } else {
-      return base_64_image;
-    }
-  }
-  async canvasToSvg() {
-    let self = this;
-    if(self.production_svg_url) {
-      return {
-        svg: self.factory_cuttings_canvas?.toSVG(),
-        options: self.svg_file_options
-      };
-    } else {
-      return undefined;
-    }
+    let svg_doc = await self.getDocFromString(svg_string)
+    self.svgGroups.forEach((svg_group_item:Record<any, any>) => {
+      $(svg_doc).find(`[id][fill]`).each(function(doc_item) {
+        let doc_elem_id = $(this).attr("id");
+        if(doc_elem_id) {
+          doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
+          if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
+            $(this).attr("fill", svg_group_item.color);
+          }
+        }
+      })
+    })
+    self.production_file_obj.content = new XMLSerializer().serializeToString(svg_doc);
+    self.$emit("update:production_file_obj", self.production_file_obj)
   }
 
+  public async resetProductionFileObj() {
+    this.production_file_obj = {
+      url: null, content: null
+    };
+  }
 
+  public async fetchUrlContent(url:string) {
+    let fetch_content = await fetch(url);
+    let url_content   = await fetch_content.text();
+    return url_content;
+  }
+
+  public async getDocFromString(doc_string: string, type="image/svg+xml") {
+    let parser = new DOMParser();
+    return  parser.parseFromString(doc_string, type);
+  }
 }
 </script>
 
