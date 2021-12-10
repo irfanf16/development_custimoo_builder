@@ -4055,7 +4055,8 @@ $fontSize: 0.5;
         .selected {
             opacity: 0;
             z-index: -1;
-        transform: scale(1.2);
+            transform: scale(1.2);
+        }
     }
 }
 
@@ -4095,8 +4096,8 @@ $fontSize: 0.5;
 }
 
 .upload_logo {
-    &.mobile{
-    overflow-x: hidden;
+    &.mobile {
+        overflow-x: hidden;
 
         .upload-logo-content {
             display: none;
@@ -4217,6 +4218,7 @@ $fontSize: 0.5;
             }
         }
     }
+}
 
     .nav-tabs {
         gap: 15px;
@@ -4276,6 +4278,7 @@ $fontSize: 0.5;
                 margin-top: 2px;
             }
         }
+    }
 //.dropping{
 //    position: relative;
 //
