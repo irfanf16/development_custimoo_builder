@@ -644,8 +644,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
         if(collections && collections.length < 1){
           active_tab = 3
         }
-        this.$store.commit("Change_Locker_Active_Tab", active_tab);
-
+        this.$emit('yearlyPlannerTab',selected_locker.id)
       }else if (res.status == 401){
         this.showErrorArr("Event not added")
       }

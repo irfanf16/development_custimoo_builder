@@ -190,7 +190,7 @@
                     </template>
                   </div>
                  </b-tab>
-                <b-tab  @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly"  title="Yearly Planner" class="designCollections">
+                <b-tab :ref="`yearlyTab${room.id}`" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly"  title="Yearly Planner" class="designCollections">
                   <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
                     <template>
                       <div v-if="!room.have_yearly_planner">
@@ -229,7 +229,7 @@
 
     <CreateLockerRoomModal @lockerAdded="lockerAdded"/>
     <ExistingCollectionModal @existingCollection="existingCollection"/>
-    <EventModal ref="eventmodal" @change-locker-tabindex="changeLockerTabIndex"   />
+    <EventModal ref="eventmodal" @change-locker-tabindex="changeLockerTabIndex" @yearlyPlannerTab="yearlyPlannerTab"   />
     <ContactModal ref="contactmodal"   />
   </b-tabs>
 
@@ -754,8 +754,28 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public async lockerTabUpdated(newTabIndex:number , prevTabIndex: number, bvEvent:Record<any, any> ) {
+    console.log('hereer',newTabIndex)
     this.lockerActiveTabIndex = newTabIndex;
     this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
+  }
+  public async yearlyPlannerTab(room_id:number) {
+   this.$refs[`yearlyTab${room_id}`][0].activate()
+  }
+
+  public lockerChanged(newTabIndex: number ) {
+
+    this.tabIndex = newTabIndex
+    /*
+    * If locker collection tab is active and user switch to the locker then activate first tab (product tab)
+    * */
+    if (this.lockerActiveTabIndex == 3 || this.lockerActiveTabIndex == 4) {
+      this.lockerActiveTabIndex = 0
+    }
+
+
+    let payload = {index:this.tabIndex, attribute: 'active_tab', value:true}
+    this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', newTabIndex)
   }
 
   public async clickYearlyTab(evt:any,room_id:number) {
@@ -881,21 +901,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
     this.getLockerProducts[lockerIndex].product[productIndex] = product;
   }
 
-  public lockerChanged(newTabIndex: number ) {
 
-    this.tabIndex = newTabIndex
-    /*
-    * If locker collection tab is active and user switch to the locker then activate first tab (product tab)
-    * */
-    if (this.lockerActiveTabIndex == 3 || this.lockerActiveTabIndex == 4) {
-      this.lockerActiveTabIndex = 0
-    }
-
-
-    let payload = {index:this.tabIndex, attribute: 'active_tab', value:true}
-    this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
-    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', newTabIndex)
-  }
 
   // public processColorsCustom(colors: [],customLogoIndex:number):void {
   //   let imageColors: any[] = []
