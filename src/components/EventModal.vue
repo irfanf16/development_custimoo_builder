@@ -71,7 +71,7 @@
             </b-input-group>
             <div class="w-100 d-flex justify-content-start align-items-end gap-3" v-if="event_data.email_to_others">
 
-              <div class="w-100" v-if="event_data.to_emails && event_data.to_emails.length">
+              <div class="w-100" v-if="event_data.to_emails && event_data.to_emails.length" style="max-height: 200px; overflow-y: auto">
                 <div  v-for="(email, i) in event_data.to_emails" :key="i">
                   <validation-provider rules="email" v-slot="{ errors }">
                     <b-input-group class="mt-3">
@@ -88,7 +88,7 @@
               </div>
 
               <div class="text-right mt-2">
-                <a data-title="Add contact" class="btn btn-dark rounded-circle light add fs-4 d-inline-flex align-items-center justify-content-center p-0" style="height: 40px; width: 40px" @click="addEmptyEmail">
+                <a data-title="Add contact" class="btn btn-dark light rounded-circle light add fs-4 d-inline-flex align-items-center justify-content-center p-0" style="height: 40px; width: 40px" @click="addEmptyEmail">
                   <BIconPlus/>
                 </a>
               </div>
@@ -143,6 +143,7 @@
                         <img crossorigin="anonymous" :src="file_data" style="width: 100%; max-width: 150px"/>
                       </div>
                       <span class="file_name">{{file_name}}</span>
+                      <a style="display: block" v-if="is_file_download && event_data.id>0" target="_blank" :href="file_data" >Download File</a>
                     </template>
 
                     <div v-if="!file_data">
@@ -151,13 +152,16 @@
                       </div>
                       <slot name="upload_text"><div class="fs-2 mt-1">Upload File</div></slot>
 
-                      <validation-provider rules="required_if:eventType,custom|mimes:image/*" v-slot="{ errors }">
-                        <input
+<!--                      <validation-provider rules="required_if:eventType,custom|ext:jpg,png,svg|size:2048" v-slot="{ errors }">-->
+                      <validation-provider rules="required_if:eventType,custom|size:2048" v-slot="{ errors }">
+                        <b-form-file
                                 type="file"
                                 name="file" ref="fileInput"
-                                @change="uploadEventImage"
+                                v-model="event_data.file"
+                                @input="uploadEventImage"
                                 class="fileLoader"
-                                accept="image/*" />
+                                accept="image/*" ></b-form-file>
+
                         <span class="error">{{ errors[0] }}</span>
                       </validation-provider>
 
@@ -168,15 +172,15 @@
                 </div>
               </div>
           </div>
-          <div class="d-flex align-items-center gap-1">
+          <div class="d-flex align-items-center gap-1" >
             <b-input-group class="w-100">
               <validation-provider rules="required" v-slot="{ errors }">
-                <b-form-select class="w-100" v-model="email_template_index" @change="setEventEmailTemplate"
+                <b-form-select class="w-100" :disabled="!checkEmailTemplateDependency" v-model="email_template_index" @change="setEventEmailTemplate"
                                :options="getEmailTemplateOptions"></b-form-select>
                 <span class="error">{{ errors[0] }}</span>
               </validation-provider>
             </b-input-group>
-            <b-button style="height: 40px; width: 40px; flex-shrink: 0;" variant="dark" class="rounded-circle fs-2 p-0 d-inline-flex align-items-center justify-content-center" v-if="email_template_index !== null" v-b-modal.email-template-modal>
+            <b-button style="height: 40px; width: 40px; flex-shrink: 0;" variant="dark" class="rounded-circle light fs-2 p-0 d-inline-flex align-items-center justify-content-center" v-if="email_template_index !== null" v-b-modal.email-template-modal>
               <BIconPencil />
             </b-button>
           </div>
@@ -207,11 +211,11 @@
 
 <script lang="ts">
 
-import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import datePicker from 'vue-bootstrap-datetimepicker';
 import { ValidationProvider, ValidationObserver, extend  } from 'vee-validate';
-import { required, email, required_if, mimes } from 'vee-validate/dist/rules';
+import { required, email, required_if, ext, size } from 'vee-validate/dist/rules';
 import { VueEditor } from "vue2-editor";
 import {getReminderOptions} from '@/helpers/Helpers';
 import ConfirmModal from "@/components/ConfirmModal.vue";
@@ -229,9 +233,13 @@ extend('email',{
   ...email,
   message: 'Provide a valid email address'
 });
-extend('mimes',{
-  ...mimes,
+extend('ext',{
+  ...ext,
   message: 'Please provide a valid image file'
+});
+extend('size',{
+  ...size,
+  message: 'File size exceeded. '
 });
 
 @Component<EventModal>({
@@ -270,6 +278,10 @@ export default class EventModal extends Mixins(ErrorMessages) {
   public email_template_index:number = null
   public file_data: any = null
   public file_name: string = null
+  public is_file_download = false
+  public selected_collection_pdf_link:string = null
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
+
 
   public datepickerOptions:Record<any, any> = {
     format: 'YYYY-MM-DD hh:mm:ss',
@@ -286,7 +298,20 @@ export default class EventModal extends Mixins(ErrorMessages) {
       close: 'far fa-times-circle'
     }
   }
-
+  //@Watch('checkEmailTemplateDependency')
+  get checkEmailTemplateDependency(){
+    let resp = true;
+    if(!this.event_data.event_time){
+      resp =  false
+    }
+    else if(this.event_data.event_type === null || this.file_data === null){
+      resp =  false
+    }
+    if(!resp){
+      this.email_template_index = null
+    }
+    return  resp
+  }
 
   get showEventPopup() {
     return this.$store.getters.showEventPopup
@@ -342,8 +367,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
     return getReminderOptions()
   }
 
-
-
   public userTimeZone(){
     var timezone_offset_min = new Date().getTimezoneOffset(),
       offset_hrs = parseInt(Math.abs(timezone_offset_min/60)),
@@ -373,6 +396,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.file_data = null
     this.file_name = null
     this.event_data.file = null
+    this.is_file_download = false
 
     if (e === 'design') {
       this.$store.commit('SET_SELECTION_MODE', {
@@ -392,8 +416,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
       })
       this.hideEventModal()
     }
-
-
   }
 
   public setEventProduct(id: number, url:string, name: string) {
@@ -409,6 +431,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     })
     let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
     this.$emit('change-locker-tabindex', selected_locker_index)
+    this.replaceEmailContentTags();
   }
 
   public setEventCollection(collection_index: number) {
@@ -417,6 +440,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.event_data.file_id = collection.id
     this.file_data = collection.collection_products
     this.file_name = collection.name
+    this.selected_collection_pdf_link = collection.link
 
     this.showEventModal();
     this.$store.commit('SET_SELECTION_MODE', {
@@ -427,6 +451,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     })
     let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
     this.$emit('change-locker-tabindex', selected_locker_index)
+    this.replaceEmailContentTags();
 
   }
 
@@ -435,9 +460,44 @@ export default class EventModal extends Mixins(ErrorMessages) {
       let template = this.$store.getters.getEmailTemplates[index];
       this.event_data.email_template_id = template.id
       this.event_data.email_content = template.content
+      this.replaceEmailContentTags();
     }else{
       this.event_data.email_template_id = null
       this.event_data.email_content = ''
+    }
+  }
+
+  public replaceEmailContentTags() {
+
+    if (this.email_template_index !== null) {
+
+      let template = this.$store.getters.getEmailTemplates[this.email_template_index];
+      let email_content = template.content
+
+      let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
+      let selected_locker = this.$store.getters.getLockerProducts[selected_locker_index]
+
+      email_content = email_content.replace(/\|\|locker_name\|\|/g, selected_locker.room_name)
+      email_content = email_content.replace(/\|\|due_date\|\|/g, this.event_data.event_time)
+      email_content = email_content.replace(/\|\|description\|\|/g, this.event_data.description)
+
+      let all_links = email_content.match(/{\|\|.*?\|\|}/g);
+      if (all_links) {
+        for (let link of all_links) {
+          let link_text = link.substring(3, link.length - 3)
+
+          let final_link = '';
+          if (this.event_data.event_type === 'design') {
+            final_link = `<a href="${this.file_data}" target="_blank">${link_text}</a>`
+          } else if (this.event_data.event_type === 'collection') {
+            final_link = `<a href="${this.storageUrl}/${this.selected_collection_pdf_link}" target="_blank">${link_text}</a>`
+          } else {
+            final_link = `<a href="{uploaded_file_link}" target="_blank">${link_text}</a>`
+          }
+          email_content = email_content.replace(link, final_link);
+        }
+      }
+      this.event_data.email_content = email_content
     }
   }
 
@@ -447,12 +507,24 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.file_data = null
     this.file_name = null
     this.event_data.file = null
+    this.is_file_download = false
   }
 
   public uploadEventImage(){
-    this.event_data.file  = this.ref.fileInput.files[0] as Blob;
-    this.file_data = URL.createObjectURL(this.event_data.file);
-    this.file_name = this.event_data.file.name;
+    //comment ext check code temporarily
+    //let extensions = ["jpg","png","jpeg","gif","svg","ai","eps","pdf","csv","xlxx",'doc','docs'];
+    let event_data_file  = this.event_data.file as Blob;
+
+   // let ext = event_data_file.name.split('.').pop();
+   // ext = (ext == event_data_file.name)? "" : ext;
+  //  console.log(ext)
+
+    //if(extensions.indexOf(ext) !== -1 && (event_data_file.size/1024) <= 2048){
+    if((event_data_file.size/1024) <= 2048){
+      this.file_name = event_data_file.name;
+      this.file_data = URL.createObjectURL(this.event_data.file);
+    }
+    this.replaceEmailContentTags();
   }
 
   public async editEvent(event_id:number){
@@ -501,6 +573,8 @@ export default class EventModal extends Mixins(ErrorMessages) {
        this.file_name = res.file.collection_data.name
      }else{
        this.file_data = res.file.product_url
+       this.file_name = res.file.product_url.substring(res.file.product_url.lastIndexOf('/')+1);
+       this.is_file_download = true
      }
 
    }else{
@@ -589,6 +663,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
       this.file_data = null
       this.file_name = null
   }
+
   public async deleteEvent() {
     try {
       const ok = await this.ref['reset-modal'].showConfirm()
@@ -608,6 +683,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     catch (e) {
       console.log('e',e)
       this.showError(e.response.data.message)
+
     }
   }
 
