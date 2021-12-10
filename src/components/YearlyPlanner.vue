@@ -22,33 +22,42 @@
       >
         <template #header>
           <div class="d-flex align-items-center position-relative justify-content-between">
-            <span>{{event.month}}</span>
+            <span :style="{opacity: event.add_event ? '1': '0.4'}">{{event.month}}</span>
             <span v-if="event.add_event" style="right: 0" class="fs-4 cursor-pointer position-absolute" @click="showEventPopup"><BIconPlus /></span>
           </div>
         </template>
        <ul class="events">
-         <li class="d-flex align-items-start gap-1" :key="locker_event.id" v-for="(locker_event) in event.events">
-           <div class="d-flex controls gap-1">
-             <a class="cursor-pointer" data-title="Edit Event"
+         <template v-for="(locker_event, index) in event.events">
+           <li class="d-flex align-items-start gap-1" :key="locker_event.id" v-if="index < 3">
+             <div class="d-flex controls gap-1">
+               <a class="cursor-pointer" data-title="Edit Event"
                   @click="$emit('edit-event',locker_event.id)">
-               <font-awesome-icon
-                 :icon="['fas', 'edit']"/>
-             </a>
-             <a class="cursor-pointer" data-title="Edit Event"
-                @click="deleteEvent(locker_event.id)">
-               <font-awesome-icon
-                 :icon="['fas', 'trash-alt']"/>
-             </a>
-          </div>
-           <div v-if="view_emails">
-             <span style="display: block" :key="index" v-for="(email, index) in getEventEmails(locker_event.to_emails) ">
-               <strong>{{email}}</strong>
-             </span>
-           </div>
-           <span v-else>
-             <span class="event_day" style="color: #107BB7"><BIconCalendar style="color: #107BB7" /> {{ locker_event.event_day }}</span> {{ locker_event.title }}
+                 <font-awesome-icon
+                   :icon="['fas', 'edit']"/>
+               </a>
+               <a class="cursor-pointer" data-title="Edit Event"
+                  @click="deleteEvent(locker_event.id)">
+                 <font-awesome-icon
+                   :icon="['fas', 'trash-alt']"/>
+               </a>
+             </div>
+             <div v-if="view_emails">
+           <span style="display: block" :key="index" v-for="(email, index) in getEventEmails(locker_event.to_emails) ">
+             <strong>{{email}}</strong>
            </span>
-         </li>
+             </div>
+             <span v-else>
+           <span class="event_day" style="color: #107BB7"><BIconCalendar style="color: #107BB7" /> {{ locker_event.event_day }}</span> {{ locker_event.title }}
+           </span>
+           </li>
+           <li :key="index" v-else-if="index == 3">
+             <button class="d-inline-flex align-items-center gap-1 reset-btn px-2 font-weight-bold" @click="showAllEvents(event.month, event.events)">View all <BIconChevronDown /></button>
+           </li>
+
+           <template v-else-if="index > 3">
+
+           </template>
+         </template>
        </ul>
 <!--        <button class="btn btn-secondary" @click="showEventPopup">Add Event</button>-->
       </b-card>
@@ -70,28 +79,75 @@
           </div>
         </template>
 
-        <table class="table table-bordered b-table-fixed w-100">
-          <tr :key="locker_event.id" v-for="(locker_event) in event.events">
+        <div style="overflow-x:auto">
+          <table class="table table-bordered b-table-fixed w-100">
+            <tr :key="locker_event.id" v-for="(locker_event) in event.events">
+              <td>{{  `${locker_event.event_day} / ${locker_event.event_month} - ${locker_event.format_time}`}}</td>
+              <td>{{locker_event.title}}</td>
+              <td>{{ locker_event.to_emails | eventEmails(locker_event.to_emails) }}</td>
+              <td>{{ locker_event.reminder | reminderTime(locker_event.reminder) }}</td>
+              <td class="cursor-pointer">   <a data-title="Edit Event"
+                       @click="$emit('edit-event',locker_event.id)">
+                <font-awesome-icon
+                  :icon="['fas', 'edit']"/>
+              </a></td>
+              <td class="cursor-pointer">  <a data-title="Delete Event"
+                       @click="deleteEvent(locker_event.id)">
+                <font-awesome-icon
+                  :icon="['fas', 'trash-alt']"/>
+              </a></td>
+            </tr>
+        </table>
+        </div>
+      </b-card>
+    </div>
+  </div>
+  <ContactModal ref="contactmodal"  :room_id="room_id" :room_index="room_index"   />
+  <SelectYear ref="selectYearModal" :room_id="room_id" :room_index="room_index"   />
+  <b-modal size="xl" hide-footer modal-class="event_form" ref="all-events" id="modal-center-event" centered scrollable
+           :title="'All Events ('+currentMonth+')'" >
+    <div style="overflow-x:auto">
+      <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="allEvents">
+        <thead class="bg-light">
+          <tr>
+            <th class="font-weight-bold">
+              Date - Time
+            </th>
+            <th class="font-weight-bold">
+              Title
+            </th>
+            <th class="font-weight-bold">
+              Emails
+            </th>
+            <th class="font-weight-bold">
+              Reminder
+            </th>
+            <th colspan="2" class="font-weight-bold">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr :key="locker_event.id" v-for="(locker_event) in allEvents">
             <td>{{  `${locker_event.event_day} / ${locker_event.event_month} - ${locker_event.format_time}`}}</td>
             <td>{{locker_event.title}}</td>
-            <td>{{ locker_event.to_emails | eventEmails(locker_event.to_emails) }}</td>
+            <td style="word-break: break-all">{{ locker_event.to_emails | eventEmails(locker_event.to_emails) }}</td>
             <td>{{ locker_event.reminder | reminderTime(locker_event.reminder) }}</td>
             <td class="cursor-pointer">   <a data-title="Edit Event"
-                     @click="$emit('edit-event',locker_event.id)">
+                                             @click="$emit('edit-event',locker_event.id)">
               <font-awesome-icon
                 :icon="['fas', 'edit']"/>
             </a></td>
             <td class="cursor-pointer">  <a data-title="Delete Event"
-                     @click="deleteEvent(locker_event.id)">
+                                            @click="deleteEvent(locker_event.id)">
               <font-awesome-icon
                 :icon="['fas', 'trash-alt']"/>
             </a></td>
           </tr>
+        </tbody>
       </table>
-      </b-card>
     </div>
-  </div>
-  <SelectYear ref="selectYearModal" :room_id="room_id" :room_index="room_index"   />
+  </b-modal>
   <div class="row">
     <div v-if="!view_emails" class="col-lg-12 mt-4 text-right">
       <button class="btn btn-dark light" @click="showEventPopup">Add Event</button>
@@ -105,7 +161,8 @@
   </div>
   <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
   <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
-                 ref="reset-modal"></confirm-modal>
+                 ref="reset-modal">
+  </confirm-modal>
 </div>
 
 
@@ -151,6 +208,15 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   public event_view = 'month'
   public viewLoader = false
   public view_emails = false
+  public years = []
+  public currentMonth = ''
+  public allEvents!:Record<any, any>
+
+  public showAllEvents(month:string, events:Record<any, any>){
+    this.currentMonth = month + ", " + this.$store.getters.getSelectedYear;
+    this.allEvents = events;
+    this.$refs['all-events'].show();
+  }
 
   public showEventPopup(){
     const room_index = this.$store.getters.getActiveLockerIndex;
@@ -226,7 +292,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
 
     .card-body{
       padding: 0.7rem;
-      min-height: 100px;
+      min-height: 140px;
     }
 
     .event_day{
