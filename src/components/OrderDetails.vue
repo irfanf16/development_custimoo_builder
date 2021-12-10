@@ -44,7 +44,7 @@
       </div>
     </div>
     <div class="d-none">
-      <ProductionScene ref="production-scene"/>
+      <ProductionScene ref="production-scene" v-bind:production_file_obj.sync="production_file_obj"/>
     </div>
 
 <!--    <div class="d-none">
@@ -87,6 +87,9 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
   public pdf_back_image = null;
   public showModal = false
   public shared_url = ""
+  public production_file_obj = {
+    url: null, content: null
+  }
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -176,14 +179,9 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
       const selected_model = product_models[selected_model_index];
       product_model_id = selected_model.id;
     }
-     let canvas_obj = await this.$refs["production-scene"].canvasToSvg();
     let form_data = new FormData();
-    if(canvas_obj) {
-      let canvas_svg = canvas_obj.svg;
-      let svg_doc = await self.getDocFromString(canvas_svg);
-      $(svg_doc).find("svg").eq(0).attr(canvas_obj.options);
-      let svg_string = new XMLSerializer().serializeToString(svg_doc)
-      form_data.append('original_file', new File([new Blob([svg_string])], "original_file.svg", {
+    if(self.production_file_obj.url) {
+      form_data.append('original_file', new File([new Blob([self.production_file_obj.content])], "original_file.svg", {
         type: "image/svg+xml",
       }));
     }
