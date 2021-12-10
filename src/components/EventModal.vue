@@ -638,6 +638,12 @@ export default class EventModal extends Mixins(ErrorMessages) {
         this.showToast(res.data.message, 'SUCCESS')
         this.resetEventModal()
         this.hideEventModal()
+        let active_tab = 4;
+        let collections = this.$store.getters.getCollections
+        if(collections && collections.length < 1){
+          active_tab = 3
+        }
+        this.$store.commit("Change_Locker_Active_Tab", active_tab);
 
       }else if (res.status == 401){
         this.showErrorArr("Event not added")
