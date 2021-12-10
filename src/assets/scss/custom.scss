@@ -3319,6 +3319,13 @@ $fontSize: 0.5;
     cursor: pointer !important;
 }
 
+.reset-btn{
+    padding: 0;
+    border: none !important;
+    outline: none !important;
+    background: none !important;
+}
+
 .btn-dark.light{
     border-color: #eee;
     background-color: #eee;

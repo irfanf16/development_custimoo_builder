@@ -668,6 +668,12 @@ export default class EventModal extends Mixins(ErrorMessages) {
   }
 }
 
+.design-name-form{
+  label{
+    font-weight: 600 !important;
+  }
+}
+
 .event-img{
   display: flex;
   align-items: center;
