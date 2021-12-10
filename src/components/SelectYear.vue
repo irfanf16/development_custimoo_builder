@@ -11,7 +11,7 @@
             <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
               <b-input-group>
                 <b-form-select v-model="selectedYear"
-                               :options="years"></b-form-select>
+                               :options="getYears"></b-form-select>
               </b-input-group>
             </div>
             <span style="color: red" class="error">{{ errors[0] }}</span>
@@ -52,7 +52,6 @@ extend('required', {
 export default class SelectYear extends Mixins(ErrorMessages) {
   @Prop({required: true}) readonly room_id !: number
   @Prop({required: true}) readonly room_index !: number
-  @Prop({required: true}) readonly years !: [Record<any, any>]
   public ref = this.$refs as Record<any, any>
   public selectedYear = null
   public viewLoader = false
@@ -63,6 +62,23 @@ export default class SelectYear extends Mixins(ErrorMessages) {
 
   public hideModal() {
     this.ref['year-modal'].hide()
+  }
+
+  get getYears() {
+    let optionArray = [];
+    let cur_year = new Date().getFullYear()
+    optionArray.push({
+      value: null,
+      text: 'Select Year'
+    })
+    for(let i = 0; i < 5; i++) {
+      cur_year++
+      optionArray.push({
+        value: cur_year,
+        text: cur_year
+      })
+    }
+    return optionArray;
   }
 
   public async copyEvents() {

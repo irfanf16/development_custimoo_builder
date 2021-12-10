@@ -172,10 +172,10 @@
                 </div>
               </div>
           </div>
-          <div class="d-flex align-items-center gap-1">
+          <div class="d-flex align-items-center gap-1" >
             <b-input-group class="w-100">
               <validation-provider rules="required" v-slot="{ errors }">
-                <b-form-select class="w-100" v-model="email_template_index" @change="setEventEmailTemplate"
+                <b-form-select class="w-100" :disabled="!checkEmailTemplateDependency" v-model="email_template_index" @change="setEventEmailTemplate"
                                :options="getEmailTemplateOptions"></b-form-select>
                 <span class="error">{{ errors[0] }}</span>
               </validation-provider>
@@ -211,7 +211,7 @@
 
 <script lang="ts">
 
-import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import datePicker from 'vue-bootstrap-datetimepicker';
 import { ValidationProvider, ValidationObserver, extend  } from 'vee-validate';
@@ -279,6 +279,9 @@ export default class EventModal extends Mixins(ErrorMessages) {
   public file_data: any = null
   public file_name: string = null
   public is_file_download = false
+  public selected_collection_pdf_link:string = null
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
+
 
   public datepickerOptions:Record<any, any> = {
     format: 'YYYY-MM-DD hh:mm:ss',
@@ -295,7 +298,20 @@ export default class EventModal extends Mixins(ErrorMessages) {
       close: 'far fa-times-circle'
     }
   }
-
+  //@Watch('checkEmailTemplateDependency')
+  get checkEmailTemplateDependency(){
+    let resp = true;
+    if(!this.event_data.event_time){
+      resp =  false
+    }
+    else if(this.event_data.event_type === null || this.file_data === null){
+      resp =  false
+    }
+    if(!resp){
+      this.email_template_index = null
+    }
+    return  resp
+  }
 
   get showEventPopup() {
     return this.$store.getters.showEventPopup
@@ -351,8 +367,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
     return getReminderOptions()
   }
 
-
-
   public userTimeZone(){
     var timezone_offset_min = new Date().getTimezoneOffset(),
       offset_hrs = parseInt(Math.abs(timezone_offset_min/60)),
@@ -393,17 +407,22 @@ export default class EventModal extends Mixins(ErrorMessages) {
       })
       this.hideEventModal()
     } else if (e === 'collection') {
-      this.file_data = [];
-      this.$store.commit('SET_SELECTION_MODE', {
-        readonly: true,
-        collectionAddmoreMode: false,
-        eventProductMode: false,
-        eventCollectionMode: true
-      })
-      this.hideEventModal()
+      let collections = this.$store.getters.getCollections
+      if(collections && collections.length > 0){
+        this.file_data = [];
+        this.$store.commit('SET_SELECTION_MODE', {
+          readonly: true,
+          collectionAddmoreMode: false,
+          eventProductMode: false,
+          eventCollectionMode: true
+        })
+        this.hideEventModal()
+      }else{
+        this.showToast('No collection found in locker.','Error')
+        this.event_data.event_type = null;
+      }
+
     }
-
-
   }
 
   public setEventProduct(id: number, url:string, name: string) {
@@ -419,6 +438,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     })
     let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
     this.$emit('change-locker-tabindex', selected_locker_index)
+    this.replaceEmailContentTags();
   }
 
   public setEventCollection(collection_index: number) {
@@ -427,6 +447,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.event_data.file_id = collection.id
     this.file_data = collection.collection_products
     this.file_name = collection.name
+    this.selected_collection_pdf_link = collection.link
 
     this.showEventModal();
     this.$store.commit('SET_SELECTION_MODE', {
@@ -437,6 +458,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     })
     let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
     this.$emit('change-locker-tabindex', selected_locker_index)
+    this.replaceEmailContentTags();
 
   }
 
@@ -445,9 +467,44 @@ export default class EventModal extends Mixins(ErrorMessages) {
       let template = this.$store.getters.getEmailTemplates[index];
       this.event_data.email_template_id = template.id
       this.event_data.email_content = template.content
+      this.replaceEmailContentTags();
     }else{
       this.event_data.email_template_id = null
       this.event_data.email_content = ''
+    }
+  }
+
+  public replaceEmailContentTags() {
+
+    if (this.email_template_index !== null) {
+
+      let template = this.$store.getters.getEmailTemplates[this.email_template_index];
+      let email_content = template.content
+
+      let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
+      let selected_locker = this.$store.getters.getLockerProducts[selected_locker_index]
+
+      email_content = email_content.replace(/\|\|locker_name\|\|/g, selected_locker.room_name)
+      email_content = email_content.replace(/\|\|due_date\|\|/g, this.event_data.event_time)
+      email_content = email_content.replace(/\|\|description\|\|/g, this.event_data.description)
+
+      let all_links = email_content.match(/{\|\|.*?\|\|}/g);
+      if (all_links) {
+        for (let link of all_links) {
+          let link_text = link.substring(3, link.length - 3)
+
+          let final_link = '';
+          if (this.event_data.event_type === 'design') {
+            final_link = `<a href="${this.file_data}" target="_blank">${link_text}</a>`
+          } else if (this.event_data.event_type === 'collection') {
+            final_link = `<a href="${this.storageUrl}/${this.selected_collection_pdf_link}" target="_blank">${link_text}</a>`
+          } else {
+            final_link = `<a href="{uploaded_file_link}" target="_blank">${link_text}</a>`
+          }
+          email_content = email_content.replace(link, final_link);
+        }
+      }
+      this.event_data.email_content = email_content
     }
   }
 
@@ -457,10 +514,11 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.file_data = null
     this.file_name = null
     this.event_data.file = null
+    this.is_file_download = false
   }
 
   public uploadEventImage(){
-
+    //comment ext check code temporarily
     //let extensions = ["jpg","png","jpeg","gif","svg","ai","eps","pdf","csv","xlxx",'doc','docs'];
     let event_data_file  = this.event_data.file as Blob;
 
@@ -473,9 +531,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
       this.file_name = event_data_file.name;
       this.file_data = URL.createObjectURL(this.event_data.file);
     }
-
-
-
+    this.replaceEmailContentTags();
   }
 
   public async editEvent(event_id:number){
@@ -575,14 +631,20 @@ export default class EventModal extends Mixins(ErrorMessages) {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
-    }).then((res) => {
+    }).then(async (res) => {
 
       this.viewLoader = false
       if (res.status == 200){
         this.showToast(res.data.message, 'SUCCESS')
+        await this.$store.dispatch('getLockerEvents',selected_locker.id)
         this.resetEventModal()
         this.hideEventModal()
-
+        let active_tab = 4;
+        let collections = this.$store.getters.getCollections
+        if(collections && collections.length < 1){
+          active_tab = 3
+        }
+        this.$emit('yearlyPlannerTab',selected_locker.id)
       }else if (res.status == 401){
         this.showErrorArr("Event not added")
       }
@@ -614,6 +676,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
       this.file_data = null
       this.file_name = null
   }
+
   public async deleteEvent() {
     try {
       const ok = await this.ref['reset-modal'].showConfirm()
@@ -622,7 +685,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
         let selected_locker = this.$store.getters.getLockerProducts[selected_locker_index];
         this.viewLoader = true
         let res = await this.$store.dispatch('deleteEvent',this.event_data.id)
-        await this.$emit('getLockerEvents',selected_locker.id)
         await this.$store.dispatch('getLockerEvents',selected_locker.id)
         this.resetEventModal()
         this.hideEventModal()
@@ -633,6 +695,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     catch (e) {
       console.log('e',e)
       this.showError(e.response.data.message)
+
     }
   }
 

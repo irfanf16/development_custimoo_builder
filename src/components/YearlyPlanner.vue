@@ -103,7 +103,7 @@
     </div>
   </div>
   <ContactModal ref="contactmodal"  :room_id="room_id" :room_index="room_index"   />
-  <SelectYear ref="selectYearModal" :years="years" :room_id="room_id" :room_index="room_index"   />
+  <SelectYear ref="selectYearModal" :room_id="room_id" :room_index="room_index"   />
   <b-modal size="xl" hide-footer modal-class="event_form" ref="all-events" id="modal-center-event" centered scrollable
            :title="'All Events ('+currentMonth+')'" >
     <div style="overflow-x:auto">
@@ -230,20 +230,6 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
 
    }
   public openYearModal(){
-    let optionArray = [];
-    let cur_year = new Date().getFullYear()
-    optionArray.push({
-      value: null,
-      text: 'Select Year'
-    })
-    for(let i = 0; i < 5; i++) {
-      cur_year++
-      optionArray.push({
-        value: cur_year,
-        text: cur_year
-      })
-    }
-    this.years = optionArray
     this.ref['selectYearModal'].showPopup()
   }
 
