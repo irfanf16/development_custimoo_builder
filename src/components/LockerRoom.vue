@@ -754,7 +754,7 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public async lockerTabUpdated(newTabIndex:number , prevTabIndex: number, bvEvent:Record<any, any> ) {
-    console.log('hereer',newTabIndex)
+    //console.log('hereer',newTabIndex)
     this.lockerActiveTabIndex = newTabIndex;
     this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
   }

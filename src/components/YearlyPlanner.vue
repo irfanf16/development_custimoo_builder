@@ -102,7 +102,6 @@
       </b-card>
     </div>
   </div>
-  <ContactModal ref="contactmodal"  :room_id="room_id" :room_index="room_index"   />
   <SelectYear ref="selectYearModal" :room_id="room_id" :room_index="room_index"   />
   <b-modal size="xl" hide-footer modal-class="event_form" ref="all-events" id="modal-center-event" centered scrollable
            :title="'All Events ('+currentMonth+')'" >
@@ -210,7 +209,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   public view_emails = false
   public years = []
   public currentMonth = ''
-  public allEvents!:Record<any, any>
+  public allEvents!:Record<any, any> ={}
 
   public showAllEvents(month:string, events:Record<any, any>){
     this.currentMonth = month + ", " + this.$store.getters.getSelectedYear;
