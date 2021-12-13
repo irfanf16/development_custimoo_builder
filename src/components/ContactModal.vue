@@ -1,27 +1,27 @@
 <template>
-  <b-modal ref="contact-modal" @hide="hideContactModal" hide-footer id="modal-center-contact" centered scrollable
-           title="Add Contact">
+  <b-modal ref="contact-modal" @hide="hideContactModal" hide-footer id="modal-center-contact" centered scrollable>
+    <template #modal-title>
+      <h4 class="fs-3 font-weight-bold">Add Contact</h4>
+    </template>
     <div class="design-name-form">
 
       <ValidationObserver v-slot="{ handleSubmit, invalid }">
         <b-form @submit.prevent="handleSubmit(saveContact)" >
-        <div class="row" style="padding: 10px">
-          <validation-provider rules="required|email" v-slot="{ errors }">
+        <div class="d-flex w-100 align-items-center">
+          <validation-provider class="w-100" rules="required|email" v-slot="{ errors }">
             <label for="inline-form-input-productname" class="w-100 d-block mb-2">Contact Email</label>
-            <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
-              <b-input-group>
-                <b-form-input placeholder="Enter contact email" v-model="email"></b-form-input>
-              </b-input-group>
+            <div class="w-100 d-flex align-items-center gap-2">
+              <b-form-input class="w-100" placeholder="Enter contact email" v-model="email"></b-form-input>
+
+              <div class="d-flex gap-1">
+                <button type="button"  class="btn light btn-secondary" @click="hideContactModal">Cancel</button>
+                <button :disabled="invalid" type="submit" class="btn btn-secondary" >Save</button>
+              </div>
             </div>
-            <span class="error">{{ errors[0] }}</span>
+            <span class="error mt-1 d-block">{{ errors[0] }}</span>
           </validation-provider>
          </div>
-        <div class="row">
-          <div class="col-lg-12" style="text-align: right">
-            <button type="button"  class="btn btn-secondary" @click="hideContactModal">Cancel</button>
-            <button :disabled="invalid" type="submit" class="btn btn-secondary" style="margin-left: 5px;" >Save</button>
-          </div>
-        </div>
+
       </b-form>
       </ValidationObserver>
     </div>
