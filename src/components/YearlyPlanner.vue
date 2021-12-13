@@ -183,7 +183,8 @@ import SelectYear from "@/components/SelectYear.vue";
   },
   filters: {
     eventEmails: (value: string) => {
-      return value ? JSON.parse(value).toString() : 'none'
+      let jsonvalue = JSON.parse(value);
+      return jsonvalue ? jsonvalue.toString() : 'none'
     },
     reminderTime: (reminder: Record<any, any>) => {
       if(reminder) {
@@ -246,6 +247,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     return this.$store.getters.getSelectedYear;
   }
   public getEventEmails(value: string) {
+
     return value ? JSON.parse(value) : []
   }
   public changeEventView(view_type:string) {

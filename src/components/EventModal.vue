@@ -302,7 +302,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
 
   public datepickerOptions: Record<any, any> = {
-    format: 'YYYY-MM-DD hh:mm:ss',
+    format: 'YYYY-MM-DD HH:mm:ss',
     minDate: new Date(),
     icons: {
       time: 'far fa-clock',
@@ -529,7 +529,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
           if (this.event_data.event_type === 'design') {
             final_link = `<a href="${this.file_data}" target="_blank">${link_text}</a>`
           } else if (this.event_data.event_type === 'collection') {
-            final_link = `<a href="${this.storageUrl}/${this.selected_collection_pdf_link}" target="_blank">${link_text}</a>`
+            final_link = `<a href="${this.storageUrl}${this.selected_collection_pdf_link}" >${link_text}</a>`
           } else {
             final_link = `<a href="{uploaded_file_link}" target="_blank">${link_text}</a>`
           }
