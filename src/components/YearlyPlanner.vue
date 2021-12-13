@@ -42,9 +42,14 @@
                </a>
              </div>
              <div v-if="view_emails">
-           <span style="display: block" :key="index" v-for="(email, index) in getEventEmails(locker_event.to_emails) ">
-             <strong>{{email}}</strong>
-           </span>
+               <span class="event_day" style="color: #107BB7"><BIconCalendar style="color: #107BB7" /> {{ locker_event.event_day }}</span>
+               <template v-if="(getEventEmails(locker_event.to_emails)).length > 0">
+                  <span style="display: block" :key="index" v-for="(email, index) in getEventEmails(locker_event.to_emails) ">
+                 <strong>{{email}}</strong>
+               </span>
+               </template>
+              <span v-else> No Other emails</span>
+
              </div>
              <span v-else>
            <span class="event_day" style="color: #107BB7"><BIconCalendar style="color: #107BB7" /> {{ locker_event.event_day }}</span> {{ locker_event.title }}
@@ -148,15 +153,16 @@
     </div>
   </b-modal>
   <div class="row">
-    <div v-if="!view_emails" class="col-lg-12 mt-4 text-right">
-      <button class="btn btn-dark light" @click="showEventPopup(0)">Add Event</button>
-      <button style="margin-left: 5px" class="btn btn-dark light" @click="showContactPopup">Add Contact</button>
-      <button style="margin-left: 5px" class="btn btn-secondary light" @click="showEmail">Show Emails</button>
-      <button style="margin-left: 5px" class="btn btn-secondary light" @click="openYearModal">Copy all events</button>
+    <div class="col-lg-12 mt-4 text-right">
+      <template v-if="!view_emails" >
+        <button class="btn btn-dark light" @click="showEventPopup(0)">Add Event</button>
+        <button style="margin-left: 5px" class="btn btn-dark light" @click="showContactPopup">Add Contact</button>
+        <button style="margin-left: 5px" class="btn btn-secondary light" @click="showEmail">Show Emails</button>
+        <button style="margin-left: 5px" class="btn btn-secondary light" @click="openYearModal">Copy all events</button>
+      </template>
+      <button v-else style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show event details</button>
     </div>
-    <div v-else class="col-lg-4">
-      <button style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show event details</button>
-    </div>
+
   </div>
   <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
   <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"

@@ -26,17 +26,32 @@
       </ValidationObserver>
     </div>
     <div v-if="getContacts.length > 0">
-      <h1>Contacts List</h1>
-      <ul>
-        <li style="padding: 5px; margin-bottom: 5px;" v-for="(contact) in getContacts" :key="contact.id">
-          {{contact.email}}
-          <span>
-            <a data-title="Delete contact"  style="display: inline-block"
-                   @click="deleteContact(contact.id)" ><font-awesome-icon
-            :icon="['fas', 'trash-alt']"/></a>
-          </span>
-        </li>
-      </ul>
+      <h3 class="fs-3 font-weight-bold">Contacts List</h3>
+      <div class="mt-3" style="max-height: 300px; overflow-y:auto">
+        <table class="table table-bordered b-table-fixed mb-0 w-100 ">
+          <thead class="bg-light">
+          <th class="font-weight-bold">
+            Email
+          </th>
+          <th class="font-weight-bold">
+            Action
+          </th>
+          </thead>
+          <tbody>
+          <tr  v-for="(contact) in getContacts" :key="contact.id">
+            <td>{{contact.email}}</td>
+            <td class="cursor-pointer">
+              <a data-title="Delete Contact" @click="deleteContact(contact.id)">
+                <font-awesome-icon
+                  :icon="['fas', 'trash-alt']"/>
+              </a>
+            </td>
+          </tr>
+          </tbody>
+
+        </table>
+      </div>
+
 
     </div>
     <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
