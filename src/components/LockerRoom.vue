@@ -991,8 +991,8 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   public setEventCollection(collection_index:number){
     this.ref['eventmodal'].setEventCollection(collection_index)
   }
-  public initEventContacts(){
-    this.ref['eventmodal'].initEventContacts();
+  public initEventContacts(selected_month:number){
+    this.ref['eventmodal'].initEventContacts(selected_month);
   }
   public changeLockerTabIndex(lockerIndex: number){
     this.tabIndex = lockerIndex
