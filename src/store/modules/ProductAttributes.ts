@@ -1187,7 +1187,7 @@ const ProductAttributes:Module<any, any> = {
     },
     async updateNewCollection({commit},payload:Record<any, any>){
       let resp =  {status:false,message:""};
-      console.log(payload)
+      //console.log(payload)
       await http.put(`collection/${payload.collection_id}`, payload).then((res) => {
         if (res.status == 201 || res.status == 200){
           resp = {status:true,message:"Collection updated successfully"};

@@ -710,7 +710,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
   }
 
   public async lockerTabUpdated(newTabIndex:number , prevTabIndex: number, bvEvent:Record<any, any> ) {
-    console.log('hereer',newTabIndex)
+    //console.log('hereer',newTabIndex)
     this.lockerActiveTabIndex = newTabIndex;
     this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
   }
@@ -947,8 +947,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
   public setEventCollection(collection_index:number){
     this.ref['eventmodal'].setEventCollection(collection_index)
   }
-  public initEventContacts(){
-    this.ref['eventmodal'].initEventContacts();
+  public initEventContacts(selected_month:number){
+    this.ref['eventmodal'].initEventContacts(selected_month);
   }
   public changeLockerTabIndex(lockerIndex: number){
     this.tabIndex = lockerIndex

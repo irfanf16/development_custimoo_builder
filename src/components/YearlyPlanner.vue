@@ -14,7 +14,7 @@
   </div>
 </div>
   <div v-if="event_view === 'month'" class="grid grid-6 gap-x-3 gap-y-2 mt-3">
-    <div style="max-width: 100%;" :key="event.month" v-for="(event) in getEvents" class="overflow-hidden">
+    <div style="max-width: 100%;" :key="event.month" v-for="(event, index) in getEvents" class="overflow-hidden">
       <b-card
         header-border-variant="secondary"
         tag="article"
@@ -23,7 +23,7 @@
         <template #header>
           <div class="d-flex align-items-center position-relative justify-content-between">
             <span :style="{opacity: event.add_event ? '1': '0.4'}">{{event.month}}</span>
-            <span v-if="event.add_event" style="right: 0" class="fs-4 cursor-pointer position-absolute" @click="showEventPopup"><BIconPlus /></span>
+            <span v-if="event.add_event" style="right: 0" class="fs-4 cursor-pointer position-absolute" @click="showEventPopup(index+1)"><BIconPlus /></span>
           </div>
         </template>
        <ul class="events">
@@ -42,9 +42,14 @@
                </a>
              </div>
              <div v-if="view_emails">
-           <span style="display: block" :key="index" v-for="(email, index) in getEventEmails(locker_event.to_emails) ">
-             <strong>{{email}}</strong>
-           </span>
+               <span class="event_day" style="color: #107BB7"><BIconCalendar style="color: #107BB7" /> {{ locker_event.event_day }}</span>
+               <template v-if="(getEventEmails(locker_event.to_emails)).length > 0">
+                  <span style="display: block" :key="index" v-for="(email, index) in getEventEmails(locker_event.to_emails) ">
+                 <strong>{{email}}</strong>
+               </span>
+               </template>
+              <span v-else> No Other emails</span>
+
              </div>
              <span v-else>
            <span class="event_day" style="color: #107BB7"><BIconCalendar style="color: #107BB7" /> {{ locker_event.event_day }}</span> {{ locker_event.title }}
@@ -66,7 +71,7 @@
   </div>
 
   <div v-else class="row">
-    <div :key="event.month" v-for="(event) in getEvents" class="col-lg-12 mt-4">
+    <div :key="event.month" v-for="(event, index) in getEvents" class="col-lg-12 mt-4">
       <b-card
         header-border-variant="secondary"
         tag="article"
@@ -75,7 +80,7 @@
         <template #header>
           <div class="d-flex align-items-center position-relative justify-content-between">
             <span>{{event.month}}</span>
-            <span v-if="event.add_event" style="right: 0" class="fs-4 d-flex align-items-center cursor-pointer position-absolute" @click="showEventPopup"><BIconPlus /> <span class="fs-2">Add event</span></span>
+            <span v-if="event.add_event" style="right: 0" class="fs-4 d-flex align-items-center cursor-pointer position-absolute" @click="showEventPopup(index+1)"><BIconPlus /> <span class="fs-2">Add event</span></span>
           </div>
         </template>
 
@@ -102,7 +107,6 @@
       </b-card>
     </div>
   </div>
-  <ContactModal ref="contactmodal"  :room_id="room_id" :room_index="room_index"   />
   <SelectYear ref="selectYearModal" :room_id="room_id" :room_index="room_index"   />
   <b-modal size="xl" hide-footer modal-class="event_form" ref="all-events" id="modal-center-event" centered scrollable
            :title="'All Events ('+currentMonth+')'" >
@@ -149,15 +153,16 @@
     </div>
   </b-modal>
   <div class="row">
-    <div v-if="!view_emails" class="col-lg-12 mt-4 text-right">
-      <button class="btn btn-dark light" @click="showEventPopup">Add Event</button>
-      <button style="margin-left: 5px" class="btn btn-dark light" @click="showContactPopup">Add Contact</button>
-      <button style="margin-left: 5px" class="btn btn-secondary light" @click="showEmail">Show Emails</button>
-      <button style="margin-left: 5px" class="btn btn-secondary light" @click="openYearModal">Copy all events</button>
+    <div class="col-lg-12 mt-4 text-right">
+      <template v-if="!view_emails" >
+        <button class="btn btn-dark light" @click="showEventPopup(0)">Add Event</button>
+        <button style="margin-left: 5px" class="btn btn-dark light" @click="showContactPopup">Add Contact</button>
+        <button style="margin-left: 5px" class="btn btn-secondary light" @click="showEmail">Show Emails</button>
+        <button style="margin-left: 5px" class="btn btn-secondary light" @click="openYearModal">Copy all events</button>
+      </template>
+      <button v-else style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show event details</button>
     </div>
-    <div v-else class="col-lg-4">
-      <button style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show event details</button>
-    </div>
+
   </div>
   <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
   <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
@@ -184,7 +189,8 @@ import SelectYear from "@/components/SelectYear.vue";
   },
   filters: {
     eventEmails: (value: string) => {
-      return value ? JSON.parse(value).toString() : 'none'
+      let jsonvalue = JSON.parse(value);
+      return jsonvalue ? jsonvalue.toString() : 'none'
     },
     reminderTime: (reminder: Record<any, any>) => {
       if(reminder) {
@@ -210,7 +216,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   public view_emails = false
   public years = []
   public currentMonth = ''
-  public allEvents!:Record<any, any>
+  public allEvents!:Record<any, any> ={}
 
   public showAllEvents(month:string, events:Record<any, any>){
     this.currentMonth = month + ", " + this.$store.getters.getSelectedYear;
@@ -218,11 +224,11 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     this.$refs['all-events'].show();
   }
 
-  public showEventPopup(){
+  public showEventPopup(selected_month:number){
     const room_index = this.$store.getters.getActiveLockerIndex;
     this.$store.commit('SHOW_EVENT_POPUP', true)
     this.$store.commit('SET_LOCKER_INDEX_FOR_EVENT', room_index)
-    this.$emit('init-event-contacts');
+    this.$emit('init-event-contacts', selected_month);
   }
 
   public showContactPopup(){
@@ -247,6 +253,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     return this.$store.getters.getSelectedYear;
   }
   public getEventEmails(value: string) {
+
     return value ? JSON.parse(value) : []
   }
   public changeEventView(view_type:string) {

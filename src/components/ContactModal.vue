@@ -1,42 +1,57 @@
 <template>
-  <b-modal ref="contact-modal" @hide="hideContactModal" hide-footer id="modal-center-contact" centered scrollable
-           title="Add Contact">
+  <b-modal ref="contact-modal" @hide="hideContactModal" hide-footer id="modal-center-contact" centered scrollable>
+    <template #modal-title>
+      <h4 class="fs-3 font-weight-bold">Add Contact</h4>
+    </template>
     <div class="design-name-form">
 
       <ValidationObserver v-slot="{ handleSubmit, invalid }">
         <b-form @submit.prevent="handleSubmit(saveContact)" >
-        <div class="row" style="padding: 10px">
-          <validation-provider rules="required|email" v-slot="{ errors }">
+        <div class="d-flex w-100 align-items-center">
+          <validation-provider class="w-100" rules="required|email" v-slot="{ errors }">
             <label for="inline-form-input-productname" class="w-100 d-block mb-2">Contact Email</label>
-            <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
-              <b-input-group>
-                <b-form-input placeholder="Enter contact email" v-model="email"></b-form-input>
-              </b-input-group>
+            <div class="w-100 d-flex align-items-center gap-2">
+              <b-form-input class="w-100" placeholder="Enter contact email" v-model="email"></b-form-input>
+
+              <div class="d-flex gap-1">
+                <button type="button"  class="btn light btn-secondary" @click="hideContactModal">Cancel</button>
+                <button :disabled="invalid" type="submit" class="btn btn-secondary" >Save</button>
+              </div>
             </div>
-            <span class="error">{{ errors[0] }}</span>
+            <span class="error mt-1 d-block">{{ errors[0] }}</span>
           </validation-provider>
          </div>
-        <div class="row">
-          <div class="col-lg-12" style="text-align: right">
-            <button type="button"  class="btn btn-secondary" @click="hideContactModal">Cancel</button>
-            <button :disabled="invalid" type="submit" class="btn btn-secondary" style="margin-left: 5px;" >Save</button>
-          </div>
-        </div>
+
       </b-form>
       </ValidationObserver>
     </div>
     <div v-if="getContacts.length > 0">
-      <h1>Contacts List</h1>
-      <ul>
-        <li style="padding: 5px; margin-bottom: 5px;" v-for="(contact) in getContacts" :key="contact.id">
-          {{contact.email}}
-          <span>
-            <a data-title="Delete contact"  style="display: inline-block"
-                   @click="deleteContact(contact.id)" ><font-awesome-icon
-            :icon="['fas', 'trash-alt']"/></a>
-          </span>
-        </li>
-      </ul>
+      <h3 class="fs-3 font-weight-bold">Contacts List</h3>
+      <div class="mt-3" style="max-height: 300px; overflow-y:auto">
+        <table class="table table-bordered b-table-fixed mb-0 w-100 ">
+          <thead class="bg-light">
+          <th class="font-weight-bold">
+            Email
+          </th>
+          <th class="font-weight-bold">
+            Action
+          </th>
+          </thead>
+          <tbody>
+          <tr  v-for="(contact) in getContacts" :key="contact.id">
+            <td>{{contact.email}}</td>
+            <td class="cursor-pointer">
+              <a data-title="Delete Contact" @click="deleteContact(contact.id)">
+                <font-awesome-icon
+                  :icon="['fas', 'trash-alt']"/>
+              </a>
+            </td>
+          </tr>
+          </tbody>
+
+        </table>
+      </div>
+
 
     </div>
     <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
