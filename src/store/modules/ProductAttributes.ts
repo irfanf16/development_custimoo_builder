@@ -80,13 +80,18 @@ const ProductAttributes:Module<any, any> = {
     notifications:[]
   },
   mutations: {
+    UPDATE_NOTIFICATION(state:Record<any, any>, payload){
+     const index =  state.notifications.findIndex((item:Record<any, any>)=>{
+        return item.id == payload
+      })
+      Vue.set(state.notifications[index], 'is_read', 1)
+    },
     SET_NOTIFICATIONS(state:Record<any, any>, payload) {
       state.notifications  = payload
     },
     UPDATE_NOTIFICATIONS(state:Record<any, any>, payload){
       if (payload){
         state.notifications.unshift(payload)
-        // Vue.set(state.notifications, state.notifications.length, payload)
       }
     },
 
@@ -1194,11 +1199,20 @@ const ProductAttributes:Module<any, any> = {
     },
     async getNotifications({commit}){
        await http.get('customer/notifications').then((res) => {
-        commit('SET_NOTIFICATIONS', res.data.data.data)
+        commit('SET_NOTIFICATIONS', res.data.data)
       }).catch(e =>{
         console.log(e)
       })
+    },
+    readNotification({commit}, id){
+     return  http.post('read/notification', {id:id}).then((res) => {
+        if(res.status == 200){
+          commit('UPDATE_NOTIFICATION', id)
+        }
+        return res
+      })
     }
+
   }
 }
 export default ProductAttributes;

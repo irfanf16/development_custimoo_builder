@@ -66,12 +66,14 @@
                   </a></li>
                   <li v-if="isCustomerAuthenticated">
                     <a class="icon" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
-                    <div v-if="notifications.length" class="notifications" :style="dropdownStyle" id="box">
-                      <h2>Notifications</h2>
+                    <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
                       <template v-for="(notification, ind) in notifications" >
-                        <div :key="ind" class="notifications-item">
-                          <div class="text">
+                        <div :key="ind" class="notifications-item" :class="[notification.is_read === 0 ? 'font-weight-bold' : '' ]" @click="readNotification(notification)">
+                          <div class="text d-flex align-items-start justify-content-between">
                             <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                            <div class="date">
+                              <div class="day">{{ notification.created_at | formatDate }}</div>
+                            </div>
                           </div>
                         </div>
                       </template>
@@ -171,6 +173,13 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {fontsColorsManipulation, fontsList, sortTextsArray} from "@/helpers/Helpers";
 import {getClosestColor} from "@/pantoneColor";
 import LockerProduct from "@/mixins/LockerProduct";
+import moment from 'moment'
+
+Vue.filter('formatDate', function(value) {
+  if (value) {
+    return moment(value).format('MMMM DD')
+  }
+})
 
 @Component<Home>({
   components: {
@@ -847,7 +856,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
   }
-
+  public async readNotification(notification:Record<any, any>){
+    if (notification.is_read == 0){
+       await this.$store.dispatch('readNotification', notification.id)
+    }
+  }
 
   // public resetPreview() {
   //   this.$store.dispatch('defaultColors', [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}])
@@ -1236,17 +1249,19 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   position: absolute;
   left: 100%;
   bottom: 100%;
-  background: #2c3e50;
+  background: #DF4B37;
   color: #fff;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
-  width: 15px;
-  height: 15px;
-  margin: 0 0 -5px -5px;
+  flex-shrink: 0;
+  font-size: 10.5px;
+  width: 16px;
+  height: 16px;
+  margin: 0 0 -8px -8px;
   padding: 0;
+  box-shadow: 0 0 0 1px #fff;
   line-height: 1;
 }
 
@@ -1272,15 +1287,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 .notifications {
   width: 300px;
   height: 0px;
+  max-height: 300px;
   opacity: 0;
   position: absolute;
   top: 63px;
   right: 0;
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   background-color: #fff;
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
   z-index: 99;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .notifications h2 {
@@ -1297,38 +1314,55 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 }
 
 .notifications-item {
+  width: 100%;
   display: flex;
   border-bottom: 1px solid #eee;
   padding: 10px 18px;
   margin-bottom: 0px;
   cursor: pointer;
   color: #2c3e50;
+
+  &:hover {
+    background-color: #eee
+  }
+
+  img {
+    display: block;
+    width: 50px;
+    height: 50px;
+    margin-right: 9px;
+    border-radius: 50%;
+    margin-top: 2px
+  }
+
+  .text {
+    width: 100%;
+    gap: 12px;
+
+    h4 {
+      color: #777;
+      font-size: 16px;
+      margin-top: 3px
+    }
+
+    p {
+      color: #2c3e50;
+      font-size: 12px;
+      text-align: left;
+
+      &::first-letter{
+        text-transform: uppercase;
+      }
+    }
+
+    .date{
+      font-size: 12px;
+
+      .month{
+        font-size: 0.8em;
+      }
+    }
+  }
 }
-
-.notifications-item:hover {
-  background-color: #eee
-}
-
-.notifications-item img {
-  display: block;
-  width: 50px;
-  height: 50px;
-  margin-right: 9px;
-  border-radius: 50%;
-  margin-top: 2px
-}
-
-.notifications-item .text h4 {
-  color: #777;
-  font-size: 16px;
-  margin-top: 3px
-}
-
-.notifications-item .text p {
-  color: #2c3e50;
-  font-size: 12px
-}
-
-
 
 </style>
