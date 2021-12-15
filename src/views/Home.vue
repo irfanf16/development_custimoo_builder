@@ -64,18 +64,31 @@
                   <li><a>
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
                   </a></li>
-                </ul>
-                <div v-if="isCustomerAuthenticated" class="icon" id="bell" @click="notificationsDropDown"> <img src="https://i.imgur.com/AC7dgLA.png" alt=""> </div>
-                <div v-if="notifications.length" class="notifications" :style="dropdownStyle" id="box">
-                  <h2>Notifications - <span style="background-color: black"> {{ notificationsCounter}}</span></h2>
-                  <template v-for="(notification, ind) in notifications" >
-                  <div   :key="ind" class="notifications-item">
-                    <div class="text">
-                      <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                  <li v-if="isCustomerAuthenticated">
+                    <a class="icon" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
+                    <div v-if="notifications.length" class="notifications" :style="dropdownStyle" id="box">
+                      <h2>Notifications</h2>
+                      <template v-for="(notification, ind) in notifications" >
+                        <div :key="ind" class="notifications-item">
+                          <div class="text">
+                            <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                          </div>
+                        </div>
+                      </template>
                     </div>
-                  </div>
-                  </template>
-                </div>
+                  </li>
+                </ul>
+<!--                <div v-if="isCustomerAuthenticated" class="icon" id="bell" @click="notificationsDropDown"> <img src="https://i.imgur.com/AC7dgLA.png" alt=""> </div>-->
+<!--                <div v-if="notifications.length" class="notifications" :style="dropdownStyle" id="box">-->
+<!--                  <h2>Notifications - <span style="background-color: black"> {{ notificationsCounter}}</span></h2>-->
+<!--                  <template v-for="(notification, ind) in notifications" >-->
+<!--                  <div   :key="ind" class="notifications-item">-->
+<!--                    <div class="text">-->
+<!--                      <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                  </template>-->
+<!--                </div>-->
                 <div class="change-product-area d-lg-none">
                   <h2>Change Product</h2>
                   <b-button @click="showDesign()" class="change-product-opener" variant="secondary"></b-button>
@@ -1056,6 +1069,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
       }
       a{
         cursor: pointer;
+        position: relative;
       }
       &:first-child{margin: 0;}
     }
@@ -1218,6 +1232,23 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   vertical-align: top;
   margin-left: -25px
 }
+.icon span.notification-counter{
+  position: absolute;
+  left: 100%;
+  bottom: 100%;
+  background: #2c3e50;
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  width: 15px;
+  height: 15px;
+  margin: 0 0 -5px -5px;
+  padding: 0;
+  line-height: 1;
+}
 
 .icon img {
   display: inline-block;
@@ -1244,17 +1275,21 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   opacity: 0;
   position: absolute;
   top: 63px;
-  right: 62px;
-  border-radius: 5px 0px 5px 5px;
+  right: 0;
+  border-radius: 1rem;
   background-color: #fff;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  z-index: 99;
+  overflow: hidden;
 }
 
 .notifications h2 {
   font-size: 14px;
-  padding: 10px;
+  padding: 10px 20px;
   border-bottom: 1px solid #eee;
-  color: #999
+  color: #2c3e50;
+  text-align: left;
+  font-weight: 600;
 }
 
 .notifications h2 span {
@@ -1264,9 +1299,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 .notifications-item {
   display: flex;
   border-bottom: 1px solid #eee;
-  padding: 6px 9px;
+  padding: 10px 18px;
   margin-bottom: 0px;
-  cursor: pointer
+  cursor: pointer;
+  color: #2c3e50;
 }
 
 .notifications-item:hover {
@@ -1289,7 +1325,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 }
 
 .notifications-item .text p {
-  color: #aaa;
+  color: #2c3e50;
   font-size: 12px
 }
 
