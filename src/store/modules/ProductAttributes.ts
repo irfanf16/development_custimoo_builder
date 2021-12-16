@@ -82,9 +82,9 @@ const ProductAttributes:Module<any, any> = {
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
      const index =  state.notifications.findIndex((item:Record<any, any>)=>{
-        return item.id == payload
+        return item.id == payload.id
       })
-      Vue.set(state.notifications[index], 'is_read', 1)
+      Vue.set(state.notifications[index], 'read_at', payload.date)
     },
     SET_NOTIFICATIONS(state:Record<any, any>, payload) {
       state.notifications  = payload
@@ -1207,7 +1207,11 @@ const ProductAttributes:Module<any, any> = {
     readNotification({commit}, id){
      return  http.post('read/notification', {id:id}).then((res) => {
         if(res.status == 200){
-          commit('UPDATE_NOTIFICATION', id)
+          const payload = {
+            id: id,
+            date: res.data.data
+          }
+          commit('UPDATE_NOTIFICATION', payload)
         }
         return res
       })

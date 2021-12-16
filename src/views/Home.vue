@@ -68,7 +68,7 @@
                     <a class="icon" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
                     <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
                       <template v-for="(notification, ind) in notifications" >
-                        <div :key="ind" class="notifications-item" :class="[notification.is_read === 0 ? 'font-weight-bold' : '' ]" @click="readNotification(notification)">
+                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]" @click="readNotification(notification)">
                           <div class="text d-flex align-items-start justify-content-between">
                             <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
                             <div class="date">
@@ -303,7 +303,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     let unread_notification_counter = 0
     if (this.$store.getters.getNotifications.length){
       this.$store.getters.getNotifications.forEach((notification:Record<any, any>) => {
-        if (notification.is_read == 0){
+        if (notification.read_at === '' || notification.read_at === null){
           unread_notification_counter += 1
         }
       })
@@ -857,7 +857,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     return this.$store.getters.getHideColorSection
   }
   public async readNotification(notification:Record<any, any>){
-    if (notification.is_read == 0){
+    if (notification.read_at === null || notification.read_at === ''){
        await this.$store.dispatch('readNotification', notification.id)
     }
   }
