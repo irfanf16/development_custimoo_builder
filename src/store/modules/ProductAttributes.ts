@@ -1048,7 +1048,7 @@ const ProductAttributes:Module<any, any> = {
        console.log(err.response)
         return err.response.data.message
       })
-    },
+    }
   }
 }
 export default ProductAttributes;

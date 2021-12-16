@@ -218,6 +218,7 @@ import {getClosestColor} from "@/pantoneColor";
       await this.$store.dispatch('setBrowserToken')
     }
     if (this.isCustomerAuthenticated){
+      await  this.$store.dispatch('permissions')
       await this.$store.dispatch('getLockerRoomColors')
     }
   }

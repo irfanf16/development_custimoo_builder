@@ -190,7 +190,7 @@
                     </template>
                   </div>
                  </b-tab>
-                <b-tab :ref="`yearlyTab${room.id}`" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly"  title="Yearly Planner" class="designCollections">
+                <b-tab  :ref="`yearlyTab${room.id}`" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly && customerPermissions.includes('Yearly-Planner')"  title="Yearly Planner" class="designCollections">
                   <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
                     <template>
                       <div v-if="!room.have_yearly_planner">
@@ -383,6 +383,9 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
 
   get getSelectionMode() {
     return this.$store.getters.getSelectionMode;
+  }
+  get customerPermissions(){
+    return this.$store.getters.getCustomerPermissions
   }
 
   get getLockerProducts(): Record<any, any> {
