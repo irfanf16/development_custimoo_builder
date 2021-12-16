@@ -9,7 +9,7 @@
                     <div class="header-buttons">
                         <b-button @click="homeScreen" variant="outline-secondary">Back to Design</b-button>
 <!--                        <SaveDesignModal />-->
-                        <b-button variant="outline-secondary" v-b-modal.modal-center-addlockerroom @click="getLockers">Save to locker room</b-button>
+                        <b-button variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
                         <AddLockerRoomModal ref="saveToLockerModal" />
                         <a href="#"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>
                     </div>

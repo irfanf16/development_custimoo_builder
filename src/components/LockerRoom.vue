@@ -50,12 +50,12 @@
                             :icon="['fas', 'trash-alt']"/></a>
                         </li>
                         <li>
-                          <a data-title="Edit design" @click="editProduct(i, ind)" @mouseleave="hideTooltip"
+                          <a data-title="Edit design" @click="editProduct(room.id, product.id)" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li>
                           <b-button data-title="Share design" :id="'share'+i+''+ind"
-                                    @click="product.shared_url === undefined || product.shared_url === null  ? shareProduct(product, ind, i): ''"
+                                    @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"
                                     @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
                             :icon="['fas', 'share-alt']"/></b-button>
                           <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom"
@@ -66,7 +66,7 @@
                               <div class="share-form">
                                 <b-form inline>
                                   <b-form-input :id="'copy-'+ind"
-                                                :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"
+                                                :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
                                   ></b-form-input>
                                   <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
@@ -132,7 +132,6 @@
                     <template v-for="(collection, index) in getCollections">
                       <div :key="index" class="products-block">
                         <div class="image-holder">
-
                           <div class="convas_container" :key="collection_product_index"
                                v-for="(collection_product,collection_product_index) in collection.collection_products">
 <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
@@ -142,13 +141,11 @@
                                    alt="">
                             </template>
                           </div>
-
                           <div class="controls">
                             <a v-b-tooltip.hover.right title="Delete collection"
                                @click="deleteCollection(collection.id,index)" class="remove btn">
                               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
                             </a>
-
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
                                class="btn light btn-secondary rounded-circle"><font-awesome-icon
                               :icon="['fas', 'edit']"/></a>
@@ -239,6 +236,7 @@ import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {processColorsCustom} from "../helpers/Helpers"
 import {differenceBy, intersectionBy, union, includes} from 'lodash';
+import LockerProduct from "@/mixins/LockerProduct";
 
 @Component<LockerRoom>({
   components: {
@@ -259,7 +257,7 @@ import {differenceBy, intersectionBy, union, includes} from 'lodash';
     }
   }
 })
-export default class LockerRoom extends Mixins(ErrorMessages) {
+export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
@@ -284,7 +282,6 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
         mutation.target.classList.add('dropping')
       }else if(mutation.removedNodes.length){
         console.log('Nodes removed', mutation.removedNodes.length);
-
         mutation.target.classList.remove('dropping')
       }
       else if (mutation.type === 'attributes') {
@@ -515,55 +512,54 @@ export default class LockerRoom extends Mixins(ErrorMessages) {
   }
 
   public lockerStatus = 'not_accepted'
-
-  public async editProduct(lockerIndex: number, productIndex: number) {
-    const id = this.getLockerProducts[lockerIndex].product[productIndex].id
-    let prod_res = await this.$store.dispatch('getLockerProductDetail', id);
-    Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
-
-    const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
-    const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
-    this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
-    const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
-
-    const element = this.getLockerProducts[lockerIndex].product[productIndex];
-
-    let ind = 0
-    if (product_id != this.$store.getters.getEditMainProductId) {
-      const exist = this.products.find((prd:Record<any, any>) => {
-        return prd.id == product_id
-      })
-      if(!exist) {
-        this.$store.commit('CHANGE_EDIT_LOCKER_PRODUCT', {prd_id: product_id})
-        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
-        ind = this.products.length - 1;
-      }
-    else {
-        const index = this.products.findIndex((prd:Record<any, any>) => prd.id == product_id)
-        ind = index >= 0 ? index : 0
-      }
-      this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
-    }
-    // let ind = this.products.length - 1;
-    await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
-    let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
-    await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-    //console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
-    // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
-    await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
-    await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
-    await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
-    await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
-    this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-      if (item.id == element.design_id) {
-        Vue.set(item, 'design_show', 1)
-        this.$store.dispatch('setSelectedProductDesignID', item.id)
-      } else {
-        Vue.set(item, 'design_show', 0)
-      }
-    });
-    this.$emit('hideLockerRoomModal')
-  }
+  // public async editProduct(lockerIndex: number, productIndex: number) {
+  //   const id = this.getLockerProducts[lockerIndex].product[productIndex].id
+  //   let prod_res = await this.$store.dispatch('getLockerProductDetail', id);
+  //   Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
+  //   this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
+  //   this.$root.$emit('rostershared', '')
+  //   const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
+  //   const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
+  //   this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
+  //   const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
+  //   const element = this.getLockerProducts[lockerIndex].product[productIndex];
+  //   let ind = 0
+  //   if (product_id != this.$store.getters.getEditMainProductId) {
+  //     const exist = this.products.find((prd:Record<any, any>) => {
+  //       return prd.id == product_id
+  //     })
+  //     if(!exist) {
+  //       this.$store.commit('CHANGE_EDIT_LOCKER_PRODUCT', {prd_id: product_id})
+  //       await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
+  //       ind = this.products.length - 1;
+  //     }
+  //   else {
+  //       const index = this.products.findIndex((prd:Record<any, any>) => prd.id == product_id)
+  //       ind = index >= 0 ? index : 0
+  //     }
+  //     this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
+  //   }
+  //   // let ind = this.products.length - 1;
+  //   await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
+  //   let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
+  //   await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+  //   //console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
+  //   // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
+  //
+  //   await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
+  //   await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
+  //   await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
+  //   await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
+  //   this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
+  //     if (item.id == element.design_id) {
+  //       Vue.set(item, 'design_show', 1)
+  //       this.$store.dispatch('setSelectedProductDesignID', item.id)
+  //     } else {
+  //       Vue.set(item, 'design_show', 0)
+  //     }
+  //   });
+  //   this.$emit('hideLockerRoomModal')
+  // }
 
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {

@@ -215,8 +215,10 @@ const Product:Module<any, any> = {
     },
     async getShareProductDetails({commit}, payload){
      const res =  await http.post('shared/details', {url: payload}).then((res) =>{
-        return res.data;
-      })
+        return res;
+      }).catch(err => {
+        return err.response
+     })
       return res
     },
     initialLogoColors({commit}, payload){

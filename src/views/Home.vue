@@ -43,28 +43,54 @@
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     <LoginForm @actionAfterLogin="actionAfterLogin()" />
                   </li>
-                  <li>
-                    <b-button :id="'share'" @click="shareProduct(selectedProduct)">
-                      <font-awesome-icon :icon="['fas', 'share-alt']"/>
-                    </b-button>
-                    <b-tooltip :target="'share'" custom-class="share-tooltip home-sharing" placement="bottom" triggers="focus">
-                      <div class="share-holder">
-                        <h3>Copy link and Share</h3>
-                        <div class="share-form">
-                          <b-form inline>
-                            <!--                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>-->
-                            <b-form-input v-model="shared_link" id="copy-link"></b-form-input>
-                            <b-button variant="primary" @click="copyLink">Copy Link</b-button>
-                            <!--                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>-->
-                          </b-form>
-                        </div>
-                      </div>
-                    </b-tooltip>
-                  </li>
+<!--                  <li>-->
+<!--                    <b-button :id="'share'" @click="shareProduct(selectedProduct)">-->
+<!--                      <font-awesome-icon :icon="['fas', 'share-alt']"/>-->
+<!--                    </b-button>-->
+<!--                    <b-tooltip :target="'share'" custom-class="share-tooltip home-sharing" placement="bottom" triggers="focus">-->
+<!--                      <div class="share-holder">-->
+<!--                        <h3>Copy link and Share</h3>-->
+<!--                        <div class="share-form">-->
+<!--                          <b-form inline>-->
+<!--                            &lt;!&ndash;                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>&ndash;&gt;-->
+<!--                            <b-form-input v-model="shared_link" id="copy-link"></b-form-input>-->
+<!--                            <b-button variant="primary" @click="copyLink">Copy Link</b-button>-->
+<!--                            &lt;!&ndash;                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>&ndash;&gt;-->
+<!--                          </b-form>-->
+<!--                        </div>-->
+<!--                      </div>-->
+<!--                    </b-tooltip>-->
+<!--                  </li>-->
                   <li><a>
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
                   </a></li>
+                  <li v-if="isCustomerAuthenticated">
+                    <a class="icon" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
+                    <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
+                      <template v-for="(notification, ind) in notifications" >
+                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]" @click="readNotification(notification)">
+                          <div class="text d-flex align-items-start justify-content-between">
+                            <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                            <div class="date">
+                              <div class="day">{{ notification.created_at | formatDate }}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </li>
                 </ul>
+<!--                <div v-if="isCustomerAuthenticated" class="icon" id="bell" @click="notificationsDropDown"> <img src="https://i.imgur.com/AC7dgLA.png" alt=""> </div>-->
+<!--                <div v-if="notifications.length" class="notifications" :style="dropdownStyle" id="box">-->
+<!--                  <h2>Notifications - <span style="background-color: black"> {{ notificationsCounter}}</span></h2>-->
+<!--                  <template v-for="(notification, ind) in notifications" >-->
+<!--                  <div   :key="ind" class="notifications-item">-->
+<!--                    <div class="text">-->
+<!--                      <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                  </template>-->
+<!--                </div>-->
                 <div class="change-product-area d-lg-none">
                   <h2>Change Product</h2>
                   <b-button @click="showDesign()" class="change-product-opener" variant="secondary"></b-button>
@@ -146,6 +172,14 @@ import Scene from "@/components/Scene.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {fontsColorsManipulation, fontsList, sortTextsArray} from "@/helpers/Helpers";
 import {getClosestColor} from "@/pantoneColor";
+import LockerProduct from "@/mixins/LockerProduct";
+import moment from 'moment'
+
+Vue.filter('formatDate', function(value) {
+  if (value) {
+    return moment(value).format('MMMM DD')
+  }
+})
 
 @Component<Home>({
   components: {
@@ -178,6 +212,8 @@ import {getClosestColor} from "@/pantoneColor";
     if (this.isAuthenticated) {
       await this.retrieveProducts()
       await this.getFillColors()
+    }
+    if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
     }
     if (this.$route.params.name) {
@@ -185,19 +221,23 @@ import {getClosestColor} from "@/pantoneColor";
       setTimeout(async () => {
         let url = 'share/' + this.$route.params.product + '/' + this.$route.params.name
         let res = await this.$store.dispatch('getShareProductDetails', url)
-        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.product_id);
+        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.data.product_id);
         // let ind = this.products.findIndex(x => x.product_id == res.product_id)
         let ind = this.products.length -1
         await this.$store.dispatch('setSelectedIndex', { selectedIndex: ind});
-        let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.style_id);
+        let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.data.style_id);
         await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-        await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(res.custom_logos));
-        await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(res.text));
-        await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.defaultcolors));
-        await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.groupcolors));
+        let logoObj = {
+          custom_logos: res.data.custom_logos,
+          product_id: res.data.product_id
+        }
+        await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logoObj);
+        await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', JSON.parse(res.data.text));
+        await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.data.defaultcolors));
+        await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.data.groupcolors));
         await  this.$store.dispatch('setColorSectionVisibility')
         this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-          if (item.id == res.design_id){
+          if (item.id == res.data.design_id){
             Vue.set(item, 'design_show', 1)
             this.$store.dispatch('setSelectedProductDesignID',item.id)
           }else{
@@ -218,12 +258,13 @@ import {getClosestColor} from "@/pantoneColor";
       await this.$store.dispatch('setBrowserToken')
     }
     if (this.isCustomerAuthenticated){
+      await this.$store.dispatch('getNotifications')
       await this.$store.dispatch('getLockerRoomColors')
     }
   }
 })
 
-export default class Home extends Mixins(ErrorMessages) {
+export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -251,6 +292,23 @@ export default class Home extends Mixins(ErrorMessages) {
 
   public setRecentLogos() {
     this.$store.commit('SET_RECENT_LOGOS')
+  }
+
+  get notifications(){
+    return this.$store.getters.getNotifications
+  }
+
+  get notificationsCounter(){
+    // this.ref.lockerModal.$refs['lockerRoom'].editProduct()
+    let unread_notification_counter = 0
+    if (this.$store.getters.getNotifications.length){
+      this.$store.getters.getNotifications.forEach((notification:Record<any, any>) => {
+        if (notification.read_at === '' || notification.read_at === null){
+          unread_notification_counter += 1
+        }
+      })
+    }
+    return unread_notification_counter
   }
 
   public showConfirm(){
@@ -336,6 +394,9 @@ export default class Home extends Mixins(ErrorMessages) {
   get selectedDesignId():number{
     return  this.$store.getters.getSelectedDesignId;
   }
+  get rosterDetails(): [Record<any, any>] {
+    return this.$store.getters.getRosterDetails
+  }
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
   }
@@ -355,7 +416,6 @@ export default class Home extends Mixins(ErrorMessages) {
           url: query
         }
         let res = await this.$store.dispatch('updateSharedProduct', param)
-        console.log(res)
       }
     }catch (error){
       console.log(error)
@@ -441,6 +501,17 @@ export default class Home extends Mixins(ErrorMessages) {
       return  false
     }
   }
+  public dropdownStyle = { } as any
+  public down = false
+  public notificationsDropDown(){
+    if(this.down){
+      this.dropdownStyle = {'height': '0px', 'opacity': '0'}
+        this.down = false;
+      }else{
+      this.dropdownStyle = {'height' : 'auto', 'opacity': '1'}
+      this.down = true;
+      }
+  }
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
       this.getLockerRoomProducts()
@@ -502,7 +573,8 @@ export default class Home extends Mixins(ErrorMessages) {
       groupcolors: this.groupColors,
       id: this.$store.getters.getEditProductId,
       locker_front_png: locker_front_png,
-      locker_back_png: locker_back_png
+      locker_back_png: locker_back_png,
+      roster: this.rosterDetails
     }
     if (this.editStatus){
       this.showLoader = true
@@ -564,7 +636,6 @@ export default class Home extends Mixins(ErrorMessages) {
 
     if (this.hasProducts) {
       http.get(url).then(async (response: any) => {
-        console.log(searchCall,productType)
         if (searchCall || productType) {
           this.$store.commit('SET_PRODUCTS', []);
         }
@@ -649,29 +720,6 @@ export default class Home extends Mixins(ErrorMessages) {
     }
   }
 
-  public async shareProduct(){
-    try {
-      const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-        return item.design_show
-      })
-      let locker = {
-        customer_id: this.customer ? this.customer.id : '',
-        type: 'product',
-        product_id: this.selectedProduct.product_id,
-        style_id: this.selectedProduct.productstyles[this.styleIndex].id,
-        design_id: currentDesign[0].id,
-        custom_logos: this.customLogos,
-        text: this.customTexts,
-        colors: this.logoColors,
-        defaultcolors: this.defaultColors,
-        groupcolors: this.groupColors
-      }
-      let res = await this.$store.dispatch('shareProduct', locker)
-      this.shared_link = location.host+"/#/"+res.data.url
-    }catch (error){
-      console.log(error)
-    }
-  }
   public copyLink(){
     let testingCodeToCopy = document.querySelector("#copy-link")  as Record<any, any>
     testingCodeToCopy.select()
@@ -808,7 +856,11 @@ export default class Home extends Mixins(ErrorMessages) {
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
   }
-
+  public async readNotification(notification:Record<any, any>){
+    if (notification.read_at === null || notification.read_at === ''){
+       await this.$store.dispatch('readNotification', notification.id)
+    }
+  }
 
   // public resetPreview() {
   //   this.$store.dispatch('defaultColors', [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}])
@@ -1030,6 +1082,7 @@ export default class Home extends Mixins(ErrorMessages) {
       }
       a{
         cursor: pointer;
+        position: relative;
       }
       &:first-child{margin: 0;}
     }
@@ -1172,6 +1225,144 @@ export default class Home extends Mixins(ErrorMessages) {
   }
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200&display=swap');
 
+
+
+
+
+.icon {
+  cursor: pointer;
+  margin-right: 50px;
+  line-height: 60px
+}
+
+.icon span {
+  background: #f00;
+  padding: 7px;
+  border-radius: 50%;
+  color: #fff;
+  vertical-align: top;
+  margin-left: -25px
+}
+.icon span.notification-counter{
+  position: absolute;
+  left: 100%;
+  bottom: 100%;
+  background: #DF4B37;
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 10.5px;
+  width: 16px;
+  height: 16px;
+  margin: 0 0 -8px -8px;
+  padding: 0;
+  box-shadow: 0 0 0 1px #fff;
+  line-height: 1;
+}
+
+.icon img {
+  display: inline-block;
+  width: 26px;
+  margin-top: 4px;
+  background-color: purple;
+}
+
+.icon:hover {
+  opacity: .7
+}
+
+.logo {
+  flex: 1;
+  margin-left: 50px;
+  color: #eee;
+  font-size: 20px;
+  font-family: monospace
+}
+
+.notifications {
+  width: 300px;
+  height: 0px;
+  max-height: 300px;
+  opacity: 0;
+  position: absolute;
+  top: 63px;
+  right: 0;
+  border-radius: 0.5rem;
+  background-color: #fff;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  z-index: 99;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.notifications h2 {
+  font-size: 14px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #eee;
+  color: #2c3e50;
+  text-align: left;
+  font-weight: 600;
+}
+
+.notifications h2 span {
+  color: #f00
+}
+
+.notifications-item {
+  width: 100%;
+  display: flex;
+  border-bottom: 1px solid #eee;
+  padding: 10px 18px;
+  margin-bottom: 0px;
+  cursor: pointer;
+  color: #2c3e50;
+
+  &:hover {
+    background-color: #eee
+  }
+
+  img {
+    display: block;
+    width: 50px;
+    height: 50px;
+    margin-right: 9px;
+    border-radius: 50%;
+    margin-top: 2px
+  }
+
+  .text {
+    width: 100%;
+    gap: 12px;
+
+    h4 {
+      color: #777;
+      font-size: 16px;
+      margin-top: 3px
+    }
+
+    p {
+      color: #2c3e50;
+      font-size: 12px;
+      text-align: left;
+
+      &::first-letter{
+        text-transform: uppercase;
+      }
+    }
+
+    .date{
+      font-size: 12px;
+
+      .month{
+        font-size: 0.8em;
+      }
+    }
+  }
+}
 
 </style>

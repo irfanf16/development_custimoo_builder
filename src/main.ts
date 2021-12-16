@@ -35,7 +35,7 @@ import {
   faTrashAlt,
   faTshirt,
   faUserFriends,
-  faUserSecret, faSignOutAlt
+  faUserSecret, faSignOutAlt, faBell
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
@@ -74,6 +74,7 @@ library.add(faGooglePlusG)
 library.add(faCube)
 library.add(faSignOutAlt)
 library.add(faDiceTwo)
+library.add(faBell)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false

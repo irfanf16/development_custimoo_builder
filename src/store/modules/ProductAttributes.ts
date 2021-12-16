@@ -70,9 +70,30 @@ const ProductAttributes:Module<any, any> = {
       flood_fill:false
 
     },
-    editLockerProduct: []
+    editLockerProduct: [],
+    canvasImage:{
+      ref_front:'',
+      ref_back:'',
+      front:'',
+      back:''
+    },
+    notifications:[]
   },
   mutations: {
+    UPDATE_NOTIFICATION(state:Record<any, any>, payload){
+     const index =  state.notifications.findIndex((item:Record<any, any>)=>{
+        return item.id == payload.id
+      })
+      Vue.set(state.notifications[index], 'read_at', payload.date)
+    },
+    SET_NOTIFICATIONS(state:Record<any, any>, payload) {
+      state.notifications  = payload
+    },
+    UPDATE_NOTIFICATIONS(state:Record<any, any>, payload){
+      if (payload){
+        state.notifications.unshift(payload)
+      }
+    },
 
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
       state.lockerActiveTabIndex = payload
@@ -548,8 +569,10 @@ const ProductAttributes:Module<any, any> = {
       state.rosterDetails.splice(payload, 1);
     },
     UPDATE_ROSTER(state:Record<any, any>, payload:Record<any, any>){
-      state.rosterDetails = payload;
-    },
+      if (payload){
+        state.rosterDetails = payload;
+      }
+      },
     OVERRIDE_ROSTER(state:Record<any, any>){
       state.rosterDetails = [{
         text: '',
@@ -757,10 +780,20 @@ const ProductAttributes:Module<any, any> = {
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
       state.using_logo_colors = payload
     },
+    STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
+      state.canvasImage.ref_front = payload.front
+      state.canvasImage.ref_back = payload.back
+    }
   },
   getters: {
     getEditLockerProduct: state => {
       return state.editLockerProduct
+    },
+    getNotifications: state => {
+      return state.notifications
+    },
+    getCanvasImage: state => {
+      return state.canvasImage
     },
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
@@ -1017,6 +1050,7 @@ const ProductAttributes:Module<any, any> = {
       await commit('SET_SELECTED_PRODUCT_DESIGN');
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
+      console.log("sdfsdfdsf", payload)
       let done = false;
       await http.get("product?product_id="+payload).then((res) => {
         if (res.status == 200) {
@@ -1154,6 +1188,35 @@ const ProductAttributes:Module<any, any> = {
         return err.response.data.message
       })
     },
+    async regenerateRosterLink({commit}, payload){
+      return await http.post('regenerate/link', payload).then((res) => {
+        if (res.status == 201){
+          return res.data
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    async getNotifications({commit}){
+       await http.get('customer/notifications').then((res) => {
+        commit('SET_NOTIFICATIONS', res.data.data)
+      }).catch(e =>{
+        console.log(e)
+      })
+    },
+    readNotification({commit}, id){
+     return  http.post('read/notification', {id:id}).then((res) => {
+        if(res.status == 200){
+          const payload = {
+            id: id,
+            date: res.data.data
+          }
+          commit('UPDATE_NOTIFICATION', payload)
+        }
+        return res
+      })
+    }
+
   }
 }
 export default ProductAttributes;
