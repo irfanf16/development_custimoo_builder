@@ -33,7 +33,10 @@ const Event:Module<any, any> = {
     },
     getLockerIndexForEvent(state:Record<any, any>){
       return state.locker_index_for_event
-    }
+    },
+    monthlyEvents: state => (month:string) => {
+      return state.locker_events.filter((event:Record<any, any>) => month == event.month)
+    },
   },
   mutations: {
     SHOW_EVENT_POPUP(state:Record<any, any>, paylod:boolean){
