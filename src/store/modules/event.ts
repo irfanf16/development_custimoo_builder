@@ -35,7 +35,7 @@ const Event:Module<any, any> = {
       return state.locker_index_for_event
     },
     monthlyEvents: state => (month:string) => {
-      return state.locker_events.filter((event:Record<any, any>) => month == event.month)
+      return state.locker_events.find((event:Record<any, any>) => month == event.month)
     },
   },
   mutations: {

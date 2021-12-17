@@ -256,12 +256,12 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   get getSelectedYear() {
     return this.$store.getters.getSelectedYear;
   }
-  @Watch('monthlyEvents', {
-    deep: true
+  @Watch('getEvents', {
+    immediate: true, deep: true
   })
-  monthlyEventsChanged() {
-    console.log('detected')
-    this.allEvents = this.$store.getters.monthlyEvents(this.viewAllMonth)
+  getEventsChanged() {
+    if(this.$store.getters.monthlyEvents(this.viewAllMonth))
+      this.allEvents = this.$store.getters.monthlyEvents(this.viewAllMonth).events
   }
   public getEventEmails(value: string) {
 
