@@ -99,6 +99,10 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     return this.$store.getters.getRosterDetails
   }
 
+  get logoColors(): [Record<any, any>] {
+    return this.$store.getters.getLogosColors
+  }
+
   get total(): number {
     let sum = 0;
     if (this.rosterDetails){
@@ -124,6 +128,14 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
   }
 
   public showLoader = false
+
+  get customLogos(): [Record<any, any>] {
+    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
+  }
+
+  get customTexts(): [Record<any, any>] {
+    return this.$store.getters.getCustomTexts()
+  }
 
   get svgGroups(): [Record<any, any>] {
     return this.$store.getters.getSvgGroups
@@ -189,8 +201,8 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     form_data.append("product_style_id", product_style_id);
     form_data.append("product_design_id", product_design_id);
     form_data.append("product_model_id", product_model_id);
-    form_data.append("roster_detail", JSON.stringify(this.rosterDetails));
-
+    let order_detail = await self.getOrderDetail();
+    form_data.append("order_detail", JSON.stringify(order_detail));
     let p2 = new Promise((resolve) => {
       // this.pdf_front_image = this.canvasImage.ref_front.toDataURL("image/png") todo need use these lines to generate image when notification branch push
       // this.pdf_back_image = this.canvasImage.ref_back.toDataURL("image/png")
@@ -364,6 +376,19 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     } catch (err) {
       alert('Oops, unable to copy');
     }
+  }
+
+  public async getOrderDetail() {
+    let self = this;
+    let order_detail: { [key: string]: Record<any, any> } = {}
+    order_detail.roster_detail = self.rosterDetails;
+    order_detail.svg_groups = self.svgGroups;
+    order_detail.custom_texts = self.customTexts;
+    order_detail.custom_logos = self.customLogos;
+    if(self.$store.getters.getUsingColorLogos) {
+      order_detail.logo_colors = self.logoColors
+    }
+    return order_detail;
   }
 }
 </script>
