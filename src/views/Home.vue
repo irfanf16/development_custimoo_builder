@@ -362,6 +362,7 @@ import LockerProduct from "@/mixins/LockerProduct";
     }
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
+      await  this.$store.dispatch('permissions')
       await this.$store.dispatch('getLockerRoomColors')
     }
   }
