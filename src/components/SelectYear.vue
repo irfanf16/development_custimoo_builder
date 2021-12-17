@@ -92,7 +92,7 @@ export default class SelectYear extends Mixins(ErrorMessages) {
 
       let res = await this.$store.dispatch('copyEvents', payload)
       await this.$store.dispatch('setYear',this.selectedYear)
-      this.$emit('getLockerEvents',this.room_id)
+      await this.$store.dispatch('getLockerEvents',this.room_id)
       this.viewLoader = false
       this.showToast('Events copied successfully.', 'SUCCESS');
       this.hideModal()
