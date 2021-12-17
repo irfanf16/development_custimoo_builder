@@ -2,7 +2,7 @@
   <span class="asdasd">
   <b-tabs content-class="mt-3" v-model="tabIndex" @activate-tab="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
-      <b-tab :key="i" :active="tabIndex === i" @click="hideAll">
+      <b-tab :key="i" :active="tabIndex === i">
         <template #title>
           <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
                       @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
