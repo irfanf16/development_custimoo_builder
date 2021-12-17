@@ -79,6 +79,10 @@ export default class OrderDetails extends Vue {
     return this.$store.getters.getRosterDetails
   }
 
+  get logoColors(): [Record<any, any>] {
+    return this.$store.getters.getLogosColors
+  }
+
   get total(): number {
     let sum = 0;
     this.rosterDetails.forEach((item) => {
@@ -170,8 +174,8 @@ export default class OrderDetails extends Vue {
     form_data.append("product_style_id", product_style_id);
     form_data.append("product_design_id", product_design_id);
     form_data.append("product_model_id", product_model_id);
-    form_data.append("roster_detail", JSON.stringify(this.rosterDetails));
-
+    let order_detail = await self.getOrderDetail();
+    form_data.append("order_detail", JSON.stringify(order_detail));
     let p2 = new Promise((resolve) => {
       const frontElement = document.getElementById("scene-front") as Record<any, any>
       this.pdf_front_image = frontElement.toDataURL("image/png")
@@ -322,6 +326,19 @@ export default class OrderDetails extends Vue {
     xhr.open('GET', url)
     xhr.responseType = 'blob'
     xhr.send()
+  }
+
+  public async getOrderDetail() {
+    let self = this;
+    let order_detail: { [key: string]: Record<any, any> } = {}
+    order_detail.roster_detail = self.rosterDetails;
+    order_detail.svg_groups = self.svgGroups;
+    order_detail.custom_texts = self.customTexts;
+    order_detail.custom_logos = self.customLogos;
+    if(self.$store.getters.getUsingColorLogos) {
+      order_detail.logo_colors = self.logoColors
+    }
+    return order_detail;
   }
 }
 </script>
