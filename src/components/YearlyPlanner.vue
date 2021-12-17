@@ -176,7 +176,7 @@
 
 <script lang="ts">
 
-import {Component, Mixins, Prop} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Watch} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 
 import {getReminderOptions} from '@/helpers/Helpers';
@@ -217,10 +217,12 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   public allEventsLoader = false
   public view_emails = false
   public years = []
+  public viewAllMonth = ''
   public currentMonth = ''
   public allEvents:any = []
 
   public showAllEvents(month:string, events:Record<any, any>){
+    this.viewAllMonth = month
     this.currentMonth = month + ", " + this.$store.getters.getSelectedYear;
     this.allEvents = events;
     this.$refs['all-events'].show();
@@ -253,6 +255,13 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   }
   get getSelectedYear() {
     return this.$store.getters.getSelectedYear;
+  }
+  @Watch('getEvents', {
+    immediate: true, deep: true
+  })
+  getEventsChanged() {
+    if(this.$store.getters.monthlyEvents(this.viewAllMonth))
+      this.allEvents = this.$store.getters.monthlyEvents(this.viewAllMonth).events
   }
   public getEventEmails(value: string) {
 
