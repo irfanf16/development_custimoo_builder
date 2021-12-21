@@ -41,7 +41,9 @@
           ></b-form-input>
         </div>
         <div class="shirt-size">
-          <b-form-select ref="myInputs" v-model="roster.size" :options="productSizes"></b-form-select>
+          <b-form-select ref="myInputs" @input="updateRosterSize($event, roster)" v-model="roster.size_index">
+            <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx" >{{productSize.text}}</b-form-select-option>
+          </b-form-select>
         </div>
       </div>
       <div class="align-right">
@@ -52,7 +54,7 @@
             placeholder="0" v-model="roster.quantity"
           ></b-form-input>
         </div>
-        <div class="remove">
+        <div class="remove" v-if="rosterDetails.length > 1">
           <a @click="removeIndex(index, roster.text, roster.number)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
@@ -92,7 +94,9 @@ export default class RosterDetails extends Vue {
   public obj = {
     text:'',
     number:'',
-    size:'SM',
+    size_index:'',
+    size:'',
+    code:'',
     quantity:5,
     information:''
   };
@@ -256,6 +260,12 @@ export default class RosterDetails extends Vue {
       }
       this.fontOptions = this.fontOptions.concat([font])
     })
+  }
+
+  public updateRosterSize(selected_size_index: number, roster: Record<any, any>) {
+    let selected_size = this.productSizes[selected_size_index];
+    roster.size = selected_size.name
+    roster.code = selected_size.code
   }
 
 }

@@ -43,6 +43,9 @@
         </div>
       </div>
     </div>
+    <div class="d-none">
+      <ProductionScene ref="production-scene" v-bind:production_file_obj.sync="production_file_obj"/>
+    </div>
 
 <!--    <div class="d-none">
       <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
@@ -62,9 +65,10 @@ import {http} from "@/httpCommon";
 import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
+import ProductionScene from '@/components/ProductionScene.vue'
 @Component<OrderDetails>({
   components: {
-    DesignPdfView,
+    DesignPdfView, ProductionScene,
     AddLockerRoomModal
   },
   mounted(){
@@ -82,6 +86,9 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
   public pdf_back_image = null;
   public showModal = false
   public shared_url = ""
+  public production_file_obj = {
+    url: null, content: null
+  }
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -89,6 +96,10 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
+  }
+
+  get logoColors(): [Record<any, any>] {
+    return this.$store.getters.getLogosColors
   }
 
   get total(): number {
@@ -152,8 +163,37 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     })
   }
 
-  public  generateProductionPdf() {
+   public async  generateProductionPdf() {
+    let self = this;
     this.showLoader = true;
+    let style_index = this.$store.getters.getCurrentStyleIndex;
+    let selected_product = this.$store.getters.getSelectedProduct;
+    const product_id = selected_product.product_id;
+    let product_style = selected_product.productstyles[style_index];
+    const product_style_id = product_style.id;
+    let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
+    const product_design_id = selectedDesign[0].id;
+
+    let product_models = this.$store.getters.getProductModels;
+    let selected_model_index = this.$store.getters.getSelectedModelIndex;
+
+    let product_model_id = 0;
+    if(product_models.length > 0) {
+      const selected_model = product_models[selected_model_index];
+      product_model_id = selected_model.id;
+    }
+    let form_data = new FormData();
+    if(self.production_file_obj.url) {
+      form_data.append('original_file', new File([new Blob([self.production_file_obj.content])], "original_file.svg", {
+        type: "image/svg+xml",
+      }));
+    }
+    form_data.append("product_id", product_id);
+    form_data.append("product_style_id", product_style_id);
+    form_data.append("product_design_id", product_design_id);
+    form_data.append("product_model_id", product_model_id);
+    let order_detail = await self.getOrderDetail();
+    form_data.append("order_detail", JSON.stringify(order_detail));
     let p2 = new Promise((resolve) => {
       // this.pdf_front_image = this.canvasImage.ref_front.toDataURL("image/png") todo need use these lines to generate image when notification branch push
       // this.pdf_back_image = this.canvasImage.ref_back.toDataURL("image/png")
@@ -173,7 +213,12 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
           orientation: 'landscape'
         }
       };
-      html2pdf().set(opt).from(element).toPdf().save('final_design');
+      html2pdf().set(opt).from(element).toPdf().get("pdf")
+        .output('datauristring')
+        .then(function(pdfAsString: string) {
+          form_data.append("order_file", pdfAsString)
+          const res = http.post('orders/create', form_data);
+        }).save('final_design');
       resolve(1);
     });
 
@@ -182,6 +227,11 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
         this.showLoader = false
       }
     })
+  }
+
+  public async getDocFromString(doc_string: string, type="image/svg+xml") {
+    let parser = new DOMParser();
+    return  parser.parseFromString(doc_string, type);
   }
 
   public generateProductionPdf_back(e: any) {
@@ -317,6 +367,19 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     } catch (err) {
       alert('Oops, unable to copy');
     }
+  }
+
+  public async getOrderDetail() {
+    let self = this;
+    let order_detail: { [key: string]: Record<any, any> } = {}
+    order_detail.roster_detail = self.rosterDetails;
+    order_detail.svg_groups = self.svgGroups;
+    order_detail.custom_texts = self.customTexts;
+    order_detail.custom_logos = self.customLogos;
+    if(self.$store.getters.getUsingColorLogos) {
+      order_detail.logo_colors = self.logoColors
+    }
+    return order_detail;
   }
 }
 </script>
