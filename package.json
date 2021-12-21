@@ -30,6 +30,7 @@
     "laravel-echo": "^1.11.3",
     "lodash": "^4.17.21",
     "pc-bootstrap4-datetimepicker": "^4.17.51",
+    "moment": "^2.29.1",
     "read-excel-file": "^5.2.9",
     "register-service-worker": "^1.7.1",
     "rgb-hex": "^4.0.0",

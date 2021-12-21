@@ -84,16 +84,21 @@ const ProductAttributes:Module<any, any> = {
 
     },
     editLockerProduct: [],
-    notifications:[],
+    notifications:[]
   },
   mutations: {
+    UPDATE_NOTIFICATION(state:Record<any, any>, payload){
+     const index =  state.notifications.findIndex((item:Record<any, any>)=>{
+        return item.id == payload.id
+      })
+      Vue.set(state.notifications[index], 'read_at', payload.date)
+    },
     SET_NOTIFICATIONS(state:Record<any, any>, payload) {
       state.notifications  = payload
     },
     UPDATE_NOTIFICATIONS(state:Record<any, any>, payload){
       if (payload){
         state.notifications.unshift(payload)
-        // Vue.set(state.notifications, state.notifications.length, payload)
       }
     },
 
@@ -809,14 +814,14 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
-    getCanvasImage: state => {
-      return state.canvasImage
-    },
     getEditLockerProduct: state => {
       return state.editLockerProduct
     },
     getNotifications: state => {
       return state.notifications
+    },
+    getCanvasImage: state => {
+      return state.canvasImage
     },
     getShuffle: state => {
       return state.showShuffle
@@ -1230,11 +1235,24 @@ const ProductAttributes:Module<any, any> = {
     },
     async getNotifications({commit}){
        await http.get('customer/notifications').then((res) => {
-        commit('SET_NOTIFICATIONS', res.data.data.data)
+        commit('SET_NOTIFICATIONS', res.data.data)
       }).catch(e =>{
         console.log(e)
       })
+    },
+    readNotification({commit}, id){
+     return  http.post('read/notification', {id:id}).then((res) => {
+        if(res.status == 200){
+          const payload = {
+            id: id,
+            date: res.data.data
+          }
+          commit('UPDATE_NOTIFICATION', payload)
+        }
+        return res
+      })
     }
+
   }
 }
 export default ProductAttributes;

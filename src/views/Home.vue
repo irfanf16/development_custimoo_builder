@@ -95,26 +95,22 @@
                   <li><a>
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
                   </a></li>
-                </ul>
-                <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
-<!--                  <h2>Change Product</h2>-->
-<!--                  <button @click="showDesign()" class="change-product-opener btn btn-secondary light">Change Product</button>-->
-                  <div v-if="isCustomerAuthenticated" class="icon" id="bell" @click="notificationsDropDown"> <img src="https://i.imgur.com/AC7dgLA.png" alt=""> </div>
-                  <div v-if="notifications.length" class="notifications" :style="dropdownStyle" id="box">
-                    <h2>Notifications - <span style="background-color: black"> {{ notificationsCounter}}</span></h2>
-                    <template v-for="(notification, ind) in notifications" >
-                    <div   :key="ind" class="notifications-item">
-                      <div class="text">
-                        <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
-                      </div>
+                  <li v-if="isCustomerAuthenticated">
+                    <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
+                    <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
+                      <template v-for="(notification, ind) in notifications" >
+                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]" @click="readNotification(notification)">
+                          <div class="text d-flex align-items-start justify-content-between">
+                            <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                            <div class="date">
+                              <div class="day">{{ notification.created_at | formatDate }}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
                     </div>
-                    </template>
-                  </div>
-                  <div class="change-product-area d-lg-none">
-                    <h2>Change Product</h2>
-                    <b-button @click="showDesign()" class="change-product-opener" variant="secondary"></b-button>
-                  </div>
-                </div>
+                  </li>
+                </ul>
               </header>
 
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
@@ -281,6 +277,13 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {fontsColorsManipulation, fontsList, sortTextsArray} from "@/helpers/Helpers";
 import {getClosestColor} from "@/pantoneColor";
 import LockerProduct from "@/mixins/LockerProduct";
+import moment from 'moment'
+
+Vue.filter('formatDate', function(value) {
+  if (value) {
+    return moment(value).format('MMMM DD')
+  }
+})
 
 @Component<Home>({
   components: {
@@ -421,7 +424,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     let unread_notification_counter = 0
     if (this.$store.getters.getNotifications.length){
       this.$store.getters.getNotifications.forEach((notification:Record<any, any>) => {
-        if (notification.is_read == 0){
+        if (notification.read_at === '' || notification.read_at === null){
           unread_notification_counter += 1
         }
       })
@@ -997,7 +1000,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
   }
-
+  public async readNotification(notification:Record<any, any>){
+    if (notification.read_at === null || notification.read_at === ''){
+       await this.$store.dispatch('readNotification', notification.id)
+    }
+  }
 
   // public resetPreview() {
   //   this.$store.dispatch('defaultColors', [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}])
@@ -1219,6 +1226,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
       }
       a{
         cursor: pointer;
+        position: relative;
       }
       &:first-child{margin: 0;}
     }
@@ -1370,7 +1378,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 .icon {
   cursor: pointer;
   margin-right: 50px;
-  line-height: 60px
+  line-height: 60px;
+  &#bell{line-height: 1;}
 }
 
 .icon span {
@@ -1380,6 +1389,25 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   color: #fff;
   vertical-align: top;
   margin-left: -25px
+}
+.icon span.notification-counter{
+  position: absolute;
+  left: 100%;
+  bottom: 100%;
+  background: #DF4B37;
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 10.5px;
+  width: 16px;
+  height: 16px;
+  margin: 0 0 -8px -8px;
+  padding: 0;
+  box-shadow: 0 0 0 1px #fff;
+  line-height: 1;
 }
 
 .icon img {
@@ -1404,20 +1432,26 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 .notifications {
   width: 300px;
   height: 0px;
+  max-height: 300px;
   opacity: 0;
   position: absolute;
   top: 63px;
-  right: 62px;
-  border-radius: 5px 0px 5px 5px;
+  right: 0;
+  border-radius: 0.5rem;
   background-color: #fff;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  z-index: 99;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .notifications h2 {
   font-size: 14px;
-  padding: 10px;
+  padding: 10px 20px;
   border-bottom: 1px solid #eee;
-  color: #999
+  color: #2c3e50;
+  text-align: left;
+  font-weight: 600;
 }
 
 .notifications h2 span {
@@ -1425,37 +1459,55 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 }
 
 .notifications-item {
+  width: 100%;
   display: flex;
   border-bottom: 1px solid #eee;
-  padding: 6px 9px;
+  padding: 10px 18px;
   margin-bottom: 0px;
-  cursor: pointer
+  cursor: pointer;
+  color: #2c3e50;
+
+  &:hover {
+    background-color: #eee
+  }
+
+  img {
+    display: block;
+    width: 50px;
+    height: 50px;
+    margin-right: 9px;
+    border-radius: 50%;
+    margin-top: 2px
+  }
+
+  .text {
+    width: 100%;
+    gap: 12px;
+
+    h4 {
+      color: #777;
+      font-size: 16px;
+      margin-top: 3px
+    }
+
+    p {
+      color: #2c3e50;
+      font-size: 12px;
+      text-align: left;
+
+      &::first-letter{
+        text-transform: uppercase;
+      }
+    }
+
+    .date{
+      font-size: 12px;
+
+      .month{
+        font-size: 0.8em;
+      }
+    }
+  }
 }
-
-.notifications-item:hover {
-  background-color: #eee
-}
-
-.notifications-item img {
-  display: block;
-  width: 50px;
-  height: 50px;
-  margin-right: 9px;
-  border-radius: 50%;
-  margin-top: 2px
-}
-
-.notifications-item .text h4 {
-  color: #777;
-  font-size: 16px;
-  margin-top: 3px
-}
-
-.notifications-item .text p {
-  color: #aaa;
-  font-size: 12px
-}
-
-
 
 </style>
