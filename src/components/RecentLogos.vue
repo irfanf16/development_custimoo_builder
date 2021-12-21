@@ -1,10 +1,11 @@
 <template>
   <div style="position:relative;">
     <h4 v-if="getRecentLogos.length > 0" class="mb-3 mb-lg-4" style="font-weight: 700">Recent Logos</h4>
-    <div  class="grid grid-4 gap-2">
+    <div  class="grid grid-5 gap-2">
       <div style="position:relative;"  class="d-flex align-items-center justify-content-center" v-for="(logo, index) in getRecentLogos" :key="index">
-        <a class="btn remove p-0 fs-1 position-absolute" style="height: 15px;width:15px;top: 0;right: 0" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo)">
-          <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+        <a class="btn remove position-absolute" style="padding:0; height: 18px;width:18px;top: 0;right: 0; font-size: 1rem" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo)">
+<!--          <font-awesome-icon :icon="['fas', 'trash-alt']"/>-->
+          <BIconX class="position-relative" style="top: -1.7px" />
         </a>
         <img crossorigin="anonymous"   @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
       </div>
@@ -270,5 +271,11 @@ img{
   margin: 0 auto;
   height: auto;
 }
+}
+
+h4{
+  @media (min-width: 600px) {
+    font-size: 1.2rem;
+  }
 }
 </style>

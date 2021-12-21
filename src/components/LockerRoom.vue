@@ -5,7 +5,7 @@
       <b-tab :key="i" :active="tabIndex === i">
         <template #title>
           <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
-                     @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
+                      @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
             <span @click="changeColor">{{ room.room_name }}</span>
           </draggable>
           <a class="remove-tab" @click="deleteRoom(room.id, i)">
@@ -141,6 +141,7 @@
                                    alt="">
                             </template>
                           </div>
+
                           <div class="controls">
                             <a v-b-tooltip.hover.right title="Delete collection"
                                @click="deleteCollection(collection.id,index)" class="remove btn">
@@ -560,6 +561,56 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
   //   });
   //   this.$emit('hideLockerRoomModal')
   // }
+
+  public async editProduct(lockerIndex: number, productIndex: number) {
+    const id = this.getLockerProducts[lockerIndex].product[productIndex].id
+    let prod_res = await this.$store.dispatch('getLockerProductDetail', id);
+    Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
+    this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
+    this.$root.$emit('rostershared', '')
+    const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
+    const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
+    this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
+    const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
+
+    const element = this.getLockerProducts[lockerIndex].product[productIndex];
+
+    let ind = 0
+    if (product_id != this.$store.getters.getEditMainProductId) {
+      const exist = this.products.find((prd:Record<any, any>) => {
+        return prd.id == product_id
+      })
+      if(!exist) {
+        this.$store.commit('CHANGE_EDIT_LOCKER_PRODUCT', {prd_id: product_id})
+        await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', product_id);
+        ind = this.products.length - 1;
+      }
+    else {
+        const index = this.products.findIndex((prd:Record<any, any>) => prd.id == product_id)
+        ind = index >= 0 ? index : 0
+      }
+      this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
+    }
+    // let ind = this.products.length - 1;
+    await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
+    let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
+    await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+    //console.log('JSON.parse(element.custom_logos)',JSON.parse(element.custom_logos))
+    // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', JSON.parse(element.custom_logos));
+    await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
+    await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
+    await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
+    await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
+    this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
+      if (item.id == element.design_id) {
+        Vue.set(item, 'design_show', 1)
+        this.$store.dispatch('setSelectedProductDesignID', item.id)
+      } else {
+        Vue.set(item, 'design_show', 0)
+      }
+    });
+    this.$emit('hideLockerRoomModal')
+  }
 
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {

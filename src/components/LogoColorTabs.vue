@@ -69,6 +69,7 @@ export default class LogoColorTabs extends Vue {
   @Prop({required: true}) productColors!: any
   @Prop({required: true}) swatchcolor!: any
   @Prop({required: false}) swatchPantone!: any
+  @Prop({default: false}) showOtherTab!: boolean
 
   public color= this.swatchcolor
   public pantoneColorVal= this.swatchPantone
@@ -84,11 +85,11 @@ export default class LogoColorTabs extends Vue {
 
   @Watch('showOther')
   showOtherChanged(val: string) {
-    if(this.showOther){
-      let colorPicker = this.$refs['colorPicker'] as Record<any, any>
+    let colorPicker = this.$refs['colorPicker'] as Record<any, any>
+    if(this.showOther && colorPicker){
       colorPicker.data.hueHeight = 500
     }else{
-      console.log('notfound')
+      console.log('color picker not found')
     }
   }
 

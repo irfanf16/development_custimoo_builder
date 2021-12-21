@@ -57,6 +57,14 @@ const ProductAttributes:Module<any, any> = {
       mainProductId: 0,
       editStatus: false
     },
+    activeTab : 0,
+    showShuffle : true,
+    canvasImage:{
+      ref_front:'',
+      ref_back:'',
+      front:'',
+      back:''
+    },
     using_logo_colors: false,
     backgroundCheck: false,
     colorCheck: false,
@@ -71,12 +79,6 @@ const ProductAttributes:Module<any, any> = {
 
     },
     editLockerProduct: [],
-    canvasImage:{
-      ref_front:'',
-      ref_back:'',
-      front:'',
-      back:''
-    },
     notifications:[]
   },
   mutations: {
@@ -565,14 +567,13 @@ const ProductAttributes:Module<any, any> = {
       state.groupColors = payload;
     },
     REMOVE_ROSTER(state:Record<any, any>, payload:number){
-      console.log(payload);
       state.rosterDetails.splice(payload, 1);
     },
     UPDATE_ROSTER(state:Record<any, any>, payload:Record<any, any>){
       if (payload){
         state.rosterDetails = payload;
       }
-      },
+    },
     OVERRIDE_ROSTER(state:Record<any, any>){
       state.rosterDetails = [{
         text: '',
@@ -777,6 +778,12 @@ const ProductAttributes:Module<any, any> = {
     DELETE_COLLECTION(state:Record<any, any>, payload){
       state.collections.splice(payload.index, 1);
     },
+    SET_ACTIVE_TAB(state:Record<any, any>, payload){
+      state.activeTab = payload
+    },
+    SET_SUFFLE(state:Record<any, any>, payload) {
+      state.showShuffle = payload
+    },
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
       state.using_logo_colors = payload
     },
@@ -794,6 +801,12 @@ const ProductAttributes:Module<any, any> = {
     },
     getCanvasImage: state => {
       return state.canvasImage
+    },
+    getShuffle: state => {
+      return state.showShuffle
+    },
+    getActiveTab: state => {
+      return state.activeTab
     },
     getLockerActiveTabIndex: state => {
       return state.lockerActiveTabIndex
@@ -940,7 +953,9 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   actions: {
-
+    setActiveTab({commit}, payload){
+      commit('SET_ACTIVE_TAB', payload)
+    },
     setSelectedIndex({commit}, payload) {
       commit('SET_SELECTED', payload)
     },

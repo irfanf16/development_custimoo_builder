@@ -38,7 +38,7 @@
       </tbody>
     </table>
     <div class="text-right mt-2">
-      <button @click="addPlayers(roster)" class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
+      <button @click="addPlayers" class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
         <BIconPlus />
       </button>
       <b-button variant="primary"  @click="saveRoster(productId, roasterUrl)">Save Roster</b-button>
@@ -61,7 +61,7 @@ export default class RosterTable extends Vue {
   @Prop({required: true}) productSizes!: any
   @Prop({required: true, default: 0}) productId!: number
   @Prop({required: true, default: ''}) roasterUrl!: string
-  @Prop({required: true, default: []}) rosterDetails: Record<any, any>;
+  @Prop({required: true, default: []}) rosterDetails!: Record<any, any>;
   private roster: any[] = []
   public fileData: Record<any, any>[] = []
   public selected = this.productSizes[0]
@@ -91,7 +91,7 @@ export default class RosterTable extends Vue {
     return this.$store.getters.getEyeIndex;
   }
 
-  public addPlayers(obj:Record<any, any>) {
+  public addPlayers() {
     this.$emit('addPlayer');
   }
   public isActive = false;
