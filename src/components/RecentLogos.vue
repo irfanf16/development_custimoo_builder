@@ -109,6 +109,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
   }
 
   public async setLogo(index:number,logo:any) {
+    console.log('logo',logo)
     this.showLoader = true;
     const customTabIndex = this.customLogoIndex
     let custom_logos = this.$store.getters.getCustomLogos()
@@ -216,6 +217,17 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     },1000)
   }
 
+  public fetchLogoColors(id:number) {
+    await http.get('template/download',{
+      responseType: 'blob',
+    }).then((res) => {
+      let blob = new Blob([res.data],{type:res.headers['content-type']})
+      let link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = 'roster_template.xlsx';
+      link.click();
+    })
+  }
    public async addLogoObject(index:number):Promise<void> {
     let logoSetting: Record<any, any>
     if(this.logosSetting[index]) {
