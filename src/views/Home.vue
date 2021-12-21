@@ -49,7 +49,7 @@
               <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
                   <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts" variant="outline-secondary">Locker room</b-button>
+                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                   </template>
                   <template v-else>
                     <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
@@ -145,7 +145,7 @@
                       <a class="custom-link fs-3"><BIconThreeDotsVertical /> </a>
                     </template>
                     <b-dropdown-item><button @click="showDesign">Change Design / Item</button></b-dropdown-item>
-                    <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'lockerRoom'" @click="getLockerRoomProducts">Open locker room</button></b-dropdown-item>
+                    <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'lockerRoom'" @click="getLockerRoomProducts(null)">Open locker room</button></b-dropdown-item>
                     <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" v-b-modal.modal-login>Open locker room</button></b-dropdown-item>
                     <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'summarybutton'" @click="buyNow">Summary</button></b-dropdown-item>
                     <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'" v-b-modal.modal-login>Summary</b-button></b-dropdown-item>
@@ -635,7 +635,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   }
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
-      this.getLockerRoomProducts()
+      this.getLockerRoomProducts(null)
       this.ref['lockerModal'].showLockerRoomModal()
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
@@ -889,23 +889,34 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     }
     this.searchProducts()
   }
-  public async getLockerRoomProducts(){
-    this.$store.commit('SET_SELECTION_MODE',{
-      readonly:false,
-      collectionAddmoreMode:false,
-      eventProductMode:false,
-      eventCollectionMode:false
-    })
+  public async getLockerRoomProducts(locker_index:any){
+      this.$store.commit('SET_SELECTION_MODE',{
+        readonly:false,
+        collectionAddmoreMode:false,
+        eventProductMode:false,
+        eventCollectionMode:false
+      })
     if(this.isCustomerAuthenticated){
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       if (res == true){
+
+        if(locker_index){
+          let payload = {index:locker_index, attribute: 'active_tab', value:true}
+          this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+        }else{
+          locker_index = this.$store.getters.getLockerTabsIndex;
+          if(locker_index){
+            let payload = {index:locker_index, attribute: 'active_tab', value:true}
+            this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+          }
+        }
+
         this.showLockerRoomModal()
-        console.log()
+
         if(this.ref.saveToLockerModal) {
           this.ref.saveToLockerModal.ref['my-modal'].hide();
           this.ref.saveToLockerModal.showLoader = false;
         }
-
 
       }
     }
