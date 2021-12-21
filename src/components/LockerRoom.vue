@@ -686,6 +686,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
       let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
       if (res == true) {
         this.showToast('room deleted', 'SUCCESS')
+        if(this.getLockerProducts.length > 0){
+          this.tabIndex = 0;
+          let payload = {index:this.tabIndex, attribute: 'active_tab', value:true}
+          this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+        }
       } else {
         this.showError(res);
       }

@@ -195,7 +195,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
               this.ref['my-modal'].hide();
               this.showLoader = false
             } else {
-              this.$emit('open-locker-room');
+              this.$emit('open-locker-room', this.tabIndex);
             }
 
           }else{
