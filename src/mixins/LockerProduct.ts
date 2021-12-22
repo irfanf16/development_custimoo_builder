@@ -38,7 +38,6 @@ export default class LockerProducts extends Vue {
     let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
     await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
-    console.log('element',element)
     await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
@@ -53,7 +52,7 @@ export default class LockerProducts extends Vue {
     this.$emit('hideLockerRoomModal')
   }
 
-  get getLockerProducts(): Record<any, any> {
+  get getLockerProducts() {
     let main_product_id = this.$store.getters.getEditProductId;
     let locker_products = this.$store.getters.getLockerProducts;
     let locker_products_count = locker_products.length
