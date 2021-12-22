@@ -195,7 +195,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     let order_detail = await self.getOrderDetail();
     form_data.append("order_detail", JSON.stringify(order_detail));
     let p2 = new Promise((resolve) => {
-      this.pdf_front_image = this.canvasImage.ref_front.toDataURL("image/png") //todo need use these lines to generate image when notification branch push
+      this.pdf_front_image = this.canvasImage.ref_front.toDataURL("image/png")
       this.pdf_back_image = this.canvasImage.ref_back.toDataURL("image/png")
       resolve(1);
     });
