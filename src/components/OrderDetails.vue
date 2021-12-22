@@ -195,35 +195,31 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     let order_detail = await self.getOrderDetail();
     form_data.append("order_detail", JSON.stringify(order_detail));
     let p2 = new Promise((resolve) => {
-      // this.pdf_front_image = this.canvasImage.ref_front.toDataURL("image/png") todo need use these lines to generate image when notification branch push
-      // this.pdf_back_image = this.canvasImage.ref_back.toDataURL("image/png")
-      const frontElement = document.getElementById("scene-front") as Record<any, any>
-      const backElement = document.getElementById("scene-back") as Record<any, any>
-      this.pdf_front_image = frontElement.toDataURL("image/png")
-      this.pdf_back_image = backElement.toDataURL("image/png")
-      const element = document.getElementById("production-pdf-html")
-      const opt = {
-        margin: [0, 0, 0, 0],
-        filename: 'production.pdf',
-        image: {type: "jpeg", quality: 1},
-
-        jsPDF: {
-          unit: "in",
-          format: "letter",
-          orientation: 'landscape'
-        }
-      };
-      html2pdf().set(opt).from(element).toPdf().get("pdf")
-        .output('datauristring')
-        .then(function(pdfAsString: string) {
-          form_data.append("order_file", pdfAsString)
-          const res = http.post('orders/create', form_data);
-        }).save('final_design');
+      this.pdf_front_image = this.canvasImage.ref_front.toDataURL("image/png") //todo need use these lines to generate image when notification branch push
+      this.pdf_back_image = this.canvasImage.ref_back.toDataURL("image/png")
       resolve(1);
     });
 
     p2.then((value) => {
       if(value){
+        const element = document.getElementById("production-pdf-html")
+        const opt = {
+          margin: [0, 0, 0, 0],
+          filename: 'production.pdf',
+          image: {type: "jpeg", quality: 1},
+
+          jsPDF: {
+            unit: "in",
+            format: "letter",
+            orientation: 'landscape'
+          }
+        };
+        html2pdf().set(opt).from(element).toPdf().get("pdf")
+          .output('datauristring')
+          .then(function(pdfAsString: string) {
+            form_data.append("order_file", pdfAsString)
+            const res = http.post('orders/create', form_data);
+          }).save('final_design');
         this.showLoader = false
       }
     })
