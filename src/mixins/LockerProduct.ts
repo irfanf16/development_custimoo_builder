@@ -18,6 +18,7 @@ export default class LockerProducts extends Vue {
     this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
     const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
+    console.log('element',element)
     let ind = 0
     if (product_id != this.$store.getters.getEditMainProductId) {
       const exist = this.products.find((prd:Record<any, any>) => {
@@ -41,6 +42,7 @@ export default class LockerProducts extends Vue {
     await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
+    this.$store.dispatch("SET_LOGO_COLORS", element.colors ? JSON.parse(element.colors) : []);
     this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
       if (item.id == element.design_id) {
         Vue.set(item, 'design_show', 1)
