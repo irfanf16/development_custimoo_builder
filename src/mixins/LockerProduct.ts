@@ -1,7 +1,8 @@
 /* eslint-disable */
 import { Component, Vue } from 'vue-property-decorator'
 import {findIndex} from 'lodash';
-import {getRandom} from "@/helpers/Helpers";
+import {getRandom, processColorsCustom} from "@/helpers/Helpers";
+import {http} from "@/httpCommon";
 @Component
 export default class LockerProducts extends Vue {
 
@@ -42,7 +43,6 @@ export default class LockerProducts extends Vue {
     await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(element.groupcolors));
-    this.$store.dispatch("SET_LOGO_COLORS", element.colors ? JSON.parse(element.colors) : []);
     this.selectedProduct.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
       if (item.id == element.design_id) {
         Vue.set(item, 'design_show', 1)
@@ -51,6 +51,27 @@ export default class LockerProducts extends Vue {
         Vue.set(item, 'design_show', 0)
       }
     });
+
+    //set logo colors
+    let logo_colors = []
+    if(!element.colors && element.custom_logos) {
+      //fetch from server
+      let logos = JSON.parse(element.custom_logos)
+      if(logos.length > 0) {
+        let color_str:any = await this.fetchLogoColors(logos[0].id);
+        let image_colors = processColorsCustom(JSON.parse(color_str))
+        let image_color_count = image_colors.length;
+        while(image_color_count < 4 ) {
+          image_colors.push({hex: null, pantone: null, name: null});
+          ++image_color_count;
+        }
+        logo_colors = image_colors
+      }
+    }
+    else {
+      logo_colors = JSON.parse(element.colors)
+    }
+    await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
     this.$emit('hideLockerRoomModal')
   }
 
@@ -163,4 +184,17 @@ export default class LockerProducts extends Vue {
      });
      self.$emit('hideLockerRoomModal')
   }*/
+
+
+  public async fetchLogoColors(id:number) {
+    let colors = null
+    await http.get(`logos/colors?id=${id}`)
+      .then((res) => {
+        colors =  res.data.colors
+      }).catch((e) => {
+        console.log('Unable to fetch logo colors',e.response.data.message)
+        //this.showError('Unable to fetch logo colors')
+      })
+    return colors
+  }
 }

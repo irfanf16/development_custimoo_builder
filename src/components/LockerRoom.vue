@@ -647,7 +647,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
     this.colors = []
   }
 
-  public addToCustomLogos(currentLogo: Record<any, any>) {
+  public async addToCustomLogos(currentLogo: Record<any, any>) {
     let index = this.logoTabIndex
     if (this.selectedProduct.is_logo_allowed && this.selectedProduct.logos_setting[index]) {
       let logo = {
@@ -665,6 +665,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
         is_transparent: false
       }
       if (index == 0) {
+        if(!currentLogo.logo_colors) {
+          currentLogo.logo_colors = await this.fetchLogoColors(logo.id)
+        }
         if (currentLogo.logo_colors != null) {
           let image_colors = processColorsCustom(JSON.parse(currentLogo.logo_colors))
           let image_color_count = image_colors.length;
