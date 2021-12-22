@@ -890,12 +890,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     this.searchProducts()
   }
   public async getLockerRoomProducts(locker_index:any){
-      this.$store.commit('SET_SELECTION_MODE',{
-        readonly:false,
-        collectionAddmoreMode:false,
-        eventProductMode:false,
-        eventCollectionMode:false
-      })
+    this.$store.commit('SET_SELECTION_MODE',{
+      readonly:false,
+      collectionAddmoreMode:false,
+      eventProductMode:false,
+      eventCollectionMode:false
+    })
     if(this.isCustomerAuthenticated){
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       if (res == true){
