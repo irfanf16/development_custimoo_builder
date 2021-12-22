@@ -21,7 +21,13 @@
       </div>
     </div>
 
-    <SelectItemCarousel v-else ref="itemsCarousel" @retrieveProductsC="retrieveProductsC"/>
+    <template v-else>
+      <div class="collection-btn mb-2 mt-3 px-1 checkbox_buttons">
+        <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>
+        <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>
+      </div>
+      <SelectItemCarousel ref="itemsCarousel" @retrieveProductsC="retrieveProductsC"/>
+    </template>
 
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
       <span>Designs Available</span>
