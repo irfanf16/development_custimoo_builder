@@ -80,18 +80,8 @@ Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false
 
-if (store.getters.isAuthenticated) {
-  app_instance();
-} else{
-  store.dispatch('AUTH_LOGIN').then(() => {
-    app_instance();
-  })
-}
-
-function app_instance(){
-  return new Vue({
-    router,
-    store,
-    render: h => h(App)
-  }).$mount('#app')
-}
+new Vue({
+  router,
+  store,
+  render: h => h(App)
+}).$mount('#app')

@@ -36,13 +36,13 @@ const Auth:Module<any, any> = {
     }
   },
   actions:{
-    async AUTH_LOGIN({commit}){
+   /* async AUTH_LOGIN({commit}){
      await noTokenRequest.post("company/login", {provider_id: provider_id}).then( (res) => {
         localStorage.setItem('access_token', res.data.accessToken)
         commit('AUTH_SUCCESS', res.data.accessToken);
         return true;
       })
-    },
+    },*/
     async loginCustomer({commit}, payload){
       const res = await http.post('customer/login', payload);
       commit('SET_CUSTOMER', res.data)
