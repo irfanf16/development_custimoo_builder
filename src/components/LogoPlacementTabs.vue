@@ -29,7 +29,7 @@
               </div>
             </div>
             <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url && selectedProduct.product_type == 'customized'">
-              <h4 class="mb-3 mb-lg-4">Color Extracted from Logo actualy</h4>
+              <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
               <div class="mb-lg-3 w-100">
                 <div class="color-holder">
                   <div class="color-container">

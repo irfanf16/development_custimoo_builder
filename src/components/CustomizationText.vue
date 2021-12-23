@@ -101,8 +101,6 @@ import {getClosestColor} from '@/pantoneColor'
       this.selectType(this.selectTypeIndex)
     })
     this.getColors()
-
-    console.log('fontoptions', this.fontOptions)
   },
   filters: {
     capitalize: (value: string) => {

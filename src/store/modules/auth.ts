@@ -6,13 +6,17 @@ const Auth:Module<any, any> = {
   state:{
     token:'',
     jwtToken:'',
-    customer:''
+    customer:'',
+    customer_permissions:[]
   },
   getters:{
     isAuthenticated: (state: any) => state.token || localStorage.getItem("access_token"),
     isCustomerAuthenticated: (state: any) => !!state.jwtToken,
     getCustomer:(state:any) => {
       return state.customer || localStorage.getItem("customer") ? JSON.parse(localStorage.getItem("customer") as string) : ''
+    },
+    getCustomerPermissions:state => {
+      return state.customer_permissions
     }
   },
   mutations:{
@@ -33,6 +37,9 @@ const Auth:Module<any, any> = {
     },
     SET_CUSTOMER_TOKEN(state:any){
       state.jwtToken = localStorage.getItem('jwtToken') ? localStorage.getItem('jwtToken') : ''
+    },
+    SET_CUSTOMER_PERMISSIONS(state:Record<any, any>, payload){
+      state.customer_permissions = payload
     }
   },
   actions:{
@@ -68,8 +75,12 @@ const Auth:Module<any, any> = {
         }
      })
       return customer
+    },
+    async permissions({commit}){
+      return await http.get('customer/permissions').then((res) => {
+        commit('SET_CUSTOMER_PERMISSIONS', res.data)
+      })
     }
-
   }
 }
 export default Auth;

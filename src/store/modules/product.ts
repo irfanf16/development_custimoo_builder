@@ -10,7 +10,8 @@ const Product:Module<any, any> = {
     logoUrl:'',
     eyeIndex: -1,
     selectedModelIndex: 0,
-    initialExtractedColors:[]
+    initialExtractedColors:[],
+    active_locker_index:0
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -36,6 +37,9 @@ const Product:Module<any, any> = {
     },
     getinitialExtractedColors(state:Record<any, any>){
       return state.initialExtractedColors
+    },
+    getActiveLockerIndex(state:Record<any, any>){
+      return state.active_locker_index
     }
   },
   mutations:{
@@ -54,6 +58,9 @@ const Product:Module<any, any> = {
     },
     SET_LOCKER_ATTRIBUTE(state:Record<any, any>, payload:Record<any, any>){
       Vue.set(state.locker_products[payload.index],payload.attribute , payload.value);
+    },
+    SET_LOCKER_ACTIVE_INDEX(state:Record<any, any>, payload:number){
+      state.active_locker_index = payload
     },
     SET_LOCKERS(state:Record<any, any>, payload:Record<any, any>){
       state.lockers = []
@@ -223,7 +230,22 @@ const Product:Module<any, any> = {
     },
     initialLogoColors({commit}, payload){
       commit('SET_INITIAL_LOGO_COLORS', JSON.parse(payload))
-    }
+    },
+    async createYearlyPlanner({commit}, payload){
+      const res =  await http.post("locker/create-yearly-planner", payload).then((res) => {
+        if (res.status == 201){
+          commit('SET_LOCKER_ATTRIBUTE', {index: payload.index, attribute:'have_yearly_planner', value:1 })
+          return res;
+        }
+      })
+      return res
+    },
+    async deletePlanner({commit}, payload){
+     return await http.post("locker/planner/delete", payload)
+    },
+    async getIcsFile({commit}, payload){
+      return await http.post("events/create/ics/file", payload)
+    },
 
   }
 }

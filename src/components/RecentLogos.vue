@@ -110,6 +110,9 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
 
   public async setLogo(index:number,logo:any) {
     this.showLoader = true;
+    if(!logo.logo_colors) {
+      logo.logo_colors = await this.fetchLogoColors(logo.id)
+    }
     const customTabIndex = this.customLogoIndex
     let custom_logos = this.$store.getters.getCustomLogos()
     let logo_url = '';
@@ -216,6 +219,17 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     },1000)
   }
 
+  public async fetchLogoColors(id:number):any {
+    let colors = null
+    await http.get(`logos/colors?id=${id}`)
+      .then((res) => {
+        colors =  res.data.colors
+      }).catch((e) => {
+        console.log(e.response.data.message)
+        this.showError('Unable to fetch logo colors')
+      })
+    return colors
+  }
    public async addLogoObject(index:number):Promise<void> {
     let logoSetting: Record<any, any>
     if(this.logosSetting[index]) {
