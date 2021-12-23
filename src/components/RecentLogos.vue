@@ -24,6 +24,7 @@ import {http} from "@/httpCommon"
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
+import LockerProduct from "@/mixins/LockerProduct";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {log} from "fabric/fabric-impl";
 import {processColorsCustom} from "../helpers/Helpers"
@@ -35,7 +36,7 @@ import {processColorsCustom} from "../helpers/Helpers"
 })
 
 
-export default class RecentLogos extends Mixins(ErrorMessages) {
+export default class RecentLogos extends Mixins(ErrorMessages,LockerProduct) {
 
   @Prop({required:false}) customLogoIndex!: number
   @Prop({required: false, default: () => { return [{
@@ -219,17 +220,7 @@ export default class RecentLogos extends Mixins(ErrorMessages) {
     },1000)
   }
 
-  public async fetchLogoColors(id:number):any {
-    let colors = null
-    await http.get(`logos/colors?id=${id}`)
-      .then((res) => {
-        colors =  res.data.colors
-      }).catch((e) => {
-        console.log(e.response.data.message)
-        this.showError('Unable to fetch logo colors')
-      })
-    return colors
-  }
+
    public async addLogoObject(index:number):Promise<void> {
     let logoSetting: Record<any, any>
     if(this.logosSetting[index]) {
