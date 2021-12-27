@@ -4,13 +4,11 @@ import {http, noTokenRequest} from "@/httpCommon";
 import { Module } from "vuex";
 const Auth:Module<any, any> = {
   state:{
-    token:'',
     jwtToken:'',
     customer:'',
     customer_permissions:[]
   },
   getters:{
-    isAuthenticated: (state: any) => state.token || localStorage.getItem("access_token"),
     isCustomerAuthenticated: (state: any) => !!state.jwtToken,
     getCustomer:(state:any) => {
       return state.customer || localStorage.getItem("customer") ? JSON.parse(localStorage.getItem("customer") as string) : ''
@@ -20,9 +18,6 @@ const Auth:Module<any, any> = {
     }
   },
   mutations:{
-    AUTH_SUCCESS(state: any, payload){
-      state.token = payload;
-    },
     SET_CUSTOMER(state:Record<any, any>, payload){
       localStorage.setItem('jwtToken', payload.access_token)
       localStorage.setItem('customer', JSON.stringify(payload.user))
@@ -43,13 +38,6 @@ const Auth:Module<any, any> = {
     }
   },
   actions:{
-   /* async AUTH_LOGIN({commit}){
-     await noTokenRequest.post("company/login", {provider_id: provider_id}).then( (res) => {
-        localStorage.setItem('access_token', res.data.accessToken)
-        commit('AUTH_SUCCESS', res.data.accessToken);
-        return true;
-      })
-    },*/
     async loginCustomer({commit}, payload){
       const res = await http.post('customer/login', payload);
       commit('SET_CUSTOMER', res.data)

@@ -319,10 +319,8 @@ Vue.filter('formatDate', function(value) {
 
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
-    if (this.isAuthenticated) {
-      await this.retrieveProducts()
-      await this.getFillColors()
-    }
+    await this.retrieveProducts()
+    await this.getFillColors()
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
     }
@@ -444,9 +442,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     return this.$store.getters.getHideTab
   }
 
-  get isAuthenticated(): boolean {
-    return this.$store.getters.isAuthenticated
-  }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
