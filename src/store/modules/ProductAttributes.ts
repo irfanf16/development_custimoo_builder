@@ -1065,7 +1065,6 @@ const ProductAttributes:Module<any, any> = {
       await commit('SET_SELECTED_PRODUCT_DESIGN');
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
-      console.log("sdfsdfdsf", payload)
       let done = false;
       await http.get("product?product_id="+payload).then((res) => {
         if (res.status == 200) {
