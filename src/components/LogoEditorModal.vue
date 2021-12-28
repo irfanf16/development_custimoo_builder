@@ -231,8 +231,13 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         })
         let locker_colors = this.lockerColors
         locker_colors = locker_colors.map((locker_color:any) => {
-          locker_color.color_text = JSON.parse(locker_color.color_text)
-          return locker_color
+          console.log('locker_color',locker_color)
+          if(locker_color.color_text) {
+            if(typeof locker_color.color_text == 'string') {
+              locker_color.color_text = JSON.parse(locker_color.color_text)
+            }
+            return locker_color
+          }
         })
         this.productColors = this.productColors.concat(locker_colors)
 

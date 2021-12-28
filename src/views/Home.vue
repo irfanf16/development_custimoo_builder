@@ -283,6 +283,7 @@ import {getClosestColor} from "@/pantoneColor";
 import LockerProduct from "@/mixins/LockerProduct";
 import moment from 'moment'
 
+
 Vue.filter('formatDate', function(value) {
   if (value) {
     return moment(value).format('MMMM DD')
@@ -307,9 +308,13 @@ Vue.filter('formatDate', function(value) {
     LoginForm,
     Scene
   },
+  // beforeRouteEnter(to, from, next) {
+  //   next(vm => {
+  //     vm.prevRoute = from
+  //   })
+  // },
 
   async mounted() {
-
     //get recent logos
     this.setRecentLogos()
 
@@ -321,8 +326,9 @@ Vue.filter('formatDate', function(value) {
     await this.$store.dispatch('setCustomToken');
     if (this.isAuthenticated) {
       await this.retrieveProducts()
+      }
       await this.getFillColors()
-    }
+
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
     }
@@ -337,7 +343,7 @@ Vue.filter('formatDate', function(value) {
         let ind = 0
         if (!exist){
           await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.data.product_id);
-           ind = this.products.length -1
+          ind = this.products.length -1
         }else {
           const index = this.products.findIndex((prd:Record<any, any>) => prd.id == res.data.product_id)
           ind = index >= 0 ? index : 0
@@ -380,6 +386,8 @@ Vue.filter('formatDate', function(value) {
       await  this.$store.dispatch('permissions')
       await this.$store.dispatch('getLockerRoomColors')
     }
+
+
   }
 })
 
@@ -429,6 +437,18 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 
   get notifications(){
     return this.$store.getters.getNotifications
+  }
+  get lastRouteName() {
+    let returnVal = '';
+
+    const routerStack = this.$router.history.stack;
+    const idx = this.$router.history.index;
+
+    if (idx > 0) {
+      returnVal = routerStack[idx - 1].name;
+    }
+
+    return returnVal;
   }
 
   get notificationsCounter(){
@@ -772,6 +792,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   }
 
   public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): Promise<void> {
+
     if (this.nextPageUrl && !searchCall) {
       url = this.nextPageUrl
     }
@@ -786,88 +807,102 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 
 
     if (this.hasProducts) {
-      http.get(url).then(async (response: any) => {
-        if (searchCall || productType) {
-          this.$store.commit('SET_PRODUCTS', []);
-        }
-        let product_data = this.products.concat(response.data.products.data)
-        //remove product from product_data array because already added by locker
-        if(!productType) {
-          this.$store.getters.getEditLockerProduct.forEach((data_id:number) => {
-            const exist = product_data.find((prd:Record<any, any>) => prd.id == data_id)
-            if(exist) {
-              product_data = product_data.filter((product: Record<any, any>) => product.id != exist.id)
-            }
-          })
-        }
-        await this.$store.commit('SET_PRODUCTS', product_data);
-        await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
-
-        let customLogos = this.$store.getters.getCustomLogoObject
-        product_data.forEach(async (product:any) => {
-          if(!customLogos[product.id]) {
-            await this.$store.dispatch('setCustomObj',product.id)
+      console.log('api call')
+        http.get(url).then(async (response: any) => {
+          if (searchCall || productType) {
+            this.$store.commit('SET_PRODUCTS', []);
           }
-        })
-        //set custom text objects for new products
-        let customTexts = this.$store.getters.getCustomTextObject
-        product_data.forEach((product:any) => {
-          if(!customTexts[product.id]) {
-            product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-              const obj = fontsColorsManipulation(product)
-              //calculate colors pantone on init
-              let fill_color_pantone = obj.firstColor.name;
-              const pantone = getClosestColor(obj.firstColor.value);
-              if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-                fill_color_pantone = pantone.pantone;
+          let product_data = this.products.concat(response.data.products.data)
+          //remove product from product_data array because already added by locker
+          if(!productType) {
+            this.$store.getters.getEditLockerProduct.forEach((data_id:number) => {
+              const exist = product_data.find((prd:Record<any, any>) => prd.id == data_id)
+              if(exist) {
+                product_data = product_data.filter((product: Record<any, any>) => product.id != exist.id)
               }
-              let outLine_color_pantone = obj.secondColor.name;
-              const opantone = getClosestColor(obj.secondColor.value);
-              if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-                outLine_color_pantone = opantone.pantone;
-              }
-              const already_added_text_str = this.customTexts[index] ? this.customTexts[index]['text'] : ''
-              const text = {
-                text: already_added_text_str,
-                type: productName.type,
-                width: productName.width,
-                height: productName.height,
-                x_axis: productName.x_axis,
-                y_axis: productName.y_axis,
-                rotation: productName.rotation,
-                haveControls: Boolean(!productName.is_locked),
-                outlineEnabled: Boolean(productName.outline_enabled),
-                side: productName.side,
-                fontFamily: fontsList(product)[0].value,
-                fillColor: obj.firstColor.value,
-                fillColorPantone: fill_color_pantone,
-                outLineColor: obj.secondColor.value,
-                outLineColorPantone: outLine_color_pantone,
-                outLineWidth: 0,
-                textIndex: index,
-                selectColor: false
-              }
-              await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
             })
           }
-        });
-        this.nextPageUrl = response.data.products.next_page_url
-        if (!response.data.products.next_page_url) {
-          this.hasProducts = false
-        }
-        if(!this.mounted){
-          this.mounted = true;
-        }
-        this.$store.dispatch('setSelectedProductAndStyle')
-        this.$store.dispatch('setSelectedProductDesign')
-        this.$store.dispatch('setColorSectionVisibility')
-        this.$store.dispatch("getModels", this.selectedProduct.product_id);
+          await this.$store.commit('SET_PRODUCTS', product_data);
+          if(this.$store.getters.getSelectedProductId <= 0) {
+            await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
+          }
+          else {
+            const index = product_data.findIndex((prd:Record<any, any>) => prd.id == this.$store.getters.getSelectedProductId)
+            if(index < 0) {
+              //selected prd id not exist in new prod data
+              await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
+            }
+            else {
+              await this.$store.dispatch('setSelectedIndex', {selectedIndex:index});
+            }
+          }
 
-        this.$root.$emit('sliderEvent');
-        this.showLoader = false;
-      }).catch((e: any) => {
-        console.log(e)
-      });
+          let customLogos = this.$store.getters.getCustomLogoObject
+          product_data.forEach(async (product:any) => {
+            if(!customLogos[product.id]) {
+              await this.$store.dispatch('setCustomObj',product.id)
+            }
+          })
+          //set custom text objects for new products
+          let customTexts = this.$store.getters.getCustomTextObject
+          product_data.forEach((product:any) => {
+            if(!customTexts[product.id]) {
+              product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
+                const obj = fontsColorsManipulation(product)
+                //calculate colors pantone on init
+                let fill_color_pantone = obj.firstColor.name;
+                const pantone = getClosestColor(obj.firstColor.value);
+                if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+                  fill_color_pantone = pantone.pantone;
+                }
+                let outLine_color_pantone = obj.secondColor.name;
+                const opantone = getClosestColor(obj.secondColor.value);
+                if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+                  outLine_color_pantone = opantone.pantone;
+                }
+                const already_added_text_str = this.customTexts[index] ? this.customTexts[index]['text'] : ''
+                const text = {
+                  text: already_added_text_str,
+                  type: productName.type,
+                  width: productName.width,
+                  height: productName.height,
+                  x_axis: productName.x_axis,
+                  y_axis: productName.y_axis,
+                  rotation: productName.rotation,
+                  haveControls: Boolean(!productName.is_locked),
+                  outlineEnabled: Boolean(productName.outline_enabled),
+                  side: productName.side,
+                  fontFamily: fontsList(product)[0].value,
+                  fillColor: obj.firstColor.value,
+                  fillColorPantone: fill_color_pantone,
+                  outLineColor: obj.secondColor.value,
+                  outLineColorPantone: outLine_color_pantone,
+                  outLineWidth: 0,
+                  textIndex: index,
+                  selectColor: false
+                }
+                await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
+              })
+            }
+          });
+          this.nextPageUrl = response.data.products.next_page_url
+          if (!response.data.products.next_page_url) {
+            this.hasProducts = false
+          }
+          if(!this.mounted){
+            this.mounted = true;
+          }
+          this.$store.dispatch('setSelectedProductAndStyle')
+          this.$store.dispatch('setSelectedProductDesign')
+          this.$store.dispatch('setColorSectionVisibility')
+          this.$store.dispatch("getModels", this.selectedProduct.product_id);
+
+          this.$root.$emit('sliderEvent');
+          this.showLoader = false;
+        }).catch((e: any) => {
+          console.log(e)
+        });
+
     }
   }
 
@@ -1001,7 +1036,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     this.$store.dispatch('setTabMain',{value:index})
   }
 
-  public buyNow() {
+  public async buyNow() {
     this.$router.push('/confirm-order')
   }
 

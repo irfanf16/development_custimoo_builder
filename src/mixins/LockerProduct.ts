@@ -19,7 +19,6 @@ export default class LockerProducts extends Vue {
     this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
     const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
-    console.log('element',element)
     let ind = 0
     if (product_id != this.$store.getters.getEditMainProductId) {
       const exist = this.products.find((prd:Record<any, any>) => {
