@@ -349,6 +349,10 @@ Vue.filter('formatDate', function(value) {
           custom_logos: res.data.custom_logos,
           product_id: res.data.product_id
         }
+        let customLogos = this.$store.getters.getCustomLogoObject
+        if(!customLogos[res.data.product_id]) {
+          await this.$store.dispatch('setCustomObj',res.data.product_id)
+        }
         await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logoObj);
         await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', res.data);
         await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.data.defaultcolors));
@@ -366,7 +370,7 @@ Vue.filter('formatDate', function(value) {
       setTimeout(() => {
         this.showLoader = false
         this.productUpdated = true
-      }, 10000)
+      }, 4000)
     }
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
     this.jwtToken = localStorage.getItem('jwtToken') as string
@@ -778,7 +782,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     if (searchCall || productType) {
       this.hasProducts = true
     }
-
+    console.log(this.$store.getters.getCurrentStyleIndex)
     let customized = this.$store.getters.getCustomized
     let personalized = this.$store.getters.getPersonalized
 
