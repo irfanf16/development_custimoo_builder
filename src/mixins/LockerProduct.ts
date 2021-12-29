@@ -16,12 +16,10 @@ export default class LockerProducts extends Vue {
     this.$root.$emit('rostershared', '')
     const designId = this.getLockerProducts[lockerIndex].product[productIndex].design_id
     const styleId = this.getLockerProducts[lockerIndex].product[productIndex].style_id
-    this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId})
     const product_id = this.getLockerProducts[lockerIndex].product[productIndex].product_id;
+    this.$store.commit('CHANGE_EDIT_STATUS', {id: id, status: true, designId: designId, styleId: styleId, product_id: product_id})
     const element = this.getLockerProducts[lockerIndex].product[productIndex];
-    console.log('element',element)
     let ind = 0
-    if (product_id != this.$store.getters.getEditMainProductId) {
       const exist = this.products.find((prd:Record<any, any>) => {
         return prd.id == product_id
       })
@@ -35,10 +33,13 @@ export default class LockerProducts extends Vue {
         ind = index >= 0 ? index : 0
       }
       this.$store.commit('CHANGE_EDIT_STATUS', {product_id: product_id})
-    }
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: ind});
     let selectedIndex = this.selectedProduct.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
     await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+    let customLogos = this.$store.getters.getCustomLogoObject
+    if(!customLogos[element.product_id]) {
+      await this.$store.dispatch('setCustomObj', element.product_id)
+    }
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
     await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));

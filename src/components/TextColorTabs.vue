@@ -92,7 +92,7 @@ export default class TextColorTabs extends Vue {
 
     this.selectTypeIndex = index
     this.showOther = showOther
-    this.productColor = this.productColors[this.selectTypeIndex].color_text
+    this.productColor = this.productColors[this.selectTypeIndex]?.color_text
 
     if(this.selectTypeIndex){
       this.isActive = !this.isActive
