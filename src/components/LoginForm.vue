@@ -1,5 +1,5 @@
 <template>
-  <b-modal ref="loginModal" @hide="clearForm" id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
+  <b-modal ref="loginModal" @hidden="clearForm" id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
     <div class="form-holder" :class="{active: isActive}">
       <div class="form-area form-signin p-4">
         <h2>Hummel Login</h2>
