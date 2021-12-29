@@ -188,6 +188,10 @@
       try {
        let res = await this.$store.dispatch('signUpCustomer', this.form)
         if (res.status == 201){
+          this.$store.commit('SET_RECENT_LOGOS')
+          await this.$store.dispatch('getLockerRoomColors')
+          await this.$store.dispatch('getNotifications')
+          await  this.$store.dispatch('permissions')
           this.showToast(res.data.message, 'SUCCESS')
           for (let key in this.form) {
             Vue.set(this.form, key, '')
