@@ -99,7 +99,7 @@
       }
 
       public homeScreen() {
-          console.log(this.$store.getters.getMainTab);
+          // console.log(this.$store.getters.getMainTab);
         this.$router.push('/')
 
         if(this.manageComponents.mobileScreen){
