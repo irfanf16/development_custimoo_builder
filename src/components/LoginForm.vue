@@ -1,5 +1,5 @@
 <template>
-  <b-modal ref="loginModal" id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
+  <b-modal ref="loginModal" @hide="clearForm" id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
     <div class="form-holder" :class="{active: isActive}">
       <div class="form-area form-signin p-4">
         <h2>Hummel Login</h2>
@@ -197,6 +197,15 @@
       }catch (error){
         this.showError(error)
       }
+    }
+    public clearForm(){
+      this.form.first_name = ''
+      this.form.last_name= ''
+      this.form.email= ''
+      this.form.password= ''
+      this.form.password_confirmation = ''
+      this.email = ''
+      this.password = ''
     }
 
   }
