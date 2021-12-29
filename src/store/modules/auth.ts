@@ -57,6 +57,7 @@ const Auth:Module<any, any> = {
     },
     async signUpCustomer({commit}, payload){
       const res = await http.post('customer/signup', payload);
+      commit('SET_CUSTOMER', res.data)
       return res
     },
     async logoutCustomer({commit}){
