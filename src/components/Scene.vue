@@ -319,6 +319,22 @@ export default class Scene extends Vue {
   customTextsChanged(newVal: [Record<any, any>]) {
     if (this.mounted) {
       const self = this
+      if(!newVal.filter((item: Record<any, any>) => item.text).length) {
+        this.customTextObjects.forEach((customTextObject: fabric.Object, index: number) => {
+          self.frontCanvas.remove(customTextObject)
+          if (self.backCanvas) {
+            self.backCanvas.remove(customTextObject)
+          }
+          this.customTextObjects[index] = null
+        })
+        this.otherSideTexts.forEach((otherSideText: fabric.Object, index: number) => {
+          self.frontCanvas.remove(otherSideText)
+          if (self.backCanvas) {
+            self.backCanvas.remove(otherSideText)
+          }
+          this.otherSideTexts[index] = null
+        })
+      }
       newVal.forEach((text: Record<any, any>) => {
         if((this.customTextObjects[text.textIndex] && text.side != this.customTextObjects[text.textIndex].side) || (this.customTextObjects[text.textIndex] && !text.text)){
           self.frontCanvas.remove(this.customTextObjects[text.textIndex])
@@ -359,7 +375,7 @@ export default class Scene extends Vue {
 
           if (addText && text.text != '') {
             let finalText = JSON.parse(JSON.stringify(text))
-            if (!text.action && self.productNamesSetting[index]) {
+            if (!text.action && self.productNamesSetting[index] && !text.textIndex) {
               finalText.width = self.productNamesSetting[index].width
               finalText.height = self.productNamesSetting[index].height
               finalText.x_axis = self.productNamesSetting[index].x_axis
