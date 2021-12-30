@@ -803,7 +803,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     if (searchCall || productType) {
       this.hasProducts = true
     }
-    console.log(this.$store.getters.getCurrentStyleIndex)
     let customized = this.$store.getters.getCustomized
     let personalized = this.$store.getters.getPersonalized
 
@@ -811,7 +810,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
 
 
     if (this.hasProducts) {
-      console.log('api call')
         http.get(url).then(async (response: any) => {
           if (searchCall || productType) {
             this.$store.commit('SET_PRODUCTS', []);
