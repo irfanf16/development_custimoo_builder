@@ -615,6 +615,14 @@ const ProductAttributes:Module<any, any> = {
         flood_fill:false
       }
 
+      state.editProduct = {
+        editProductId: 0,
+        editStyleId: 0,
+        editDesignId: 0,
+        mainProductId: 0,
+        editStatus: false
+      }
+
      // state.products.customLogos.map((item:any) => item.customLogos = []);
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
