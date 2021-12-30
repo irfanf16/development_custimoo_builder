@@ -1181,7 +1181,7 @@ export default class Scene extends Vue {
       this.customLogos.forEach((logo, index) => {
         if(logo) {
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
-          if (logoUrl == e.target._element.src) {
+          if (logoUrl == e.target._element.src && logo.logoIndex == e.target.logoIndex) {
             if (e.action == 'drag') {
               self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customLogos)), action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
