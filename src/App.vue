@@ -40,11 +40,15 @@ window.Echo = new Echo({
           user: customer
         }
         this.$store.commit('SET_CUSTOMER', payload)
+        if(!localStorage.getItem('browserToken')){
+          await this.$store.dispatch('setBrowserToken')
+        }
         this.$router.push({name: 'Home'})
         this.$store.commit('RESET_STORE')
       }else{
         alert('no customer')
       }
+      this.$store.commit('SET_RECENT_LOGOS')
     }
     const customer =  this.$store.getters.getCustomer;
     window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
