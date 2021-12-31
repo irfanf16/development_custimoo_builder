@@ -116,7 +116,7 @@
 <!--                  <button @click="showDesign()" class="change-product-opener btn btn-secondary light">Change Product</button>-->
                 </div>
               </header>
-              <div class="undo-btn-area text-left pt-3">
+              <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
