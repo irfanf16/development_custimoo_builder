@@ -396,6 +396,10 @@ export default class CustomTabs extends Vue {
     this.showOtherTab = false
   }
 
+  public hideOtherTab(){
+    this.showOtherTab = false
+  }
+
   get svgGroups() {
     return this.$store.getters.getSvgGroups
   }
