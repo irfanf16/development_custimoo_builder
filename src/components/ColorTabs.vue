@@ -1,5 +1,9 @@
 <template>
+  <div>
+
+
   <b-tabs v-if="!this.onlyColorsTabs">
+
     <b-tab v-for="(svgElement, index) in svgGroups" :key="index" @click="showColor(index)">
       <template #title>
         {{ svgElement.id }}
@@ -46,6 +50,7 @@
         </div>
       </div>
     </b-card-body>
+  </div>
   </div>
 </template>
 
@@ -144,5 +149,8 @@ export default class ColorTabs extends Vue {
         font-size: 0.8rem;
       }
       .hu-color-picker{box-shadow: none !important;}
+  }
+  .card-body {
+    padding: 0.4rem ! important;
   }
 </style>
