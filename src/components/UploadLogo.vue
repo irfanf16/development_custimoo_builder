@@ -16,8 +16,8 @@
         <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="B">Remove Smart Logo Background</b-form-radio>
       </b-form-group>-->
 
-      <div class="w-100 text-left pl-2 position-relative" style="top: 6rem">
-        <div class="d-none d-lg-block continue-btn-holder pt-1" style="padding: 0">
+      <div class="w-100 text-left pl-2 position-relative logo-edit-btn-updated">
+        <div class="d-sm-block d-lg-block continue-btn-holder pt-1" style="padding: 0">
           <b-button @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
           <LogoEditorModal @updateLogoFromLogoEditor="updateLogoFromLogoEditor" :customLogoIndex="this.customLogoIndex" ref="logoEditorModal" :logo_id="customLogos[customLogoIndex].id" />
         </div>
@@ -638,5 +638,14 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
   display: flex;
   align-items: center;
   justify-content: center;
+  @media only screen and (max-width: 767px){
+    width: 100%;
+  }
+}
+.logo-edit-btn-updated{
+  top: 6rem;
+  @media only screen and (max-width: 767px){
+    top: 5rem;
+  }
 }
 </style>
