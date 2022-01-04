@@ -246,7 +246,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProduct) {
       haveControls: Boolean(!logoSetting.is_locked),
       side: logoSetting.side,
       customLogo: true,
-      logoIndex: 0
+      logoIndex: 0,
     }
      logo.logoIndex = index
     await this.$store.dispatch('setCustomLogos', logo)

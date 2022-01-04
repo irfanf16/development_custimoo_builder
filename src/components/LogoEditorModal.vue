@@ -199,7 +199,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         return this.$store.getters.getRemoveBackgroundRadio
       }
       set removeBackgroundRadio(val:any){
-        console.log('setter called',val)
+        //console.log('setter called',val)
       }
 
       get logoEditorObj() {
@@ -229,7 +229,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         })
         let locker_colors = this.lockerColors
         locker_colors = locker_colors.map((locker_color:any) => {
-          console.log('locker_color',locker_color)
           if(locker_color.color_text) {
             if(typeof locker_color.color_text == 'string') {
               locker_color.color_text = JSON.parse(locker_color.color_text)
