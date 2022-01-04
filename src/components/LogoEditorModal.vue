@@ -246,7 +246,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       public closeColorTabs() {
         this.colorTabClick = false
       }
-
     }
 </script>
 
