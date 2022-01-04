@@ -1311,7 +1311,7 @@ export default class Scene extends Vue {
       }
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
-
+      logoUrl = logoUrl+'?not-from-cache-please'
       fabric.Image.fromURL(logoUrl, (img: any) => {
         img.scaleToWidth(this.canvasWidth / this.mainCanvasWidth * logo.width as number)
         img.set({
