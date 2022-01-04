@@ -367,6 +367,7 @@ export default class Scene extends Vue {
             textObject.set('fill', text.fillColor)
             textObject.set('stroke', text.outLineColor)
             textObject.set('strokeWidth', parseInt(text.outLineWidth))
+            textObject.set('strokeWidth', parseInt(text.outLineWidth))
             canvas.renderAll()
 
             this.eventAction(text, textObject, otherSideObject)
@@ -1101,13 +1102,36 @@ export default class Scene extends Vue {
     }
   }
 
+  public updateLogoObject(obj:Record<any, any>,update_obj:Record<any, any>) {
+
+    Object.keys(obj).map(function(key, index) {
+      obj[key].forEach((logo:Record<any, any>,logo_index:number) => {
+        let logo_obj = obj[key][logo_index]
+        obj[key][logo_index] = {...logo_obj, ...update_obj}
+      })
+    });
+    return obj;
+  }
+
+  public updateTextObject(obj:Record<any, any>,update_obj:Record<any, any>) {
+
+    Object.keys(obj).map(function(key, index) {
+      obj[key].forEach((logo:Record<any, any>,logo_index:number) => {
+        let logo_obj = obj[key][logo_index]
+        obj[key][logo_index] = {...logo_obj, ...update_obj}
+      })
+    });
+    return obj;
+  }
+
   public objectMove(e: any, side: string) {
     const self = this;
     if(e.target.text) {
       this.customTexts.forEach((text, index) => {
         if(e.target.textIndex == index) {
           if (e.action == 'drag') {
-            this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
+            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)),{'action':e.action})
+            this.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               on_all: false,
@@ -1121,7 +1145,8 @@ export default class Scene extends Vue {
               value: e.target.top
             })
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-            this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
+            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)),{'action':e.action})
+            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
             const width = e.target.width * e.target.scaleX;
             const height = e.target.height * e.target.scaleY;
             const outLineWidth = e.target.strokeWidth * e.target.scaleX
@@ -1156,7 +1181,8 @@ export default class Scene extends Vue {
               value: outLineWidth * this.measurementRatio
             })
           } else if (e.action == 'rotate') {
-            this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
+            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)),{'action':e.action})
+            this.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               on_all: false,
@@ -1183,7 +1209,8 @@ export default class Scene extends Vue {
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
           if (logoUrl == e.target._element.src && logo.logoIndex == e.target.logoIndex) {
             if (e.action == 'drag') {
-              self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customLogos)), action: 'customLogos' })
+              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)),{'action':e.action})
+              self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
                 index: index,
                 attribute: 'x_axis',
@@ -1195,7 +1222,8 @@ export default class Scene extends Vue {
                 value: e.target.top
               })
             } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-              self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customLogos)), action: 'customLogos' })
+              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)),{'action':e.action})
+              self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
               const width = e.target.width * e.target.scaleX;
               const height = e.target.height * e.target.scaleY;
               self.$store.dispatch('updateCustomLogoAttribute', {
@@ -1219,7 +1247,8 @@ export default class Scene extends Vue {
                 value: Math.floor(height * this.measurementRatio)
               })
             } else if (e.action == 'rotate') {
-              self.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(self.customLogos)), action: 'customLogos' })
+              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)),{'action':e.action})
+              self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
                 index: index,
                 attribute: 'rotation',
@@ -1377,7 +1406,9 @@ export default class Scene extends Vue {
               index: logoIndex,
               data: {
                 originalWidth: width,
-                originalHeight: height
+                originalHeight: height,
+                scaleX: img.scaleX,
+                scaleY: img.scaleY,
               }
             })
           }
@@ -1504,6 +1535,8 @@ export default class Scene extends Vue {
             originalWidth: width,
             originalHeight: height,
             originalOutLineWidth: outLineWidth,
+            scaleX: textBox.scaleX,
+            scaleY: textBox.scaleY
           }
         })
       }
