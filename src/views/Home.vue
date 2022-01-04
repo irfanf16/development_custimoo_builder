@@ -335,7 +335,7 @@ Vue.filter('formatDate', function(value) {
     if (this.$route.params.name) {
       this.showLoader = true
       setTimeout(async () => {
-        let url = 'share/' + this.$route.params.product + '/' + this.$route.params.name
+        let url = this.getPath()
         let res = await this.$store.dispatch('getShareProductDetails', url)
         const exist = this.products.find((prd:Record<any, any>) => {
           return prd.id == res.data.product_id
@@ -511,20 +511,27 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   public editCollectionModal = () =>{
     this.ref['collectionModal'].editCollectionModal()
   }
+  public getPath(){
+    let url = ''
+    url = this.$route.path
+    if (url.charAt(0) === '/'){
+      url = url.substring(1)
+    }
+    return url
+  }
   @Watch('customLogos', {
     deep: true
   })
   async customLogosChanged(newValL: [Record<any, any>]){
     try{
       if (this.getUrlParams()){
-        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let query = this.getPath()
         let param = {
           case: 'custom_logos',
           custom_logos: this.customLogos,
           url: query
         }
         let res = await this.$store.dispatch('updateSharedProduct', param)
-        console.log(res)
       }
     }catch (error){
       console.log(error)
@@ -563,7 +570,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   async  customTextsChanged(newVal: [Record<any, any>]){
     try{
       if (this.getUrlParams()){
-        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let query = this.getPath()
         let param = {
           case: 'customtext',
           customtext: this.customTexts,
@@ -584,7 +591,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   async logoColorsChanged(newVal: [Record<any, any>]) {
     try{
       if (this.getUrlParams()){
-        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let query = this.getPath()
         let param = {
           case: 'logo_colors',
           logo_colors: this.logoColors,
@@ -606,7 +613,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   async defaultColorsChanged(newVal: [Record<any, any>]) {
     try{
       if (this.getUrlParams()){
-        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let query = this.getPath()
         let param = {
           case: 'defaultcolors',
           defaultcolors: this.defaultColors,
@@ -629,7 +636,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   async groupColorsChanged(newVal: [Record<any, any>]){
     try{
       if (this.getUrlParams()){
-        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let query = this.getPath()
         let param = {
           case: 'groupcolors',
           groupcolors: this.groupColors,
