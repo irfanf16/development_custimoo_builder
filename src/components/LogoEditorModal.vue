@@ -26,8 +26,6 @@
               </div>
 
             </div>
-
-
             <div>
               <b-form-checkbox :checked="this.$store.getters.getColorCheck"  @change="toggleLogoCheck('color',$event)">
                 Recolor Logo
@@ -36,18 +34,16 @@
               <div style="width: 50%"  class="child-check" v-if="this.$store.getters.getColorCheck">
                 <div>
                   <b-button  class="color-circle" :id="'colors'" @click="toggleColorTabs()"
-                        :style="{background: '#000000'}" >
+                        :style="{background: selectedColor}" >
                   </b-button>
 
-                  <b-popover  :show.sync="colorTabClick" :target="'colors'" custom-class="share-tooltip" triggers="click">
-                    <ColorTabs  :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
+                  <b-popover  :show.sync="colorTabClick" :target="'colors'" custom-class="share-tooltip" triggers="click" >
+                    <span @click="closeColorTabs" class="modal-close"><BIconX /></span>
+                    <ColorTabs   :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
                   </b-popover>
                 </div>
 
               </div>
-
-
-
             </div>
           </div>
 
@@ -108,6 +104,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       public colors: any = [];
       public productColors: any[] = []
       public showLoader = false;
+      public selectedColor = '#000000'
       @Prop({ required: true }) logo_id!: number
       @Prop({ required: true }) customLogoIndex!: number
 
@@ -124,6 +121,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       }
 
       public async setColorOfLogo(color:string) {
+        this.selectedColor = color
         if(this.timeout) clearTimeout(this.timeout);
         this.timeout = setTimeout(async () => {
           //search function
@@ -242,12 +240,12 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         this.productColors = this.productColors.concat(locker_colors)
 
       }
-
       public toggleColorTabs() {
         this.colorTabClick = !this.colorTabClick
       }
-
-
+      public closeColorTabs() {
+        this.colorTabClick = false
+      }
     }
 </script>
 

@@ -4132,7 +4132,8 @@ $fontSize: 0.5;
 
         .logo-placement-holder {
             width: 100%;
-            padding-bottom: 0;
+            //top: 5rem !important;
+            //padding-bottom: 0;
 
             &.hasLogo {
                 display: flex;

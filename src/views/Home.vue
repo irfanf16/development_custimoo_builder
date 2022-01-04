@@ -40,7 +40,7 @@
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
-            <CustomTabs v-else />
+            <CustomTabs ref="custom-mobile-tabs" v-else />
           </b-col>
 
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column position-relative">
@@ -112,7 +112,7 @@
                   </li>
                 </ul>
               </header>
-              <div class="undo-btn-area text-left pt-3">
+              <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
@@ -323,18 +323,15 @@ Vue.filter('formatDate', function(value) {
 
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
-    if (this.isAuthenticated) {
-      await this.retrieveProducts()
-      }
-      await this.getFillColors()
-
+    await this.retrieveProducts()
+    await this.getFillColors()
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
     }
     if (this.$route.params.name) {
       this.showLoader = true
       setTimeout(async () => {
-        let url = 'share/' + this.$route.params.product + '/' + this.$route.params.name
+        let url = this.getPath()
         let res = await this.$store.dispatch('getShareProductDetails', url)
         const exist = this.products.find((prd:Record<any, any>) => {
           return prd.id == res.data.product_id
@@ -419,6 +416,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   private isFront = true
 
   private switchTabs (e:Record<any, any>){
+    this.ref['custom-mobile-tabs'].hideOtherTab()
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let that = this;
     $(".sideNav li a").removeClass('active')
@@ -475,9 +473,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     return this.$store.getters.getHideTab
   }
 
-  get isAuthenticated(): boolean {
-    return this.$store.getters.isAuthenticated
-  }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
@@ -513,20 +508,27 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   public editCollectionModal = () =>{
     this.ref['collectionModal'].editCollectionModal()
   }
+  public getPath(){
+    let url = ''
+    url = this.$route.path
+    if (url.charAt(0) === '/'){
+      url = url.substring(1)
+    }
+    return url
+  }
   @Watch('customLogos', {
     deep: true
   })
   async customLogosChanged(newValL: [Record<any, any>]){
     try{
       if (this.getUrlParams()){
-        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let query = this.getPath()
         let param = {
           case: 'custom_logos',
           custom_logos: this.customLogos,
           url: query
         }
         let res = await this.$store.dispatch('updateSharedProduct', param)
-        console.log(res)
       }
     }catch (error){
       console.log(error)
@@ -565,7 +567,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   async  customTextsChanged(newVal: [Record<any, any>]){
     try{
       if (this.getUrlParams()){
-        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let query = this.getPath()
         let param = {
           case: 'customtext',
           customtext: this.customTexts,
@@ -586,7 +588,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   async logoColorsChanged(newVal: [Record<any, any>]) {
     try{
       if (this.getUrlParams()){
-        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let query = this.getPath()
         let param = {
           case: 'logo_colors',
           logo_colors: this.logoColors,
@@ -608,7 +610,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   async defaultColorsChanged(newVal: [Record<any, any>]) {
     try{
       if (this.getUrlParams()){
-        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let query = this.getPath()
         let param = {
           case: 'defaultcolors',
           defaultcolors: this.defaultColors,
@@ -631,7 +633,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
   async groupColorsChanged(newVal: [Record<any, any>]){
     try{
       if (this.getUrlParams()){
-        let query = "share/"+this.$route.params.product+ "/" +this.$route.params.name
+        let query = this.getPath()
         let param = {
           case: 'groupcolors',
           groupcolors: this.groupColors,

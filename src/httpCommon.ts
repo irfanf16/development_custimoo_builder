@@ -41,9 +41,8 @@ http.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
   if (401 === error.response.status) {
-    localStorage.setItem('access_token', '');
     localStorage.setItem('jwtToken', '');
-    location.reload()
+   // location.reload()
   } else {
     return Promise.reject(error);
   }
