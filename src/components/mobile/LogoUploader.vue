@@ -17,7 +17,7 @@
 <!--        </div>-->
 
         <div class="tabs-logo-container">
-          <div class="d-flex justify-content-end w-100 mt-3">
+          <div v-if="getRecentLogos.length > 0" class="d-flex justify-content-end w-100 mt-3">
             <div class="recent-logos" @click="showRecentLogosHandler">
               <BIconFileEarmarkImage />
               Recent Logos
@@ -41,8 +41,8 @@
           </div>
         </div>
 
-        <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url && selectedProduct.product_type == 'customized'">
-          <h4 class="mb-3 d-flex align-items-center justify-content-between mb-lg-4">
+        <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0  && selectedProduct.product_type == 'customized'">
+          <h4 v-if="customLogos[0].url" class="mb-3 d-flex align-items-center justify-content-between mb-lg-4">
             <div>
               Color Extracted from Logo
             </div>
@@ -203,6 +203,9 @@ export default class LogoUploader extends Vue {
   }
   get logoColors(): [] {
     return this.$store.getters.getLogosColors
+  }
+  get getRecentLogos() {
+    return this.$store.getters.getRecentLogos
   }
 
   public getColors() {
