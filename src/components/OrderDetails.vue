@@ -112,9 +112,6 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     return sum;
   }
 
-  get isAuthenticated(): boolean {
-    return this.$store.getters.isAuthenticated
-  }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
