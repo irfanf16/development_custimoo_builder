@@ -173,6 +173,7 @@
         if (res.status == 200){
           this.$store.commit('SET_RECENT_LOGOS')
           await this.$store.dispatch('getLockerRoomColors')
+          await  this.$store.dispatch('permissions')
           this.email = ''
           this.password = ''
           this.ref['loginModal'].hide();

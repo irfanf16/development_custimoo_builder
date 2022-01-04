@@ -107,7 +107,7 @@
       </b-card>
     </div>
   </div>
-  <SelectYear ref="selectYearModal" :room_id="room_id" :room_index="room_index"   />
+  <SelectYear ref="selectYearModal" :room_id="room_id" :room_index="room_index"    />
   <b-modal size="xl" hide-footer modal-class="event_form" ref="all-events" id="modal-center-event" centered scrollable
            :title="'All Events ('+currentMonth+')'" >
     <div style="overflow-x:auto">
@@ -143,13 +143,14 @@
                 :icon="['fas', 'edit']"/>
             </a></td>
             <td class="cursor-pointer">  <a data-title="Delete Event"
-                                            @click="deleteEvent(locker_event.id)">
+                                            @click="deleteEvent(locker_event.id,true)">
               <font-awesome-icon
                 :icon="['fas', 'trash-alt']"/>
             </a></td>
           </tr>
         </tbody>
       </table>
+      <div class="loader relative" v-if="allEventsLoader"><img src="../../src/assets/images/loading.gif" /></div>
     </div>
   </b-modal>
   <div class="row">
@@ -175,7 +176,7 @@
 
 <script lang="ts">
 
-import {Component, Mixins, Prop} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Watch} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 
 import {getReminderOptions} from '@/helpers/Helpers';
@@ -213,12 +214,15 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   public ref = this.$refs as Record<any, any>
   public event_view = 'month'
   public viewLoader = false
+  public allEventsLoader = false
   public view_emails = false
   public years = []
+  public viewAllMonth = ''
   public currentMonth = ''
-  public allEvents!:Record<any, any> ={}
+  public allEvents:any = []
 
   public showAllEvents(month:string, events:Record<any, any>){
+    this.viewAllMonth = month
     this.currentMonth = month + ", " + this.$store.getters.getSelectedYear;
     this.allEvents = events;
     this.$refs['all-events'].show();
@@ -252,6 +256,13 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   get getSelectedYear() {
     return this.$store.getters.getSelectedYear;
   }
+  @Watch('getEvents', {
+    immediate: true, deep: true
+  })
+  getEventsChanged() {
+    if(this.$store.getters.monthlyEvents(this.viewAllMonth))
+      this.allEvents = this.$store.getters.monthlyEvents(this.viewAllMonth).events
+  }
   public getEventEmails(value: string) {
 
     return value ? JSON.parse(value) : []
@@ -259,19 +270,25 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   public changeEventView(view_type:string) {
     this.event_view = view_type
   }
-  public async deleteEvent(event_id:number) {
+  public async deleteEvent(event_id:number,all_event_loader = false) {
     try {
       const ok = await this.ref['reset-modal'].showConfirm()
       if (ok) {
-        this.viewLoader = true
+        if(all_event_loader)
+          this.allEventsLoader = true
+        else
+          this.viewLoader = true
         let res = await this.$store.dispatch('deleteEvent',event_id)
         await this.$emit('getLockerEvents',this.room_id)
+        this.allEvents = this.allEvents.filter((event:Record<any, any>) => event.id != event_id)
         this.viewLoader = false
+        this.allEventsLoader = false
         this.showToast(res.data.message,'SUCCESS')
       }
     }
     catch (e) {
-      console.log('e',e)
+      this.viewLoader = false
+      this.allEventsLoader = false
       this.showError(e.response.data.message)
     }
   }

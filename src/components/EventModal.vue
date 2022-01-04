@@ -541,12 +541,14 @@ export default class EventModal extends Mixins(ErrorMessages) {
   }
 
   public deleteFile() {
-    this.event_data.event_type = null
     this.event_data.file_id = ''
     this.file_data = null
     this.file_name = null
     this.event_data.file = null
     this.is_file_download = false
+    if(this.event_data.event_type === 'design' || this.event_data.event_type === 'collection'){
+      this.setEventType(this.event_data.event_type)
+    }
   }
 
   public uploadEventImage() {
