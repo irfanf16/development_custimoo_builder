@@ -232,17 +232,27 @@
     <span class="hover_tooltip"></span>
     <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
         <div class="pt-4 design-name-form">
-            <b-form inline>
+            <div>
 <!--                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Design Name</label>-->
-                <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
-                    <b-input-group>
-                        <b-form-input v-model="copiedProductName"   placeholder="Design Name"></b-form-input>
+              <div class="d-flex align-items-end gap-2 justify-content-between">
+                <div class="w-100 d-block">
+                  <label class="w-100 d-block">Name of Design</label>
+                  <b-input-group>
+                        <b-form-input v-model="copiedProductName" class="mt-1 w-100" placeholder="Design Name"></b-form-input>
                     </b-input-group>
-                  <b-form-select  v-model="copiedProductLockerId"   :options="lockers" value-field="id"
-                                  text-field="room_name"></b-form-select>
-                    <b-button variant="primary" @click="copyProductDesign">Copy</b-button>
                 </div>
-            </b-form>
+
+                <div class="w-100 d-block">
+                    <label class="w-100 d-block">Copy to locker</label>
+                    <b-form-select  v-model="copiedProductLockerId" class="mt-1 w-100" :options="lockers" value-field="id"
+                                    text-field="room_name"></b-form-select>
+                  </div>
+
+                <div class="w-auto">
+                  <b-button variant="primary" class="w-100" @click="copyProductDesign">Copy</b-button>
+                </div>
+              </div>
+            </div>
 
           <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
         </div>
@@ -264,7 +274,7 @@ import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import {getRandom} from "@/helpers/Helpers";
+import {getRandom, setCustomLogo} from "@/helpers/Helpers";
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {processColorsCustom} from "../helpers/Helpers"
@@ -646,42 +656,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
     this.colors = []
   }
 
-  public async addToCustomLogos(currentLogo: Record<any, any>) {
+  public async addToCustomLogos(logo: Record<any, any>) {
     let index = this.logoTabIndex
-    if (this.selectedProduct.is_logo_allowed && this.selectedProduct.logos_setting[index]) {
-      let logo = {
-        logoIndex: index,
-        id: currentLogo.id,
-        url: currentLogo.logo_url,
-        width: this.selectedProduct.logos_setting[index].width,
-        height: this.selectedProduct.logos_setting[index].height,
-        x_axis: this.selectedProduct.logos_setting[index].x_axis,
-        y_axis: this.selectedProduct.logos_setting[index].y_axis,
-        rotation: this.selectedProduct.logos_setting[index].rotation as number,
-        haveControls: Boolean(!this.selectedProduct.logos_setting[index].is_locked),
-        side: this.selectedProduct.logos_setting[index].side,
-        customLogo: true,
-        is_transparent: false
-      }
-      if (index == 0) {
-        if(!currentLogo.logo_colors) {
-          currentLogo.logo_colors = await this.fetchLogoColors(logo.id)
-        }
-        if (currentLogo.logo_colors != null) {
-          let image_colors = processColorsCustom(JSON.parse(currentLogo.logo_colors))
-          let image_color_count = image_colors.length;
-          while (image_color_count < 4) {
-            image_colors.push({hex: null, pantone: null, name: null});
-            ++image_color_count;
-          }
-          this.$store.dispatch("SET_LOGO_COLORS", image_colors);
-          this.$store.dispatch("initialLogoColors", JSON.stringify(image_colors))
-          this.$store.commit("UPDATE_USING_COLOR_LOGOS", false);
-          /*this.processColorsCustom(JSON.parse(currentLogo.logo_colors))*/
-        }
-      }
-      this.$store.dispatch('setCustomLogos', logo)
+    if(!logo.logo_colors) {
+      logo.logo_colors = await this.fetchLogoColors(logo.id)
     }
+    this.$store.commit('SET_COLORS_FROM_RECENT',false)
+    await setCustomLogo(logo,index)
     this.$emit('hideLockerRoomModal')
   }
 
