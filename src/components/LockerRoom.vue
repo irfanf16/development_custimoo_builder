@@ -233,17 +233,27 @@
     <span class="hover_tooltip"></span>
     <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
         <div class="pt-4 design-name-form">
-            <b-form inline>
+            <div>
 <!--                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Design Name</label>-->
-                <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
-                    <b-input-group>
-                        <b-form-input v-model="copiedProductName"   placeholder="Design Name"></b-form-input>
+              <div class="d-flex align-items-end gap-2 justify-content-between">
+                <div class="w-100 d-block">
+                  <label class="w-100 d-block">Name of Design</label>
+                  <b-input-group>
+                        <b-form-input v-model="copiedProductName" class="mt-1 w-100" placeholder="Design Name"></b-form-input>
                     </b-input-group>
-                  <b-form-select  v-model="copiedProductLockerId"   :options="lockers" value-field="id"
-                                  text-field="room_name"></b-form-select>
-                    <b-button variant="primary" @click="copyProductDesign">Copy</b-button>
                 </div>
-            </b-form>
+
+                <div class="w-100 d-block">
+                    <label class="w-100 d-block">Copy to locker</label>
+                    <b-form-select  v-model="copiedProductLockerId" class="mt-1 w-100" :options="lockers" value-field="id"
+                                    text-field="room_name"></b-form-select>
+                  </div>
+
+                <div class="w-auto">
+                  <b-button variant="primary" class="w-100" @click="copyProductDesign">Copy</b-button>
+                </div>
+              </div>
+            </div>
 
           <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
         </div>
