@@ -275,7 +275,7 @@ import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import {getRandom} from "@/helpers/Helpers";
+import {getRandom, setCustomLogo} from "@/helpers/Helpers";
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {processColorsCustom} from "../helpers/Helpers"
@@ -657,42 +657,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
     this.colors = []
   }
 
-  public async addToCustomLogos(currentLogo: Record<any, any>) {
+  public async addToCustomLogos(logo: Record<any, any>) {
     let index = this.logoTabIndex
-    if (this.selectedProduct.is_logo_allowed && this.selectedProduct.logos_setting[index]) {
-      let logo = {
-        logoIndex: index,
-        id: currentLogo.id,
-        url: currentLogo.logo_url,
-        width: this.selectedProduct.logos_setting[index].width,
-        height: this.selectedProduct.logos_setting[index].height,
-        x_axis: this.selectedProduct.logos_setting[index].x_axis,
-        y_axis: this.selectedProduct.logos_setting[index].y_axis,
-        rotation: this.selectedProduct.logos_setting[index].rotation as number,
-        haveControls: Boolean(!this.selectedProduct.logos_setting[index].is_locked),
-        side: this.selectedProduct.logos_setting[index].side,
-        customLogo: true,
-        is_transparent: false
-      }
-      if (index == 0) {
-        if(!currentLogo.logo_colors) {
-          currentLogo.logo_colors = await this.fetchLogoColors(logo.id)
-        }
-        if (currentLogo.logo_colors != null) {
-          let image_colors = processColorsCustom(JSON.parse(currentLogo.logo_colors))
-          let image_color_count = image_colors.length;
-          while (image_color_count < 4) {
-            image_colors.push({hex: null, pantone: null, name: null});
-            ++image_color_count;
-          }
-          this.$store.dispatch("SET_LOGO_COLORS", image_colors);
-          this.$store.dispatch("initialLogoColors", JSON.stringify(image_colors))
-          this.$store.commit("UPDATE_USING_COLOR_LOGOS", false);
-          /*this.processColorsCustom(JSON.parse(currentLogo.logo_colors))*/
-        }
-      }
-      this.$store.dispatch('setCustomLogos', logo)
+    if(!logo.logo_colors) {
+      logo.logo_colors = await this.fetchLogoColors(logo.id)
     }
+    this.$store.commit('SET_COLORS_FROM_RECENT',false)
+    await setCustomLogo(logo,index)
     this.$emit('hideLockerRoomModal')
   }
 

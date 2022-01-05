@@ -208,5 +208,96 @@ const getReminderOptions = () => {
   return optionArray;
 }
 
+const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number):Promise<void> => {
 
-export {getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions };
+  const customTabIndex = logoIndex
+  const custom_logos = Store.getters.getCustomLogos()
+  let logo_url = '';
+  const transparent_logo =  logo.transparent_logo_url;
+  const smart_transparent_logo = logo.smart_transparent_logo_url;
+  const original_logo = logo.logo_url;
+  const is_transparent = false;
+  logo_url = original_logo;
+
+  const payload = [{
+    index: customTabIndex,
+    attribute: 'url',
+    value: logo_url
+  },{
+    index: customTabIndex,
+    attribute: 'id',
+    value: logo.id
+  },{
+    index: customTabIndex,
+    attribute: 'is_transparent',
+    value: false
+  },
+    {
+      index: customTabIndex,
+      attribute: 'original_logo',
+      value: original_logo
+    },
+    {
+      index: customTabIndex,
+      attribute: 'transparent_logo',
+      value: transparent_logo
+    },
+    {
+      index: customTabIndex,
+      attribute: 'smart_transparent_logo',
+      value: smart_transparent_logo
+    },
+    {
+      index: customTabIndex,
+      attribute: 'is_smart_transparent',
+      value: false
+    }
+
+  ];
+  let getLogos = []
+  if (custom_logos.length > 1){
+    getLogos = custom_logos.slice(0, -1)
+  }else{
+    getLogos = custom_logos
+  }
+  Store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(Store.getters.getCustomLogoObject)), action: 'customLogos' })
+  // Store.commit('SET_COLORS_FROM_RECENT',true)
+  payload.forEach(async (data) => {
+    await Store.dispatch('updateCustomLogoAttribute', data)
+  })
+
+
+  if(customTabIndex == 0) {
+    //update team logo url in all product logos
+    const logo_:any = {}
+    logo_.original_logo = original_logo
+    logo_.transparent_logo = transparent_logo
+    logo_.smart_transparent_logo = smart_transparent_logo
+    logo_.is_smart_transparent = false
+    logo_.is_transparent = false
+    logo_.url = logo_url
+    logo_.id = logo.id;
+    await Store.dispatch('setTeamLogoUrl',logo_)
+  }
+  if(!logo.logo_colors) {
+    Store.dispatch("SET_LOGO_COLORS", []);
+  }
+  else {
+    if(customTabIndex == 0) {
+      if(logo.logo_colors != null) {
+        const image_colors = processColorsCustom(JSON.parse(logo.logo_colors))
+        let image_color_count = image_colors.length;
+        while(image_color_count < 4 ) {
+          image_colors.push({hex: null, pantone: null, name: null});
+          ++image_color_count;
+        }
+        Store.dispatch("SET_LOGO_COLORS", image_colors);
+        Store.dispatch("initialLogoColors", JSON.stringify(image_colors));
+        Store.commit("UPDATE_USING_COLOR_LOGOS", false);
+      }
+    }
+  }
+}
+
+
+export {getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo };
