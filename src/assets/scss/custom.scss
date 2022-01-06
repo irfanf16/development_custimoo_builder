@@ -1815,9 +1815,13 @@ button{
             position: relative;
             padding: 0;
             display: block;
+            outline: none !important;
+            box-shadow: none !important;
 
             a{
                 display: block;
+                outline: none !important;
+                box-shadow: none !important;
             }
 
             @media only screen and (min-width: 992px){
