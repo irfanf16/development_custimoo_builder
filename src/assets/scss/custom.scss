@@ -1909,11 +1909,17 @@ button{
                 flex-direction: row;
                 max-height: 50vh;
                 overflow-y: auto;
-                div{
+
+                .assets-logo-block{
+                    border: 1px solid rgba(0,0,0,0.1);
                     display: flex;
-                    flex-basis: 33.3%;
-                    justify-content: center;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+                div{
                     margin-bottom: 20px;
+
                     @media only screen and (min-width: 768px){
                         flex-basis: 20%;
                     }
