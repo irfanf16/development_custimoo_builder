@@ -41,14 +41,14 @@
                    :icon="['fas', 'trash-alt']"/>
                </a>
              </div>
-             <div v-if="view_emails">
+             <div v-if="view_emails" class="d-flex align-items-start gap-1">
                <span class="event_day" style="color: #107BB7"><BIconCalendar style="color: #107BB7" /> {{ locker_event.event_day }}</span>
-               <template v-if="(getEventEmails(locker_event.to_emails)).length > 0">
-                  <span style="display: block" :key="index" v-for="(email, index) in getEventEmails(locker_event.to_emails) ">
-                 <strong>{{email}}</strong>
-               </span>
-               </template>
-              <span v-else> No Other emails</span>
+               <div v-if="(getEventEmails(locker_event.to_emails)).length > 0">
+                 <span style="display: block" :key="index" v-b-tooltip="email" v-for="(email, index) in getEventEmails(locker_event.to_emails) ">
+                  <strong>{{email}}</strong>
+                 </span>
+               </div>
+              <div v-else> No Other emails</div>
 
              </div>
              <span v-else>
@@ -317,6 +317,9 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     .card-body{
       padding: 0.7rem;
       min-height: 140px;
+      max-height: 240px;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
 
     .event_day{
