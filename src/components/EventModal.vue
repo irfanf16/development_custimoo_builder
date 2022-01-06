@@ -72,14 +72,14 @@
                   </b-form-checkbox>
 
                 </b-input-group>
-                <div class="w-100 d-flex justify-content-start align-items-end gap-3" v-if="event_data.email_to_others">
+                <div class="w-100 d-flex mt-3 justify-content-start align-items-end gap-3" v-if="event_data.email_to_others">
 
                   <div class="w-100" v-if="event_data.to_emails && event_data.to_emails.length"
                        style="max-height: 200px; overflow-y: auto">
                     <div v-for="(email, i) in event_data.to_emails" :key="i">
                       <validation-provider rules="email" v-slot="{ errors }">
-                        <b-input-group class="mt-3">
-                          <b-form-input placeholder="Enter Email" @input="updateEmail($event, i)"
+                        <b-input-group :class="{'mt-3': i > 0}">
+                          <b-form-input placeholder="Enter Email" class="no-outline" @input="updateEmail($event, i)"
                                         :value="email"></b-form-input>
                           <b-input-group-append>
                             <b-button variant="danger" @click="deleteEmail(i)">
