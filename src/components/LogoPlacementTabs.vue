@@ -447,6 +447,7 @@ export default class LogoPlacementTabs extends Vue {
 
   public setSwatchColor(color: Record<any, any>) {
     let payload = {color_info : color , index : this.selectedSwatchIndex}
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
     this.$store.dispatch('setDefaultColor', { index: this.selectedSwatchIndex, color: color.hex, pantone: color.pantone, name: color.name })
     this.$store.commit('SET_LOGO_COLOR', payload)
   }
