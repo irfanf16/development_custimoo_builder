@@ -37,8 +37,8 @@
 
                             <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <template v-if="room.active_tab">
-                              <img v-if="!getSelectionMode.eventProductMode"  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
-                              <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                              <img @dblclick="editProduct(room.id, product.id)" v-if="!getSelectionMode.eventProductMode"  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                              <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url+'tesss' ? '' : 'placeholder'" alt="">
                             </template>
 
                           </div>
