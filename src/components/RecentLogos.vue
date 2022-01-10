@@ -24,7 +24,7 @@ import {http} from "@/httpCommon"
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import LockerProduct from "@/mixins/LockerProduct";
+import {LockerProducts} from "@/mixins/LockerProduct";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {log} from "fabric/fabric-impl";
 import {processColorsCustom} from "../helpers/Helpers"
@@ -36,7 +36,7 @@ import {processColorsCustom} from "../helpers/Helpers"
 })
 
 
-export default class RecentLogos extends Mixins(ErrorMessages,LockerProduct) {
+export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
 
   @Prop({required:false}) customLogoIndex!: number
   @Prop({required: false, default: () => { return [{

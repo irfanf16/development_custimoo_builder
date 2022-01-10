@@ -47,14 +47,6 @@ export default {
       this.$store.dispatch("getModels", this.products[index].product_id);
       this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
       this.$store.dispatch('setColorSectionVisibility')
-    },
-    // loadMoreProduct: function (currentIndex) {
-    //   if(this.$store.getters.getProducts.length - 5 <= currentIndex){
-    //     this.$emit('retrieveProductsC', 1)
-    //   }
-    // },
-    myfunction: function(){
-      alert('here')
     }
   }
 }

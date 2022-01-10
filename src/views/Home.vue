@@ -4,39 +4,6 @@
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
-<!--        <template v-if="manageComponents.BasicCustomization">-->
-<!--          <b-col cols="12" lg="3" class="text-left home-color-area" :class="extractedcolorclass">-->
-<!--            <div v-if="this.$store.getters.getShuffle" class="py-2 py-md-3 pb-0 py-lg-5 overflow-hidden mt-4 mt-lg-0">-->
-<!--              <ChooseColor :colors="colors"/>-->
-<!--            </div>-->
-<!--            <template v-if="manageComponents.ExtractedColors">-->
-<!--              <div class="mb-3 mb-lg-0" v-if="customLogos[0] && customLogos[0].url" :class="extractedcolorclass">-->
-<!--                <ExtractedColors v-if="!hideColorSection" />-->
-<!--              </div>-->
-<!--            </template>-->
-
-<!--            <template v-if="this.$store.getters.getActiveTab === 0">-->
-<!--              <template v-if="products.length && selectedProduct.is_logo_allowed == 1">-->
-<!--                <template v-if="manageComponents.LogoArea">-->
-<!--                  <UploadLogo :customLogoIndex="0"/>-->
-<!--                </template>-->
-<!--              </template>-->
-<!--            </template>-->
-<!--            <template v-if="manageComponents.ChooseInterest">-->
-<!--              <ChooseInterest :categories="categories" @search="getSearchQuery" @additionalClassTrigger="additionalClass"/>-->
-<!--            </template>-->
-<!--          </b-col>-->
-
-<!--        </template>-->
-<!--        <template v-if="manageComponents.AdvanceCustomization">-->
-<!--          <b-col v-if="false" cols="12" lg="3" class="text-left border-right py-lg-3">-->
-<!--            <CustomizationTabs :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>-->
-<!--          </b-col>-->
-<!--        </template>-->
-
-<!--        <CustomTabs />-->
-
-          <!-- <template v-if="manageComponents.AdvanceCustomization"> -->
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
@@ -74,24 +41,6 @@
                     <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                   </li>
-<!--                  <li>-->
-<!--                    <b-button :id="'share'" @click="shareProduct(selectedProduct)">-->
-<!--                      <font-awesome-icon :icon="['fas', 'share-alt']"/>-->
-<!--                    </b-button>-->
-<!--                    <b-tooltip :target="'share'" custom-class="share-tooltip home-sharing" placement="bottom" triggers="focus">-->
-<!--                      <div class="share-holder">-->
-<!--                        <h3>Copy link and Share</h3>-->
-<!--                        <div class="share-form">-->
-<!--                          <b-form inline>-->
-<!--                            &lt;!&ndash;                            <b-form-input :id="'copy-'+ind" :value="product.shared_url !== 'undefined'  ?  baseUrl + product.shared_url : ''"></b-form-input>&ndash;&gt;-->
-<!--                            <b-form-input v-model="shared_link" id="copy-link"></b-form-input>-->
-<!--                            <b-button variant="primary" @click="copyLink">Copy Link</b-button>-->
-<!--                            &lt;!&ndash;                            <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>&ndash;&gt;-->
-<!--                          </b-form>-->
-<!--                        </div>-->
-<!--                      </div>-->
-<!--                    </b-tooltip>-->
-<!--                  </li>-->
                   <li><a>
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
                   </a></li>
@@ -112,8 +61,6 @@
                   </li>
                 </ul>
                 <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
-<!--                  <h2>Change Product</h2>-->
-<!--                  <button @click="showDesign()" class="change-product-opener btn btn-secondary light">Change Product</button>-->
                 </div>
               </header>
               <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
@@ -156,7 +103,6 @@
                     <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" v-b-modal.modal-login>Open locker room</button></b-dropdown-item>
                     <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'summarybutton'" @click="buyNow">Summary</button></b-dropdown-item>
                     <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'" v-b-modal.modal-login>Summary</b-button></b-dropdown-item>
-<!--                    <b-dropdown-item>Share</b-dropdown-item>-->
                     <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
                     <b-dropdown-item v-if="!isCustomerAuthenticated"><button v-b-modal.modal-login>Login</button></b-dropdown-item>
                     <b-dropdown-item v-else><button @click="logoutCustomer">Logout</button></b-dropdown-item>
@@ -168,7 +114,6 @@
           <div class="customization-area" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
             <div v-bind:class="{active: isActive}">
               <div class="twoD-view">
-<!--                <CustomizationPreview />-->
                 <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
                   <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
                     <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
@@ -248,7 +193,7 @@
           </div>
         </b-col>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" @search="getSearchQuery"/>
+          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts"/>
           <button class="backtohome-btn d-lg-none" @click="showHomeLanding()"><font-awesome-icon :icon="['fas', 'arrow-left']"/></button>
         </b-col>
         </template>
@@ -281,9 +226,7 @@ import Scene from "@/components/Scene.vue";
 import $ from 'jquery';
 import CustomTabs from "@/components/CustomTabs.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {fontsColorsManipulation, fontsList, sortTextsArray} from "@/helpers/Helpers";
-import {getClosestColor} from "@/pantoneColor";
-import LockerProduct from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
 
 
@@ -311,11 +254,6 @@ Vue.filter('formatDate', function(value) {
     LoginForm,
     Scene
   },
-  // beforeRouteEnter(to, from, next) {
-  //   next(vm => {
-  //     vm.prevRoute = from
-  //   })
-  // },
 
   async mounted() {
     //get recent logos
@@ -395,7 +333,7 @@ Vue.filter('formatDate', function(value) {
   }
 })
 
-export default class Home extends Mixins(ErrorMessages, LockerProduct) {
+export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts) {
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -799,119 +737,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     }
   }
 
-  public async retrieveProducts(url = '/list/products', searchCall = false, productType = false): Promise<void> {
-
-    if (this.nextPageUrl && !searchCall) {
-      url = this.nextPageUrl
-    }
-    if (searchCall || productType) {
-      this.hasProducts = true
-    }
-    let customized = this.$store.getters.getCustomized
-    let personalized = this.$store.getters.getPersonalized
-
-    url += `?customized=${customized}&personalized=${personalized}`
-
-
-    if (this.hasProducts) {
-        http.get(url).then(async (response: any) => {
-          if (searchCall || productType) {
-            this.$store.commit('SET_PRODUCTS', []);
-          }
-          let product_data = this.products.concat(response.data.products.data)
-          //remove product from product_data array because already added by locker
-          if(!productType) {
-            this.$store.getters.getEditLockerProduct.forEach((data_id:number) => {
-              const exist = product_data.find((prd:Record<any, any>) => prd.id == data_id)
-              if(exist) {
-                product_data = product_data.filter((product: Record<any, any>) => product.id != exist.id)
-              }
-            })
-          }
-          await this.$store.commit('SET_PRODUCTS', product_data);
-          if(this.$store.getters.getSelectedProductId <= 0) {
-            await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
-          }
-          else {
-            const index = product_data.findIndex((prd:Record<any, any>) => prd.id == this.$store.getters.getSelectedProductId)
-            if(index < 0) {
-              //selected prd id not exist in new prod data
-              await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
-            }
-            else {
-              await this.$store.dispatch('setSelectedIndex', {selectedIndex:index});
-            }
-          }
-
-          let customLogos = this.$store.getters.getCustomLogoObject
-          product_data.forEach(async (product:any) => {
-            if(!customLogos[product.id]) {
-              await this.$store.dispatch('setCustomObj',product.id)
-            }
-          })
-          //set custom text objects for new products
-          let customTexts = this.$store.getters.getCustomTextObject
-          product_data.forEach((product:any) => {
-            if(!customTexts[product.id]) {
-              product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-                const obj = fontsColorsManipulation(product)
-                //calculate colors pantone on init
-                let fill_color_pantone = obj.firstColor.name;
-                const pantone = getClosestColor(obj.firstColor.value);
-                if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-                  fill_color_pantone = pantone.pantone;
-                }
-                let outLine_color_pantone = obj.secondColor.name;
-                const opantone = getClosestColor(obj.secondColor.value);
-                if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-                  outLine_color_pantone = opantone.pantone;
-                }
-                const already_added_text_str = this.customTexts[index] ? this.customTexts[index]['text'] : ''
-                const text = {
-                  text: already_added_text_str,
-                  type: productName.type,
-                  width: productName.width,
-                  height: productName.height,
-                  x_axis: productName.x_axis,
-                  y_axis: productName.y_axis,
-                  rotation: productName.rotation,
-                  haveControls: Boolean(!productName.is_locked),
-                  outlineEnabled: Boolean(productName.outline_enabled),
-                  side: productName.side,
-                  fontFamily: fontsList(product)[0].value,
-                  fillColor: obj.firstColor.value,
-                  fillColorPantone: fill_color_pantone,
-                  outLineColor: obj.secondColor.value,
-                  outLineColorPantone: outLine_color_pantone,
-                  outLineWidth: 0,
-                  textIndex: index,
-                  selectColor: false
-                }
-                await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
-              })
-            }
-          });
-          this.nextPageUrl = response.data.products.next_page_url
-          if (!response.data.products.next_page_url) {
-            this.hasProducts = false
-          }
-          if(!this.mounted){
-            this.mounted = true;
-          }
-          this.$store.dispatch('setSelectedProductAndStyle')
-          this.$store.dispatch('setSelectedProductDesign')
-          this.$store.dispatch('setColorSectionVisibility')
-          this.$store.dispatch("getModels", this.selectedProduct.product_id);
-
-          this.$root.$emit('sliderEvent');
-          this.showLoader = false;
-        }).catch((e: any) => {
-          console.log(e)
-        });
-
-    }
-  }
-
   public copyLink(){
     let testingCodeToCopy = document.querySelector("#copy-link")  as Record<any, any>
     testingCodeToCopy.select()
@@ -922,26 +747,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
       alert('Oops, unable to copy');
     }
   }
-  public searchProducts() {
-    this.hasProducts = true
-    let url = '/list/products?';
-    if (this.search) {
-      url += '&search=' + this.search
-    }
-    if (this.category_id) {
-      url += '&category_id=' + this.category_id
-    }
-    this.retrieveProducts(url, true)
-  }
 
-  public getSearchQuery(param: string, type: string) {
-    if (type == 'search') {
-      this.search = param
-    } else {
-      this.category_id = param
-    }
-    this.searchProducts()
-  }
   public async getLockerRoomProducts(locker_index:any){
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
@@ -1070,9 +876,18 @@ export default class Home extends Mixins(ErrorMessages, LockerProduct) {
     }
   }
 
-  // public resetPreview() {
-  //   this.$store.dispatch('defaultColors', [{name: 'Color One', color: null, pantone: null}, {name: 'Color Two', color: null, pantone: null}, {name: 'Color Three', color: null, pantone: null}, {name: 'Color Four', color: null, pantone: null}])
-  // }
+  public async retrieveProducts() {
+    let self = this;
+    let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
+    http.get(url).then(async (response: Record<any, any>) => {
+      await self.handleMainProducts(response);
+      if(self["showLoader"]) {
+        self.showLoader = false;
+      }
+    }, (error) => {
+      console.error("Error while getting order detail", error.response.data.message)
+    })
+  }
 
 }
 </script>
