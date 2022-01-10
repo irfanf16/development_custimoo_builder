@@ -7,7 +7,7 @@
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
-            <CustomTabs v-else />
+            <CustomTabs ref="custom-mobile-tabs" v-else />
           </b-col>
 
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column position-relative">
@@ -358,6 +358,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private isFront = true
 
   private switchTabs (e:Record<any, any>){
+    this.ref['custom-mobile-tabs'].hideOtherTab()
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let that = this;
     $(".sideNav li a").removeClass('active')

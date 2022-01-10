@@ -27,7 +27,8 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts} from "@/mixins/LockerProduct";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {log} from "fabric/fabric-impl";
-import {processColorsCustom} from "../helpers/Helpers"
+import {processColorsCustom, setCustomLogo} from "../helpers/Helpers"
+import Store from "@/store";
 
 @Component<RecentLogos>({
   components: {
@@ -111,110 +112,23 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
 
   public async setLogo(index:number,logo:any) {
     this.showLoader = true;
-    if(!logo.logo_colors) {
-      logo.logo_colors = await this.fetchLogoColors(logo.id)
-    }
-    const customTabIndex = this.customLogoIndex
-    let custom_logos = this.$store.getters.getCustomLogos()
-    let logo_url = '';
-    let transparent_logo =  logo.transparent_logo_url;
-    let smart_transparent_logo = logo.smart_transparent_logo_url;
-    let original_logo = logo.logo_url;
-    let is_transparent = false;
-    if(custom_logos[this.customLogoIndex] && custom_logos[this.customLogoIndex].is_transparent===true){
-      logo_url = transparent_logo;
-      is_transparent = true;
-    }else{
-      logo_url = original_logo;
-    }
-
-    let payload = [{
-      index: customTabIndex,
-      attribute: 'url',
-      value: logo_url
-    },{
-      index: customTabIndex,
-      attribute: 'id',
-      value: logo.id
-    },{
-      index: customTabIndex,
-      attribute: 'is_transparent',
-      value: false
-    },
-      {
-        index: customTabIndex,
-        attribute: 'original_logo',
-        value: original_logo
-      },
-      {
-        index: customTabIndex,
-        attribute: 'transparent_logo',
-        value: transparent_logo
-      },
-      {
-        index: customTabIndex,
-        attribute: 'smart_transparent_logo',
-        value: smart_transparent_logo
-      },
-      {
-        index: customTabIndex,
-        attribute: 'is_smart_transparent',
-        value: false
+    try {
+      if(!logo.logo_colors) {
+        logo.logo_colors = await this.fetchLogoColors(logo.id)
       }
-
-    ];
-    //check if logo is removed but the tab is still active
-    if(!custom_logos[index]) {
-      //add logo object in custom logos array
-      this.addLogoObject(customTabIndex)
-    }
-
-
-
-    let getLogos = []
-    if (custom_logos.length > 1){
-      getLogos = custom_logos.slice(0, -1)
-    }else{
-      getLogos = custom_logos
-    }
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
-    this.$store.commit('SET_COLORS_FROM_RECENT',true)
-    payload.forEach(async (data) => {
-       await this.$store.dispatch('updateCustomLogoAttribute', data)
-    })
-
-
-    if(customTabIndex == 0) {
-      //update team logo url in all product logos
-      let logo_:any = {}
-      logo_.original_logo = original_logo
-      logo_.transparent_logo = transparent_logo
-      logo_.smart_transparent_logo = smart_transparent_logo
-      logo_.is_smart_transparent = false
-      logo_.is_transparent = false
-      logo_.url = logo_url
-      logo_.id = logo.id;
-      await this.$store.dispatch('setTeamLogoUrl',logo_)
-    }
-    if(!logo.logo_colors) {
-      this.$store.dispatch("SET_LOGO_COLORS", []);
-    }
-    else {
-      if(customTabIndex == 0) {
-        if(logo.logo_colors != null) {
-          let image_colors = processColorsCustom(JSON.parse(logo.logo_colors))
-          let image_color_count = image_colors.length;
-          while(image_color_count < 4 ) {
-            image_colors.push({hex: null, pantone: null, name: null});
-            ++image_color_count;
-          }
-          this.$store.dispatch("SET_LOGO_COLORS", image_colors);
-          this.$store.dispatch("initialLogoColors", JSON.stringify(image_colors));
-          this.$store.commit("UPDATE_USING_COLOR_LOGOS", false);
-        }
+      let custom_logos = this.$store.getters.getCustomLogos()
+      //check if logo is removed but the tab is still active
+      if(!custom_logos[index]) {
+        //add logo object in custom logos array
+        await this.addLogoObject(this.customLogoIndex)
       }
+      this.$store.commit('SET_COLORS_FROM_RECENT',true)
+      await setCustomLogo(logo,this.customLogoIndex)
     }
-
+    catch (err) {
+      console.log(err)
+      this.showLoader = false;
+    }
     setTimeout(() => {
       this.showLoader = false;
     },1000)
@@ -246,7 +160,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
       haveControls: Boolean(!logoSetting.is_locked),
       side: logoSetting.side,
       customLogo: true,
-      logoIndex: 0
+      logoIndex: 0,
     }
      logo.logoIndex = index
     await this.$store.dispatch('setCustomLogos', logo)

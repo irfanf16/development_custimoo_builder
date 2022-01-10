@@ -103,6 +103,10 @@ button{
     // }
 }
 
+.btn[disabled]{
+    cursor: not-allowed !important;
+}
+
 .btn.btn-outline-secondary[disabled]{
     color: #999 !important;
     cursor: not-allowed !important;
@@ -3248,6 +3252,8 @@ $fontSize: 0.5;
                 padding: 0;
                 border: none;
                 font-size: 1em;
+                outline: none !important;
+                box-shadow: none !important;
 
                 &.active{
                     color: #189076;
@@ -4132,7 +4138,8 @@ $fontSize: 0.5;
 
         .logo-placement-holder {
             width: 100%;
-            padding-bottom: 0;
+            //top: 5rem !important;
+            //padding-bottom: 0;
 
             &.hasLogo {
                 display: flex;
@@ -4339,5 +4346,12 @@ $fontSize: 0.5;
     }
     em{
         font-style: italic;
+    }
+}
+
+.no-outline{
+    &:focus,&:hover,&:active {
+        box-shadow: none !important;
+        outline: none !important;
     }
 }

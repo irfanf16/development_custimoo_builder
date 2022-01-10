@@ -220,14 +220,9 @@ const ProductAttributes:Module<any, any> = {
     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
       if(customLogo){
         if('logoIndex' in customLogo && customLogo.logoIndex != null) {
-
           Vue.set(state.customLogos[state.selectedPrdId], customLogo.logoIndex, customLogo)
-          // Vue.set(state.customLogos, customLogo.logoIndex, customLogo)
         } else {
-          console.log('else')
-
           Vue.set(state.customLogos[state.selectedPrdId], state.customLogos[state.selectedPrdId].length, customLogo)
-         // Vue.set(state.customLogos, state.customLogos.length, customLogo)
         }
       }
     },
@@ -253,9 +248,9 @@ const ProductAttributes:Module<any, any> = {
     },
     CUSTOM_LOGO_WITHOUT_TRIGGER(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
-        if(customLogoAttribute.data.length && state.customLogos[state.selectedPrdId] && state.customLogos[state.selectedPrdId][customLogoAttribute.index]) {
-          customLogoAttribute.data.forEach((item: Record<any, any>, key: string) => {
-            state.customLogos[state.selectedPrdId][customLogoAttribute.index][key] = item
+        if(Object.keys(customLogoAttribute.data).length && state.customLogos[state.selectedPrdId] && state.customLogos[state.selectedPrdId][customLogoAttribute.index]) {
+          Object.keys(customLogoAttribute.data).forEach((key) => {
+            state.customLogos[state.selectedPrdId][customLogoAttribute.index][key] = customLogoAttribute.data[key]
           })
         }
       }
@@ -622,12 +617,8 @@ const ProductAttributes:Module<any, any> = {
         mainProductId: 0,
         editStatus: false
       }
-
-     // state.products.customLogos.map((item:any) => item.customLogos = []);
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
-
-
         let arr:any = []
         state.products.forEach(async (product:any) => {
           const default_setting = setLogoSettings(0)

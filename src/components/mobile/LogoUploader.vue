@@ -17,7 +17,7 @@
 <!--        </div>-->
 
         <div class="tabs-logo-container">
-          <div class="d-flex justify-content-end w-100 mt-3">
+          <div v-if="getRecentLogos.length > 0" class="d-flex justify-content-end w-100 mt-3">
             <div class="recent-logos" @click="showRecentLogosHandler">
               <BIconFileEarmarkImage />
               Recent Logos
@@ -41,8 +41,8 @@
           </div>
         </div>
 
-        <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url && selectedProduct.product_type == 'customized'">
-          <h4 class="mb-3 d-flex align-items-center justify-content-between mb-lg-4">
+        <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0  && selectedProduct.product_type == 'customized'">
+          <h4 v-if="customLogos[0].url" class="mb-3 d-flex align-items-center justify-content-between mb-lg-4">
             <div>
               Color Extracted from Logo
             </div>
@@ -69,7 +69,7 @@
 
                 <div v-if="showLogoColors" class="mobile-other">
                   <span class="close" @click="hideOther"><BIconX /></span>
-                  <h2>Chose a color</h2>
+                  <h2>Choose a color</h2>
                   <LogoColorTabs @setSwatchColor="setSwatchColor"
                                  :swatchPantone="defSwatchPantone"
                                  :swatchcolor="defSwatchColor"
@@ -204,6 +204,9 @@ export default class LogoUploader extends Vue {
   get logoColors(): [] {
     return this.$store.getters.getLogosColors
   }
+  get getRecentLogos() {
+    return this.$store.getters.getRecentLogos
+  }
 
   public getColors() {
 
@@ -219,6 +222,7 @@ export default class LogoUploader extends Vue {
 
   public setSwatchColor(color: Record<any, any>) {
     let payload = {color_info : color , index : this.selectedSwatchIndex}
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
     this.$store.dispatch('setDefaultColor', { index: this.selectedSwatchIndex, color: color.hex, pantone: color.pantone, name: color.name })
     this.$store.commit('SET_LOGO_COLOR', payload)
   }

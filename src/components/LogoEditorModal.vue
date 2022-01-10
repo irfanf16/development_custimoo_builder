@@ -34,7 +34,7 @@
               <div style="width: 50%"  class="child-check" v-if="this.$store.getters.getColorCheck">
                 <div>
                   <b-button  class="color-circle" :id="'colors'" @click="toggleColorTabs()"
-                        :style="{background: '#000000'}" >
+                        :style="{background: selectedColor}" >
                   </b-button>
 
                   <b-popover  :show.sync="colorTabClick" :target="'colors'" custom-class="share-tooltip" triggers="click" >
@@ -104,6 +104,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       public colors: any = [];
       public productColors: any[] = []
       public showLoader = false;
+      public selectedColor = '#000000'
       @Prop({ required: true }) logo_id!: number
       @Prop({ required: true }) customLogoIndex!: number
 
@@ -120,6 +121,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       }
 
       public async setColorOfLogo(color:string) {
+        this.selectedColor = color
         if(this.timeout) clearTimeout(this.timeout);
         this.timeout = setTimeout(async () => {
           //search function
@@ -197,7 +199,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         return this.$store.getters.getRemoveBackgroundRadio
       }
       set removeBackgroundRadio(val:any){
-        console.log('setter called',val)
+        //console.log('setter called',val)
       }
 
       get logoEditorObj() {
@@ -227,7 +229,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         })
         let locker_colors = this.lockerColors
         locker_colors = locker_colors.map((locker_color:any) => {
-          console.log('locker_color',locker_color)
           if(locker_color.color_text) {
             if(typeof locker_color.color_text == 'string') {
               locker_color.color_text = JSON.parse(locker_color.color_text)
@@ -244,7 +245,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       public closeColorTabs() {
         this.colorTabClick = false
       }
-
     }
 </script>
 

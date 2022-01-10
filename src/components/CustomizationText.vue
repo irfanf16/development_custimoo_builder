@@ -218,6 +218,10 @@ export default class CustomizationText extends Vue {
   updateTextField(index: number, value: string) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'text', value: value})
+    const type = this.customTexts[index].type == 'name' ? 'text' : 'number'
+    if (index == 0 || index == 1){
+      this.$store.commit('rosterDetailAttribute',{index: 0, attribute: type, value: value})
+    }
   }
 }
 </script>

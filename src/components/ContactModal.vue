@@ -15,7 +15,7 @@
 
               <div class="d-flex gap-1">
                 <button type="button"  class="btn light btn-secondary" @click="hideContactModal">Cancel</button>
-                <button :disabled="invalid" type="submit" class="btn btn-secondary" >Save</button>
+                <button :disabled="invalid" type="submit" class="btn btn-secondary" >Add</button>
               </div>
             </div>
             <span class="error mt-1 d-block">{{ errors[0] }}</span>
@@ -26,7 +26,6 @@
       </ValidationObserver>
     </div>
     <div v-if="getContacts.length > 0">
-      <h3 class="fs-3 font-weight-bold">Contacts List</h3>
       <div class="mt-3" style="max-height: 300px; overflow-y:auto">
         <table class="table table-bordered b-table-fixed mb-0 w-100 ">
           <thead class="bg-light">
