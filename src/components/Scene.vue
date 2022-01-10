@@ -898,7 +898,7 @@ export default class Scene extends Vue {
     })
 
 
-    
+
     let vertical_line = new fabric.Line([self.canvasWidth/2,0,self.canvasWidth/2,self.canvasHeight], {
       stroke: '#6EF3CC',
       strokeWidth:4,
@@ -916,8 +916,8 @@ export default class Scene extends Vue {
       self.objectScaling(e, side)
 
       if(!this.drawLines) {
-        self.frontCanvas.add(vertical_line);
-        self.frontCanvas.add(horizontal_line);
+        canvas.add(vertical_line);
+        canvas.add(horizontal_line);
         this.drawLines = true
       }
 
@@ -960,7 +960,6 @@ export default class Scene extends Vue {
         canvas.renderAll();
       }
     else {
-        let objects = canvas.getObjects('line');
         horizontal_line.set({
           stroke: '#6EF3CC',
           strokeWidth:4,
