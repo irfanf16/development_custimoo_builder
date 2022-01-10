@@ -109,6 +109,7 @@ import {setLogoSettings} from "@/helpers/Helpers";
     }
 
     function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
+      console.log('delete')
       let target = transform.target;
       let canvas = target.canvas;
       if('textIndex' in target) {
@@ -183,6 +184,7 @@ export default class Scene extends Vue {
   public otherSideTexts: any[] = []
   public logoIndex = 0
   public textIndex = 0
+  public drawLines = false
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -886,11 +888,86 @@ export default class Scene extends Vue {
       }
     }, 1000)
     canvas.on('object:modified', (e: Record<any, any>) => {
+      var objects = canvas.getObjects('line');
+      for (let i in objects) {
+        canvas.remove(objects[i]);
+      }
+      this.drawLines = false
       self.objectMove(e, side)
       self.addToOtherSide(e.target, side)
     })
+
+
+    
+    let vertical_line = new fabric.Line([self.canvasWidth/2,0,self.canvasWidth/2,self.canvasHeight], {
+      stroke: '#6EF3CC',
+      strokeWidth:4,
+      strokeDashArray: [5, 5],
+    })
+    let horizontal_line = new fabric.Line([0,(self.canvasHeight/2),self.canvasWidth,(self.canvasHeight/2)], {
+      stroke: '#6EF3CC',
+      strokeWidth:4,
+      strokeDashArray: [5, 5],
+    })
+    let relativeCanvasWidth = parseInt(self.canvasWidth/2 - 20)
+    let relativeCanvasHeight = (self.canvasHeight/2 - 20)
+
     canvas.on('object:moving', (e: Record<any, any>) => {
       self.objectScaling(e, side)
+
+      if(!this.drawLines) {
+        self.frontCanvas.add(vertical_line);
+        self.frontCanvas.add(horizontal_line);
+        this.drawLines = true
+      }
+
+      let actObj = e.target;
+      let coords = actObj.calcCoords();
+
+      let left = coords.tl.x;
+      let top = coords.tl.y;
+
+
+      let  height = e.target.height * e.target.scaleY
+      let width = e.target.width * e.target.scaleX
+      width = parseInt(width/2)
+      height = parseInt(height/2)
+
+
+      if(parseInt(left) >= relativeCanvasWidth-width && parseInt(left) <= (relativeCanvasWidth-width)+5) {
+        vertical_line.set({
+          stroke: '#6EF3CC',
+          strokeWidth:4,
+          strokeDashArray: []
+        })
+        canvas.renderAll()
+      }
+    else {
+        vertical_line.set({
+          stroke: '#6EF3CC',
+          strokeWidth:4,
+          strokeDashArray: [5,5]
+        })
+        canvas.renderAll()
+      }
+
+      if(parseInt(top) >= relativeCanvasHeight-height && parseInt(top) <= (relativeCanvasHeight-height)+5 ) {
+        horizontal_line.set({
+          stroke: '#6EF3CC',
+          strokeWidth:4,
+          strokeDashArray: [],
+        })
+        canvas.renderAll();
+      }
+    else {
+        let objects = canvas.getObjects('line');
+        horizontal_line.set({
+          stroke: '#6EF3CC',
+          strokeWidth:4,
+          strokeDashArray: [5,5],
+        })
+        canvas.renderAll();
+      }
     })
 
     canvas.on('object:scaling', (e: Record<any, any>) => {
@@ -900,9 +977,15 @@ export default class Scene extends Vue {
       }
       this.showDimensions(e, dimText)
     });
+    // canvas.on('selection:cleared',(e:Record<any, any>) => {
+    //   // var objects = canvas.getObjects('line');
+    //   // for (let i in objects) {
+    //   //   canvas.remove(objects[i]);
+    //   // }
+    // });
+
 
   }
-
   public objectScaling(e: Record<any, any>, side: string) {
     let texture = this.frontTexture
     let canvas = this.frontCanvas
@@ -1209,6 +1292,34 @@ export default class Scene extends Vue {
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
           if (logoUrl == e.target._element.src && logo.logoIndex == e.target.logoIndex) {
             if (e.action == 'drag') {
+
+              // var rect = new fabric.Rect({
+              //   width: 100,
+              //   height: 100,
+              //   fill: 'green',
+              //   originX:'center',
+              //   originY:'center',
+              //   left:self.canvasWidth/2,
+              //   top:self.canvasHeight/2,
+              // });
+              // var rect2 = new fabric.Rect({
+              //   width: 100,
+              //   height: 100,
+              //   fill: 'green',
+              //   originX:'center',
+              //   originY:'center',
+              //   left:self.canvasWidth/2,
+              //   top:self.canvasHeight/2,
+              // });
+              // self.frontCanvas.add(rect,rect2);
+
+              // self.frontCanvas.add(new fabric.Line([50, 100, 200, 200], {
+              //   left: 170,
+              //   top: 150,
+              //   stroke: 'blue'
+              // }));
+
+
               let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)),{'action':e.action})
               self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
