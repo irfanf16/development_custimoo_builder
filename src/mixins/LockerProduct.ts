@@ -7,24 +7,43 @@ import {getClosestColor} from "@/pantoneColor";
 @Component
 export class LockerProducts extends Vue {
 
-  public async editProduct(room_id: number, room_product_id: number) {
+  public async editProduct(room_id: number, room_product_id: number, share_url="") {
     let self = this;
     let is_customized = this.$store.getters.getCustomized
     let is_personalized = this.$store.getters.getPersonalized
-    const lockerIndex = await findIndex(this.getLockerProducts, {id: room_id});
-    const  productIndex = findIndex(this.getLockerProducts[lockerIndex].product, {id: room_product_id});
-    let locker_product =  this.getLockerProducts[lockerIndex].product[productIndex];
-    let locker_product_type = locker_product.product_type;
-    http.get(`locker/product/detail/${locker_product.id}`).then(async (selected_product_detail) => {
+    let lockerIndex: null | number = null;
+    let productIndex: null | number = null;
+    let locker_product: null | Record<any, any> = null;
+    if(room_id) {
+      lockerIndex = await findIndex(this.getLockerProducts, {id: room_id});
+      productIndex = findIndex(this.getLockerProducts[lockerIndex].product, {id: room_product_id});
+      locker_product =  this.getLockerProducts[lockerIndex].product[productIndex];
+    }
+    let url = "locker/product/detail";
+    let data = null;
+    if(locker_product) {
+      data = {id: locker_product.id}
+      // url += `?id=${locker_product.id}`;
+    } else {
+      data = {share_url: share_url}
+      // url += `?share_url=${share_url}`;
+    }
+
+    http.get(url, {params: data}).then(async (selected_product_detail) => {
       let prod_res = selected_product_detail;
-      Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
+      let locker_product_type = prod_res.data.product_type;
+      locker_product = prod_res.data;
+      if(room_id) {
+        // @ts-ignore
+        Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
+      }
       this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
       this.$root.$emit('rostershared', '')
       const designId = locker_product.design_id
       const styleId = locker_product.style_id
       const product_id = locker_product.product_id;
       this.$store.commit('CHANGE_EDIT_STATUS', {id: locker_product.id, status: true, designId: designId, styleId: styleId, product_id: product_id})
-      const element = this.getLockerProducts[lockerIndex].product[productIndex];
+      const element = prod_res.data;
       is_customized = locker_product_type == "customized" ? true: is_customized;
       is_personalized = locker_product_type == "personalized" ? true : is_personalized;
       let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${locker_product.product_id}`;
@@ -77,7 +96,7 @@ export class LockerProducts extends Vue {
       })
       await this.$store.dispatch('setProductType', {prd_type: locker_product_type, value: true});
     }).catch(err => {
-      console.error("Error while getting order detail", err.response.data.message)
+      console.error("Error while getting order detail", err)
     })
   }
 

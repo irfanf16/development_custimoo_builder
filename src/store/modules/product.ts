@@ -154,7 +154,7 @@ const Product:Module<any, any> = {
       })
     },
     async getLockerProductDetail({commit}, id){
-      return await http.get('locker/product/detail/'+id).then((res) => {
+      return await http.get(`locker/product/detail?id=${id}`).then((res) => {
         if (res.status == 200){
           return res
         }

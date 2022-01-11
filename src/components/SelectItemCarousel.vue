@@ -49,6 +49,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts) {
     this.$store.commit('CHANGE_STYLE_INDEX', 0);
     this.$store.dispatch("getModels", this.products[index].product_id);
     this.$store.dispatch('setColorSectionVisibility')
+    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0,})
   }
 
   public setSliderIndex() {

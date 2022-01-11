@@ -265,56 +265,61 @@ Vue.filter('formatDate', function(value) {
 
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
-    await this.retrieveProducts()
+    // await this.retrieveProducts()
     await this.getFillColors()
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
     }
     if (this.$route.params.name) {
       this.showLoader = true
-      setTimeout(async () => {
-        let url = this.getPath()
-        let res = await this.$store.dispatch('getShareProductDetails', url)
-        const exist = this.products.find((prd:Record<any, any>) => {
-          return prd.id == res.data.product_id
-        })
-        let ind = 0
-        if (!exist){
-          await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.data.product_id);
-          ind = this.products.length -1
-        }else {
-          const index = this.products.findIndex((prd:Record<any, any>) => prd.id == res.data.product_id)
-          ind = index >= 0 ? index : 0
-        }
-        await this.$store.dispatch('setSelectedIndex', { selectedIndex: ind});
-        let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.data.style_id);
-        await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-        let logoObj = {
-          custom_logos: res.data.custom_logos,
-          product_id: res.data.product_id
-        }
-        let customLogos = this.$store.getters.getCustomLogoObject
-        if(!customLogos[res.data.product_id]) {
-          await this.$store.dispatch('setCustomObj',res.data.product_id)
-        }
-        await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logoObj);
-        await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', res.data);
-        await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.data.defaultcolors));
-        await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.data.groupcolors));
-        await  this.$store.dispatch('setColorSectionVisibility')
-        this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-          if (item.id == res.data.design_id){
-            Vue.set(item, 'design_show', 1)
-            this.$store.dispatch('setSelectedProductDesignID', item.id)
-          }else{
-            Vue.set(item, 'design_show', 0)
-          }
-        });
-      }, 2000)
-      setTimeout(() => {
-        this.showLoader = false
-        this.productUpdated = true
-      }, 4000)
+      await this.editProduct(0, 0, this.getPath());
+      this.showLoader = false
+
+      // setTimeout(async () => {
+      //   let url = this.getPath()
+      //   let res = await this.$store.dispatch('getShareProductDetails', url)
+      //   const exist = this.products.find((prd:Record<any, any>) => {
+      //     return prd.id == res.data.product_id
+      //   })
+      //   let ind = 0
+      //   if (!exist){
+      //     await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.data.product_id);
+      //     ind = this.products.length -1
+      //   }else {
+      //     const index = this.products.findIndex((prd:Record<any, any>) => prd.id == res.data.product_id)
+      //     ind = index >= 0 ? index : 0
+      //   }
+      //   await this.$store.dispatch('setSelectedIndex', { selectedIndex: ind});
+      //   let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.data.style_id);
+      //   await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+      //   let logoObj = {
+      //     custom_logos: res.data.custom_logos,
+      //     product_id: res.data.product_id
+      //   }
+      //   let customLogos = this.$store.getters.getCustomLogoObject
+      //   if(!customLogos[res.data.product_id]) {
+      //     await this.$store.dispatch('setCustomObj',res.data.product_id)
+      //   }
+      //   await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logoObj);
+      //   await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', res.data);
+      //   await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.data.defaultcolors));
+      //   await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.data.groupcolors));
+      //   await  this.$store.dispatch('setColorSectionVisibility')
+      //   this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
+      //     if (item.id == res.data.design_id){
+      //       Vue.set(item, 'design_show', 1)
+      //       this.$store.dispatch('setSelectedProductDesignID', item.id)
+      //     }else{
+      //       Vue.set(item, 'design_show', 0)
+      //     }
+      //   });
+      // }, 2000)
+      // setTimeout(() => {
+      //   this.showLoader = false
+      //   this.productUpdated = true
+      // }, 4000)
+    } else {
+      await this.retrieveProducts()
     }
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
     this.jwtToken = localStorage.getItem('jwtToken') as string
