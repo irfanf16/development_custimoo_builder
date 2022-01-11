@@ -7,16 +7,16 @@
       </h2>
 
       <div class="select-items" :class="showItems ? 'opened' : ''">
-        <div class="collection-btn mb-2 mt-3 px-1 checkbox_buttons">
+        <div class="collection-btn mb-2 mt-3 px-1 d-flex align-items-center checkbox_buttons gap-2">
 <!--          <b-form-checkbox :checked="customized" @change="changeProductType('customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
 <!--          <b-form-checkbox :checked="personalized" @change="changeProductType('personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
-          <button type="button" :class="$store.getters.getCustomized ? 'btn btn-success' : 'btn btn-secondary'"
+          <button type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
                   @click="changeProductType(!$store.getters.getCustomized, 'customized')">
             <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
             Customized
           </button>
 
-          <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-success' : 'btn btn-secondary'"
+          <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
                   @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
             <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
             Stock
@@ -28,15 +28,15 @@
     </div>
 
     <template v-else>
-      <div class="collection-btn mb-2 mt-3 px-1 checkbox_buttons">
+      <div class="collection-btn mb-2 mt-3 px-1 d-flex align-items-center checkbox_buttons gap-2">
 
-        <button type="button" :class="$store.getters.getCustomized ? 'btn btn-success' : 'btn btn-secondary'"
+        <button type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
                 @click="changeProductType(!$store.getters.getCustomized, 'customized')">
           <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
           Customized
         </button>
 
-        <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-success' : 'btn btn-secondary'"
+        <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
                 @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
           <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
           Stock
