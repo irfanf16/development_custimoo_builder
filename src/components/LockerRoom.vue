@@ -283,7 +283,7 @@ import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {processColorsCustom} from "../helpers/Helpers"
 import {differenceBy, intersectionBy, union, includes} from 'lodash';
-import LockerProduct from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
 
 @Component<LockerRoom>({
@@ -308,7 +308,7 @@ import ContactModal from "@/components/ContactModal.vue";
     }
   }
 })
-export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
+export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
@@ -393,31 +393,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
   }
   get customerPermissions(){
     return this.$store.getters.getCustomerPermissions
-  }
-
-  get getLockerProducts(): Record<any, any> {
-    let main_product_id = this.$store.getters.getEditProductId;
-    let locker_products = this.$store.getters.getLockerProducts;
-    let locker_products_count = locker_products.length
-    locker_products = locker_products.map((item: Record<any, any>, lpIdx: number) => {
-      //locker_pull_groups contains the locker group names where products can be moved. This array is make sure user can not drop product to same locker.
-      let locker_pull_groups = [];
-      for (let i = 0; i < locker_products_count; i++) {
-        if (lpIdx != i) {
-          locker_pull_groups.push(`locker-${i}`);
-        }
-      }
-      locker_products[lpIdx].locker_pull_groups = locker_pull_groups
-      item.product = item.product.map((locker_product: Record<any, any>) => {
-        if (main_product_id == locker_product.id) {
-          let random = getRandom();
-          locker_product.product_url = `${locker_product.product_url}?${random}`;
-        }
-        return locker_product
-      })
-      return item
-    })
-    return locker_products;
   }
 
   get mainproductId():number{

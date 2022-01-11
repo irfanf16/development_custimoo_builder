@@ -1,10 +1,5 @@
 <template>
   <div class="item-to-customize text-left py-lg-5">
-<!--    <div class="customization-nav-area px-3 px-lg-0">-->
-<!--      <Search :categoryListing="categories" @search="searchProduct"/>-->
-<!--    </div>-->
-<!--    <items-carousel @retrieveProductsC="retrieveProductsC"></items-carousel>-->
-<!--    <SelectItemCarousel @retrieveProductsC="retrieveProductsC"/>-->
     <div class="p-3" style="border-bottom: 1px solid #eee" v-if="mobileScreen" >
       <h2 class="fw-bold p-lg-0 mb-lg-4 fz-18 bg-transparent d-flex align-items-center justify-content-between" @click="toggleItems">
         <span>Select Item to Customize</span>
@@ -13,20 +8,43 @@
 
       <div class="select-items" :class="showItems ? 'opened' : ''">
         <div class="collection-btn mb-2 mt-3 px-1 checkbox_buttons">
-          <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>
-          <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>
+<!--          <b-form-checkbox :checked="customized" @change="changeProductType('customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
+<!--          <b-form-checkbox :checked="personalized" @change="changeProductType('personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
+          <button type="button" :class="$store.getters.getCustomized ? 'btn btn-success' : 'btn btn-secondary'"
+                  @click="changeProductType(!$store.getters.getCustomized, 'customized')">
+            <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
+            Customized
+          </button>
+
+          <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-success' : 'btn btn-secondary'"
+                  @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
+            <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
+            Stock
+          </button>
         </div>
 
-        <ItemsGrid @retrieveProductsC="retrieveProductsC" />
+        <ItemsGrid />
       </div>
     </div>
 
     <template v-else>
       <div class="collection-btn mb-2 mt-3 px-1 checkbox_buttons">
-        <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>
-        <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>
+
+        <button type="button" :class="$store.getters.getCustomized ? 'btn btn-success' : 'btn btn-secondary'"
+                @click="changeProductType(!$store.getters.getCustomized, 'customized')">
+          <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
+          Customized
+        </button>
+
+        <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-success' : 'btn btn-secondary'"
+                @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
+          <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
+          Stock
+        </button>
+<!--        <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
+<!--        <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
       </div>
-      <SelectItemCarousel ref="itemsCarousel" @retrieveProductsC="retrieveProductsC"/>
+      <SelectItemCarousel ref="itemsCarousel"/>
     </template>
 
     <h2 v-if="mobileScreen" class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
@@ -45,8 +63,6 @@
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator'
   import Search from '@/components/Search.vue'
-
-  // import ItemsCarousel from '@/components/ItemsCarousel.vue'
   import SelectItemCarousel from '../components/SelectItemCarousel.vue'
   import DesignAvailable from '../components/DesignAvailable.vue'
   import ItemsGrid from "@/components/ItemsGrid.vue";
@@ -80,44 +96,34 @@ export default class ItemToCustomize extends Vue {
     this.showDesigns = !this.showDesigns
   }
 
-  public retrieveProductsC(index :number){
-    //this.$emit('retrieveProducts', index)
-    this.$emit('retrieveProducts','/list/products',false,true)
-  }
-  public searchProduct(param: string, type: string){
-    this.$emit('search', param, type)
-  }
   public async changeProductType(new_val:boolean, prd_type:string) {
     let self:Record<string, any> = this;
-    let old_val = self[prd_type];
-    self[prd_type] = new_val;
+    let customized = self.$store.getters.getCustomized
+    let personalized = self.$store.getters.getPersonalized
     const itemCarousel = this.$refs['itemsCarousel'] as Record<any, any>
+    let retrieve_products = false;
     if(new_val == false) {
-      if(self.customized || self.personalized) {
-        await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
-        this.$emit('retrieveProducts','/list/products',false,true)
-        itemCarousel.setSliderIndex();
-      } else {
-        await this.$store.dispatch('setProductType', {prd_type: prd_type, value: old_val});
-        self[prd_type] = prd_type == "personalized" ? self.$store.getters.getPersonalized : this.$store.getters.getCustomized;
-        itemCarousel.setSliderIndex();
+      if(prd_type == "customized" && personalized) {
+        retrieve_products = true;
+      }
+      if(prd_type == "personalized" && customized) {
+        retrieve_products = true;
       }
     } else {
+      if(prd_type == "customized" && !customized) {
+        retrieve_products = true;
+      }
+      if(prd_type == "personalized" && !personalized) {
+        retrieve_products = true;
+      }
+    }
+    self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id: null});
+    if(retrieve_products) {
       await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
-      this.$emit('retrieveProducts','/list/products',false,true)
+      self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
+      this.$emit('retrieveProducts','/list/products')
       itemCarousel.setSliderIndex();
     }
-  }
-  public async changeProductType_back(prd_type :any){
-
-    let value = false
-    if(prd_type == 'personalized')
-      value = this.getPersonalized
-    else
-      value = this.getCustomized
-
-    await this.$store.dispatch('setProductType', {prd_type: prd_type, value: !value});
-    this.$emit('retrieveProducts','/list/products',false,true)
   }
 
   get getPersonalized(): boolean {

@@ -143,11 +143,11 @@ const ProductAttributes:Module<any, any> = {
     SET_DISABLED_PRODUCTS(state: Record<any, any>, payload: boolean){
       state.selectedCollectionProducts.disabled_products = state.selectedCollectionProducts.locker_products
     },
-    SET_PRODUCTS(state: Record<any, any>, payload: [Record<any, any>]){
-      if(payload.length) {
-        state.products = [...state.products, ...payload];
+    SET_PRODUCTS(state: Record<any, any>, payload: Record<any, any>){
+      if(payload.append_products) {
+        state.products = [...state.products, ...payload.products];
       } else {
-        state.products = []
+        state.products = payload.products;
       }
     },
     // DELETE_PRODUCT(state: Record<any, any>, logoIndex: number){

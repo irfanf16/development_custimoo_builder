@@ -8,7 +8,7 @@
 <script lang="ts">
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import Header from '@/components/Header.vue';
-import LockerProduct from "@/mixins/LockerProduct";
+import {LockerProducts} from "@/mixins/LockerProduct";
 
 import Echo from "laravel-echo";
 window.io = require('socket.io-client');
@@ -56,7 +56,7 @@ window.Echo = new Echo({
     })
   }
 })
-export default class App extends Mixins(LockerProduct) {
+export default class App extends Mixins(LockerProducts) {
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
