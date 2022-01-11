@@ -16,27 +16,28 @@
 
 <script lang="ts">
 
-    import { Component, Vue } from 'vue-property-decorator'
+import {Component, Mixins, Vue} from 'vue-property-decorator'
+import ErrorMessages from "@/mixins/ErrorMessages";
     // @Component<CreateLockerRoomModal>({
     // })
    @Component
-    export default class CreateLockerRoomModal extends Vue {
+    export default class CreateLockerRoomModal extends Mixins(ErrorMessages) {
       public name = ''
       public ref = this.$refs as Record<any, any>
 
       public async createLocker(){
         if(this.name == ''){
-          alert('please input locker name')
+          this.showError('please input locker name')
           return false
         }
         let res = await this.$store.dispatch('createLocker', this.name);
-       if (res == ''){
-         this.name = ''
-         await this.$store.dispatch('GET_LOCKER_PRODUCTS');
-         this.ref['create-modal'].hide();
-         this.$emit('lockerAdded')
-       }else{
-         alert(res);
+        if (res.status == 201){
+          this.name = ''
+          await this.$store.dispatch('GET_LOCKER_PRODUCTS');
+          this.ref['create-modal'].hide();
+          this.$emit('lockerAdded')
+       }else if (res.status == 422){
+         this.showError(res.message)
        }
       }
     }
