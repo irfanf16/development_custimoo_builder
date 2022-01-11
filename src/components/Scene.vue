@@ -778,7 +778,6 @@ export default class Scene extends Vue {
     } else {
       this.frontCanvas = canvas
     }
-
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
     let model: any
@@ -897,8 +896,6 @@ export default class Scene extends Vue {
       self.addToOtherSide(e.target, side)
     })
 
-
-
     let vertical_line = new fabric.Line([self.canvasWidth/2,0,self.canvasWidth/2,self.canvasHeight], {
       stroke: '#6EF3CC',
       strokeWidth:4,
@@ -909,64 +906,12 @@ export default class Scene extends Vue {
       strokeWidth:4,
       strokeDashArray: [5, 5],
     })
-    let relativeCanvasWidth = parseInt(self.canvasWidth/2 - 20)
-    let relativeCanvasHeight = (self.canvasHeight/2 - 20)
+    let relativeCanvasWidth = self.canvasWidth/2 - 20
+    let relativeCanvasHeight = self.canvasHeight/2 - 20
 
     canvas.on('object:moving', (e: Record<any, any>) => {
       self.objectScaling(e, side)
-
-      if(!this.drawLines) {
-        canvas.add(vertical_line);
-        canvas.add(horizontal_line);
-        this.drawLines = true
-      }
-
-      let actObj = e.target;
-      let coords = actObj.calcCoords();
-
-      let left = coords.tl.x;
-      let top = coords.tl.y;
-
-
-      let  height = e.target.height * e.target.scaleY
-      let width = e.target.width * e.target.scaleX
-      width = parseInt(width/2)
-      height = parseInt(height/2)
-
-
-      if(parseInt(left) >= relativeCanvasWidth-width && parseInt(left) <= (relativeCanvasWidth-width)+5) {
-        vertical_line.set({
-          stroke: '#6EF3CC',
-          strokeWidth:4,
-          strokeDashArray: []
-        })
-        canvas.renderAll()
-      }
-    else {
-        vertical_line.set({
-          stroke: '#6EF3CC',
-          strokeWidth:4,
-          strokeDashArray: [5,5]
-        })
-        canvas.renderAll()
-      }
-
-      if(parseInt(top) >= relativeCanvasHeight-height && parseInt(top) <= (relativeCanvasHeight-height)+5 ) {
-        horizontal_line.set({
-          stroke: '#6EF3CC',
-          strokeWidth:4,
-          strokeDashArray: [],
-        })
-        canvas.renderAll();
-      }
-    else {
-        horizontal_line.set({
-          stroke: '#6EF3CC',
-          strokeWidth:4,
-          strokeDashArray: [5,5],
-        })
-        canvas.renderAll();
-      }
+      this.addGuideLine(e,canvas,vertical_line,horizontal_line,relativeCanvasWidth,relativeCanvasHeight)
     })
 
     canvas.on('object:scaling', (e: Record<any, any>) => {
@@ -976,15 +921,62 @@ export default class Scene extends Vue {
       }
       this.showDimensions(e, dimText)
     });
-    // canvas.on('selection:cleared',(e:Record<any, any>) => {
-    //   // var objects = canvas.getObjects('line');
-    //   // for (let i in objects) {
-    //   //   canvas.remove(objects[i]);
-    //   // }
-    // });
-
-
   }
+  public addGuideLine(e: Record<any, any>, canvas: Record<any, any>,vertical_line:Record<any, any>,horizontal_line:Record<any, any>,relativeCanvasWidth:number,relativeCanvasHeight:number) {
+
+    if(!this.drawLines) {
+      canvas.add(vertical_line);
+      canvas.add(horizontal_line);
+      this.drawLines = true
+    }
+
+    let actObj = e.target;
+    let coords = actObj.calcCoords();
+
+    let left = coords.tl.x;
+    let top = coords.tl.y;
+
+
+    let  height = e.target.height * e.target.scaleY
+    let width = e.target.width * e.target.scaleX
+    width = Math.trunc(width/2)
+    height = Math.trunc(height/2)
+
+    if(parseInt(left) >= relativeCanvasWidth-width && parseInt(left) <= (relativeCanvasWidth-width)+5) {
+      vertical_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: []
+      })
+      canvas.renderAll()
+    }
+    else {
+      vertical_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: [5,5]
+      })
+      canvas.renderAll()
+    }
+
+    if(parseInt(top) >= relativeCanvasHeight-height && parseInt(top) <= (relativeCanvasHeight-height)+5 ) {
+      horizontal_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: [],
+      })
+      canvas.renderAll();
+    }
+    else {
+      horizontal_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: [5,5],
+      })
+      canvas.renderAll();
+    }
+  }
+
   public objectScaling(e: Record<any, any>, side: string) {
     let texture = this.frontTexture
     let canvas = this.frontCanvas
@@ -1291,34 +1283,6 @@ export default class Scene extends Vue {
           let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
           if (logoUrl == e.target._element.src && logo.logoIndex == e.target.logoIndex) {
             if (e.action == 'drag') {
-
-              // var rect = new fabric.Rect({
-              //   width: 100,
-              //   height: 100,
-              //   fill: 'green',
-              //   originX:'center',
-              //   originY:'center',
-              //   left:self.canvasWidth/2,
-              //   top:self.canvasHeight/2,
-              // });
-              // var rect2 = new fabric.Rect({
-              //   width: 100,
-              //   height: 100,
-              //   fill: 'green',
-              //   originX:'center',
-              //   originY:'center',
-              //   left:self.canvasWidth/2,
-              //   top:self.canvasHeight/2,
-              // });
-              // self.frontCanvas.add(rect,rect2);
-
-              // self.frontCanvas.add(new fabric.Line([50, 100, 200, 200], {
-              //   left: 170,
-              //   top: 150,
-              //   stroke: 'blue'
-              // }));
-
-
               let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)),{'action':e.action})
               self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
