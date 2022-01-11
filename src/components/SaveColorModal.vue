@@ -57,6 +57,10 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       public folder_name = '';
       public ref = this.$refs as Record<any, any>
 
+      public showColorModal(){
+        this.ref['my-modal'].show();
+      }
+
       get getLockerProducts():Record<any, any>{
         return this.$store.getters.getLockerProducts;
       }
@@ -279,7 +283,6 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
         }
       }
     }
-
 
 
 </style>

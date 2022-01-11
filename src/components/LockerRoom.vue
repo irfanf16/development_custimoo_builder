@@ -1279,9 +1279,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
 .lockerroom-color-folders {
   position: relative;
 
+  .color-folder-holder{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid: 15px;
+  }
+
   .folder-wrapper {
-    flex: 0 0 50%;
-    max-width: 50%;
     @media only screen and (min-width: 1200px) {
       flex: 0 0 70%;
       max-width: 70%;
@@ -1295,12 +1299,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
     }
 
     a {
-      margin: 0 10px 12px;
-      font-size: 10px;
-      flex: 0 0 38%;
-      max-width: 38%;
+      font-size: 11px;
+
       @media only screen and (min-width: 768px) {
-        font-size: 10px;
+        font-size: 12px;
         flex: 0 0 19%;
         max-width: 19%;
       }
@@ -1323,49 +1325,66 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
     }
   }
 
-  .color-holder {
-    flex: 0 0 45%;
-    max-width: 45%;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    max-height: 180px;
-    @media only screen and (min-width: 768px) {
-      max-height: 300px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-    @media only screen and (min-width: 1200px) {
-      flex: 0 0 25%;
-      max-width: 25%;
-    }
+  .color-folder-holder{
+   width: 100%;
+  }
 
-    &::-webkit-scrollbar {
-      display: none;
-    }
+  .color-holder{
+    box-shadow: none;
+    border-top: 1px solid #eee;
+    border-radius: 0;
 
-    .color-container {
-      gap: 7px;
-      @media only screen and (min-width: 410px) {
-        gap: 35px;
-      }
-      @media only screen and (min-width: 768px) {
-        gap: 25px;
-      }
-      @media only screen and (min-width: 1200px) {
-        gap: 7px;
-      }
-      @media only screen and (min-width: 1274px) {
-        gap: 7px;
-      }
-
-      .color-box {
-        margin: 0 auto 5px;
+    .color-container{
+      @media (max-width: 500px) {
+        gap: 10px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
       }
     }
   }
+  //.color-holder {
+  //  flex: 0 0 45%;
+  //  max-width: 45%;
+  //  position: absolute;
+  //  right: 0;
+  //  top: 0;
+  //  width: 100%;
+  //  height: 100%;
+  //  max-height: 180px;
+  //  @media only screen and (min-width: 768px) {
+  //    max-height: 300px;
+  //    top: 50%;
+  //    transform: translateY(-50%);
+  //  }
+  //  @media only screen and (min-width: 1200px) {
+  //    flex: 0 0 25%;
+  //    max-width: 25%;
+  //  }
+  //
+  //  &::-webkit-scrollbar {
+  //    display: none;
+  //  }
+  //
+  //  .color-container {
+  //    gap: 7px;
+  //    @media only screen and (min-width: 410px) {
+  //      gap: 35px;
+  //    }
+  //    @media only screen and (min-width: 768px) {
+  //      gap: 25px;
+  //    }
+  //    @media only screen and (min-width: 1200px) {
+  //      gap: 7px;
+  //    }
+  //    @media only screen and (min-width: 1274px) {
+  //      gap: 7px;
+  //    }
+  //
+  //    .color-box {
+  //      margin: 0 auto 5px;
+  //    }
+  //  }
+  //}
 
   .color-folder-holder {
     overflow-y: auto;
