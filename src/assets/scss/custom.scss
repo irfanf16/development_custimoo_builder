@@ -4365,3 +4365,14 @@ $fontSize: 0.5;
         outline: none !important;
     }
 }
+
+.well{
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+
+    &.custom{
+        border: none;
+        box-shadow: 1px 4px 7px rgba(0,0,0,0.1);
+    }
+}

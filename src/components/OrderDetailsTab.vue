@@ -3,6 +3,16 @@
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <DesignPdfView :pdf_front_image="pdf_front_image" :pdf_back_image="pdf_back_image"/>
 
+    <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
+      <b-input-group class="w-100">
+        <b-form-input id="shared_url_link" class="w-100" v-model="shared_url" ></b-form-input>
+      </b-input-group>
+      <b-button class="btn btn-secondary fw-bold w-auto" style="white-space: nowrap" @click="copyLink">Copy URL</b-button>
+      <button class="closeBtn" @click="closeCopyUrl">
+        <BIconX />
+      </button>
+    </div>
+
     <div>
       <ConfirmOrderTab />
     </div>
@@ -35,14 +45,9 @@
 <!--              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share roster url</b-button>-->
               <AddLockerRoomModal :rosterUrl="true"  ref="share" />
             </template>
-            <template v-if="shared_url">
-              <b-input-group>
-                <b-form-input id="shared_url_link"   v-model="shared_url" ></b-form-input>
-              </b-input-group>
-              <b-button class="btn btn-secondary fw-bold w-100 mb-2" @click="copyLink">copy url</b-button>
-            </template>
           </div>
-          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>
+<!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
+          <button class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
         </div>
       </div>
     </div>
@@ -354,12 +359,15 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       this.shared_url = res.data
     }
   }
+  public closeCopyUrl(){
+    this.shared_url = ""
+  }
   public copyLink() {
     let testingCodeToCopy = document.querySelector("#shared_url_link") as Record<any, any>
     testingCodeToCopy.select()
     try {
       document.execCommand('copy');
-      this.shared_url = ""
+      this.closeCopyUrl();
       this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
     } catch (err) {
       alert('Oops, unable to copy');
@@ -736,5 +744,24 @@ img {
   display: block;
   margin: 0 auto;
   height: auto;
+}
+
+.closeBtn{
+  background: firebrick;
+  color: #fff;
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  border-radius: 1000px;
+  font-size: 1rem;
 }
 </style>
