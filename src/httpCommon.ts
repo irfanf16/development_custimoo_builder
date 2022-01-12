@@ -1,7 +1,7 @@
 
 const base_url = process.env.VUE_APP_API_BASE_URL
 import Axios, { AxiosRequestConfig } from "axios"
-
+import Store from './store'
 const http = Axios.create({
   baseURL: process.env.VUE_APP_API_BASE_URL+"/api",
   headers: {
@@ -43,7 +43,11 @@ http.interceptors.response.use(function (response) {
   if (401 === error.response.status) {
     localStorage.setItem('jwtToken', '');
    // location.reload()
-  } else {
+  }
+  else if (error.response.status === 420 ) {
+    Store.dispatch('logoutCustomer')
+  }
+  else {
     return Promise.reject(error);
   }
 });
