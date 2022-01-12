@@ -1227,11 +1227,15 @@ const ProductAttributes:Module<any, any> = {
       })
     },
     async getNotifications({commit}){
-       await http.get('customer/notifications').then((res) => {
-        commit('SET_NOTIFICATIONS', res.data.data)
-      }).catch(e =>{
-        console.log(e)
-      })
+      try {
+        await http.get('customer/notifications').then((res) => {
+          commit('SET_NOTIFICATIONS', res.data.data)
+        })
+      }
+      catch (e:any) {
+        commit('SET_NOTIFICATIONS', [])
+      }
+
     },
     readNotification({commit}, id){
      return  http.post('read/notification', {id:id}).then((res) => {

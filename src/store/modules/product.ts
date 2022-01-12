@@ -144,6 +144,8 @@ const Product:Module<any, any> = {
           await commit('SET_LOCKER_PRODUCTS', res.data)
           return true
         }
+      }).catch((e) => {
+        return false
       })
     },
     getLockers({commit}){
@@ -151,6 +153,8 @@ const Product:Module<any, any> = {
         if (res.status == 200){
           commit('SET_LOCKERS', res.data);
         }
+      }).catch((e) => {
+        commit('SET_LOCKERS', []);
       })
     },
     async getLockerProductDetail({commit}, id){

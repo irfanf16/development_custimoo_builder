@@ -66,9 +66,14 @@ const Auth:Module<any, any> = {
       return customer
     },
     async permissions({commit}){
-      return await http.get('customer/permissions').then((res) => {
-        commit('SET_CUSTOMER_PERMISSIONS', res.data)
-      })
+      try {
+        return await http.get('customer/permissions').then((res) => {
+          commit('SET_CUSTOMER_PERMISSIONS', res.data)
+        })
+      }
+      catch (e:any) {
+        commit('SET_CUSTOMER_PERMISSIONS', [])
+      }
     }
   }
 }
