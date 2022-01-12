@@ -96,19 +96,34 @@
               <CollarStyle :productModels="productModels"/>
             </div>
           </b-tab>
+<!--          <b-tab>-->
+<!--            <button @click="setHideTab('teamHide', !hideTab.teamHide)" class="tab-close-btn d-lg-none"></button>-->
+<!--            <template #title>-->
+<!--              <a @click="setHideTab('teamHide', true)" >-->
+<!--              <span class="icon-holder">-->
+<!--                <font-awesome-icon :icon="['fas', 'user-friends']"/>-->
+<!--              </span>-->
+<!--                Team-->
+<!--              </a>-->
+<!--            </template>-->
+<!--            <div class="team-roaster-area p-4" v-if="hideTab.teamHide">-->
+<!--              <h2 class="fw-bold mb-2 fz-18">Roster</h2>-->
+<!--              <EditRosterArea :productSizes="selectedProduct.sizes"/>-->
+<!--            </div>-->
+<!--          </b-tab>-->
           <b-tab>
             <button @click="setHideTab('teamHide', !hideTab.teamHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('teamHide', true)" >
               <span class="icon-holder">
-                <font-awesome-icon :icon="['fas', 'user-friends']"/>
+                <BIconFileTextFill />
               </span>
-                Team
+                Summary
               </a>
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-              <EditRosterArea :productSizes="selectedProduct.sizes"/>
+              <EditRosterAreaTab :productSizes="selectedProduct.sizes"/>
             </div>
           </b-tab>
         </vue-custom-scrollbar>
@@ -124,7 +139,7 @@ import ColorAccordion from '@/components/ColorAccordion.vue'
 import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
-import EditRosterArea from '@/components/EditRosterArea.vue'
+import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
@@ -142,7 +157,7 @@ import "vue-custom-scrollbar/dist/vueScrollbar.css"
     LogoPlacementTabs,
     CustomizationText,
     CollarStyle,
-    EditRosterArea,
+    EditRosterAreaTab,
     ColorTabs,
     UploadLogo
   },
