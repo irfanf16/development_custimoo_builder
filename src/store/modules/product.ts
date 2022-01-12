@@ -165,17 +165,21 @@ const Product:Module<any, any> = {
       })
     },
    async createLocker({commit}, payload:string){
-     let err = '';
+     // let err = '';
       const res = await http.post("locker/create", {name:payload}).then((res:Record<any, any>) =>{
         if (res.status == 201){
           commit('ADD_LOCKER', res.data.data);
-          return '';
+          return res;
         }
-      }).catch((errors)=>{
+      }).catch((errors:Record<any, any>)=>{
         if (errors.response.status == 422){
-          err =  errors.response.data.errors.name[0];
+          const data = {
+            status:422,
+            message:errors.response.data.errors.name[0]
+          }
+          return data
         }
-        return err;
+        // return errors;
       });
      return res;
     },

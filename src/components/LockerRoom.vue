@@ -1,8 +1,8 @@
 <template>
   <span class="asdasd">
-  <b-tabs content-class="mt-3" v-model="tabIndex" @activate-tab="lockerChanged">
+  <b-tabs content-class="mt-3"   @changed="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
-      <b-tab :key="i" :active="tabIndex === i">
+      <b-tab :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
         <template #title>
           <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
                       @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
@@ -463,10 +463,12 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public lockerAdded() {
-    setTimeout(() => {
-      let index = this.getLockerProducts.length - 1
-      this.tabIndex = index
-    }, 1000)
+    let index = this.getLockerProducts.length - 1
+    this.tabIndex = index
+    let payload = {index: index, attribute: 'active_tab', value:true}
+    this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', index)
+    this.$store.commit('Change_Locker_Tabs_Index', index)
   }
 
   public showDesignModal(product:Record<any, any>){
@@ -620,6 +622,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
           this.tabIndex = 0;
           let payload = {index:this.tabIndex, attribute: 'active_tab', value:true}
           this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+          this.$store.commit('Change_Locker_Tabs_Index', 0)
+          this.$store.commit('SET_LOCKER_ACTIVE_INDEX', 0)
         }
       } else {
         this.showError(res);
@@ -681,7 +685,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public async lockerTabUpdated(newTabIndex:number , prevTabIndex: number, bvEvent:Record<any, any> ) {
-    //console.log('hereer',newTabIndex)
     this.lockerActiveTabIndex = newTabIndex;
     this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
   }
@@ -689,20 +692,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
    this.$refs[`yearlyTab${room_id}`][0].activate()
   }
 
-  public lockerChanged(newTabIndex: number ) {
-
-    this.tabIndex = newTabIndex
+  public lockerChanged(newTabIndex: any , prev:any) {
     /*
     * If locker collection tab is active and user switch to the locker then activate first tab (product tab)
     * */
     if (this.lockerActiveTabIndex == 3 || this.lockerActiveTabIndex == 4) {
       this.lockerActiveTabIndex = 0
     }
-
-
-    let payload = {index:this.tabIndex, attribute: 'active_tab', value:true}
-    this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
-    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', newTabIndex)
   }
 
   public async clickYearlyTab(evt:any,room_id:number) {
@@ -732,7 +728,12 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       }
     })
   }
-
+  public changeTabIndex(i:number){
+    this.tabIndex = i
+    let payload = {index: i, attribute: 'active_tab', value:true}
+    this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', i)
+  }
   public productsAddedToLocker(payload: Record<any, any>) {
     let clones = payload.clone ? [payload.clone] : payload.clones;
     let added_locker_room_products_ids: number[] = [];
