@@ -270,6 +270,7 @@ extend('size', {
   },
   mounted() {
     this.$store.dispatch('getEmailTemplates');
+    this.$store.dispatch('getYearlyPlannerTemplates');
   }
 })
 
