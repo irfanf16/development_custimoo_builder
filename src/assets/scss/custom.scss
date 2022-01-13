@@ -3568,6 +3568,31 @@ $fontSize: 0.5;
     }
 }
 
+.edit-logo-modal {
+    overflow: visible !important;
+
+    .popover-body {
+        .card-body {
+            padding: 0 !important;
+        }
+
+        .color-holder {
+            box-shadow: none;
+            border-top: 1px solid #ccc;
+            border-radius: 0;
+            padding-top: 10px;
+
+            .color-container {
+                padding: 0;
+            }
+        }
+    }
+
+    .modal-body {
+        overflow-x: visible;
+    }
+}
+
 .customize_controls {
     &.other_tab {
         &:after {
@@ -3782,31 +3807,6 @@ $fontSize: 0.5;
 
             &:hover {
                 color: #666;
-            }
-        }
-
-        .edit-logo-modal {
-            overflow: visible !important;
-
-            .popover-body {
-                .card-body {
-                    padding: 0 !important;
-                }
-
-                .color-holder {
-                    box-shadow: none;
-                    border-top: 1px solid #ccc;
-                    border-radius: 0;
-                    padding-top: 10px;
-
-                    .color-container {
-                        padding: 0;
-                    }
-                }
-            }
-
-            .modal-body {
-                overflow-x: visible;
             }
         }
 
