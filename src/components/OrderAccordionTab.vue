@@ -41,6 +41,9 @@
                 <span>{{ roster.number }}</span>
                 <span>{{ roster.size }}</span>
                 <span>{{ roster.quantity }}</span>
+<!--                <span>-->
+<!--                  {{getCustomTexts.length}}-->
+<!--                </span>-->
               </div>
             </template>
           </div>
@@ -91,6 +94,12 @@
                 <div class="text-left">
                   <span class="d-block mb-1">Logo Placement</span>
                   <span class="text-uppercase">{{ logo.side }}</span>
+                  <div class="d-flex mt-1 badge badge-light">
+                    Size:
+                    <span class="ml-1">{{ logo.originalWidth }}cm</span>
+                    <span class="ml-1">x</span>
+                    <span class="ml-1">{{ logo.originalHeight }}cm</span>
+                  </div>
                 </div>
 
               </div>
@@ -114,6 +123,9 @@ export default class OrderAccordion extends Vue {
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
+  }
+  get getCustomTexts(): [Record<any, any>] {
+    return this.$store.getters.getCustomTexts(this.selectedProduct)
   }
 
   get selectedProduct(): Record<any, any> {
