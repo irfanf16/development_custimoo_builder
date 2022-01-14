@@ -103,8 +103,9 @@ export default class ColorAccordion extends Vue {
 
     this.selectTypeIndex = index
     this.showOther = showOther
-    this.productColor = this.productColors[this.selectTypeIndex].color_text
-
+    if (this.productColors[index]){
+      this.productColor = this.productColors[index].color_text
+    }
     if(this.selectTypeIndex){
       this.isActive = !this.isActive
     }

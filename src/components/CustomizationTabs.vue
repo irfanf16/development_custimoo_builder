@@ -167,7 +167,6 @@ import "vue-custom-scrollbar/dist/vueScrollbar.css"
     this.fontsColorsManipulation()
     this.fontsList()
     this.customTextInit()
-   // console.log('customTexts',this.customTexts)
   },
 })
 export default class CustomizationProcess extends Vue {
@@ -256,11 +255,11 @@ export default class CustomizationProcess extends Vue {
   }
 
   @Watch('lockerColors', {
-    deep: false
+    deep: true
   })
 
 
-  lockerColorsChanged() {
+  lockerColorsChanged(newval:any, old:any) {
     this.productColorsManipulation()
   }
 
@@ -271,8 +270,9 @@ export default class CustomizationProcess extends Vue {
       finalColor.color_text = JSON.parse(colors.color_text)
       this.productColors = this.productColors.concat(finalColor)
     })
-    this.productColors = this.productColors.concat(this.lockerColors)
-
+    if (this.lockerColors.length > 0){
+      this.productColors = this.productColors.concat(this.lockerColors)
+    }
     if(this.logoColors.length){
       let logoColorsNew: any[] = []
       this.logoColors.forEach((color: any, index: number) => {

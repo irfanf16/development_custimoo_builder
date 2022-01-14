@@ -269,6 +269,7 @@ Vue.filter('formatDate', function(value) {
     await this.getFillColors()
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
+      await this.$store.dispatch('getLockerRoomColors')
     }
     if (this.$route.params.name) {
       this.showLoader = true
@@ -331,7 +332,7 @@ Vue.filter('formatDate', function(value) {
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
       await  this.$store.dispatch('permissions')
-      await this.$store.dispatch('getLockerRoomColors')
+
     }
 
 
@@ -739,6 +740,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
       await this.$store.dispatch('logoutCustomer');
+      this.$store.commit('ADD_LOCKER_ROOM_COLORS', [])
       await this.$store.commit('SET_RECENT_LOGOS')
     }
   }
