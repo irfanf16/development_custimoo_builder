@@ -2,8 +2,9 @@
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex">
-        <vue-custom-scrollbar class="scroll-area"  :settings="settings">
-          <b-tab v-if="selectedProduct.is_logo_allowed == 1">
+<!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
+        <vue-scrollbar classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">
+        <b-tab v-if="selectedProduct.is_logo_allowed == 1">
             <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
@@ -111,7 +112,7 @@
               <EditRosterArea :productSizes="selectedProduct.sizes"/>
             </div>
           </b-tab>
-        </vue-custom-scrollbar>
+        </vue-scrollbar>
       </b-tabs>
     </div>
 
@@ -133,6 +134,8 @@ import RecentLogos from "@/components/RecentLogos.vue";
 import {sortTextsArray} from "@/helpers/Helpers";
 import vueCustomScrollbar from 'vue-custom-scrollbar';
 import "vue-custom-scrollbar/dist/vueScrollbar.css"
+import "vue2-scrollbar/style/vue2-scrollbar.css"
+import vueScrollbar from 'vue2-scrollbar'
 
 @Component<CustomizationProcess>({
   components: {
@@ -144,7 +147,8 @@ import "vue-custom-scrollbar/dist/vueScrollbar.css"
     CollarStyle,
     EditRosterArea,
     ColorTabs,
-    UploadLogo
+    UploadLogo,
+    vueScrollbar
   },
   mounted() {
     this.$store.dispatch('setCustomLogos')
@@ -163,6 +167,13 @@ export default class CustomizationProcess extends Vue {
     suppressScrollX: true,
     wheelPropagation: false,
     wheelSpeed: 3
+  }
+  public styling = {
+    /* Scrollbar */
+    scrollbar: {
+      width: "100%",
+      height: "calc(100vh - 220px)"
+    },
   }
   @Prop({required: false, default:0}) tabIndexNew!: number
   public fontOptions: Record<any, any>[] = []
