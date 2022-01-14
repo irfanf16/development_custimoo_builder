@@ -1,12 +1,16 @@
 import { Module } from "vuex";
 import {http} from "@/httpCommon";
 import {Vue} from "vue-property-decorator";
+
+const d = new Date();
+const selected_year: string = d.getFullYear();
+
 const Event:Module<any, any> = {
   state: {
     locker_index_for_event :0,
     show_event_popup:false,
     locker_events:[],
-    selected_year: 2021,
+    selected_year: selected_year,
     emailTemplates: [],
     yearlyPlannerTemplates:[]
   },
