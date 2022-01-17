@@ -259,6 +259,15 @@ const Product:Module<any, any> = {
       })
       return res
     },
+    async copyYearlyPlannerEvents({commit}, payload){
+      const res =  await http.post("create-planner-from-template", payload).then((res) => {
+        if (res.status == 201){
+          commit('SET_LOCKER_ATTRIBUTE', {index: payload.index, attribute:'have_yearly_planner', value:1 })
+          return res;
+        }
+      })
+      return res
+    },
     async deletePlanner({commit}, payload){
      return await http.post("locker/planner/delete", payload)
     },
