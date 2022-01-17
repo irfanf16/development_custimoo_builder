@@ -3,7 +3,7 @@
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex">
 <!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
-        <vue-scrollbar classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">
+        <vue-scrollbar :speed="10" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">
           <div class="scroll-me">
             <b-tab v-if="selectedProduct.is_logo_allowed == 1">
               <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
