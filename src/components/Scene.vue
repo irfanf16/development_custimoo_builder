@@ -943,13 +943,8 @@ export default class Scene extends Vue {
 
     canvas.on('object:moving', (e: Record<any, any>) => {
       self.objectScaling(e, side)
-      let logosLength = this.customLogoObjects.filter((logo) => {
-        if(logo) return logo
-      }).length
-      let textsLength = this.customTextObjects.filter((text) => {
-        if(text) return text
-      }).length
-      if((logosLength + textsLength) == 1)
+      let customObj:Record<any, any> = this.getCustomObjectsLength(canvas)
+      if(customObj.logoLength + customObj.textLength == 1)
         this.addGuideLine(e,canvas,vertical_line,horizontal_line,relativeCanvasWidth,relativeCanvasHeight)
 
       self.addGuideForMultipleObjects(canvas,e.target)
@@ -962,6 +957,19 @@ export default class Scene extends Vue {
       }
       this.showDimensions(e, dimText)
     });
+  }
+  public getCustomObjectsLength(canvas:Record<any, any>) {
+    let logoLength = 0
+    let textLength = 0
+    canvas.getObjects().forEach((obj:Record<any, any>) => {
+      if('logoIndex' in obj) {
+        logoLength++
+      }
+      if('textIndex' in obj) {
+        textLength++
+      }
+    })
+    return {logoLength,textLength}
   }
   public addGuideLine(e: Record<any, any>, canvas: Record<any, any>,vertical_line:Record<any, any>,horizontal_line:Record<any, any>,relativeCanvasWidth:number,relativeCanvasHeight:number) {
 
