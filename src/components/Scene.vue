@@ -943,7 +943,15 @@ export default class Scene extends Vue {
 
     canvas.on('object:moving', (e: Record<any, any>) => {
       self.objectScaling(e, side)
-      this.addGuideLine(e,canvas,vertical_line,horizontal_line,relativeCanvasWidth,relativeCanvasHeight)
+      let logosLength = this.customLogoObjects.filter((logo) => {
+        if(logo) return logo
+      }).length
+      let textsLength = this.customTextObjects.filter((text) => {
+        if(text) return text
+      }).length
+      if((logosLength + textsLength) == 1)
+        this.addGuideLine(e,canvas,vertical_line,horizontal_line,relativeCanvasWidth,relativeCanvasHeight)
+
       self.addGuideForMultipleObjects(canvas,e.target)
     })
 
