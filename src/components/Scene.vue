@@ -109,6 +109,7 @@ import {setLogoSettings} from "@/helpers/Helpers";
     }
 
     function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
+      console.log('delete')
       let target = transform.target;
       let canvas = target.canvas;
       if('textIndex' in target) {
@@ -191,6 +192,7 @@ export default class Scene extends Vue {
   public aligningLineWidth = 3
   public aligningLineColor = 'rgb(110, 243, 204)'
   public viewportTransform:any
+  public drawLines = false
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -784,9 +786,6 @@ export default class Scene extends Vue {
     } else {
       this.frontCanvas = canvas
     }
-
-
-
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
     let model: any
@@ -896,6 +895,11 @@ export default class Scene extends Vue {
       }
     }, 1000)
     canvas.on('object:modified', (e: Record<any, any>) => {
+      var objects = canvas.getObjects('line');
+      for (let i in objects) {
+        canvas.remove(objects[i]);
+      }
+      this.drawLines = false
       self.objectMove(e, side)
       self.addToOtherSide(e.target, side)
     })
@@ -923,8 +927,23 @@ export default class Scene extends Vue {
     canvas.on('mouse:down', () => {
       this.viewportTransform = canvas.viewportTransform;
     });
+
+    let vertical_line = new fabric.Line([self.canvasWidth/2,0,self.canvasWidth/2,self.canvasHeight], {
+      stroke: '#6EF3CC',
+      strokeWidth:4,
+      strokeDashArray: [5, 5],
+    })
+    let horizontal_line = new fabric.Line([0,(self.canvasHeight/2),self.canvasWidth,(self.canvasHeight/2)], {
+      stroke: '#6EF3CC',
+      strokeWidth:4,
+      strokeDashArray: [5, 5],
+    })
+    let relativeCanvasWidth = self.canvasWidth/2 - 20
+    let relativeCanvasHeight = self.canvasHeight/2 - 20
+
     canvas.on('object:moving', (e: Record<any, any>) => {
       self.objectScaling(e, side)
+      this.addGuideLine(e,canvas,vertical_line,horizontal_line,relativeCanvasWidth,relativeCanvasHeight)
       self.addGuideForMultipleObjects(canvas,e.target)
     })
 
@@ -935,7 +954,60 @@ export default class Scene extends Vue {
       }
       this.showDimensions(e, dimText)
     });
+  }
+  public addGuideLine(e: Record<any, any>, canvas: Record<any, any>,vertical_line:Record<any, any>,horizontal_line:Record<any, any>,relativeCanvasWidth:number,relativeCanvasHeight:number) {
 
+    if(!this.drawLines) {
+      canvas.add(vertical_line);
+      canvas.add(horizontal_line);
+      this.drawLines = true
+    }
+
+    let actObj = e.target;
+    let coords = actObj.calcCoords();
+
+    let left = coords.tl.x;
+    let top = coords.tl.y;
+
+
+    let  height = e.target.height * e.target.scaleY
+    let width = e.target.width * e.target.scaleX
+    width = Math.trunc(width/2)
+    height = Math.trunc(height/2)
+
+    if(parseInt(left) >= relativeCanvasWidth-width && parseInt(left) <= (relativeCanvasWidth-width)+5) {
+      vertical_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: []
+      })
+      canvas.renderAll()
+    }
+    else {
+      vertical_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: [5,5]
+      })
+      canvas.renderAll()
+    }
+
+    if(parseInt(top) >= relativeCanvasHeight-height && parseInt(top) <= (relativeCanvasHeight-height)+5 ) {
+      horizontal_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: [],
+      })
+      canvas.renderAll();
+    }
+    else {
+      horizontal_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: [5,5],
+      })
+      canvas.renderAll();
+    }
   }
 
   public addGuideForMultipleObjects(canvas:Record<any, any>,selectedObject:Record<any, any>) {
