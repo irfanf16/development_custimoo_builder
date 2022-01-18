@@ -167,7 +167,7 @@
                         </slot>
 
                         <!--                      <validation-provider rules="required_if:eventType,custom|ext:jpg,png,svg|size:2048" v-slot="{ errors }">-->
-                        <validation-provider rules="required_if:eventType,custom|size:2048" v-slot="{ errors }">
+<!--                        <validation-provider rules="required_if:eventType,custom|size:2048" v-slot="{ errors }">-->
                           <b-form-file
                             type="file"
                             name="file" ref="fileInput"
@@ -176,8 +176,8 @@
                             class="fileLoader"
                             accept="image/*"></b-form-file>
 
-                          <span class="error">{{ errors[0] }}</span>
-                        </validation-provider>
+<!--                          <span class="error">{{ errors[0] }}</span>-->
+<!--                        </validation-provider>-->
 
                       </div>
 
@@ -326,8 +326,16 @@ export default class EventModal extends Mixins(ErrorMessages) {
     if (!this.event_data.event_time) {
       resp = false
     } else if (this.event_data.event_type === null || this.file_data === null) {
-      resp = false
+      if(this.event_data.event_type === 'custom'){
+        resp = true
+      }else{
+        resp = false
+      }
+
     }
+
+
+
     if (!resp) {
       this.email_template_index = null
     }
@@ -635,14 +643,22 @@ export default class EventModal extends Mixins(ErrorMessages) {
         this.file_data = res.file.collection_data.collection_products
         this.file_name = res.file.collection_data.name
       } else {
-        this.file_data = res.file.product_url
-        this.file_name = res.file.product_url.substring(res.file.product_url.lastIndexOf('/') + 1);
-        this.is_file_download = true
-        if(!this.showImage(res.file.product_url)){
-          this.showPlaceholder = false
+        if(res.file && res.file.file_url){
+          this.file_data = res.file.product_url
+          this.file_name = res.file.product_url.substring(res.file.product_url.lastIndexOf('/') + 1);
+          this.is_file_download = true
+          if(!this.showImage(res.file.product_url)){
+            this.showPlaceholder = false
+          }else{
+            this.showPlaceholder = true
+          }
         }else{
+          this.file_data = null
+          this.file_name = ''
+          this.is_file_download = false
           this.showPlaceholder = true
         }
+
       }
 
     } else {
@@ -682,6 +698,9 @@ export default class EventModal extends Mixins(ErrorMessages) {
     if (this.event_data.id === null) {
       url = 'events/create'
     } else {
+      if(!this.file_data){
+        form.append('delete_file',1);
+      }
       url = 'events/update'
     }
 
