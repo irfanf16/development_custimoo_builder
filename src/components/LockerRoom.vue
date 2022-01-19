@@ -200,8 +200,8 @@
                                        :room_id="room.id" :room_index="i" :key="room.id"
                         >
                           <template slot="actions">
-                            <b-button class="mr-3 light" variant="secondary" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
-                            <button class="btn mr-3 light btn-secondary" @click="getIcsFile(room.id,i)">Add to calender</button>
+                            <b-button class="mr-3 light" variant="danger" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
+                            <button class="btn mr-3 light btn-secondary" @click="getIcsFile(room.id,i)">Export to Outlook</button>
                           </template>
                         </YearlyPlanner>
                       </div>
@@ -978,7 +978,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
     this.tabIndex = lockerIndex
   }
   public editEvent(event_id:number){
-    const room_index = this.$store.getters.getActiveLockerIndex;
+    const room_index = this.$store.getters.getLockerTabsIndex;
     this.$store.commit('SHOW_EVENT_POPUP', true)
     this.$store.commit('SET_LOCKER_INDEX_FOR_EVENT', room_index)
     this.ref['eventmodal'].editEvent(event_id);

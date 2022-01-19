@@ -499,7 +499,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     })
     let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
     this.$emit('change-locker-tabindex', selected_locker_index)
-    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', selected_locker_index)
+    this.$store.commit('Change_Locker_Tabs_Index', selected_locker_index)
     this.replaceEmailContentTags();
   }
 
@@ -519,8 +519,9 @@ export default class EventModal extends Mixins(ErrorMessages) {
       eventCollectionMode: false
     })
     let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
-    this.$emit('change-locker-tabindex', selected_locker_index)
-    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', selected_locker_index)
+     this.$emit('change-locker-tabindex', selected_locker_index)
+    // this.$store.commit('SET_LOCKER_ACTIVE_INDEX', selected_locker_index)
+    this.$store.commit('Change_Locker_Tabs_Index', selected_locker_index)
     this.replaceEmailContentTags();
 
   }
@@ -710,7 +711,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
       if (key == 'to_emails') {
         for (var i = 0; i < this.event_data.to_emails.length; i++) {
           if(this.event_data.to_emails[i] != ''){
-            console.log('here')
             form.append('to_emails[]', this.event_data.to_emails[i])
           }
         }
