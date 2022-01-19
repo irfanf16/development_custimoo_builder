@@ -197,7 +197,9 @@
                   <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
                     <template>
                       <div v-if="!room.have_yearly_planner">
-                          <b-button variant="secondary" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
+                          <b-button variant="secondary" style="float: left" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
+                          <b-form-select style="display:inline-block; float:left; width: 30%; margin-left: 10px" @change="copyYearlyPlannerEvents($event,room.id,i)" v-model="yearly_planner_template_id"  :options="getYearlyPlannerTemplateOptions"
+                                        ></b-form-select>
                       </div>
                       <div v-else>
                         <YearlyPlanner @edit-event="editEvent"
@@ -330,6 +332,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
   public collection_available = false;
   public lockerActiveTabIndex = this.$store.getters.getLockerActiveTabIndex;
   public collection_base_url = ''
+  public yearly_planner_template_id = null
+
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
     for(const mutation of mutationsList) {
@@ -480,6 +484,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
 
   get lockers(): Record<any, any> {
     return this.$store.getters.getLockers;
+  }
+
+  get getYearlyPlannerTemplateOptions() {
+   return this.$store.getters.yearlyPlannerTemplateOptions;
   }
 
   get selectedProduct(): Record<any, any> {
@@ -899,6 +907,24 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProduct) {
       this.showError(res)
     }
   }
+
+  public async copyYearlyPlannerEvents(yearlyplanner_template_id:string, locker_room_id:number, index:number){
+    if(yearlyplanner_template_id) {
+      let user_timezone = this.ref['eventmodal'].userTimeZone()
+      let payload = {yearlyplanner_template_id, locker_id: locker_room_id, user_timezone, index};
+      this.viewLoader = true
+      let res = await this.$store.dispatch('copyYearlyPlannerEvents', payload)
+       this.viewLoader = false
+      if (res.status == 201) {
+        this.yearlyplanner_template_id = null
+        await this.getLockerEvents(locker_room_id)
+        this.showToast('Yearly planner has been created successfully with events for this locker.', 'SUCCESS');
+      } else {
+        this.showError(res)
+      }
+    }
+  }
+
   public async deletePlanner(locker_room_id:number, index:number){
     try {
       const ok = await this.ref['reset-modal'].showConfirm()

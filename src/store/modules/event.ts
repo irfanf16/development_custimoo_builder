@@ -1,13 +1,18 @@
 import { Module } from "vuex";
 import {http} from "@/httpCommon";
 import {Vue} from "vue-property-decorator";
+
+const d = new Date();
+const selected_year: string = d.getFullYear();
+
 const Event:Module<any, any> = {
   state: {
     locker_index_for_event :0,
     show_event_popup:false,
     locker_events:[],
-    selected_year: 2021,
-    emailTemplates: []
+    selected_year: selected_year,
+    emailTemplates: [],
+    yearlyPlannerTemplates:[]
   },
   getters: {
     showEventPopup(state:Record<any, any>){
@@ -25,6 +30,15 @@ const Event:Module<any, any> = {
       optionArray[0] = {value: null, text: 'Select an email template'}
       state.emailTemplates.map(function (obj:Record<any, any>, index:number){
         optionArray.push({value: index, text: obj.title});
+      })
+      return optionArray;
+    },
+    yearlyPlannerTemplateOptions(state:Record<any, any>){
+      const optionArray = [];
+      optionArray[0] = {value: null, text: 'Create yearly planner from template'}
+      const state_arr = JSON.parse(JSON.stringify(state.yearlyPlannerTemplates))
+      state_arr.map(function (obj:Record<any, any>, index:number){
+        optionArray.push({value: obj.id, text: obj.name});
       })
       return optionArray;
     },
@@ -53,6 +67,9 @@ const Event:Module<any, any> = {
     },
     SET_EMAIL_TEMPLATES(state:Record<any, any>, paylod:number){
       state.emailTemplates = paylod;
+    },
+    SET_EVENT_TEMPLATES(state:Record<any, any>, paylod:number){
+      state.yearlyPlannerTemplates = paylod;
     }
   },
   actions: {
@@ -60,6 +77,13 @@ const Event:Module<any, any> = {
       http.get("get-email-templates?type=event").then((res) =>{
         if (res.status == 200){
           commit('SET_EMAIL_TEMPLATES', res.data);
+        }
+      })
+    },
+    getYearlyPlannerTemplates({commit}){
+      http.get("yearly-planner-templates").then((res) =>{
+        if (res.status == 200){
+          commit('SET_EVENT_TEMPLATES', res.data);
         }
       })
     },
