@@ -109,6 +109,7 @@ import {setLogoSettings} from "@/helpers/Helpers";
     }
 
     function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
+      console.log('delete')
       let target = transform.target;
       let canvas = target.canvas;
       if('textIndex' in target) {
@@ -183,6 +184,15 @@ export default class Scene extends Vue {
   public otherSideTexts: any[] = []
   public logoIndex = 0
   public textIndex = 0
+  public ctx:any = {}
+  public verticalLines:Record<any, any>[] = []
+  public horizontalLines:Record<any, any>[] = []
+  public aligningLineOffset = 5
+  public aligningLineMargin = 4
+  public aligningLineWidth = 3
+  public aligningLineColor = 'rgb(110, 243, 204)'
+  public viewportTransform:any
+  public drawLines = false
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -776,7 +786,6 @@ export default class Scene extends Vue {
     } else {
       this.frontCanvas = canvas
     }
-
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
     let model: any
@@ -886,11 +895,59 @@ export default class Scene extends Vue {
       }
     }, 1000)
     canvas.on('object:modified', (e: Record<any, any>) => {
+      var objects = canvas.getObjects('line');
+      for (let i in objects) {
+        canvas.remove(objects[i]);
+      }
+      this.drawLines = false
       self.objectMove(e, side)
       self.addToOtherSide(e.target, side)
     })
+
+    var ctx = canvas.getSelectionContext()
+
+    canvas.on('mouse:up', function() {
+      self.verticalLines.length = self.horizontalLines.length = 0;
+      canvas.renderAll();
+    });
+    canvas.on('before:render', function() {
+      canvas.clearContext(canvas.contextTop);
+    });
+
+    canvas.on('after:render', function() {
+      for (let i = self.verticalLines.length; i--; ) {
+        self.drawVerticalLine(self.verticalLines[i],ctx);
+      }
+      for (let i = self.horizontalLines.length; i--; ) {
+        self.drawHorizontalLine(self.horizontalLines[i],ctx);
+      }
+      self.verticalLines.length = self.horizontalLines.length = 0;
+    });
+
+    canvas.on('mouse:down', () => {
+      this.viewportTransform = canvas.viewportTransform;
+    });
+
+    let vertical_line = new fabric.Line([self.canvasWidth/2,0,self.canvasWidth/2,self.canvasHeight], {
+      stroke: '#6EF3CC',
+      strokeWidth:4,
+      strokeDashArray: [5, 5],
+    })
+    let horizontal_line = new fabric.Line([0,(self.canvasHeight/2),self.canvasWidth,(self.canvasHeight/2)], {
+      stroke: '#6EF3CC',
+      strokeWidth:4,
+      strokeDashArray: [5, 5],
+    })
+    let relativeCanvasWidth = self.canvasWidth/2 - 20
+    let relativeCanvasHeight = self.canvasHeight/2 - 20
+
     canvas.on('object:moving', (e: Record<any, any>) => {
       self.objectScaling(e, side)
+      let customObj:Record<any, any> = this.getCustomObjectsLength(canvas)
+      if(customObj.logoLength + customObj.textLength == 1)
+        this.addGuideLine(e,canvas,vertical_line,horizontal_line,relativeCanvasWidth,relativeCanvasHeight)
+
+      self.addGuideForMultipleObjects(canvas,e.target)
     })
 
     canvas.on('object:scaling', (e: Record<any, any>) => {
@@ -900,8 +957,245 @@ export default class Scene extends Vue {
       }
       this.showDimensions(e, dimText)
     });
-
   }
+  public getCustomObjectsLength(canvas:Record<any, any>) {
+    let logoLength = 0
+    let textLength = 0
+    canvas.getObjects().forEach((obj:Record<any, any>) => {
+      if('logoIndex' in obj) {
+        logoLength++
+      }
+      if('textIndex' in obj) {
+        textLength++
+      }
+    })
+    return {logoLength,textLength}
+  }
+  public addGuideLine(e: Record<any, any>, canvas: Record<any, any>,vertical_line:Record<any, any>,horizontal_line:Record<any, any>,relativeCanvasWidth:number,relativeCanvasHeight:number) {
+
+    if(!this.drawLines) {
+      canvas.add(vertical_line);
+      canvas.add(horizontal_line);
+      this.drawLines = true
+    }
+
+    let actObj = e.target;
+    let coords = actObj.calcCoords();
+
+    let left = coords.tl.x;
+    let top = coords.tl.y;
+
+
+    let  height = e.target.height * e.target.scaleY
+    let width = e.target.width * e.target.scaleX
+    width = Math.trunc(width/2)
+    height = Math.trunc(height/2)
+
+    if(parseInt(left) >= relativeCanvasWidth-width && parseInt(left) <= (relativeCanvasWidth-width)+5) {
+      vertical_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: []
+      })
+      canvas.renderAll()
+    }
+    else {
+      vertical_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: [5,5]
+      })
+      canvas.renderAll()
+    }
+
+    if(parseInt(top) >= relativeCanvasHeight-height && parseInt(top) <= (relativeCanvasHeight-height)+5 ) {
+      horizontal_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: [],
+      })
+      canvas.renderAll();
+    }
+    else {
+      horizontal_line.set({
+        stroke: '#6EF3CC',
+        strokeWidth:4,
+        strokeDashArray: [5,5],
+      })
+      canvas.renderAll();
+    }
+  }
+
+  public addGuideForMultipleObjects(canvas:Record<any, any>,selectedObject:Record<any, any>) {
+    var activeObject = selectedObject,
+      canvasObjects = canvas.getObjects(),
+      activeObjectCenter = activeObject.getCenterPoint(),
+      activeObjectLeft = activeObjectCenter.x,
+      activeObjectTop = activeObjectCenter.y,
+      activeObjectBoundingRect = activeObject.getBoundingRect(),
+      activeObjectHeight = activeObjectBoundingRect.height / this.viewportTransform[3],
+      activeObjectWidth = activeObjectBoundingRect.width / this.viewportTransform[0],
+      horizontalInTheRange = false,
+      verticalInTheRange = false,
+      transform = canvas._currentTransform;
+
+    if (!transform) return;
+
+    // It should be trivial to DRY this up by encapsulating (repeating) creation of x1, x2, y1, and y2 into functions,
+    // but we're not doing it here for perf. reasons -- as this a function that's invoked on every mouse move
+
+    for (var i = canvasObjects.length; i--; ) {
+      if (canvasObjects[i] === activeObject) continue;
+
+      if('logoIndex' in canvasObjects[i] || 'textIndex' in canvasObjects[i]) {
+
+        var objectCenter = canvasObjects[i].getCenterPoint(),
+          objectLeft = objectCenter.x,
+          objectTop = objectCenter.y,
+          objectBoundingRect = canvasObjects[i].getBoundingRect(),
+          objectHeight = objectBoundingRect.height / this.viewportTransform[3],
+          objectWidth = objectBoundingRect.width / this.viewportTransform[0];
+
+        // snap by the horizontal center line
+        if (this.isInRange(objectLeft, activeObjectLeft)) {
+          verticalInTheRange = true;
+          this.verticalLines.push({
+            x: objectLeft,
+            y1: (objectTop < activeObjectTop)
+              ? (objectTop - objectHeight / 2 - this.aligningLineOffset)
+              : (objectTop + objectHeight / 2 + this.aligningLineOffset),
+            y2: (activeObjectTop > objectTop)
+              ? (activeObjectTop + activeObjectHeight / 2 + this.aligningLineOffset)
+              : (activeObjectTop - activeObjectHeight / 2 - this.aligningLineOffset)
+          });
+          activeObject.setPositionByOrigin(new fabric.Point(objectLeft, activeObjectTop), 'center', 'center');
+        }
+
+        // snap by the left edge
+        if (this.isInRange(objectLeft - objectWidth / 2, activeObjectLeft - activeObjectWidth / 2)) {
+          verticalInTheRange = true;
+          this.verticalLines.push({
+            x: objectLeft - objectWidth / 2 +10,
+            y1: (objectTop < activeObjectTop)
+              ? (objectTop - objectHeight / 2 - this.aligningLineOffset)
+              : (objectTop + objectHeight / 2 + this.aligningLineOffset),
+            y2: (activeObjectTop > objectTop)
+              ? (activeObjectTop + activeObjectHeight / 2 + this.aligningLineOffset)
+              : (activeObjectTop - activeObjectHeight / 2 - this.aligningLineOffset)
+          });
+          activeObject.setPositionByOrigin(new fabric.Point(objectLeft - objectWidth / 2 + activeObjectWidth / 2, activeObjectTop), 'center', 'center');
+        }
+
+        // snap by the right edge
+        if (this.isInRange(objectLeft + objectWidth / 2, activeObjectLeft + activeObjectWidth / 2)) {
+          verticalInTheRange = true;
+          this.verticalLines.push({
+            x: objectLeft + objectWidth / 2 - 11,
+            y1: (objectTop < activeObjectTop)
+              ? (objectTop - objectHeight / 2 - this.aligningLineOffset)
+              : (objectTop + objectHeight / 2 + this.aligningLineOffset),
+            y2: (activeObjectTop > objectTop)
+              ? (activeObjectTop + activeObjectHeight / 2 + this.aligningLineOffset)
+              : (activeObjectTop - activeObjectHeight / 2 - this.aligningLineOffset)
+          });
+          activeObject.setPositionByOrigin(new fabric.Point(objectLeft + objectWidth / 2 - activeObjectWidth / 2, activeObjectTop), 'center', 'center');
+        }
+
+        // snap by the vertical center line
+        if (this.isInRange(objectTop, activeObjectTop)) {
+          horizontalInTheRange = true;
+          this.horizontalLines.push({
+            y: objectTop,
+            x1: (objectLeft < activeObjectLeft)
+              ? (objectLeft - objectWidth / 2 - this.aligningLineOffset)
+              : (objectLeft + objectWidth / 2 + this.aligningLineOffset),
+            x2: (activeObjectLeft > objectLeft)
+              ? (activeObjectLeft + activeObjectWidth / 2 + this.aligningLineOffset)
+              : (activeObjectLeft - activeObjectWidth / 2 - this.aligningLineOffset)
+          });
+          activeObject.setPositionByOrigin(new fabric.Point(activeObjectLeft, objectTop), 'center', 'center');
+        }
+
+        // snap by the top edge
+        if (this.isInRange(objectTop - objectHeight / 2, activeObjectTop - activeObjectHeight / 2)) {
+          horizontalInTheRange = true;
+          this.horizontalLines.push({
+            y: objectTop - objectHeight / 2 + 10,
+            x1: (objectLeft < activeObjectLeft)
+              ? (objectLeft - objectWidth / 2 - this.aligningLineOffset)
+              : (objectLeft + objectWidth / 2 + this.aligningLineOffset),
+            x2: (activeObjectLeft > objectLeft)
+              ? (activeObjectLeft + activeObjectWidth / 2 + this.aligningLineOffset)
+              : (activeObjectLeft - activeObjectWidth / 2 - this.aligningLineOffset)
+          });
+          activeObject.setPositionByOrigin(new fabric.Point(activeObjectLeft, objectTop - objectHeight / 2 + activeObjectHeight / 2), 'center', 'center');
+        }
+
+        // snap by the bottom edge
+        if (this.isInRange(objectTop + objectHeight / 2, activeObjectTop + activeObjectHeight / 2)) {
+          horizontalInTheRange = true;
+          this.horizontalLines.push({
+            y: objectTop + objectHeight / 2 - 11,
+            x1: (objectLeft < activeObjectLeft)
+              ? (objectLeft - objectWidth / 2 - this.aligningLineOffset)
+              : (objectLeft + objectWidth / 2 + this.aligningLineOffset),
+            x2: (activeObjectLeft > objectLeft)
+              ? (activeObjectLeft + activeObjectWidth / 2 + this.aligningLineOffset)
+              : (activeObjectLeft - activeObjectWidth / 2 - this.aligningLineOffset)
+          });
+          activeObject.setPositionByOrigin(new fabric.Point(activeObjectLeft, objectTop + objectHeight / 2 - activeObjectHeight / 2), 'center', 'center');
+        }
+      }
+    }
+
+    if (!horizontalInTheRange) {
+      this.horizontalLines.length = 0;
+    }
+    if (!verticalInTheRange) {
+      this.verticalLines.length = 0;
+    }
+  }
+
+  public drawVerticalLine(coords:any,ctx:CanvasRenderingContext2D) {
+    this.drawLine(
+      coords.x + 0.5,
+      coords.y1 > coords.y2 ? coords.y2 : coords.y1,
+      coords.x + 0.5,
+      coords.y2 > coords.y1 ? coords.y2 : coords.y1, ctx);
+  }
+
+  public drawHorizontalLine(coords:any,ctx:any) {
+    this.drawLine(
+      coords.x1 > coords.x2 ? coords.x2 : coords.x1,
+      coords.y + 0.5,
+      coords.x2 > coords.x1 ? coords.x2 : coords.x1,
+      coords.y + 0.5,ctx);
+  }
+
+  public drawLine(x1:number, y1:number, x2:number, y2:number,ctx:CanvasRenderingContext2D) {
+    ctx.save();
+    ctx.lineWidth = this.aligningLineWidth;
+    ctx.strokeStyle = this.aligningLineColor;
+    ctx.setLineDash([5, 5]);
+
+    ctx.beginPath();
+    ctx.moveTo(((x1+this.viewportTransform[4])), ((y1+this.viewportTransform[5])));
+    ctx.lineTo(((x2+this.viewportTransform[4])), ((y2+this.viewportTransform[5])));
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  public isInRange(value1:number, value2:number) {
+    value1 = Math.round(value1);
+    value2 = Math.round(value2);
+    for (var i = value1 - this.aligningLineMargin, len = value1 + this.aligningLineMargin; i <= len; i++) {
+      if (i === value2) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 
   public objectScaling(e: Record<any, any>, side: string) {
     let texture = this.frontTexture
