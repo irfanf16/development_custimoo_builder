@@ -147,6 +147,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     return  this.$store.getters.getEditStatus
   }
 
+  get customLogos(): [Record<any, any>] {
+    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
+  }
+
+  get customTexts(): [Record<any, any>] {
+    return this.$store.getters.getCustomTexts()
+  }
+
 
   public logosConversionToBase64() {
     const self = this
