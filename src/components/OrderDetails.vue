@@ -117,7 +117,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos()
+    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
   }
 
   get customTexts(): [Record<any, any>] {
