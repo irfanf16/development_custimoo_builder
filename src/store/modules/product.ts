@@ -11,7 +11,12 @@ const Product:Module<any, any> = {
     eyeIndex: -1,
     selectedModelIndex: 0,
     initialExtractedColors:[],
-    active_locker_index:0
+    active_locker_index:0,
+    main_products_info: {
+      has_more_products: false,
+      next_page: null,
+      active_product_id: null
+    }
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -40,6 +45,9 @@ const Product:Module<any, any> = {
     },
     getActiveLockerIndex(state:Record<any, any>){
       return state.active_locker_index
+    },
+    async getMainProductsInfo(state:Record<any, any>){
+      return state.main_products_info
     }
   },
   mutations:{
@@ -104,7 +112,10 @@ const Product:Module<any, any> = {
           Vue.set(element, 'copy_count', count)
         }
       })
-    }
+    },
+    UPDATE_MAIN_PRODUCTS_INFO(state:Record<any, any>, payload){
+      state.main_products_info = payload
+    },
   },
   actions: {
     async getModels({commit}, paylod:number){
@@ -147,7 +158,7 @@ const Product:Module<any, any> = {
       })
     },
     async getLockerProductDetail({commit}, id){
-      return await http.get('locker/product/detail/'+id).then((res) => {
+      return await http.get(`locker/product/detail?id=${id}`).then((res) => {
         if (res.status == 200){
           return res
         }
@@ -262,6 +273,9 @@ const Product:Module<any, any> = {
     },
     async getIcsFile({commit}, payload){
       return await http.post("events/create/ics/file", payload)
+    },
+    async updateMainProductsInfo({commit}, payload){
+      commit('UPDATE_MAIN_PRODUCTS_INFO', payload)
     },
 
   }

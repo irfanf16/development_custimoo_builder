@@ -1,5 +1,5 @@
 <template>
-  <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: products.length > 3? 4: products.length, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
+  <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: 4, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
     <template v-for="(product, index) in products">
       <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">
@@ -17,58 +17,66 @@
   </slither-slider>
 </template>
 
-<script>
-
+<script lang="ts">
+import {Component, Vue, Mixins} from 'vue-property-decorator'
 import SlitherSlider from 'slither-slider';
 import Scene from '@/components/Scene.vue'
-import Vue from 'vue'
+import {http} from "@/httpCommon";
+import {handleMainProducts} from "@/mixins/LockerProduct";
+
 Vue.use(SlitherSlider)
 
-export default {
-  components: { Scene },
-  data: function () {
-    return {
-      storageUrl: process.env.VUE_APP_STORAGE_URL,
-      renderComponent : true,
-      multipleLogo:false
-    }
-  },
-  // mounted() {
-    // this.$root.$on('sliderEvent', () => { // here you need to use the arrow function
-    //  if(this.$refs && this.$refs.slider)
-    //   this.$refs.slider.goToIndex(0);
-    // })
-  // },
-  computed: {
-    products: function() {
-      return this.$store.getters.getProducts
-    }
-  },
-  methods: {
-    productDesigns: async function(index) {
-
-      await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
-      this.$store.commit('CHANGE_STYLE_INDEX', 0);
-      this.$store.dispatch("getModels", this.products[index].product_id);
-      this.$store.dispatch('setColorSectionVisibility')
+@Component<SelectItemCarousel>({
+  components: {
+    Scene
+  }
+})
 
 
-    },
-    setSliderIndex: function() {
-      if(this.$refs && this.$refs.slider)
-          this.$refs.slider.goToIndex(0);
-    },
-    loadMoreProduct: function (currentIndex) {
-      if(this.$store.getters.getProducts.length - 5 <= currentIndex){
-        this.$emit('retrieveProductsC', 1)
+export default class SelectItemCarousel extends Mixins(handleMainProducts) {
+
+  public storageUrl = process.env.VUE_APP_STORAGE_URL;
+  public renderComponent =  true;
+  public multipleLogo = false;
+  public has_more_products = false;
+
+  get products() {
+    return this.$store.getters.getProducts
+  }
+
+  public async productDesigns(index: number) {
+    await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
+    this.$store.commit('CHANGE_STYLE_INDEX', 0);
+    this.$store.dispatch("getModels", this.products[index].product_id);
+    this.$store.dispatch('setColorSectionVisibility')
+    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0,})
+  }
+
+  public setSliderIndex() {
+    if(this.$refs && this.$refs.slider)
+      this.$refs.slider.goToIndex(0);
+  }
+
+  public async loadMoreProduct() {
+    let self = this;
+    let main_products_info = await self.$store.getters.getMainProductsInfo;
+    if(main_products_info.has_more_products) {
+      let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&page=${main_products_info.next_page}`;
+      if(main_products_info.active_product_id) {
+        url += `&active_product_id=${main_products_info.active_product_id}`
       }
-    },
-    myfunction: function(){
-      alert('here')
+      http.get(url).then(async (response: Record<any, any>) => {
+        await self.handleMainProducts(response);
+        if(self["showLoader"]) {
+          self.showLoader = false;
+        }
+      }, (error) => {
+        console.error("Error while getting order detail", error.response.data.message)
+      })
     }
   }
-}
 
+}
 </script>
 
 <style lang="scss" scoped>
