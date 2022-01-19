@@ -34,9 +34,11 @@
                 </b-form>
                 <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />
               </div>
-              <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
-                   :title="color.name" :style="{background: color.value}" :key="index">
-              </div>
+              <template v-else v-for="(color, index) in productColor">
+                <div v-if="color.value"  class="color-box"  @click="setColor(color)"
+                     :title="color.name" :style="{background: color.value }" :key="index">
+                </div>
+              </template>
             </div>
           </div>
         </b-card-body>
@@ -103,8 +105,9 @@ export default class ColorAccordion extends Vue {
 
     this.selectTypeIndex = index
     this.showOther = showOther
-    this.productColor = this.productColors[this.selectTypeIndex].color_text
-
+    if (this.productColors[index]){
+      this.productColor = this.productColors[index].color_text
+    }
     if(this.selectTypeIndex){
       this.isActive = !this.isActive
     }
@@ -115,13 +118,15 @@ export default class ColorAccordion extends Vue {
 
   public setColor(color: Record<any, any>) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
-    this.$store.dispatch('updateGroupColors',
-    {
-      index: this.svgGroups[this.selectAccordionIndex].id,
-      color: color.value,
-      pantone: color.pantone,
-      name: color.name
-    })
+    if (color.value){
+      this.$store.dispatch('updateGroupColors',
+        {
+          index: this.svgGroups[this.selectAccordionIndex].id,
+          color: color.value,
+          pantone: color.pantone,
+          name: color.name
+        })
+    }
   }
 
   public changeColor(color: Record<any, any>) {

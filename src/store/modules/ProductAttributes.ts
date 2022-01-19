@@ -579,10 +579,12 @@ const ProductAttributes:Module<any, any> = {
       }];
     },
     ADD_LOCKER_ROOM_COLORS(state:Record<any, any>, payload:Record<any, any>){
-      payload = payload.map((item: Record<any, any>) => {
-         item.color_text = JSON.parse(JSON.stringify(item.color_text))
-        return item
-      })
+      if (payload){
+        payload = payload.map((item: Record<any, any>) => {
+          item.color_text = JSON.parse(item.color_text)
+          return item
+        })
+      }
       state.lockerColors = payload
     },
     ACTION_BEFORE_LOGIN(state: Record<any, any>, action: string){

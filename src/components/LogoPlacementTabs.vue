@@ -422,7 +422,6 @@ export default class LogoPlacementTabs extends Vue {
     return this.$store.getters.getLogosColors
   }
   public getColors() {
-
     this.productColors = []
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
@@ -430,7 +429,6 @@ export default class LogoPlacementTabs extends Vue {
       this.productColors = this.productColors.concat(finalColor)
     })
     this.productColors = this.productColors.concat(this.lockerColors)
-
   }
 
   public selectLogoColor(index: number, imageColor: Record<any, any>){

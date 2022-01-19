@@ -331,6 +331,7 @@ Vue.filter('formatDate', function(value) {
     await this.getFillColors()
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
+      await this.$store.dispatch('getLockerRoomColors')
     }
     if (this.$route.params.name) {
       this.showLoader = true
@@ -388,7 +389,6 @@ Vue.filter('formatDate', function(value) {
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
       await  this.$store.dispatch('permissions')
-      await this.$store.dispatch('getLockerRoomColors')
     }
 
 
