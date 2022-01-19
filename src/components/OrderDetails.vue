@@ -117,14 +117,6 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     return this.$store.getters.isCustomerAuthenticated
   }
 
-  get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos()
-  }
-
-  get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts()
-  }
-
   public buyNow() {
     this.$router.push('/confirm-order')
   }
