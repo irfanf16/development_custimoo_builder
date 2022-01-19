@@ -116,6 +116,14 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     return this.$store.getters.isCustomerAuthenticated
   }
 
+  get customLogos(): [Record<any, any>] {
+    return this.$store.getters.getCustomLogos()
+  }
+
+  get customTexts(): [Record<any, any>] {
+    return this.$store.getters.getCustomTexts()
+  }
+
   public buyNow() {
     this.$router.push('/confirm-order')
   }
@@ -369,6 +377,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     order_detail.svg_groups = self.svgGroups;
     order_detail.custom_texts = self.customTexts;
     order_detail.custom_logos = self.customLogos;
+    //if logo colors are being used then we will send it otherwise not
     if(self.$store.getters.getUsingColorLogos) {
       order_detail.logo_colors = self.logoColors
     }
