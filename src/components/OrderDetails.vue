@@ -129,6 +129,14 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     return this.$store.getters.getSvgGroups
   }
 
+  get customLogos(): [Record<any, any>] {
+    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
+  }
+
+  get customTexts(): [Record<any, any>] {
+    return this.$store.getters.getCustomTexts()
+  }
+
 
   get productionSVGs(): Record<any, any> {
     return this.$store.getters.getProductionSVGs
