@@ -1571,6 +1571,7 @@ export default class Scene extends Vue {
     const self = this
     if(file_ext == 'svg'){
       fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
+        options.crossOrigin = 'Anonymous'
         const img = fabric.util.groupSVGElements(objects) as fabric.Group
         img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
           hasControls: false,
@@ -1592,7 +1593,7 @@ export default class Scene extends Vue {
         } else {
           this.frontTexture = img
         }
-      }, ()=> true, {crossOrigin: 'Anonymous'})
+      })
     }else{
       fabric.Image.fromURL(textureUrl, (img: any) => {
        // console.log(img)
