@@ -51,159 +51,171 @@
             </b-input-group>
             </div>
           </span>
-
-              <div class="w-100 d-flex flex-wrap align-items-center justify-content-between mt-3"
-                   style="min-height: 40px">
-                <b-form-checkbox v-model="event_data.is_reminder" :checked="event_data.is_reminder"><span
-                  class="d-inline-flex" style="padding-top: 2px">Send reminder</span></b-form-checkbox>
-
-                <div v-if="event_data.is_reminder">
-                  <validation-provider rules="required" v-slot="{ errors }">
-                    <b-form-select v-model="event_data.before_time" :options="getReminders"></b-form-select>
-                    <span class="error">{{ errors[0] }}</span>
-                  </validation-provider>
-                </div>
-              </div>
-
-              <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
-                <b-input-group>
-                  <b-form-checkbox v-model="event_data.email_to_others" :checked="event_data.email_to_others">
-                    <span class="d-inline-flex" style="padding-top: 2px">Send reminder to others:</span>
-                  </b-form-checkbox>
-
-                </b-input-group>
-                <div class="w-100 d-flex mt-3 justify-content-start align-items-end gap-3" v-if="event_data.email_to_others">
-
-                  <div class="w-100" v-if="event_data.to_emails && event_data.to_emails.length"
-                       style="max-height: 200px; overflow-y: auto">
-                    <div v-for="(email, i) in event_data.to_emails" :key="i">
-                      <validation-provider rules="email" v-slot="{ errors }">
-                        <b-input-group :class="{'mt-3': i > 0}">
-                          <b-form-input placeholder="Enter Email" class="no-outline" @input="updateEmail($event, i)"
-                                        :value="email"></b-form-input>
-                          <b-input-group-append>
-                            <b-button variant="danger" @click="deleteEmail(i)">
-                              <BIconX/>
-                            </b-button>
-                          </b-input-group-append>
-                        </b-input-group>
-                        <div class="error">{{ errors[0] }}</div>
-                      </validation-provider>
-                    </div>
-                  </div>
-
-                  <div class="text-right mt-2">
-                    <a data-title="Add contact"
-                       class="btn btn-dark light rounded-circle light add fs-4 d-inline-flex align-items-center justify-content-center p-0"
-                       style="height: 40px; width: 40px" @click="addEmptyEmail">
-                      <BIconPlus/>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
+        </div>
 
             <div class="col-lg-4">
-              <div class="event-img d-flex flex-column align-items-center justify-content-between"
-                   style="height: calc(100% - 120px)">
-                <div class="design" v-if="event_data.event_type === 'design' ">
-                  <a class="remove" data-title="Delete file"
-                     @click="deleteFile()">
-                    <BIconX/>
-                  </a>
-                  <img :src="file_data" style="width: 100%; max-width: 150px"/>
-                  <div class="file_name">
-                    <span>{{ file_name }}</span>
-                  </div>
-                </div>
-
-                <div class="collection" v-else-if="event_data.event_type === 'collection' ">
-                  <a class="remove" data-title="Delete file"
-                     @click="deleteFile()">
-                    <BIconX/>
-                  </a>
-                  <div class="image-holder">
-                    <div class="convas_container" :key="collection_product_index"
-                         v-for="(collection_product,collection_product_index) in file_data">
-                      <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
-                      <template v-if="collection_product_index < 3">
-                        <img style="width: 100%; max-width: 150px"
-                             :src="collection_product.product_locker_room.product_url"
-                             :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'"
-                             alt="">
-                      </template>
+                  <div class="event-img d-flex flex-column align-items-center justify-content-between"
+                       style="height: calc(100% - 120px)">
+                    <div class="design" v-if="event_data.event_type === 'design' ">
+                      <a class="remove" data-title="Delete file"
+                         @click="deleteFile()">
+                        <BIconX/>
+                      </a>
+                      <img :src="file_data" style="width: 100%; max-width: 150px"/>
+                      <div class="file_name">
+                        <span>{{ file_name }}</span>
+                      </div>
                     </div>
-                  </div>
-                  <div class="file_name mt-3">
-                    <span>{{ file_name }}</span>
-                  </div>
-                </div>
 
-                <div class="custom" v-else-if="event_data.event_type === 'custom'"
-                     :style="{overflow: file_data ? 'visible': 'hidden', padding: file_data ? '15px 10px': '0'}">
-                  <a class="remove" v-if="file_data" @click="deleteFile">
-                    <BIconX/>
-                  </a>
-
-                  <div class="modal-handler">
-
-                    <label class="upload-box position-relative">
-                      <template v-if="file_data">
-                        <div class="uploaded-logo-holder">
-                          <img crossorigin="anonymous" v-if="showPlaceholder" :src="file_data" style="width: 100%; max-width: 150px"/>
-                          <div v-else> <BIconFileEarmark/></div>
+                    <div class="collection" v-else-if="event_data.event_type === 'collection' ">
+                      <a class="remove" data-title="Delete file"
+                         @click="deleteFile()">
+                        <BIconX/>
+                      </a>
+                      <div class="image-holder">
+                        <div class="convas_container" :key="collection_product_index"
+                             v-for="(collection_product,collection_product_index) in file_data">
+                          <!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
+                          <template v-if="collection_product_index < 3">
+                            <img v-if="collection_product.product_locker_room" style="width: 100%; max-width: 150px"
+                                 :src="collection_product.product_locker_room.product_url"
+                                 :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'"
+                                 alt="">
+                          </template>
                         </div>
-                        <span class="file_name">{{ file_name }}</span>
-                        <a style="display: block" v-if="is_file_download && event_data.id>0" target="_blank"
-                           :href="file_data">Download File</a>
-                      </template>
+                      </div>
+                      <div class="file_name mt-3">
+                        <span>{{ file_name }}</span>
+                      </div>
+                    </div>
 
-                      <div v-if="!file_data">
-                        <div class="icon-holder fs-4">
-                          <BIconImage/>
-                        </div>
-                        <slot name="upload_text">
-                          <div class="fs-2 mt-1">Upload File</div>
-                        </slot>
+                    <div class="custom" v-else-if="event_data.event_type === 'custom'"
+                         :style="{overflow: file_data ? 'visible': 'hidden', padding: file_data ? '15px 10px': '0'}">
+                      <a class="remove" v-if="file_data" @click="deleteFile">
+                        <BIconX/>
+                      </a>
 
-                        <!--                      <validation-provider rules="required_if:eventType,custom|ext:jpg,png,svg|size:2048" v-slot="{ errors }">-->
-<!--                        <validation-provider rules="required_if:eventType,custom|size:2048" v-slot="{ errors }">-->
-                          <b-form-file
-                            type="file"
-                            name="file" ref="fileInput"
-                            v-model="event_data.file"
-                            @input="uploadEventImage"
-                            class="fileLoader"
-                            accept="image/*"></b-form-file>
+                      <div class="modal-handler">
 
-<!--                          <span class="error">{{ errors[0] }}</span>-->
-<!--                        </validation-provider>-->
+                        <label class="upload-box position-relative">
+                          <template v-if="file_data">
+                            <div class="uploaded-logo-holder">
+                              <img crossorigin="anonymous" v-if="showPlaceholder" :src="file_data" style="width: 100%; max-width: 150px"/>
+                              <div v-else> <BIconFileEarmark/></div>
+                            </div>
+                            <span class="file_name">{{ file_name }}</span>
+                            <a style="display: block" v-if="is_file_download && event_data.id>0" target="_blank"
+                               :href="file_data">Download File</a>
+                          </template>
+
+                          <div v-if="!file_data">
+                            <div class="icon-holder fs-4">
+                              <BIconImage/>
+                            </div>
+                            <slot name="upload_text">
+                              <div class="fs-2 mt-1">Upload File</div>
+                            </slot>
+
+                            <!--                      <validation-provider rules="required_if:eventType,custom|ext:jpg,png,svg|size:2048" v-slot="{ errors }">-->
+    <!--                        <validation-provider rules="required_if:eventType,custom|size:2048" v-slot="{ errors }">-->
+                              <b-form-file
+                                type="file"
+                                name="file" ref="fileInput"
+                                v-model="event_data.file"
+                                @input="uploadEventImage"
+                                class="fileLoader"
+                                accept="image/*"></b-form-file>
+
+    <!--                          <span class="error">{{ errors[0] }}</span>-->
+    <!--                        </validation-provider>-->
+
+                          </div>
+
+                        </label>
 
                       </div>
+                    </div>
+                  </div>
 
-                    </label>
 
+            </div>
+          <div class="col-lg-12">
+            <div class="row">
+              <div class="col-lg-8">
+                <div class="w-100 d-flex flex-wrap align-items-center justify-content-between mt-3"
+                     style="min-height: 40px">
+                  <validation-provider  vid="sendReminder" >
+                    <b-form-checkbox @input="setEmailTemplate($event)" v-model="event_data.is_reminder" :checked="event_data.is_reminder"><span
+                      class="d-inline-flex" style="padding-top: 2px">Send reminder</span></b-form-checkbox>
+                  </validation-provider>
+                  <div v-if="event_data.is_reminder">
+                    <validation-provider rules="required" v-slot="{ errors }">
+                      <b-form-select style="min-height: 40px" v-model="event_data.before_time" :options="getReminders"></b-form-select>
+                      <span class="error">{{ errors[0] }}</span>
+                    </validation-provider>
                   </div>
                 </div>
               </div>
-              <div class="d-flex align-items-center gap-1">
-                <b-input-group class="w-100">
-                  <validation-provider rules="required" v-slot="{ errors }">
-                    <b-form-select class="w-100" :disabled="!checkEmailTemplateDependency"
-                                   v-model="email_template_index" @change="setEventEmailTemplate"
-                                   :options="getEmailTemplateOptions"></b-form-select>
-                    <span class="error">{{ errors[0] }}</span>
-                  </validation-provider>
-                </b-input-group>
-                <b-button style="height: 40px; width: 40px; flex-shrink: 0;" variant="dark"
-                          class="rounded-circle light fs-2 p-0 d-inline-flex align-items-center justify-content-center"
-                          v-if="email_template_index !== null" v-b-modal.email-template-modal>
-                  <BIconPencil/>
-                </b-button>
-              </div>
 
+              <div class="col-lg-4">
+                <div class="d-flex align-items-center mt-3 gap-1">
+                  <b-input-group class="w-100">
+                    <validation-provider rules="required_if:sendReminder,true" v-slot="{ errors }">
+                      <b-form-select class="w-100" :disabled="!checkEmailTemplateDependency"
+                                     v-model="email_template_index" @change="setEventEmailTemplate"
+                                     :options="getEmailTemplateOptions"></b-form-select>
+                      <span class="error">{{ errors[0] }}</span>
+                    </validation-provider>
+                  </b-input-group>
+                  <b-button style="height: 40px; width: 40px; flex-shrink: 0;" variant="dark"
+                            class="rounded-circle light fs-2 p-0 d-inline-flex align-items-center justify-content-center"
+                            v-if="email_template_index !== null" v-b-modal.email-template-modal>
+                    <BIconPencil/>
+                  </b-button>
+                </div>
+              </div>
             </div>
           </div>
+
+          <div class="col-lg-8">
+            <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
+              <b-input-group>
+                <b-form-checkbox v-model="event_data.email_to_others" :checked="event_data.email_to_others">
+                  <span class="d-inline-flex" style="padding-top: 2px">Send reminder to others:</span>
+                </b-form-checkbox>
+
+              </b-input-group>
+              <div class="w-100 d-flex mt-3 justify-content-start align-items-end gap-3" v-if="event_data.email_to_others">
+
+                <div class="w-100" v-if="event_data.to_emails && event_data.to_emails.length"
+                     style="max-height: 200px; overflow-y: auto">
+                  <div v-for="(email, i) in event_data.to_emails" :key="i">
+                    <validation-provider rules="email" v-slot="{ errors }">
+                      <b-input-group :class="{'mt-3': i > 0}">
+                        <b-form-input placeholder="Enter Email" class="no-outline" @input="updateEmail($event, i)"
+                                      :value="email"></b-form-input>
+                        <b-input-group-append>
+                          <b-button variant="danger" @click="deleteEmail(i)">
+                            <BIconX/>
+                          </b-button>
+                        </b-input-group-append>
+                      </b-input-group>
+                      <div class="error">{{ errors[0] }}</div>
+                    </validation-provider>
+                  </div>
+                </div>
+
+                <div class="text-right mt-2">
+                  <a data-title="Add contact"
+                     class="btn btn-dark light rounded-circle light add fs-4 d-inline-flex align-items-center justify-content-center p-0"
+                     style="height: 40px; width: 40px" @click="addEmptyEmail">
+                    <BIconPlus/>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         </div>
         <div class="row">
@@ -323,7 +335,9 @@ export default class EventModal extends Mixins(ErrorMessages) {
   //@Watch('checkEmailTemplateDependency')
   get checkEmailTemplateDependency() {
     let resp = true;
-    if (!this.event_data.event_time) {
+    if(!this.event_data.is_reminder){
+      resp = false
+    } else if (!this.event_data.event_time) {
       resp = false
     } else if (this.event_data.event_type === null || this.file_data === null) {
       if(this.event_data.event_type === 'custom'){
@@ -334,12 +348,16 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
     }
 
-
-
     if (!resp) {
       this.email_template_index = null
     }
     return resp
+  }
+  public setEmailTemplate(e:boolean){
+   if(!e){
+     this.event_data.email_template_id = null
+     this.event_data.email_content = ''
+   }
   }
 
   get showEventPopup() {
@@ -481,6 +499,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     })
     let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
     this.$emit('change-locker-tabindex', selected_locker_index)
+    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', selected_locker_index)
     this.replaceEmailContentTags();
   }
 
@@ -501,6 +520,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     })
     let selected_locker_index = this.$store.getters.getLockerIndexForEvent;
     this.$emit('change-locker-tabindex', selected_locker_index)
+    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', selected_locker_index)
     this.replaceEmailContentTags();
 
   }
@@ -628,10 +648,14 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
       this.event_data.email_template_id = res.email_template_id
       this.event_data.email_content = res.email_content
-      let emailTemplates = this.$store.getters.getEmailTemplates
-      this.email_template_index = emailTemplates.map(function (eTemplate) {
-        return eTemplate.id;
-      }).indexOf(res.email_template_id);
+
+      if(res.email_template_id){
+        let emailTemplates = this.$store.getters.getEmailTemplates
+        this.email_template_index = emailTemplates.map(function (eTemplate) {
+          return eTemplate.id;
+        }).indexOf(res.email_template_id);
+      }
+
 
       if (res.event_type == 'design') {
 
@@ -676,11 +700,19 @@ export default class EventModal extends Mixins(ErrorMessages) {
     this.event_data.event_timezone = this.userTimeZone();
 
 
+    if(!this.event_data.email_template_id){
+      this.event_data.email_template_id = '';
+      this.event_data.email_content = '';
+    }
+
     let form = new FormData()
     for (const key in this.event_data) {
       if (key == 'to_emails') {
         for (var i = 0; i < this.event_data.to_emails.length; i++) {
-          form.append('to_emails[]', this.event_data.to_emails[i])
+          if(this.event_data.to_emails[i] != ''){
+            console.log('here')
+            form.append('to_emails[]', this.event_data.to_emails[i])
+          }
         }
       } else if (key == 'email_to_others' || key == 'is_reminder') {
         if (this.event_data[key]) {
@@ -732,7 +764,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
         this.showErrorArr(err.response.data.errors)
       }
     })
-
 
   }
 
