@@ -18,8 +18,8 @@
           <div>
             <b-card no-body>
               <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
-              <b-tabs card changed="currentTabs" @activate-tab="lockerTabUpdated" :value="lockerActiveTabIndex">
-                <b-tab v-if="!getSelectionMode.eventCollectionMode" title="Products">
+              <b-tabs card v-model="lockerActiveTabIndex" @changed="checkINdex">
+                <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" >
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
                              :multiDrag="true"
@@ -209,8 +209,8 @@
                                        :room_id="room.id" :room_index="i" :key="room.id"
                         >
                           <template slot="actions">
-                            <b-button class="mr-3 light" variant="secondary" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
-                            <button class="btn mr-3 light btn-secondary" @click="getIcsFile(room.id,i)">Add to calender</button>
+                            <b-button class="mr-3 light" variant="danger" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
+                            <button class="btn mr-3 light btn-secondary" @click="getIcsFile(room.id,i)">Export to Outlook</button>
                           </template>
                         </YearlyPlanner>
                       </div>
@@ -330,7 +330,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public url = ''
   public group = ''
   public collection_available = false;
-  public lockerActiveTabIndex = this.$store.getters.getLockerActiveTabIndex;
+  public lockerActiveTabIndex = 0;
   public collection_base_url = ''
   public yearly_planner_template_id = null
 
@@ -700,20 +700,20 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public async lockerTabUpdated(newTabIndex:number , prevTabIndex: number, bvEvent:Record<any, any> ) {
-    this.lockerActiveTabIndex = newTabIndex;
-    this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
+    this.lockerActiveTabIndex = 0;
+    // this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
   }
   public async yearlyPlannerTab(room_id:number) {
    this.$refs[`yearlyTab${room_id}`][0].activate()
   }
 
-  public lockerChanged(newTabIndex: any , prev:any) {
+  public lockerChanged() {
     /*
     * If locker collection tab is active and user switch to the locker then activate first tab (product tab)
     * */
-    if (this.lockerActiveTabIndex == 3 || this.lockerActiveTabIndex == 4) {
+    // if (this.lockerActiveTabIndex == 3 || this.lockerActiveTabIndex == 4) {
       this.lockerActiveTabIndex = 0
-    }
+    // }
   }
 
   public async clickYearlyTab(evt:any,room_id:number) {
@@ -747,7 +747,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.tabIndex = i
     let payload = {index: i, attribute: 'active_tab', value:true}
     this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
-    this.$store.commit('SET_LOCKER_ACTIVE_INDEX', i)
+    this.$store.commit('Change_Locker_Tabs_Index', i)
+    this.lockerActiveTabIndex = 0
+  }
+  public checkINdex(){
+    this.lockerActiveTabIndex = 0
   }
   public productsAddedToLocker(payload: Record<any, any>) {
     let clones = payload.clone ? [payload.clone] : payload.clones;
@@ -959,7 +963,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.tabIndex = lockerIndex
   }
   public editEvent(event_id:number){
-    const room_index = this.$store.getters.getActiveLockerIndex;
+    const room_index = this.$store.getters.getLockerTabsIndex;
     this.$store.commit('SHOW_EVENT_POPUP', true)
     this.$store.commit('SET_LOCKER_INDEX_FOR_EVENT', room_index)
     this.ref['eventmodal'].editEvent(event_id);
