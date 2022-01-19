@@ -158,10 +158,13 @@
       <template v-if="!view_emails" >
         <button class="btn btn-dark light" @click="showEventPopup(0)">Add Event</button>
         <button style="margin-left: 5px" class="btn btn-dark light" @click="showContactPopup">Add Contact</button>
-        <button style="margin-left: 5px" class="btn btn-secondary light" @click="showEmail">Show Emails</button>
+        <button v-if="event_view=='month'"  style="margin-left: 5px" class="btn btn-secondary light" @click="showEmail">Show Emails</button>
         <button style="margin-left: 5px" class="btn btn-secondary light" @click="openYearModal">Copy all events</button>
       </template>
-      <button v-else style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show event details</button>
+      <template v-else>
+        <button v-if="event_view=='month'" style="margin-left: 5px" class="btn btn-secondary" @click="showEmail">Show event details</button>
+      </template>
+
     </div>
 
   </div>
@@ -229,7 +232,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
   }
 
   public showEventPopup(selected_month:number){
-    const room_index = this.$store.getters.getActiveLockerIndex;
+    const room_index = this.$store.getters.getLockerTabsIndex;
     this.$store.commit('SHOW_EVENT_POPUP', true)
     this.$store.commit('SET_LOCKER_INDEX_FOR_EVENT', room_index)
     this.$emit('init-event-contacts', selected_month);
