@@ -3,8 +3,9 @@
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex">
 <!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
-        <vue-scrollbar :speed="20" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">
-          <div class="scroll-me">
+<!--        <vue-scrollbar :speed="20" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">-->
+      <div class="myscroll">
+<!--        <vuescroll :ops="ops">-->
             <b-tab v-if="selectedProduct.is_logo_allowed == 1">
               <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
               <template #title>
@@ -113,9 +114,9 @@
               <EditRosterArea :productSizes="selectedProduct.sizes"/>
             </div>
           </b-tab>
-          </div>
-        </vue-scrollbar>
-      </b-tabs>
+<!--        </vuescroll>-->
+      </div>
+    </b-tabs>
     </div>
 
   </div>
@@ -135,9 +136,11 @@ import {getClosestColor} from '@/pantoneColor'
 import RecentLogos from "@/components/RecentLogos.vue";
 import {sortTextsArray} from "@/helpers/Helpers";
 import vueCustomScrollbar from 'vue-custom-scrollbar';
-import "vue-custom-scrollbar/dist/vueScrollbar.css"
-import "vue2-scrollbar/dist/style/vue2-scrollbar.css"
+// import "vue-custom-scrollbar/dist/vueScrollbar.css"
+// import "vue2-scrollbar/dist/style/vue2-scrollbar.css"
 import vueScrollbar from 'vue2-scrollbar'
+import vuescroll from "vuescroll/dist/vuescroll-native";
+import "vuescroll/dist/vuescroll.css";
 
 @Component<CustomizationProcess>({
   components: {
@@ -150,7 +153,8 @@ import vueScrollbar from 'vue2-scrollbar'
     EditRosterArea,
     ColorTabs,
     UploadLogo,
-    vueScrollbar
+    vueScrollbar,
+    vuescroll
   },
   mounted() {
     this.$store.dispatch('setCustomLogos')
@@ -164,12 +168,37 @@ import vueScrollbar from 'vue2-scrollbar'
 export default class CustomizationProcess extends Vue {
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
-  private settings = {
-    suppressScrollY: false,
-    suppressScrollX: true,
-    wheelPropagation: false,
-    wheelSpeed: 3
+  private ops = {
+    // vuescroll: {
+    //   mode: 'native'
+    // },
+    // scrollpanel: { scrollingX: false, scrollingY: true },
+    // rail: {
+    //   background: '#219F84',
+    //   opacity: '0.2',
+    //   gutterOfSide: '0',
+    // },
+    // bar: {
+    //   background: '#219F84',
+    //   opacity: '0.9',
+    // }
   }
+
+  // private settings = {
+  //   suppressScrollY: false,
+  //   suppressScrollX: true,
+  //   wheelPropagation: false,
+  //   wheelSpeed: 3
+  // }
+
+  // public setScroll(){
+  //   // alert('scrollBar[0].scrollTop')
+  //   let scrollBar:Record<any, any> = this.$refs['Scrollbar'];
+  //
+  //   // scrollBar.scrollToY(0);
+  //   console.log('scroll', )
+  // }
+
   public styling = {
     /* Scrollbar */
     scrollbar: {
@@ -487,5 +516,23 @@ export default class CustomizationProcess extends Vue {
   position: relative;
   max-height: 73vh;
   overflow-y: auto;
+}
+
+.myscroll{
+  height: calc(100vh - 220px);
+  overflow-y: auto;
+
+  &::-webkit-scrollbar{
+    width: 3px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #219F84;
+  }
+
+  scrollbar-color: #219F84 #f1f1f1;
+  scrollbar-width: thin;
 }
 </style>
