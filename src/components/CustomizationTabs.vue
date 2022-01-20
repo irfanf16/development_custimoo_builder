@@ -135,16 +135,9 @@ import {default as $} from 'jquery';
 import {getClosestColor} from '@/pantoneColor'
 import RecentLogos from "@/components/RecentLogos.vue";
 import {sortTextsArray} from "@/helpers/Helpers";
-import vueCustomScrollbar from 'vue-custom-scrollbar';
-// import "vue-custom-scrollbar/dist/vueScrollbar.css"
-// import "vue2-scrollbar/dist/style/vue2-scrollbar.css"
-import vueScrollbar from 'vue2-scrollbar'
-import vuescroll from "vuescroll/dist/vuescroll-native";
-import "vuescroll/dist/vuescroll.css";
 
 @Component<CustomizationProcess>({
   components: {
-    vueCustomScrollbar,
     RecentLogos,
     ColorAccordion,
     LogoPlacementTabs,
@@ -153,8 +146,6 @@ import "vuescroll/dist/vuescroll.css";
     EditRosterArea,
     ColorTabs,
     UploadLogo,
-    vueScrollbar,
-    vuescroll
   },
   mounted() {
     this.$store.dispatch('setCustomLogos')
