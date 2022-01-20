@@ -100,6 +100,9 @@ export default class DesignAvailable extends Vue {
       background: #219F84;
   }
 
+  scrollbar-color: #219F84 #f1f1f1;
+  scrollbar-width: thin;
+
   // &:after {
   //   content: '';
   //   flex: auto;
