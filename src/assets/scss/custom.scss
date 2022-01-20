@@ -4366,13 +4366,17 @@ $fontSize: 0.5;
     }
 }
 
-.well{
+.well {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
 
-    &.custom{
+    &.custom {
         border: none;
-        box-shadow: 1px 4px 7px rgba(0,0,0,0.1);
+        box-shadow: 1px 4px 7px rgba(0, 0, 0, 0.1);
     }
+}
+.vuescroll-panel{
+    margin-right: -17px !important;
+    overflow-y: scroll !important;
 }

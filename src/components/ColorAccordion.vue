@@ -83,6 +83,17 @@ export default class ColorAccordion extends Vue {
   public isActive = false
   public othersActive = false
 
+  // public showit(){
+  //   // this.$emit('setScroll')
+  //   // this.$root.$on('bv::collapse::state', (collapseId:string, isJustShown:string) => {
+  //   //   console.log('collapseId:', collapseId)
+  //   //   console.log('isJustShown:', isJustShown)
+  //   //
+  //   //   console.log(this.svgGroups.length)
+  //   // })
+  //   // this.$emit('setScroll')
+  // }
+
   get svgGroups() {
     return this.$store.getters.getSvgGroups
   }
