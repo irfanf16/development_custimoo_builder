@@ -332,7 +332,6 @@ Vue.filter('formatDate', function(value) {
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
       await  this.$store.dispatch('permissions')
-
     }
 
 

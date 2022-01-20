@@ -113,7 +113,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
           productColors.push(obj)
         })
 
-       let saved = await this.$store.dispatch('storeFolder', {folder_name: this.folder_name, room_id: this.room_id, colors: productColors});
+        let saved = await this.$store.dispatch('storeFolder', {folder_name: this.folder_name, room_id: this.room_id, colors: productColors});
         if (saved == true){
           await this.$store.dispatch('getLockerRoomColors')
           this.folder_name = ''
