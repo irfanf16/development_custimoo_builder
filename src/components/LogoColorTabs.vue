@@ -22,9 +22,11 @@
                 </b-form>
                 <color-picker @changeColor="changeColor" ref="colorPicker" theme="light" :color="swatchcolor" :colors-history="false" :colors-default="[]" :key="swatchPantone"/>
               </div>
-              <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
-                   :title="color.name" :style="{background: color.value}" :key="index">
-              </div>
+              <template v-else v-for="(color, index) in productColor">
+                <div v-if="color.value"  class="color-box"  @click="setColor(color)"
+                     :title="color.name" :style="{background: color.value}" :key="index">
+                </div>
+              </template>
             </div>
           </div>
         </b-card-body>

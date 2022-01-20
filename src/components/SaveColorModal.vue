@@ -49,13 +49,22 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
         components: {
             LockerRoomProducts,
             CreateLockerRoomModal
+        },
+      mounted() {
+        if (this.lockers.length >0 ){
+          this.room_id = this.lockers[0].id
         }
+      }
     })
     export default class SaveColorModal extends Vue {
       public locker_selected = true;
       public room_id = 0;
       public folder_name = '';
       public ref = this.$refs as Record<any, any>
+
+      public showColorModal(){
+        this.ref['my-modal'].show();
+      }
 
       get getLockerProducts():Record<any, any>{
         return this.$store.getters.getLockerProducts;
@@ -104,7 +113,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
           productColors.push(obj)
         })
 
-       let saved = await this.$store.dispatch('storeFolder', {folder_name: this.folder_name, room_id: this.room_id, colors: this.logoColors});
+        let saved = await this.$store.dispatch('storeFolder', {folder_name: this.folder_name, room_id: this.room_id, colors: productColors});
         if (saved == true){
           await this.$store.dispatch('getLockerRoomColors')
           this.folder_name = ''
@@ -279,7 +288,6 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
         }
       }
     }
-
 
 
 </style>
