@@ -1,6 +1,5 @@
 <template>
   <div>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <DesignPdfView :pdf_front_image="pdf_front_image" :pdf_back_image="pdf_back_image"/>
 
     <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
@@ -39,8 +38,14 @@
               <AddLockerRoomModal :rosterUrl="true"  ref="share" />
             </template>
           </div>
-<!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
-          <button class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
+          <button class="btn btn-secondary fw-bold w-100" :disabled="showLoader" @click="generateProductionPdf">
+            <template v-if="showLoader">
+              Downloading...
+            </template>
+            <template v-else>
+              Download Design File
+            </template>
+          </button>
         </div>
       </div>
     </div>
