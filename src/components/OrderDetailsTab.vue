@@ -3,6 +3,19 @@
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <DesignPdfView :pdf_front_image="pdf_front_image" :pdf_back_image="pdf_back_image"/>
 
+    <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
+      <b-input-group class="w-100">
+        <b-form-input id="shared_url_link" class="w-100" v-model="shared_url" ></b-form-input>
+      </b-input-group>
+      <b-button class="btn btn-secondary fw-bold w-auto" style="white-space: nowrap" @click="copyLink">Copy URL</b-button>
+      <button class="closeBtn" @click="closeCopyUrl">
+        <BIconX />
+      </button>
+    </div>
+
+    <div>
+      <ConfirmOrderTab />
+    </div>
     <div class="order-details-area">
       <div class="qty-area">
         <div class="qty-details" v-for="(roster,index) in rosterDetails" :key="index">
@@ -22,37 +35,17 @@
       <div class="pricing-are">
         <div class="order-details">
           <div class="order-row">
-            <template v-if="isCustomerAuthenticated">
-              <button class="btn btn-secondary fw-bold w-100 mb-2" @click="buyNow">Summary</button>
-            </template>
-            <template v-else>
-              <b-button class="btn btn-secondary fw-bold w-100 mb-2" v-b-modal.modal-login>Summary</b-button>
-            </template>
             <template>
-              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share roster url</b-button>
               <AddLockerRoomModal :rosterUrl="true"  ref="share" />
             </template>
-            <template v-if="shared_url">
-              <b-input-group>
-                <b-form-input id="shared_url_link"   v-model="shared_url" ></b-form-input>
-              </b-input-group>
-              <b-button class="btn btn-secondary fw-bold w-100 mb-2" @click="copyLink">copy url</b-button>
-            </template>
           </div>
-          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>
+          <button class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
         </div>
       </div>
     </div>
     <div class="d-none">
       <ProductionScene ref="production-scene" v-bind:production_file_obj.sync="production_file_obj"/>
     </div>
-
-<!--    <div class="d-none">
-      <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
-      </canvas>
-      <canvas width="600" height="600" ref="pdfBack" style="text-align: center; display: block">
-      </canvas>
-    </div>-->
   </div>
 </template>
 
@@ -62,14 +55,16 @@ import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
+import ConfirmOrderTab from "@/views/ConfirmOrderTab.vue";
 import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
-@Component<OrderDetails>({
+import {compact} from 'lodash';
+@Component<OrderDetailsTab>({
   components: {
     DesignPdfView, ProductionScene,
-    AddLockerRoomModal
+    AddLockerRoomModal, ConfirmOrderTab
   },
   mounted(){
     this.$root.$on('rostershared', (val:string) =>{
@@ -78,7 +73,7 @@ import ProductionScene from '@/components/ProductionScene.vue'
   }
 })
 
-export default class OrderDetails extends Mixins(ErrorMessages)  {
+export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>
@@ -129,6 +124,15 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     return this.$store.getters.getSvgGroups
   }
 
+
+  get productionSVGs(): Record<any, any> {
+    return this.$store.getters.getProductionSVGs
+  }
+
+  get editStatus():boolean{
+    return  this.$store.getters.getEditStatus
+  }
+
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
   }
@@ -137,13 +141,12 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     return this.$store.getters.getCustomTexts()
   }
 
-
-  get productionSVGs(): Record<any, any> {
-    return this.$store.getters.getProductionSVGs
+   get customTextObjects(): Record<any, any>[] {
+    return this.$store.getters.customTextObjects;
   }
 
-  get editStatus():boolean{
-    return  this.$store.getters.getEditStatus
+  get customLogoObjects(): Record<any, any>[] {
+    return compact(this.$store.getters.customLogoObjects);
   }
 
 
@@ -189,7 +192,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     }
     let form_data = new FormData();
     if(self.production_file_obj.url) {
-      form_data.append('original_file', new File([new Blob([self.production_file_obj.content])], "original_file.svg", {
+      form_data.append('production_cutting_file', new File([new Blob([self.production_file_obj.content])], "production_cutting_file.svg", {
         type: "image/svg+xml",
       }));
     }
@@ -221,11 +224,16 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
         };
         html2pdf().set(opt).from(element).toPdf().get("pdf")
           .output('datauristring')
-          .then(function(pdfAsString: string) {
+          .then(async function(pdfAsString: string) {
             form_data.append("order_file", pdfAsString)
-            const res = http.post('orders/create', form_data);
+            await http.post('orders/create', form_data).then(() => {
+              self.showLoader = false
+            }).catch(error => {
+              self.showLoader = false
+              console.log("Error wilde creating order", error)
+            });
           }).save('final_design');
-        this.showLoader = false
+
       }
     })
   }
@@ -233,47 +241,6 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
   public async getDocFromString(doc_string: string, type="image/svg+xml") {
     let parser = new DOMParser();
     return  parser.parseFromString(doc_string, type);
-  }
-
-  public generateProductionPdf_back(e: any) {
-    this.showLoader = true
-    $('meta[name=viewport]').attr('content', 'width=1024')
-    let frontCanvas = this.productionSVGs.front
-    let backCanvas = this.productionSVGs.back
-
-    let front = new fabric.Canvas(this.$refs.pdfFront as HTMLCanvasElement)
-    front.setHeight(600);
-    front.setWidth(600);
-    let back = new fabric.Canvas(this.$refs.pdfBack as HTMLCanvasElement)
-    back.setHeight(600);
-    back.setWidth(600);
-    let emptyCallback = () => { console }
-    front.loadFromJSON(JSON.stringify(frontCanvas), emptyCallback, emptyCallback)
-    back.loadFromJSON(JSON.stringify(backCanvas), emptyCallback, emptyCallback)
-
-    let front2dCtx = front.getContext()
-    let back2dCtx = back.getContext()
-    let front2D = $(front2dCtx.canvas)
-    let back2D = $(back2dCtx.canvas)
-
-    $(front2D).attr("id", "front-pdf")
-    $(back2D).attr("id", "back-pdf")
-    $(front2D).attr("class", "canvas")
-    $(back2D).attr("class", "canvas")
-
-    $.each($(front2D).data(), (i) => {
-      $(front2D).removeAttr("data-" + i)
-    })
-    $.each($(back2D).data(), (i) => {
-      $(back2D).removeAttr("data-" + i)
-    })
-
-    let frontViewPdf = front2D.get(0)
-    let backViewPdf = back2D.get(0)
-
-    $("#front-svg").html(frontViewPdf)
-    $("#back-svg").html(backViewPdf)
-    this.logosConversionToBase64()
   }
 
   public htmlPdfGenerator() {
@@ -358,12 +325,15 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
       this.shared_url = res.data
     }
   }
+  public closeCopyUrl(){
+    this.shared_url = ""
+  }
   public copyLink() {
     let testingCodeToCopy = document.querySelector("#shared_url_link") as Record<any, any>
     testingCodeToCopy.select()
     try {
       document.execCommand('copy');
-      this.shared_url = ""
+      this.closeCopyUrl();
       this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
     } catch (err) {
       alert('Oops, unable to copy');
@@ -375,12 +345,20 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     let order_detail: { [key: string]: Record<any, any> } = {}
     order_detail.roster_detail = self.rosterDetails;
     order_detail.svg_groups = self.svgGroups;
-    order_detail.custom_texts = self.customTexts;
+    order_detail.custom_texts = self.customTexts.filter((custom_text) => custom_text.text.length > 0);
     order_detail.custom_logos = self.customLogos;
-    //if logo colors are being used then we will send it otherwise not
     if(self.$store.getters.getUsingColorLogos) {
       order_detail.logo_colors = self.logoColors
     }
+    let custom_text_objects = compact(this.customTextObjects);
+    order_detail.custom_text_svgs = custom_text_objects.map(custom_text_object => {
+      return custom_text_object.toSVG();
+    })
+    let custom_logo_objects = compact(this.customLogoObjects);
+    let custom_logo_svgs = custom_logo_objects.map(custom_logo_svg => {
+      return custom_logo_svg.toSVG();
+    })
+    order_detail.custom_logo_svgs = custom_logo_svgs
     return order_detail;
   }
 }
@@ -741,5 +719,24 @@ img {
   display: block;
   margin: 0 auto;
   height: auto;
+}
+
+.closeBtn{
+  background: firebrick;
+  color: #fff;
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  border-radius: 1000px;
+  font-size: 1rem;
 }
 </style>

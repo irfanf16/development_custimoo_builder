@@ -84,7 +84,9 @@ const ProductAttributes:Module<any, any> = {
 
     },
     editLockerProduct: [],
-    notifications:[]
+    notifications:[],
+    customTextObjects:[],
+    customLogoObjects:[]
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -634,6 +636,8 @@ const ProductAttributes:Module<any, any> = {
 
         //state.customLogos.push(setLogoSettings(0));
         state.logoTabIndex = 0;
+        state.customTextObjects = [];
+        state.customLogoObjects = [];
       }
 
       //rest custom texts
@@ -789,6 +793,20 @@ const ProductAttributes:Module<any, any> = {
     STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
       state.canvasImage.ref_front = payload.front
       state.canvasImage.ref_back = payload.back
+    },
+    UPDATE_CUSTOM_TEXT_OBJECTS(state:Record<any, any>, payload){
+      if(Object.prototype.hasOwnProperty.call(payload, "index")) {
+        state.customTextObjects[payload.index] = payload.data
+      } else {
+        state.customTextObjects.push(payload.data)
+      }
+    },
+    UPDATE_CUSTOM_LOGO_OBJECTS(state:Record<any, any>, payload){
+      if(Object.prototype.hasOwnProperty.call(payload, "index")) {
+        state.customLogoObjects[payload.index] = payload.data
+      } else {
+        state.customLogoObjects.push(payload.data)
+      }
     }
   },
   getters: {
@@ -949,6 +967,12 @@ const ProductAttributes:Module<any, any> = {
     },
     getUsingColorLogos(state:Record<any, any>){
       return state.using_logo_colors
+    },
+    customTextObjects(state:Record<any, any>){
+      return state.customTextObjects
+    },
+    customLogoObjects(state:Record<any, any>){
+      return state.customLogoObjects
     }
   },
   actions: {

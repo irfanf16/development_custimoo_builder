@@ -254,6 +254,9 @@ export default class Scene extends Vue {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
           }
           this.customLogoObjects[logo.logoIndex] = null
+          if(this.mainPreview) {
+            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: logo.logoIndex, data: null});
+          }
           if(this.otherSideLogos[index]) {
             this.frontCanvas.remove(this.otherSideLogos[index])
             if (this.backCanvas) {
@@ -268,6 +271,9 @@ export default class Scene extends Vue {
               this.backCanvas.remove(this.customLogoObjects[index])
             }
             this.customLogoObjects[index] = null
+            if(this.mainPreview) {
+              this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: index, data: null});
+            }
             if(this.otherSideLogos[index]) {
               this.frontCanvas.remove(this.otherSideLogos[index])
               if (this.backCanvas) {
@@ -326,6 +332,9 @@ export default class Scene extends Vue {
             self.backCanvas.remove(customTextObject)
           }
           this.customTextObjects[index] = null
+          if(this.mainPreview) {
+            this.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", {index: index, data: null})
+          }
         })
         this.otherSideTexts.forEach((otherSideText: fabric.Object, index: number) => {
           self.frontCanvas.remove(otherSideText)
@@ -342,6 +351,9 @@ export default class Scene extends Vue {
             self.backCanvas.remove(this.customTextObjects[text.textIndex])
           }
           this.customTextObjects[text.textIndex] = null
+          if(this.mainPreview) {
+            this.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", {index: text.textIndex, data: null})
+          }
           if(this.otherSideTexts[text.textIndex]) {
             self.frontCanvas.remove(this.otherSideTexts[text.textIndex])
             if (self.backCanvas) {
@@ -1412,6 +1424,9 @@ export default class Scene extends Vue {
             })
           }
           this.customLogoObjects[logoIndex as number] = img
+          if(this.mainPreview) {
+            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: logoIndex, data: img});
+          }
         } else {
           this.logoObjects.push(img)
         }
@@ -1523,6 +1538,7 @@ export default class Scene extends Vue {
       this.addToOtherSide(textBox, text.side)
 
       if(this.mainPreview) {
+        self.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", {index: textIndex, data: textBox});
         const scaleX = textBox.scaleX as number
         const scaleY = textBox.scaleY as number
         const width = Math.floor(textBox.width as number * scaleX * this.measurementRatio)

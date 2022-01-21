@@ -3,22 +3,22 @@
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex">
 <!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
-        <vue-scrollbar :speed="10" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">
+        <vue-scrollbar classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">
           <div class="scroll-me">
-            <b-tab v-if="selectedProduct.is_logo_allowed == 1">
-              <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
-              <template #title>
-                <a @click="setHideTab('logoHide', true)" >
-                <span class="icon-holder">
-                  <font-awesome-icon :icon="['fas', 'image']"/>
-                </span>
-                  Logo
-                </a>
-              </template>
-              <div class="logo-placement-tabs" v-if="hideTab.logoHide">
-                <LogoPlacementTabs v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
-                                   :logosSetting="selectedProduct.logos_setting"/>
-              </div>
+          <b-tab v-if="selectedProduct.is_logo_allowed == 1">
+            <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
+            <template #title>
+              <a @click="setHideTab('logoHide', true)" >
+              <span class="icon-holder">
+                <font-awesome-icon :icon="['fas', 'image']"/>
+              </span>
+                Logo
+              </a>
+            </template>
+            <div class="logo-placement-tabs" v-if="hideTab.logoHide">
+              <LogoPlacementTabs v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
+                                 :logosSetting="selectedProduct.logos_setting"/>
+            </div>
 
 
             </b-tab>
@@ -103,14 +103,14 @@
             <template #title>
               <a @click="setHideTab('teamHide', true)" >
               <span class="icon-holder">
-                <font-awesome-icon :icon="['fas', 'user-friends']"/>
+                <BIconFileTextFill />
               </span>
-                Team
+                Summary
               </a>
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-              <EditRosterArea :productSizes="selectedProduct.sizes"/>
+              <EditRosterAreaTab :productSizes="selectedProduct.sizes"/>
             </div>
           </b-tab>
           </div>
@@ -127,7 +127,7 @@ import ColorAccordion from '@/components/ColorAccordion.vue'
 import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
-import EditRosterArea from '@/components/EditRosterArea.vue'
+import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
@@ -147,7 +147,7 @@ import vueScrollbar from 'vue2-scrollbar'
     LogoPlacementTabs,
     CustomizationText,
     CollarStyle,
-    EditRosterArea,
+    EditRosterAreaTab,
     ColorTabs,
     UploadLogo,
     vueScrollbar

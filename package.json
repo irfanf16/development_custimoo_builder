@@ -52,6 +52,7 @@
     "vue2-editor": "^2.10.3",
     "vue2-scrollbar": "0.0.3",
     "vue2-touch-events": "^3.2.2",
+    "vuebar": "0.0.20",
     "vuedraggable": "https://github.com/midasdev711/Vue-DragDrop.git",
     "vuex": "^3.4.0",
     "vuex-persist": "^3.1.3",
