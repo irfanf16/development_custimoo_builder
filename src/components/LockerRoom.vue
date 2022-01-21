@@ -18,7 +18,7 @@
           <div>
             <b-card no-body>
               <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
-              <b-tabs card v-model="lockerActiveTabIndex" @changed="checkINdex">
+              <b-tabs card v-model="lockerActiveTabIndex" @changed="checkINdex" :no-fade="true">
                 <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" >
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
