@@ -12,9 +12,7 @@ import {fabric as fabrics} from 'fabric'
 import $ from "jquery";
 
 @Component<ProductionScene>({
-  mounted() {
-    console.log("mounted")
-  }
+
 })
 
 export default class ProductionScene extends Vue {

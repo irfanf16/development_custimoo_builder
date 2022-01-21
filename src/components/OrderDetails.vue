@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Vue} from 'vue-property-decorator'
+import {Component, Mixins} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
@@ -136,14 +136,6 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
 
   get svgGroups(): [Record<any, any>] {
     return this.$store.getters.getSvgGroups
-  }
-
-  get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
-  }
-
-  get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts()
   }
 
 

@@ -35,14 +35,7 @@
       <div class="pricing-are">
         <div class="order-details">
           <div class="order-row">
-<!--            <template v-if="isCustomerAuthenticated">-->
-<!--              <button class="btn btn-secondary fw-bold w-100 mb-2" @click="buyNow">Summary</button>-->
-<!--            </template>-->
-<!--            <template v-else>-->
-<!--              <b-button class="btn btn-secondary fw-bold w-100 mb-2" v-b-modal.modal-login>Summary</b-button>-->
-<!--            </template>-->
             <template>
-<!--              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share roster url</b-button>-->
               <AddLockerRoomModal :rosterUrl="true"  ref="share" />
             </template>
           </div>
@@ -54,13 +47,6 @@
     <div class="d-none">
       <ProductionScene ref="production-scene" v-bind:production_file_obj.sync="production_file_obj"/>
     </div>
-
-<!--    <div class="d-none">
-      <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
-      </canvas>
-      <canvas width="600" height="600" ref="pdfBack" style="text-align: center; display: block">
-      </canvas>
-    </div>-->
   </div>
 </template>
 
@@ -75,6 +61,7 @@ import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
+import {compact} from 'lodash';
 @Component<OrderDetailsTab>({
   components: {
     DesignPdfView, ProductionScene,
@@ -155,6 +142,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     return this.$store.getters.getCustomTexts()
   }
 
+   get customTextObjects(): Record<any, any>[] {
+    return this.$store.getters.customTextObjects;
+  }
+
+  get customLogoObjects(): Record<any, any>[] {
+    return compact(this.$store.getters.customLogoObjects);
+  }
+
 
   public logosConversionToBase64() {
     const self = this
@@ -198,7 +193,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     }
     let form_data = new FormData();
     if(self.production_file_obj.url) {
-      form_data.append('original_file', new File([new Blob([self.production_file_obj.content])], "original_file.svg", {
+      form_data.append('production_cutting_file', new File([new Blob([self.production_file_obj.content])], "production_cutting_file.svg", {
         type: "image/svg+xml",
       }));
     }
@@ -230,11 +225,16 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
         };
         html2pdf().set(opt).from(element).toPdf().get("pdf")
           .output('datauristring')
-          .then(function(pdfAsString: string) {
+          .then(async function(pdfAsString: string) {
             form_data.append("order_file", pdfAsString)
-            const res = http.post('orders/create', form_data);
+            await http.post('orders/create', form_data).then(() => {
+              self.showLoader = false
+            }).catch(error => {
+              self.showLoader = false
+              console.log("Error wilde creating order", error)
+            });
           }).save('final_design');
-        this.showLoader = false
+
       }
     })
   }
@@ -242,47 +242,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   public async getDocFromString(doc_string: string, type="image/svg+xml") {
     let parser = new DOMParser();
     return  parser.parseFromString(doc_string, type);
-  }
-
-  public generateProductionPdf_back(e: any) {
-    this.showLoader = true
-    $('meta[name=viewport]').attr('content', 'width=1024')
-    let frontCanvas = this.productionSVGs.front
-    let backCanvas = this.productionSVGs.back
-
-    let front = new fabric.Canvas(this.$refs.pdfFront as HTMLCanvasElement)
-    front.setHeight(600);
-    front.setWidth(600);
-    let back = new fabric.Canvas(this.$refs.pdfBack as HTMLCanvasElement)
-    back.setHeight(600);
-    back.setWidth(600);
-    let emptyCallback = () => { console }
-    front.loadFromJSON(JSON.stringify(frontCanvas), emptyCallback, emptyCallback)
-    back.loadFromJSON(JSON.stringify(backCanvas), emptyCallback, emptyCallback)
-
-    let front2dCtx = front.getContext()
-    let back2dCtx = back.getContext()
-    let front2D = $(front2dCtx.canvas)
-    let back2D = $(back2dCtx.canvas)
-
-    $(front2D).attr("id", "front-pdf")
-    $(back2D).attr("id", "back-pdf")
-    $(front2D).attr("class", "canvas")
-    $(back2D).attr("class", "canvas")
-
-    $.each($(front2D).data(), (i) => {
-      $(front2D).removeAttr("data-" + i)
-    })
-    $.each($(back2D).data(), (i) => {
-      $(back2D).removeAttr("data-" + i)
-    })
-
-    let frontViewPdf = front2D.get(0)
-    let backViewPdf = back2D.get(0)
-
-    $("#front-svg").html(frontViewPdf)
-    $("#back-svg").html(backViewPdf)
-    this.logosConversionToBase64()
   }
 
   public htmlPdfGenerator() {
@@ -387,11 +346,20 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     let order_detail: { [key: string]: Record<any, any> } = {}
     order_detail.roster_detail = self.rosterDetails;
     order_detail.svg_groups = self.svgGroups;
-    order_detail.custom_texts = self.customTexts;
+    order_detail.custom_texts = self.customTexts.filter((custom_text) => custom_text.text.length > 0);
     order_detail.custom_logos = self.customLogos;
     if(self.$store.getters.getUsingColorLogos) {
       order_detail.logo_colors = self.logoColors
     }
+    let custom_text_objects = compact(this.customTextObjects);
+    order_detail.custom_text_svgs = custom_text_objects.map(custom_text_object => {
+      return custom_text_object.toSVG();
+    })
+    let custom_logo_objects = compact(this.customLogoObjects);
+    let custom_logo_svgs = custom_logo_objects.map(custom_logo_svg => {
+      return custom_logo_svg.toSVG();
+    })
+    order_detail.custom_logo_svgs = custom_logo_svgs
     return order_detail;
   }
 }
