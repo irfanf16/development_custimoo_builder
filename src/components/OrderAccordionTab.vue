@@ -7,9 +7,9 @@
       </b-card-header>
       <b-collapse id="accordion-1" visible accordion="my-accordion" role="tabpanel">
         <b-card-body>
-          <div class="order-selected-colors d-flex flex-wrap align-items-center">
+          <div class="order-selected-colors">
             <button v-for="(svgColor, index) in svgGroups" :key="index">
-              <span class="text-uppercase">{{ svgColor.id }}</span>
+              <span class="text-uppercase color-title">{{ svgColor.id }}</span>
               <span class="color-circle" :style="{background: svgColor.color}"></span>
               <span class="text-left">
                 <span class="text-uppercase d-block">{{ svgColor.pantone }}</span>
@@ -153,7 +153,10 @@ export default class OrderAccordion extends Vue {
 
 <style lang="scss" scoped>
 .order-selected-colors {
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+
   @media only screen and (min-width: 768px) {
     justify-content: flex-start;
   }
@@ -161,15 +164,31 @@ export default class OrderAccordion extends Vue {
   button {
     background: none;
     border: 1px solid #E1E6EA;
-    padding: 10px;
+    padding: 18px 10px 5px;
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    margin: 0 5px 10px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 3px;
     font-size: 12px;
+    margin-top: 15px;
+    border-radius: 5px;
+    position: relative;
+
     @media only screen and (min-width: 768px) {
       font-size: 14px;
+    }
+
+    .color-title{
+      position: absolute;
+      padding: 5px 10px;
+      background: #E1E6EA;
+      color: #333;
+      z-index: 10;
+      top: -15px;
+      left: 10px;
+      border-radius: 3px;
+      font-weight: 500;
     }
 
     .color-circle {
@@ -178,7 +197,7 @@ export default class OrderAccordion extends Vue {
       border-radius: 50%;
       background: #FFC658;
       position: relative;
-      margin: 0 3px;
+      margin-top: 1px;
 
       &:before {
         position: absolute;
@@ -199,11 +218,15 @@ export default class OrderAccordion extends Vue {
   margin: -1.25rem;
 
   .roster-row {
-    padding: 1.25rem;
+    padding: 0.5rem 1.25rem;
     border-bottom: 1px solid #E1E6EA;
 
     &:first-child {
       border-top: 1px solid #E1E6EA;
+    }
+
+    &:nth-child(even) {
+      background: #E1E6EA;
     }
 
     &.head {
