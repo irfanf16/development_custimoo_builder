@@ -357,13 +357,20 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       order_detail.logo_colors = self.logoColors
     }
     let custom_text_objects = compact(this.customTextObjects);
-    order_detail.custom_text_svgs = custom_text_objects.map(custom_text_object => {
-      return custom_text_object.toSVG();
-    })
     let custom_logo_objects = compact(this.customLogoObjects);
-    let custom_logo_svgs = custom_logo_objects.map(custom_logo_svg => {
-      return custom_logo_svg.toSVG();
-    })
+    let custom_text_svgs = [];
+    for (const custom_text_object of custom_text_objects) {
+      if (custom_text_object.constructor.name == "klass") {
+        custom_text_svgs.push(custom_text_object.toSVG());
+      }
+    }
+    order_detail.custom_text_svgs = custom_text_svgs
+    let custom_logo_svgs = [];
+    for (const custom_logo_svg of custom_logo_objects) {
+     if(custom_logo_svg.constructor.name == "klass") {
+       custom_logo_svgs.push(custom_logo_svg.toSVG());
+     }
+    }
     order_detail.custom_logo_svgs = custom_logo_svgs
     return order_detail;
   }
