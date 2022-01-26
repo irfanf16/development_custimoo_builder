@@ -122,14 +122,16 @@
                   <div class="logo-area">
                     <h2>Logos</h2>
                     <div class="logo-holder">
-                      <div class="logo-block" v-for="(logo, index) in customLogos" :key="index">
-                        <!--                    <img :src="`${storageUrl}${logo.url}`" height="80" width="80">-->
-                        <div class="logo">
-                          <img :src="logo.base64_logo" height="80" width="80">
-                          <!--                      <img src="../assets/images/logo.svg">-->
+                      <template v-for="(logo, index) in customLogos" >
+                        <div v-if="logo.url" class="logo-block" :key="index">
+                          <!--                    <img :src="`${storageUrl}${logo.url}`" height="80" width="80">-->
+                          <div class="logo" >
+                            <img :src="logo.base64_logo" height="80" width="80">
+                            <!--                      <img src="../assets/images/logo.svg">-->
+                          </div>
+                          <p>Size: {{ `${logo.originalHeight}cm x ${logo.originalWidth}cm` }}</p>
                         </div>
-                        <p>Size: {{ `${logo.originalHeight}cm x ${logo.originalWidth}cm` }}</p>
-                      </div>
+                      </template>
                     </div>
                   </div>
                 </div>
