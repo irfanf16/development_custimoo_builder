@@ -2,87 +2,87 @@
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex">
-<!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
-<!--        <vue-scrollbar :speed="20" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">-->
-      <div class="myscroll">
-<!--        <vuescroll :ops="ops">-->
-            <b-tab v-if="selectedProduct.is_logo_allowed == 1">
-              <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
-              <template #title>
-                <a @click="setHideTab('logoHide', true)" >
+        <!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
+        <!--        <vue-scrollbar :speed="20" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">-->
+        <div class="myscroll">
+          <!--        <vuescroll :ops="ops">-->
+          <b-tab v-if="selectedProduct.is_logo_allowed == 1">
+            <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
+            <template #title>
+              <a @click="setHideTab('logoHide', true)" >
                 <span class="icon-holder">
                   <font-awesome-icon :icon="['fas', 'image']"/>
                 </span>
-                  Logo
-                </a>
-              </template>
-              <div class="logo-placement-tabs" v-if="hideTab.logoHide">
-                <LogoPlacementTabs v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
-                                   :logosSetting="selectedProduct.logos_setting"/>
-              </div>
-            </b-tab>
-            <b-tab v-if="selectedProduct.product_type !== 'personalized'">
-              <button @click="setHideTab('colorHide', !hideTab.colorHide)" class="tab-close-btn d-lg-none"></button>
-              <template #title>
-                <a @click="setHideTab('colorHide', true)" >
+                Logo
+              </a>
+            </template>
+            <div class="logo-placement-tabs" v-if="hideTab.logoHide">
+              <LogoPlacementTabs v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
+                                 :logosSetting="selectedProduct.logos_setting"/>
+            </div>
+          </b-tab>
+          <b-tab v-if="selectedProduct.product_type !== 'personalized'">
+            <button @click="setHideTab('colorHide', !hideTab.colorHide)" class="tab-close-btn d-lg-none"></button>
+            <template #title>
+              <a @click="setHideTab('colorHide', true)" >
                 <span class="icon-holder">
                   <font-awesome-icon :icon="['fas', 'fill-drip']"/>
                 </span>
-                  Color
-                </a>
-              </template>
-              <div v-if="hideTab.colorHide">
-                <h2 class="fw-bold fz-16 p-3 d-none d-lg-block">Choose Color</h2>
-                <div class="d-none d-lg-block">
-                  <ColorAccordion :productColors="productColors"/>
-                </div>
-                <!--            for mobile-->
-                <div class="color-tabs d-lg-none">
-                  <ColorTabs :productColors="productColors"/>
-                </div>
+                Color
+              </a>
+            </template>
+            <div v-if="hideTab.colorHide">
+              <h2 class="fw-bold fz-16 p-3 d-none d-lg-block">Choose Color</h2>
+              <div class="d-none d-lg-block">
+                <ColorAccordion :productColors="productColors"/>
               </div>
-            </b-tab>
-            <b-tab>
-              <button @click="setHideTab('textHide', !hideTab.textHide)" class="tab-close-btn d-lg-none"></button>
-              <template #title>
-                <a @click="setHideTab('textHide', true)" >
+              <!--            for mobile-->
+              <div class="color-tabs d-lg-none">
+                <ColorTabs :productColors="productColors"/>
+              </div>
+            </div>
+          </b-tab>
+          <b-tab>
+            <button @click="setHideTab('textHide', !hideTab.textHide)" class="tab-close-btn d-lg-none"></button>
+            <template #title>
+              <a @click="setHideTab('textHide', true)" >
                 <span class="icon-holder">
                   <font-awesome-icon :icon="['fas', 'text-height']"/>
                 </span>
-                  Text
-                </a>
-              </template>
-              <div class="d-none d-lg-block">
-                <div v-for="(customText, index) in customTexts" :key="index">
-                  <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
-                                     :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-                </div>
-                <div class="px-3 pt-3 p-lg-4 text-right">
+                Text
+              </a>
+            </template>
+            <div class="d-none d-lg-block">
+              <div v-for="(customText, index) in customTexts" :key="index">
+                <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
+                                   :fontsColors="fontsColors" :fontOptions="fontOptions"/>
+              </div>
+              <div class="px-3 pt-3 p-lg-4 text-right">
+                <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
+                  +
+                </b-button>
+              </div>
+            </div>
+            <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
+              <b-tabs>
+                <!-- <div class="p-lg-4 text-right">
                   <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
                     +
                   </b-button>
-                </div>
-              </div>
-              <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
-                <b-tabs>
-                  <!-- <div class="p-lg-4 text-right">
-                    <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
-                      +
-                    </b-button>
-                  </div> -->
-                  <b-tab v-for="(customText, index) in customTexts" :key="index">
-                    <template #title>
-                      Player Name
-                    </template>
-                    <div>
-                      <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
-                                         :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-                    </div>
-                  </b-tab>
-                </b-tabs>
-              </div>
-            </b-tab>
-            <b-tab @click="getModels">
+                </div> -->
+                <b-tab v-for="(customText, index) in customTexts" :key="index">
+                  <template #title>
+                    Player Name
+                  </template>
+                  <div>
+                    <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
+                                       :fontsColors="fontsColors" :fontOptions="fontOptions"/>
+                  </div>
+                </b-tab>
+              </b-tabs>
+            </div>
+          </b-tab>
+          <b-tab @click="getModels">
             <button @click="setHideTab('styleHide', !hideTab.styleHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('styleHide', true)" >
@@ -112,9 +112,9 @@
               <EditRosterAreaTab :productSizes="selectedProduct.sizes"/>
             </div>
           </b-tab>
-<!--        </vuescroll>-->
-      </div>
-    </b-tabs>
+          <!--        </vuescroll>-->
+        </div>
+      </b-tabs>
     </div>
 
   </div>
