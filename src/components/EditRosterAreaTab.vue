@@ -11,7 +11,7 @@
         <RosterDetails :productSizes="sizeOptions" @addPlayer="rosterDetailsInit"/>
         <div class="roster-preview-area">
           <CustomizationPreview :designs="products[designsIndex]"/>
-          <OrderDetails/>
+<!--          <OrderDetails/>-->
         </div>
       </div>
     </b-modal>
