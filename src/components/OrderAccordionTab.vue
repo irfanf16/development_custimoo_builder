@@ -127,8 +127,8 @@
               <template v-for="(text, index) in customTexts">
                 <div :key="index" v-if="text.text || text.text != null" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
                   <span class="name">{{ text.text }}</span>
-                  <span>{{ text.originalHeight }}</span>
-                  <span>{{ text.originalWidth }}</span>
+                  <span>{{ text.originalHeight }}cm</span>
+                  <span>{{ text.originalWidth }}cm</span>
                 </div>
               </template>
             </div>
