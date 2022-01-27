@@ -1,5 +1,5 @@
 <template>
-  <div class="accordion my-3" role="tablist">
+  <div class="accordion my-4" role="tablist">
     <b-card no-body v-if="selectedProduct.product_type != 'personalized' ">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-1 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Colors</span> <span
@@ -109,33 +109,6 @@
         </b-card-body>
       </b-collapse>
     </b-card>
-
-    <b-card no-body v-if="customLogos.length > 0">
-      <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-5 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Text & Number Sizes</span> <span
-          class="accordion-icon"></span></b-button>
-      </b-card-header>
-      <b-collapse id="accordion-5" accordion="my-accordion" role="tabpanel">
-        <b-card-body class="border-top">
-          <div class="order-logo-holder">
-            <div v-if="customTexts" class="overflow-hidden roster-details-table">
-              <div class="roster-row head d-flex flex-wrap align-items-center justify-content-between">
-                <span class="name">Text/Number</span>
-                <span>Height</span>
-                <span>Width</span>
-              </div>
-              <template v-for="(text, index) in customTexts">
-                <div :key="index" v-if="text.text || text.text != null" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
-                  <span class="name">{{ text.text }}</span>
-                  <span>{{ text.originalHeight }}cm</span>
-                  <span>{{ text.originalWidth }}cm</span>
-                </div>
-              </template>
-            </div>
-          </div>
-        </b-card-body>
-      </b-collapse>
-    </b-card>
   </div>
 </template>
 
@@ -161,10 +134,6 @@ export default class OrderAccordion extends Vue {
 
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
-  }
-
-  get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
   }
 
   get svgGroups(): [Record<any, any>] {
