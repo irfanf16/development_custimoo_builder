@@ -68,7 +68,8 @@ const ProductAttributes:Module<any, any> = {
       ref_front:'',
       ref_back:'',
       front:'',
-      back:''
+      back:'',
+      scene:null
     },
     using_logo_colors: false,
     backgroundCheck: false,
@@ -581,7 +582,9 @@ const ProductAttributes:Module<any, any> = {
     ADD_LOCKER_ROOM_COLORS(state:Record<any, any>, payload:Record<any, any>){
       if (payload){
         payload = payload.map((item: Record<any, any>) => {
-          item.color_text = JSON.parse(item.color_text)
+          if(typeof (item.color_text)  == "string"){
+            item.color_text = JSON.parse(item.color_text)
+          }
           return item
         })
       }
@@ -791,6 +794,7 @@ const ProductAttributes:Module<any, any> = {
     STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
       state.canvasImage.ref_front = payload.front
       state.canvasImage.ref_back = payload.back
+      state.canvasImage.scene = payload.scene
     }
   },
   getters: {
