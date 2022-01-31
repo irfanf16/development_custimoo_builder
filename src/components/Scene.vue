@@ -1695,8 +1695,8 @@ export default class Scene extends Vue {
 
         if (logo.customLogo) {
           if (this.mainPreview) {
-            const width = Math.floor(img.width * img.scaleX * this.measurementRatio)
-            const height = Math.floor(img.height * img.scaleY * this.measurementRatio)
+            const width = (img.width * img.scaleX * this.measurementRatio).toFixed(1)
+            const height = (img.height * img.scaleY * this.measurementRatio).toFixed(1)
             this.$store.dispatch('updateCustomLogoWithoutTrigger', {
               index: logoIndex,
               data: {
@@ -1781,8 +1781,8 @@ export default class Scene extends Vue {
 
       textBox.set('height', this.canvasWidth / this.mainCanvasWidth * text.width)
       if(text.scaleX && text.scaleY) {
-        textBox.scaleX = this.canvasWidth / this.mainCanvasWidth * text.scaleX
-        textBox.scaleY = this.canvasHeight / this.mainCanvasHeight * text.scaleY
+        textBox.scaleX = text.scaleX
+        textBox.scaleY = text.scaleY
       }
 
       let canvas = self.frontCanvas
@@ -1821,8 +1821,8 @@ export default class Scene extends Vue {
       if(this.mainPreview) {
         const scaleX = textBox.scaleX as number
         const scaleY = textBox.scaleY as number
-        const width = Math.floor(textBox.width as number * scaleX * this.measurementRatio)
-        const height = Math.floor(textBox.height as number * scaleY * this.measurementRatio)
+        const width = (textBox.width as number * scaleX * this.measurementRatio).toFixed(1)
+        const height = (textBox.height as number * scaleY * this.measurementRatio).toFixed(1)
         const outLineWidth = textBox.strokeWidth as number * this.measurementRatio
         self.$store.dispatch('updateCustomTextWithoutTrigger', {
           index: textIndex,
