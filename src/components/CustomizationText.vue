@@ -10,12 +10,14 @@
           :value="customTexts[customTextIndex].text"
           @input="updateTextField(customTextIndex, $event)"
         ></b-form-input>
-        <button @click="setOpenIndex(customTextIndex)" class="d-flex align-items-center btn btn-secondary light">
-          <BIconPlus /> Customize
+        <button v-b-toggle="'accordion-'+(customTextIndex+1)" class="d-flex align-items-center btn btn-secondary light">
+          <BIconDash class="minus" />
+          <BIconPlus class="plus" />
+          Customize
         </button>
       </div>
 
-      <template v-if="openIndex == customTextIndex">
+      <b-collapse :id="'accordion-'+(customTextIndex+1)" visible accordion="my-accordion" role="tabpanel">
         <h4 class="mt-3 mb-2 fz-16">Font Type</h4>
         <div class="font-type-area">
           <div class="type-block">
@@ -86,10 +88,7 @@
             </div>
           </template>
         </div>
-      </template>
-      <template v-else>
-
-      </template>
+      </b-collapse>
     </div>
   </div>
 </template>
@@ -112,6 +111,7 @@ import {getClosestColor} from '@/pantoneColor'
       this.selectType(this.selectTypeIndex)
     })
     this.getColors()
+    console.log(this.openIndex)
   },
   filters: {
     capitalize: (value: string) => {
@@ -144,6 +144,8 @@ export default class CustomizationText extends Vue {
 
   public setOpenIndex(index:any){
     this.openIndex = index;
+    console.log('log custom text index ', index)
+    console.log('log text index ', this.openIndex)
   }
 
   get customTexts(): [Record<any, any>] {
@@ -248,6 +250,20 @@ export default class CustomizationText extends Vue {
   #range-2{
     &::-webkit-slider-thumb{
       background: #189076;
+    }
+  }
+}
+.btn{
+  .minus{
+    display: none;
+  }
+
+  &.not-collapsed{
+    .minus{
+      display: block;
+    }
+    .plus{
+      display: none;
     }
   }
 }
