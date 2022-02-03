@@ -2120,7 +2120,12 @@ button{
     .image-holder{
         .canvas-container{
             height: 100px !important;
-            width: 70px !important;
+            width: 100px !important;
+
+            @media (max-width: 1920px) {
+                height: 90px !important;
+                width: 90px !important;
+            }
             margin: 0 auto;
             .canvas{
                 width: 100% !important;
