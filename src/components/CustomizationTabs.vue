@@ -6,7 +6,7 @@
         <!--        <vue-scrollbar :speed="20" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">-->
         <div class="myscroll">
           <!--        <vuescroll :ops="ops">-->
-          <b-tab v-if="selectedProduct.is_logo_allowed == 1">
+          <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
