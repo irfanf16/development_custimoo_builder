@@ -4382,7 +4382,11 @@ $fontSize: 0.5;
         box-shadow: 1px 4px 7px rgba(0, 0, 0, 0.1);
     }
 }
-.vuescroll-panel{
+.vuescroll-panel {
     margin-right: -17px !important;
     overflow-y: scroll !important;
+}
+
+.slither-slider-slides{
+    height: auto !important;
 }

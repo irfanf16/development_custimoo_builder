@@ -256,6 +256,9 @@ Vue.filter('formatDate', function(value) {
   },
 
   async mounted() {
+    caches.keys().then((names) => {
+      for (let name of names) caches.delete(name)
+    })
     //get recent logos
     this.setRecentLogos()
 
