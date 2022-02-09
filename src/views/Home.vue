@@ -193,7 +193,7 @@
           </div>
         </b-col>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts"/>
+          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products"/>
           <button class="backtohome-btn d-lg-none" @click="showHomeLanding()"><font-awesome-icon :icon="['fas', 'arrow-left']"/></button>
         </b-col>
         </template>
@@ -344,7 +344,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private nextPageUrl !: string
   public hasProducts = true
   public category_id !: string
-  public search = ''
+  public search_products = ''
   public colors = []
   public product_id !: number
   public provider_id = 'oVXYIzKY'
@@ -885,6 +885,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public async retrieveProducts() {
     let self = this;
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
+    if(self.search_products) {
+      url += `&title=${self.search_products}`
+    }
     http.get(url).then(async (response: Record<any, any>) => {
       await self.handleMainProducts(response);
       if(self["showLoader"]) {
