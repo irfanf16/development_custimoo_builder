@@ -47,7 +47,7 @@
             </template>
           </div>
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
-          <button class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
+          <button v-if="this.isCustomerAuthenticated" class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
         </div>
       </div>
     </div>
