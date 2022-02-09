@@ -4,7 +4,7 @@
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
-        <template v-if="selectedProduct">
+        <template>
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
             <CustomTabs ref="custom-mobile-tabs" v-else />
@@ -115,7 +115,7 @@
             <div v-bind:class="{active: isActive}">
               <div class="twoD-view">
                 <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
-                  <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
+                                        <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
                     <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
                       <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
                              :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
@@ -130,10 +130,13 @@
                              :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
                              :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
                     </div>
-                  </template>
+                  </template> 
 
                   <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                 </div>
+                                  <template v-else>
+                    <p>Nothing to display</p>
+                  </template>
               </div>
               <div class="d-none d-lg-block continue-btn-holder pt-5">
                 <b-button v-if="tabIndex > 0" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
@@ -445,8 +448,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   get mainProductType():string{
-    let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
-    return selected_product.back_design ?  "front_back" : "front";
+    let selected_product = this.selectedProduct?this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0]:null;
+    return selected_product?(selected_product.back_design ?  "front_back" : "front"):"";
   }
 
   public showCollectionModal = () =>{
@@ -497,7 +500,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return  this.$store.getters.getCurrentStyleIndex;
   }
   get selectedDesignId():number{
-    return  this.$store.getters.getSelectedDesignId;
+  return  this.$store.getters.getSelectedDesignId;
   }
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails

@@ -22,8 +22,12 @@
             Stock
           </button>
         </div>
-
-        <ItemsGrid />
+        <template v-if="selectedProduct">
+                  <ItemsGrid />
+        </template>
+        <template v-else>
+            <p>Nothing to Display</p>
+        </template>
       </div>
     </div>
 
@@ -44,12 +48,18 @@
         </div>
 
         <div>
-          <b-form-input type="text" placeholder="Search" @keyup="searchProducts" v-model="search_products" />
+          <b-form-input type="text" placeholder="Search" @keyup.enter="searchProducts" v-model="search_products" />
         </div>
 <!--        <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
 <!--        <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
       </div>
-      <SelectItemCarousel ref="itemsCarousel"/>
+        <template v-if="selectedProduct">
+                  <SelectItemCarousel ref="itemsCarousel"/>
+        </template>
+        <template v-else>
+            <p>Nothing to Display</p>
+        </template>
+      
     </template>
 
     <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
@@ -57,7 +67,13 @@
       <span class="mt-1 toggleArrow" :class="showDesigns ? 'opened' : ''"><BIconChevronDown /></span>
     </h2>
     <div class="select-designs" :class="showDesigns ? 'opened' : ''">
-      <DesignAvailable />
+      <template v-if="selectedProduct">
+          <DesignAvailable />
+      </template>
+      <template v-else>
+        <p>Nothing to Display</p>
+      </template>
+      
     </div>
   </div>
 </template>
@@ -100,6 +116,13 @@ export default class ItemToCustomize extends Vue {
     this.showDesigns = !this.showDesigns
   }
 
+    get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
+  }
+
+// \
+
+
   public async searchProducts() {
     let self = this;
     const itemCarousel = this.$refs['itemsCarousel'] as Record<any, any>
@@ -108,6 +131,9 @@ export default class ItemToCustomize extends Vue {
     this.$emit('retrieveProducts','/list/products')
     itemCarousel.setSliderIndex();
   }
+
+  //  public doSearchDebounced = this.debounce(this.searchProducts,1000);
+
   public async changeProductType(new_val:boolean, prd_type:string) {
     let self:Record<string, any> = this;
     let customized = self.$store.getters.getCustomized
