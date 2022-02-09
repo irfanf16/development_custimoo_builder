@@ -1,6 +1,6 @@
 <template>
   <div class="loading-holder">
-    <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;" v-if="selectedProduct">
+    <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
         <canvas ref="front" id="scene-front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         <h2>Front</h2>
@@ -9,9 +9,6 @@
         <canvas v-if="back" ref="back" id="scene-back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         <h2>Back</h2>
       </a>
-    </div>
-    <div v-else>
-      <p>Nothing to Display</p>
     </div>
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
@@ -229,9 +226,6 @@ export default class Scene extends Vue {
 
   get selectedProductId(): number {
     return this.$store.getters.getSelectedProductId
-  }
-  get selectedProduct(): Record<any, any>{
-    return this.$store.getters.getSelectedProduct
   }
 
   @Watch('customLogos', {

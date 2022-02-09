@@ -22,12 +22,7 @@
             Stock
           </button>
         </div>
-        <template v-if="selectedProduct">
-                  <ItemsGrid />
-        </template>
-        <template v-else>
-            <p>Nothing to Display</p>
-        </template>
+          <ItemsGrid />
       </div>
     </div>
 
@@ -53,12 +48,7 @@
 <!--        <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
 <!--        <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
       </div>
-        <template v-if="selectedProduct">
-                  <SelectItemCarousel ref="itemsCarousel"/>
-        </template>
-        <template v-else>
-            <p>Nothing to Display</p>
-        </template>
+          <SelectItemCarousel ref="itemsCarousel"/>
       
     </template>
 
@@ -67,12 +57,7 @@
       <span class="mt-1 toggleArrow" :class="showDesigns ? 'opened' : ''"><BIconChevronDown /></span>
     </h2>
     <div class="select-designs" :class="showDesigns ? 'opened' : ''">
-      <template v-if="selectedProduct">
-          <DesignAvailable />
-      </template>
-      <template v-else>
-        <p>Nothing to Display</p>
-      </template>
+      <DesignAvailable />
       
     </div>
   </div>
@@ -116,9 +101,6 @@ export default class ItemToCustomize extends Vue {
     this.showDesigns = !this.showDesigns
   }
 
-    get selectedProduct(): Record<any, any>{
-    return this.$store.getters.getSelectedProduct
-  }
 
 // \
 
