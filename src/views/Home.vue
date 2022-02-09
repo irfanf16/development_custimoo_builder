@@ -130,7 +130,7 @@
                              :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
                              :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
                     </div>
-                  </template> 
+                  </template>
 
                   <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                 </div>
@@ -889,9 +889,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       url += `&title=${self.search_products}`
     }
     http.get(url).then(async (response: Record<any, any>) => {
-      await self.handleMainProducts(response);
-      if(self["showLoader"]) {
-        self.showLoader = false;
+      if(response.data.products.data.length > 0 ){
+        await self.handleMainProducts(response);
+        if(self["showLoader"]) {
+          self.showLoader = false;
+        }
+      }else{
+        this.showError("No Product Found")
       }
     }, (error) => {
       console.error("Error while getting order detail", error.response.data.message)
