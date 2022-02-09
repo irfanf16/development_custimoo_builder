@@ -22,29 +22,34 @@
             Stock
           </button>
         </div>
-
-        <ItemsGrid />
+          <ItemsGrid />
       </div>
     </div>
 
     <template v-else>
-      <div class="collection-btn mb-2 mt-3 px-1 d-flex align-items-center checkbox_buttons gap-2">
+      <div class="collection-btn mb-2 mt-3 d-flex">
+        <div class="px-1 d-flex align-items-center checkbox_buttons gap-2">
+          <button type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                  @click="changeProductType(!$store.getters.getCustomized, 'customized')">
+            <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
+            Customized
+          </button>
 
-        <button type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                @click="changeProductType(!$store.getters.getCustomized, 'customized')">
-          <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
-          Customized
-        </button>
+          <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                  @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
+            <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
+            Stock
+          </button>
+        </div>
 
-        <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
-          <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
-          Stock
-        </button>
+        <div>
+          <b-form-input type="text" placeholder="Search" @keyup.enter="searchProducts" v-model="search_products" />
+        </div>
 <!--        <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
 <!--        <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
       </div>
-      <SelectItemCarousel ref="itemsCarousel"/>
+          <SelectItemCarousel ref="itemsCarousel"/>
+      
     </template>
 
     <h2 v-if="mobileScreen" class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
@@ -56,6 +61,7 @@
     </h2>
     <div class="select-designs" :class="showDesigns ? 'opened' : ''">
       <DesignAvailable />
+      
     </div>
   </div>
 </template>
@@ -88,6 +94,8 @@ export default class ItemToCustomize extends Vue {
 
   public personalized = this.$store.getters.getPersonalized
   public customized = this.$store.getters.getCustomized
+  public search_products = '';
+
 
   private toggleItems () {
     this.showItems = !this.showItems
@@ -95,6 +103,21 @@ export default class ItemToCustomize extends Vue {
   private toggleDesigns () {
     this.showDesigns = !this.showDesigns
   }
+
+
+// \
+
+
+  public async searchProducts() {
+    let self = this;
+    const itemCarousel = this.$refs['itemsCarousel'] as Record<any, any>
+    self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
+    this.$emit('update:search_products',self.search_products)
+    this.$emit('retrieveProducts','/list/products')
+    itemCarousel.setSliderIndex();
+  }
+
+  //  public doSearchDebounced = this.debounce(this.searchProducts,1000);
 
   public async changeProductType(new_val:boolean, prd_type:string) {
     let self:Record<string, any> = this;
