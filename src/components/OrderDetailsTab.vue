@@ -39,11 +39,11 @@
             </template>
           </div>
           <button class="btn btn-secondary fw-bold w-100" :disabled="showLoader" @click="generateProductionPdf">
-            <template v-if="showLoader">
-              Downloading...
+            <template v-if="isCustomerAuthenticated">
+              <button  class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
             </template>
             <template v-else>
-              Download Design File
+              <button  @click="setActionBeforeLogin('downloadDesign')" :key="'loginmodal'"  class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Download Design File</button>
             </template>
           </button>
         </div>
@@ -52,6 +52,14 @@
     <div class="d-none">
       <ProductionScene ref="production-scene" v-bind:production_file_obj.sync="production_file_obj"/>
     </div>
+
+<!--    <div class="d-none">
+      <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
+      </canvas>
+      <canvas width="600" height="600" ref="pdfBack" style="text-align: center; display: block">
+      </canvas>
+    </div>-->
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 </template>
 
@@ -76,6 +84,9 @@ import {compact} from 'lodash';
     this.$root.$on('rostershared', (val:string) =>{
       this.shared_url = val
     })
+  },
+  created() {
+    this.$root.$refs.Order_Details = this;
   }
 })
 
@@ -155,6 +166,18 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     return compact(this.$store.getters.customLogoObjects);
   }
 
+  get actionBeforeLogin(): string {
+    return this.$store.getters.getActionBeforeLogin
+  }
+  public setActionBeforeLogin(type: string) {
+    this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$store.commit('SET_SELECTION_MODE',{
+      readonly:false,
+      collectionAddmoreMode:false,
+      eventProductMode:false,
+      eventCollectionMode:false
+    })
+  }
 
   public logosConversionToBase64() {
     const self = this
@@ -179,7 +202,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
 
    public async  generateProductionPdf() {
     let self = this;
-    this.showLoader = true;
+    self.showLoader = true;
     let style_index = this.$store.getters.getCurrentStyleIndex;
     let selected_product = this.$store.getters.getSelectedProduct;
     const product_id = selected_product.product_id;
@@ -725,7 +748,7 @@ a {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
   z-index: 1030;
 }
 
