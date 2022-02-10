@@ -626,6 +626,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
+    } else if(this.actionBeforeLogin == 'downloadDesign') {
+      this.$root.$refs.Order_Details.generateProductionPdf()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
