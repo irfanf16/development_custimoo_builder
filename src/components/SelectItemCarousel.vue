@@ -1,24 +1,27 @@
 <template>
-  <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: 4, adaptiveHeight: false, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
-    <template v-for="(product, index) in products">
-      <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
-        <template v-for="design in product.productstyles[0].productdesigns">
-          <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
-            <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
-              :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : ''}"
-                   :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
-                   :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
-                   :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id"/>
-          </div>
-        </template>
-        <h3 class="text-center">{{ product.product_name }}</h3>
-      </a>
-    </template>
-  </slither-slider>
+  <div class="position-relative">
+    <div class="loader" v-if="searchLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: 4, adaptiveHeight: false, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
+      <template v-for="(product, index) in products">
+        <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
+          <template v-for="design in product.productstyles[0].productdesigns">
+            <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
+              <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
+                     :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : ''}"
+                     :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
+                     :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
+                     :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id"/>
+            </div>
+          </template>
+          <h3 class="text-center">{{ product.product_name }}</h3>
+        </a>
+      </template>
+    </slither-slider>
+  </div>
 </template>
 
 <script lang="ts">
-import {Component, Vue, Mixins} from 'vue-property-decorator'
+import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
 import SlitherSlider from 'slither-slider';
 import Scene from '@/components/Scene.vue'
 import {http} from "@/httpCommon";
@@ -39,7 +42,11 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts) {
   public renderComponent =  true;
   public multipleLogo = false;
   public has_more_products = false;
+  public showLoader = false;
 
+  get searchLoader() {
+    return this.$store.getters.getSearchLoader
+  }
   get products() {
     return this.$store.getters.getProducts
   }
@@ -88,6 +95,19 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts) {
     white-space: nowrap;
     font-size: 0.8rem;
     margin-top: 5px;
+  }
+}
+
+.loader{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  img{
+    width: 100%;
+    max-width: 50px;
   }
 }
 </style>

@@ -360,7 +360,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public showModal = false
   public shared_link = ''
   public extractedcolorclass = ""
-  private isFront = true
+  private isFront = true;
+
 
   private switchTabs (e:Record<any, any>){
     this.ref['custom-mobile-tabs'].hideOtherTab()
@@ -882,6 +883,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
+  get searchLoader() {
+    return this.$store.getters.getSearchLoader
+  }
+
   public async retrieveProducts() {
     let self = this;
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
@@ -891,11 +896,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     http.get(url).then(async (response: Record<any, any>) => {
       if(response.data.products.data.length > 0 ){
         await self.handleMainProducts(response);
-        if(self["showLoader"]) {
+        if(self["showLoader"] || self["searchLoader"]) {
           self.showLoader = false;
+          await self.$store.dispatch('setSearchLoader', false)
         }
       }else{
         this.showError("No Product Found")
+        self.showLoader = false
+        await self.$store.dispatch('setSearchLoader', false)
       }
     }, (error) => {
       console.error("Error while getting order detail", error.response.data.message)

@@ -99,6 +99,8 @@ export default class ItemToCustomize extends Vue {
   public personalized = this.$store.getters.getPersonalized
   public customized = this.$store.getters.getCustomized
   public search_products = '';
+  public showLoader = false;
+  public searchLoader = false;
   public timeout = 0;
 
 
@@ -109,7 +111,7 @@ export default class ItemToCustomize extends Vue {
     this.showDesigns = !this.showDesigns
   }
 
-  public async searchProducts(isClear) {
+  public async searchProducts(isClear:boolean) {
     let self = this;
     if(isClear)
     {
@@ -118,8 +120,10 @@ export default class ItemToCustomize extends Vue {
     if(this.timeout) clearTimeout(this.timeout);
     this.timeout = setTimeout(async () => {
       //search function
-      const itemCarousel = this.$refs['itemsCarousel'] as Record<any, any>
-      self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
+      await self.$store.dispatch('setSearchLoader', true)
+      self.showLoader = true;
+      const itemCarousel = self.$refs['itemsCarousel'] as Record<any, any>
+      await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
       this.$emit('update:search_products', self.search_products)
       this.$emit('retrieveProducts','/list/products')
       itemCarousel.setSliderIndex();
