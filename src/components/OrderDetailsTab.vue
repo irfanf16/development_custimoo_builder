@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+
     <DesignPdfView :pdf_front_image="pdf_front_image" :pdf_back_image="pdf_back_image"/>
 
     <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
@@ -47,7 +47,15 @@
             </template>
           </div>
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
-          <button v-if="this.isCustomerAuthenticated" class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
+
+          <template v-if="isCustomerAuthenticated">
+            <button  class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
+          </template>
+          <template v-else>
+            <button  @click="setActionBeforeLogin('downloadDesign')" :key="'loginmodal'"  class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Download Design File</button>
+          </template>
+
+
         </div>
       </div>
     </div>
@@ -61,6 +69,7 @@
       <canvas width="600" height="600" ref="pdfBack" style="text-align: center; display: block">
       </canvas>
     </div>-->
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 </template>
 
@@ -84,6 +93,9 @@ import ProductionScene from '@/components/ProductionScene.vue'
     this.$root.$on('rostershared', (val:string) =>{
       this.shared_url = val
     })
+  },
+  created() {
+    this.$root.$refs.Order_Details = this;
   }
 })
 
@@ -154,7 +166,18 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
-
+  get actionBeforeLogin(): string {
+    return this.$store.getters.getActionBeforeLogin
+  }
+  public setActionBeforeLogin(type: string) {
+    this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$store.commit('SET_SELECTION_MODE',{
+      readonly:false,
+      collectionAddmoreMode:false,
+      eventProductMode:false,
+      eventCollectionMode:false
+    })
+  }
 
   public logosConversionToBase64() {
     const self = this
@@ -179,7 +202,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
 
    public async  generateProductionPdf() {
     let self = this;
-    this.showLoader = true;
+    self.showLoader = true;
     let style_index = this.$store.getters.getCurrentStyleIndex;
     let selected_product = this.$store.getters.getSelectedProduct;
     const product_id = selected_product.product_id;
@@ -235,8 +258,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
           .then(function(pdfAsString: string) {
             form_data.append("order_file", pdfAsString)
             const res = http.post('orders/create', form_data);
+            self.showLoader = false
           }).save('final_design');
-        this.showLoader = false
+
       }
     })
   }
@@ -745,7 +769,7 @@ a {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
   z-index: 1030;
 }
 
