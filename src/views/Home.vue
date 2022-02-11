@@ -25,7 +25,7 @@
                     <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
                   </template>
                   <template v-else>
-                    <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
+                    <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                   </template>
                   <!-- <template v-if="isCustomerAuthenticated">
                     <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
@@ -70,7 +70,7 @@
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
               <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
-              <LoginForm @actionAfterLogin="actionAfterLogin()" />
+              <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
 
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                 <div>
@@ -361,7 +361,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public shared_link = ''
   public extractedcolorclass = ""
   private isFront = true
-
   private switchTabs (e:Record<any, any>){
     this.ref['custom-mobile-tabs'].hideOtherTab()
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -645,6 +644,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$modal.show('loginModal')
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
       collectionAddmoreMode:false,
@@ -779,7 +779,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.showLockerRoomModal()
 
         if(this.ref.saveToLockerModal) {
-          this.ref.saveToLockerModal.ref['my-modal'].hide();
+          this.ref['saveToLockerModal'].hideModal()
           this.ref.saveToLockerModal.showLoader = false;
         }
 
