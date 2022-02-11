@@ -59,6 +59,11 @@
                       </template>
                     </div>
                   </li>
+                  <li v-if="isCustomerAuthenticated">
+                    <a  class="icon mr-0">
+                      <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ notificationsCounter}}</span>
+                    </a>
+                  </li>
                 </ul>
                 <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
                 </div>

@@ -36,7 +36,7 @@ import {
   faTrashAlt,
   faTshirt,
   faUserFriends,
-  faUserSecret, faSignOutAlt, faBell
+  faUserSecret, faSignOutAlt, faBell, faCartArrowDown
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
@@ -50,6 +50,7 @@ Vue.use(IconsPlugin)
 library.add(faUserSecret)
 library.add(faSearch)
 library.add(faRedoAlt)
+library.add(faCartArrowDown)
 library.add(faTimes)
 library.add(faImage)
 library.add(faFillDrip)
