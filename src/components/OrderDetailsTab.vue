@@ -224,11 +224,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     }
     let form_data = new FormData();
     if(self.production_file_obj.url) {
-<<<<<<< HEAD
-      form_data.append('production_cutting_file', new File([new Blob([self.production_file_obj.content])], "production_cutting_file.svg", {
-=======
-      form_data.append('original_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "original_file.svg", {
->>>>>>> master
+      form_data.append('production_cutting_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "production_cutting_file.svg", {
         type: "image/svg+xml",
       }));
     }
