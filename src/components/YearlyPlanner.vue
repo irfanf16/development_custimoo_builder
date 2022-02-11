@@ -228,7 +228,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     this.viewAllMonth = month
     this.currentMonth = month + ", " + this.$store.getters.getSelectedYear;
     this.allEvents = events;
-    this.$refs['all-events'].show();
+    (this.$refs['all-events'] as Record<any,any>).show();
   }
 
   public showEventPopup(selected_month:number){
@@ -289,7 +289,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
         this.showToast(res.data.message,'SUCCESS')
       }
     }
-    catch (e) {
+    catch (e:any) {
       this.viewLoader = false
       this.allEventsLoader = false
       this.showError(e.response.data.message)

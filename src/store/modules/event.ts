@@ -3,7 +3,7 @@ import {http} from "@/httpCommon";
 import {Vue} from "vue-property-decorator";
 
 const d = new Date();
-const selected_year: string = d.getFullYear();
+const selected_year: number = d.getFullYear();
 
 const Event:Module<any, any> = {
   state: {

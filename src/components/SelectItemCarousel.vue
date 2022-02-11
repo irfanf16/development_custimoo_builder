@@ -54,7 +54,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts) {
 
   public setSliderIndex() {
     if(this.$refs && this.$refs.slider)
-      this.$refs.slider.goToIndex(0);
+      (this.$refs as Record<any,any>).slider.goToIndex(0);
   }
 
   public async loadMoreProduct() {
@@ -67,8 +67,8 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts) {
       }
       http.get(url).then(async (response: Record<any, any>) => {
         await self.handleMainProducts(response);
-        if(self["showLoader"]) {
-          self.showLoader = false;
+        if((self as Record<any,any>)["showLoader"]) {
+          (self as Record<any,any>).showLoader = false;
         }
       }, (error) => {
         console.error("Error while getting order detail", error.response.data.message)
