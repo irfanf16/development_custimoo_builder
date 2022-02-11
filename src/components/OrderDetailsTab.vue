@@ -239,8 +239,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       product_design_id,
       product_model_id,
       ...order_detail,
-      pdf_front_image: this.canvasImage.ref_front.toDataURL("image/png"),
-      pdf_back_image: this.canvasImage.ref_back.toDataURL("image/png")
+      front_image: this.canvasImage.ref_front.toDataURL("image/png"),
+      back_image: this.canvasImage.ref_back.toDataURL("image/png")
     }
     http.post("cart/add", post_data).then((res: any) => {
       if (res.status == 200){
