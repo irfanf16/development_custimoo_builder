@@ -84,7 +84,9 @@ import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
+
 import {compact} from 'lodash';
+type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
 @Component<OrderDetailsTab>({
   components: {
