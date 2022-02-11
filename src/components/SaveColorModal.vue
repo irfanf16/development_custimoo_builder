@@ -105,7 +105,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
           alert('select room first');
           return false;
         }
-        let productColors = []
+        let productColors:Record<any,any>[] = []
         this.logoColors.forEach((item:Record<any, any>) => {
           let obj = {
             name: item.pantone, value: item.hex

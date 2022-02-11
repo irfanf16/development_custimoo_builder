@@ -170,6 +170,7 @@ export default class CustomTabs extends Vue {
   public backImage = ''
   public productName = ''
   public showLoader = false
+  public designsIndex = 0;
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
