@@ -901,13 +901,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 </script>
 
 <style lang="scss" scoped>
-.page-wrapper {
-  @media only screen and (min-width: 992px) {
-    border: 1px solid #dee2e6;
-    background: #fff;
-  }
-}
-
 .home-color-area {
   @media only screen and (min-width: 992px) {
     padding-bottom: 12rem !important;
@@ -1396,5 +1389,4 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 }
-
 </style>

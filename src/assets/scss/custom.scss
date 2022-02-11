@@ -4381,3 +4381,10 @@ $fontSize: 0.5;
 .slither-slider-slides{
     height: auto !important;
 }
+
+.page-wrapper {
+    @media only screen and (min-width: 992px) {
+        border: 1px solid #dee2e6;
+        background: #fff;
+    }
+}

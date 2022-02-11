@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
+import Cart from '../views/Cart.vue'
+import Order from '../views/Order.vue'
 import ViewScene from '../views/ViewScene.vue'
 import ShareRoster from '../views/ShareRoster.vue'
 import CustomizationProcess from '../views/CustomizationProcess.vue'
@@ -14,6 +16,16 @@ const routes: Array<RouteConfig> = [
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/cart',
+    name: 'Cart',
+    component: Cart
+  },
+  {
+    path: '/order',
+    name: 'Order',
+    component: Order
   },
   {
     path: '/confirm-order',
