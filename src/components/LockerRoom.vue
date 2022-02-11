@@ -727,7 +727,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     // this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
   }
   public async yearlyPlannerTab(room_id:number) {
-   this.$refs[`yearlyTab${room_id}`][0].activate()
+    (this.$refs as Record<any, any>)[`yearlyTab${room_id}`][0].activate()
   }
 
   public lockerChanged() {
@@ -910,7 +910,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public async copyYearlyPlannerEvents(yearlyplanner_template_id:string, locker_room_id:number, index:number){
+  public async copyYearlyPlannerEvents(yearlyplanner_template_id: string | null, locker_room_id:number, index:number){
     if(yearlyplanner_template_id) {
       let user_timezone = this.ref['eventmodal'].userTimeZone()
       let payload = {yearlyplanner_template_id, locker_id: locker_room_id, user_timezone, index};
@@ -918,7 +918,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       let res = await this.$store.dispatch('copyYearlyPlannerEvents', payload)
        this.viewLoader = false
       if (res.status == 201) {
-        this.yearlyplanner_template_id = null
+        this.yearly_planner_template_id = null
         await this.getLockerEvents(locker_room_id)
         this.showToast('Yearly planner has been created successfully with events for this locker.', 'SUCCESS');
       } else {

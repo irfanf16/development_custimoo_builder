@@ -40,7 +40,7 @@
           { value: null, text: '3XL' }
         ]
 
-        private products : any[] = []
+        private products : Record<any,any>[] = []
         private company_id !: string
         private product_id !: string
 

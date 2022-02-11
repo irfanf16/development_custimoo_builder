@@ -66,6 +66,9 @@ import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
+
+type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
+
 @Component<OrderDetails>({
   components: {
     DesignPdfView,
@@ -190,14 +193,14 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     }
     let form_data = new FormData();
     if(self.production_file_obj.url) {
-      form_data.append('original_file', new File([new Blob([self.production_file_obj.content])], "original_file.svg", {
+      form_data.append('original_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "original_file.svg", {
         type: "image/svg+xml",
       }));
     }
     form_data.append("product_id", product_id);
     form_data.append("product_style_id", product_style_id);
     form_data.append("product_design_id", product_design_id);
-    form_data.append("product_model_id", product_model_id);
+    form_data.append("product_model_id", product_model_id.toString());
     let order_detail = await self.getOrderDetail();
     form_data.append("order_detail", JSON.stringify(order_detail));
     let p2 = new Promise((resolve) => {
@@ -231,7 +234,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     })
   }
 
-  public async getDocFromString(doc_string: string, type="image/svg+xml") {
+  public async getDocFromString(doc_string: string, type:DOMParserSupportedType ="image/svg+xml") {
     let parser = new DOMParser();
     return  parser.parseFromString(doc_string, type);
   }

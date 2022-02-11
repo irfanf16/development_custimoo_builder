@@ -11,3 +11,11 @@ declare global {
     }
   }
 }
+
+declare global {
+  interface Window {
+      io:any;
+      Echo:any;
+  }
+}
+

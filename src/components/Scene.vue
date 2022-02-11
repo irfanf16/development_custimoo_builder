@@ -923,8 +923,8 @@ export default class Scene extends Vue {
       canvas.renderAll();
     });
     canvas.on('before:render', function() {
-      if(canvas.contextTop) {
-        canvas.clearContext(canvas.contextTop);
+      if((canvas as Record<any,any>).contextTop) {
+        canvas.clearContext((canvas as Record<any,any>).contextTop);
       }
     });
 
