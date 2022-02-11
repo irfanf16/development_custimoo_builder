@@ -11,6 +11,8 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import {fabric as fabrics} from 'fabric'
 import $ from "jquery";
 
+type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
+
 @Component<ProductionScene>({
   mounted() {
     console.log("mounted")
@@ -107,7 +109,7 @@ export default class ProductionScene extends Vue {
     return url_content;
   }
 
-  public async getDocFromString(doc_string: string, type="image/svg+xml") {
+  public async getDocFromString(doc_string: string, type:DOMParserSupportedType ="image/svg+xml") {
     let parser = new DOMParser();
     return  parser.parseFromString(doc_string, type);
   }

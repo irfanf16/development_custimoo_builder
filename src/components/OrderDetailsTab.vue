@@ -85,6 +85,7 @@ import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
 import {compact} from 'lodash';
+
 @Component<OrderDetailsTab>({
   components: {
     DesignPdfView, ProductionScene,
@@ -273,14 +274,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     }
     let form_data = new FormData();
     if(self.production_file_obj.url) {
-      form_data.append('original_file', new File([new Blob([self.production_file_obj.content])], "original_file.svg", {
+      form_data.append('original_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "original_file.svg", {
         type: "image/svg+xml",
       }));
     }
     form_data.append("product_id", product_id);
     form_data.append("product_style_id", product_style_id);
     form_data.append("product_design_id", product_design_id);
-    form_data.append("product_model_id", product_model_id);
+    form_data.append("product_model_id", product_model_id.toString());
     let order_detail = await self.getOrderDetail();
     this.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
     this.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
@@ -317,7 +318,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     })
   }
 
-  public async getDocFromString(doc_string: string, type="image/svg+xml") {
+  public async getDocFromString(doc_string: string, type:DOMParserSupportedType ="image/svg+xml") {
     let parser = new DOMParser();
     return  parser.parseFromString(doc_string, type);
   }

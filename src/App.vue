@@ -51,7 +51,7 @@ window.Echo = new Echo({
       this.$store.commit('SET_RECENT_LOGOS')
     }
     const customer =  this.$store.getters.getCustomer;
-    window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
+    window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e: Record<any,any>) => {
       this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
     })
   }

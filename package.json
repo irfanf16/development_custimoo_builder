@@ -6,6 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "build:staging": "vue-cli-service build --mode staging",
+    "build:wc:customizer:staging": "vue-cli-service build --mode staging --dest ../santa_customizer --target wc --name v-customizer ./src/webComponents/Customizer.vue",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "colorthief": "^2.3.2",
     "core-js": "^3.6.5",
     "csq-vue-multi-draggable": "^1.0.1",
+    "css-loader": "^6.5.1",
     "fabric": "^4.4.0",
     "hex-rgb": "^5.0.0",
     "html2pdf.js": "^0.9.3",
@@ -31,7 +33,8 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "pc-bootstrap4-datetimepicker": "^4.17.51",
-    "read-excel-file": "^5.2.9",
+    "portal-vue": "^2.1.7",
+    "read-excel-file": "^5.2.26",
     "register-service-worker": "^1.7.1",
     "rgb-hex": "^4.0.0",
     "slither-slider": "^2.8.3",
@@ -48,6 +51,7 @@
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.2.0",
     "vue-socket.io": "^3.0.10",
+    "vue-style-loader": "^4.1.3",
     "vue2-editor": "^2.10.3",
     "vue2-scrollbar": "0.0.3",
     "vue2-touch-events": "^3.2.2",

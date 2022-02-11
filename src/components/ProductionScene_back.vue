@@ -136,7 +136,7 @@ export default class ProductionScene extends Vue {
 
   canvasToImage(type = 'png', download = false, download_as = 'factory_cuttings') {
     let self = this;
-    let base_64_image = self.$refs.factory_cuttings.toDataURL(type)
+    let base_64_image = (self.$refs as Record<any,any>).factory_cuttings.toDataURL(type)
     if(download) {
       let a = document.createElement("a");
       a.href =  base_64_image;

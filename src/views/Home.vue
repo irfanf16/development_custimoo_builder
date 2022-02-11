@@ -235,7 +235,7 @@ import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
 
 
-Vue.filter('formatDate', function(value) {
+Vue.filter('formatDate', function(value:string) {
   if (value) {
     return moment(value).format('MMMM DD')
   }
@@ -394,8 +394,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get lastRouteName() {
     let returnVal = '';
 
-    const routerStack = this.$router.history.stack;
-    const idx = this.$router.history.index;
+    const routerStack = (this.$router as Record<any, any>).history.stack;
+    const idx = (this.$router as Record<any, any>).history.index;
+
 
     if (idx > 0) {
       returnVal = routerStack[idx - 1].name;
@@ -632,7 +633,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
     } else if(this.actionBeforeLogin == 'downloadDesign') {
-      this.$root.$refs.Order_Details.generateProductionPdf()
+      (this.$root.$refs as Record<any,any>).Order_Details.generateProductionPdf()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
