@@ -57,11 +57,15 @@
                         <li>
                         <li v-if="!getSelectionMode.readonly">
                           <a v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product.id)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
+                          <a v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product.id)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                           <a v-else data-title="Edit design" @click="editProduct(room.id, product.id)" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
                           <b-button v-if="mobileScreen" data-title="Share design" :id="'share'+i+''+ind"
+                                    @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
+                            :icon="['fas', 'share-alt']"/></b-button>
+                          <b-button v-else-if="isSafari" data-title="Share design" :id="'share'+i+''+ind"
                                     @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
                             :icon="['fas', 'share-alt']"/></b-button>
                           <b-button v-else data-title="Share design" :id="'share'+i+''+ind"
@@ -91,6 +95,11 @@
                           </a>
                         </li>
                         <li v-if="mobileScreen" class="swap">
+                          <a v-if="product.design && product.design.back_design_count > 0" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
+                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
+                          </a>
+                        </li>
+                        <li v-else-if="isSafari" class="swap">
                           <a v-if="product.design && product.design.back_design_count > 0" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
                             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
                           </a>
@@ -321,7 +330,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
-  public colors : [] = []
+  public colors: [] = []
   public tabIndex = this.$store.getters.getLockerTabsIndex;
   public viewLoader = false
   public copiedProductId = 0
@@ -332,7 +341,18 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public collection_available = false;
   public lockerActiveTabIndex = 0;
   public collection_base_url = ''
-  public yearly_planner_template_id = null
+  public yearly_planner_template_id = null;
+  public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
+  // public isSafari = () => {
+  //   let ua = navigator.userAgent.toLowerCase();
+  //   if (ua.indexOf('safari') != -1) {
+  //     if (ua.indexOf('chrome') > -1) {
+  //       return false; //Chrome
+  //     } else {
+  //       return true // Safari
+  //     }
+  //   }
+  // }
 
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
@@ -704,7 +724,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     // this.$store.commit("Change_Locker_Active_Tab", newTabIndex);
   }
   public async yearlyPlannerTab(room_id:number) {
-   this.$refs[`yearlyTab${room_id}`][0].activate()
+    (this.$refs as Record<any, any>)[`yearlyTab${room_id}`][0].activate()
   }
 
   public lockerChanged() {
@@ -887,7 +907,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public async copyYearlyPlannerEvents(yearlyplanner_template_id:string, locker_room_id:number, index:number){
+  public async copyYearlyPlannerEvents(yearlyplanner_template_id: string | null, locker_room_id:number, index:number){
     if(yearlyplanner_template_id) {
       let user_timezone = this.ref['eventmodal'].userTimeZone()
       let payload = {yearlyplanner_template_id, locker_id: locker_room_id, user_timezone, index};
@@ -895,7 +915,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       let res = await this.$store.dispatch('copyYearlyPlannerEvents', payload)
        this.viewLoader = false
       if (res.status == 201) {
-        this.yearlyplanner_template_id = null
+        this.yearly_planner_template_id = null
         await this.getLockerEvents(locker_room_id)
         this.showToast('Yearly planner has been created successfully with events for this locker.', 'SUCCESS');
       } else {

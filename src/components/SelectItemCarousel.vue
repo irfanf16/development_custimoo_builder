@@ -1,5 +1,5 @@
 <template>
-  <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: 4, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
+  <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: 4, adaptiveHeight: false, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
     <template v-for="(product, index) in products">
       <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">
@@ -54,7 +54,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts) {
 
   public setSliderIndex() {
     if(this.$refs && this.$refs.slider)
-      this.$refs.slider.goToIndex(0);
+      (this.$refs as Record<any,any>).slider.goToIndex(0);
   }
 
   public async loadMoreProduct() {
@@ -67,8 +67,8 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts) {
       }
       http.get(url).then(async (response: Record<any, any>) => {
         await self.handleMainProducts(response);
-        if(self["showLoader"]) {
-          self.showLoader = false;
+        if((self as Record<any,any>)["showLoader"]) {
+          (self as Record<any,any>).showLoader = false;
         }
       }, (error) => {
         console.error("Error while getting order detail", error.response.data.message)

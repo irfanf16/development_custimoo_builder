@@ -307,11 +307,11 @@ export default class EventModal extends Mixins(ErrorMessages) {
     email_content: '',
     file: null
   }
-  public email_template_index: number = null
+  public email_template_index: number| null = null
   public file_data: any = null
-  public file_name: string = null
+  public file_name: string | null = null
   public is_file_download = false
-  public selected_collection_pdf_link: string = null
+  public selected_collection_pdf_link: string | null = null
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public showPlaceholder = true
 
@@ -371,7 +371,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
     const lockerProducts = this.$store.getters.getLockerProducts;
     let contacts = lockerProducts[room_index].contacts;
 
-    contacts.map((contact) => {
+    contacts.map((contact:Record<any,any>) => {
       this.event_data.to_emails.push(contact.email)
     })
 
@@ -416,7 +416,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
   get getEventTypes() {
 
-    let optionArray: Array = [];
+    let optionArray: Record<any,any>[] = [];
     optionArray[0] = {value: null, text: 'Choose an event type'}
     optionArray[1] = {value: 'design', text: 'Design'}
     optionArray[2] = {value: 'collection', text: 'Collection'}
@@ -429,15 +429,16 @@ export default class EventModal extends Mixins(ErrorMessages) {
   }
 
   public userTimeZone() {
-    var timezone_offset_min = new Date().getTimezoneOffset(),
-      offset_hrs = parseInt(Math.abs(timezone_offset_min / 60)),
-      offset_min = Math.abs(timezone_offset_min % 60),
+    var timezone_offset_min : number = new Date().getTimezoneOffset(),
+      // offset_hrs : number = parseInt(Math.abs(timezone_offset_min / 60)),
+      offset_hrs : number | string = Math.abs(timezone_offset_min / 60),
+      offset_min : number | string = Math.abs(timezone_offset_min % 60),
       timezone_standard;
 
-    if (offset_hrs < 10)
+    if (typeof(offset_hrs) === 'number'  && offset_hrs < 10)
       offset_hrs = '0' + offset_hrs;
 
-    if (offset_min < 10)
+    if (typeof(offset_min) === 'number' && offset_min < 10)
       offset_min = '0' + offset_min;
 
     if (timezone_offset_min < 0)
@@ -586,7 +587,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
   public uploadEventImage() {
     //comment ext check code temporarily
     //let extensions = ["jpg","png","jpeg","gif","svg","ai","eps","pdf","csv","xlxx",'doc','docs'];
-    let event_data_file = this.event_data.file as Blob;
+    let event_data_file = this.event_data.file as File;
 
     // let ext = event_data_file.name.split('.').pop();
     // ext = (ext == event_data_file.name)? "" : ext;
@@ -608,8 +609,8 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
   public showImage(file_url:string){
     let extensions = ["jpg","png","jpeg","gif"];
-    let ext = file_url.split('.').pop();
-    if(extensions.includes(ext)){
+    let ext:string | undefined = file_url.split('.').pop();
+    if(typeof(ext) === "string" && extensions.includes(ext)){
       return true
     }else{
       return false
@@ -652,7 +653,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
       if(res.email_template_id){
         let emailTemplates = this.$store.getters.getEmailTemplates
-        this.email_template_index = emailTemplates.map(function (eTemplate) {
+        this.email_template_index = emailTemplates.map(function (eTemplate:Record<any,any>) {
           return eTemplate.id;
         }).indexOf(res.email_template_id);
       }
@@ -716,9 +717,9 @@ export default class EventModal extends Mixins(ErrorMessages) {
         }
       } else if (key == 'email_to_others' || key == 'is_reminder') {
         if (this.event_data[key]) {
-          form.append(key, 1);
+          form.append(key, "1");
         } else {
-          form.append(key, 0);
+          form.append(key, "0");
         }
       } else {
         form.append(key, this.event_data[key]);
@@ -731,7 +732,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
       url = 'events/create'
     } else {
       if(!this.file_data){
-        form.append('delete_file',1);
+        form.append('delete_file', "1");
       }
       url = 'events/update'
     }
@@ -800,7 +801,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
         this.viewLoader = false
         this.showToast(res.data.message, 'SUCCESS')
       }
-    } catch (e) {
+    } catch(e:any) {
       console.log('e', e)
       this.showError(e.response.data.message)
 

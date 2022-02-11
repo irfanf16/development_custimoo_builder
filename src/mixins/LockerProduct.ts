@@ -39,17 +39,17 @@ export class LockerProducts extends Vue {
       }
       this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
       this.$root.$emit('rostershared', '')
-      const designId = locker_product.design_id
-      const styleId = locker_product.style_id
-      const product_id = locker_product.product_id;
-      this.$store.commit('CHANGE_EDIT_STATUS', {id: locker_product.id, status: true, designId: designId, styleId: styleId, product_id: product_id})
+      const designId = locker_product?.design_id
+      const styleId = locker_product?.style_id
+      const product_id = locker_product?.product_id;
+      this.$store.commit('CHANGE_EDIT_STATUS', {id: locker_product?.id, status: true, designId: designId, styleId: styleId, product_id: product_id})
       const element = prod_res.data;
       is_customized = locker_product_type == "customized" ? true: is_customized;
       is_personalized = locker_product_type == "personalized" ? true : is_personalized;
-      let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${locker_product.product_id}`;
-      await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id:locker_product.product_id});
+      let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${locker_product?.product_id}`;
+      await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id:locker_product?.product_id});
       http.get(url).then(async (response: Record<any, any>) => {
-        await this.handleMainProducts(response);
+        await (this as Record<any,any>).handleMainProducts(response);
         let selected_product = this.$store.getters.getSelectedProduct;
         let selectedIndex = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === element.style_id);
         await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
@@ -147,7 +147,7 @@ export class LockerProducts extends Vue {
 
 @Component
 export class handleMainProducts extends Vue {
-  public async handleMainProducts(response: Record<any, any>) {
+  public async handleMainProducts(response: Record<any, any>){
     let self =this;
     let main_products_info = await self.$store.getters.getMainProductsInfo;
     let append_products = main_products_info.next_page && main_products_info.next_page > 1;
