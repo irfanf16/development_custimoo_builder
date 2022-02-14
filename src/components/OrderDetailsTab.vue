@@ -219,7 +219,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     const product_style_id = product_style.id;
     let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
     const product_design_id = selectedDesign[0].id;
-
     let product_models = this.$store.getters.getProductModels;
     let selected_model_index = this.$store.getters.getSelectedModelIndex;
 
@@ -228,26 +227,37 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       const selected_model = product_models[selected_model_index];
       product_model_id = selected_model.id;
     }
-
     let order_detail = await this.getOrderDetail();
-    // if(order_detail.custom_logos.length > 0) {
-    //   order_detail.custom_logos.forEach(function(value:any){ delete value.base64_logo });
-    // }
+
     let post_data = {
-      product_id,
-      product_style_id,
-      product_design_id,
-      product_model_id,
-      ...order_detail,
-      front_image: this.canvasImage.ref_front.toDataURL("image/png"),
-      back_image: this.canvasImage.ref_back.toDataURL("image/png")
+      factory_product:{
+        style_id:product_style_id,
+        design_id:product_design_id,
+        model_id:product_model_id,
+        product_id:product_id,
+        svg_groups: order_detail.svg_groups?order_detail.svg_groups:[],
+        custom_logos: order_detail.custom_logos?order_detail.custom_logos:[],
+        custom_texts: order_detail.custom_texts?order_detail.custom_texts:[],
+        roster_detail: order_detail.roster_detail?order_detail.roster_detail:[],
+        custom_logo_svgs: order_detail.custom_logo_svgs?order_detail.custom_logo_svgs:[],
+        custom_text_svgs: order_detail.custom_text_svgs?order_detail.custom_text_svgs:[],
+        pdf_file:null,
+        front_image: this.canvasImage.ref_front.toDataURL("image/png") ? this.canvasImage.ref_front.toDataURL("image/png") : null,
+        back_image: this.canvasImage.ref_back.toDataURL("image/png") ? this.canvasImage.ref_back.toDataURL("image/png") : null
+      }
     }
-    http.post("cart/add", post_data).then((res: any) => {
-      if (res.status == 200){
+    http.post("carts", post_data).then((res: any) => {
+      if (res.data.success == true){
+        console.log(res);
         this.showToast('Item Added in Cart', 'SUCCESS');
-        this.$store.dispatch('addToCart',res.data)
+        this.$store.dispatch('addToCart',res.data.result)
       }else{
-        this.showError(res)
+        if(res.data.status_code === 422){
+          this.showErrorValidation(res.data.errors);
+        }
+        else{
+          this.showError(res)
+        }        
       }
     }).catch(err => {
       if(err.response.status){
