@@ -6,6 +6,9 @@ import 'vue-toast-notification/dist/theme-sugar.css';
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
 Vue.use(VueToast);
+import VModal from 'vue-js-modal/dist/index.nocss.js'
+import 'vue-js-modal/dist/styles.css'
+Vue.use(VModal)
 // Vue.directive('tooltip', VTooltip)
 // Vue.directive('close-popover', VClosePopover)
 // Vue.component('v-popover', VPopover)
