@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="my-modal" hide-footer id="modal-center-savecolormodal" centered scrollable size="xl" title="Add Color to Locker Room" content-class="lockerroom-modal">
+    <modal ref="my-modal" name="color-modal" hide-footer id="modal-center-savecolormodal" centered scrollable size="xl" title="Add Color to Locker Room" content-class="lockerroom-modal">
       <b-tabs content-class="mt-3">
         <template v-for="(room, i) in getLockerProducts">
         <b-tab :key="i">
@@ -20,8 +20,8 @@
         </b-tab>
         </template>
         <div class="create-lockerroom">
-            <b-button class="create-btn" variant="secondary" v-b-modal.modal-center-createlockerroom><span>Create New </span>+</b-button>
-            <CreateLockerRoomModal />
+            <b-button class="create-btn" variant="secondary" @click="openCreateLockerModal"><span>Create New </span>+</b-button>
+            <CreateLockerRoomModal ref="create-modal" />
         </div>
       </b-tabs>
 
@@ -37,7 +37,7 @@
             </b-form>
         </div>
 
-    </b-modal>
+    </modal>
 </template>
 
 <script lang="ts">
@@ -63,7 +63,10 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       public ref = this.$refs as Record<any, any>
 
       public showColorModal(){
-        this.ref['my-modal'].show();
+        this.$modal.show('color-modal');
+      }
+      public openCreateLockerModal(){
+        this.ref['create-modal'].showModal()
       }
 
       get getLockerProducts():Record<any, any>{
@@ -117,7 +120,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
         if (saved == true){
           await this.$store.dispatch('getLockerRoomColors')
           this.folder_name = ''
-          this.ref['my-modal'].hide();
+          this.$modal.hide('color-modal');
         }
       }
     }
