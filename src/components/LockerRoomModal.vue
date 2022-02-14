@@ -1,5 +1,7 @@
 <template>
-    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room" modal-class="modal-fullscreen2" content-class="lockerroom-modal"
+    <modal :minWidth ="800"
+           :minHeight="600" :resizable="true"
+           :adaptive="true" name="locker-modal" ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room" modal-class="modal-fullscreen2"  content-class="lockerroom-modal"
     @close="$store.commit('Change_Locker_Active_Tab', 0)">
       <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
                   @showCollectionModal="showCollectionModal"
@@ -15,7 +17,7 @@
           <b-button v-if="selectedCollectionProducts.length > 0 && ($store.getters.getSelectionMode.readonly && $store.getters.getSelectionMode.collectionAddmoreMode)" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
         </div>
       </template>
-    </b-modal>
+    </modal>
 </template>
 
 <script lang="ts">
@@ -56,11 +58,11 @@ export default class LockerRoomModal extends Vue {
 
 
   public hideLockerRoomModal () {
-    this.ref['locker-modal'].hide()
+    this.$modal.hide('locker-modal')
   }
 
   public showLockerRoomModal () {
-    this.ref['locker-modal'].show()
+    this.$modal.show('locker-modal')
   }
 
   public addDesignCollection () {

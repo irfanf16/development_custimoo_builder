@@ -83,6 +83,8 @@ library.add(faSignOutAlt)
 library.add(faDiceTwo)
 library.add(faBell)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+import VModal from 'vue-js-modal/dist/index.nocss.js'
+Vue.use(VModal)
 
 import Echo from "laravel-echo";
 window.io = require('socket.io-client');
@@ -123,10 +125,6 @@ export default {
       document.head.append(ubuntu_font)
       console.log("font appended")
     }
-
-    this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
-      console.log('Modal is about to be shown', bvEvent, modalId)
-    })
 
 
     // This will only work on your root Vue component since it's using $parent
@@ -173,6 +171,7 @@ export default {
 @import '~bootstrap/dist/css/bootstrap.css';
 @import '~bootstrap-vue/dist/bootstrap-vue.css';
 @import '~pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';
+@import '~vue-js-modal/dist/styles.css';
 @import '../assets/css/custom.css';
 
 #app {

@@ -1,5 +1,5 @@
 <template>
-  <b-modal ref="loginModal" @hidden="clearForm" id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
+  <modal name="loginModal" ref="loginModal" @hidden="clearForm" id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
     <div class="form-holder" :class="{active: isActive}">
       <div class="form-area form-signin p-4">
         <h2>Hummel Login</h2>
@@ -139,7 +139,7 @@
         </div>
       </div>
     </div>
-  </b-modal>
+  </modal>
 </template>
 
 <script lang="ts">
@@ -164,6 +164,9 @@
     public additionClass() {
       this.isActive = !this.isActive
     }
+    public show(){
+      this.ref['loginModal'].show()
+    }
     public async submitForm(){
       try {
         let payload = {
@@ -178,10 +181,11 @@
           await  this.$store.dispatch('permissions')
           this.email = ''
           this.password = ''
-          this.ref['loginModal'].hide();
+          this.$modal.hide('loginModal');
           this.$emit('actionAfterLogin')
         }
       }catch (error){
+        console.log(error)
         this.showError(error)
       }
     }

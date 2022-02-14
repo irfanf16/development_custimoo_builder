@@ -236,12 +236,12 @@
     <template #tabs-end>
       <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getSelectionMode.readonly"
                   role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
-        <span class="btn btn-secondary light">Add <BIconPlus/></span>
+        <span class="btn btn-secondary light" @click="openCreateLockerModal">Add <BIconPlus/></span>
       </b-nav-item>
      </template>
 
 
-    <CreateLockerRoomModal @lockerAdded="lockerAdded"/>
+    <CreateLockerRoomModal ref="create-modal" @lockerAdded="lockerAdded"/>
     <ExistingCollectionModal @existingCollection="existingCollection"/>
     <EventModal ref="eventmodal" @change-locker-tabindex="changeLockerTabIndex" @yearlyPlannerTab="yearlyPlannerTab"   />
     <ContactModal ref="contactmodal"   />
@@ -250,8 +250,8 @@
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
                     ref="reset-modal"></confirm-modal>
 
-    <span class="hover_tooltip"></span>
-    <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
+    <span class="hover_tooltip" ref="hoover_tooltip"></span>
+    <modal ref="copy-product-modal" name="copy-product-modal" hide-footer @closed="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
         <div class="pt-4 design-name-form">
             <div>
 <!--                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Design Name</label>-->
@@ -277,7 +277,7 @@
 
           <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
         </div>
-    </b-modal>
+    </modal>
   </span>
 
 </template>
@@ -393,7 +393,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   private showTooltip(e: Record<any, any>) {
-    let element = document.querySelector('.hover_tooltip') as Record<any, any>
+    let element = this.$el.querySelector(".hover_tooltip")
     element.style.opacity = '1'
     element.style.zIndex = '100'
     element.style.left = (e.clientX + 10) + 'px'
@@ -402,7 +402,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   private hideTooltip() {
-    let element = document.querySelector('.hover_tooltip') as Record<any, any>
+    let element = this.$el.querySelector(".hover_tooltip")
     element.style.opacity = '0'
     element.style.left = '0'
     element.style.top = '0'
@@ -496,6 +496,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   get logoTabIndex(): number {
     return this.$store.getters.getActiveLogoIndex
   }
+  public openCreateLockerModal(){
+    this.ref['create-modal'].showModal()
+  }
 
   public lockerAdded() {
     let index = this.getLockerProducts.length - 1
@@ -515,7 +518,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       count = product.copy_count + 1
     }
     this.copiedProductName = product.product_name + '(copy)'+(count == 1 || count == 0 ?  '' : count)
-    this.ref['copy-product-modal'].show()
+    this.$modal.show('copy-product-modal')
   }
   public resetModal(){
     this.copiedProductId = 0
