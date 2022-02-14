@@ -49,10 +49,10 @@
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <button  class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
+            <button  class="btn btn-secondary fw-bold w-100" @click="addToCart">Add to Cart</button>
           </template>
           <template v-else>
-            <button  @click="setActionBeforeLogin('downloadDesign')" :key="'loginmodal'"  class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Download Design File</button>
+            <button  @click="setActionBeforeLogin('downloadDesign')" :key="'loginmodal'"  class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Add to Cart</button>
           </template>
 
 
@@ -85,6 +85,7 @@ import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
 
+import {compact} from 'lodash';
 type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
 @Component<OrderDetailsTab>({
@@ -172,6 +173,13 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   get actionBeforeLogin(): string {
     return this.$store.getters.getActionBeforeLogin
   }
+
+  get customTextObjects(): Record<any, any>[] {
+    return this.$store.getters.customTextObjects;
+  }
+  get customLogoObjects(): Record<any, any>[] {
+    return compact(this.$store.getters.customLogoObjects);
+  }
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
     this.$store.commit('SET_SELECTION_MODE',{
@@ -203,6 +211,50 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     })
   }
 
+  public async addToCart() {
+    let style_index = this.$store.getters.getCurrentStyleIndex;
+    let selected_product = this.$store.getters.getSelectedProduct;
+    const product_id = selected_product.product_id;
+    let product_style = selected_product.productstyles[style_index];
+    const product_style_id = product_style.id;
+    let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
+    const product_design_id = selectedDesign[0].id;
+
+    let product_models = this.$store.getters.getProductModels;
+    let selected_model_index = this.$store.getters.getSelectedModelIndex;
+
+    let product_model_id = 0;
+    if(product_models.length > 0) {
+      const selected_model = product_models[selected_model_index];
+      product_model_id = selected_model.id;
+    }
+
+    let order_detail = await this.getOrderDetail();
+    // if(order_detail.custom_logos.length > 0) {
+    //   order_detail.custom_logos.forEach(function(value:any){ delete value.base64_logo });
+    // }
+    let post_data = {
+      product_id,
+      product_style_id,
+      product_design_id,
+      product_model_id,
+      ...order_detail,
+      front_image: this.canvasImage.ref_front.toDataURL("image/png"),
+      back_image: this.canvasImage.ref_back.toDataURL("image/png")
+    }
+    http.post("cart/add", post_data).then((res: any) => {
+      if (res.status == 200){
+        this.showToast('Item Added in Cart', 'SUCCESS');
+        this.$store.dispatch('addToCart',res.data)
+      }else{
+        this.showError(res)
+      }
+    }).catch(err => {
+      if(err.response.status){
+        this.showErrorArr(err.response.data.errors)
+      }
+    });
+  }
    public async  generateProductionPdf() {
     let self = this;
     self.showLoader = true;
@@ -411,18 +463,48 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     }
   }
 
+  // public async getOrderDetail() {
+  //   let self = this;
+  //   let order_detail: { [key: string]: Record<any, any> } = {}
+  //   order_detail.roster_detail = self.rosterDetails;
+  //   order_detail.svg_groups = self.svgGroups;
+  //   order_detail.custom_texts = self.customTexts;
+  //   order_detail.custom_logos = self.customLogos;
+  //   if(self.$store.getters.getUsingColorLogos) {
+  //     order_detail.logo_colors = self.logoColors
+  //   }
+  //   return order_detail;
+  // }
+
   public async getOrderDetail() {
     let self = this;
     let order_detail: { [key: string]: Record<any, any> } = {}
     order_detail.roster_detail = self.rosterDetails;
     order_detail.svg_groups = self.svgGroups;
-    order_detail.custom_texts = self.customTexts;
+    order_detail.custom_texts = self.customTexts.filter((custom_text) => custom_text.text.length > 0);
     order_detail.custom_logos = self.customLogos;
     if(self.$store.getters.getUsingColorLogos) {
       order_detail.logo_colors = self.logoColors
     }
+    let custom_text_objects = compact(this.customTextObjects);
+    let custom_logo_objects = compact(this.customLogoObjects);
+    let custom_text_svgs = [];
+    for (const custom_text_object of custom_text_objects) {
+      if (custom_text_object.constructor.name == "klass") {
+        custom_text_svgs.push(custom_text_object.toSVG());
+      }
+    }
+    order_detail.custom_text_svgs = custom_text_svgs
+    let custom_logo_svgs = [];
+    for (const custom_logo_svg of custom_logo_objects) {
+      if(custom_logo_svg.constructor.name == "klass") {
+        custom_logo_svgs.push(custom_logo_svg.toSVG());
+      }
+    }
+    order_detail.custom_logo_svgs = custom_logo_svgs
     return order_detail;
   }
+
 }
 </script>
 
