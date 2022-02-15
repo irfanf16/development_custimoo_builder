@@ -43,7 +43,7 @@
 <!--            </template>-->
             <template>
 <!--              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share roster url</b-button>-->
-              <AddLockerRoomModal :rosterUrl="true"  ref="share" />
+              <AddLockerRoomModal modal_name="share" :rosterUrl="true"  ref="share" />
             </template>
           </div>
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
@@ -257,7 +257,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
         }
         else{
           this.showError(res)
-        }        
+        }
       }
     }).catch(err => {
       if(err.response.status){

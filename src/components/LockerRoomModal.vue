@@ -64,11 +64,11 @@ export default class LockerRoomModal extends Vue {
 
 
   public hideLockerRoomModal () {
-    this.$modal.hide('locker-modal')
+    (this.$modal as Record<any, any>).hide('locker-modal')
   }
 
   public showLockerRoomModal () {
-    this.$modal.show('locker-modal')
+    (this.$modal as Record<any, any>).show('locker-modal')
   }
 
   public addDesignCollection () {
