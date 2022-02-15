@@ -4382,11 +4382,13 @@ $fontSize: 0.5;
     height: auto !important;
 }
 #modal-center-lockerroom{
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
     .modal-content.lockerroom-modal{
         border: none !important;
     }
 }
 
 .vm--modal{
-    overflow-y: auto;
+    //overflow-y: auto;
 }
