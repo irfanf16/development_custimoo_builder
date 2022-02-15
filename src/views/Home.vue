@@ -664,11 +664,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const url = '/carts/cart-items'
     http.get(url).then((res: any) => {
       let api_res:Record<any, any> = res.data.result
-      let cart_items:Record<any, any>[] = []
-      api_res.items.forEach((item:Record<any, any>) => {
-        cart_items.push(...item.factory_products)
-      })
-      this.$store.dispatch('addToCart',cart_items)
+      // let cart_items:Record<any, any>[] = []
+      // api_res.items.forEach((item:Record<any, any>) => {
+      //   cart_items.push(...item.factory_products)
+      // })
+      this.$store.dispatch('addToCart',api_res.items)
     }).catch((e: any) => {
       console.error(e)
     });
