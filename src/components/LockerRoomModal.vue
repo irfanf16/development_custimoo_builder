@@ -1,8 +1,12 @@
 <template>
-    <modal :minWidth ="screenWidth"
-           :minHeight="680" :resizable="true"
-           :adaptive="true" name="locker-modal" ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room"
-    @close="$store.commit('Change_Locker_Active_Tab', 0)">
+    <modal :width="screenWidth"
+           :resizable="true"
+           :scrollable="true"
+           height="auto"
+           :reset="true"
+           :shiftY="0"
+           name="locker-modal" ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room"
+           @close="$store.commit('Change_Locker_Active_Tab', 0)">
       <div class="modal-content lockerroom-modal">
         <div id="modal-center-lockerroom" class="modal-body">
           <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
