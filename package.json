@@ -6,7 +6,9 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "build:staging": "vue-cli-service build --mode staging",
-    "build:wc:customizer:staging": "vue-cli-service build --mode staging --dest ../santa_customizer --target wc --name v-customizer ./src/webComponents/Customizer.vue",
+    "sass-compile": "sass src/assets/scss/custom.scss src/assets/css/custom.css",
+    "generate-component": "vue-cli-service build --mode staging --dest ../santa_customizer --target wc --name v-customizer ./src/webComponents/Customizer.vue && npm run sass-compile",
+    "build:wc:customizer:staging":"concurrently npm:sass-compile npm:generate-component",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -22,6 +24,7 @@
     "bootstrap-vue": "^2.21.2",
     "color-diff": "^1.2.0",
     "colorthief": "^2.3.2",
+    "concurrently": "^7.0.0",
     "core-js": "^3.6.5",
     "csq-vue-multi-draggable": "^1.0.1",
     "css-loader": "^6.5.1",
@@ -86,7 +89,7 @@
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^6.2.2",
     "node-sass": "^5.0.0",
-    "sass-loader": "^10.1.1",
+    "sass-loader": "^10.2.1",
     "typescript": "~4.1.5",
     "vue-template-compiler": "^2.6.11",
     "vue-toast-notification": "^0.6.2",
