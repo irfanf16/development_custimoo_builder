@@ -26,8 +26,7 @@
 
         </td>
         <td>{{cart_item.roster_detail | itemQtyCount(cart_item.roster_detail)}}</td>
-        <td class="cursor-pointer">   <a data-title="Edit Event"
-                                         >
+        <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(cart_item)">
           <font-awesome-icon
             :icon="['fas', 'edit']"/>
         </a></td>
@@ -82,6 +81,9 @@ import {getReminderOptions} from "@/helpers/Helpers";
       }
       get cartItems() {
         return this.$store.getters.getCartItems
+      }
+      public editCartItem(cart_item:Record<any, any>) {
+        console.log('cart_item',cart_item)
       }
 
     }

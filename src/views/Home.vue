@@ -275,6 +275,8 @@ Vue.filter('formatDate', function(value:string) {
     await this.$store.dispatch('setCustomToken');
     // await this.retrieveProducts()
     await this.getFillColors()
+
+    this.getCartItems()
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
       await this.$store.dispatch('getLockerRoomColors')
@@ -654,6 +656,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
       this.colors = JSON.parse(response.data.color_text)
+    }).catch((e: any) => {
+      console.log(e)
+    });
+  }
+  getCartItems() {
+    const url = '/carts/cart-items'
+    http.get(url).then((response: any) => {
+      console.log(response)
     }).catch((e: any) => {
       console.log(e)
     });
