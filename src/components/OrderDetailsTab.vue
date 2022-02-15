@@ -228,7 +228,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       product_model_id = selected_model.id;
     }
     let order_detail = await this.getOrderDetail();
-
+    //remove base64 key from logos array
+    if(order_detail.custom_logos.length > 0) {
+      order_detail.custom_logos.forEach(function(logo:Record<any, any>){ delete logo.base64_logo });
+    }
     let post_data = {
       factory_product:{
         style_id:product_style_id,
@@ -250,14 +253,19 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       if (res.data.success == true){
         console.log(res);
         this.showToast('Item Added in Cart', 'SUCCESS');
-        this.$store.dispatch('addToCart',res.data.result)
+        let api_res:Record<any, any> = res.data.result
+        let cart_items:Record<any, any>[] = []
+        api_res.items.forEach((item:Record<any, any>) => {
+          cart_items.push(...item.factory_products)
+        })
+        this.$store.dispatch('addToCart',cart_items)
       }else{
         if(res.data.status_code === 422){
           this.showErrorValidation(res.data.errors);
         }
         else{
           this.showError(res)
-        }        
+        }
       }
     }).catch(err => {
       if(err.response.status){

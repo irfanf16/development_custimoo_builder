@@ -8,6 +8,12 @@ const Cart:Module<any, any> = {
     cart_items: []
   },
   getters: {
+    getCartItemsCount(state:Record<any, any>){
+      return state.cart_items.length;
+    },
+    getCartItems(state:Record<any, any>){
+      return state.cart_items;
+    },
   },
   mutations: {
     ADD_TO_CART(state: Record<any, any>, payload: boolean){
