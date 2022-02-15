@@ -393,7 +393,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   private showTooltip(e: Record<any, any>) {
-    let element = this.$el.querySelector(".hover_tooltip")
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>
     element.style.opacity = '1'
     element.style.zIndex = '100'
     element.style.left = (e.clientX + 10) + 'px'
@@ -402,7 +402,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   private hideTooltip() {
-    let element = this.$el.querySelector(".hover_tooltip")
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>
     element.style.opacity = '0'
     element.style.left = '0'
     element.style.top = '0'
