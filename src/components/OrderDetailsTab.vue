@@ -49,7 +49,10 @@
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <button  class="btn btn-secondary fw-bold w-100" @click="addToCart">Add to Cart</button>
+            <button  class="btn btn-secondary fw-bold w-100" @click="addToCart" v-if="!isLoading">Add to Cart</button>
+            <button  class="btn btn-secondary fw-bold w-100" :disabled="true" v-if="isLoading">
+              <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+            </button>
           </template>
           <template v-else>
             <button  @click="setActionBeforeLogin('downloadDesign')" :key="'loginmodal'"  class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Add to Cart</button>
@@ -114,6 +117,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   public production_file_obj = {
     url: null, content: null
   }
+  public isLoading = false;
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -212,6 +216,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   }
 
   public async addToCart() {
+    this.isLoading = true;
     let style_index = this.$store.getters.getCurrentStyleIndex;
     let selected_product = this.$store.getters.getSelectedProduct;
     const product_id = selected_product.product_id;
@@ -259,17 +264,21 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
           cart_items.push(...item.factory_products)
         })
         this.$store.dispatch('addToCart',cart_items)
+        this.isLoading = false;
       }else{
         if(res.data.status_code === 422){
           this.showErrorValidation(res.data.errors);
+          this.isLoading = false
         }
         else{
           this.showError(res)
+          this.isLoading = false
         }
       }
     }).catch(err => {
       if(err.response.status){
         this.showErrorArr(err.response.data.errors)
+        this.isLoading = false
       }
     });
   }
