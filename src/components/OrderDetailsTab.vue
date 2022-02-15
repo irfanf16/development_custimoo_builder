@@ -49,7 +49,7 @@
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <button  class="btn btn-secondary fw-bold w-100" @click="addToCart" v-if="!isLoading">Add to Cart</button>
+            <button  class="btn btn-secondary fw-bold w-100" @click="addToCart" v-if="!isLoading">{{cartItemId.length > 0 ? 'Update Item' : 'Add to Cart'}}</button>
             <button  class="btn btn-secondary fw-bold w-100" :disabled="true" v-if="isLoading">
               <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
             </button>
@@ -122,6 +122,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
+  get cartItemId(): Record<any, any> {
+    return this.$store.getters.getCartItemId
+  }
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
@@ -184,6 +187,12 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   get customLogoObjects(): Record<any, any>[] {
     return compact(this.$store.getters.customLogoObjects);
   }
+  get defaultColors() : [Record<any, any>] {
+    return this.$store.getters.getDefaultColors
+  }
+  get groupColors() : [Record<any, any>] {
+    return this.$store.getters.getGroupColors
+  }
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
     this.$store.commit('SET_SELECTION_MODE',{
@@ -237,6 +246,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     if(order_detail.custom_logos.length > 0) {
       order_detail.custom_logos.forEach(function(logo:Record<any, any>){ delete logo.base64_logo });
     }
+
+
+
     let post_data = {
       factory_product:{
         style_id:product_style_id,
@@ -250,13 +262,15 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
         custom_logo_svgs: order_detail.custom_logo_svgs?order_detail.custom_logo_svgs:[],
         custom_text_svgs: order_detail.custom_text_svgs?order_detail.custom_text_svgs:[],
         pdf_file:null,
+        defaultcolors: this.defaultColors,
+        groupcolors: this.groupColors,
+        colors:this.$store.getters.getLogosColors,
         front_image: this.canvasImage.ref_front.toDataURL("image/png") ? this.canvasImage.ref_front.toDataURL("image/png") : null,
         back_image: this.canvasImage.ref_back.toDataURL("image/png") ? this.canvasImage.ref_back.toDataURL("image/png") : null
       }
     }
     http.post("carts", post_data).then((res: any) => {
       if (res.data.success == true){
-        console.log(res);
         this.showToast('Item Added in Cart', 'SUCCESS');
         let api_res:Record<any, any> = res.data.result
         let cart_items:Record<any, any>[] = []
