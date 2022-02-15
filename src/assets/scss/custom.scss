@@ -1714,7 +1714,7 @@ button{
 #modal-center-lockerroom{
     //height: auto;
     overflow-y: auto;
-    padding-left: 0 !important;
+    //padding-left: 0 !important;
 
     @media only screen and (max-width: 991px){
         // top: auto;
@@ -2911,7 +2911,7 @@ $fontSize: 0.5;
     display: flex !important;
     align-items: start;
     justify-content: center;
-    padding-left: 0 !important;
+    //padding-left: 0 !important;
     //padding-top: 60px;
     .modal {
         padding: 0 !important;
@@ -4380,4 +4380,13 @@ $fontSize: 0.5;
 
 .slither-slider-slides{
     height: auto !important;
+}
+#modal-center-lockerroom{
+    .modal-content.lockerroom-modal{
+        border: none !important;
+    }
+}
+
+.vm--modal{
+    overflow-y: auto;
 }
