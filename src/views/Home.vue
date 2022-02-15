@@ -60,8 +60,8 @@
                     </div>
                   </li>
                   <li v-if="isCustomerAuthenticated">
-                    <a  class="icon mr-0">
-                      <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ notificationsCounter}}</span>
+                    <a  class="icon mr-0" @click="openCartModal">
+                      <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                     </a>
                   </li>
                 </ul>
@@ -72,9 +72,10 @@
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
+              <CartModal ref="cartModal" />
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
-              <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
+              <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
               <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
 
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
@@ -233,6 +234,7 @@ import CustomTabs from "@/components/CustomTabs.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
+import CartModal from "@/components/CartModal.vue";
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -243,6 +245,7 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
+    CartModal,
     CustomTabs,
     ConfirmModal,
     DesignCollectionModal,
@@ -272,6 +275,8 @@ Vue.filter('formatDate', function(value:string) {
     await this.$store.dispatch('setCustomToken');
     // await this.retrieveProducts()
     await this.getFillColors()
+
+    this.getCartItems()
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
       await this.$store.dispatch('getLockerRoomColors')
@@ -417,6 +422,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return unread_notification_counter
   }
 
+  get cartItemsCount(){
+    return this.$store.getters.getCartItemsCount
+  }
+
   public showConfirm(){
     this.ref['reset-modal'].showConfirm()
   }
@@ -459,6 +468,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   public editCollectionModal = () =>{
     this.ref['collectionModal'].editCollectionModal()
+  }
+  public openCartModal = () =>{
+    this.ref.cartModal.show()
   }
   public getPath(){
     let url = ''
@@ -628,7 +640,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.ref['lockerModal'].showLockerRoomModal()
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
-      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+      // this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
     } else if(this.actionBeforeLogin == 'downloadDesign') {
@@ -644,6 +656,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
       this.colors = JSON.parse(response.data.color_text)
+    }).catch((e: any) => {
+      console.log(e)
+    });
+  }
+  getCartItems() {
+    const url = '/carts/cart-items'
+    http.get(url).then((response: any) => {
+      console.log(response)
     }).catch((e: any) => {
       console.log(e)
     });

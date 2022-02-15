@@ -61,9 +61,8 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       public room_id = 0;
       public folder_name = '';
       public ref = this.$refs as Record<any, any>
-
       public showColorModal(){
-        this.$modal.show('color-modal');
+        (this.$modal as Record<any, any>).show('color-modal');
       }
       public openCreateLockerModal(){
         this.ref['create-modal'].showModal()

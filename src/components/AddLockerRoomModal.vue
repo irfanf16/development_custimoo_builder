@@ -1,7 +1,7 @@
 <template>
-  <modal name="my-modal" :minWidth ="800"
+  <modal :name="modal_name" :minWidth ="800"
          :minHeight="600" :resizable="true"
-         :adaptive="true" ref="my-modal" id="modal-center-addlockerroom" hide-footer centered scrollable size="xl" title="Add to Locker Room"  modal-class="add_locker" content-class="lockerroom-modal">
+         :adaptive="true" id="modal-center-addlockerroom" hide-footer centered scrollable size="xl" title="Add to Locker Room"  modal-class="add_locker" content-class="lockerroom-modal">
     <div class="text-right">
       <b-button>close</b-button>
     </div>
@@ -74,6 +74,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
     export default class AddLockerRoomModal extends Mixins(ErrorMessages) {
       @Prop({required: false, default: true}) readonly close_on_add !: boolean
       @Prop({required: false, default: false})  rosterUrl !: boolean
+      @Prop({required: true, default: "addlockermodal"})  modal_name !: string
       async recallProducts(){
         await this.$store.dispatch('GET_LOCKER_PRODUCTS')
         if (this.roomWithProducts.length){
@@ -155,10 +156,10 @@ import LockerRoom from "@/components/LockerRoom.vue";
         }
       }
       public showCreateModal(){
-        this.$modal.show('create-modal')
+        (this.$modal as Record<any, any>).show('create-modal')
       }
       public hideModal(){
-        this.$modal.hide('my-modal')
+        (this.$modal as Record<any, any>).hide(this.modal_name)
       }
 
       public async saveToLocker(){
@@ -204,7 +205,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
             this.product_name = ''
             this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
             if(this.close_on_add) {
-              this.ref['my-modal'].hide();
+              this.hideModal();
               this.showLoader = false
             } else {
               this.$emit('open-locker-room', this.tabIndex);
@@ -234,7 +235,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
         }
       }
       public showSaveToLockerRoomModal() {
-        this.$modal.show('my-modal')
+        (this.$modal as Record<any, any>).show(this.modal_name)
         this.recallProducts();
       }
       public async deleteProduct(ind:number, id:number){
