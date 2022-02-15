@@ -259,11 +259,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
         console.log(res);
         this.showToast('Item Added in Cart', 'SUCCESS');
         let api_res:Record<any, any> = res.data.result
-        let cart_items:Record<any, any>[] = []
-        api_res.items.forEach((item:Record<any, any>) => {
-          cart_items.push(...item.factory_products)
-        })
-        this.$store.dispatch('addToCart',cart_items)
+        this.$store.dispatch('addToCart',api_res.items)
         this.isLoading = false;
       }else{
         if(res.data.status_code === 422){

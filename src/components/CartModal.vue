@@ -20,22 +20,24 @@
       </tr>
       </thead>
       <tbody>
-      <tr :key="cart_item.id" v-for="(cart_item) in cartItems">
-        <td><b-img style="width: 80px" thumbnail fluid :src="cart_item.front_image" alt="Front Design"></b-img>
-          <b-img style="width: 80px" thumbnail fluid :src="cart_item.back_image" alt="Back Design"></b-img>
+      <template v-for="(cart_item) in cartItems">
+        <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
+          <td><b-img style="width: 80px" thumbnail fluid :src="factory_product.front_image" alt="Front Design"></b-img>
+            <b-img style="width: 80px" thumbnail fluid :src="factory_product.back_image" alt="Back Design"></b-img>
 
-        </td>
-        <td>{{cart_item.roster_detail | itemQtyCount(cart_item.roster_detail)}}</td>
-        <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(cart_item)">
-          <font-awesome-icon
-            :icon="['fas', 'edit']"/>
-        </a></td>
-        <td class="cursor-pointer">  <a data-title="Delete Event"
+          </td>
+          <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>
+          <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(cart_item,factory_product)">
+            <font-awesome-icon
+              :icon="['fas', 'edit']"/>
+          </a></td>
+          <td class="cursor-pointer">  <a data-title="Delete Event" @click="deleteConfirm(cart_item,factory_product)"
                                         >
-          <font-awesome-icon
-            :icon="['fas', 'trash-alt']"/>
-        </a></td>
-      </tr>
+            <font-awesome-icon
+              :icon="['fas', 'trash-alt']"/>
+          </a></td>
+        </tr>
+      </template>
       </tbody>
     </table>
 
@@ -84,6 +86,10 @@ import {getReminderOptions} from "@/helpers/Helpers";
       }
       public editCartItem(cart_item:Record<any, any>) {
         console.log('cart_item',cart_item)
+      }
+
+      public deleteConfirm(cart_item:Record<any,any>,factory_product:Record<any,any>){
+        this.$emit("deleteCartItem",{cart_item:cart_item,factory_product:factory_product});
       }
 
     }

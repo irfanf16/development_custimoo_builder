@@ -72,7 +72,7 @@
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
-              <CartModal ref="cartModal" />
+              <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
               <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
@@ -205,6 +205,7 @@
         </template>
       </b-row>
     </b-container>
+    <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes" ref="delete-cart-item"></confirm-modal>
     <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
     <confirm-modal message="This will reset everything. All design changes will be lost.
  Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes"></confirm-modal>
@@ -525,6 +526,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
+  get cartItems() {
+    return this.$store.getters.getCartItems
+  }
   @Watch('customTexts', {
     deep: true
   })
@@ -667,6 +671,35 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }).catch((e: any) => {
       console.log(e)
     });
+  }
+  async deleteCartItem(item:Record<any,any>){
+    const response = await this.ref['delete-cart-item'].showConfirm();
+    if(response){
+      const url = `carts/cart-items/${item.cart_item.id}/factory_product/${item.factory_product.id}`
+      http.delete(url).then((response:Record<any,any>) => {
+        // const cart_item = this.cartItems.filter((cart_item:Record<any,any>) => {
+        //   return cart_item.id === item.cart_item.id;
+        // });
+        // const factory_products = cart_item.factory_products.filter((factory_pd:Record<any,any>) => {
+        //       return factory_pd.id !== item.factory_product.id;
+        // });
+        // cart_item.factory_products = factory_products;
+        // let cart_item_index = this.cartItems.findIndex(cart_item);
+        // this.cartItems[cart_item_index] = cart_item;
+
+        // this.$store.dispatch('addToCart',this.cartItems)
+        this.showToast(response.data.message, 'SUCCESS')
+        this.ref['cartModal'].hide();
+      }).catch((e:any)=>{
+        console.log(e);
+        // alert("Error Deleted");
+        this.showError(e);
+        this.ref['cartModal'].hide();
+      });
+    }
+    else{
+      alert('You pressed No');
+    }
   }
 
 
