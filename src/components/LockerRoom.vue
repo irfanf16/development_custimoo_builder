@@ -535,7 +535,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     if (res.status == 201){
       let room_ind = await this.lockers.findIndex((element:Record<any, any>) => element.id === this.copiedProductLockerId)
       this.$store.commit('UPDATE_COPY_COUNT', {room_ind: room_ind, id: this.copiedProductId})
-      this.ref['copy-product-modal'].hide()
+      this.$modal.hide('copy-product-modal')
       this.copiedProductId = 0
       this.copiedProductLockerId = this.lockers[0].id
       this.copiedProductName = ""
