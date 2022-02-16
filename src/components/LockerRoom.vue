@@ -251,7 +251,12 @@
                     ref="reset-modal"></confirm-modal>
 
     <span class="hover_tooltip" ref="hoover_tooltip"></span>
-    <modal ref="copy-product-modal" name="copy-product-modal" hide-footer @closed="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
+    <modal ref="copy-product-modal" name="copy-product-modal" hide-footer @closed="resetModal" class="lockerroom-modal create-lockerroom-modal" id="modal-center-copydesign" :scrollable="true" size="xl">
+      <div class="modal-header d-flex justify-content-between">
+        <span class="fs-3 font-weight-bold">Copy Design</span>
+        <span class="fs-4 font-weight-bold cursor-pointer modal-close" @click="$modal.hide('copy-product-modal')"><BIconX /></span>
+      </div>
+      <div class="modal-body">
         <div class="pt-4 design-name-form">
             <div>
 <!--                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Design Name</label>-->
@@ -277,6 +282,7 @@
 
           <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
         </div>
+      </div>
     </modal>
   </span>
 
@@ -519,6 +525,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
     this.copiedProductName = product.product_name + '(copy)'+(count == 1 || count == 0 ?  '' : count)
     this.$modal.show('copy-product-modal')
+  }
+  private closeModal(){
+    (this.$modal as Record<any, any>).hide('copy-product-modal')
   }
   public resetModal(){
     this.copiedProductId = 0
