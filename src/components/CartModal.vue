@@ -20,22 +20,24 @@
       </tr>
       </thead>
       <tbody>
-      <tr :key="cart_item.id" v-for="(cart_item) in cartItems">
-        <td><b-img style="width: 80px" thumbnail fluid :src="cart_item.front_image" alt="Front Design"></b-img>
-          <b-img style="width: 80px" thumbnail fluid :src="cart_item.back_image" alt="Back Design"></b-img>
+      <template v-for="(cart_item) in cartItems">
+        <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
+          <td><b-img style="width: 80px" thumbnail fluid :src="factory_product.front_image" alt="Front Design"></b-img>
+            <b-img style="width: 80px" thumbnail fluid :src="factory_product.back_image" alt="Back Design"></b-img>
 
-        </td>
-        <td>{{cart_item.roster_detail | itemQtyCount(cart_item.roster_detail)}}</td>
-        <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(cart_item)">
-          <font-awesome-icon
-            :icon="['fas', 'edit']"/>
-        </a></td>
-        <td class="cursor-pointer">  <a data-title="Delete Event"
+          </td>
+          <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>
+          <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id)">
+            <font-awesome-icon
+              :icon="['fas', 'edit']"/>
+          </a></td>
+          <td class="cursor-pointer">  <a data-title="Delete Event" @click="deleteConfirm(cart_item,factory_product)"
                                         >
-          <font-awesome-icon
-            :icon="['fas', 'trash-alt']"/>
-        </a></td>
-      </tr>
+            <font-awesome-icon
+              :icon="['fas', 'trash-alt']"/>
+          </a></td>
+        </tr>
+      </template>
       </tbody>
     </table>
 
@@ -52,10 +54,11 @@
 <script lang="ts">
 
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
-
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {getReminderOptions} from "@/helpers/Helpers";
+import {getReminderOptions, processColorsCustom} from "@/helpers/Helpers";
+import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
+import {findIndex} from "lodash";
     @Component<CartModal>({
         components: {},
       filters: {
@@ -70,7 +73,7 @@ import {getReminderOptions} from "@/helpers/Helpers";
         // this.getColors()
       }
     })
-    export default class CartModal extends Mixins(ErrorMessages) {
+    export default class CartModal extends Mixins(ErrorMessages, handleMainProducts) {
 
       public hide() {
         this.$modal.hide('cart-modal')
@@ -82,8 +85,119 @@ import {getReminderOptions} from "@/helpers/Helpers";
       get cartItems() {
         return this.$store.getters.getCartItems
       }
-      public editCartItem(cart_item:Record<any, any>) {
-        console.log('cart_item',cart_item)
+      public editCartItem(cart_item:Record<any, any>,cart_id:number) {
+
+        let self = this;
+        let is_customized = this.$store.getters.getCustomized
+        let is_personalized = this.$store.getters.getPersonalized
+        let lockerIndex: null | number = null;
+        let productIndex: null | number = null;
+        let locker_product: null | Record<any, any> = null;
+        // if(room_id) {
+        //   lockerIndex = await findIndex(this.getLockerProducts, {id: room_id});
+        //   productIndex = findIndex(this.getLockerProducts[lockerIndex].product, {id: room_product_id});
+        //   locker_product =  this.getLockerProducts[lockerIndex].product[productIndex];
+        // }
+        let url = "product_detail";
+        // let data = null;
+        // if(locker_product) {
+        //   data = {id: locker_product.id}
+        //   // url += `?id=${locker_product.id}`;
+        // } else {
+        //   data = {share_url: share_url}
+        //   // url += `?share_url=${share_url}`;
+        // }
+
+        http.get(url, {params: {id: cart_item.product_id}}).then(async (selected_product_detail) => {
+          let prod_res = selected_product_detail;
+          let locker_product_type = prod_res.data.product_type;
+          locker_product = prod_res.data;
+          // if(room_id) {
+          //   // @ts-ignore
+          //   Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
+          // }
+          this.$store.commit('UPDATE_ROSTER', cart_item.roster_detail)
+          this.$root.$emit('rostershared', '')
+          const designId = cart_item.design_id
+          const styleId = cart_item.style_id
+          const product_id = cart_item.product_id
+
+
+          //this.$store.commit('CHANGE_EDIT_STATUS', {id: locker_product?.id, status: true, designId: designId, styleId: styleId, product_id: product_id})
+
+
+          // const element = prod_res.data;
+          is_customized = locker_product_type == "customized" ? true: is_customized;
+          is_personalized = locker_product_type == "personalized" ? true : is_personalized;
+          let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${locker_product?.id}`;
+          await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id:locker_product.id});
+          console.log('aaaaaaaaaaaa',url)
+          await http.get(url).then(async (response: Record<any, any>) => {
+            console.log('response',response)
+            await (this as Record<any,any>).handleMainProducts(response);
+
+            let selected_product = this.$store.getters.getSelectedProduct;
+            let selectedIndex = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === cart_item.style_id);
+            await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
+            let customLogos = this.$store.getters.getCustomLogoObject
+            if(!customLogos[cart_item.product_id]) {
+              await this.$store.dispatch('setCustomObj', cart_item.product_id)
+            }
+
+            let logos = {
+              custom_logos: JSON.stringify(cart_item.custom_logos),
+              product_id:cart_item.product_id
+            }
+            let texts = {
+              text: JSON.stringify(cart_item.custom_texts),
+              product_id:cart_item.product_id
+            }
+            await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
+            await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', texts);
+            await this.$store.dispatch('overRideDefaultColors', cart_item.defaultcolors);
+            await this.$store.dispatch('overRideGroupColors', cart_item.groupcolors);
+            selected_product.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
+              if (item.id == cart_item.design_id) {
+                Vue.set(item, 'design_show', 1)
+                this.$store.dispatch('setSelectedProductDesignID', item.id)
+              } else {
+                Vue.set(item, 'design_show', 0)
+              }
+            });
+
+            //set logo colors
+            let logo_colors = []
+            if(!cart_item.colors && cart_item.custom_logos) {
+              //fetch from server
+              let logos = cart_item.custom_logos
+              if(logos.length > 0) {
+                let color_str:any = await this.fetchLogoColors(logos[0].id);
+                let image_colors = processColorsCustom(JSON.parse(color_str))
+                let image_color_count = image_colors.length;
+                while(image_color_count < 4 ) {
+                  image_colors.push({hex: null, pantone: null, name: null});
+                  ++image_color_count;
+                }
+                logo_colors = image_colors
+              }
+            }
+            else {
+              logo_colors = cart_item.colors
+            }
+            await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
+
+          })
+          await this.$store.dispatch('setProductType', {prd_type: locker_product_type, value: true});
+          await this.$store.dispatch('setEditCart', {key:'cartId',value:cart_id});
+          await this.$store.dispatch('setEditCart', {key:'cartItemId',value:cart_item.id});
+          this.hide()
+        }).catch(err => {
+          console.error("Error while getting order detail", err)
+        })
+      }
+
+      public deleteConfirm(cart_item:Record<any,any>,factory_product:Record<any,any>){
+        this.$emit("deleteCartItem",{cart_item:cart_item,factory_product:factory_product});
       }
 
     }
