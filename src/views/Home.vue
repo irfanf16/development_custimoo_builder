@@ -15,18 +15,21 @@
             <div class="customization-preview-process w-100">
               <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
-                  <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                  <template v-if="editCart.cartId < 1">
+                    <template v-if="isCustomerAuthenticated">
+                      <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                    </template>
+                    <template v-else>
+                      <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                    </template>
+                    <template v-if="isCustomerAuthenticated">
+                      <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
+                    </template>
+                    <template v-else>
+                      <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                    </template>
                   </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
-                  </template>
-                  <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
-                  </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
-                  </template>
+
                   <!-- <template v-if="isCustomerAuthenticated">
                     <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
                   </template>
@@ -396,6 +399,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get notifications(){
     return this.$store.getters.getNotifications
   }
+  get editCart(): Record<any, any> {
+    return this.$store.getters.getEditCart
+  }
   get lastRouteName() {
     let returnVal = '';
 
@@ -670,29 +676,16 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if(response){
       const url = `carts/cart-items/${item.cart_item.id}/factory_product/${item.factory_product.id}`
       http.delete(url).then(async (response:Record<any,any>) => {
-        // const cart_item = this.cartItems.filter((cart_item:Record<any,any>) => {
-        //   return cart_item.id === item.cart_item.id;
-        // });
-        // const factory_products = cart_item.factory_products.filter((factory_pd:Record<any,any>) => {
-        //       return factory_pd.id !== item.factory_product.id;
-        // });
-        // cart_item.factory_products = factory_products;
-        // let cart_item_index = this.cartItems.findIndex(cart_item);
-        // this.cartItems[cart_item_index] = cart_item;
-
-        // this.$store.dispatch('addToCart',this.cartItems)
-        await this.$store.dispatch('getCartServer', {})
+        await this.$store.dispatch('getCartServer', {});
+        if(this.cartItems && !this.cartItems.length){
+          this.ref['cartModal'].hide();
+        }
         this.showToast(response.data.message, 'SUCCESS')
-        this.ref['cartModal'].hide();
       }).catch((e:any)=>{
         console.log(e);
-        // alert("Error Deleted");
         this.showError(e);
         this.ref['cartModal'].hide();
       });
-    }
-    else{
-      alert('You pressed No');
     }
   }
 
