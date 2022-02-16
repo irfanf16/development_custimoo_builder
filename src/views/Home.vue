@@ -15,18 +15,21 @@
             <div class="customization-preview-process w-100">
               <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
-                  <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                  <template v-if="editCart.cartId < 1">
+                    <template v-if="isCustomerAuthenticated">
+                      <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                    </template>
+                    <template v-else>
+                      <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                    </template>
+                    <template v-if="isCustomerAuthenticated">
+                      <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
+                    </template>
+                    <template v-else>
+                      <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                    </template>
                   </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
-                  </template>
-                  <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
-                  </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
-                  </template>
+
                   <!-- <template v-if="isCustomerAuthenticated">
                     <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
                   </template>
@@ -395,6 +398,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   get notifications(){
     return this.$store.getters.getNotifications
+  }
+  get editCart(): Record<any, any> {
+    return this.$store.getters.getEditCart
   }
   get lastRouteName() {
     let returnVal = '';
