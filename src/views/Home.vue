@@ -670,29 +670,16 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if(response){
       const url = `carts/cart-items/${item.cart_item.id}/factory_product/${item.factory_product.id}`
       http.delete(url).then(async (response:Record<any,any>) => {
-        // const cart_item = this.cartItems.filter((cart_item:Record<any,any>) => {
-        //   return cart_item.id === item.cart_item.id;
-        // });
-        // const factory_products = cart_item.factory_products.filter((factory_pd:Record<any,any>) => {
-        //       return factory_pd.id !== item.factory_product.id;
-        // });
-        // cart_item.factory_products = factory_products;
-        // let cart_item_index = this.cartItems.findIndex(cart_item);
-        // this.cartItems[cart_item_index] = cart_item;
-
-        // this.$store.dispatch('addToCart',this.cartItems)
-        await this.$store.dispatch('getCartServer', {})
+        await this.$store.dispatch('getCartServer', {});
+        if(this.cartItems && !this.cartItems.length){
+          this.ref['cartModal'].hide();
+        }
         this.showToast(response.data.message, 'SUCCESS')
-        this.ref['cartModal'].hide();
       }).catch((e:any)=>{
         console.log(e);
-        // alert("Error Deleted");
         this.showError(e);
         this.ref['cartModal'].hide();
       });
-    }
-    else{
-      alert('You pressed No');
     }
   }
 
