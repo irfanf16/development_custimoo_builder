@@ -173,7 +173,7 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state, 'customized', payload.value)*/
     },
     SET_EDIT_CART(state: Record<any, any>, payload: Record<any, any>){
-      Vue.set(state,payload.key,payload.value)
+      Vue.set(state.editCart,payload.key,payload.value)
     },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
@@ -633,6 +633,11 @@ const ProductAttributes:Module<any, any> = {
         editStatus: false
       }
 
+      state.editCart = {
+        cartId: 0,
+        cartItemId: ''
+      }
+
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
         let arr:any = []
@@ -812,8 +817,8 @@ const ProductAttributes:Module<any, any> = {
     getEditLockerProduct: state => {
       return state.editLockerProduct
     },
-    getCartItemId: state => {
-      return state.cartItemId
+    getEditCart: state => {
+      return state.editCart
     },
     getNotifications: state => {
       return state.notifications

@@ -49,7 +49,7 @@
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <button  class="btn btn-secondary fw-bold w-100" @click="addToCart" v-if="!isLoading">{{cartItemId.length > 0 ? 'Update Item' : 'Add to Cart'}}</button>
+            <button  class="btn btn-secondary fw-bold w-100" @click="addToCart" v-if="!isLoading">{{editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}</button>
             <button  class="btn btn-secondary fw-bold w-100" :disabled="true" v-if="isLoading">
               <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
             </button>
@@ -122,8 +122,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-  get cartItemId(): Record<any, any> {
-    return this.$store.getters.getCartItemId
+  get editCart(): Record<any, any> {
+    return this.$store.getters.getEditCart
   }
 
   get rosterDetails(): [Record<any, any>] {
@@ -246,10 +246,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     if(order_detail.custom_logos.length > 0) {
       order_detail.custom_logos.forEach(function(logo:Record<any, any>){ delete logo.base64_logo });
     }
-
-
-
-    let post_data = {
+    this.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
+    this.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
+    let post_data:Record<any, any> = {
       factory_product:{
         style_id:product_style_id,
         design_id:product_design_id,
@@ -269,11 +268,21 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
         back_image: this.canvasImage.ref_back.toDataURL("image/png") ? this.canvasImage.ref_back.toDataURL("image/png") : null
       }
     }
+    if(this.$store.getters.getEditCart.cartId > 0) {
+      post_data.cart_item_id = this.$store.getters.getEditCart.cartId
+      post_data.factory_product_id = this.$store.getters.getEditCart.cartItemId
+    }
     http.post("carts", post_data).then((res: any) => {
       if (res.data.success == true){
-        this.showToast('Item Added in Cart', 'SUCCESS');
+        if(this.$store.getters.getEditCart.cartId > 0) {
+          this.showToast('Cart Item Updated', 'SUCCESS');
+        } else {
+          this.showToast('Item Added in Cart', 'SUCCESS');
+        }
         let api_res:Record<any, any> = res.data.result
         this.$store.dispatch('addToCart',api_res.items)
+        this.$store.dispatch('setEditCart', {key:'cartId',value:0});
+        this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
         this.isLoading = false;
       }else{
         if(res.data.status_code === 422){
