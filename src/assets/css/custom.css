@@ -390,7 +390,7 @@ button:focus, button:active {
 @media only screen and (min-width: 1360px) {
   .customization-tabs .nav-tabs .nav-link {
     font-size: 11px;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.7rem;
   }
 }
 @media only screen and (min-width: 1550px) {
@@ -591,7 +591,7 @@ button:focus, button:active {
   border-color: #219F84;
 }
 .customization-tabs .logo-placement-tabs .nav-tabs .nav-link .remove-logo {
-  top: -5px !important;
+  top: -5px;
   right: -10px;
 }
 .customization-tabs .logo-placement-tabs .logo-placement-holder {
@@ -623,6 +623,7 @@ button:focus, button:active {
   max-width: 100%;
   margin: 0 auto;
   height: auto;
+  width: auto;
   max-height: 100%;
 }
 .customization-tabs .logo-placement-tabs .logo-placement-holder .logo-holder .remove-img {
@@ -1821,7 +1822,6 @@ button:focus, button:active {
 #modal-center-addlockerroom,
 #modal-center-lockerroom {
   overflow-y: auto;
-  padding-left: 0 !important;
 }
 @media only screen and (max-width: 991px) {
   #modal-center-addlockerroom .modal-dialog,
@@ -2002,6 +2002,7 @@ button:focus, button:active {
   flex-basis: 33.3%;
   justify-content: center;
   margin-bottom: 20px;
+  align-items: center;
 }
 @media only screen and (min-width: 768px) {
   .lockerroom-modal .lockerroom-tabs .card .assets-file div {
@@ -2209,8 +2210,14 @@ button:focus, button:active {
 
 .slither-slider-slide .image-holder .canvas-container {
   height: 100px !important;
-  width: 70px !important;
+  width: 100px !important;
   margin: 0 auto;
+}
+@media (max-width: 1920px) {
+  .slither-slider-slide .image-holder .canvas-container {
+    height: 90px !important;
+    width: 90px !important;
+  }
 }
 .slither-slider-slide .image-holder .canvas-container .canvas {
   width: 100% !important;
@@ -3145,7 +3152,6 @@ button:focus, button:active {
   display: flex !important;
   align-items: start;
   justify-content: center;
-  padding-left: 0 !important;
 }
 .modal-fullscreen2 .modal {
   padding: 0 !important;
@@ -4313,8 +4319,16 @@ button:focus, button:active {
   box-shadow: 1px 4px 7px rgba(0, 0, 0, 0.1);
 }
 
-div p {
-  background: red;
+.slither-slider-slides {
+  height: auto !important;
+}
+
+#modal-center-lockerroom {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+#modal-center-lockerroom .modal-content.lockerroom-modal {
+  border: none !important;
 }
 
 /*# sourceMappingURL=custom.css.map */

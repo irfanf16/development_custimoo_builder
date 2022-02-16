@@ -9,7 +9,11 @@ const Cart:Module<any, any> = {
   },
   getters: {
     getCartItemsCount(state:Record<any, any>){
-      return state.cart_items.length;
+      let items_count = 0;
+      state.cart_items.forEach((cart_item:Record<any, any>) => {
+       items_count = items_count + cart_item.items_count
+      })
+      return items_count;
     },
     getCartItems(state:Record<any, any>){
       return state.cart_items;
