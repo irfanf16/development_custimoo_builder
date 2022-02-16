@@ -2121,29 +2121,30 @@ button:focus, button:active {
   border-top-color: #000;
 }
 
-.tooltip.b-tooltip.share-tooltip {
+.custom_popover {
   opacity: 1;
 }
-.tooltip.b-tooltip.share-tooltip .arrow:before {
+.custom_popover .arrow:before {
   border-bottom-color: #fff;
 }
-.tooltip.b-tooltip.share-tooltip .tooltip-inner {
+.custom_popover .tooltip-inner {
   background-color: #fff;
   max-width: 360px;
   padding: 1rem;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
 }
-.tooltip.b-tooltip.share-tooltip .share-holder h3 {
+.custom_popover .share-holder h3 {
   color: #000;
   font-size: 14px;
   font-weight: 600;
   margin: 0 0 10px;
   text-align: left;
 }
-.tooltip.b-tooltip.share-tooltip .share-holder .form-inline {
+.custom_popover .share-holder .form-inline {
   flex-wrap: nowrap;
+  align-items: stretch;
 }
-.tooltip.b-tooltip.share-tooltip .share-holder .form-inline .form-control {
+.custom_popover .share-holder .form-inline .form-control {
   margin: 0;
   background: #F0F0F0;
   color: #808895;
@@ -2153,22 +2154,25 @@ button:focus, button:active {
   z-index: 1;
 }
 @media only screen and (max-width: 767px) {
-  .tooltip.b-tooltip.share-tooltip .share-holder .form-inline .form-control {
+  .custom_popover .share-holder .form-inline .form-control {
     max-width: 180px;
   }
 }
-.tooltip.b-tooltip.share-tooltip .share-holder .form-inline .form-control:focus {
+.custom_popover .share-holder .form-inline .form-control:focus {
   outline: none;
   box-shadow: none;
 }
-.tooltip.b-tooltip.share-tooltip .share-holder .form-inline .btn {
+.custom_popover .share-holder .form-inline button {
   background: #219f84;
+  color: #fff;
+  white-space: nowrap;
+  border: none;
   font-size: 12px;
-  border-color: #219f84;
   margin-left: -0.75rem;
-  padding-left: 1.5rem;
+  padding-left: 1.2rem;
+  border-radius: 0 0.25rem 0.25rem 0;
 }
-.tooltip.b-tooltip.share-tooltip .share-holder .form-inline .btn:focus {
+.custom_popover .share-holder .form-inline button:focus {
   outline: none;
   box-shadow: none;
 }
@@ -4329,6 +4333,24 @@ button:focus, button:active {
 }
 #modal-center-lockerroom .modal-content.lockerroom-modal {
   border: none !important;
+}
+
+.vm--modal .modal-close {
+  opacity: 0.5;
+  transition: 0.2s all ease;
+}
+.vm--modal .modal-close:hover {
+  opacity: 1;
+}
+.vm--modal .modal-footer:empty {
+  display: none;
+}
+
+.custom_popover {
+  background: #fff;
+  padding: 0.7rem 1rem;
+  border-radius: 7px;
+  box-shadow: 1px 1px 11px rgba(0, 0, 0, 0.2);
 }
 
 /*# sourceMappingURL=custom.css.map */
