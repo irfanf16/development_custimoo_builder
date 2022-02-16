@@ -86,7 +86,11 @@ const ProductAttributes:Module<any, any> = {
     },
     editLockerProduct: [],
     notifications:[],
-    cartItemId:''
+    cartItemId:'',
+    editCart: {
+      cartId: 0,
+      cartItemId: ''
+    }
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -168,8 +172,8 @@ const ProductAttributes:Module<any, any> = {
       else
         Vue.set(state, 'customized', payload.value)*/
     },
-    SET_CART_ITEM_ID(state: Record<any, any>, payload: Record<any, any>){
-      state.cartItemId = payload
+    SET_EDIT_CART(state: Record<any, any>, payload: Record<any, any>){
+      Vue.set(state,payload.key,payload.value)
     },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
@@ -628,6 +632,7 @@ const ProductAttributes:Module<any, any> = {
         mainProductId: 0,
         editStatus: false
       }
+
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
         let arr:any = []
@@ -988,8 +993,8 @@ const ProductAttributes:Module<any, any> = {
     setProductType({commit}, payload) {
       commit('SET_PRODUCT_TYPE', payload)
     },
-    setCartItemId({commit}, payload) {
-      commit('SET_CART_ITEM_ID', payload)
+    setEditCart({commit}, payload) {
+      commit('SET_EDIT_CART', payload)
     },
     setCategories({commit}){
       const url = '/product/categories'

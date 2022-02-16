@@ -277,7 +277,7 @@ Vue.filter('formatDate', function(value:string) {
     // await this.retrieveProducts()
     await this.getFillColors()
 
-    await this.getCartItems()
+    await this.$store.dispatch('getCartServer', {})
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
       await this.$store.dispatch('getLockerRoomColors')
@@ -664,24 +664,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       console.log(e)
     });
   }
-  getCartItems() {
-    const url = '/carts/cart-items'
-    http.get(url).then((res: any) => {
-      let api_res:Record<any, any> = res.data.result
-      // let cart_items:Record<any, any>[] = []
-      // api_res.items.forEach((item:Record<any, any>) => {
-      //   cart_items.push(...item.factory_products)
-      // })
-      this.$store.dispatch('addToCart',api_res.items)
-    }).catch((e: any) => {
-      console.error(e)
-    });
-  }
+
   async deleteCartItem(item:Record<any,any>){
     const response = await this.ref['delete-cart-item'].showConfirm();
     if(response){
       const url = `carts/cart-items/${item.cart_item.id}/factory_product/${item.factory_product.id}`
-      http.delete(url).then((response:Record<any,any>) => {
+      http.delete(url).then(async (response:Record<any,any>) => {
         // const cart_item = this.cartItems.filter((cart_item:Record<any,any>) => {
         //   return cart_item.id === item.cart_item.id;
         // });
@@ -693,6 +681,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         // this.cartItems[cart_item_index] = cart_item;
 
         // this.$store.dispatch('addToCart',this.cartItems)
+        await this.$store.dispatch('getCartServer', {})
         this.showToast(response.data.message, 'SUCCESS')
         this.ref['cartModal'].hide();
       }).catch((e:any)=>{

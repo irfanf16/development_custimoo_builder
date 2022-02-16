@@ -171,7 +171,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
+    return this.$store.getters.getCustomLogos()
   }
 
   get customTexts(): [Record<any, any>] {
@@ -518,7 +518,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     let order_detail: { [key: string]: Record<any, any> } = {}
     order_detail.roster_detail = self.rosterDetails;
     order_detail.svg_groups = self.svgGroups;
-    order_detail.custom_texts = self.customTexts.filter((custom_text) => custom_text.text.length > 0);
+    order_detail.custom_texts = this.customTexts;
     order_detail.custom_logos = self.customLogos;
     if(self.$store.getters.getUsingColorLogos) {
       order_detail.logo_colors = self.logoColors

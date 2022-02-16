@@ -27,7 +27,7 @@
 
           </td>
           <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>
-          <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(cart_item,factory_product)">
+          <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id)">
             <font-awesome-icon
               :icon="['fas', 'edit']"/>
           </a></td>
@@ -85,8 +85,7 @@ import {findIndex} from "lodash";
       get cartItems() {
         return this.$store.getters.getCartItems
       }
-      public editCartItem(cart_item:Record<any, any>) {
-        console.log('cart_item',cart_item)
+      public editCartItem(cart_item:Record<any, any>,cart_id:number) {
 
         let self = this;
         let is_customized = this.$store.getters.getCustomized
@@ -149,8 +148,12 @@ import {findIndex} from "lodash";
               custom_logos: JSON.stringify(cart_item.custom_logos),
               product_id:cart_item.product_id
             }
+            let texts = {
+              text: JSON.stringify(cart_item.custom_texts),
+              product_id:cart_item.product_id
+            }
             await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
-            await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', {text:JSON.stringify(cart_item.custom_texts)});
+            await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', texts);
             await this.$store.dispatch('overRideDefaultColors', cart_item.defaultcolors);
             await this.$store.dispatch('overRideGroupColors', cart_item.groupcolors);
             selected_product.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
@@ -185,7 +188,8 @@ import {findIndex} from "lodash";
 
           })
           await this.$store.dispatch('setProductType', {prd_type: locker_product_type, value: true});
-          await this.$store.dispatch('setCartItemId', 'yooo');
+          await this.$store.dispatch('setEditCart', {key:'cartId',value:cart_id});
+          await this.$store.dispatch('setEditCart', {key:'cartItemId',value:cart_item.id});
           this.hide()
         }).catch(err => {
           console.error("Error while getting order detail", err)
