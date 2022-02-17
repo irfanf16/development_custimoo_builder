@@ -224,7 +224,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     })
   }
   public async editToCart(){
-      alert('Edit To Cart');
     this.isLoading = true;
     let style_index = this.$store.getters.getCurrentStyleIndex;
     let selected_product = this.$store.getters.getSelectedProduct;
@@ -292,7 +291,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     })
   }
   public async addToCart() {
-    alert('Add to Cart');
     this.isLoading = true;
     let style_index = this.$store.getters.getCurrentStyleIndex;
     let selected_product = this.$store.getters.getSelectedProduct;
