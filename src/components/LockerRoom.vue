@@ -282,6 +282,7 @@
                       <div v-else>
                         <YearlyPlanner @edit-event="editEvent"
                                        @init-event-contacts="initEventContacts"
+                                       @open-event-modal="openEventModal"
                                        @getLockerEvents="getLockerEvents(room.id)"
                                        @show-contact-modal="showContactPopup"
                                        :room_id="room.id" :room_index="i" :key="room.id"
@@ -317,7 +318,7 @@
   </b-tabs>
 
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
-                    ref="reset-modal"></confirm-modal>
+                    ref="reset-confirm-modal" name=""></confirm-modal>
 
     <span class="hover_tooltip" ref="hoover_tooltip"></span>
     <modal ref="copy-product-modal" name="copy-product-modal" hide-footer @closed="resetModal" class="lockerroom-modal create-lockerroom-modal" id="modal-center-copydesign" :scrollable="true" size="xl">
@@ -488,7 +489,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public showConfirm() {
-    this.ref['reset-modal'].showConfirm()
+    this.ref['reset-confirm-modal'].showConfirm()
   }
 
   public collectionData = {}
@@ -616,7 +617,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     if (res.status == 201){
       let room_ind = await this.lockers.findIndex((element:Record<any, any>) => element.id === this.copiedProductLockerId)
       this.$store.commit('UPDATE_COPY_COUNT', {room_ind: room_ind, id: this.copiedProductId})
-      this.ref['copy-product-modal'].hide()
+      this.$modal.hide('copy-product-modal')
       this.copiedProductId = 0
       this.copiedProductLockerId = this.lockers[0].id
       this.copiedProductName = ""
@@ -708,7 +709,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public async deleteProduct(i: number, ind: number, id: number) {
-    const ok = await this.ref['reset-modal'].showConfirm()
+    const ok = await this.ref['reset-confirm-modal'].showConfirm()
     if (ok) {
       let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id: id});
       if (res == true) {
@@ -722,7 +723,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public async deleteCollection(id: number, index: number) {
     try {
-      const ok = await this.ref['reset-modal'].showConfirm()
+      const ok = await this.ref['reset-confirm-modal'].showConfirm()
       if (ok) {
         let res = await this.$store.dispatch('deleteCollection', {id: id, index: index});
         this.showToast(res.data.message, 'SUCCESS');
@@ -1010,7 +1011,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public async deletePlanner(locker_room_id:number, index:number){
     try {
-      const ok = await this.ref['reset-modal'].showConfirm()
+      const ok = await this.ref['reset-confirm-modal'].showConfirm()
       if (ok) {
         let payload = {locker_id: locker_room_id, index};
         this.viewLoader = true
@@ -1052,6 +1053,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
      this.viewLoader = true
     let res = await this.$store.dispatch('getLockerEvents',room_id)
      this.viewLoader = false
+  }
+  public openEventModal(status:boolean){
+    this.ref['eventmodal'].showEventModal()
   }
   public setEventProduct(id:number, url:string, name:string){
     this.ref['eventmodal'].setEventProduct(id, url, name)

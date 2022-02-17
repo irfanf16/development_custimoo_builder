@@ -40,7 +40,7 @@
 
                 <ul class="preview-header-icons">
                   <li class="d-flex flex-wrap align-items-center">
-                    <b-button v-if="!isCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
+                    <b-button v-if="!isCustomerAuthenticated" @click="$modal.show('loginModal')"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                     <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                   </li>
@@ -208,10 +208,10 @@
         </template>
       </b-row>
     </b-container>
-    <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes" ref="delete-cart-item"></confirm-modal>
-    <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
+    <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes" name="delete-cart-item" ref="delete-cart-item"></confirm-modal>
+    <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" name="reset-modal" ref="reset-modal"></confirm-modal>
     <confirm-modal message="This will reset everything. All design changes will be lost.
- Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes"></confirm-modal>
+ Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes" name="reset-changes"></confirm-modal>
   </div>
 </template>
 
