@@ -168,6 +168,7 @@ export default {
 * {
   touch-action: manipulation;
 }
+@import '~vue-popperjs/dist/vue-popper.css';
 @import '~bootstrap/dist/css/bootstrap.css';
 @import '~bootstrap-vue/dist/bootstrap-vue.css';
 @import '~pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';

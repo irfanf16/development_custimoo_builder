@@ -62,32 +62,101 @@
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
-                          <b-button v-if="mobileScreen" data-title="Share design" :id="'share'+i+''+ind"
-                                    @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
-                            :icon="['fas', 'share-alt']"/></b-button>
-                          <b-button v-else-if="isSafari" data-title="Share design" :id="'share'+i+''+ind"
-                                    @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
-                            :icon="['fas', 'share-alt']"/></b-button>
-                          <b-button v-else data-title="Share design" :id="'share'+i+''+ind"
-                                    @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"
-                                    @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
-                            :icon="['fas', 'share-alt']"/></b-button>
-                          <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom"
-                                     triggers="focus">
-                            <div class="share-holder">
-                              <h3>Copy link
-                                ..and Share</h3>
-                              <div class="share-form">
-                                <b-form inline>
-                                  <b-form-input :id="'copy-'+ind"
-                                                :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+                          <popper
+                            v-if="mobileScreen"
+                            trigger="clickToOpen"
+                            :stop-propagation="true"
+                            :options="{
+                                placement: 'bottom',
+                              }">
+                            <span class="custom_popover popper" ref="hoover_popover">
+                              <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                  <b-form inline>
+                                    <b-form-input :id="'copy-'+ind"
+                                                  :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
-                                  ></b-form-input>
-                                  <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
-                                </b-form>
+                                    ></b-form-input>
+                                    <button @click="copyLink(product, ind)" type="button">Copy Link</button>
+                                  </b-form>
+                                </div>
                               </div>
-                            </div>
-                          </b-tooltip>
+                            </span>
+                            <b-button data-title="Share design" :id="'share'+i+''+ind" slot="reference"
+                                      @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
+                              :icon="['fas', 'share-alt']"/>
+                            </b-button>
+                          </popper>
+                          <popper
+                            v-else-if="isSafari"
+                            trigger="clickToOpen"
+                            :stop-propagation="true"
+                            :options="{
+                                placement: 'bottom',
+                              }">
+                            <span class="custom_popover popper" ref="hoover_popover">
+                              <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                  <b-form inline>
+                                    <b-form-input :id="'copy-'+ind"
+                                                  :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+
+                                    ></b-form-input>
+                                    <button @click="copyLink(product, ind)" type="button">Copy Link</button>
+                                  </b-form>
+                                </div>
+                              </div>
+                            </span>
+                            <b-button data-title="Share design" :id="'share'+i+''+ind" slot="reference"
+                                      @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
+                              :icon="['fas', 'share-alt']"/>
+                            </b-button>
+                          </popper>
+                          <popper
+                            v-else
+                            trigger="clickToOpen"
+                            :stop-propagation="true"
+                            :options="{
+                                placement: 'bottom',
+                              }">
+                            <span class="custom_popover popper" ref="hoover_popover">
+                              <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                  <b-form inline>
+                                    <b-form-input :id="'copy-'+ind"
+                                                  :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+
+                                    ></b-form-input>
+                                    <button @click="copyLink(product, ind)" type="button">Copy Link</button>
+                                  </b-form>
+                                </div>
+                              </div>
+                            </span>
+                            <b-button data-title="Share design" :id="'share'+i+''+ind" slot="reference"
+                                      @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"
+                                      @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
+                              :icon="['fas', 'share-alt']"/>
+                            </b-button>
+                          </popper>
+<!--                          <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom"-->
+<!--                                     triggers="focus">-->
+<!--                            <div class="share-holder">-->
+<!--                              <h3>Copy link-->
+<!--                                ..and Share</h3>-->
+<!--                              <div class="share-form">-->
+<!--                                <b-form inline>-->
+<!--                                  <b-form-input :id="'copy-'+ind"-->
+<!--                                                :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"-->
+
+<!--                                  ></b-form-input>-->
+<!--                                  <buttonclick="copyLink(product, ind) ">Copy Link</b-button>-->
+<!--                                </b-form>-->
+<!--                              </div>-->
+<!--                            </div>-->
+<!--                          </b-tooltip>-->
                         </li>
                         <li v-if="!getSelectionMode.readonly">
                           <a  @click="showDesignModal(product)">
@@ -309,6 +378,8 @@ import {processColorsCustom} from "../helpers/Helpers"
 import {differenceBy, intersectionBy, union, includes} from 'lodash';
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
+import Popper from 'vue-popperjs';
+import 'vue-popperjs/dist/vue-popper.css';
 
 @Component<LockerRoom>({
   components: {
@@ -320,6 +391,7 @@ import ContactModal from "@/components/ContactModal.vue";
     YearlyPlanner,
     EventModal,
     ContactModal,
+    Popper,
     draggable
   },
   mounted() {
