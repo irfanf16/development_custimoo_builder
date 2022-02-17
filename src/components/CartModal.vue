@@ -79,14 +79,12 @@ import {findIndex} from "lodash";
         this.$modal.hide('cart-modal')
       }
       public show() {
-        console.log('here')
         this.$modal.show('cart-modal')
       }
       get cartItems() {
         return this.$store.getters.getCartItems
       }
       public editCartItem(cart_item:Record<any, any>,cart_id:number) {
-
         let self = this;
         let is_customized = this.$store.getters.getCustomized
         let is_personalized = this.$store.getters.getPersonalized
@@ -131,9 +129,7 @@ import {findIndex} from "lodash";
           is_personalized = locker_product_type == "personalized" ? true : is_personalized;
           let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${locker_product?.id}`;
           await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id:locker_product.id});
-          console.log('aaaaaaaaaaaa',url)
           await http.get(url).then(async (response: Record<any, any>) => {
-            console.log('response',response)
             await (this as Record<any,any>).handleMainProducts(response);
 
             let selected_product = this.$store.getters.getSelectedProduct;
