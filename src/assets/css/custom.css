@@ -4331,4 +4331,15 @@ button:focus, button:active {
   border: none !important;
 }
 
+.vm--modal .modal-close {
+  opacity: 0.5;
+  transition: 0.2s all ease;
+}
+.vm--modal .modal-close:hover {
+  opacity: 1;
+}
+.vm--modal .modal-footer:empty {
+  display: none;
+}
+
 /*# sourceMappingURL=custom.css.map */
