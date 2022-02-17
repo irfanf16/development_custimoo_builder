@@ -8,7 +8,7 @@
     "build:staging": "vue-cli-service build --mode staging",
     "sass-compile": "sass src/assets/scss/custom.scss src/assets/css/custom.css",
     "generate-component": "vue-cli-service build --mode staging --dest ../santa_customizer --target wc --name v-customizer ./src/webComponents/Customizer.vue && npm run sass-compile",
-    "build:wc:customizer:staging":"concurrently npm:sass-compile npm:generate-component",
+    "build:wc:customizer:staging": "concurrently npm:sass-compile npm:generate-component",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -52,6 +52,7 @@
     "vue-color": "^2.8.1",
     "vue-echo-laravel": "^0.1.0",
     "vue-js-modal": "^2.0.1",
+    "vue-popperjs": "^2.3.0",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.2.0",
     "vue-socket.io": "^3.0.10",
