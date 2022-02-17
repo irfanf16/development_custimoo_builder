@@ -64,7 +64,7 @@ import {findIndex} from "lodash";
       filters: {
         itemQtyCount: (value: Record<any, any>) => {
           if(value.length > 0) {
-            return value.reduce((a, b) => a + (b['quantity'] || 0), 0);
+            return value.reduce((a:Record<any, any>, b:Record<any, any>) => a + (b['quantity'] || 0), 0);
           }
           return 0
         }

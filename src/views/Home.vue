@@ -280,10 +280,11 @@ Vue.filter('formatDate', function(value:string) {
     // await this.retrieveProducts()
     await this.getFillColors()
 
-    await this.$store.dispatch('getCartServer', {})
+
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
       await this.$store.dispatch('getLockerRoomColors')
+      await this.$store.dispatch('getCartServer', {})
     }
     if (this.$route.params.name) {
       this.showLoader = true
@@ -477,7 +478,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.ref['collectionModal'].editCollectionModal()
   }
   public openCartModal = () =>{
-    this.ref.cartModal.show()
+    if(this.cartItemsCount > 0) {
+      this.ref.cartModal.show()
+    }
+
   }
   public getPath(){
     let url = ''
