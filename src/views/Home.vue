@@ -217,7 +217,7 @@
 
 <script lang="ts">
 
-import {Component, Prop, Mixins, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
@@ -378,14 +378,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private isFront = true
   private switchTabs (e:Record<any, any>){
     this.ref['custom-mobile-tabs'].hideOtherTab()
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let that = this;
+    let self = this;
     $(".sideNav li a").removeClass('active')
     // e.target.classes.push('active');
     e.currentTarget.classList.add('active');
     $(".sideNav li a").each(function (index){
       if($(this).hasClass('active')){
-        that.$store.dispatch('setActiveTab', index);
+        self.$store.dispatch('setActiveTab', index);
       }
     })
   }

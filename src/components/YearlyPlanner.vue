@@ -327,7 +327,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     .event_day{
       position: relative;
       display: inline-flex;
-      align-items: start;
+      align-items: flex-start;
       justify-content: center;
       height: 22px;
       width: 22px;
