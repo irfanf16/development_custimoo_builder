@@ -47,6 +47,7 @@
 
       </div>
     </template>
+    <b-button @click="createOrder">create Order</b-button>
   </modal>
 
 </template>
@@ -83,6 +84,10 @@ import {findIndex} from "lodash";
       }
       get cartItems() {
         return this.$store.getters.getCartItems
+      }
+      public createOrder(){
+        const res  = this.$store.dispatch('createOrder')
+        console.log(res)
       }
       public editCartItem(cart_item:Record<any, any>,cart_id:number) {
         let self = this;
