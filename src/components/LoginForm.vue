@@ -193,6 +193,7 @@
           await this.$store.dispatch('getLockers')
           await this.$store.dispatch('getNotifications')
           await  this.$store.dispatch('permissions')
+          await this.$store.dispatch('getCartServer', {})
           this.email = ''
           this.password = ''
           this.$modal.hide('loginModal');
