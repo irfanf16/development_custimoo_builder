@@ -87,6 +87,7 @@ import {findIndex} from "lodash";
         return this.$store.getters.getCartItems
       }
       public createOrder(){
+        this.viewLoader = true;
         http.post('order', {}).then((res:Record<any, any>) => {
           if (res.data.success){
             this.$store.dispatch('addToCart',[])
@@ -100,7 +101,7 @@ import {findIndex} from "lodash";
           }
         }).catch((err:any) => {
           this.viewLoader = false
-          this.showError(err)
+          this.showErrorArr(err.response.data.errors)
         });
       }
       public editCartItem(cart_item:Record<any, any>,cart_id:number) {
