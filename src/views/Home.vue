@@ -67,7 +67,7 @@
                       <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                     </a>
                   </li>
-                  <li>
+                  <li v-if="isCustomerAuthenticated">
                     <a  class="icon mr-0" @click="openOrdersModal">
                       <font-awesome-icon :icon="['fas', 'cart-arrow-down']" />
                     </a>
@@ -85,7 +85,7 @@
               <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
               <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
               <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
-              <OrderListing ref="orderlisting"/>
+              <OrderListing   ref="orderlisting"/>
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                 <div>
                   <b-button variant="outline-secondary mr-2" :disabled="undoItems.length < 1" @click="undoAction"><span class="d-sm-block d-none">Undo</span><span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span></b-button>
@@ -488,7 +488,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.ref.cartModal.show()
     }
   }
-  public openOrdersModal(){
+  public async openOrdersModal(){
     this.ref['orderlisting'].showOdersPopup()
   }
   public getPath(){
@@ -959,13 +959,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 </script>
 
 <style lang="scss" scoped>
-.page-wrapper {
-  @media only screen and (min-width: 992px) {
-    border: 1px solid #dee2e6;
-    background: #fff;
-  }
-}
-
 .home-color-area {
   @media only screen and (min-width: 992px) {
     padding-bottom: 12rem !important;
@@ -1454,5 +1447,4 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 }
-
 </style>
