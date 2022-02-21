@@ -1260,6 +1260,10 @@ const ProductAttributes:Module<any, any> = {
         }
         return res
       })
+    },
+    async createOrder({commit}){
+     const res = await http.post('order', {});
+     return res
     }
 
   }

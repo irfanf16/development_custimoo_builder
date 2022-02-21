@@ -1,21 +1,38 @@
 <template>
   <div>
     <div class="d-flex gap-2">
-      <b-button class="d-none d-lg-block" v-b-modal.modal-scrollable>Edit Roster</b-button>
+      <b-button class="d-none d-lg-block" @click="show">Edit Roster</b-button>
       <button class="btn btn-secondary light" v-if="isCustomerAuthenticated" @click="shareRoster">Share roster url</button>
     </div>
 
-    <b-modal id="modal-scrollable" scrollable title="Roster" content-class="roster-modal" size="xl"
+    <modal id="modal-scrollable" :width="screenWidth"
+           :resizable="true"
+           :scrollable="true"
+           height="auto"
+           :reset="true"
+           :shiftY="0"
+           name="rostermodal"  title="Roster" class="roster-modal" size="xl"
              footer-class="hide-modal-footer d-none">
-      <div class="d-flex flex-wrap justify-content-between">
-        <RosterDetails :productSizes="sizeOptions" @addPlayer="rosterDetailsInit"/>
-        <div class="roster-preview-area">
-          <CustomizationPreview :designs="products[designsIndex]"/>
-<!--          <OrderDetails/>-->
+      <div class="modal-header d-flex justify-content-between">
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex flex-wrap justify-content-between">
+          <RosterDetails :productSizes="sizeOptions" ref="rostermodal" @addPlayer="rosterDetailsInit"/>
+          <div class="roster-preview-area">
+            <CustomizationPreview :designs="products[designsIndex]"/>
+  <!--          <OrderDetails/>-->
+          </div>
         </div>
       </div>
-    </b-modal>
-    <b-modal ref="myModal" content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered scrollable size="lg" title="Upload Team Roster">
+    </modal>
+    <modal :width="screenWidth"
+           :resizable="true"
+           :scrollable="true"
+           height="auto"
+           :reset="true"
+           :shiftY="0" name="rosterfilemodal"  content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered  size="lg" title="Upload Team Roster">
+      <div class="modal-body">
       <p class="mb-4">The Team Roster can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
       <div class="roster-template-area">
         <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download Roster Template <a  v-b-tooltip.hover
@@ -29,7 +46,8 @@
             <font-awesome-icon :icon="['fas', 'info-circle']"/>
           </a></b-button>
       </div>
-    </b-modal>
+      </div>
+    </modal>
 
     <div class="d-lg-none">
       <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>
@@ -76,7 +94,7 @@ export default class EditRosterAreaTab extends Vue {
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
-
+  private screenWidth = (window.screen.availWidth - 100)
   public shareRoster(){
     this.ref['order-details'].getLockers();
   }
@@ -111,6 +129,12 @@ export default class EditRosterAreaTab extends Vue {
       .catch((e: any) => {
         console.log(e)
       });
+  }
+  public show(){
+    this.$modal.show('rostermodal')
+  }
+  public hide(){
+    this.$modal.hide('rostermodal')
   }
 
   public rosterDetailsInit() {
@@ -216,11 +240,12 @@ export default class EditRosterAreaTab extends Vue {
           }
         }
         if (loopStatus == true){
+          console.log(loopStatus)
           this.$store.dispatch('updateRoster', this.fileData);
-          this.ref['myModal'].hide();
+          this.$modal.hide('rosterfilemodal');
         }else{
           alert('Size is missing');
-          this.ref['myModal'].hide();
+          this.$modal.hide('rosterfilemodal');
         }
       }else{
         alert("please upload a valid file");

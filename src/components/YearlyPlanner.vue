@@ -233,14 +233,13 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
 
   public showEventPopup(selected_month:number){
     const room_index = this.$store.getters.getLockerTabsIndex;
-    this.$store.commit('SHOW_EVENT_POPUP', true)
     this.$store.commit('SET_LOCKER_INDEX_FOR_EVENT', room_index)
     this.$emit('init-event-contacts', selected_month);
+    this.$emit('open-event-modal', true);
   }
 
   public showContactPopup(){
     this.$emit('show-contact-modal',this.room_id, this.room_index);
-
    }
   public openYearModal(){
     this.ref['selectYearModal'].showPopup()
@@ -328,7 +327,7 @@ export default class YearlyPlanner extends Mixins(ErrorMessages) {
     .event_day{
       position: relative;
       display: inline-flex;
-      align-items: start;
+      align-items: flex-start;
       justify-content: center;
       height: 22px;
       width: 22px;

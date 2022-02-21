@@ -2039,59 +2039,7 @@ button{
         &:before{border-top-color: #000;}
     }
 }
-//.tooltip.b-tooltip.share-tooltip{
-//    .arrow{
-//        &:before{border-bottom-color: #fff;}
-//    }
-//    opacity: 1;
-//    .tooltip-inner{
-//        background-color: #fff;
-//        max-width: 360px;
-//        padding: 1rem;
-//        box-shadow: 0 0 8px rgba(0,0,0,0.2);
-//    }
-//    .share-holder{
-//        h3{
-//            color: #000;
-//            font-size: 14px;
-//            font-weight: 600;
-//            margin: 0 0 10px;
-//            text-align: left;
-//        }
-//        .form-inline{
-//            flex-wrap: nowrap;
-//
-//            .form-control{
-//                margin: 0;
-//                background: #F0F0F0;
-//                color: #808895;
-//                font-size: 12px;
-//                padding-right: 1.5rem;
-//                position: relative;
-//                z-index: 1;
-//                @media only screen and (max-width: 767px){
-//                    max-width: 180px;
-//                }
-//                &:focus{
-//                    outline: none;
-//                    box-shadow: none;
-//                }
-//            }
-//            .btn{
-//                background: #219f84;
-//                font-size: 12px;
-//                border-color: #219f84;
-//                margin-left: -0.75rem;
-//                padding-left: 1.5rem;
-//                &:focus{
-//                    outline: none;
-//                    box-shadow: none;
-//                }
-//            }
-//        }
-//    }
-//}
-.custom_popover{
+.tooltip.b-tooltip.share-tooltip{
     .arrow{
         &:before{border-bottom-color: #fff;}
     }
@@ -2112,7 +2060,6 @@ button{
         }
         .form-inline{
             flex-wrap: nowrap;
-            align-items: stretch;
 
             .form-control{
                 margin: 0;
@@ -2130,15 +2077,12 @@ button{
                     box-shadow: none;
                 }
             }
-            button{
+            .btn{
                 background: #219f84;
-                color: #fff;
-                white-space: nowrap;
-                border: none;
                 font-size: 12px;
+                border-color: #219f84;
                 margin-left: -0.75rem;
-                padding-left: 1.2rem;
-                border-radius: 0 0.25rem 0.25rem 0;
+                padding-left: 1.5rem;
                 &:focus{
                     outline: none;
                     box-shadow: none;
@@ -2965,7 +2909,7 @@ $fontSize: 0.5;
 
 .modal-fullscreen2 {
     display: flex !important;
-    align-items: start;
+    align-items: flex-start;
     justify-content: center;
     //padding-left: 0 !important;
     //padding-top: 60px;
@@ -4460,11 +4404,4 @@ $fontSize: 0.5;
     .modal-footer:empty{
         display: none;
     }
-}
-
-.custom_popover{
-    background: #fff;
-    padding: 0.7rem 1rem;
-    border-radius: 7px;
-    box-shadow: 1px 1px 11px rgba(0,0,0,0.2);
 }

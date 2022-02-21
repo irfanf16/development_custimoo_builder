@@ -45,7 +45,7 @@ import {
   faTrashAlt,
   faTshirt,
   faUserFriends,
-  faUserSecret, faSignOutAlt, faBell
+  faUserSecret, faSignOutAlt, faBell, faCartArrowDown
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
@@ -58,6 +58,7 @@ library.add(faRedoAlt)
 library.add(faTimes)
 library.add(faImage)
 library.add(faFillDrip)
+library.add(faCartArrowDown)
 library.add(faTextHeight)
 library.add(faSwatchbook)
 library.add(faUserFriends)
@@ -83,9 +84,8 @@ library.add(faSignOutAlt)
 library.add(faDiceTwo)
 library.add(faBell)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
-import VModal from 'vue-js-modal/dist/index.nocss.js'
+import VModal from 'vue-js-modal'
 Vue.use(VModal)
-
 import Echo from "laravel-echo";
 window.io = require('socket.io-client');
 window.Echo = new Echo({

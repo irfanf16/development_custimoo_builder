@@ -49,8 +49,8 @@
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <button  class="btn btn-secondary fw-bold w-100" v-on="editCart.cartId > 0 ? { click: editToCart } : { click: addToCart }" v-if="!isLoading">{{editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}</button>
-            <button  class="btn btn-secondary fw-bold w-100" :disabled="true" v-if="isLoading">
+            <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" >{{editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}</button>
+            <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
               <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
             </button>
           </template>
@@ -223,141 +223,85 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       }
     })
   }
-  public async editToCart(){
-      alert('Edit To Cart');
-    this.isLoading = true;
-    let style_index = this.$store.getters.getCurrentStyleIndex;
-    let selected_product = this.$store.getters.getSelectedProduct;
-    const product_id = selected_product.product_id;
-    let product_style = selected_product.productstyles[style_index];
-    const product_style_id = product_style.id;
-    let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
-    const product_design_id = selectedDesign[0].id;
-    let product_models = this.$store.getters.getProductModels;
-    let selected_model_index = this.$store.getters.getSelectedModelIndex;
 
-    let product_model_id = 0;
-    if(product_models.length > 0) {
-      const selected_model = product_models[selected_model_index];
-      product_model_id = selected_model.id;
-    }
-    let order_detail = await this.getOrderDetail();
-    //remove base64 key from logos array
-    if(order_detail.custom_logos.length > 0) {
-      order_detail.custom_logos.forEach(function(logo:Record<any, any>){ delete logo.base64_logo });
-    }
-    this.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
-    this.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
-    const cart_item_id = this.$store.getters.getEditCart.cartId
-    const factory_product_id = this.$store.getters.getEditCart.cartItemId
-    let post_data:Record<any, any> = {
-      factory_product:{
-        id: factory_product_id,
-        style_id:product_style_id,
-        design_id:product_design_id,
-        model_id:product_model_id,
-        product_id:product_id,
-        svg_groups: order_detail.svg_groups?order_detail.svg_groups:[],
-        custom_logos: order_detail.custom_logos?order_detail.custom_logos:[],
-        custom_texts: order_detail.custom_texts?order_detail.custom_texts:[],
-        roster_detail: order_detail.roster_detail?order_detail.roster_detail:[],
-        custom_logo_svgs: order_detail.custom_logo_svgs?order_detail.custom_logo_svgs:[],
-        custom_text_svgs: order_detail.custom_text_svgs?order_detail.custom_text_svgs:[],
-        pdf_file:null,
-        defaultcolors: this.defaultColors,
-        groupcolors: this.groupColors,
-        colors:this.$store.getters.getLogosColors,
-        front_image: this.canvasImage.ref_front.toDataURL("image/png") ? this.canvasImage.ref_front.toDataURL("image/png") : null,
-        back_image: this.canvasImage.ref_back.toDataURL("image/png") ? this.canvasImage.ref_back.toDataURL("image/png") : null
-      }
-    }
-    http.post(`carts/cart-items/${cart_item_id}/factory_product/${factory_product_id}`, post_data).then((res: any) => {
-      if (res.data.success == true){
-        this.showToast('Cart Item Updated', 'SUCCESS');
-        let api_res:Record<any, any> = res.data.result
-        this.$store.dispatch('addToCart',api_res.items)
-        this.$store.dispatch('setEditCart', {key:'cartId',value:0});
-        this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
-        this.isLoading = false;
-      }else{
-        if(res.data.status_code === 422){
-          this.showErrorValidation(res.data.errors);
-          this.isLoading = false;
-        }
-        else{
-          this.showError(res);
-          this.isLoading = false;
-        }
-      }
-    })
-  }
   public async addToCart() {
-    alert('Add to Cart');
-    this.isLoading = true;
-    let style_index = this.$store.getters.getCurrentStyleIndex;
-    let selected_product = this.$store.getters.getSelectedProduct;
-    const product_id = selected_product.product_id;
-    let product_style = selected_product.productstyles[style_index];
-    const product_style_id = product_style.id;
-    let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
-    const product_design_id = selectedDesign[0].id;
-    let product_models = this.$store.getters.getProductModels;
-    let selected_model_index = this.$store.getters.getSelectedModelIndex;
+    try {
+      this.isLoading = true;
+      let style_index = this.$store.getters.getCurrentStyleIndex;
+      let selected_product = this.$store.getters.getSelectedProduct;
+      const product_id = selected_product.product_id;
+      let product_style = selected_product.productstyles[style_index];
+      const product_style_id = product_style.id;
+      let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
+      const product_design_id = selectedDesign[0].id;
+      let product_models = this.$store.getters.getProductModels;
+      let selected_model_index = this.$store.getters.getSelectedModelIndex;
 
-    let product_model_id = 0;
-    if(product_models.length > 0) {
-      const selected_model = product_models[selected_model_index];
-      product_model_id = selected_model.id;
-    }
-    let order_detail = await this.getOrderDetail();
-    //remove base64 key from logos array
-    if(order_detail.custom_logos.length > 0) {
-      order_detail.custom_logos.forEach(function(logo:Record<any, any>){ delete logo.base64_logo });
-    }
-    this.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
-    this.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
-    let post_data:Record<any, any> = {
-      factory_product:{
-        style_id:product_style_id,
-        design_id:product_design_id,
-        model_id:product_model_id,
-        product_id:product_id,
-        svg_groups: order_detail.svg_groups?order_detail.svg_groups:[],
-        custom_logos: order_detail.custom_logos?order_detail.custom_logos:[],
-        custom_texts: order_detail.custom_texts?order_detail.custom_texts:[],
-        roster_detail: order_detail.roster_detail?order_detail.roster_detail:[],
-        custom_logo_svgs: order_detail.custom_logo_svgs?order_detail.custom_logo_svgs:[],
-        custom_text_svgs: order_detail.custom_text_svgs?order_detail.custom_text_svgs:[],
-        pdf_file:null,
-        defaultcolors: this.defaultColors,
-        groupcolors: this.groupColors,
-        colors:this.$store.getters.getLogosColors,
-        front_image: this.canvasImage.ref_front.toDataURL("image/png") ? this.canvasImage.ref_front.toDataURL("image/png") : null,
-        back_image: this.canvasImage.ref_back.toDataURL("image/png") ? this.canvasImage.ref_back.toDataURL("image/png") : null
+      let product_model_id = 0;
+      if(product_models.length > 0) {
+        const selected_model = product_models[selected_model_index];
+        product_model_id = selected_model.id;
       }
-    }
-    http.post("carts", post_data).then((res: any) => {
-      if (res.data.success == true){
-        this.showToast('Item Added in Cart', 'SUCCESS');
-        let api_res:Record<any, any> = res.data.result
-        this.$store.dispatch('addToCart',api_res.items)
-        this.isLoading = false;
-      }else{
-        if(res.data.status_code === 422){
-          this.showErrorValidation(res.data.errors);
-          this.isLoading = false
-        }
-        else{
-          this.showError(res)
-          this.isLoading = false
+      let order_detail = await this.getOrderDetail();
+      //remove base64 key from logos array
+      if(order_detail.custom_logos.length > 0) {
+        order_detail.custom_logos.forEach(function(logo:Record<any, any>){ delete logo.base64_logo });
+      }
+      this.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
+      this.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
+      let post_data:Record<any, any> = {
+        factory_product:{
+          style_id:product_style_id,
+          design_id:product_design_id,
+          model_id:product_model_id,
+          product_id:product_id,
+          svg_groups: order_detail.svg_groups?order_detail.svg_groups:[],
+          custom_logos: order_detail.custom_logos?order_detail.custom_logos:[],
+          custom_texts: order_detail.custom_texts?order_detail.custom_texts:[],
+          roster_detail: order_detail.roster_detail?order_detail.roster_detail:[],
+          custom_logo_svgs: order_detail.custom_logo_svgs?order_detail.custom_logo_svgs:[],
+          custom_text_svgs: order_detail.custom_text_svgs?order_detail.custom_text_svgs:[],
+          pdf_file:null,
+          defaultcolors: this.defaultColors,
+          groupcolors: this.groupColors,
+          colors:this.$store.getters.getLogosColors,
+          front_image: this.canvasImage.ref_front.toDataURL("image/png") ? this.canvasImage.ref_front.toDataURL("image/png") : null,
+          back_image: this.canvasImage.ref_back.toDataURL("image/png") ? this.canvasImage.ref_back.toDataURL("image/png") : null
         }
       }
-    }).catch(err => {
-      if(err.response.status){
-        this.showErrorArr(err.response.data.errors)
+
+      let url = "carts"
+      if(this.$store.getters.getEditCart.cartId > 0) {
+        post_data.factory_product.id = this.$store.getters.getEditCart.cartItemId
+        url = `carts/cart-items/${this.$store.getters.getEditCart.cartId}/update`
+      }
+      http.post(url, post_data).then((res: any) => {
+        if (res.data.success == true){
+          let api_res:Record<any, any> = res.data.result
+          this.$store.dispatch('addToCart',api_res.items)
+          this.$store.dispatch('setEditCart', {key:'cartId',value:0});
+          this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
+          this.showToast(res.data.message, 'SUCCESS');
+          this.isLoading = false;
+        }else{
+          if(res.data.status_code === 422){
+            this.showErrorValidation(res.data.errors);
+            this.isLoading = false
+          }
+          else{
+            this.showError(res)
+            this.isLoading = false
+          }
+        }
+      }).catch(err => {
         this.isLoading = false
-      }
-    });
+        this.showErrorArr(err.response.data.errors)
+      });
+    }
+    catch (e) {
+      console.error('error in add to cart',e)
+      this.isLoading = false
+    }
   }
    public async  generateProductionPdf() {
     let self = this;
@@ -566,19 +510,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       alert('Oops, unable to copy');
     }
   }
-
-  // public async getOrderDetail() {
-  //   let self = this;
-  //   let order_detail: { [key: string]: Record<any, any> } = {}
-  //   order_detail.roster_detail = self.rosterDetails;
-  //   order_detail.svg_groups = self.svgGroups;
-  //   order_detail.custom_texts = self.customTexts;
-  //   order_detail.custom_logos = self.customLogos;
-  //   if(self.$store.getters.getUsingColorLogos) {
-  //     order_detail.logo_colors = self.logoColors
-  //   }
-  //   return order_detail;
-  // }
 
   public async getOrderDetail() {
     let self = this;
