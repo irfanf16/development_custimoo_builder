@@ -1264,6 +1264,10 @@ const ProductAttributes:Module<any, any> = {
     async createOrder({commit}){
      const res = await http.post('order', {});
      return res
+    },
+    async getOrders({commit}, payload:string|''){
+      const res = await http.get('order'+payload)
+      return res
     }
 
   }
