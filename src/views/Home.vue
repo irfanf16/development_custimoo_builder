@@ -115,7 +115,7 @@
             <div v-bind:class="{active: isActive}">
               <div class="twoD-view">
                 <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
-                  <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
+                    <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
                     <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
                       <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
                              :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
@@ -193,7 +193,7 @@
           </div>
         </b-col>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts"/>
+          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products"/>
           <button class="backtohome-btn d-lg-none" @click="showHomeLanding()"><font-awesome-icon :icon="['fas', 'arrow-left']"/></button>
         </b-col>
         </template>
@@ -344,7 +344,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private nextPageUrl !: string
   public hasProducts = true
   public category_id !: string
-  public search = ''
+  public search_products = ''
   public colors = []
   public product_id !: number
   public provider_id = 'oVXYIzKY'
@@ -360,7 +360,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public showModal = false
   public shared_link = ''
   public extractedcolorclass = ""
-  private isFront = true
+  private isFront = true;
+
 
   private switchTabs (e:Record<any, any>){
     this.ref['custom-mobile-tabs'].hideOtherTab()
@@ -444,10 +445,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return  this.$store.getters.getEditStatus
   }
 
-  get mainProductType():string{
+ get mainProductType():string{
     let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
     return selected_product.back_design ?  "front_back" : "front";
-  }
+ }
 
   public showCollectionModal = () =>{
     this.ref['collectionModal'].showCollectionModal()
@@ -497,7 +498,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return  this.$store.getters.getCurrentStyleIndex;
   }
   get selectedDesignId():number{
-    return  this.$store.getters.getSelectedDesignId;
+  return  this.$store.getters.getSelectedDesignId;
   }
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
@@ -884,13 +885,27 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
+  get searchLoader() {
+    return this.$store.getters.getSearchLoader
+  }
+
   public async retrieveProducts() {
     let self = this;
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
+    if(self.search_products) {
+      url += `&title=${self.search_products}`
+    }
     http.get(url).then(async (response: Record<any, any>) => {
-      await self.handleMainProducts(response);
-      if(self["showLoader"]) {
-        self.showLoader = false;
+      if(response.data.products.data.length > 0 ){
+        await self.handleMainProducts(response);
+        if(self["showLoader"] || self["searchLoader"]) {
+          self.showLoader = false;
+          await self.$store.dispatch('setSearchLoader', false)
+        }
+      }else{
+        this.showError("No Product Found")
+        self.showLoader = false
+        await self.$store.dispatch('setSearchLoader', false)
       }
     }, (error) => {
       console.error("Error while getting order detail", error.response.data.message)
