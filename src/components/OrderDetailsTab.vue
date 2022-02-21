@@ -255,6 +255,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
           design_id:product_design_id,
           model_id:product_model_id,
           product_id:product_id,
+          product_name:selected_product.product_name,
           svg_groups: order_detail.svg_groups?order_detail.svg_groups:[],
           custom_logos: order_detail.custom_logos?order_detail.custom_logos:[],
           custom_texts: order_detail.custom_texts?order_detail.custom_texts:[],
