@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
+import ThreeD from '../views/ThreeD.vue'
 import ShareRoster from '../views/ShareRoster.vue'
 import ConfirmOrder from '../views/ConfirmOrder.vue'
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
@@ -12,6 +13,11 @@ const routes: Array<RouteConfig> = [
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/three-d',
+    name: 'ThreeD',
+    component: ThreeD
   },
   {
     path: '/confirm-order',
