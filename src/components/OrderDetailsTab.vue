@@ -49,7 +49,7 @@
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" >{{editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}</button>
+            <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" >{{editCart.cartId > 0 ? 'Update Item' : 'Add to Cart Collection'}}</button>
             <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
               <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
             </button>

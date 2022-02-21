@@ -4,7 +4,7 @@
          :adaptive="true" name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl"  title="User Cart" modal-class="modal-fullscreen2"  content-class="lockerroom-modal"
         >
 
-
+    <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
       <thead class="bg-light">
       <tr>
@@ -47,7 +47,7 @@
 
       </div>
     </template>
-    <b-button @click="createOrder">create Order</b-button>
+    <b-button class="mt-4" @click="createOrder">Finalize Order</b-button>
   </modal>
 
 </template>
@@ -76,6 +76,7 @@ import {findIndex} from "lodash";
     })
     export default class CartModal extends Mixins(ErrorMessages, handleMainProducts) {
 
+      public viewLoader = false;
       public hide() {
         this.$modal.hide('cart-modal')
       }
@@ -86,8 +87,21 @@ import {findIndex} from "lodash";
         return this.$store.getters.getCartItems
       }
       public createOrder(){
-        const res  = this.$store.dispatch('createOrder')
-        console.log(res)
+        http.post('order', {}).then((res:Record<any, any>) => {
+          if (res.data.success){
+            this.$store.dispatch('addToCart',[])
+            this.showToast(res.data.message, 'SUCCESS');
+            this.viewLoader = false;
+            this.hide()
+          }
+          else {
+            this.viewLoader = false
+            this.showError('Your order could not created')
+          }
+        }).catch((err:any) => {
+          this.viewLoader = false
+          this.showError(err)
+        });
       }
       public editCartItem(cart_item:Record<any, any>,cart_id:number) {
         let self = this;
