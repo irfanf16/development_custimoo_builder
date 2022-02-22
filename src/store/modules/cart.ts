@@ -31,12 +31,20 @@ const Cart:Module<any, any> = {
     async getCartServer({commit,state},room_id:number){
       const url = '/carts/cart-items'
      return http.get(url).then((res: any) => {
-        const api_res:Record<any, any> = res.data.result
-        // let cart_items:Record<any, any>[] = []
-        // api_res.items.forEach((item:Record<any, any>) => {
-        //   cart_items.push(...item.factory_products)
-        // })
-        commit('ADD_TO_CART',api_res.items)
+       console.log('Cart',res);
+       if(res.data.success){
+          if(res.data.result) {
+            const api_res: Record<any, any> = res.data.result
+            commit('ADD_TO_CART', api_res.items)
+          }
+          else{
+            commit('ADD_TO_CART', [])
+          }
+       }else{
+         commit('ADD_TO_CART', [])
+         console.log('Nothing to show')
+       }
+
       }).catch((e: any) => {
         console.error(e)
       });
