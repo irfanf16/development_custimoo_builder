@@ -6,7 +6,7 @@
         <div class="fs-4 font-weight-bolder order-title p-2">
           {{ order.created_at | reformDate }}
           Order  {{ order.order_no }}
-          {{order.product_names_names ? order.product_names : ''}}
+          {{order.product_names ? order.product_names : ''}}
         </div>
         <div class="fs-4 font-weight-bolder order-title p-2 chevron"><BIconChevronDown /></div>
       </div>
