@@ -63,8 +63,9 @@
                         <li v-if="!getSelectionMode.readonly">
                           <popper
                             v-if="mobileScreen"
-                            trigger="clickToOpen"
+                            trigger="focus"
                             :stop-propagation="true"
+                            :prevent-default="true"
                             :options="{
                                 placement: 'bottom',
                               }">
@@ -89,8 +90,9 @@
                           </popper>
                           <popper
                             v-else-if="isSafari"
-                            trigger="clickToOpen"
+                            trigger="focus"
                             :stop-propagation="true"
+                            :prevent-default="true"
                             :options="{
                                 placement: 'bottom',
                               }">
@@ -115,8 +117,9 @@
                           </popper>
                           <popper
                             v-else
-                            trigger="clickToOpen"
+                            trigger="focus"
                             :stop-propagation="true"
+                            :prevent-default="true"
                             :options="{
                                 placement: 'bottom',
                               }">
@@ -381,8 +384,10 @@ import {processColorsCustom} from "../helpers/Helpers"
 import {differenceBy, intersectionBy, union, includes} from 'lodash';
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
-import Popper from 'vue-popperjs';
-import 'vue-popperjs/dist/vue-popper.css';
+// import Popper from 'vue-popperjs';
+// import 'vue-popperjs/dist/vue-popper.css';
+import { Popper } from 'popper-vue'
+import 'popper-vue/dist/popper-vue.css'
 
 @Component<LockerRoom>({
   components: {
