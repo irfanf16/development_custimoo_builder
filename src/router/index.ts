@@ -5,6 +5,7 @@ import Cart from '../views/Cart.vue'
 import Order from '../views/Order.vue'
 import Orders from '../views/Orders.vue'
 import ViewScene from '../views/ViewScene.vue'
+import ThreeD from '../views/ThreeD.vue'
 import ShareRoster from '../views/ShareRoster.vue'
 import CustomizationProcess from '../views/CustomizationProcess.vue'
 import ConfirmOrder from '../views/ConfirmOrder.vue'
@@ -32,6 +33,11 @@ const routes: Array<RouteConfig> = [
     path: '/orders',
     name: 'Orders',
     component: Orders
+  },
+  {
+    path: '/three-d',
+    name: 'ThreeD',
+    component: ThreeD
   },
   {
     path: '/confirm-order',
