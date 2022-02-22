@@ -95,15 +95,45 @@
       </b-collapse>
     </div>
 
-    <modal :width="800"
+    <modal :width="1000"
            :resizable="true"
            :scrollable="true"
            height="auto"
            :reset="true"
-           :shiftY="0"
            name="rejection-modal" ref="rejection-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true" title="Locker Room"
            @close="$store.commit('Change_Locker_Active_Tab', 0)">
-      rejection modal
+      <div class="modal-header fs-4 d-flex justify-content-between p-3">
+        <div class="font-weight-bold pl-1">
+          Reject Artwork
+        </div>
+        <span class="modal-close cursor-pointer" @click="$modal.hide('rejection-modal')">
+          <BIconX />
+        </span>
+      </div>
+
+      <div class="d-flex align-items-center justify-content-between gap-1 py-4 px-3 m-auto">
+        <div class="fs-5">
+          <BIconChevronLeft />
+        </div>
+        <div>
+          <img src="img/images/image-product.png" alt="" class="w-100">
+        </div>
+        <div class="fs-5">
+          <BIconChevronRight />
+        </div>
+      </div>
+
+      <div class="p-4 text-left">
+        <div class="fs-4">Write your feedback</div>
+        <div class="mt-2">
+          <b-textarea placeholder="Please write your feedback here..." rows="5"></b-textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary light" @click="$modal.hide('rejection-modal')">Cancel</button>
+        <button class="btn btn-secondary">Reject</button>
+      </div>
     </modal>
   </div>
 </template>
