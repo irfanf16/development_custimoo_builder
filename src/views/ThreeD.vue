@@ -14,65 +14,46 @@
           <template>
             <div class="customization-preview-process w-100">
               <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
-                <div class="buttons-preview text-left">
-                  <template v-if="editCart.cartId < 1">
-                    <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
-                    </template>
-                    <template v-else>
-                      <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
-                    </template>
-                    <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
-                    </template>
-                    <template v-else>
-                      <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
-                    </template>
-                  </template>
+<!--                <div class="buttons-preview text-left">-->
+<!--                  <template v-if="isCustomerAuthenticated">-->
+<!--                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>-->
+<!--                  </template>-->
+<!--                  <template v-else>-->
+<!--                    <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>-->
+<!--                  </template>-->
+<!--                  <template v-if="isCustomerAuthenticated">-->
+<!--                    <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>-->
+<!--                  </template>-->
+<!--                  <template v-else>-->
+<!--                    <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>-->
+<!--                  </template>-->
+<!--                </div>-->
 
-                  <!-- <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
-                  </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'" variant="outline-secondary" v-b-modal.modal-login>Summary</b-button>
-                  </template> -->
-                </div>
-
-                <ul class="preview-header-icons">
-                  <li class="d-flex flex-wrap align-items-center">
-                    <b-button v-if="!isCustomerAuthenticated" @click="$modal.show('loginModal')"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
-                    <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
-                  </li>
-                  <li><a>
-                    <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
-                  </a></li>
-                  <li v-if="isCustomerAuthenticated">
-                    <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
-                    <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
-                      <template v-for="(notification, ind) in notifications" >
-                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]" @click="readNotification(notification)">
-                          <div class="text d-flex align-items-start justify-content-between">
-                            <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
-                            <div class="date">
-                              <div class="day">{{ notification.created_at | formatDate }}</div>
-                            </div>
-                          </div>
-                        </div>
-                      </template>
-                    </div>
-                  </li>
-                  <li v-if="isCustomerAuthenticated">
-                    <a  class="icon mr-0" @click="openCartModal">
-                      <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
-                    </a>
-                  </li>
-                  <li v-if="isCustomerAuthenticated">
-                    <a  class="icon mr-0" @click="openOrdersModal">
-                      <font-awesome-icon :icon="['fas', 'cart-arrow-down']" />
-                    </a>
-                  </li>
-                </ul>
+<!--                <ul class="preview-header-icons">-->
+<!--                  <li class="d-flex flex-wrap align-items-center">-->
+<!--                    <b-button v-if="!isCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>-->
+<!--                    <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>-->
+<!--                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>-->
+<!--                  </li>-->
+<!--                  <li><a>-->
+<!--                    <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>-->
+<!--                  </a></li>-->
+<!--                  <li v-if="isCustomerAuthenticated">-->
+<!--                    <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>-->
+<!--                    <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">-->
+<!--                      <template v-for="(notification, ind) in notifications" >-->
+<!--                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]" @click="readNotification(notification)">-->
+<!--                          <div class="text d-flex align-items-start justify-content-between">-->
+<!--                            <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>-->
+<!--                            <div class="date">-->
+<!--                              <div class="day">{{ notification.created_at | formatDate }}</div>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                        </div>-->
+<!--                      </template>-->
+<!--                    </div>-->
+<!--                  </li>-->
+<!--                </ul>-->
                 <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
                 </div>
               </header>
@@ -80,12 +61,11 @@
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
-              <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
-              <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
-              <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
-              <OrderListing   ref="orderlisting"/>
+              <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
+              <LoginForm @actionAfterLogin="actionAfterLogin()" />
+
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                 <div>
                   <b-button variant="outline-secondary mr-2" :disabled="undoItems.length < 1" @click="undoAction"><span class="d-sm-block d-none">Undo</span><span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span></b-button>
@@ -106,7 +86,7 @@
                 </div>
 
                 <div class="mobile-nav">
-                  <strong class="user-name mr-1">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
+                  <strong class="user-name mr-1">{{ isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
 
                   <b-dropdown size="lg"  variant="link" toggle-class="text-decoration-none" no-caret>
                     <template #button-content>
@@ -129,17 +109,11 @@
             <div v-bind:class="{active: isActive}">
               <div class="twoD-view">
                 <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
-                    <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
+                  <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
                     <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
-                      <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
+                      <SceneThreeD v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
                              :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                              :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
-                             :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                             :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                             :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
-
-                      <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio" ref="mainScene"
-                             :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                              :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                              :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
                              :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
@@ -206,17 +180,16 @@
             </ul>
           </div>
         </b-col>
-        <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products"/>
-          <button class="backtohome-btn d-lg-none" @click="showHomeLanding()"><font-awesome-icon :icon="['fas', 'arrow-left']"/></button>
-        </b-col>
+<!--        <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">-->
+<!--          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts"/>-->
+<!--          <button class="backtohome-btn d-lg-none" @click="showHomeLanding()"><font-awesome-icon :icon="['fas', 'arrow-left']"/></button>-->
+<!--        </b-col>-->
         </template>
       </b-row>
     </b-container>
-    <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes" name="delete-cart-item" ref="delete-cart-item"></confirm-modal>
-    <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" name="reset-modal" ref="reset-modal"></confirm-modal>
+    <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
     <confirm-modal message="This will reset everything. All design changes will be lost.
- Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes" name="reset-changes"></confirm-modal>
+ Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes"></confirm-modal>
   </div>
 </template>
 
@@ -234,17 +207,15 @@ import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import ExtractedColors from '@/components/ExtractedColors.vue'
 import LoginForm from '@/components/LoginForm.vue'
-import OrderListing from '@/components/OrderListing.vue'
 import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import Scene from "@/components/Scene.vue";
+import SceneThreeD from "@/components/SceneThreeD.vue";
 import $ from 'jquery';
 import CustomTabs from "@/components/CustomTabs.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
-import CartModal from "@/components/CartModal.vue";
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -255,7 +226,6 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
-    CartModal,
     CustomTabs,
     ConfirmModal,
     DesignCollectionModal,
@@ -270,8 +240,7 @@ Vue.filter('formatDate', function(value:string) {
     SaveColorModal,
     ExtractedColors,
     LoginForm,
-    Scene,
-    OrderListing
+    SceneThreeD
   },
 
   async mounted() {
@@ -286,12 +255,9 @@ Vue.filter('formatDate', function(value:string) {
     await this.$store.dispatch('setCustomToken');
     // await this.retrieveProducts()
     await this.getFillColors()
-
-
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
       await this.$store.dispatch('getLockerRoomColors')
-      await this.$store.dispatch('getCartServer', {})
     }
     if (this.$route.params.name) {
       this.showLoader = true
@@ -366,7 +332,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private nextPageUrl !: string
   public hasProducts = true
   public category_id !: string
-  public search_products = ''
+  public search = ''
   public colors = []
   public product_id !: number
   public provider_id = 'oVXYIzKY'
@@ -382,8 +348,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public showModal = false
   public shared_link = ''
   public extractedcolorclass = ""
-  private isFront = true;
-
+  private isFront = true
 
   private switchTabs (e:Record<any, any>){
     this.ref['custom-mobile-tabs'].hideOtherTab()
@@ -407,9 +372,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   get notifications(){
     return this.$store.getters.getNotifications
-  }
-  get editCart(): Record<any, any> {
-    return this.$store.getters.getEditCart
   }
   get lastRouteName() {
     let returnVal = '';
@@ -436,10 +398,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       })
     }
     return unread_notification_counter
-  }
-
-  get cartItemsCount(){
-    return this.$store.getters.getCartItemsCount
   }
 
   public showConfirm(){
@@ -474,24 +432,16 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return  this.$store.getters.getEditStatus
   }
 
- get mainProductType():string{
+  get mainProductType():string{
     let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
     return selected_product.back_design ?  "front_back" : "front";
- }
+  }
 
   public showCollectionModal = () =>{
     this.ref['collectionModal'].showCollectionModal()
   }
   public editCollectionModal = () =>{
     this.ref['collectionModal'].editCollectionModal()
-  }
-  public openCartModal = () =>{
-    if(this.cartItemsCount > 0) {
-      this.ref.cartModal.show()
-    }
-  }
-  public async openOrdersModal(){
-    this.ref['orderlisting'].showOdersPopup()
   }
   public getPath(){
     let url = ''
@@ -535,7 +485,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return  this.$store.getters.getCurrentStyleIndex;
   }
   get selectedDesignId():number{
-  return  this.$store.getters.getSelectedDesignId;
+    return  this.$store.getters.getSelectedDesignId;
   }
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
@@ -545,9 +495,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
-  }
-  get cartItems() {
-    return this.$store.getters.getCartItems
   }
   @Watch('customTexts', {
     deep: true
@@ -664,7 +611,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.ref['lockerModal'].showLockerRoomModal()
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
-      // this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
     } else if(this.actionBeforeLogin == 'downloadDesign') {
@@ -685,28 +632,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     });
   }
 
-  async deleteCartItem(item:Record<any,any>){
-    const response = await this.ref['delete-cart-item'].showConfirm();
-    if(response){
-      const url = `carts/cart-items/${item.cart_item.id}/factory_product/${item.factory_product.id}`
-      http.delete(url).then(async (response:Record<any,any>) => {
-        await this.$store.dispatch('getCartServer', {});
-        if(this.cartItems && !this.cartItems.length){
-          this.ref['cartModal'].hide();
-        }
-        this.showToast(response.data.message, 'SUCCESS')
-      }).catch((e:any)=>{
-        console.log(e);
-        this.showError(e);
-        this.ref['cartModal'].hide();
-      });
-    }
-  }
-
 
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
-    this.$modal.show('loginModal')
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
       collectionAddmoreMode:false,
@@ -841,7 +769,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.showLockerRoomModal()
 
         if(this.ref.saveToLockerModal) {
-          this.ref['saveToLockerModal'].hideModal()
+          this.ref.saveToLockerModal.ref['my-modal'].hide();
           this.ref.saveToLockerModal.showLoader = false;
         }
 
@@ -944,27 +872,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  get searchLoader() {
-    return this.$store.getters.getSearchLoader
-  }
-
   public async retrieveProducts() {
     let self = this;
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
-    if(self.search_products) {
-      url += `&title=${self.search_products}`
-    }
     http.get(url).then(async (response: Record<any, any>) => {
-      if(response.data.products.data.length > 0 ){
-        await self.handleMainProducts(response);
-        if(self["showLoader"] || self["searchLoader"]) {
-          self.showLoader = false;
-          await self.$store.dispatch('setSearchLoader', false)
-        }
-      }else{
-        this.showError("No Product Found")
-        self.showLoader = false
-        await self.$store.dispatch('setSearchLoader', false)
+      await self.handleMainProducts(response);
+      if(self["showLoader"]) {
+        self.showLoader = false;
       }
     }, (error) => {
       console.error("Error while getting order detail", error.response.data.message)
@@ -975,6 +889,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 </script>
 
 <style lang="scss" scoped>
+.page-wrapper {
+  @media only screen and (min-width: 992px) {
+    border: 1px solid #dee2e6;
+    background: #fff;
+  }
+}
+
 .home-color-area {
   @media only screen and (min-width: 992px) {
     padding-bottom: 12rem !important;
@@ -1463,4 +1384,5 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 }
+
 </style>
