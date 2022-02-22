@@ -58,7 +58,7 @@
                   <img src="img/images/image-product.png" alt="">
                 </div>
                 <div class="actions">
-                  <button class="btn reject"><BIconXSquareFill /></button>
+                  <button class="btn reject" @click="$modal.show('rejection-modal')"><BIconXSquareFill /></button>
                   <button class="btn approve"><BIconCheckSquareFill /></button>
                 </div>
               </div>
@@ -94,6 +94,17 @@
         </div>
       </b-collapse>
     </div>
+
+    <modal :width="800"
+           :resizable="true"
+           :scrollable="true"
+           height="auto"
+           :reset="true"
+           :shiftY="0"
+           name="rejection-modal" ref="rejection-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true" title="Locker Room"
+           @close="$store.commit('Change_Locker_Active_Tab', 0)">
+      rejection modal
+    </modal>
   </div>
 </template>
 
