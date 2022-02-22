@@ -55,7 +55,7 @@
             </button>
           </template>
           <template v-else>
-            <button  @click="setActionBeforeLogin('downloadDesign')" :key="'loginmodal'"  class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Add to Cart</button>
+            <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Add to Cart</button>
           </template>
 
 
@@ -225,14 +225,17 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   }
 
   public async addToCart() {
+    let self = this;
     try {
       this.isLoading = true;
       let style_index = this.$store.getters.getCurrentStyleIndex;
       let selected_product = this.$store.getters.getSelectedProduct;
       const product_id = selected_product.product_id;
+      const product_type = selected_product.product_type;
       let product_style = selected_product.productstyles[style_index];
       const product_style_id = product_style.id;
       let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
+      console.log('selectedDesign',selectedDesign)
       const product_design_id = selectedDesign[0].id;
       let product_models = this.$store.getters.getProductModels;
       let selected_model_index = this.$store.getters.getSelectedModelIndex;
@@ -247,14 +250,17 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       if(order_detail.custom_logos.length > 0) {
         order_detail.custom_logos.forEach(function(logo:Record<any, any>){ delete logo.base64_logo });
       }
-      this.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
-      this.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
+     setTimeout(() => {
+       self.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
+       self.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
+     }, 10)
       let post_data:Record<any, any> = {
         factory_product:{
           style_id:product_style_id,
           design_id:product_design_id,
           model_id:product_model_id,
           product_id:product_id,
+          product_type:product_type,
           product_name:selected_product.product_name,
           svg_groups: order_detail.svg_groups?order_detail.svg_groups:[],
           custom_logos: order_detail.custom_logos?order_detail.custom_logos:[],

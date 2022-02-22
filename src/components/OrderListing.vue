@@ -37,7 +37,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<OrderListing>({
   mounted(){
-    console.log("orders", this.customer_orders)
+   // console.log("orders", this.customer_orders)
   }
 })
 export default class OrderListing  extends Mixins(ErrorMessages)  {
