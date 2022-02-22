@@ -1,9 +1,14 @@
 <template>
-  <b-modal ref="my-modal" id="modal-center-addlockerroom" hide-footer centered scrollable size="xl" title="Add to Locker Room"  modal-class="add_locker" content-class="lockerroom-modal">
-        <div class="lockerroom-header">
+  <modal :name="modal_name" :minWidth ="800"
+         :minHeight="600" :resizable="true"
+         :adaptive="true" id="modal-center-addlockerroom" hide-footer centered scrollable size="xl" title="Add to Locker Room"  modal-class="add_locker" content-class="lockerroom-modal">
+    <div class="text-right">
+      <b-button>close</b-button>
+    </div>
+    <div class="lockerroom-header">
             <div class="locker-opener">
               <b-button v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-              <span class="btn btn-secondary light add_new_locker_btn" v-b-modal.modal-center-createlockerroom>Add <BIconPlus /></span>
+              <span class="btn btn-secondary light add_new_locker_btn" @click="showCreateModal">Add <BIconPlus /></span>
             </div>
 <!--            <div class="add_new_locker">-->
 <!--              -->
@@ -48,7 +53,7 @@
       </div>
       <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
-    </b-modal>
+    </modal>
 </template>
 
 <script lang="ts">
@@ -69,6 +74,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
     export default class AddLockerRoomModal extends Mixins(ErrorMessages) {
       @Prop({required: false, default: true}) readonly close_on_add !: boolean
       @Prop({required: false, default: false})  rosterUrl !: boolean
+      @Prop({required: true, default: "addlockermodal"})  modal_name !: string
       async recallProducts(){
         await this.$store.dispatch('GET_LOCKER_PRODUCTS')
         if (this.roomWithProducts.length){
@@ -149,6 +155,13 @@ import LockerRoom from "@/components/LockerRoom.vue";
           this.productData = this.roomWithProducts[index].product;
         }
       }
+      public showCreateModal(){
+        (this.$modal as Record<any, any>).show('create-modal')
+      }
+      public hideModal(){
+        (this.$modal as Record<any, any>).hide(this.modal_name)
+      }
+
       public async saveToLocker(){
         this.showLoader = true
         const modelIndex = this.$store.getters.getSelectedModelIndex
@@ -192,7 +205,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
             this.product_name = ''
             this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
             if(this.close_on_add) {
-              this.ref['my-modal'].hide();
+              this.hideModal();
               this.showLoader = false
             } else {
               this.$emit('open-locker-room', this.tabIndex);
@@ -222,7 +235,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
         }
       }
       public showSaveToLockerRoomModal() {
-        this.ref['my-modal'].show()
+        (this.$modal as Record<any, any>).show(this.modal_name)
         this.recallProducts();
       }
       public async deleteProduct(ind:number, id:number){

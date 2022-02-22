@@ -88,7 +88,12 @@ const ProductAttributes:Module<any, any> = {
     editLockerProduct: [],
     notifications:[],
     customTextObjects:[],
-    customLogoObjects:[]
+    customLogoObjects:[],
+    cartItemId:'',
+    editCart: {
+      cartId: 0,
+      cartItemId: ''
+    }
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -172,6 +177,9 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state, 'personalized', payload.value)
       else
         Vue.set(state, 'customized', payload.value)*/
+    },
+    SET_EDIT_CART(state: Record<any, any>, payload: Record<any, any>){
+      Vue.set(state.editCart,payload.key,payload.value)
     },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
@@ -487,7 +495,9 @@ const ProductAttributes:Module<any, any> = {
       state.products.push(payload);
     },
     OVERRIDE_LOGOS(state:Record<any, any>, payload){
+      console.log('payload',payload)
       const locker_logos = JSON.parse(payload.custom_logos)
+      console.log('after parse',locker_logos)
       Object.keys(state.customLogos).map(function(key:any, index:any) {
         if(key == payload.product_id) {
           Vue.set(state.customLogos,key,locker_logos)
@@ -644,6 +654,12 @@ const ProductAttributes:Module<any, any> = {
         mainProductId: 0,
         editStatus: false
       }
+
+      state.editCart = {
+        cartId: 0,
+        cartItemId: ''
+      }
+
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
         let arr:any = []
@@ -842,6 +858,9 @@ const ProductAttributes:Module<any, any> = {
     getEditLockerProduct: state => {
       return state.editLockerProduct
     },
+    getEditCart: state => {
+      return state.editCart
+    },
     getNotifications: state => {
       return state.notifications
     },
@@ -1028,6 +1047,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setProductType({commit}, payload) {
       commit('SET_PRODUCT_TYPE', payload)
+    },
+    setEditCart({commit}, payload) {
+      commit('SET_EDIT_CART', payload)
     },
     setCategories({commit}){
       const url = '/product/categories'
@@ -1288,6 +1310,11 @@ const ProductAttributes:Module<any, any> = {
         }
         return res
       })
+    },
+
+    async getOrders({commit}){
+      const res = await http.get('order')
+      return res
     }
 
   }

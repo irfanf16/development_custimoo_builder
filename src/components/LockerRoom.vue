@@ -61,32 +61,101 @@
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
-                          <b-button v-if="mobileScreen" data-title="Share design" :id="'share'+i+''+ind"
-                                    @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
-                            :icon="['fas', 'share-alt']"/></b-button>
-                          <b-button v-else-if="isSafari" data-title="Share design" :id="'share'+i+''+ind"
-                                    @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
-                            :icon="['fas', 'share-alt']"/></b-button>
-                          <b-button v-else data-title="Share design" :id="'share'+i+''+ind"
-                                    @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"
-                                    @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
-                            :icon="['fas', 'share-alt']"/></b-button>
-                          <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom"
-                                     triggers="focus">
-                            <div class="share-holder">
-                              <h3>Copy link
-                                ..and Share</h3>
-                              <div class="share-form">
-                                <b-form inline>
-                                  <b-form-input :id="'copy-'+ind"
-                                                :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+                          <popper
+                            v-if="mobileScreen"
+                            trigger="clickToOpen"
+                            :stop-propagation="true"
+                            :options="{
+                                placement: 'bottom',
+                              }">
+                            <span class="custom_popover popper" ref="hoover_popover">
+                              <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                  <b-form inline>
+                                    <b-form-input :id="'copy-'+ind"
+                                                  :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
-                                  ></b-form-input>
-                                  <b-button variant="primary" @click="copyLink(product, ind) ">Copy Link</b-button>
-                                </b-form>
+                                    ></b-form-input>
+                                    <button @click="copyLink(product, ind)" type="button">Copy Link</button>
+                                  </b-form>
+                                </div>
                               </div>
-                            </div>
-                          </b-tooltip>
+                            </span>
+                            <b-button data-title="Share design" :id="'share'+i+''+ind" slot="reference"
+                                      @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
+                              :icon="['fas', 'share-alt']"/>
+                            </b-button>
+                          </popper>
+                          <popper
+                            v-else-if="isSafari"
+                            trigger="clickToOpen"
+                            :stop-propagation="true"
+                            :options="{
+                                placement: 'bottom',
+                              }">
+                            <span class="custom_popover popper" ref="hoover_popover">
+                              <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                  <b-form inline>
+                                    <b-form-input :id="'copy-'+ind"
+                                                  :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+
+                                    ></b-form-input>
+                                    <button @click="copyLink(product, ind)" type="button">Copy Link</button>
+                                  </b-form>
+                                </div>
+                              </div>
+                            </span>
+                            <b-button data-title="Share design" :id="'share'+i+''+ind" slot="reference"
+                                      @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
+                              :icon="['fas', 'share-alt']"/>
+                            </b-button>
+                          </popper>
+                          <popper
+                            v-else
+                            trigger="clickToOpen"
+                            :stop-propagation="true"
+                            :options="{
+                                placement: 'bottom',
+                              }">
+                            <span class="custom_popover popper" ref="hoover_popover">
+                              <div class="share-holder">
+                                <h3>Copy link and Share</h3>
+                                <div class="share-form">
+                                  <b-form inline>
+                                    <b-form-input :id="'copy-'+ind"
+                                                  :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+
+                                    ></b-form-input>
+                                    <button @click="copyLink(product, ind)" type="button">Copy Link</button>
+                                  </b-form>
+                                </div>
+                              </div>
+                            </span>
+                            <b-button data-title="Share design" :id="'share'+i+''+ind" slot="reference"
+                                      @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"
+                                      @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
+                              :icon="['fas', 'share-alt']"/>
+                            </b-button>
+                          </popper>
+<!--                          <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom"-->
+<!--                                     triggers="focus">-->
+<!--                            <div class="share-holder">-->
+<!--                              <h3>Copy link-->
+<!--                                ..and Share</h3>-->
+<!--                              <div class="share-form">-->
+<!--                                <b-form inline>-->
+<!--                                  <b-form-input :id="'copy-'+ind"-->
+<!--                                                :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"-->
+
+<!--                                  ></b-form-input>-->
+<!--                                  <buttonclick="copyLink(product, ind) ">Copy Link</b-button>-->
+<!--                                </b-form>-->
+<!--                              </div>-->
+<!--                            </div>-->
+<!--                          </b-tooltip>-->
                         </li>
                         <li v-if="!getSelectionMode.readonly">
                           <a  @click="showDesignModal(product)">
@@ -216,6 +285,7 @@
                       <div v-else>
                         <YearlyPlanner @edit-event="editEvent"
                                        @init-event-contacts="initEventContacts"
+                                       @open-event-modal="openEventModal"
                                        @getLockerEvents="getLockerEvents(room.id)"
                                        @show-contact-modal="showContactPopup"
                                        :room_id="room.id" :room_index="i" :key="room.id"
@@ -239,22 +309,27 @@
     <template #tabs-end>
       <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getSelectionMode.readonly"
                   role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
-        <span class="btn btn-secondary light">Add <BIconPlus/></span>
+        <span class="btn btn-secondary light" @click="openCreateLockerModal">Add <BIconPlus/></span>
       </b-nav-item>
      </template>
 
 
-    <CreateLockerRoomModal @lockerAdded="lockerAdded"/>
+    <CreateLockerRoomModal ref="create-modal" @lockerAdded="lockerAdded"/>
     <ExistingCollectionModal @existingCollection="existingCollection"/>
     <EventModal ref="eventmodal" @change-locker-tabindex="changeLockerTabIndex" @yearlyPlannerTab="yearlyPlannerTab"   />
     <ContactModal ref="contactmodal"   />
   </b-tabs>
 
      <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
-                    ref="reset-modal"></confirm-modal>
+                    ref="reset-confirm-modal" name=""></confirm-modal>
 
-    <span class="hover_tooltip"></span>
-    <b-modal ref="copy-product-modal" hide-footer @hide="resetModal" id="modal-center-copydesign" centered scrollable size="xl" title="Copy Design" content-class="lockerroom-modal create-lockerroom-modal">
+    <span class="hover_tooltip" ref="hoover_tooltip"></span>
+    <modal ref="copy-product-modal" name="copy-product-modal" hide-footer @closed="resetModal" class="lockerroom-modal create-lockerroom-modal" id="modal-center-copydesign" :scrollable="true" size="xl">
+      <div class="modal-header d-flex justify-content-between">
+        <span class="fs-3 font-weight-bold">Copy Design</span>
+        <span class="fs-4 font-weight-bold cursor-pointer modal-close" @click="$modal.hide('copy-product-modal')"><BIconX /></span>
+      </div>
+      <div class="modal-body">
         <div class="pt-4 design-name-form">
             <div>
 <!--                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Design Name</label>-->
@@ -280,7 +355,8 @@
 
           <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
         </div>
-    </b-modal>
+      </div>
+    </modal>
   </span>
 
 </template>
@@ -305,6 +381,8 @@ import {processColorsCustom} from "../helpers/Helpers"
 import {differenceBy, intersectionBy, union, includes} from 'lodash';
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
+import Popper from 'vue-popperjs';
+import 'vue-popperjs/dist/vue-popper.css';
 
 @Component<LockerRoom>({
   components: {
@@ -316,6 +394,7 @@ import ContactModal from "@/components/ContactModal.vue";
     YearlyPlanner,
     EventModal,
     ContactModal,
+    Popper,
     draggable
   },
   mounted() {
@@ -396,7 +475,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   private showTooltip(e: Record<any, any>) {
-    let element = document.querySelector('.hover_tooltip') as Record<any, any>
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>
     element.style.opacity = '1'
     element.style.zIndex = '100'
     element.style.left = (e.clientX + 10) + 'px'
@@ -405,7 +484,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   private hideTooltip() {
-    let element = document.querySelector('.hover_tooltip') as Record<any, any>
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>
     element.style.opacity = '0'
     element.style.left = '0'
     element.style.top = '0'
@@ -413,7 +492,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public showConfirm() {
-    this.ref['reset-modal'].showConfirm()
+    this.ref['reset-confirm-modal'].showConfirm()
   }
 
   public collectionData = {}
@@ -499,6 +578,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   get logoTabIndex(): number {
     return this.$store.getters.getActiveLogoIndex
   }
+  public openCreateLockerModal(){
+    this.ref['create-modal'].showModal()
+  }
 
   public lockerAdded() {
     let index = this.getLockerProducts.length - 1
@@ -518,7 +600,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       count = product.copy_count + 1
     }
     this.copiedProductName = product.product_name + '(copy)'+(count == 1 || count == 0 ?  '' : count)
-    this.ref['copy-product-modal'].show()
+    this.$modal.show('copy-product-modal')
+  }
+  private closeModal(){
+    (this.$modal as Record<any, any>).hide('copy-product-modal')
   }
   public resetModal(){
     this.copiedProductId = 0
@@ -535,7 +620,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     if (res.status == 201){
       let room_ind = await this.lockers.findIndex((element:Record<any, any>) => element.id === this.copiedProductLockerId)
       this.$store.commit('UPDATE_COPY_COUNT', {room_ind: room_ind, id: this.copiedProductId})
-      this.ref['copy-product-modal'].hide()
+      this.$modal.hide('copy-product-modal')
       this.copiedProductId = 0
       this.copiedProductLockerId = this.lockers[0].id
       this.copiedProductName = ""
@@ -627,7 +712,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public async deleteProduct(i: number, ind: number, id: number) {
-    const ok = await this.ref['reset-modal'].showConfirm()
+    const ok = await this.ref['reset-confirm-modal'].showConfirm()
     if (ok) {
       let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id: id});
       if (res == true) {
@@ -641,7 +726,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public async deleteCollection(id: number, index: number) {
     try {
-      const ok = await this.ref['reset-modal'].showConfirm()
+      const ok = await this.ref['reset-confirm-modal'].showConfirm()
       if (ok) {
         let res = await this.$store.dispatch('deleteCollection', {id: id, index: index});
         this.showToast(res.data.message, 'SUCCESS');
@@ -929,7 +1014,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public async deletePlanner(locker_room_id:number, index:number){
     try {
-      const ok = await this.ref['reset-modal'].showConfirm()
+      const ok = await this.ref['reset-confirm-modal'].showConfirm()
       if (ok) {
         let payload = {locker_id: locker_room_id, index};
         this.viewLoader = true
@@ -971,6 +1056,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
      this.viewLoader = true
     let res = await this.$store.dispatch('getLockerEvents',room_id)
      this.viewLoader = false
+  }
+  public openEventModal(status:boolean){
+    this.ref['eventmodal'].showEventModal()
   }
   public setEventProduct(id:number, url:string, name:string){
     this.ref['eventmodal'].setEventProduct(id, url, name)

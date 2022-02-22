@@ -1,12 +1,21 @@
 <template>
-  <b-modal ref="loginModal" @hidden="clearForm" id="modal-login" content-class="login-modal" size="lg" hide-title hide-footer>
+  <modal  :width="screenWidth"
+         :resizable="true"
+         :scrollable="true"
+         height="auto"
+         :reset="true"
+         :shiftY="0" name="loginModal" ref="loginModal" id="modal-login" class="login-modal" size="lg" hide-title hide-footer>
+    <div class="modal-header d-flex justify-content-between">
+      <span class="fs-5 font-weight-bold">Hummel Login</span>
+      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
+    </div>
+    <div class="modal-body">
     <div class="form-holder" :class="{active: isActive}">
       <div class="form-area form-signin p-4">
-        <h2>Hummel Login</h2>
         <b-form>
           <b-form-group
             label="Email address:"
-            label-for="input-1"
+            label-for="input-1" class="text-left"
           >
             <b-form-input
               type="email"
@@ -16,7 +25,7 @@
             ></b-form-input>
           </b-form-group>
 
-          <b-form-group id="input-group-2" label="Password:" label-for="input-2">
+          <b-form-group id="input-group-2" label="Password:" class="text-left" label-for="input-2">
             <b-form-input
               type="password"
               v-model="password"
@@ -43,7 +52,7 @@
       <div class="form-area form-signup p-4">
         <h2>Join Customizer!</h2>
         <b-form>
-          <b-form-group
+          <b-form-group class="text-left"
             label="First Name"
             label-for="input-1"
           >
@@ -54,7 +63,7 @@
               required
             ></b-form-input>
           </b-form-group>
-          <b-form-group
+          <b-form-group class="text-left"
             label="Last Name"
             label-for="input-2"
           >
@@ -67,7 +76,7 @@
             ></b-form-input>
           </b-form-group>
 
-          <b-form-group
+          <b-form-group class="text-left"
             label="Email Address"
             label-for="input-3"
           >
@@ -79,7 +88,7 @@
             ></b-form-input>
           </b-form-group>
 
-          <b-form-group id="input-group-4" label="Password" label-for="input-4">
+          <b-form-group id="input-group-4" class="text-left" label="Password" label-for="input-4">
             <b-form-input
               v-model="form.password"
               id="input-4"
@@ -89,7 +98,7 @@
             ></b-form-input>
           </b-form-group>
 
-          <b-form-group id="input-group-5" label="Confirm Password" label-for="input-5">
+          <b-form-group id="input-group-5" class="text-left" label="Confirm Password" label-for="input-5">
             <b-form-input
               v-model="form.password_confirmation"
                type="password"
@@ -140,7 +149,8 @@
         </div>
       </div>
     </div>
-  </b-modal>
+    </div>
+  </modal>
 </template>
 
 <script lang="ts">
@@ -151,7 +161,7 @@
   export default class LoginForm extends Mixins(ErrorMessages) {
 
     public ref = this.$refs as Record<any, any>
-
+    private screenWidth = (window.screen.availWidth - 100)
     public email  = ''
     public password  = ''
     public form = {
@@ -165,6 +175,13 @@
     public additionClass() {
       this.isActive = !this.isActive
     }
+    public show(){
+      this.$modal.show('loginModal')
+    }
+    public hide(){
+      this.clearForm()
+      this.$modal.hide('loginModal')
+    }
     public async submitForm(){
       try {
         let payload = {
@@ -177,12 +194,14 @@
           await this.$store.dispatch('getLockers')
           await this.$store.dispatch('getNotifications')
           await  this.$store.dispatch('permissions')
+          await this.$store.dispatch('getCartServer', {})
           this.email = ''
           this.password = ''
-          this.ref['loginModal'].hide();
+          this.$modal.hide('loginModal');
           this.$emit('actionAfterLogin')
         }
       }catch (error){
+        console.log(error)
         this.showError(error)
       }
     }

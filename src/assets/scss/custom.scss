@@ -1714,7 +1714,7 @@ button{
 #modal-center-lockerroom{
     //height: auto;
     overflow-y: auto;
-    padding-left: 0 !important;
+    //padding-left: 0 !important;
 
     @media only screen and (max-width: 991px){
         // top: auto;
@@ -2918,9 +2918,9 @@ $fontSize: 0.5;
 
 .modal-fullscreen2 {
     display: flex !important;
-    align-items: start;
+    align-items: flex-start;
     justify-content: center;
-    padding-left: 0 !important;
+    //padding-left: 0 !important;
     //padding-top: 60px;
     .modal {
         padding: 0 !important;
@@ -4389,4 +4389,106 @@ $fontSize: 0.5;
 
 .slither-slider-slides{
     height: auto !important;
+}
+
+#modal-center-lockerroom{
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    .modal-content.lockerroom-modal{
+        border: none !important;
+    }
+}
+
+.vm--modal {
+    //overflow-y: auto;
+
+    .modal-close {
+        opacity: 0.5;
+        transition: 0.2s all ease;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+
+    .modal-footer:empty {
+        display: none;
+    }
+
+    .page-wrapper {
+        @media only screen and (min-width: 992px) {
+            border: 1px solid #dee2e6;
+            background: #fff;
+        }
+    }
+}
+
+.order-wrapper {
+    .tabs{
+        margin-top: 1rem;
+        .nav-tabs{
+            border: none;
+            .nav-link{
+                background: transparent;
+                font-size: 1.1em;
+                font-weight: 600;
+                border: none ;
+                border-bottom: 2px solid transparent;
+
+                &.active{
+                    border-bottom: 2px solid #219F84;
+                    color: inherit;
+                }
+            }
+        }
+    }
+
+    .order-flow{
+        position: relative;
+        display: inline-flex;
+        margin: 1rem auto;
+        gap: 100px;
+
+        &:before{
+            content: "";
+            display: block;
+            position: absolute;
+            top: 9px;
+            left: 70px;
+            right: 70px;
+            height: 2px;
+            background: #219F84;
+        }
+
+        .order-step{
+            position: relative;
+            text-align: center;
+            color: #219F84;
+            padding-top: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            min-width: 120px;
+
+            &.active{
+                &:before{
+                    background: #219F84;
+                }
+            }
+
+            &:before{
+                content: "";
+                display: block;
+                position: absolute;
+                height: 20px;
+                width: 20px;
+                top: 0;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
+                border-radius: 1000px;
+                background: #fff;
+                border: 2px solid #219F84;
+            }
+        }
+    }
 }

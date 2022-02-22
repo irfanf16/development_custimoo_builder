@@ -6,6 +6,8 @@ import 'vue-toast-notification/dist/theme-sugar.css';
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
 Vue.use(VueToast);
+import VModal from 'vue-js-modal'
+Vue.use(VModal)
 // Vue.directive('tooltip', VTooltip)
 // Vue.directive('close-popover', VClosePopover)
 // Vue.component('v-popover', VPopover)
@@ -36,7 +38,7 @@ import {
   faTrashAlt,
   faTshirt,
   faUserFriends,
-  faUserSecret, faSignOutAlt, faBell
+  faUserSecret, faSignOutAlt, faBell, faCartArrowDown
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
@@ -50,6 +52,7 @@ Vue.use(IconsPlugin)
 library.add(faUserSecret)
 library.add(faSearch)
 library.add(faRedoAlt)
+library.add(faCartArrowDown)
 library.add(faTimes)
 library.add(faImage)
 library.add(faFillDrip)

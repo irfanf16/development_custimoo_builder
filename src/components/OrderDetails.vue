@@ -355,6 +355,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
   }
   public async getLockers(){
     if (!this.editStatus){
+      alert("athun khul rya")
       await this.$store.dispatch("getLockers");
       this.ref['share'].showSaveToLockerRoomModal()
     }else{

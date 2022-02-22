@@ -1,5 +1,11 @@
 <template>
-  <b-modal ref="confirm-modal" id="reset-confirm" size="md" :hide-footer="true" :hide-header="true" modal-class="confirm-modal">
+  <modal :width="500"
+         :resizable="true"
+         :scrollable="true"
+         height="auto"
+         :reset="true"
+         :shiftY="0"  :name="name" id="reset-confirm" size="md" :hide-footer="true" :hide-header="true" class="confirm-modal">
+   <div class="modal-body">
     <div class="text-center">
         <span class="btn btn-secondary light rounded-circle confirm-icon">
           <BIconQuestion v-if="popup_icon === 'question'"/>
@@ -15,7 +21,8 @@
       <b-button v-if="confirm_text.length > 0"  @click="_confirm" >{{ confirm_text }}</b-button>
       <b-button v-if="cancel_text.length > 0" @click="_cancel" class="light">{{ cancel_text }}</b-button>
     </div>
-  </b-modal>
+   </div>
+  </modal>
 </template>
 
 <script lang="ts">
@@ -29,6 +36,7 @@ export default class  ConfirmModal extends Vue{
   @Prop({ type: String, default: "Are you sure?" }) private message!: string;
   @Prop({ type: String, default: "No" }) private cancel_text!: string;
   @Prop({ type: String, default: "Yes" }) private confirm_text!: string;
+  @Prop({ type: String, default: "reset-changes" }) private name!: string;
   @Prop({required: false, default: 'question'})  popup_icon !: string;
   private ref = this.$refs as Record<any, any>
 
@@ -37,7 +45,7 @@ export default class  ConfirmModal extends Vue{
   private rejectPromise: any
 
   private showConfirm(){
-    this.ref['confirm-modal'].show()
+    this.$modal.show(`${this.name}`)
 
     return new Promise((resolve, reject) => {
       this.resolvePromise = resolve
@@ -46,7 +54,7 @@ export default class  ConfirmModal extends Vue{
 
   }
   private hideConfirm(){
-    this.ref['confirm-modal'].hide()
+    this.$modal.hide(`${this.name}`)
   }
   _confirm():any {
     this.hideConfirm()

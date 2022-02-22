@@ -423,6 +423,7 @@ export default class CustomizationProcess extends Vue {
 
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
+    let shadow_dom = this.$root.$options.shadowRoot;
     productFonts.forEach((fonts: any, key: number) => {
       let fontNameParam = fonts.file_url.split('/').reverse()
       fontNameParam = fontNameParam[0].split('.')
@@ -438,6 +439,12 @@ export default class CustomizationProcess extends Vue {
       style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
       headElement.appendChild(style_tag)
       $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
+      if(shadow_dom) {
+        $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
+        setTimeout(() => {
+          $(shadow_dom).find("#delete_after_load").remove()
+        }, 100)
+      }
       setTimeout(() => {
         $("#delete_after_load").remove()
       }, 100)

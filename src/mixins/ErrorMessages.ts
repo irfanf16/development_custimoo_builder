@@ -53,4 +53,21 @@ export default class ErrorMessages extends Vue{
       });
     })
   }
+
+  public showErrorValidation(errors: Record<any, any>[string]):void{
+    const errArr: string[] = [];
+     Object.keys(errors).map((field: string) => {
+       errArr.push(errors[field]);
+     });
+     errArr.forEach(element => {
+       Vue.$toast.open({
+         message: element,
+         type: 'error',
+         dismissible: true,
+         duration: 5000,
+         position: 'bottom-left'
+       });
+     })
+   }
+  
 }
