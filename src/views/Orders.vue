@@ -13,6 +13,7 @@
 
 import {Component, Mixins} from 'vue-property-decorator'
 import Order from './Order.vue';
+import {http} from "@/httpCommon";
 
 
 @Component<Orders>({
@@ -20,13 +21,34 @@ import Order from './Order.vue';
     Order
   },
   async mounted() {
-    let res = await this.$store.dispatch('getOrders')
-    this.customer_orders = res.data.data
+    this.getOrders();
   }
 })
 
 export default class Orders extends Mixins() {
   public customer_orders = []
+
+  public async getOrders(params:string){
+    const res =  await http.get('order').then((successResponse) => {
+      let response_data = successResponse.data;
+      this.showLoader = false
+      if(response_data.success) {
+        this.customer_orders = response_data.result.data;
+        this.makePagination(res.data.result)
+      }
+      console.log("shsha", successResponse)
+
+    }).catch((errorResponse) => {
+      console.log("error", errorResponse)
+    })
+  }
+
+  public makePagination(data:Record<any, any>){
+    this.pagination.currentPage = data.current_page;
+    this.pagination.rows = data.total;
+    this.pagination.perPage = data.per_page;
+    this.pagination.total = data.total;
+  }
 }
 </script>
 
