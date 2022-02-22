@@ -13,30 +13,9 @@
       <b-collapse :id="`accordion-${index}`" accordion="my-accordion" role="tabpanel">
         <b-tabs content-class="mt-3">
           <template v-if="order">
-            <b-tab :key="i" v-for="(item, i) in order.factories">
-              <template #title>
-                {{item.name}}
-              </template>
-              <div class="order-flow">
-                <div class="order-step active">Order<br>Created
-              </div>
-              <div class="order-step">
-                Artwork<br>Approval
-              </div>O
-              <div class="order-step">
-                Sample<br>Design
-              </div>
-              <div class="order-step">
-                In<br>Production
-              </div>
-              <div class="order-step">
-                Order<br>Shipped
-              </div>
-              <div class="order-step">
-                Order<br>Completed
-              </div>
-              </div>
-            </b-tab>
+            <b-table striped hover :fields="items" :items="order.factories">
+
+            </b-table>
           </template>
         </b-tabs>
       </b-collapse>
@@ -63,6 +42,9 @@ Vue.filter('reformDate', function(value:string) {
 export default class Order extends Mixins() {
   @Prop({required: true}) order!: Record<any, any>
   @Prop({required: true}) index!: number
+  public items:Record<any, any>=[
+    {key: 'name', label: 'Factory Name'},
+    {key: 'actions', label: 'Order Detail'},]
 }
 </script>
 
