@@ -14,6 +14,7 @@ import {log} from "fabric/fabric-impl";
 import {getClosestColor} from "@/pantoneColor";
 const ProductAttributes:Module<any, any> = {
   state: {
+    searchLoader: false,
     lockerActiveTabIndex:0,
     lockerTabsIndex:0,
     products:[],
@@ -155,6 +156,9 @@ const ProductAttributes:Module<any, any> = {
       } else {
         state.products = payload.products;
       }
+    },
+    SET_SEARCH_LOADER(state: Record<any, any>, payload: boolean){
+      state.searchLoader = payload;
     },
     // DELETE_PRODUCT(state: Record<any, any>, logoIndex: number){
     //   console.log("deleteeeeeee", state.products, state.selectedIndex)
@@ -814,6 +818,9 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
+    getSearchLoader: state => {
+      return state.searchLoader
+    },
     getEditLockerProduct: state => {
       return state.editLockerProduct
     },
@@ -977,6 +984,9 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   actions: {
+    setSearchLoader({commit}, payload){
+      commit('SET_SEARCH_LOADER', payload)
+    },
     setActiveTab({commit}, payload){
       commit('SET_ACTIVE_TAB', payload)
     },
