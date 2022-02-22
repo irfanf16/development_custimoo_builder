@@ -1272,8 +1272,8 @@ const ProductAttributes:Module<any, any> = {
       })
     },
 
-    async getOrders({commit}, payload:string|''){
-      const res = await http.get('order'+payload)
+    async getOrders({commit}){
+      const res = await http.get('order')
       return res
     }
 

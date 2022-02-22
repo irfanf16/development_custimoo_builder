@@ -22,8 +22,8 @@
       <tbody>
       <template v-for="(cart_item) in cartItems">
         <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
-          <td><b-img style="width: 80px" thumbnail fluid :src="factory_product.front_image" alt="Front Design"></b-img>
-            <b-img style="width: 80px" thumbnail fluid :src="factory_product.back_image" alt="Back Design"></b-img>
+          <td><b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
+            <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
 
           </td>
           <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>
@@ -77,6 +77,8 @@ import {findIndex} from "lodash";
     export default class CartModal extends Mixins(ErrorMessages, handleMainProducts) {
 
       public viewLoader = false;
+      private storageUrl = process.env.VUE_APP_STORAGE_URL
+
       public hide() {
         this.$modal.hide('cart-modal')
       }
