@@ -58,6 +58,17 @@
               </div>
             </div>
 
+            <div class="p-2">
+              <div class="comment-box d-flex gap-1">
+              <span class="comment-avatar close"><BIconX /></span>
+              <span class="comment-avatar">GY</span>
+                <b-form-textarea rows="2" placeholder="Write your comment here..." />
+                <button class="align-self-end btn btn-dark bordered">
+                  <BIconChatDots />
+                </button>
+              </div>
+            </div>
+
             <div class="comment-button text-left px-2">
               <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>
             </div>
@@ -108,6 +119,39 @@
             </div>
             <div class="activity-text p-2 fs-2 text-muted">
               Your artwork is approved by the factory.
+            </div>
+
+            <div class="comment-row px-2 pb-2">
+              <div>
+                asdasd
+              </div>
+            </div>
+
+            <div class="comment-button text-left px-2">
+              <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>
+            </div>
+          </div>
+        </div>
+        <div class="activity-status">
+          <div class="activity-icon">
+            <BIconXDiamond />
+          </div>
+
+          <div class="activity-content">
+            <div class="activity-title">
+              Design Sample
+              <span class="date-time">
+                12-Feb-2022 14:40
+              </span>
+            </div>
+            <div class="images-grid p-2 d-flex gap-1">
+              <div class="d-flex flex-wrap gap-1">
+                <img src="img/images/image-product.png" alt="" :key="item" v-for="item in 7">
+              </div>
+              <div class="actions" v-if="false">
+                <button class="btn reject" @click="$modal.show('rejection-modal')"><BIconXSquareFill /></button>
+                <button class="btn approve"><BIconCheckSquareFill /></button>
+              </div>
             </div>
 
             <div class="comment-button text-left px-2">
@@ -316,6 +360,62 @@ export default class Order extends Mixins() {
           }
         }
       }
+    }
+  }
+
+  .comment-box{
+    width: 100%;
+    max-width: 600px;
+    background: #efefef;
+    padding:0.7rem;
+    border-radius: 5px;
+    border: 1px solid #e6e6e6;
+    position: relative;
+
+    textarea{
+      border: none;
+      resize: none;
+    }
+
+    .comment-avatar{
+      display: flex;
+      font-size: 1rem;
+      text-transform: uppercase;
+      height: 30px;
+      width: 30px;
+      flex-shrink: 0;
+      background: #009eda;
+      color: #fff;
+      align-items: center;
+      justify-content: center;
+      border-radius: 1000px;
+      //make mixin of above rule
+
+      &.close{
+        background: #c80b0b;
+        opacity: 0.9;
+        height: 22px;
+        width: 22px;
+        font-size: 1.1rem;
+        position: absolute;
+        top: -11px;
+        right: -11px;
+        cursor: pointer;
+      }
+    }
+
+    button{
+      flex-shrink: 0;
+    }
+  }
+
+  .comment-row{
+    display: flex;
+
+    &>div{
+      background: #E1E6EA;
+      padding: 0.5rem 0.7rem;
+      border-radius: 5px;
     }
   }
 }
