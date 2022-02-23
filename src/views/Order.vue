@@ -1,82 +1,121 @@
 <template>
   <div class="page-wrapper m-lg-4" v-cloak>
-
     <div class="order-wrapper">
-      <div class="d-flex justify-content-between align-items-center" v-b-toggle.accordion-0>
-        <div class="fs-4 font-weight-bolder order-title p-2">
-          {{ order.created_at | reformDate }}
-          Order  {{ order.order_no }}
-          {{order.product_names ? order.product_names : ''}}
-        </div>
-        <div class="fs-4 font-weight-bolder order-title p-2 chevron"><BIconChevronDown /></div>
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="fs-4 font-weight-bolder order-title p-2">Order # 12331</div>
+<!--        <div class="fs-4 font-weight-bolder order-title p-2 chevron"><BIconChevronDown /></div>-->
       </div>
-      <b-collapse :id="`accordion-${index}`" accordion="my-accordion" role="tabpanel">
-        <b-tabs content-class="mt-3">
-          <template v-if="order">
-            <b-table striped hover :fields="items" :items="order.factories">
 
-            </b-table>
+      <b-tabs content-class="mt-3">
+        <b-tab :key="i" v-for="(item, i) in 3">
+          <template #title>
+            Factory {{item}}
           </template>
-        </b-tabs>
 
-        <div class="order-activities">
-          <div class="activity-status active">
-            <div class="activity-icon">
-              <BIconLightningFill />
+          <div class="order-flow">
+            <div class="order-step active">
+              Order<br>Created
             </div>
-
-            <div class="activity-content">
-              <div class="activity-title">
-                Order Created
-                <span class="date-time">
-                  12-Feb-2022 14:40
-                </span>
-              </div>
-              <div class="images-grid p-2 d-flex gap-1">
-                <div class="d-flex flex-wrap gap-1">
-                  <img src="img/images/image-product.png" alt="">
-                  <img src="img/images/image-product.png" alt="">
-                  <img src="img/images/image-product.png" alt="">
-                  <img src="img/images/image-product.png" alt="">
-                  <img src="img/images/image-product.png" alt="">
-                  <img src="img/images/image-product.png" alt="">
-                </div>
-                <div class="actions">
-                  <button class="btn reject" @click="$modal.show('rejection-modal')"><BIconXSquareFill /></button>
-                  <button class="btn approve"><BIconCheckSquareFill /></button>
-                </div>
-              </div>
+            <div class="order-step">
+              Artwork<br>Approval
+            </div>
+            <div class="order-step">
+              Sample<br>Design
+            </div>
+            <div class="order-step">
+              In<br>Production
+            </div>
+            <div class="order-step">
+              Order<br>Shipped
+            </div>
+            <div class="order-step">
+              Order<br>Completed
             </div>
           </div>
-          <div class="activity-status active">
-            <div class="activity-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"/>
-                <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"/>
-              </svg>
-            </div>
+        </b-tab>
+      </b-tabs>
 
-            <div class="activity-content">
-              <div class="activity-title">
-                Order Rejected
-                <span class="date-time">
+      <div class="order-activities">
+        <div class="activity-status">
+          <div class="activity-icon">
+            <BIconLightningFill />
+          </div>
+
+          <div class="activity-content">
+            <div class="activity-title">
+              Artwork Created
+              <span class="date-time">
                   12-Feb-2022 14:40
                 </span>
+            </div>
+            <div class="images-grid p-2 d-flex gap-1">
+              <div class="d-flex flex-wrap gap-1">
+                <img src="img/images/image-product.png" alt="" :key="item" v-for="item in 7">
               </div>
-              <div class="image-feedback d-flex flex-wrap p-2 gap-1">
-                <div class="feedback-row" :key="item" v-for="item in 3">
-                  <div class="feedback-image">
-                    <img src="img/images/image-product.png" alt="">
-                  </div>
-                  <div class="feedback-text">
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci, consequuntur eos iusto omnis quia voluptate? Aliquam...
-                  </div>
-                </div>
+              <div class="actions">
+                <button class="btn reject" @click="$modal.show('rejection-modal')"><BIconXSquareFill /></button>
+                <button class="btn approve"><BIconCheckSquareFill /></button>
               </div>
+            </div>
+
+            <div class="comment-button text-left px-2">
+              <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>
             </div>
           </div>
         </div>
-      </b-collapse>
+        <div class="activity-status">
+          <div class="activity-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"/>
+              <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"/>
+            </svg>
+          </div>
+
+          <div class="activity-content">
+            <div class="activity-title">
+              Artwork Rejected
+              <span class="date-time">
+                  12-Feb-2022 14:40
+                </span>
+            </div>
+            <div class="image-feedback p-2">
+              <div class="feedback-row d-flex flex-column">
+                <div class="feedback-images">
+                  <img src="img/images/image-product.png" alt="" :key="item" v-for="item in 7">
+                </div>
+                <div class="feedback-text fs-2">
+                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci, consequuntur eos iusto omnis quia voluptate? Aliquam...
+                </div>
+              </div>
+            </div>
+
+            <div class="comment-button text-left px-2">
+              <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>
+            </div>
+          </div>
+        </div>
+        <div class="activity-status">
+          <div class="activity-icon">
+            <BIconCheck2 />
+          </div>
+
+          <div class="activity-content">
+            <div class="activity-title">
+              Artwork Approved
+              <span class="date-time">
+                12-Feb-2022 14:40
+              </span>
+            </div>
+            <div class="activity-text p-2 fs-2 text-muted">
+              Your artwork is approved by the factory.
+            </div>
+
+            <div class="comment-button text-left px-2">
+              <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <modal :width="1000"
@@ -124,13 +163,8 @@
 
 <script lang="ts">
 
-import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
-import moment from "moment";
-Vue.filter('reformDate', function(value:string) {
-  if (value) {
-    return moment(value).format('MM/DD/YYYY')
-  }
-})
+import {Component, Mixins} from 'vue-property-decorator'
+
 
 @Component<Order>({
   components: {
@@ -139,11 +173,7 @@ Vue.filter('reformDate', function(value:string) {
 })
 
 export default class Order extends Mixins() {
-  @Prop({required: true}) order!: Record<any, any>
-  @Prop({required: true}) index!: number
-  public items:Record<any, any>=[
-    {key: 'name', label: 'Factory Name'},
-    {key: 'actions', label: 'Order Detail'},]
+
 }
 </script>
 
@@ -270,7 +300,6 @@ export default class Order extends Mixins() {
         gap: 0.7rem;
         background: #E1E6EA;
         border-radius: 5px;
-        max-width: 300px;
         flex-shrink: 0;
         transition: 0.2s ease all;
         cursor: pointer;
@@ -279,7 +308,9 @@ export default class Order extends Mixins() {
           box-shadow: inset 0 0 0 1000px rgba(0,0,0,0.1);
         }
 
-        .feedback-image{
+        .feedback-images{
+          display: flex;
+          gap: 10px;
           img{
             height: 100px;
           }
