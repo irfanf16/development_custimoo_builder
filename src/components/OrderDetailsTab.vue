@@ -82,7 +82,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
 import {compact} from 'lodash';
 
-import {compact} from 'lodash';
 type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
 @Component<OrderDetailsTab>({
@@ -170,14 +169,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
 
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
-  }
-
-   get customTextObjects(): Record<any, any>[] {
-    return this.$store.getters.customTextObjects;
-  }
-
-  get customLogoObjects(): Record<any, any>[] {
-    return compact(this.$store.getters.customLogoObjects);
   }
 
   get actionBeforeLogin(): string {
