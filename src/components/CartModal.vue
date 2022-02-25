@@ -94,6 +94,7 @@ import {findIndex} from "lodash";
           if (res.data.success){
             this.$store.dispatch('addToCart',[])
             this.showToast(res.data.message, 'SUCCESS');
+            this.showToast('Your pdf is generating', 'SUCCESS');
             this.viewLoader = false;
             this.hide()
           }

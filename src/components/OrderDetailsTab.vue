@@ -55,7 +55,7 @@
             </button>
           </template>
           <template v-else>
-            <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Add to Cart</button>
+            <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"   class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Add to Cart</button>
           </template>
 
 
@@ -195,6 +195,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   }
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$modal.show('loginModal')
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
       collectionAddmoreMode:false,
@@ -235,7 +236,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       let product_style = selected_product.productstyles[style_index];
       const product_style_id = product_style.id;
       let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
-      console.log('selectedDesign',selectedDesign)
       const product_design_id = selectedDesign[0].id;
       let product_models = this.$store.getters.getProductModels;
       let selected_model_index = this.$store.getters.getSelectedModelIndex;
@@ -254,6 +254,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
        self.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
        self.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
      }, 10)
+      let front_design = null
+      if(selectedDesign.length) {
+         front_design = (({ design_name, file_base_url }) => ({ design_name, file_base_url }))(selectedDesign[0].front_design);
+      }
       let post_data:Record<any, any> = {
         factory_product:{
           style_id:product_style_id,
@@ -272,6 +276,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
           defaultcolors: this.defaultColors,
           groupcolors: this.groupColors,
           colors:this.$store.getters.getLogosColors,
+          front_design:front_design,
           front_image: this.canvasImage.ref_front.toDataURL("image/png") ? this.canvasImage.ref_front.toDataURL("image/png") : null,
           back_image: this.canvasImage.ref_back.toDataURL("image/png") ? this.canvasImage.ref_back.toDataURL("image/png") : null
         }
