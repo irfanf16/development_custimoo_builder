@@ -61,7 +61,7 @@
             <div class="p-2">
               <div class="comment-box d-flex gap-1">
               <span class="comment-avatar close"><BIconX /></span>
-              <span class="comment-avatar">GY</span>
+              <span class="comment-avatar">YR</span>
                 <b-form-textarea rows="2" placeholder="Write your comment here..." />
                 <button class="align-self-end btn btn-dark bordered">
                   <BIconChatDots />
@@ -69,7 +69,7 @@
               </div>
             </div>
 
-            <div class="comment-button text-left px-2">
+            <div class="comment-button text-left px-2" v-if="false">
               <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>
             </div>
           </div>
@@ -121,14 +121,25 @@
               Your artwork is approved by the factory.
             </div>
 
-            <div class="comment-row px-2 pb-2">
-              <div>
-                asdasd
-              </div>
-            </div>
-
             <div class="comment-button text-left px-2">
               <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>
+            </div>
+
+            <div class="comment-row px-2 pb-2 d-flex gap-1 mt-3">
+              <div class="d-flex gap-1">
+                <span class="comment-avatar">GY</span>
+                <div class="comment-msg">
+                  <div class="comment-action">
+                    <button>
+                      <BIconChevronDown />
+                    </button>
+                  </div>
+                  Peyo da artwork c, saaleyo approve te karna e pena c taanu. 😏
+                </div>
+              </div>
+              <div class="comment-time">
+                12:30 PM
+              </div>
             </div>
           </div>
         </div>
@@ -222,6 +233,20 @@ export default class Order extends Mixins() {
 </script>
 
 <style lang="scss" scoped>
+@mixin avatar{
+  display: flex;
+  font-size: 1rem;
+  text-transform: uppercase;
+  height: 30px;
+  width: 30px;
+  flex-shrink: 0;
+  background: #009eda;
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1000px;
+}
+
 .order-wrapper{
   padding: 10px;
   background: #efefef;
@@ -378,18 +403,7 @@ export default class Order extends Mixins() {
     }
 
     .comment-avatar{
-      display: flex;
-      font-size: 1rem;
-      text-transform: uppercase;
-      height: 30px;
-      width: 30px;
-      flex-shrink: 0;
-      background: #009eda;
-      color: #fff;
-      align-items: center;
-      justify-content: center;
-      border-radius: 1000px;
-      //make mixin of above rule
+      @include avatar;
 
       &.close{
         background: #c80b0b;
@@ -410,12 +424,39 @@ export default class Order extends Mixins() {
   }
 
   .comment-row{
-    display: flex;
+    .comment-avatar{
+      @include avatar;
+      background: #42b983;
+    }
 
-    &>div{
+    .comment-msg{
       background: #E1E6EA;
-      padding: 0.5rem 0.7rem;
+      padding: 0.5rem 1.5rem 0.5rem 0.7rem;
       border-radius: 5px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      max-width: 800px;
+
+      .comment-action{
+        position: absolute;
+        right: 5px;
+        top: 3px;
+
+        button{
+          padding: 0;
+          border: none;
+          background: none;
+        }
+      }
+    }
+
+    .comment-time{
+      text-align: right;
+      font-size: 0.9em;
+      white-space: nowrap;
+      color: rgba(0,0,0,0.4);
+      align-self: flex-end;
     }
   }
 }
