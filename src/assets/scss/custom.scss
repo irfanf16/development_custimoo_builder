@@ -4346,6 +4346,27 @@ $fontSize: 0.5;
         color: #000;
     }
 }
+.btn-dark.medium{
+    border-color: #c1c1c1;
+    background-color: #c1c1c1;
+    color: #333;
+
+    &:hover{
+        background-color: #999;
+        color: #000;
+    }
+}
+.btn-dark.bordered{
+    border-color: #666;
+    background-color: transparent;
+    color: #333;
+
+    &:hover{
+        border-color: #333;
+        background-color: #333;
+        color: #fff;
+    }
+}
 
 .ql-editor{
     strong{
@@ -4447,7 +4468,7 @@ $fontSize: 0.5;
             top: 9px;
             left: 70px;
             right: 70px;
-            height: 2px;
+            height: 1px;
             background: #219F84;
         }
 
@@ -4456,8 +4477,7 @@ $fontSize: 0.5;
             text-align: center;
             color: #219F84;
             padding-top: 30px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1rem;
             min-width: 120px;
 
             &.active{
@@ -4478,7 +4498,7 @@ $fontSize: 0.5;
                 margin: 0 auto;
                 border-radius: 1000px;
                 background: #fff;
-                border: 2px solid #219F84;
+                border: 1px solid #219F84;
             }
         }
     }
@@ -4495,4 +4515,8 @@ $fontSize: 0.5;
             opacity: 1;
         }
     }
+}
+
+.text-underline{
+    text-decoration: underline;
 }
