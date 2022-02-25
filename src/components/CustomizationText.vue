@@ -126,7 +126,6 @@ export default class CustomizationText extends Vue {
   @Prop({required: true}) fontsColors!: any
   @Prop({required: true}) customTextIndex!: any
   @Prop({required: true}) fontOptions!: any
-  @Prop({required: true}) index!: any
   public selectedFont = null
   public colorImage = '/img/images/color-placeholder.png'
   public fontColorType!: string
