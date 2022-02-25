@@ -49,7 +49,7 @@
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" >{{editCart.cartId > 0 ? 'Update Item' : 'Add to Cart Collection'}}</button>
+            <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">{{editCart.cartId > 0 ? 'Update Item' : 'Add to Cart Collection'}}</button>
             <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
               <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
             </button>
@@ -250,10 +250,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       if(order_detail.custom_logos.length > 0) {
         order_detail.custom_logos.forEach(function(logo:Record<any, any>){ delete logo.base64_logo });
       }
-     setTimeout(() => {
-       self.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
-       self.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
-     }, 10)
+      self.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
+      self.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
       let post_data:Record<any, any> = {
         factory_product:{
           style_id:product_style_id,
