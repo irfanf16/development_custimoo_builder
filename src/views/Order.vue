@@ -121,7 +121,7 @@
               Your artwork is approved by the factory.
             </div>
 
-            <div class="comment-button d-flex text-left px-2 gap-2">
+            <div class="comment-button d-flex text-left flex-wrap px-2 gap-2">
               <button class="btn btn-secondary fs-2"><BIconUpload class="mr-1" /> Upload Design Sample</button>
               <a href="#!" class="text-info align-self-end"><BIconChatDots /> Add comment</a>
             </div>
@@ -217,7 +217,7 @@
               </div>
             </div>
 
-            <div class="comment-button d-flex text-left px-2 gap-2">
+            <div class="comment-button d-flex text-left flex-wrap px-2 gap-2">
               <button class="btn btn-secondary fs-2"><BIconUpload class="mr-1" /> Upload Design Sample</button>
               <a href="#!" class="text-info align-self-end"><BIconChatDots /> Add comment</a>
             </div>
@@ -239,7 +239,7 @@
               Your design sample is approved by the customer.
             </div>
 
-            <div class="comment-button d-flex text-left px-2 gap-2">
+            <div class="comment-button d-flex text-left flex-wrap px-2 gap-2">
               <button class="btn btn-secondary fs-2"><BIconPrinter class="mr-1" /> Put In Production</button>
               <a href="#!" class="text-info align-self-end"><BIconChatDots /> Add comment</a>
             </div>
@@ -298,7 +298,7 @@
               Your artwork is in production.
             </div>
 
-            <div class="comment-button d-flex text-left px-2 gap-2">
+            <div class="comment-button d-flex text-left flex-wrap px-2 gap-2">
               <button class="btn btn-secondary fs-2"><BIconTruck class="mr-1" /> Enter Shipping Details</button>
               <a href="#!" class="text-info align-self-end"><BIconChatDots /> Add comment</a>
             </div>
@@ -320,7 +320,7 @@
               The shipping no is 530483849.
             </div>
 
-            <div class="comment-button d-flex text-left px-2 gap-2">
+            <div class="comment-button d-flex text-left flex-wrap px-2 gap-2">
               <button class="btn btn-secondary fs-2"><BIconCursor class="mr-1" /> Track Order</button>
               <a href="#!" class="text-info align-self-end"><BIconChatDots /> Add comment</a>
             </div>
@@ -342,7 +342,7 @@
               The order is completed successfully.
             </div>
 
-            <div class="comment-button d-flex text-left px-2 gap-2">
+            <div class="comment-button d-flex text-left flex-wrap px-2 gap-2">
               <a href="#!" class="text-info align-self-end"><BIconChatDots /> Add comment</a>
             </div>
           </div>
@@ -557,6 +557,7 @@ export default class Order extends Mixins() {
         .feedback-images{
           display: flex;
           gap: 10px;
+          flex-wrap: wrap;
           img{
             height: 100px;
           }
