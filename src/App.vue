@@ -11,6 +11,8 @@ import Header from '@/components/Header.vue';
 import {LockerProducts} from "@/mixins/LockerProduct";
 
 import Echo from "laravel-echo";
+import {http} from "@/httpCommon";
+import ErrorMessages from "@/mixins/ErrorMessages";
 window.io = require('socket.io-client');
 
 // console.log(localStorage.getItem('access_tokens'))
@@ -31,7 +33,7 @@ window.Echo = new Echo({
   },
   async mounted() {
 
-  const token = this.$router.currentRoute.query.token
+    const token = this.$router.currentRoute.query.token
     if (token){
       let customer = await this.$store.dispatch('getCustomerFromToken', token)
       if (customer){
@@ -54,9 +56,17 @@ window.Echo = new Echo({
     window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e: Record<any,any>) => {
       this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
     })
+    window.Echo.channel(`orderfile.${customer.id}`).listen('OrderFileCreatedEvent',  (e: Record<any,any>) => {
+      if(e.design_file.length) {
+        this.downloadPdfFile(e.design_file)
+      } else {
+        this.showError('Pdf file could not be created')
+      }
+    })
   }
 })
-export default class App extends Mixins(LockerProducts) {
+export default class App extends Mixins(LockerProducts,ErrorMessages) {
+  public storageUrl = process.env.VUE_APP_STORAGE_URL
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
@@ -66,6 +76,17 @@ export default class App extends Mixins(LockerProducts) {
     if(newVal) {
       await this.$store.dispatch('GET_LOCKER_PRODUCTS')
     }
+  }
+
+  public downloadPdfFile(file_url:string) {
+    http.get('pdf/download?file_url='+this.storageUrl+file_url,{responseType:'blob'}).then((res:Record<any, any>) => {
+      let blob = new Blob([res.data],{type:res.headers['content-type']})
+      let link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = 'order_design.pdf';
+      link.click();
+      this.showToast('Pdf file created','SUCCESS')
+    })
   }
 
 }
