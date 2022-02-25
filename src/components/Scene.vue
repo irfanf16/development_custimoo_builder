@@ -265,7 +265,7 @@ export default class Scene extends Vue {
           }
           this.customLogoObjects[logo.logoIndex] = null
           if(this.mainPreview) {
-            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: logo.logoIndex, data: null});
+            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: logo.logoIndex, data: null, scene: self});
           }
           if(this.otherSideLogos[index]) {
             this.frontCanvas.remove(this.otherSideLogos[index])
@@ -282,7 +282,7 @@ export default class Scene extends Vue {
             }
             this.customLogoObjects[index] = null
             if(this.mainPreview) {
-              this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: index, data: null});
+              this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: index, data: null, scene: self});
             }
             if(this.otherSideLogos[index]) {
               this.frontCanvas.remove(this.otherSideLogos[index])
@@ -1721,7 +1721,7 @@ export default class Scene extends Vue {
           }
           this.customLogoObjects[logoIndex as number] = img
           if(this.mainPreview) {
-            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: logoIndex, data: img});
+            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: logoIndex, data: img, scene: self});
           }
         } else {
           this.logoObjects.push(img)
