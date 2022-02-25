@@ -141,6 +141,26 @@
                 12:30 PM
               </div>
             </div>
+
+            <div class="comment-row px-2 pb-2 d-flex gap-1 mt-3">
+              <div class="d-flex gap-1">
+                <span class="comment-avatar" style="background: tomato">AN</span>
+                <div class="comment-msg">
+                  <div class="comment-quote">
+                    Peyo da artwork c, saaleyo approve te karna e pena c taanu. 😏
+                  </div>
+                  <div class="comment-action">
+                    <button>
+                      <BIconChevronDown />
+                    </button>
+                  </div>
+                  Ah g ku nai enj e gal ae, je taada artwork nai approve karna te fer kida karna ae. 🙇‍♂️🙇
+                </div>
+              </div>
+              <div class="comment-time">
+                12:30 PM
+              </div>
+            </div>
           </div>
         </div>
         <div class="activity-status">
@@ -448,6 +468,19 @@ export default class Order extends Mixins() {
           border: none;
           background: none;
         }
+      }
+
+      .comment-quote{
+        background: rgba(255,255,255,0.9);
+        padding: 0.3rem 0.5rem;
+        font-style: italic;
+        color: #777;
+        border-radius: 5px;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
 
