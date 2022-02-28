@@ -12,24 +12,28 @@
             Factory {{item}}
           </template>
 
-          <div class="order-flow">
-            <div class="order-step active">
-              Order<br>Created
-            </div>
-            <div class="order-step">
-              Artwork<br>Approval
-            </div>
-            <div class="order-step">
-              Sample<br>Design
-            </div>
-            <div class="order-step">
-              In<br>Production
-            </div>
-            <div class="order-step">
-              Order<br>Shipped
-            </div>
-            <div class="order-step">
-              Order<br>Completed
+          <div class="fade-right overflow-hidden fade-gray">
+            <div class="overflow-auto hide-scroll">
+              <div class="order-flow">
+                <div class="order-step active">
+                  Order<br>Created
+                </div>
+                <div class="order-step">
+                  Artwork<br>Approval
+                </div>
+                <div class="order-step">
+                  Sample<br>Design
+                </div>
+                <div class="order-step">
+                  In<br>Production
+                </div>
+                <div class="order-step">
+                  Order<br>Shipped
+                </div>
+                <div class="order-step">
+                  Order<br>Completed
+                </div>
+              </div>
             </div>
           </div>
         </b-tab>
@@ -91,7 +95,7 @@
             </div>
             <div class="image-feedback p-2">
               <div class="feedback-row d-flex flex-column">
-                <div class="feedback-images">
+                <div class="feedback-images d-flex flex-wrap gap-1">
                   <img src="img/images/image-product.png" alt="" :key="item" v-for="item in 7">
                 </div>
                 <div class="feedback-text fs-2">
@@ -177,10 +181,10 @@
               </span>
             </div>
             <div class="images-grid p-2 d-flex gap-1">
-              <div class="d-flex flex-wrap gap-1">
+              <div class="d-flex flex-wrap gap-1 w-100">
                 <img src="img/images/image-product.png" alt="" :key="item" v-for="item in 7">
               </div>
-              <div class="actions" v-if="false">
+              <div class="actions flex-shrink-0" v-if="false">
                 <button class="btn reject" @click="$modal.show('rejection-modal')"><BIconXSquareFill /></button>
                 <button class="btn approve"><BIconCheckSquareFill /></button>
               </div>
@@ -208,7 +212,7 @@
             </div>
             <div class="image-feedback p-2">
               <div class="feedback-row d-flex flex-column">
-                <div class="feedback-images">
+                <div class="feedback-images d-flex flex-wrap gap-1">
                   <img src="img/images/image-product.png" alt="" :key="item" v-for="item in 7">
                 </div>
                 <div class="feedback-text fs-2">
@@ -422,6 +426,12 @@ export default class Order extends Mixins() {
   align-items: center;
   justify-content: center;
   border-radius: 1000px;
+
+  @media (max-width: 600px) {
+    height: 25px;
+    width: 25px;
+    font-size: 0.8rem;
+  }
 }
 
 .order-wrapper{
@@ -495,6 +505,8 @@ export default class Order extends Mixins() {
         }
       }
       .activity-content{
+        max-width: 100%;
+
         .activity-title{
           padding-left: 0.5rem;
           font-size: 1rem;
@@ -506,6 +518,7 @@ export default class Order extends Mixins() {
             margin-left: 5px;
             font-weight: normal;
             font-size: smaller;
+            white-space: nowrap;
           }
         }
 
@@ -536,6 +549,11 @@ export default class Order extends Mixins() {
           img{
             height: 150px;
             border-radius: 4px;
+
+            @media (max-width: 600px){
+              height: auto;
+              width: calc(50% - 0.5rem);
+            }
           }
         }
       }
@@ -555,11 +573,13 @@ export default class Order extends Mixins() {
         }
 
         .feedback-images{
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
           img{
             height: 100px;
+
+            @media (max-width: 600px){
+              height: auto;
+              width: calc(33.333333% - 0.34rem);
+            }
           }
         }
       }
@@ -575,9 +595,18 @@ export default class Order extends Mixins() {
     border: 1px solid #e6e6e6;
     position: relative;
 
+    @media (max-width: 600px) {
+      flex-direction: column;
+    }
+
     textarea{
       border: none;
       resize: none;
+
+      @media (max-width: 600px) {
+        height: 110px;
+        font-size: 1rem;
+      }
     }
 
     .comment-avatar{
@@ -602,6 +631,12 @@ export default class Order extends Mixins() {
   }
 
   .comment-row{
+    max-width: 100%;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+    }
+
     .comment-avatar{
       @include avatar;
       background: #42b983;
@@ -614,6 +649,8 @@ export default class Order extends Mixins() {
       display: flex;
       flex-direction: column;
       position: relative;
+      width: 100%;
+      flex-shrink: 1;
       max-width: 800px;
 
       .comment-action{
@@ -635,7 +672,6 @@ export default class Order extends Mixins() {
         color: #777;
         border-radius: 5px;
         margin-bottom: 5px;
-        white-space: nowrap;
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
