@@ -3,6 +3,7 @@ import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
 import Cart from '../views/Cart.vue'
 import Order from '../views/Order.vue'
+import OrderDetail from '../views/OrderDetail.vue'
 import Orders from '../views/Orders.vue'
 import ViewScene from '../views/ViewScene.vue'
 import ThreeD from '../views/ThreeD.vue'
@@ -28,6 +29,11 @@ const routes: Array<RouteConfig> = [
     path: '/order',
     name: 'Order',
     component: Order
+  },
+  {
+    path: '/order/:order_id/detail',
+    name: 'OrderDetail',
+    component: OrderDetail
   },
   {
     path: '/orders',
