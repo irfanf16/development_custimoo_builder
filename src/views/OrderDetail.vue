@@ -68,10 +68,11 @@
                       <span class="comment-avatar">{{order.customer_name | initials}}</span>
                       <b-form-textarea rows="2" placeholder="Write your comment here..." v-model="item_status_activity.comment_object.message"/>
                       <div class="d-flex justify-content-end gap-1">
-                        <button class="align-self-end btn btn-dark bordered">
+                        <button class="align-self-end btn btn-dark bordered file-button">
+                          <input type="file" multiple @change="uploadFiles($event, item_status_activity)">
                           <BIconPaperclip />
                         </button>
-                        <button class="align-self-end btn btn-dark bordered">
+                        <button class="align-self-end btn btn-dark bordered" @click="addComment(item_status_activity)">
                           <BIconChatDots />
                         </button>
                       </div>
@@ -278,6 +279,62 @@ export default class OrderDetail extends Mixins() {
       }).catch((errorResponse: any) => {
         handleResponseException(errorResponse)
       });
+  }
+
+  async addComment(item_status_activity: Record<any, any> ) {
+    let self = this;
+    let comment_object = item_status_activity.comment_object;
+    if(comment_object.message) {
+      let form_data = new FormData();
+      form_data.append('message', comment_object.message);
+
+      // let request_data: {activity_id: number, message: string, files: []} = {
+      //   activity_id: item_status_activity.id, message: comment_object.message, files: []
+      // }
+      if(comment_object.files.length > 0 ) {
+        comment_object.files.forEach((comment_file: Record<any, any>) => {
+          form_data.append('files[]', comment_file.file_info);
+        });
+      }
+      let url = `order_item/${item_status_activity.id}/add_comment`
+      http.post(url, form_data)
+        .then((successResponse: Record<any, any>) => {
+          console.log("sdfdsfs");
+        }).catch((errorResponse: any) => {
+        handleResponseException(errorResponse)
+      });
+    } else {
+      alert("Can not send empty message");
+    }
+  }
+
+  async uploadFiles(event: Record<any, any>, item_status_activity: Record<any, any> ) {
+    let self = this;
+    let comment_object:Record<any, any> = self.getAddCommentDefaultObject();
+    comment_object.message = item_status_activity.comment_object.message;
+    comment_object.files = [];
+    let uploaded_files = event.target.files;
+    for(let uploaded_file of uploaded_files) {
+      let file_preview = await self.createFilePreview(uploaded_file)
+      comment_object.files.push({file_info: uploaded_file, file_preview: file_preview})
+    }
+    item_status_activity.comment_object = comment_object;
+  }
+
+  async createFilePreview(file:File) {
+    let result_base64 = await new Promise((resolve) => {
+      let fileReader = new FileReader();
+      fileReader.onload = (e) => resolve(fileReader.result);
+      fileReader.readAsDataURL(file);
+    });
+    return result_base64;
+  }
+
+  getAddCommentDefaultObject() {
+    return {
+      message: null,
+      files: []
+    }
   }
 
 
