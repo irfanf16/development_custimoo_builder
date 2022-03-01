@@ -11,6 +11,7 @@ import ShareRoster from '../views/ShareRoster.vue'
 import CustomizationProcess from '../views/CustomizationProcess.vue'
 import ConfirmOrder from '../views/ConfirmOrder.vue'
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
+import OrderListing from "@/views/OrderListing.vue";
 
 Vue.use(VueRouter)
 
@@ -29,6 +30,11 @@ const routes: Array<RouteConfig> = [
     path: '/order',
     name: 'Order',
     component: Order
+  },
+  {
+    path: '/customer-orders',
+    name: 'CustomerOrders',
+    component: OrderListing
   },
   {
     path: '/order/:order_id/detail',

@@ -5,6 +5,8 @@ import ShareRoster from '../views/ShareRoster.vue'
 import ConfirmOrder from '../views/ConfirmOrder.vue'
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
 
+
+
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
