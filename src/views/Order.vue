@@ -68,7 +68,8 @@
               <span class="comment-avatar">YR</span>
                 <b-form-textarea rows="2" placeholder="Write your comment here..." />
                 <div class="d-flex justify-content-end gap-1">
-                  <button class="align-self-end btn btn-dark bordered">
+                  <button class="align-self-end btn btn-dark bordered file-button">
+                    <input type="file">
                     <BIconPaperclip />
                   </button>
                   <button class="align-self-end btn btn-dark bordered">
