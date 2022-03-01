@@ -67,9 +67,15 @@
               <span class="comment-avatar close"><BIconX /></span>
               <span class="comment-avatar">YR</span>
                 <b-form-textarea rows="2" placeholder="Write your comment here..." />
-                <button class="align-self-end btn btn-dark bordered">
-                  <BIconChatDots />
-                </button>
+                <div class="d-flex justify-content-end gap-1">
+                  <button class="align-self-end btn btn-dark bordered file-button">
+                    <input type="file">
+                    <BIconPaperclip />
+                  </button>
+                  <button class="align-self-end btn btn-dark bordered">
+                    <BIconChatDots />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -135,11 +141,25 @@
                 <span class="comment-avatar">GY</span>
                 <div class="comment-msg">
                   <div class="comment-action">
-                    <button>
+                    <button ref="anchorEl" @click="showPopper">
                       <BIconChevronDown />
                     </button>
                   </div>
                   Peyo da artwork c, saaleyo approve te karna e pena c taanu. 😏
+
+                  <Popper
+                    :is-open="show"
+                    :anchor-el="$refs.anchorEl"
+                    :on-close="hidePopper"
+                  >
+                    <aside id="popper-content" class="custom-popper">
+                      <ul>
+                        <li><a href="#!"><BIconReply /> Reply</a></li>
+                        <li><a href="#!"><BIconPencil /> Edit</a></li>
+                        <li><a href="#!"><BIconTrash /> Delete</a></li>
+                      </ul>
+                    </aside>
+                  </Popper>
                 </div>
               </div>
               <div class="comment-time">
@@ -398,18 +418,25 @@
 </template>
 
 <script lang="ts">
-
 import {Component, Mixins} from 'vue-property-decorator'
-
+import { Popper } from 'popper-vue'
+import 'popper-vue/dist/popper-vue.css'
 
 @Component<Order>({
   components: {
-
+    Popper
   },
 })
 
 export default class Order extends Mixins() {
+  private show = false;
 
+  private showPopper () {
+    this.show = !this.show
+  }
+  private hidePopper () {
+    this.show = false
+  }
 }
 </script>
 

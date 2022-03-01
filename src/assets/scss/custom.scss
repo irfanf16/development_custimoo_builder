@@ -4522,6 +4522,24 @@ $fontSize: 0.5;
     }
 }
 
+.file-button{
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    input{
+        appearance: none;
+        display: block;
+        position: absolute;
+        opacity: 0;
+        height: 1000px;
+        width: 1000px;
+        z-index: 100;
+        bottom: 0;
+        right: 0;
+        cursor: pointer;
+    }
+}
+
 .vm--modal {
     //overflow-y: auto;
 
@@ -4537,4 +4555,49 @@ $fontSize: 0.5;
 
 .text-underline{
     text-decoration: underline;
+}
+
+.custom-popper.popper-vue{
+    background: #fff;
+    padding: 7px 10px;
+    box-shadow: 1px 1px 10px 1px var(--arrow-shadow-color);
+    z-index: 1000;
+    border-radius: 5px;
+    animation: fadeInUp 0.15s ease-out;
+
+    &>[x-arrow]{
+        &::before{
+            box-shadow: none;
+        }
+    }
+
+    ul{
+        padding: 0;
+
+        li{
+            &+li{
+                //border-top: 1px solid #eee;
+            }
+
+            a{
+                display: block;
+                padding: 4px 7px;
+                color: #666;
+                svg{
+                    margin-right: 5px;
+                }
+            }
+        }
+    }
+}
+
+@keyframes fadeInUp {
+    from{
+        opacity: 0;
+        top: 30px;
+    }
+    to{
+        opacity: 1;
+        top: 0px;
+    }
 }

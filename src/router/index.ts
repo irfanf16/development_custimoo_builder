@@ -12,6 +12,8 @@ import CustomizationProcess from '../views/CustomizationProcess.vue'
 import ConfirmOrder from '../views/ConfirmOrder.vue'
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
 import OrderListing from "@/views/OrderListing.vue";
+import Dashboard from "@/views/Dashboard.vue";
+
 
 Vue.use(VueRouter)
 
@@ -25,6 +27,11 @@ const routes: Array<RouteConfig> = [
     path: '/cart',
     name: 'Cart',
     component: Cart
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component:Dashboard
   },
   {
     path: '/order',
