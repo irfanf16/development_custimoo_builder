@@ -53,29 +53,26 @@
                     </template>
                   </div>
 <!--                  <div class="actions" v-if="[order_item.status].includes('test_sample_created')">-->
-                  <div class="actions" >
+                  <div class="actions">
                     <button class="btn reject" @click="$modal.show('rejection-modal')"><BIconXSquareFill /></button>
                     <button class="btn approve"><BIconCheckSquareFill /></button>
                   </div>
                 </div>
                 <div class="comment-button text-left px-2">
-                  <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>
+                  <a class="text-info" @click="item_status_activity.add_comment = !item_status_activity.add_comment"><BIconChatDots /> Add comment</a>
                 </div>
-
-                <div class="p-2">
-                  <div class="comment-box d-flex gap-1">
-                    <span class="comment-avatar close"><BIconX /></span>
-                    <span class="comment-avatar">{{order.customer_name | initials}}</span>
-                    <b-form-textarea rows="2" placeholder="Write your comment here..." />
-                    <button class="align-self-end btn btn-dark bordered">
-                      <BIconChatDots />
-                    </button>
+                <template v-if="item_status_activity.add_comment">
+                  <div class="p-2">
+                    <div class="comment-box d-flex gap-1">
+                      <span class="comment-avatar close"  @click="item_status_activity.add_comment = false"><BIconX /></span>
+                      <span class="comment-avatar">{{order.customer_name | initials}}</span>
+                      <b-form-textarea rows="2" placeholder="Write your comment here..." v-model="item_status_activity.comment_object.message"/>
+                      <button class="align-self-end btn btn-dark bordered" @click="addComment(item_status_activity, )">
+                        <BIconChatDots />
+                      </button>
+                    </div>
                   </div>
-                </div>
-
-                <div class="comment-button text-left px-2" v-if="false">
-                  <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>
-                </div>
+                </template>
 
               </div>
             </div>
