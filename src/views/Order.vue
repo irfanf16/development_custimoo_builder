@@ -67,9 +67,14 @@
               <span class="comment-avatar close"><BIconX /></span>
               <span class="comment-avatar">YR</span>
                 <b-form-textarea rows="2" placeholder="Write your comment here..." />
-                <button class="align-self-end btn btn-dark bordered">
-                  <BIconChatDots />
-                </button>
+                <div class="d-flex justify-content-end gap-1">
+                  <button class="align-self-end btn btn-dark bordered">
+                    <BIconPaperclip />
+                  </button>
+                  <button class="align-self-end btn btn-dark bordered">
+                    <BIconChatDots />
+                  </button>
+                </div>
               </div>
             </div>
 
