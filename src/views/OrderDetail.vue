@@ -67,9 +67,17 @@
                       <span class="comment-avatar close"  @click="item_status_activity.add_comment = false"><BIconX /></span>
                       <span class="comment-avatar">{{order.customer_name | initials}}</span>
                       <b-form-textarea rows="2" placeholder="Write your comment here..." v-model="item_status_activity.comment_object.message"/>
-                      <button class="align-self-end btn btn-dark bordered" @click="addComment(item_status_activity, )">
-                        <BIconChatDots />
-                      </button>
+                      <div class="d-flex justify-content-end gap-1">
+                        <button class="align-self-end btn btn-dark bordered">
+                          <BIconPaperclip />
+                        </button>
+                        <button class="align-self-end btn btn-dark bordered">
+                          <BIconChatDots />
+                        </button>
+                      </div>
+<!--                      <button class="align-self-end btn btn-dark bordered" @click="addComment(item_status_activity, )">-->
+<!--                        <BIconChatDots />-->
+<!--                      </button>-->
                     </div>
                   </div>
                 </template>
