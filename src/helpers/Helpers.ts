@@ -2,6 +2,7 @@ import Store from '../store'
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {default as $} from "jquery";
+import Axios, {AxiosError} from "axios";
 
 const getLogoSettingsObject = () => {
   return {
@@ -299,5 +300,23 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number):Promise<
   }
 }
 
+const handleResponseException = (errorResponse: AxiosError | TypeError) => {
+  if("isAxiosError" in errorResponse) {
+    // errorResponse.response.data object have keys { exception, file, line, message, trace }
+    const { message } = errorResponse.response?.data;
+    console.error("Error (Axios): ", message)
+  } else {
+    console.error(`Error (${errorResponse.name}): `, {
+      name: errorResponse.name,
+      message: errorResponse.message,
+      stack: errorResponse.stack
+    })
+  }
+}
 
-export {getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo };
+
+
+export {
+  getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
+  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException
+};
