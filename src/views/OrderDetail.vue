@@ -76,112 +76,49 @@
                           <BIconChatDots />
                         </button>
                       </div>
-<!--                      <button class="align-self-end btn btn-dark bordered" @click="addComment(item_status_activity, )">-->
-<!--                        <BIconChatDots />-->
-<!--                      </button>-->
+                    </div>
+                  </div>
+                </template>
+                <template v-for="(activity_comment, acIdx) in item_status_activity.comments">
+                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-3" :key="`acIdx-${acIdx}`">
+                    <div class="d-flex gap-1">
+                      <span class="comment-avatar">GY</span>
+                      <div class="comment-msg">
+                        <div class="comment-action">
+                          <button ref="anchorEl" @click="showPopper">
+                            <BIconChevronDown />
+                          </button>
+                        </div>
+                        <template v-for="(comment_file, cfIdx) in activity_comment.files">
+                          <img :key="`cfIdx-${cfIdx}`" :src="`${storage_url}${comment_file.url}`" :alt="`${comment_file.name}`" width="100">
+                        </template>
+                        {{activity_comment.message}}
+
+                        <Popper
+                          :is-open="show"
+                          :anchor-el="$refs.anchorEl"
+                          :on-close="hidePopper"
+                        >
+                          <aside id="popper-content" class="custom-popper">
+                            <ul>
+                              <li><a href="#!"><BIconReply /> Reply</a></li>
+                              <li><a href="#!"><BIconPencil /> Edit</a></li>
+                              <li><a href="#!"><BIconTrash /> Delete</a></li>
+                            </ul>
+                          </aside>
+                        </Popper>
+                      </div>
+                    </div>
+                    <div class="comment-time">
+                      12:30 PM
                     </div>
                   </div>
                 </template>
 
+
               </div>
             </div>
           </template>
-<!--            <div class="activity-status">-->
-<!--              <div class="activity-icon">-->
-<!--                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">-->
-<!--                  <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"/>-->
-<!--                  <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"/>-->
-<!--                </svg>-->
-<!--              </div>-->
-
-<!--              <div class="activity-content">-->
-<!--                <div class="activity-title">-->
-<!--                  Artwork Rejected-->
-<!--                  <span class="date-time">-->
-<!--                  12-Feb-2022 14:40-->
-<!--                </span>-->
-<!--                </div>-->
-<!--                <div class="image-feedback p-2">-->
-<!--                  <div class="feedback-row d-flex flex-column">-->
-<!--                    <div class="feedback-images">-->
-<!--                      <img src="img/images/image-product.png" alt="" :key="item" v-for="item in 7">-->
-<!--                    </div>-->
-<!--                    <div class="feedback-text fs-2">-->
-<!--                      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci, consequuntur eos iusto omnis quia voluptate? Aliquam...-->
-<!--                    </div>-->
-<!--                  </div>-->
-<!--                </div>-->
-
-<!--                <div class="comment-button text-left px-2">-->
-<!--                  <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--            <div class="activity-status">-->
-<!--              <div class="activity-icon">-->
-<!--                <BIconCheck2 />-->
-<!--              </div>-->
-
-<!--              <div class="activity-content">-->
-<!--                <div class="activity-title">-->
-<!--                  Artwork Approved-->
-<!--                  <span class="date-time">-->
-<!--                12-Feb-2022 14:40-->
-<!--              </span>-->
-<!--                </div>-->
-<!--                <div class="activity-text p-2 fs-2 text-muted">-->
-<!--                  Your artwork is approved by the factory.-->
-<!--                </div>-->
-
-<!--                <div class="comment-button text-left px-2">-->
-<!--                  <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>-->
-<!--                </div>-->
-
-<!--                <div class="comment-row px-2 pb-2 d-flex gap-1 mt-3">-->
-<!--                  <div class="d-flex gap-1">-->
-<!--                    <span class="comment-avatar">GY</span>-->
-<!--                    <div class="comment-msg">-->
-<!--                      <div class="comment-action">-->
-<!--                        <button>-->
-<!--                          <BIconChevronDown />-->
-<!--                        </button>-->
-<!--                      </div>-->
-<!--                      Peyo da artwork c, saaleyo approve te karna e pena c taanu. 😏-->
-<!--                    </div>-->
-<!--                  </div>-->
-<!--                  <div class="comment-time">-->
-<!--                    12:30 PM-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--            <div class="activity-status">-->
-<!--              <div class="activity-icon">-->
-<!--                <BIconXDiamond />-->
-<!--              </div>-->
-
-<!--              <div class="activity-content">-->
-<!--                <div class="activity-title">-->
-<!--                  Design Sample-->
-<!--                  <span class="date-time">-->
-<!--                12-Feb-2022 14:40-->
-<!--              </span>-->
-<!--                </div>-->
-<!--                <div class="images-grid p-2 d-flex gap-1">-->
-<!--                  <div class="d-flex flex-wrap gap-1">-->
-<!--                    <img src="img/images/image-product.png" alt="" :key="item" v-for="item in 7">-->
-<!--                  </div>-->
-<!--                  <div class="actions" v-if="false">-->
-<!--                    <button class="btn reject" @click="$modal.show('rejection-modal')"><BIconXSquareFill /></button>-->
-<!--                    <button class="btn approve"><BIconCheckSquareFill /></button>-->
-<!--                  </div>-->
-<!--                </div>-->
-
-<!--                <div class="comment-button text-left px-2">-->
-<!--                  <a href="#!" class="text-info"><BIconChatDots /> Add comment</a>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
           </div>
         </b-tab>
       </b-tabs>
@@ -237,6 +174,7 @@
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import {handleResponseException} from "@/helpers/Helpers";
+import { Popper } from 'popper-vue'
 
 
 @Component<OrderDetail>({
@@ -245,7 +183,7 @@ import {handleResponseException} from "@/helpers/Helpers";
     self.getOrderDetail();
   },
   components: {
-
+    Popper
   },
   filters: {
     initials(value: string) {
@@ -299,7 +237,9 @@ export default class OrderDetail extends Mixins() {
       let url = `order_item/${item_status_activity.id}/add_comment`
       http.post(url, form_data)
         .then((successResponse: Record<any, any>) => {
-          console.log("sdfdsfs");
+          let response_data = successResponse.data;
+          console.log("sdfsdf", response_data.result);
+          item_status_activity.comments = response_data.result.activity_comments;
         }).catch((errorResponse: any) => {
         handleResponseException(errorResponse)
       });
@@ -335,6 +275,13 @@ export default class OrderDetail extends Mixins() {
       message: null,
       files: []
     }
+  }
+
+  private showPopper () {
+    //this.show = !this.show
+  }
+  private hidePopper () {
+    //this.show = false
   }
 
 
