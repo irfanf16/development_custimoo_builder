@@ -17,7 +17,7 @@ window.io = require('socket.io-client');
 window.Echo = new Echo({
   broadcaster: "socket.io",
   transports: ['websocket', 'polling', 'flashsocket'],
-  host: window.location.hostname + ':' + process.env.PORT,
+  host: window.location.hostname + ':' + process.env.SOCKET_PORT,
   auth: {
     headers: {
       Authorization: 'Bearer ' + localStorage.getItem('access_token'),
