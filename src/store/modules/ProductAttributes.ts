@@ -1311,12 +1311,6 @@ const ProductAttributes:Module<any, any> = {
         return res
       })
     },
-
-    async getOrders({commit}){
-      const res = await http.get('order')
-      return res
-    }
-
   }
 }
 export default ProductAttributes;

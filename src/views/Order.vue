@@ -63,18 +63,27 @@
             </div>
 
             <div class="p-2">
-              <div class="comment-box d-flex gap-1">
-              <span class="comment-avatar close"><BIconX /></span>
-              <span class="comment-avatar">YR</span>
-                <b-form-textarea rows="2" placeholder="Write your comment here..." />
-                <div class="d-flex justify-content-end gap-1">
-                  <button class="align-self-end btn btn-dark bordered file-button">
-                    <input type="file">
-                    <BIconPaperclip />
-                  </button>
-                  <button class="align-self-end btn btn-dark bordered">
-                    <BIconChatDots />
-                  </button>
+              <div class="comment-box">
+                <div class="d-flex gap-1">
+                  <span class="comment-avatar close"><BIconX /></span>
+                  <span class="comment-avatar">YR</span>
+                  <b-form-textarea rows="2" placeholder="Write your comment here..." />
+                  <div class="d-flex justify-content-end gap-1">
+                    <button class="align-self-end btn btn-dark bordered file-button">
+                      <input type="file">
+                      <BIconPaperclip />
+                    </button>
+                    <button class="align-self-end btn btn-dark bordered">
+                      <BIconChatDots />
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mt-2 upload-images">
+                  <div :key="item" v-for="item in 17">
+                    <span class="delete-image"><BIconXCircle /></span>
+                    <img src="img/images/image-product.png" alt="">
+                  </div>
                 </div>
               </div>
             </div>
@@ -654,6 +663,39 @@ export default class Order extends Mixins() {
 
     button{
       flex-shrink: 0;
+    }
+
+    .upload-images{
+      display: flex;
+      gap: 7px;
+      max-width: 100%;
+      overflow-x: auto;
+
+      &>div{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 80px;
+        border-radius: 5px;
+        overflow: hidden;
+        position: relative;
+        flex-shrink: 0;
+
+        .delete-image{
+          position: absolute;
+          z-index: 100;
+          top: 1px;
+          right: 3px;
+          cursor: pointer;
+        }
+
+        img{
+          width: auto;
+          height: auto;
+          max-width: 100%;
+          max-height: 100%;
+        }
+      }
     }
   }
 
