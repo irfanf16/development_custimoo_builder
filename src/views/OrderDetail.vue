@@ -52,7 +52,6 @@
                       <img :src="`${storage_url}${activity_file.url}`" alt="" :key="`fu-${fuIdx}`" >
                     </template>
                   </div>
-<!--                  <div class="actions" v-if="[order_item.status].includes('test_sample_created')">-->
                   <div class="actions">
                     <button class="btn reject" @click="$modal.show('rejection-modal')"><BIconXSquareFill /></button>
                     <button class="btn approve"><BIconCheckSquareFill /></button>
@@ -63,26 +62,38 @@
                 </div>
                 <template v-if="item_status_activity.add_comment">
                   <div class="p-2">
-                    <div class="comment-box d-flex gap-1">
-                      <span class="comment-avatar close"  @click="item_status_activity.add_comment = false"><BIconX /></span>
-                      <span class="comment-avatar">{{order.customer_name | initials}}</span>
-                      <b-form-textarea rows="2" placeholder="Write your comment here..." v-model="item_status_activity.comment_object.message"/>
-                      <div class="d-flex justify-content-end gap-1">
-                        <button class="align-self-end btn btn-dark bordered file-button">
-                          <input type="file" multiple @change="uploadFiles($event, item_status_activity)">
-                          <BIconPaperclip />
-                        </button>
-                        <button class="align-self-end btn btn-dark bordered" @click="addComment(item_status_activity)">
-                          <BIconChatDots />
-                        </button>
+                    <div class="comment-box">
+                      <div class="d-flex gap-1">
+                        <span class="comment-avatar close"  @click="item_status_activity.add_comment = false"><BIconX /></span>
+                        <span class="comment-avatar">{{order.customer_name | initials}}</span>
+                        <b-form-textarea rows="2" placeholder="Write your comment here..." v-model="item_status_activity.comment_object.message"/>
+                        <div class="d-flex justify-content-end gap-1">
+                          <button class="align-self-end btn btn-dark bordered file-button">
+                            <input :id="`item_status_activity_${item_status_activity.id}_uploader`" type="file" multiple @change="uploadFiles($event, item_status_activity)">
+                            <BIconPaperclip />
+                          </button>
+                          <button class="align-self-end btn btn-dark bordered" @click="addComment(item_status_activity)">
+                            <BIconChatDots />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="mt-2 upload-images">
+                        <div :key="`cfpIdx-${cfpIdx}`" v-for="(comment_file_preview, cfpIdx) in item_status_activity.comment_object.files">
+                          <span class="delete-image" @click="item_status_activity.comment_object.files.splice(cfpIdx, 1)"><BIconXCircle /></span>
+                          <img :src="comment_file_preview.file_preview" alt="">
+                        </div>
                       </div>
                     </div>
                   </div>
+
                 </template>
                 <template v-for="(activity_comment, acIdx) in item_status_activity.comments">
                   <div class="comment-row px-2 pb-2 d-flex gap-1 mt-3" :key="`acIdx-${acIdx}`">
                     <div class="d-flex gap-1">
-                      <span class="comment-avatar">GY</span>
+                      <span class="comment-avatar">
+                        {{activity_comment.user ? `${activity_comment.user.first_name} ${activity_comment.user.last_name}`  : ""  | initials}}
+                      </span>
                       <div class="comment-msg">
                         <div class="comment-action">
                           <button ref="anchorEl" @click="showPopper">
@@ -94,23 +105,22 @@
                         </template>
                         {{activity_comment.message}}
 
-                        <Popper
-                          :is-open="show"
-                          :anchor-el="$refs.anchorEl"
-                          :on-close="hidePopper"
-                        >
-                          <aside id="popper-content" class="custom-popper">
-                            <ul>
-                              <li><a href="#!"><BIconReply /> Reply</a></li>
-                              <li><a href="#!"><BIconPencil /> Edit</a></li>
-                              <li><a href="#!"><BIconTrash /> Delete</a></li>
-                            </ul>
-                          </aside>
-                        </Popper>
+<!--                        <Popper-->
+<!--                          :anchor-el="$refs.anchorEl"-->
+<!--                          :on-close="hidePopper"-->
+<!--                        >-->
+<!--                          <aside id="popper-content" class="custom-popper">-->
+<!--                            <ul>-->
+<!--                              <li><a href="#!"><BIconReply /> Reply</a></li>-->
+<!--                              <li><a href="#!"><BIconPencil /> Edit</a></li>-->
+<!--                              <li><a href="#!"><BIconTrash /> Delete</a></li>-->
+<!--                            </ul>-->
+<!--                          </aside>-->
+<!--                        </Popper>-->
                       </div>
                     </div>
                     <div class="comment-time">
-                      12:30 PM
+                      {{activity_comment.created_at | formatDate('HH:mm Do MMM YY ')}}
                     </div>
                   </div>
                 </template>
@@ -175,6 +185,7 @@ import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import {handleResponseException} from "@/helpers/Helpers";
 import { Popper } from 'popper-vue'
+import moment from "moment";
 
 
 @Component<OrderDetail>({
@@ -187,17 +198,28 @@ import { Popper } from 'popper-vue'
   },
   filters: {
     initials(value: string) {
-      let value_array = value.split(" ");
+      if(value) {
+        let value_array = value.split(" ");
 
-      // Select the first letter of the name
-      let first_letter = value.charAt(0);
-      let last_letter = "";
-      if(value_array.length > 1) {
-        last_letter = value_array[value_array.length - 1].charAt(0);
+        // Select the first letter of the name
+        let first_letter = value.charAt(0);
+        let last_letter = "";
+        if(value_array.length > 1) {
+          last_letter = value_array[value_array.length - 1].charAt(0);
+        }
+        let initial_letters = first_letter + last_letter;
+        // Return the initials
+        return initial_letters.toUpperCase();
+      } else {
+        return "";
       }
-      let initial_letters = first_letter + last_letter;
-      // Return the initials
-      return initial_letters.toUpperCase();
+
+    },
+    formatDate(value: string, format: string) {
+      if(!format) {
+        format = "MM-DD-YYYY"
+      }
+      return moment(value).format(format)
     }
   }
 })
@@ -225,10 +247,6 @@ export default class OrderDetail extends Mixins() {
     if(comment_object.message) {
       let form_data = new FormData();
       form_data.append('message', comment_object.message);
-
-      // let request_data: {activity_id: number, message: string, files: []} = {
-      //   activity_id: item_status_activity.id, message: comment_object.message, files: []
-      // }
       if(comment_object.files.length > 0 ) {
         comment_object.files.forEach((comment_file: Record<any, any>) => {
           form_data.append('files[]', comment_file.file_info);
@@ -238,8 +256,8 @@ export default class OrderDetail extends Mixins() {
       http.post(url, form_data)
         .then((successResponse: Record<any, any>) => {
           let response_data = successResponse.data;
-          console.log("sdfsdf", response_data.result);
-          item_status_activity.comments = response_data.result.activity_comments;
+          item_status_activity.comments.unshift(response_data.result.item_activity_comment);
+          item_status_activity.comment_object = self.getAddCommentDefaultObject()
         }).catch((errorResponse: any) => {
         handleResponseException(errorResponse)
       });
@@ -250,15 +268,12 @@ export default class OrderDetail extends Mixins() {
 
   async uploadFiles(event: Record<any, any>, item_status_activity: Record<any, any> ) {
     let self = this;
-    let comment_object:Record<any, any> = self.getAddCommentDefaultObject();
-    comment_object.message = item_status_activity.comment_object.message;
-    comment_object.files = [];
     let uploaded_files = event.target.files;
     for(let uploaded_file of uploaded_files) {
       let file_preview = await self.createFilePreview(uploaded_file)
-      comment_object.files.push({file_info: uploaded_file, file_preview: file_preview})
+      item_status_activity.comment_object.files.push({file_info: uploaded_file, file_preview: file_preview})
     }
-    item_status_activity.comment_object = comment_object;
+    event.target.files = null;
   }
 
   async createFilePreview(file:File) {
@@ -284,6 +299,25 @@ export default class OrderDetail extends Mixins() {
     //this.show = false
   }
 
+  public removePreviewFile(item_status_activity: Record<any, any>, file_index: number) {
+    item_status_activity.comment_object.files.splice(file_index, 1);
+    let input_id = `item_status_activity_${item_status_activity.id}_uploader`;
+
+  }
+
+  public removeFileFromInput(input_id: string, index: number) {
+    const data_transfer_object = new DataTransfer()
+    const input = document.getElementById(input_id) as HTMLInputElement
+    const { files } = input
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      if (index !== i)
+        data_transfer_object.items.add(file) // here you exclude the file. thus removing it.
+    }
+    input.files = data_transfer_object.files // Assign the updates list
+  }
+
 
 }
 </script>
@@ -301,6 +335,12 @@ export default class OrderDetail extends Mixins() {
   align-items: center;
   justify-content: center;
   border-radius: 1000px;
+
+  @media (max-width: 600px) {
+    height: 25px;
+    width: 25px;
+    font-size: 0.8rem;
+  }
 }
 
 .order-wrapper{
@@ -374,6 +414,8 @@ export default class OrderDetail extends Mixins() {
         }
       }
       .activity-content{
+        max-width: 100%;
+
         .activity-title{
           padding-left: 0.5rem;
           font-size: 1rem;
@@ -385,6 +427,7 @@ export default class OrderDetail extends Mixins() {
             margin-left: 5px;
             font-weight: normal;
             font-size: smaller;
+            white-space: nowrap;
           }
         }
 
@@ -415,6 +458,11 @@ export default class OrderDetail extends Mixins() {
           img{
             height: 150px;
             border-radius: 4px;
+
+            @media (max-width: 600px){
+              height: auto;
+              width: calc(50% - 0.5rem);
+            }
           }
         }
       }
@@ -434,10 +482,13 @@ export default class OrderDetail extends Mixins() {
         }
 
         .feedback-images{
-          display: flex;
-          gap: 10px;
           img{
             height: 100px;
+
+            @media (max-width: 600px){
+              height: auto;
+              width: calc(33.333333% - 0.34rem);
+            }
           }
         }
       }
@@ -453,9 +504,18 @@ export default class OrderDetail extends Mixins() {
     border: 1px solid #e6e6e6;
     position: relative;
 
+    @media (max-width: 600px) {
+      flex-direction: column;
+    }
+
     textarea{
       border: none;
       resize: none;
+
+      @media (max-width: 600px) {
+        height: 110px;
+        font-size: 1rem;
+      }
     }
 
     .comment-avatar{
@@ -477,9 +537,48 @@ export default class OrderDetail extends Mixins() {
     button{
       flex-shrink: 0;
     }
+
+    .upload-images{
+      display: flex;
+      gap: 7px;
+      max-width: 100%;
+      overflow-x: auto;
+
+      &>div{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 80px;
+        border-radius: 5px;
+        overflow: hidden;
+        position: relative;
+        flex-shrink: 0;
+
+        .delete-image{
+          position: absolute;
+          z-index: 100;
+          top: 1px;
+          right: 3px;
+          cursor: pointer;
+        }
+
+        img{
+          width: auto;
+          height: auto;
+          max-width: 100%;
+          max-height: 100%;
+        }
+      }
+    }
   }
 
   .comment-row{
+    max-width: 100%;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+    }
+
     .comment-avatar{
       @include avatar;
       background: #42b983;
@@ -492,6 +591,8 @@ export default class OrderDetail extends Mixins() {
       display: flex;
       flex-direction: column;
       position: relative;
+      width: 100%;
+      flex-shrink: 1;
       max-width: 800px;
 
       .comment-action{
@@ -504,6 +605,18 @@ export default class OrderDetail extends Mixins() {
           border: none;
           background: none;
         }
+      }
+
+      .comment-quote{
+        background: rgba(255,255,255,0.9);
+        padding: 0.3rem 0.5rem;
+        font-style: italic;
+        color: #777;
+        border-radius: 5px;
+        margin-bottom: 5px;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
 
