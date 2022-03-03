@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
+import Addresses from '../views/Addresses.vue'
 import Cart from '../views/Cart.vue'
 import Order from '../views/Order.vue'
 import OrderDetail from '../views/OrderDetail.vue'
@@ -32,6 +33,11 @@ const routes: Array<RouteConfig> = [
     path: '/dashboard',
     name: 'Dashboard',
     component:Dashboard
+  },
+  {
+    path: '/address',
+    name: 'Address',
+    component:Addresses
   },
   {
     path: '/order',
