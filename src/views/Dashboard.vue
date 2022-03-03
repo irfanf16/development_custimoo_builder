@@ -95,7 +95,7 @@
           </div>
           <div class="row">
             <div class="col my-4">
-              <button type="button" class="btn btn-outline-secondary w-50">Address book</button>
+              <router-link to="address" class="btn btn-outline-secondary w-50">Address book</router-link>
             </div>
           </div>
 <!--          <div class="row">-->
