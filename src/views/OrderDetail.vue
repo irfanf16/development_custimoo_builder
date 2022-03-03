@@ -3,7 +3,6 @@
     <div class="order-wrapper" v-if="order">
       <div class="d-flex justify-content-between align-items-center">
         <div class="fs-4 font-weight-bolder order-title p-2">Order # {{order.order_no}}</div>
-<!--        <div class="fs-4 font-weight-bolder order-title p-2 chevron"><BIconChevronDown /></div>-->
       </div>
 
       <b-tabs content-class="mt-3">
@@ -96,9 +95,6 @@
                       </span>
                       <div class="comment-msg">
                         <div class="comment-action" style="right: -165px">
-<!--                          <button :id="`activity_comment_${activity_comment.id}_popper`" :ref="`activity_comment_${activity_comment.id}_popper`" @click="$set(activity_comment, 'show_popper', !activity_comment.show_popper)">-->
-<!--                            <BIconChevronDown />-->
-<!--                          </button>-->
                           <ul class="fs-1 d-flex gap-2">
                               <li><a href="#!"><BIconReply /> Reply</a></li>
                               <li><a href="#!"><BIconPencil /> Edit</a></li>
@@ -109,23 +105,6 @@
                           <img :key="`cfIdx-${cfIdx}`" :src="`${storage_url}${comment_file.url}`" :alt="`${comment_file.name}`" width="100">
                         </template>
                         {{activity_comment.message}}
-
-<!--                        <template v-if="component_refs && component_refs[`activity_comment_${activity_comment.id}_popper`]">-->
-<!--                          <Popper-->
-<!--                            :is-open="activity_comment.show_popper"-->
-<!--                            :ref="`activity_comment_${activity_comment.id}_popper_component`"-->
-<!--                            :anchor-el="$refs[`activity_comment_${activity_comment.id}_popper`]"-->
-<!--                            :on-close="hidePopper"-->
-<!--                          >-->
-<!--                            <aside class="custom-popper">-->
-<!--                              <ul>-->
-<!--                                <li><a href="#!"><BIconReply /> Reply</a></li>-->
-<!--                                <li><a href="#!"><BIconPencil /> Edit</a></li>-->
-<!--                                <li><a href="#!"><BIconTrash /> Delete</a></li>-->
-<!--                              </ul>-->
-<!--                            </aside>-->
-<!--                          </Popper>-->
-<!--                        </template>-->
                       </div>
                     </div>
                     <div class="comment-time">
@@ -193,7 +172,6 @@
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import {handleResponseException} from "@/helpers/Helpers";
-import { Popper } from 'popper-vue'
 import moment from "moment";
 
 
@@ -203,7 +181,7 @@ import moment from "moment";
     self.getOrderDetail();
   },
   components: {
-    Popper
+
   },
   filters: {
     initials(value: string) {
@@ -301,12 +279,6 @@ export default class OrderDetail extends Mixins() {
     }
   }
 
-  private showPopper () {
-    this.show = !this.show
-  }
-  private hidePopper () {
-    this.show = false
-  }
 
   public removePreviewFile(item_status_activity: Record<any, any>, file_index: number) {
     item_status_activity.comment_object.files.splice(file_index, 1);
