@@ -47,8 +47,11 @@
                 </div>
                 <div class="images-grid p-2 d-flex gap-1">
                   <div class="d-flex flex-wrap gap-1">
-                    <template v-for="(activity_file, fuIdx) in item_status_activity.files">
-                      <img :src="`${storage_url}${activity_file.url}`" alt="" :key="`fu-${fuIdx}`" >
+                    <template v-for="(activity_item) in item_status_activity.activity_items">
+                      <template v-for="(activity_file, afIdx) in activity_item.activity_files">
+                        <img :src="`${storage_url}${activity_file.url}`" alt="" :key="`af-${afIdx}`" >
+                      </template>
+
                     </template>
                   </div>
                   <div class="actions">
