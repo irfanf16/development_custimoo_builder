@@ -3,7 +3,6 @@
     <div class="order-wrapper" v-if="order">
       <div class="d-flex justify-content-between align-items-center">
         <div class="fs-4 font-weight-bolder order-title p-2">Order # {{order.order_no}}</div>
-<!--        <div class="fs-4 font-weight-bolder order-title p-2 chevron"><BIconChevronDown /></div>-->
       </div>
 
       <b-tabs content-class="mt-3">
@@ -41,15 +40,18 @@
 
               <div class="activity-content">
                 <div class="activity-title">
-                  {{item_status_activity.status}}
+                  {{item_status_activity.message}}
                   <span class="date-time">
                   12-Feb-2022 14:40
                 </span>
                 </div>
                 <div class="images-grid p-2 d-flex gap-1">
                   <div class="d-flex flex-wrap gap-1">
-                    <template v-for="(activity_file, fuIdx) in item_status_activity.files">
-                      <img :src="`${storage_url}${activity_file.url}`" alt="" :key="`fu-${fuIdx}`" >
+                    <template v-for="(activity_item) in item_status_activity.activity_items">
+                      <template v-for="(activity_file, afIdx) in activity_item.activity_files">
+                        <img :src="`${storage_url}${activity_file.url}`" alt="" :key="`af-${afIdx}`" >
+                      </template>
+
                     </template>
                   </div>
                   <div class="actions">
@@ -95,28 +97,17 @@
                         {{activity_comment.user ? `${activity_comment.user.first_name} ${activity_comment.user.last_name}`  : ""  | initials}}
                       </span>
                       <div class="comment-msg">
-                        <div class="comment-action">
-                          <button ref="anchorEl" @click="showPopper">
-                            <BIconChevronDown />
-                          </button>
+                        <div class="comment-action" style="right: -165px">
+                          <ul class="fs-1 d-flex gap-2">
+                              <li><a href="#!"><BIconReply /> Reply</a></li>
+                              <li><a href="#!"><BIconPencil /> Edit</a></li>
+                              <li><a href="#!"><BIconTrash /> Delete</a></li>
+                          </ul>
                         </div>
                         <template v-for="(comment_file, cfIdx) in activity_comment.files">
                           <img :key="`cfIdx-${cfIdx}`" :src="`${storage_url}${comment_file.url}`" :alt="`${comment_file.name}`" width="100">
                         </template>
                         {{activity_comment.message}}
-
-<!--                        <Popper-->
-<!--                          :anchor-el="$refs.anchorEl"-->
-<!--                          :on-close="hidePopper"-->
-<!--                        >-->
-<!--                          <aside id="popper-content" class="custom-popper">-->
-<!--                            <ul>-->
-<!--                              <li><a href="#!"><BIconReply /> Reply</a></li>-->
-<!--                              <li><a href="#!"><BIconPencil /> Edit</a></li>-->
-<!--                              <li><a href="#!"><BIconTrash /> Delete</a></li>-->
-<!--                            </ul>-->
-<!--                          </aside>-->
-<!--                        </Popper>-->
                       </div>
                     </div>
                     <div class="comment-time">
@@ -184,7 +175,6 @@
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import {handleResponseException} from "@/helpers/Helpers";
-import { Popper } from 'popper-vue'
 import moment from "moment";
 
 
@@ -194,7 +184,7 @@ import moment from "moment";
     self.getOrderDetail();
   },
   components: {
-    Popper
+
   },
   filters: {
     initials(value: string) {
@@ -292,12 +282,6 @@ export default class OrderDetail extends Mixins() {
     }
   }
 
-  private showPopper () {
-    //this.show = !this.show
-  }
-  private hidePopper () {
-    //this.show = false
-  }
 
   public removePreviewFile(item_status_activity: Record<any, any>, file_index: number) {
     item_status_activity.comment_object.files.splice(file_index, 1);
