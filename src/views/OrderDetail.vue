@@ -40,7 +40,7 @@
 
               <div class="activity-content">
                 <div class="activity-title">
-                  {{item_status_activity.status}}
+                  {{item_status_activity.message}}
                   <span class="date-time">
                   12-Feb-2022 14:40
                 </span>
