@@ -91,7 +91,7 @@
 
                 </template>
                 <template v-for="(activity_comment, acIdx) in item_status_activity.comments">
-                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-3" :key="`acIdx-${acIdx}`">
+                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-3" :key="`acIdx-${acIdx}`" v-if="!activity_comment.edit_comment">
                     <div class="d-flex gap-1">
                       <span class="comment-avatar">
                         {{activity_comment.user ? `${activity_comment.user.first_name} ${activity_comment.user.last_name}`  : ""  | initials}}
@@ -100,8 +100,8 @@
                         <div class="comment-action" style="right: -165px">
                           <ul class="fs-1 d-flex gap-2">
                               <li><a href="#!"><BIconReply /> Reply</a></li>
-                              <li><a href="#!"><BIconPencil /> Edit</a></li>
-                              <li><a href="#!"><BIconTrash /> Delete</a></li>
+                              <li><a @click="activity_comment.edit_comment = !activity_comment.edit_comment"><BIconPencil /> Edit</a></li>
+                              <li><a @click="deleteComment(activity_comment,item_status_activity)"><BIconTrash /> Delete</a></li>
                           </ul>
                         </div>
                         <template v-for="(comment_file, cfIdx) in activity_comment.files">
@@ -114,6 +114,33 @@
                       {{activity_comment.created_at | formatDate('HH:mm Do MMM YY ')}}
                     </div>
                   </div>
+                  <template v-if="activity_comment.edit_comment">
+                    <div class="p-2" :key="`acIdx-edit-${acIdx}`">
+                      <div class="comment-box">
+                        <div class="d-flex gap-1">
+                          <span class="comment-avatar close"  @click="activity_comment.edit_comment = false"><BIconX /></span>
+                          <span class="comment-avatar">{{order.customer_name | initials}}</span>
+                          <b-form-textarea rows="2" placeholder="Write your comment here..." v-model="activity_comment.message"/>
+                          <div class="d-flex justify-content-end gap-1">
+                            <button class="align-self-end btn btn-dark bordered file-button">
+                              <input :id="`item_status_activity_${activity_comment.id}_uploader`" type="file" multiple @change="uploadFiles($event, activity_comment)">
+                              <BIconPaperclip />
+                            </button>
+                            <button class="align-self-end btn btn-dark bordered" @click="editComment(activity_comment,item_status_activity)">
+                              <BIconChatDots />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div class="mt-2 upload-images">
+                          <div :key="`cfpIdx-edit-${cfpIdx}`" v-for="(comment_file_preview, cfpIdx) in activity_comment.files">
+                            <span class="delete-image" @click="activity_comment.files.splice(cfpIdx, 1)"><BIconXCircle /></span>
+                            <img :src="`${storage_url}${comment_file_preview.url}`" alt="">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
                 </template>
 
 
@@ -248,6 +275,45 @@ export default class OrderDetail extends Mixins() {
           let response_data = successResponse.data;
           item_status_activity.comments.unshift(response_data.result.item_activity_comment);
           item_status_activity.comment_object = self.getAddCommentDefaultObject()
+        }).catch((errorResponse: any) => {
+        handleResponseException(errorResponse)
+      });
+    } else {
+      alert("Can not send empty message");
+    }
+  }
+
+  async deleteComment(activity_comment:Record<any,any>,item_status_activity:Record<any,any>){
+    console.log(activity_comment);
+    let url = `order_item/${activity_comment.id}/delete_comment`;
+    let comment_index = item_status_activity.comments.indexOf(activity_comment);
+    item_status_activity.comments.splice(comment_index,1);
+    http.delete(url)
+      .then((successResponse: Record<any, any>) => {
+        console.log(successResponse);
+      }).catch((errorResponse: any) => {
+      item_status_activity.comments.push(activity_comment);
+      handleResponseException(errorResponse)
+    });
+  }
+
+  async editComment(activity_comment:Record<any,any>,item_status_activity:Record<any,any>){
+    let self = this;
+    let comment_index = item_status_activity.comments.indexOf(activity_comment);
+
+    if(activity_comment.message) {
+      let form_data = new FormData();
+      form_data.append('message', activity_comment.message);
+      if(activity_comment.files.length > 0 ) {
+        activity_comment.files.forEach((comment_file: Record<any, any>) => {
+          form_data.append('files[]', comment_file.file_info);
+        });
+      }
+      let url = `order_item/${item_status_activity.id}/edit_comment/${activity_comment.id}`
+      http.post(url, form_data)
+        .then((successResponse: Record<any, any>) => {
+          let response_data = successResponse.data;
+          item_status_activity.comments[comment_index] = response_data.result.item_activity_comment;
         }).catch((errorResponse: any) => {
         handleResponseException(errorResponse)
       });
