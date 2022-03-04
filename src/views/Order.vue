@@ -169,6 +169,12 @@
                       </ul>
                     </aside>
                   </Popper>
+
+                  <div class="mt-2 upload-images">
+                    <div :key="item" v-for="item in 7">
+                      <img src="img/images/image-product.png" alt="">
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="comment-time">
@@ -664,7 +670,9 @@ export default class Order extends Mixins() {
     button{
       flex-shrink: 0;
     }
+  }
 
+  .comment-box, .comment-msg{
     .upload-images{
       display: flex;
       gap: 7px;
