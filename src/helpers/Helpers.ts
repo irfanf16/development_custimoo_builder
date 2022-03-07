@@ -314,9 +314,13 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
   }
 }
 
+const logData = (data: any) => {
+  console.info("data logged", data)
+}
+
 
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
-  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException
+  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData
 };
