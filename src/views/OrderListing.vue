@@ -183,7 +183,7 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
   public async getOrders(params:string){
     if(!params)
       params = ''
-    http.get('order'+params).then((res:Record<any, any>) => {
+    http.get('orders'+params).then((res:Record<any, any>) => {
       console.log('res',res)
       this.orders =  res.data.result.data
       this.makePagination(res.data.result)
