@@ -1,29 +1,103 @@
 <template>
   <div>
-    <div v-for="(order,index) in orders" :key="index" class="list-item-container">
-      <div class="list-item-head p-8">
-        <div class="row">
-          <div class="col-3">
-            {{ order.created_at | orderDate }}
-          </div>
-          <div class="col-3">
-            {{order.order_no}}
-          </div>
-          <div class="col-3">
-            {{order.items_count}}
+    <div class="container-fluid my-2">
+      <div class="row">
+        <div class="col-8">
+
+        </div>
+        <div class="col-2">
+          <div>
+            <b-input-group>
+                <template #append>
+                  <b-input-group-text style="height: 33px; cursor: pointer" @click="clearFilter"><strong class="text-secondary">X</strong></b-input-group-text>
+                </template>
+                <b-form-select v-model="params.filter" :options="options" class="mb-3" @change="filterOrders">
+                  <!-- This slot appears above the options from 'options' prop -->
+                  <template #first>
+                    <b-form-select-option :value="null" disabled>-- Please select an option --</b-form-select-option>
+                  </template>
+
+                  <!-- These options will appear after the ones from 'options' prop -->
+                </b-form-select>
+              </b-input-group>
+
+<!--            <div class="mt-3">Selected: <strong>{{ selected }}</strong></div>-->
           </div>
         </div>
-
-
-        <span class="toggle float-right" @click="toggleHideShow(index,!order.visible)" v-text="toggletText[order.visible * 1]">
-      </span>
-      </div>
-      <div class="list-item-body p-8" v-show="order.visible">
-        <h4>asdasdas</h4>
-        <h4>wqeqweqw</h4>
+        <div class="col-2">
+          <div style="max-width: 230px; flex-shrink: 1; padding-left: 4px">
+            <b-input-group>
+              <template #append>
+                <b-input-group-text style="height: 33px; cursor: pointer" @click="clearSearch()"><strong class="text-secondary">X</strong></b-input-group-text>
+              </template>
+              <b-form-input type="text" style="height: 33px;" placeholder="Search" @keyup.enter="filterOrders" v-model="params.search" />
+            </b-input-group>
+          </div>
+        </div>
       </div>
     </div>
-<!--    <b-table striped hover :items="orders" :fields="titles"></b-table>-->
+    <table class="order-listing">
+      <tr>
+        <th>
+          Order No
+        </th>
+        <th>
+          Created At
+        </th>
+        <th>
+          Items Count
+        </th>
+        <th>
+          Actions
+        </th>
+      </tr>
+      <template v-if="orders.length !== 0">
+        <template v-for="(order,index) in orders" >
+          <tr  @click="toggleHideShow(index,!order.visible)" :key="index" >
+            <td>
+              {{order.order_no}}
+            </td>
+            <td>
+              {{ order.created_at | orderDate }}
+            </td>
+            <td>
+              {{order.items_count}}
+            </td>
+            <td>
+              <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-secondary mx-2">PDF</a><router-link  :to="`order/${order.id}/detail`" class="btn btn-secondary mx-2">Details</router-link>
+            </td>
+
+          </tr>
+          <tr :key="'order-detail'+index" v-if="order.visible">
+            <td colspan="4" class="order-detail-container">
+              <template v-for="(item,indexItem) in order.items" >
+                <div class="order-detail" :key="indexItem+index">
+                  <div class="factory-container">
+                    <h1 class="factory-name">{{item.factory_name}}</h1>
+                  </div>
+                  <table class="w-100">
+                    <template v-for="(product,indexProduct) in item.factory_products">
+                      <tr class="product-details" :key="indexItem + indexProduct + index">
+                        <td>{{ product.product_name }}</td>
+                        <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                        <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                        <td>{{ item.status | Status }}</td>
+                      </tr>
+                    </template>
+                  </table>
+
+                </div>
+              </template>
+            </td>
+          </tr>
+        </template>
+      </template>
+      <template v-else>
+        <tr class="text-center">
+          <td colspan="4">No records found</td>
+        </tr>
+      </template>
+    </table>
     <b-pagination
       v-model="pagination.currentPage"
       :total-rows="pagination.rows"
@@ -36,42 +110,14 @@
   </div>
 
 </template>
-<!--  <div :width="screenWidth"
-         :resizable="true"
-         :scrollable="true"
-         height="auto"
-         :reset="true"
-         :shiftY="0" size="lg" name="orderspopup"  hide-footer  class="event_form"
-         id="modal-center-event" centered
-         >
-    <div class="modal-header d-flex justify-content-between">
-      <span class="fs-5 font-weight-bold">Order Listing</span>
-      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideOrderspopup"><BIconX /></span>
-    </div>
-    <div class="modal-body">
-      <template v-if="customer_orders.length > 0">
-        <b-table striped hover :items="customer_orders" :fields="titles"></b-table>
-        <b-pagination
-          v-model="pagination.currentPage"
-          :total-rows="pagination.rows"
-          :per-page="pagination.perPage"
-          aria-controls="itemList"
-          align="center"
-          @change="handlePagination"
-          v-if="pagination.total > 0"
-        ></b-pagination>
-      </template>
-    </div>
-    <div class="loader" v-if="showLoader"><img src="../assets/images/loading.gif" /></div>
-
-  </div>-->
-
 
 <script lang="ts">
 import {Component, Mixins, Vue} from "vue-property-decorator";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {http} from "@/httpCommon";
 import moment from "moment";
+import {CustimooOrderFlowStatuses} from '@/helpers/Helpers';
+import Search from '@/components/Search.vue';
 
 Vue.filter('orderDate', function(value:string) {
   if (value) {
@@ -79,13 +125,36 @@ Vue.filter('orderDate', function(value:string) {
   }
 })
 
+Vue.filter('Status', function(value:string) {
+  if (value) {
+    return CustimooOrderFlowStatuses[value];
+  }
+})
+
 @Component<OrderListing>({
+  components:{
+    Search
+  },
+  created(){
+    Object.entries(CustimooOrderFlowStatuses).forEach(([key, value]) => {
+      this.options.push({
+        value: key,
+        text: value
+      })
+    })
+  },
   mounted(){
-    this.getOrders()
+    this.getOrders();
   }
 })
 export default class OrderListing  extends Mixins(ErrorMessages)  {
   private screenWidth = (window.screen.availWidth - 100)
+  public storage_url = process.env.VUE_APP_STORAGE_URL
+  public params = {
+    search: '',
+    filter : null,
+  }
+  public options = [];
   public orders = []
   public showLoader = false
   public search = ''
@@ -103,6 +172,9 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
   }
   public toggletText =  ['show', 'hide']
 
+
+
+
   public toggleHideShow(index:number,val:boolean) {
     console.log(index,val)
     Vue.set(this.orders[index], 'visible', val)
@@ -118,12 +190,6 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
     }).catch((e) => {
       console.log('e',e)
     })
-    // const res = await this.$store.dispatch('getOrders', params)
-    // if (res.data.status_code == 200){
-    //   this.showLoader = false
-    //   this.customer_orders = await res.data.result.data
-    //   this.makePagination(res.data.result)
-    // }
   }
 
   public hideOrderspopup(){
@@ -142,10 +208,45 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
   }
   public handlePagination(page:string|''){
     let params = '?page='+page;
-    if(this.search) {
-      params += '&search='+this.search
+    if(this.params.search && this.params.filter) {
+      params += 'search='+this.params.search + '&filter=' + this.params.filter;
+    }
+    else if(this.params.search){
+      params += 'search='+this.params.search;
+    }
+    else if(this.params.filter){
+      params += 'filter=' + this.params.filter;
+    }
+    else{
+      params = '?page='+page;
     }
     console.log('params',params)
+    this.getOrders(params);
+  }
+
+
+  public clearSearch(){
+    this.params.search = '';
+    this.filterOrders();
+  }
+  public clearFilter(){
+    this.params.filter = null;
+    this.filterOrders();
+  }
+  public filterOrders(){
+    let params = '?';
+    if(this.params.search && this.params.filter) {
+      params += 'search='+this.params.search + '&filter=' + this.params.filter;
+    }
+    else if(this.params.search){
+      params += 'search='+this.params.search;
+    }
+    else if(this.params.filter){
+      params += 'filter=' + this.params.filter;
+    }
+    else{
+      params = '';
+    }
     this.getOrders(params);
   }
 
@@ -187,5 +288,55 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
 }
 .toggle{
   cursor: pointer;
+}
+
+table.order-listing{
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table.order-listing td, table.order-listing th {
+  border: 1px solid #aec2d6;
+  padding: 8px;
+}
+
+table.order-listing tr:nth-child(even){background-color: #dee2e6;}
+
+table.order-listing tr:hover {background-color: #ddd;}
+
+table.order-listing th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  /*background-color: #219F84;*/
+  color: black;
+  font-weight: bold;
+  text-align: center;
+}
+
+.order-detail .factory-container{
+  font-weight: bold;
+  text-align: left;
+  font-size: large;
+  text-decoration: underline;
+}
+.order-detail .factory-container .factory-name {
+  margin: 1rem 0;
+}
+.product-details td {
+  text-align: left;
+  vertical-align: middle;
+}
+
+td.order-detail-container{
+  padding: 0rem 0rem 1rem 0rem !important;
+}
+
+.product-details td.image{
+  text-align: center;
+  vertical-align: middle;
+}
+table.order-listing{
+  margin-bottom: 1rem;
 }
 </style>
