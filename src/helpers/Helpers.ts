@@ -314,9 +314,25 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
   }
 }
 
+const logData = (data: any) => {
+  console.info("data logged", data)
+}
+
+const CustimooOrderFlowStatuses : any = {
+  submitted_for_factory_review: 'Submitted for Factory Review',
+  factory_approved: 'Factory Approved',
+  factory_rejected: 'Factory Rejected',
+  submitted_for_customer_review: 'Submitted for Customer Review',
+  customer_approved: 'Customer Approved',
+  customer_rejected: 'Customer Rejected',
+  in_production: 'In Production',
+  shipped: 'Shipped',
+  completed: 'Completed',
+};
 
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
-  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException
+  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData,
+  CustimooOrderFlowStatuses
 };
