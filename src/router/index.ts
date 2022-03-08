@@ -15,7 +15,7 @@ const routes: Array<RouteConfig> = [
     component: Home
   },
   {
-    path: '/three-d',
+    path: '/3d',
     name: 'ThreeD',
     component: ThreeD
   },
