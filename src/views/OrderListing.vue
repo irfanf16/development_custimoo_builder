@@ -142,10 +142,11 @@ Vue.filter('Status', function(value:string) {
         value: key,
         text: value
       })
-    })
+    });
+    this.getOrders();
   },
   mounted(){
-    this.getOrders();
+
   }
 })
 export default class OrderListing  extends Mixins(ErrorMessages)  {

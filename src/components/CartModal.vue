@@ -9,6 +9,9 @@
       <thead class="bg-light">
       <tr>
         <th class="font-weight-bold">
+          Product Name
+        </th>
+        <th class="font-weight-bold">
           Design Image
         </th>
         <th class="font-weight-bold">
@@ -22,6 +25,9 @@
       <tbody>
       <template v-for="(cart_item) in cartItems">
         <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
+          <td>
+            {{factory_product.product_name}}
+          </td>
           <td><b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
             <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
 
@@ -65,7 +71,12 @@ import {findIndex} from "lodash";
       filters: {
         itemQtyCount: (value: Record<any, any>) => {
           if(value.length > 0) {
-            return value.reduce((a:Record<any, any>, b:Record<any, any>) => a + (b['quantity'] || 0), 0);
+            let quantity = 0 ;
+             value.forEach((roster:Record<any,any>) => {
+                 quantity += parseInt(roster.quantity);
+            });
+            return quantity
+            // return value.reduce((a:Record<any, any>, b:Record<any, any>) => a + (b['quantity'] || 0), 0);
           }
           return 0
         }
