@@ -41,7 +41,7 @@
                   <div class="activity-title">
                     {{ item_status_activity.message }}
                     <span class="date-time">
-                  12-Feb-2022 14:40
+                  {{ item_status_activity.created_at | formatDate('HH:mm Do MMM YY ')  }}
                 </span>
                   </div>
                   <div class="images-grid p-2 d-flex gap-1">
@@ -132,11 +132,17 @@
                               </li>
                             </ul>
                           </div>
+                          <blockquote class="blockquote mb-0">
+                            <footer class="blockquote-footer" v-if="activity_comment.parent_message_id">
+                              <cite title="Source Title">{{ activity_comment.parent_message }}</cite>
+                            </footer>
+                          </blockquote>
                           <template v-for="(activity_comment_file, activity_comment_file_index) in activity_comment.files">
                             <img :key="`activity_comment_file_${activity_comment_file_index}`"
                                  :src="`${storage_url}${activity_comment_file.url}`" :alt="`${activity_comment_file.name}`" width="100">
                           </template>
-                          {{ activity_comment.message }}
+                          <p> {{ activity_comment.message }}</p>
+
                         </div>
                       </div>
                       <div class="comment-time">
@@ -427,7 +433,7 @@ export default class OrderDetail extends Mixins() {
       comment_files = comment_container_object.edited_comment_object.files;
     } else {
       //while editing comment append comment id that is going to be edited
-      url = `order_item/${comment_container_object.order_item_activity_id}/comment/${comment_container_object.id}`;
+      url = `order_item/${comment_container_object.order_item_activity_id}/comment`;
       form_data.append("parent_message_id", comment_container_object.id);
       form_data.append("parent_message", comment_container_object.message);
       comment_message = comment_container_object.reply_comment_object.message;
