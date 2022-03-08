@@ -154,7 +154,7 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
     search: '',
     filter : null,
   }
-  public options = [];
+  public options: Record<any, any>[] = [];
   public orders = []
   public showLoader = false
   public search = ''
@@ -180,7 +180,7 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
     Vue.set(this.orders[index], 'visible', val)
     console.log(this.orders)
   }
-  public async getOrders(params:string){
+  public async getOrders(params: string | void){
     if(!params)
       params = ''
     http.get('orders'+params).then((res:Record<any, any>) => {
