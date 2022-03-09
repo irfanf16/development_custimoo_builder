@@ -68,6 +68,7 @@
                       <BIconChatDots/>
                       Add comment</a>
                   </div>
+                  <!-- add comment starts -->
                   <template v-if="item_status_activity.add_comment">
                     <div class="p-2">
                       <div class="comment-box">
@@ -91,17 +92,25 @@
                         </div>
 
                         <div class="mt-2 upload-images">
-                          <div :key="`comment_file_preview-${comment_file_preview_index}`"
-                               v-for="(comment_file_preview, comment_file_preview_index) in item_status_activity.comment_object.files">
+                          <div :key="`comment_file_preview-${comment_file_object_index}`"
+                               v-for="(comment_file_object, comment_file_object_index) in item_status_activity.comment_object.files">
                             <span class="delete-image"
-                                  @click="removePreviewFileFrom('item_status_activity',item_status_activity.comment_object, comment_file_preview_index)"><BIconXCircle/></span>
-                            <img :src="comment_file_preview.file_preview" alt="">
+                                  @click="removePreviewFileFrom('item_status_activity',item_status_activity.comment_object, comment_file_object_index)"><BIconXCircle/></span>
+                            <template v-if="['jpg', 'jpeg', 'png'].includes(comment_file_object.extension.toLowerCase())">
+                              <img :src="comment_file_object.file_preview" alt="">
+                            </template>
+                            <template v-if="comment_file_object.extension.toLowerCase() == 'pdf'">
+                              <img src="/img/images/pdf-placeholer.png" alt="" @click="previewPdf(comment_file_object)">
+                            </template>
                           </div>
                         </div>
                       </div>
                     </div>
 
                   </template>
+                  <!-- add comment ends -->
+
+                  <!-- Comment listing starts -->
                   <template v-for="(activity_comment, activity_comment_index) in item_status_activity.comments">
                     <div class="comment-row px-2 pb-2 d-flex gap-1 mt-3" :key="`activity_comment_${activity_comment_index}`"
                          v-if="!activity_comment.edit_comment && !activity_comment.reply_comment">
@@ -110,6 +119,7 @@
                         {{ activity_comment.user ? `${activity_comment.user.first_name} ${activity_comment.user.last_name}` : "" | initials }}
                       </span>
                         <div class="comment-msg">
+                        <!-- Comment action buttons starts -->
                           <div class="comment-action" style="right: -165px">
                             <ul class="fs-1 d-flex gap-2">
                               <li>
@@ -132,14 +142,23 @@
                               </li>
                             </ul>
                           </div>
+                        <!-- Comment action buttons ends -->
+
                           <blockquote class="blockquote mb-0">
                             <footer class="blockquote-footer" v-if="activity_comment.parent_message_id">
                               <cite title="Source Title">{{ activity_comment.parent_message }}</cite>
                             </footer>
                           </blockquote>
                           <template v-for="(activity_comment_file, activity_comment_file_index) in activity_comment.files">
-                            <img :key="`activity_comment_file_${activity_comment_file_index}`"
-                                 :src="`${storage_url}${activity_comment_file.url}`" :alt="`${activity_comment_file.name}`" width="100">
+                            <template v-if="['png', 'jpg', 'jpeg'].includes(activity_comment_file.extension)">
+                              <img :key="`activity_comment_file_${activity_comment_file_index}`"
+                                   :src="`${storage_url}${activity_comment_file.url}`" :alt="`${activity_comment_file.name}`" width="100">
+                            </template>
+                            <template v-if="activity_comment_file.extension.toLowerCase() == 'pdf'">
+                              <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="activity_comment_file.file_preview" download target="_blank">
+                                <img src="/img/images/pdf-placeholer.png" alt="">
+                              </a>
+                            </template>
                           </template>
                           <p> {{ activity_comment.message }}</p>
 
@@ -177,7 +196,14 @@
                               <div :key="`edit_comment_file_preview-${edit_comment_file_preview_index}`">
                                 <span class="delete-image"
                                       @click="removePreviewFileFrom('edit', activity_comment, edit_comment_file_preview_index)"><BIconXCircle/></span>
-                                <img :src="`${edit_comment_file_preview.file_preview}`" alt="">
+                                <template v-if="['jpg, jpeg, png'].includes(edit_comment_file_preview.extension.toLowerCase())">
+                                  <img :src="`${edit_comment_file_preview.file_preview}`" alt="">
+                                </template>
+                                <template v-if="edit_comment_file_preview.extension.toLowerCase() == 'pdf'">
+                                  <a :href="edit_comment_file_preview.file_preview" download target="_blank">
+                                    <img src="/img/images/pdf-placeholer.png" alt="">
+                                  </a>
+                                </template>
                               </div>
                             </template>
                           </div>
@@ -229,6 +255,7 @@
                     <!--  add reply ends -->
 
                   </template>
+                  <!-- Comment listing ends -->
                 </div>
               </div>
             </template>
@@ -285,7 +312,7 @@
 
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
-import {handleResponseException, logData} from "@/helpers/Helpers";
+import {handleResponseException, logData, pathInfo} from "@/helpers/Helpers";
 import moment from "moment";
 
 
@@ -373,11 +400,12 @@ export default class OrderDetail extends Mixins() {
     activity_comment.edited_comment_object.files = [];
     if (activity_comment.files.length > 0) {
       activity_comment.files.forEach((activity_comment_file: Record<any, any>) => {
-        //file_info key basically is used for storing uploaded files through input type file. As in case of editing comment we need to show existing files.
+        let file_path_info =  pathInfo(activity_comment_file.url)
+        //file key basically is used for storing uploaded files through input type file. As in case of editing comment we need to show existing files.
         // So in this case we will place string (file path) because in edit mode we have existing files paths instead of file objects.
         activity_comment.edited_comment_object.files.push({
-          file_info: activity_comment_file.url,
-          file_preview: `${self.storage_url}${activity_comment_file.url}`
+          file: activity_comment_file.url, file_preview: `${self.storage_url}${activity_comment_file.url}`,
+          name: file_path_info.name, extension: file_path_info.extension
         });
       })
     }
@@ -442,9 +470,9 @@ export default class OrderDetail extends Mixins() {
     form_data.append('message', comment_message);
     if (comment_files.length > 0) {
       comment_files.forEach((comment_file: Record<any, any>) => {
-        //this check is due to that file_info can have string or file object. String will be in case when we user edit comment and we need to show existing file
-        if (comment_file.file_info.constructor.name == "File") {
-          form_data.append('files[]', comment_file.file_info);
+        //this check is due to that file can have string or file object. String will be in case when we user edit comment and we need to show existing file
+        if (comment_file.file.constructor.name == "File") {
+          form_data.append('files[]', comment_file.file);
         }
       });
     }
@@ -473,10 +501,25 @@ export default class OrderDetail extends Mixins() {
     }
     let comment_files_container = files_container_object[key_name];
     let uploaded_files = event.target.files;
+    let allowed_file_types = ["jpg", "jpeg", "pdf"]
+    let rejected_files = [];
     for (let uploaded_file of uploaded_files) {
-      let file_preview = await self.createFilePreview(uploaded_file)
-      comment_files_container.files.push({file_info: uploaded_file, file_preview: file_preview})
+      let file_name = uploaded_file.name;
+      let file_extension = file_name.substring(file_name.lastIndexOf('.') + 1).toLowerCase();
+      if(allowed_file_types.includes(file_extension)) {
+        let file_preview = await self.createFilePreview(uploaded_file)
+        comment_files_container.files.push({
+          file: uploaded_file, file_preview: file_preview, name: file_name, extension: file_extension
+        })
+      } else {
+        rejected_files.push(file_name)
+      }
     }
+    let rejected_files_length = rejected_files.length;
+    if(rejected_files_length > 0) {
+      console.warn(`Uploaded files(${rejected_files_length}) has been rejected. The rejected files are`+ rejected_files.toString())
+    }
+    console.log("uploaded files", comment_files_container.files);
     event.target.files = null;
   }
 
@@ -501,11 +544,11 @@ export default class OrderDetail extends Mixins() {
     if (type == "item_status_activity") {
       files_container_object.files.splice(file_index, 1);
     } else if(type == "edit") { //in case of editing comment
-      let file_info = files_container_object.edited_comment_object.files[file_index].file_info;
-      //file_info contains string or file object. In case of string it will be the path of existing file. While in case of file object new file is uploaded.
-      //So if file_info contains string then it means that comment existing file needs to be removed.
-      if (file_info.constructor.name == "String") {
-        files_container_object.edited_comment_object.removed_files.push(file_info);
+      let file = files_container_object.edited_comment_object.files[file_index].file;
+      //file contains string or file object. In case of string it will be the path of existing file. While in case of file object new file is uploaded.
+      //So if file contains string then it means that comment existing file needs to be removed.
+      if (file.constructor.name == "String") {
+        files_container_object.edited_comment_object.removed_files.push(file);
       }
       files_container_object.edited_comment_object.files.splice(file_index, 1);
     }
@@ -522,6 +565,14 @@ export default class OrderDetail extends Mixins() {
         data_transfer_object.items.add(file) // here you exclude the file. thus removing it.
     }
     input.files = data_transfer_object.files // Assign the updates list
+  }
+  previewPdf(pdf_container_object: Record<any, any>) {
+    const pdfWindow = window.open("");
+    // let data = '<object data="' + pdf_container_object.file_preview + '" width="100%" height="100%">';
+    let data = `<object data="${pdf_container_object.file_preview}" width="100%" height="100%">
+                    <embed ng-srs="${pdf_container_object.file_preview}" width="100%" height="100%"></embed>
+                </object>`;
+    pdfWindow.document.write(data);
   }
 
 
