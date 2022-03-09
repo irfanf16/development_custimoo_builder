@@ -38,6 +38,7 @@ export default new Vuex.Store({
       'Main.tabIndexMain',
       'ProductAttributes.customTextObjects',
       'ProductAttributes.customLogoObjects',
+      'Auth.jwtToken',
      ]
 
 

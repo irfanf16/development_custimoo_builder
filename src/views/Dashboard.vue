@@ -11,52 +11,58 @@
           <div class="row">
             <div class="col">
               <div class="card mb-3 bg-success text-white" style="max-width: 540px;">
-                <div class="row no-gutters">
-                  <div class="col-md-4 d-flex align-items-center justify-content-center border-right">
-                    <i class="fa-solid fa-shirt" style="font-size: 5rem"></i>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="card-body">
-                      <h5 class="card-title h1">{{ counters?counters.orders_count:0 }}</h5>
-                      <p class="card-text h2">My Orders</p>
+                <router-link :to="'customer-orders'" class="my-orders">
+                  <div class="row no-gutters">
+                    <div class="col-md-4 d-flex align-items-center justify-content-center border-right">
+                      <i class="fa-solid fa-shirt" style="font-size: 5rem"></i>
+                    </div>
+                    <div class="col-md-8">
+                      <div class="card-body">
+                        <h5 class="card-title h1">{{ counters?counters.orders_count:0 }}</h5>
+                        <p class="card-text h2">My Orders</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </router-link>
               </div>
             </div>
           </div>
           <div class="row">
             <div class="col">
               <div class="card mb-3 bg-primary text-white" style="max-width: 540px;">
-                <div class="row no-gutters">
-                  <div class="col-md-4 d-flex align-items-center justify-content-center border-right">
-                    <i class="fa-solid fa-file-image" style="font-size: 5rem"></i>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="card-body">
-                      <h5 class="card-title h1">{{ counters?counters.pending_approval_count:0 }}</h5>
-                      <p class="card-text h2">Pending Approvals</p>
+                <router-link :to="'customer-orders?filter=submitted_for_customer_review'" class="my-orders">
+                  <div class="row no-gutters">
+                    <div class="col-md-4 d-flex align-items-center justify-content-center border-right">
+                      <i class="fa-solid fa-file-image" style="font-size: 5rem"></i>
+                    </div>
+                    <div class="col-md-8">
+                      <div class="card-body">
+                        <h5 class="card-title h1">{{ counters?counters.pending_approval_count:0 }}</h5>
+                        <p class="card-text h2">Pending Approvals</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </router-link>
               </div>
             </div>
           </div>
           <div class="row">
             <div class="col">
-              <div class="card mb-3 bg-danger text-white" style="max-width: 540px;">
-                <div class="row no-gutters">
-                  <div class="col-md-4 d-flex align-items-center justify-content-center border-right">
-                    <i class="fas fa-shipping-fast" style="font-size: 5rem"></i>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="card-body">
-                      <h5 class="card-title h1">{{ counters?counters.track_my_orders_count:0 }}</h5>
-                      <p class="card-text h2">Track my orders</p>
+                <div class="card mb-3 bg-danger text-white" style="max-width: 540px;">
+                  <router-link :to="'customer-orders?filter=shipped'" class="my-orders">
+                    <div class="row no-gutters">
+                      <div class="col-md-4 d-flex align-items-center justify-content-center border-right">
+                        <i class="fas fa-shipping-fast" style="font-size: 5rem"></i>
+                      </div>
+                      <div class="col-md-8">
+                        <div class="card-body">
+                          <h5 class="card-title h1">{{ counters?counters.track_my_orders_count:0 }}</h5>
+                          <p class="card-text h2">Track my orders</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </router-link>
                 </div>
-              </div>
             </div>
           </div>
 <!--          <div class="row">-->
@@ -151,5 +157,12 @@ export default class Dashboard extends Mixins(ErrorMessages) {
 </script>
 
 <style lang="scss" scoped>
-
+a.my-orders{
+  text-decoration: none;
+  color:white;
+}
+a.my-orders:hover{
+  color:#2c3e50;
+  opacity: 0.7;
+}
 </style>
