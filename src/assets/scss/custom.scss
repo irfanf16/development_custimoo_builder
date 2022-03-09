@@ -2079,16 +2079,37 @@ button{
             }
             .btn{
                 background: #219f84;
+                color: #fff;
                 font-size: 12px;
+                border-radius: 0.25rem;
                 border-color: #219f84;
                 margin-left: -0.75rem;
                 padding-left: 1.5rem;
+                padding-right: 0.5rem;
+                white-space: nowrap;
+                width: auto !important;
+
                 &:focus{
                     outline: none;
                     box-shadow: none;
                 }
             }
         }
+    }
+
+    &>[x-arrow]{
+        &::before{
+            box-shadow: none;
+        }
+    }
+
+    &.share-tooltip{
+        background: #fff;
+        box-shadow: 2px 2px 7px 0px rgba(0,0,0,0.2);
+        padding: 10px 15px;
+        z-index: 1000;
+        top: auto !important;
+        border-radius: 7px;
     }
 }
 .available-designs-section .design-col a{
