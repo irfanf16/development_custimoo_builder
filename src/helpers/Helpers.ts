@@ -318,7 +318,7 @@ const logData = (data: any) => {
   console.info("data logged", data)
 }
 
-const CustimooOrderFlowStatuses : any = {
+const CustimooOrderFlowStatuses : Record<any, any> = {
   submitted_for_factory_review: 'Submitted for Factory Review',
   factory_approved: 'Factory Approved',
   factory_rejected: 'Factory Rejected',
@@ -330,9 +330,19 @@ const CustimooOrderFlowStatuses : any = {
   completed: 'Completed',
 };
 
+const pathInfo = (file_path: string, ) => {
+  const pathArray = file_path.split("/");
+  const lastIndex = pathArray.length - 1;
+  const name = pathArray[lastIndex];
+  const extension = name.substring(name.lastIndexOf(".") + 1);
+  return {
+    name: name, extension: extension
+  };
+}
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
-  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData,
+  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses
 };
