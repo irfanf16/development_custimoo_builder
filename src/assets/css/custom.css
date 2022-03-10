@@ -2163,14 +2163,28 @@ button:focus, button:active {
 }
 .tooltip.b-tooltip.share-tooltip .share-holder .form-inline .btn {
   background: #219f84;
+  color: #fff;
   font-size: 12px;
+  border-radius: 0.25rem;
   border-color: #219f84;
   margin-left: -0.75rem;
   padding-left: 1.5rem;
+  padding-right: 0.5rem;
+  white-space: nowrap;
+  width: auto !important;
 }
 .tooltip.b-tooltip.share-tooltip .share-holder .form-inline .btn:focus {
   outline: none;
   box-shadow: none;
+}
+.tooltip.b-tooltip.share-tooltip > [x-arrow]::before {
+  box-shadow: none;
+}
+.tooltip.b-tooltip.share-tooltip.share-tooltip {
+  background: #fff;
+  box-shadow: 2px 2px 7px 0px rgba(0, 0, 0, 0.2);
+  padding: 10px 15px;
+  border-radius: 7px;
 }
 
 .available-designs-section .design-col a canvas {
@@ -4396,7 +4410,7 @@ button:focus, button:active {
   position: relative;
   display: inline-flex;
   margin: 1rem auto;
-  gap: 100px;
+  gap: 7vw;
 }
 @media (max-width: 600px) {
   .order-wrapper .order-flow {
