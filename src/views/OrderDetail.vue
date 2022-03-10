@@ -70,42 +70,10 @@
                   </div>
                   <!-- add comment starts -->
                   <template v-if="item_status_activity.add_comment">
-                    <div class="p-2">
-                      <div class="comment-box">
-                        <div class="d-flex gap-1">
-                          <span class="comment-avatar close" @click="item_status_activity.add_comment = false"><BIconX/></span>
-                          <span class="comment-avatar">{{ order.customer_name | initials }}</span>
-                          <b-form-textarea rows="2" placeholder="Write your comment here..."
-                                           v-model="item_status_activity.comment_object.message"/>
-                          <div class="d-flex justify-content-end gap-1">
-                            <button class="align-self-end btn btn-dark bordered file-button">
-                              <input :id="`item_status_activity_${item_status_activity.id}_uploader`" type="file"
-                                     multiple
-                                     @change="uploadFiles($event, 'add' , item_status_activity)">
-                              <BIconPaperclip/>
-                            </button>
-                            <button class="align-self-end btn btn-dark bordered"
-                                    @click="addComment(item_status_activity)">
-                              <BIconChatDots/>
-                            </button>
-                          </div>
-                        </div>
-
-                        <div class="mt-2 upload-images">
-                          <div :key="`comment_file_preview-${comment_file_object_index}`"
-                               v-for="(comment_file_object, comment_file_object_index) in item_status_activity.comment_object.files">
-                            <span class="delete-image"
-                                  @click="removePreviewFileFrom('item_status_activity',item_status_activity.comment_object, comment_file_object_index)"><BIconXCircle/></span>
-                            <template v-if="['jpg', 'jpeg', 'png'].includes(comment_file_object.extension.toLowerCase())">
-                              <img :src="comment_file_object.file_preview" alt="">
-                            </template>
-                            <template v-if="comment_file_object.extension.toLowerCase() == 'pdf'">
-                              <img src="/img/images/pdf-placeholer.png" alt="" @click="previewPdf(comment_file_object)">
-                            </template>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <AddUpdateComment :url="`order_item/${item_status_activity.id}/comment`"
+                            v-on:hideCommentBox = "hideCommentBox(item_status_activity, 'add_comment')"
+                            v-on:commentActionCompleted = "item_status_activity.comments.unshift($event)"
+                    ></AddUpdateComment>
 
                   </template>
                   <!-- add comment ends -->
@@ -129,7 +97,7 @@
                                 </a>
                               </li>
                               <li>
-                                <a @click="editComment(activity_comment)">
+                                <a @click="activity_comment.edit_comment = !activity_comment.edit_comment">
                                   <BIconPencil/>
                                   Edit
                                 </a>
@@ -170,88 +138,20 @@
                     </div>
                     <!--  edit comment starts -->
                     <template v-if="activity_comment.edit_comment">
-                      <div class="p-2" :key="`activity_comment-edit-${activity_comment_index}`">
-                        <div class="comment-box">
-                          <div class="d-flex gap-1">
-                            <span class="comment-avatar close"
-                                  @click="activity_comment.edit_comment = !activity_comment.edit_comment"><BIconX/></span>
-                            <span class="comment-avatar">{{ order.customer_name | initials }}</span>
-                            <b-form-textarea rows="2" placeholder="Write your comment here..."
-                                             v-model="activity_comment.edited_comment_object.message"/>
-                            <div class="d-flex justify-content-end gap-1">
-                              <button class="align-self-end btn btn-dark bordered file-button">
-                                <input :id="`item_status_activity_${activity_comment.id}_uploader`" type="file" multiple
-                                       @change="uploadFiles($event, 'edit', activity_comment)">
-                                <BIconPaperclip/>
-                              </button>
-                              <button class="align-self-end btn btn-dark bordered"
-                                      @click="updateComment(item_status_activity, activity_comment_index)">
-                                <BIconChatDots/>
-                              </button>
-                            </div>
-                          </div>
-                          <div class="mt-2 upload-images">
-                            <template
-                              v-for="(edit_comment_file_preview, edit_comment_file_preview_index) in activity_comment.edited_comment_object.files">
-                              <div :key="`edit_comment_file_preview-${edit_comment_file_preview_index}`">
-                                <span class="delete-image"
-                                      @click="removePreviewFileFrom('edit', activity_comment, edit_comment_file_preview_index)"><BIconXCircle/></span>
-                                <template v-if="['jpg, jpeg, png'].includes(edit_comment_file_preview.extension.toLowerCase())">
-                                  <img :src="`${edit_comment_file_preview.file_preview}`" alt="">
-                                </template>
-                                <template v-if="edit_comment_file_preview.extension.toLowerCase() == 'pdf'">
-                                  <a :href="edit_comment_file_preview.file_preview" download target="_blank">
-                                    <img src="/img/images/pdf-placeholer.png" alt="">
-                                  </a>
-                                </template>
-                              </div>
-                            </template>
-                          </div>
-                        </div>
-                      </div>
+                      <AddUpdateComment :key="`activity_comment-edit-${activity_comment_index}`" action="edit"
+                                        v-on:hideCommentBox = "hideCommentBox(activity_comment, 'edit_comment')"
+                                        v-on:commentActionCompleted="handleCommentActionCompleted($event, item_status_activity, activity_comment_index)"
+                                        :comment_obj="activity_comment" :url="`order_item/${item_status_activity.id}/comment/${activity_comment.id}`"
+                      ></AddUpdateComment>
                     </template>
                     <!--  edit comment ends -->
 
                     <!--  add reply starts -->
-                    <template v-if="activity_comment.reply_comment">
-                      {{activity_comment.message}}
-                      <template v-for="(parent_activity_comment_file, parent_activity_comment_file_index) in activity_comment.files">
-                        <img :key="`parent_activity_comment_file_${parent_activity_comment_file_index}`"
-                             :src="`${storage_url}${parent_activity_comment_file.url}`" :alt="`${parent_activity_comment_file.name}`" width="100">
-                      </template>
-                      <div class="p-2" :key="`activity_comment-reply-${activity_comment_index}`">
-                        <div class="comment-box">
-                          <div class="d-flex gap-1">
-                            <span class="comment-avatar close"
-                                  @click="activity_comment.reply_comment = !activity_comment.reply_comment"><BIconX/></span>
-                            <span class="comment-avatar">{{ order.customer_name | initials }}</span>
-                            <b-form-textarea rows="2" placeholder="Write your comment here..."
-                                             v-model="activity_comment.reply_comment_object.message"/>
-                            <div class="d-flex justify-content-end gap-1">
-                              <button class="align-self-end btn btn-dark bordered file-button">
-                                <input :id="`item_status_activity_${activity_comment.id}_uploader`" type="file" multiple
-                                       @change="uploadFiles($event, 'reply', activity_comment)">
-                                <BIconPaperclip/>
-                              </button>
-                              <button class="align-self-end btn btn-dark bordered"
-                                      @click="addCommentReply(item_status_activity, activity_comment, activity_comment_index)">
-                                <BIconChatDots/>
-                              </button>
-                            </div>
-                          </div>
-                          <div class="mt-2 upload-images">
-                            <template
-                              v-for="(reply_comment_file_preview, reply_comment_file_preview_index) in activity_comment.reply_comment_object.files">
-                              <div :key="`reply_comment_file_preview-${reply_comment_file_preview_index}`">
-                                <span class="delete-image"
-                                      @click="removePreviewFileFrom('reply', activity_comment, reply_comment_file_preview_index)"><BIconXCircle/></span>
-                                <img :src="`${reply_comment_file_preview.file_preview}`" alt="">
-                              </div>
-                            </template>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
+                    <AddUpdateComment :key="`activity_comment-edit-${activity_comment_index}`" action="reply" v-if="activity_comment.reply_comment"
+                                      v-on:hideCommentBox = "hideCommentBox(activity_comment, 'reply_comment')"
+                                      v-on:commentActionCompleted="handleCommentActionCompleted($event, item_status_activity, activity_comment_index)"
+                                      :comment_obj="activity_comment" :url="`order_item/${item_status_activity.id}/comment`"
+                    ></AddUpdateComment>
                     <!--  add reply ends -->
 
                   </template>
@@ -313,6 +213,7 @@
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import {handleResponseException, logData, pathInfo} from "@/helpers/Helpers";
+import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import moment from "moment";
 
 
@@ -321,7 +222,9 @@ import moment from "moment";
     let self = this;
     self.getOrderDetail();
   },
-  components: {},
+  components: {
+    AddUpdateComment
+  },
   filters: {
     initials(value: string) {
       if (value) {
@@ -339,7 +242,6 @@ import moment from "moment";
       } else {
         return "";
       }
-
     },
     formatDate(value: string, format: string) {
       if (!format) {
@@ -368,18 +270,6 @@ export default class OrderDetail extends Mixins() {
     });
   }
 
-  async addComment(item_status_activity: Record<any, any> ) {
-    let self = this;
-    self.handleActivityCommentAction("add", item_status_activity).then((successResponse: Record<any, any>) => {
-      let response_data = successResponse.data;
-      item_status_activity.comments.unshift(response_data.result.item_activity_comment);
-      item_status_activity.add_comment = false
-      item_status_activity.comment_object = self.getAddCommentDefaultObject()
-    }).catch((errorResponse: any) => {
-      handleResponseException(errorResponse)
-    })
-  }
-
   async deleteComment(activity_comment: Record<any, any>, item_status_activity: Record<any, any>) {
     let url = `order_item/${activity_comment.id}/delete_comment`;
     let comment_index = item_status_activity.comments.indexOf(activity_comment);
@@ -393,186 +283,13 @@ export default class OrderDetail extends Mixins() {
     });
   }
 
-  editComment(activity_comment: Record<any, any>) {
+  hideCommentBox(hide_comment_box_for_obj: Record<any, any>, obj_key: string) {
+    this.$set(hide_comment_box_for_obj, obj_key, false);
+  }
+
+  handleCommentActionCompleted(event_data: Record<any, any>, activity_item: Record<any, any>, activity_item_comment_index: number) {
     let self = this;
-    activity_comment.edit_comment = !activity_comment.edit_comment
-    activity_comment.edited_comment_object.message = activity_comment.message;
-    activity_comment.edited_comment_object.files = [];
-    if (activity_comment.files.length > 0) {
-      activity_comment.files.forEach((activity_comment_file: Record<any, any>) => {
-        let file_path_info =  pathInfo(activity_comment_file.url)
-        //file key basically is used for storing uploaded files through input type file. As in case of editing comment we need to show existing files.
-        // So in this case we will place string (file path) because in edit mode we have existing files paths instead of file objects.
-        activity_comment.edited_comment_object.files.push({
-          file: activity_comment_file.url, file_preview: `${self.storage_url}${activity_comment_file.url}`,
-          name: file_path_info.name, extension: file_path_info.extension
-        });
-      })
-    }
-  }
-
-  updateComment(item_status_activity: Record<any, any>, comment_index: number) {
-    let self = this;
-    let activity_comment = item_status_activity.comments[comment_index]
-    self.handleActivityCommentAction("edit", activity_comment).then((successResponse: Record<any, any>) => {
-      let response_data = successResponse.data;
-      self.$set(item_status_activity.comments, comment_index, response_data.result.item_activity_comment)
-    }).catch((errorResponse: any) => {
-      handleResponseException(errorResponse)
-    })
-  }
-
-  addCommentReply(item_status_activity:Record<any, any>,comment_object:Record<any, any>, comment_index: number) {
-    let self = this;
-    self.handleActivityCommentAction("reply", comment_object).then((successResponse: Record<any, any>) => {
-      let response_data = successResponse.data;
-      item_status_activity.comments.unshift(response_data.result.item_activity_comment);
-      comment_object.reply_comment = false
-      item_status_activity.reply_comment_object = {
-        "message": null, "files": []
-      }
-    }).catch((errorResponse: any) => {
-      handleResponseException(errorResponse)
-    })
-  }
-
-
-  async handleActivityCommentAction(action: string, comment_container_object: Record<any, any>) {
-    let item_activity_id = null;
-    let url: null|string = null;
-    let comment_message = null;
-    let comment_files = [];
-    let form_data = new FormData();
-    //in case of add comment_container_object have order_item_activities table object
-    if(action == "add") {
-      item_activity_id = comment_container_object.id;
-      url = `order_item/${item_activity_id}/comment`
-      comment_message = comment_container_object.comment_object.message;
-      comment_files = comment_container_object.comment_object.files;
-    }
-    //in case of edit comment_container_object have order_item_activity_comments table object
-    else if (action == "edit") {
-      //while editing comment append comment id that is going to be edited
-      url = `order_item/${comment_container_object.order_item_activity_id}/comment/${comment_container_object.id}`;
-      comment_container_object.edited_comment_object.removed_files.forEach((removed_file: string) => {
-        form_data.append('removed_files[]', removed_file);
-      })
-      comment_message = comment_container_object.edited_comment_object.message;
-      comment_files = comment_container_object.edited_comment_object.files;
-    } else {
-      //while editing comment append comment id that is going to be edited
-      url = `order_item/${comment_container_object.order_item_activity_id}/comment`;
-      form_data.append("parent_message_id", comment_container_object.id);
-      form_data.append("parent_message", comment_container_object.message);
-      comment_message = comment_container_object.reply_comment_object.message;
-      comment_files = comment_container_object.reply_comment_object.files;
-    }
-    form_data.append('message', comment_message);
-    if (comment_files.length > 0) {
-      comment_files.forEach((comment_file: Record<any, any>) => {
-        //this check is due to that file can have string or file object. String will be in case when we user edit comment and we need to show existing file
-        if (comment_file.file.constructor.name == "File") {
-          form_data.append('files[]', comment_file.file);
-        }
-      });
-    }
-
-    return http.post(url, form_data);
-
-  }
-
-  //this method represents edited_comment_object column of Model OrderActivityComment. This column is dynamically added to work on frontend
-  getDefaultEditedCommentObject() {
-    return {
-      message: null, files: [], removed_files: []
-    }
-  }
-
-  async uploadFiles(event: Record<any, any>, type: string, files_container_object: Record<any, any>) {
-    let self = this;
-    //in case of add order_item_activity object is passed. In case of edit order_item_activity_comments object is passed
-    let key_name = null;
-    if(type == "add") {
-      key_name = "comment_object"
-    } else if(type == "edit") {
-      key_name = "edited_comment_object"
-    } else {
-      key_name = "reply_comment_object"
-    }
-    let comment_files_container = files_container_object[key_name];
-    let uploaded_files = event.target.files;
-    let allowed_file_types = ["jpg", "jpeg", "pdf"]
-    let rejected_files = [];
-    for (let uploaded_file of uploaded_files) {
-      let file_name = uploaded_file.name;
-      let file_extension = file_name.substring(file_name.lastIndexOf('.') + 1).toLowerCase();
-      if(allowed_file_types.includes(file_extension)) {
-        let file_preview = await self.createFilePreview(uploaded_file)
-        comment_files_container.files.push({
-          file: uploaded_file, file_preview: file_preview, name: file_name, extension: file_extension
-        })
-      } else {
-        rejected_files.push(file_name)
-      }
-    }
-    let rejected_files_length = rejected_files.length;
-    if(rejected_files_length > 0) {
-      console.warn(`Uploaded files(${rejected_files_length}) has been rejected. The rejected files are`+ rejected_files.toString())
-    }
-    console.log("uploaded files", comment_files_container.files);
-    event.target.files = null;
-  }
-
-  async createFilePreview(file: File) {
-    let result_base64 = await new Promise((resolve) => {
-      let fileReader = new FileReader();
-      fileReader.onload = (e) => resolve(fileReader.result);
-      fileReader.readAsDataURL(file);
-    });
-    return result_base64;
-  }
-
-  getAddCommentDefaultObject() {
-    return {
-      message: null,
-      files: []
-    }
-  }
-
-
-  public removePreviewFileFrom(type: string, files_container_object: Record<any, any>, file_index: number) {
-    if (type == "item_status_activity") {
-      files_container_object.files.splice(file_index, 1);
-    } else if(type == "edit") { //in case of editing comment
-      let file = files_container_object.edited_comment_object.files[file_index].file;
-      //file contains string or file object. In case of string it will be the path of existing file. While in case of file object new file is uploaded.
-      //So if file contains string then it means that comment existing file needs to be removed.
-      if (file.constructor.name == "String") {
-        files_container_object.edited_comment_object.removed_files.push(file);
-      }
-      files_container_object.edited_comment_object.files.splice(file_index, 1);
-    }
-  }
-
-  public removeFileFromInput(input_id: string, index: number) {
-    const data_transfer_object = new DataTransfer()
-    const input = document.getElementById(input_id) as HTMLInputElement
-    const {files} = input
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      if (index !== i)
-        data_transfer_object.items.add(file) // here you exclude the file. thus removing it.
-    }
-    input.files = data_transfer_object.files // Assign the updates list
-  }
-  previewPdf(pdf_container_object: Record<any, any>) {
-    const pdfWindow = window.open("");
-    // let data = '<object data="' + pdf_container_object.file_preview + '" width="100%" height="100%">';
-    let data = `<object data="${pdf_container_object.file_preview}" width="100%" height="100%">
-                    <embed ng-srs="${pdf_container_object.file_preview}" width="100%" height="100%"></embed>
-                </object>`;
-    pdfWindow.document.write(data);
+    self.$set(activity_item.comments, activity_item_comment_index, event_data)
   }
 
 
