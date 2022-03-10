@@ -293,7 +293,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 export default class OrderDetail extends Mixins(ErrorMessages) {
   public storage_url = process.env.VUE_APP_STORAGE_URL
   private order_id = this.$route.params.order_id;
-  private order = null;
+  private order:Record<any,any> = {};
   public logData = logData
 
   // -------- Order Status Constants
@@ -308,7 +308,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public ORDERCOMPLETED = "completed"
 
   public activity_sample_files = []
-  public activity_navigation_index:null|numeric = null
+  public activity_navigation_index:number = 0
   public activity_items :Record<any, any> = {
     order_item_id:null,
     order_item_index:null,
@@ -321,6 +321,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     status:null,
     message:null
   }
+
 
 
   getOrderDetail() {
@@ -445,10 +446,10 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       for (const key in this.activity_items) {
 
         if (key == 'activity_item_data') {
-          this.activity_items[key].forEach((activity_file_obj:Record<any,any> , actIndx:numberic) => {
+          this.activity_items[key].forEach((activity_file_obj:Record<any,any> , actIndx:number) => {
             for (const key2 in activity_file_obj) {
               if(key2 == 'files'){
-                activity_file_obj[key2].forEach((activity_file:Record<any,any> , fileInd:numberic) => {
+                activity_file_obj[key2].forEach((activity_file:Record<any,any> , fileInd:number) => {
                   for(const key3 in activity_file){
                     form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', this.activity_items[key][actIndx][key2][fileInd][key3]);
                   }
@@ -496,7 +497,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
 
 
-    let image = this.$refs['designImage'+ref_index+this.activity_navigation_index][0];
+    let image = (this.$refs as Record<any,any>)['designImage'+ref_index+this.activity_navigation_index][0];
     //image.crossOrigin = "https://custimoo.s3.us-east-1.amazonaws.com";
     //  console.log(image)
 

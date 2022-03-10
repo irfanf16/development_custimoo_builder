@@ -125,7 +125,7 @@ export default class AddUpdateComment extends Vue {
   * */
   public storage_url = process.env.VUE_APP_STORAGE_URL
   public logData = logData;
-  public comment_message = null;
+  public comment_message:string|null = null;
   public comment_files: Record<any, any>[] = [];
   public removed_files = [];
   public parent_message: null|string= null;
@@ -170,12 +170,12 @@ export default class AddUpdateComment extends Vue {
 
 
   previewPdf(pdf_file_object: Record<any, any>) {
-    const pdfWindow = window.open("");
+    const pdfWindow:Record<any,any>|null = window.open("");
     // let data = '<object data="' + pdf_file_object.file_preview + '" width="100%" height="100%">';
     let data = `<object data="${pdf_file_object.file_preview}" width="100%" height="100%">
                     <embed ng-srs="${pdf_file_object.file_preview}" width="100%" height="100%"></embed>
                 </object>`;
-    pdfWindow.document.write(data);
+    pdfWindow?.document.write(data);
   }
 
   async getPayloadData() {
@@ -190,14 +190,14 @@ export default class AddUpdateComment extends Vue {
         form_data.append('files[]', comment_file.file);
       }
     });
-    self.removed_files.forEach((removed_file: Record<any, any>) => {
+    self.removed_files.forEach((removed_file: File) => {
       form_data.append('removed_files[]', removed_file);
     });
     if(self.parent_message_id) {
      if(self.parent_message) {
        form_data.append('parent_message', self.parent_message);
      }
-      form_data.append('parent_message_id', self.parent_message_id);
+      form_data.append('parent_message_id', self.parent_message_id.toString());
     }
     return form_data;
   }
@@ -227,7 +227,7 @@ export default class AddUpdateComment extends Vue {
     let remove_file = self.comment_files[file_index];
     //if removed file type is string then it means user is deleting existing file of comment and we remove it from database
     if(self.action == "edit" && remove_file.file.constructor.name == "String") {
-      self.removed_files.push(self.comment_files[file_index].file)
+      self.removed_files.push(self.comment_files[file_index].file )
     }
     self.comment_files.splice(file_index, 1);
   }
