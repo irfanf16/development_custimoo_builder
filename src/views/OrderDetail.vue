@@ -308,7 +308,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public ORDERCOMPLETED = "completed"
 
   public activity_sample_files = []
-  public activity_navigation_index:number = 0
+  public activity_navigation_index = 0
   public activity_items :Record<any, any> = {
     order_item_id:null,
     order_item_index:null,
@@ -501,7 +501,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     //image.crossOrigin = "https://custimoo.s3.us-east-1.amazonaws.com";
     //  console.log(image)
 
-    const markerArea = new markerjs2.MarkerArea(image)
+    const markerArea:Record<any,any> = new markerjs2.MarkerArea(image)
     markerArea.addEventListener('render', (event:Record<any,any>) => {
       // console.log('event',event);
       activityObj.files[ref_index].file = event.dataUrl
