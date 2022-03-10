@@ -11,16 +11,17 @@
           </template>
 
           <div class="order-flow">
-            <div class="order-step" :class="order_item.status == 'created' ? 'active' : ''">
+            <div class="order-step" :class="order_item.status == FACTORYREVIEW ? 'active' : ''">
               Order<br>Created
             </div>
-            <div class="order-step">
+            <div class="order-step" :class="order_item.status == FACTORYAPPROVED ? 'active' : ''">
               Artwork<br>Approval
             </div>
-            <div class="order-step">
+            <div class="order-step" :class="(order_item.status == CUSTOMERREVIEW
+            || order_item.status == CUSTOMERREJECTED || order_item.status == CUSTOMERAPPROVED ) ? 'active' : ''">
               Sample<br>Design
             </div>
-            <div class="order-step">
+            <div class="order-step" :class="(order_item.status == ORDERINPRODUCTION) ? 'active' : ''">
               In<br>Production
             </div>
             <div class="order-step">
@@ -54,15 +55,22 @@
 
                       </template>
                     </div>
-                    <div class="actions">
-                      <button class="btn reject" @click="$modal.show('rejection-modal')">
-                        <BIconXSquareFill/>
-                      </button>
-                      <button class="btn approve">
-                        <BIconCheckSquareFill/>
-                      </button>
-                    </div>
+
+                    <template v-if="item_status_activity_index==0">
+                      <div class="actions" v-if="order_item.status == FACTORYREVIEW && item_status_activity.status == FACTORYREJECTED">
+                        <button class="btn approve" @click="editCustomerProducts(order_item, order_item_index)"><BIconCheckSquareFill/></button>
+                      </div>
+
+                      <div class="actions" v-if="order_item.status == CUSTOMERREVIEW && item_status_activity.status == CUSTOMERREVIEW">
+                        <button class="btn approve" @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)"><BIconCheckSquareFill /></button>
+                      </div>
+                    </template>
+
+
+
                   </div>
+
+
                   <div class="comment-button text-left px-2">
                     <a class="text-info" @click="item_status_activity.add_comment = !item_status_activity.add_comment">
                       <BIconChatDots/>
@@ -169,52 +177,82 @@
            :scrollable="true"
            height="auto"
            :reset="true"
-           name="rejection-modal" ref="rejection-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true"
-           title="Locker Room"
+           name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true" title="Locker Room"
            @close="$store.commit('Change_Locker_Active_Tab', 0)">
+
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="font-weight-bold pl-1">
           Reject Artwork
         </div>
-        <span class="modal-close cursor-pointer" @click="$modal.hide('rejection-modal')">
-          <BIconX/>
+        <span class="modal-close cursor-pointer" @click="$modal.hide('customer-review-modal')">
+          <BIconX />
         </span>
       </div>
 
-      <div class="d-flex align-items-center justify-content-between gap-1 py-4 px-3 m-auto">
-        <div class="fs-5">
-          <BIconChevronLeft/>
-        </div>
-        <div>
-          <img src="img/images/image-product.png" alt="" class="w-100">
-        </div>
-        <div class="fs-5">
-          <BIconChevronRight/>
-        </div>
-      </div>
+      <template v-if="activity_items.activity_item_data[activity_navigation_index]">
 
-      <div class="p-4 text-left">
-        <div class="fs-4">Write your feedback</div>
-        <div class="mt-2">
-          <b-textarea placeholder="Please write your feedback here..." rows="5"></b-textarea>
-        </div>
-      </div>
+        <div class="d-flex align-items-center justify-content-between gap-1 py-4 px-3 m-auto">
+          <div class="fs-5">
+            <BIconChevronLeft @click="navigateActivitySlider('back')" />
+          </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary light" @click="$modal.hide('rejection-modal')">Cancel</button>
-        <button class="btn btn-secondary">Reject</button>
-      </div>
+          <div v-for="(actFile, fileInd) in activity_items.activity_item_data[activity_navigation_index].files" :key="`actfile-${fileInd}`">
+            <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
+<!--                          <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`"  :src="`${storage_url}${actFile.file}`" alt="" class="w-100">-->
+
+            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`"  :src="actFile.file" alt="" class="w-100" style="max-height: 500px">
+          </div>
+
+
+<!--          <div class="fs-5" v-if="(activity_items.activity_item_data.length - 1) != activity_navigation_index">-->
+          <div class="fs-5">
+            <BIconChevronRight @click="navigateActivitySlider('next')" />
+          </div>
+        </div>
+
+        <div class="p-4 text-left">
+          <div class="fs-4">Write your feedback</div>
+          <div class="mt-2">
+            <b-textarea v-model="activity_items.activity_item_data[activity_navigation_index].message" placeholder="Please write your feedback here..." rows="5"></b-textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary light" @click="$modal.hide('customer-review-modal')">Cancel</button>
+
+          <template v-if="activity_items.activity_item_data[activity_navigation_index].action">
+            <span v-if="activity_items.activity_item_data[activity_navigation_index].action == 'accept'">Accepted</span>
+            <span v-else>Rejected</span>
+          </template>
+          <template v-else>
+            <button class="btn btn-secondary" @click="approveRejectDesigns('accept')">Accept</button>
+            <button class="btn btn-secondary" @click="approveRejectDesigns('reject')">Reject</button>
+          </template>
+
+          <template v-if="((activity_items.activity_item_data.length - 1) == activity_navigation_index) && activity_items.activity_item_data[activity_navigation_index].action">
+            <button class="btn btn-secondary" @click="submitActivity('')">Submit Changes</button>
+          </template>
+
+
+        </div>
+
+      </template>
+
+
+
     </modal>
   </div>
 </template>
 
 <script lang="ts">
-
+import Vue from 'vue'
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import {handleResponseException, logData, pathInfo} from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import moment from "moment";
+import * as markerjs2 from 'markerjs2';
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 
 @Component<OrderDetail>({
@@ -252,11 +290,39 @@ import moment from "moment";
   }
 })
 
-export default class OrderDetail extends Mixins() {
+export default class OrderDetail extends Mixins(ErrorMessages) {
   public storage_url = process.env.VUE_APP_STORAGE_URL
   private order_id = this.$route.params.order_id;
-  private order = null;
+  private order:Record<any,any> = {};
   public logData = logData
+
+  // -------- Order Status Constants
+  public FACTORYREVIEW = "submitted_for_factory_review"
+  public FACTORYAPPROVED = "factory_approved"
+  public FACTORYREJECTED = "factory_rejected"
+  public CUSTOMERREVIEW = "submitted_for_customer_review"
+  public CUSTOMERAPPROVED = "customer_approved"
+  public CUSTOMERREJECTED = "customer_rejected"
+  public ORDERINPRODUCTION = "in_production"
+  public ORDERSHIPPED = "shipped"
+  public ORDERCOMPLETED = "completed"
+
+  public activity_sample_files = []
+  public activity_navigation_index:number = 0
+  public activity_items :Record<any, any> = {
+    order_item_id:null,
+    order_item_index:null,
+    activity_item_data: []
+  }
+
+  public ref = this.$refs as Record<any, any>;
+  public activity_data:Record<any,any>={
+    order_item_id: null,
+    status:null,
+    message:null
+  }
+
+
 
   getOrderDetail() {
     let self = this;
@@ -290,6 +356,202 @@ export default class OrderDetail extends Mixins() {
   handleCommentActionCompleted(event_data: Record<any, any>, activity_item: Record<any, any>, activity_item_comment_index: number) {
     let self = this;
     self.$set(activity_item.comments, activity_item_comment_index, event_data)
+  }
+
+
+
+
+
+  ///////////////// Activity Methods
+
+  public editCustomerProducts(orderItem: any, orderItemIndex:number){
+
+    let prod_ids = [];
+    for(let factoryProd of orderItem.factory_products){
+      if(factoryProd.status == this.FACTORYREJECTED){
+        prod_ids.push(factoryProd.product_id)
+      }
+    }
+
+      let post_data:Record<any,any> = {};
+      post_data.product_ids = prod_ids
+      post_data.order_item_id = orderItem.id;
+
+      let url = `customer-orders/${orderItem.id}/temp-activity`
+      http.post(url, post_data)
+        .then((successResponse) => {
+          let response_data = successResponse.data;
+
+          console.log('response',response_data.result.order_item);
+          console.log(orderItemIndex);
+           Vue.set(this.order.items, orderItemIndex, response_data.result.order_item)
+          // this.$modal.hide('rejection-modal');
+          // this.$modal.hide('test-sample-modal');
+
+          // this.resetActivityData();
+          // console.log("sdfsdf", response_data.result.order_activity);
+
+        }).catch((errorResponse) => {
+        console.log(errorResponse);
+        //handleResponseException(errorResponse)
+      });
+
+
+  }
+
+
+  public showSampleDesigns(order_item: Record<any, any>, order_item_index :number, activity_item_index:number){
+
+    console.log('order',order_item);
+
+    this.$modal.show('customer-review-modal');
+    this.activity_items.order_item_id = order_item.id
+    this.activity_items.order_item_index = order_item_index
+
+    let activity_item = Object.assign({}, order_item.status_activities[activity_item_index]);
+
+
+    this.activity_items.activity_item_data = [];
+    for(let actItem of activity_item.activity_items){
+      let actObj:Record<any,any> = {};
+      actObj.action = null;
+      actObj.status = activity_item.status;
+      actObj.message = null;
+      actObj.files = [];
+      actObj.product_id = actItem.product_id;
+      for(let actfile of actItem.activity_files){
+        let fileObj:Record<any,any> = {};
+        console.log(actfile.url);
+        fileObj.file = 'http://localhost:8081/sample.jpg';
+        // fileObj.file = actfile.url;
+        fileObj.file_type = null;
+        actObj.files.push(fileObj);
+      }
+      this.activity_items.activity_item_data.push(actObj);
+    }
+
+    if(this.activity_items.activity_item_data.length > 0)
+      this.activity_navigation_index = 0;
+
+
+  }
+
+  public submitActivity(submit_type:string) {
+
+    let form_data = this.activity_items;
+    if(submit_type == 'form_data'){
+      // form_data = null;
+      form_data = new FormData();
+
+      for (const key in this.activity_items) {
+
+        if (key == 'activity_item_data') {
+          this.activity_items[key].forEach((activity_file_obj:Record<any,any> , actIndx:number) => {
+            for (const key2 in activity_file_obj) {
+              if(key2 == 'files'){
+                activity_file_obj[key2].forEach((activity_file:Record<any,any> , fileInd:number) => {
+                  for(const key3 in activity_file){
+                    form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', this.activity_items[key][actIndx][key2][fileInd][key3]);
+                  }
+                });
+              }else{
+
+                form_data.append(key+'['+actIndx+']['+key2+']', this.activity_items[key][actIndx][key2]);
+              }
+            }
+          });
+        }
+        else {
+          form_data.append(key, this.activity_items[key]);
+        }
+
+      }
+    }
+
+    let url = `customer-orders/${this.activity_items.order_item_id}/order-activity`
+    http.post(url, form_data)
+      .then((successResponse) => {
+        let response_data = successResponse.data;
+
+        console.log('response',response_data.result.order_item);
+        Vue.set(this.order.items, this.activity_items.order_item_index, response_data.result.order_item)
+        this.$modal.hide('customer-review-modal');
+        // this.$modal.hide('test-sample-modal');
+
+        // this.resetActivityData();
+        // console.log("sdfsdf", response_data.result.order_activity);
+
+      }).catch((errorResponse) => {
+      console.log(errorResponse);
+      //handleResponseException(errorResponse)
+    });
+  }
+  public resetActivityData(){
+    this.activity_data.order_item_id = null
+    this.activity_data.status = null
+    this.activity_sample_files = []
+    this.activity_data.message = null
+  }
+  public showMarkerArea(ref_index: number){
+
+    let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
+
+
+    let image = (this.$refs as Record<any,any>)['designImage'+ref_index+this.activity_navigation_index][0];
+    //image.crossOrigin = "https://custimoo.s3.us-east-1.amazonaws.com";
+    //  console.log(image)
+
+    const markerArea = new markerjs2.MarkerArea(image)
+    markerArea.addEventListener('render', (event:Record<any,any>) => {
+      // console.log('event',event);
+      activityObj.files[ref_index].file = event.dataUrl
+      activityObj.files[ref_index].file_type = 'encode'
+    });
+    markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+    markerArea.show();
+    //markerArea.close();
+  }
+  public navigateActivitySlider(direction:string){
+
+    let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
+    if((this.activity_items.activity_item_data.length - 1) == this.activity_navigation_index && direction == 'next'){
+      this.showToast('No more items to show','error');
+    } else if((activityObj.message == null || activityObj.message == '') && direction == 'next'){
+      this.showToast('Please provide feedback before navigate','error');
+    } else if(activityObj.action == null && direction == 'next'){
+      this.showToast('Please accept or reject designs before navigate','error');
+    }else{
+      let limit = this.activity_items.activity_item_data.length;
+      if(direction == 'next'){
+        if((this.activity_navigation_index+1) < limit){
+          this.activity_navigation_index ++
+        }
+      }else{
+        if((this.activity_navigation_index-1) >= 0) {
+          this.activity_navigation_index--
+        }
+      }
+    }
+
+
+  }
+  public approveRejectDesigns(action:string){
+
+    let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
+    if(action == 'reject'){
+      //console.log(activityObj);
+      if(activityObj.message == null || activityObj.message == ''){
+        this.showToast('Please provide feedback before rejection','error');
+      }else{
+        this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
+        this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
+        this.navigateActivitySlider('next')
+      }
+    }else if(action == 'accept'){
+      this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
+      this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERAPPROVED;
+      this.navigateActivitySlider('next')
+    }
   }
 
 
