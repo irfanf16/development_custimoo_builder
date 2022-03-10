@@ -34,6 +34,7 @@
     "jquery": "^3.6.0",
     "laravel-echo": "^1.11.3",
     "lodash": "^4.17.21",
+    "markerjs2": "^2.20.0",
     "moment": "^2.29.1",
     "pc-bootstrap4-datetimepicker": "^4.17.51",
     "popper-vue": "^0.1.8",
