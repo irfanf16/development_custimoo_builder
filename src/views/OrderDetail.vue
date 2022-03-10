@@ -308,11 +308,18 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public ORDERCOMPLETED = "completed"
 
   public activity_sample_files = []
-  public activity_navigation_index = null
+  public activity_navigation_index:null|numeric = null
   public activity_items :Record<any, any> = {
     order_item_id:null,
     order_item_index:null,
     activity_item_data: []
+  }
+
+  public ref = this.$refs as Record<any, any>;
+  public activity_data:Record<any,any>={
+    order_item_id: null,
+    status:null,
+    message:null
   }
 
 
@@ -365,7 +372,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       }
     }
 
-      let post_data = {};
+      let post_data:Record<any,any> = {};
       post_data.product_ids = prod_ids
       post_data.order_item_id = orderItem.id;
 
@@ -405,14 +412,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
     this.activity_items.activity_item_data = [];
     for(let actItem of activity_item.activity_items){
-      let actObj = {};
+      let actObj:Record<any,any> = {};
       actObj.action = null;
       actObj.status = activity_item.status;
       actObj.message = null;
       actObj.files = [];
       actObj.product_id = actItem.product_id;
       for(let actfile of actItem.activity_files){
-        let fileObj = {};
+        let fileObj:Record<any,any> = {};
         console.log(actfile.url);
         fileObj.file = 'http://localhost:8081/sample.jpg';
         // fileObj.file = actfile.url;
@@ -438,10 +445,10 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       for (const key in this.activity_items) {
 
         if (key == 'activity_item_data') {
-          this.activity_items[key].forEach((activity_file_obj , actIndx) => {
+          this.activity_items[key].forEach((activity_file_obj:Record<any,any> , actIndx:numberic) => {
             for (const key2 in activity_file_obj) {
               if(key2 == 'files'){
-                activity_file_obj[key2].forEach((activity_file , fileInd) => {
+                activity_file_obj[key2].forEach((activity_file:Record<any,any> , fileInd:numberic) => {
                   for(const key3 in activity_file){
                     form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', this.activity_items[key][actIndx][key2][fileInd][key3]);
                   }
@@ -494,7 +501,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     //  console.log(image)
 
     const markerArea = new markerjs2.MarkerArea(image)
-    markerArea.addEventListener('render', event => {
+    markerArea.addEventListener('render', (event:Record<any,any>) => {
       // console.log('event',event);
       activityObj.files[ref_index].file = event.dataUrl
       activityObj.files[ref_index].file_type = 'encode'
@@ -507,11 +514,11 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
     if((this.activity_items.activity_item_data.length - 1) == this.activity_navigation_index && direction == 'next'){
-      this.showToast('No more items to show');
+      this.showToast('No more items to show','error');
     } else if((activityObj.message == null || activityObj.message == '') && direction == 'next'){
-      this.showToast('Please provide feedback before navigate');
+      this.showToast('Please provide feedback before navigate','error');
     } else if(activityObj.action == null && direction == 'next'){
-      this.showToast('Please accept or reject designs before navigate');
+      this.showToast('Please accept or reject designs before navigate','error');
     }else{
       let limit = this.activity_items.activity_item_data.length;
       if(direction == 'next'){
@@ -533,7 +540,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     if(action == 'reject'){
       //console.log(activityObj);
       if(activityObj.message == null || activityObj.message == ''){
-        this.showToast('Please provide feedback before rejection');
+        this.showToast('Please provide feedback before rejection','error');
       }else{
         this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
         this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
