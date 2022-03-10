@@ -127,7 +127,7 @@ export default class AddUpdateComment extends Vue {
   public logData = logData;
   public comment_message:string|null = null;
   public comment_files: Record<any, any>[] = [];
-  public removed_files = [];
+  public removed_files: File[] = [];
   public parent_message: null|string= null;
   public parent_message_id: null|number = null;
   public adding_comment = false;
@@ -227,7 +227,7 @@ export default class AddUpdateComment extends Vue {
     let remove_file = self.comment_files[file_index];
     //if removed file type is string then it means user is deleting existing file of comment and we remove it from database
     if(self.action == "edit" && remove_file.file.constructor.name == "String") {
-      self.removed_files.push(self.comment_files[file_index].file )
+      self.removed_files.push(self.comment_files[file_index].file)
     }
     self.comment_files.splice(file_index, 1);
   }
