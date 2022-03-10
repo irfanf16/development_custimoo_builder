@@ -68,7 +68,7 @@
                           </b-button>
                           <Popper
                             :is-open="popperID == ('share'+i+''+ind)"
-                            :anchor-el="$refs['share'+i+''+ind]"
+                            :anchor-el="$refs['share'+i+''+ind][0]"
                             :on-close="hidePopper"
                           >
                             <aside id="popper-content" class="tooltip b-tooltip bs-tooltip share-tooltip">
