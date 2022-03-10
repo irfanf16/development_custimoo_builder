@@ -19,8 +19,9 @@
                             <!-- <router-link class="btn btn-secondary ml-3" to="/">Customizer</router-link> -->
                         </b-nav>
                         <b-nav class="align-items-center justify-content-end text-uppercase" v-if="isCustomerAuthenticated">
-                          <li class="nav-item"><router-link class="nav-link" :to="'customer-orders'">Orders</router-link></li>
-                          <li class="nav-item"><router-link class="nav-link" :to="'dashboard'">My Account</router-link></li>
+                          <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'/'" exact>Customize</router-link></li>
+                          <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'customer-orders'">Orders</router-link></li>
+                          <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'dashboard'">My Account</router-link></li>
                         </b-nav>
                     </div>
                 </b-col>
@@ -69,5 +70,11 @@ export default {
             max-width: 100%;
             float: right;
         }
+    }
+    .nav-item .nav-link.router-link-exact-active.active{
+      color:#219f84;
+    }
+    .nav-item .nav-link.active{
+      color:#219f84;
     }
 </style>
