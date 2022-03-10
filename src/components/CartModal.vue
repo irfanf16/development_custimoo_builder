@@ -9,6 +9,9 @@
       <thead class="bg-light">
       <tr>
         <th class="font-weight-bold">
+          Product Name
+        </th>
+        <th class="font-weight-bold">
           Design Image
         </th>
         <th class="font-weight-bold">
@@ -22,6 +25,9 @@
       <tbody>
       <template v-for="(cart_item) in cartItems">
         <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
+          <td>
+            {{factory_product.product_name}}
+          </td>
           <td><b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
             <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
 
@@ -65,7 +71,12 @@ import {findIndex} from "lodash";
       filters: {
         itemQtyCount: (value: Record<any, any>) => {
           if(value.length > 0) {
-            return value.reduce((a:Record<any, any>, b:Record<any, any>) => a + (b['quantity'] || 0), 0);
+            let quantity = 0 ;
+             value.forEach((roster:Record<any,any>) => {
+                 quantity += parseInt(roster.quantity);
+            });
+            return quantity
+            // return value.reduce((a:Record<any, any>, b:Record<any, any>) => a + (b['quantity'] || 0), 0);
           }
           return 0
         }
@@ -74,7 +85,7 @@ import {findIndex} from "lodash";
         // this.getColors()
       }
     })
-    export default class CartModal extends Mixins(ErrorMessages, handleMainProducts) {
+    export default class CartModal extends Mixins(ErrorMessages,LockerProducts, handleMainProducts) {
 
       public viewLoader = false;
       private storageUrl = process.env.VUE_APP_STORAGE_URL
@@ -94,6 +105,7 @@ import {findIndex} from "lodash";
           if (res.data.success){
             this.$store.dispatch('addToCart',[])
             this.showToast(res.data.message, 'SUCCESS');
+            this.showToast('Your pdf is generating', 'SUCCESS');
             this.viewLoader = false;
             this.hide()
           }
@@ -150,7 +162,7 @@ import {findIndex} from "lodash";
           is_customized = locker_product_type == "customized" ? true: is_customized;
           is_personalized = locker_product_type == "personalized" ? true : is_personalized;
           let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${locker_product?.id}`;
-          await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id:locker_product.id});
+          await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id:locker_product?.id});
           await http.get(url).then(async (response: Record<any, any>) => {
             await (this as Record<any,any>).handleMainProducts(response);
 

@@ -8,7 +8,7 @@
                     </div>
                 </b-col>
                 <b-col cols="6" lg="10">
-                    <div class="d-flex flex-wrap justify-content-end justify-content-lg-start">
+                    <div class="d-flex flex-wrap justify-content-end justify-content-lg-between">
                         <b-nav class="align-items-center text-uppercase">
                             <li class="nav-item">DESIGN HUMMEL</li>
 <!--                            <li class="nav-item"><router-link class="nav-link" to="#">Women</router-link></li>-->
@@ -17,6 +17,11 @@
 <!--                            <li class="nav-item"><router-link class="nav-link" to="#">Karma</router-link></li>-->
 <!--                            <li class="nav-item"><router-link class="nav-link" to="#">Copenhagen 2021</router-link></li>-->
                             <!-- <router-link class="btn btn-secondary ml-3" to="/">Customizer</router-link> -->
+                        </b-nav>
+                        <b-nav class="align-items-center justify-content-end text-uppercase" v-if="isCustomerAuthenticated">
+                          <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'/'" exact>Customizer</router-link></li>
+                          <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'customer-orders'">Orders</router-link></li>
+                          <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'dashboard'">My Account</router-link></li>
                         </b-nav>
                     </div>
                 </b-col>
@@ -34,8 +39,11 @@
 
 export default {
     name: 'Header',
-    components: {
-
+    components: {},
+    computed:{
+      isCustomerAuthenticated: function () {
+        return this.$store.getters.isCustomerAuthenticated;
+      }
     }
 }
 </script>
@@ -62,5 +70,11 @@ export default {
             max-width: 100%;
             float: right;
         }
+    }
+    .nav-item .nav-link.router-link-exact-active.active{
+      color:#219f84;
+    }
+    .nav-item .nav-link.active{
+      color:#219f84;
     }
 </style>

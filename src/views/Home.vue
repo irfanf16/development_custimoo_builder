@@ -86,7 +86,6 @@
               <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
               <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
               <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
-              <OrderListing   ref="orderlisting"/>
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                 <div>
                   <b-button variant="outline-secondary mr-2" :disabled="undoItems.length < 1" @click="undoAction"><span class="d-sm-block d-none">Undo</span><span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span></b-button>
@@ -235,7 +234,6 @@ import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import ExtractedColors from '@/components/ExtractedColors.vue'
 import LoginForm from '@/components/LoginForm.vue'
-import OrderListing from '@/components/OrderListing.vue'
 import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
@@ -273,8 +271,7 @@ Vue.filter('formatDate', function(value:string) {
     SaveColorModal,
     ExtractedColors,
     LoginForm,
-    Scene,
-    OrderListing
+    Scene
   },
 
   async mounted() {
@@ -495,9 +492,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.ref.cartModal.show()
     }
   }
-  public async openOrdersModal(){
-    this.ref['orderlisting'].showOdersPopup()
-  }
+  // public async openOrdersModal(){
+  //   this.ref['orderlisting'].showOdersPopup()
+  // }
   public getPath(){
     let url = ''
     url = this.$route.path

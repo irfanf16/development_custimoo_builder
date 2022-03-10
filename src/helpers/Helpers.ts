@@ -2,6 +2,7 @@ import Store from '../store'
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {default as $} from "jquery";
+import Axios, {AxiosError} from "axios";
 
 const getLogoSettingsObject = () => {
   return {
@@ -299,5 +300,49 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number):Promise<
   }
 }
 
+const handleResponseException = (errorResponse: AxiosError | TypeError) => {
+  if("isAxiosError" in errorResponse) {
+    // errorResponse.response.data object have keys { exception, file, line, message, trace }
+    const { message } = errorResponse.response?.data;
+    console.error("Error (Axios): ", message)
+  } else {
+    console.error(`Error (${errorResponse.name}): `, {
+      name: errorResponse.name,
+      message: errorResponse.message,
+      stack: errorResponse.stack
+    })
+  }
+}
 
-export {getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo };
+const logData = (data: any) => {
+  console.info("data logged", data)
+}
+
+const CustimooOrderFlowStatuses : Record<any, any> = {
+  submitted_for_factory_review: 'Submitted for Factory Review',
+  factory_approved: 'Factory Approved',
+  factory_rejected: 'Factory Rejected',
+  submitted_for_customer_review: 'Submitted for Customer Review',
+  customer_approved: 'Customer Approved',
+  customer_rejected: 'Customer Rejected',
+  in_production: 'In Production',
+  shipped: 'Shipped',
+  completed: 'Completed',
+};
+
+const pathInfo = (file_path: string, ) => {
+  const pathArray = file_path.split("/");
+  const lastIndex = pathArray.length - 1;
+  const name = pathArray[lastIndex];
+  const extension = name.substring(name.lastIndexOf(".") + 1);
+  return {
+    name: name, extension: extension
+  };
+}
+
+
+export {
+  getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
+  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
+  CustimooOrderFlowStatuses
+};

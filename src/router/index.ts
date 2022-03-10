@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
+import Addresses from '../views/Addresses.vue'
 import Cart from '../views/Cart.vue'
 import Order from '../views/Order.vue'
+import OrderDetail from '../views/OrderDetail.vue'
 import Orders from '../views/Orders.vue'
 import ViewScene from '../views/ViewScene.vue'
 import ThreeD from '../views/ThreeD.vue'
@@ -10,6 +12,9 @@ import ShareRoster from '../views/ShareRoster.vue'
 import CustomizationProcess from '../views/CustomizationProcess.vue'
 import ConfirmOrder from '../views/ConfirmOrder.vue'
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
+import OrderListing from "@/views/OrderListing.vue";
+import Dashboard from "@/views/Dashboard.vue";
+
 import CustomerOrders from "@/components/CustomerOrders.vue"
 
 Vue.use(VueRouter)
@@ -26,9 +31,29 @@ const routes: Array<RouteConfig> = [
     component: Cart
   },
   {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component:Dashboard
+  },
+  {
+    path: '/address',
+    name: 'Address',
+    component:Addresses
+  },
+  {
     path: '/order',
     name: 'Order',
     component: Order
+  },
+  {
+    path: '/customer-orders',
+    name: 'CustomerOrders',
+    component: OrderListing
+  },
+  {
+    path: '/order/:order_id/detail',
+    name: 'OrderDetail',
+    component: OrderDetail
   },
   {
     path: '/orders',
@@ -36,7 +61,7 @@ const routes: Array<RouteConfig> = [
     component: Orders
   },
   {
-    path: '/three-d',
+    path: '/3d',
     name: 'ThreeD',
     component: ThreeD
   },
