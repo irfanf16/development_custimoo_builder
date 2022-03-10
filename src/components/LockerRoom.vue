@@ -62,15 +62,16 @@
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
-                          <popper
-                            v-if="mobileScreen"
-                            trigger="focus"
-                            :stop-propagation="true"
-                            :prevent-default="true"
-                            :options="{
-                                placement: 'bottom',
-                              }">
-                            <span class="custom_popover popper" ref="hoover_popover">
+                          <b-button data-title="Share design" :ref="'share'+i+''+ind" :id="'share'+i+''+ind"
+                                  @click="shareProduct(product, ind, i)"><font-awesome-icon
+                          :icon="['fas', 'share-alt']"/>
+                          </b-button>
+                          <Popper
+                            :is-open="popperID == ('share'+i+''+ind)"
+                            :anchor-el="$refs['share'+i+''+ind]"
+                            :on-close="hidePopper"
+                          >
+                            <aside id="popper-content" class="tooltip b-tooltip bs-tooltip share-tooltip">
                               <div class="share-holder">
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
@@ -79,71 +80,13 @@
                                                   :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
                                     ></b-form-input>
-                                    <button @click="copyLink(product, ind)" type="button">Copy Link</button>
+                                    <button @click="copyLink(product, ind)" class="btn" type="button">Copy Link</button>
                                   </b-form>
                                 </div>
                               </div>
-                            </span>
-                            <b-button data-title="Share design" :id="'share'+i+''+ind" slot="reference"
-                                      @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
-                              :icon="['fas', 'share-alt']"/>
-                            </b-button>
-                          </popper>
-                          <popper
-                            v-else-if="isSafari"
-                            trigger="focus"
-                            :stop-propagation="true"
-                            :prevent-default="true"
-                            :options="{
-                                placement: 'bottom',
-                              }">
-                            <span class="custom_popover popper" ref="hoover_popover">
-                              <div class="share-holder">
-                                <h3>Copy link and Share</h3>
-                                <div class="share-form">
-                                  <b-form inline>
-                                    <b-form-input :id="'copy-'+ind"
-                                                  :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+                            </aside>
+                          </Popper>
 
-                                    ></b-form-input>
-                                    <button @click="copyLink(product, ind)" type="button">Copy Link</button>
-                                  </b-form>
-                                </div>
-                              </div>
-                            </span>
-                            <b-button data-title="Share design" :id="'share'+i+''+ind" slot="reference"
-                                      @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"><font-awesome-icon
-                              :icon="['fas', 'share-alt']"/>
-                            </b-button>
-                          </popper>
-                          <popper
-                            v-else
-                            trigger="focus"
-                            :stop-propagation="true"
-                            :prevent-default="true"
-                            :options="{
-                                placement: 'bottom',
-                              }">
-                            <span class="custom_popover popper" ref="hoover_popover">
-                              <div class="share-holder">
-                                <h3>Copy link and Share</h3>
-                                <div class="share-form">
-                                  <b-form inline>
-                                    <b-form-input :id="'copy-'+ind"
-                                                  :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
-
-                                    ></b-form-input>
-                                    <button @click="copyLink(product, ind)" type="button">Copy Link</button>
-                                  </b-form>
-                                </div>
-                              </div>
-                            </span>
-                            <b-button data-title="Share design" :id="'share'+i+''+ind" slot="reference"
-                                      @click="product.shared_url === undefined || product.shared_url === null || product.shared_url  ==='' ? shareProduct(product, ind, i): ''"
-                                      @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
-                              :icon="['fas', 'share-alt']"/>
-                            </b-button>
-                          </popper>
 <!--                          <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom"-->
 <!--                                     triggers="focus">-->
 <!--                            <div class="share-holder">-->
@@ -427,6 +370,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public collection_base_url = ''
   public yearly_planner_template_id = null;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
+  private popperID = "";
   // public isSafari = () => {
   //   let ua = navigator.userAgent.toLowerCase();
   //   if (ua.indexOf('safari') != -1) {
@@ -669,21 +613,32 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public lockerStatus = 'not_accepted'
 
+  public showPopper(id:string){
+    this.popperID = id;
+  }
+  public hidePopper(){
+    this.popperID = '';
+  }
+
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {
-      let payload = {
-        type: 'locker',
-        id: product.id,
-        customer_id: this.customer ? this.customer.id : '',
-        product_id: this.selectedProduct.product_id
-      }
-      let shared_url = "";
-      if (product.shared_url) {
-        shared_url += product.shared_url;
-      } else {
-        let res = await this.$store.dispatch('shareProduct', payload);
-        shared_url += res.data.url;
-        Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url', shared_url)
+      if(product){
+          let payload = {
+            type: 'locker',
+            id: product.id,
+            customer_id: this.customer ? this.customer.id : '',
+            product_id: this.selectedProduct.product_id
+          }
+          let shared_url = "";
+          if (product.shared_url) {
+            shared_url += product.shared_url;
+          } else {
+            let res = await this.$store.dispatch('shareProduct', payload);
+            shared_url += res.data.url;
+            Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url', shared_url)
+          }
+
+          this.showPopper('share'+lockerIndex+''+ind);
       }
     } catch (error) {
       console.log(error)

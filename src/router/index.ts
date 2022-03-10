@@ -60,7 +60,7 @@ const routes: Array<RouteConfig> = [
     component: Orders
   },
   {
-    path: '/three-d',
+    path: '/3d',
     name: 'ThreeD',
     component: ThreeD
   },

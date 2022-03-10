@@ -61,7 +61,7 @@
               {{ order.created_at | orderDate }}
             </td>
             <td>
-              {{order.product_count}}
+              {{order.roster_quantity}}
             </td>
             <td>
               <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-secondary mx-2">PDF</a><router-link  :to="`order/${order.id}/detail`" class="btn btn-secondary mx-2">Details</router-link>
@@ -81,7 +81,7 @@
                         <td>{{ product.product_name }}</td>
                         <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
                         <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
-                        <td>{{ product.roster_detail[0].quantity }}</td>
+                        <td>{{ product.roster_quantity }}</td>
                         <td>{{ product.status | Status }}</td>
                       </tr>
                     </template>
@@ -143,13 +143,19 @@ Vue.filter('Status', function(value:string) {
         text: value
       })
     });
-    this.getOrders();
+    if((this.$route as Record<any,any>)?.query?.filter in CustimooOrderFlowStatuses){
+      this.params.filter = this.$route.query.filter;
+      this.filterOrders();
+    }
+    else{
+      this.getOrders();
+    }
   }
 })
 export default class OrderListing  extends Mixins(ErrorMessages)  {
   private screenWidth = (window.screen.availWidth - 100)
   public storage_url = process.env.VUE_APP_STORAGE_URL
-  public params = {
+  public params:Record<any,any> = {
     search: '',
     filter : null,
   }
