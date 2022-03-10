@@ -361,7 +361,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     let prod_ids = [];
     for(let factoryProd of orderItem.factory_products){
       if(factoryProd.status == this.FACTORYREJECTED){
-        prod_ids.push(factoryProd.product_id)
+        prod_ids.push(factoryProd.id)
       }
     }
 
@@ -374,8 +374,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         .then((successResponse) => {
           let response_data = successResponse.data;
 
-          console.log('response',response_data.result.order_item);
-          console.log(orderItemIndex);
+          // console.log('response',response_data.result.order_item);
+          // console.log(orderItemIndex);
            Vue.set(this.order.items, orderItemIndex, response_data.result.order_item)
           // this.$modal.hide('rejection-modal');
           // this.$modal.hide('test-sample-modal');
@@ -410,7 +410,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       actObj.status = activity_item.status;
       actObj.message = null;
       actObj.files = [];
-      actObj.product_id = actItem.product_id;
+      actObj.factory_product_id = actItem.factory_product_id;
       for(let actfile of actItem.activity_files){
         let fileObj = {};
         console.log(actfile.url);
