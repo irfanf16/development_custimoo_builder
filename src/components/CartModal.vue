@@ -85,7 +85,7 @@ import {findIndex} from "lodash";
         // this.getColors()
       }
     })
-    export default class CartModal extends Mixins(ErrorMessages, handleMainProducts) {
+    export default class CartModal extends Mixins(ErrorMessages,LockerProducts, handleMainProducts) {
 
       public viewLoader = false;
       private storageUrl = process.env.VUE_APP_STORAGE_URL
@@ -162,7 +162,7 @@ import {findIndex} from "lodash";
           is_customized = locker_product_type == "customized" ? true: is_customized;
           is_personalized = locker_product_type == "personalized" ? true : is_personalized;
           let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${locker_product?.id}`;
-          await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id:locker_product.id});
+          await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id:locker_product?.id});
           await http.get(url).then(async (response: Record<any, any>) => {
             await (this as Record<any,any>).handleMainProducts(response);
 

@@ -192,8 +192,9 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
       console.log('res',res)
       this.orders =  res.data.result.data
       this.makePagination(res.data.result)
-    }).catch((e) => {
+    }).catch((e:any) => {
       console.log('e',e)
+      this.showError(e.response.data.message)
     })
   }
 
