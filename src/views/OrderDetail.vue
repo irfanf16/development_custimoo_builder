@@ -198,8 +198,6 @@
 
           <div v-for="(actFile, fileInd) in activity_items.activity_item_data[activity_navigation_index].files" :key="`actfile-${fileInd}`">
             <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
-<!--                          <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`"  :src="`${storage_url}${actFile.file}`" alt="" class="w-100">-->
-
             <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`"  :src="actFile.file" alt="" class="w-100" style="max-height: 500px">
           </div>
 
@@ -422,8 +420,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       for(let actfile of actItem.activity_files){
         let fileObj:Record<any,any> = {};
         console.log(actfile.url);
-        fileObj.file = 'http://localhost:8081/sample.jpg';
-        // fileObj.file = actfile.url;
+        //fileObj.file = 'http://localhost:8081/sample.jpg';
+         fileObj.file = `${this.storage_url}${actfile.url}`;
         fileObj.file_type = null;
         actObj.files.push(fileObj);
       }
@@ -498,8 +496,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
     let image = (this.$refs as Record<any,any>)['designImage'+ref_index+this.activity_navigation_index][0];
-    //image.crossOrigin = "https://custimoo.s3.us-east-1.amazonaws.com";
-    //  console.log(image)
+    image.crossOrigin="anonymous"
 
     const markerArea:Record<any,any> = new markerjs2.MarkerArea(image)
     markerArea.addEventListener('render', (event:Record<any,any>) => {
