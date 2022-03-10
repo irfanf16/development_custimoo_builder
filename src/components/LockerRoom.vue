@@ -67,6 +67,7 @@
                           :icon="['fas', 'share-alt']"/>
                           </b-button>
                           <Popper
+                            v-if="$refs['share'+i+''+ind]"
                             :is-open="popperID == ('share'+i+''+ind)"
                             :anchor-el="$refs['share'+i+''+ind][0]"
                             :on-close="hidePopper"
