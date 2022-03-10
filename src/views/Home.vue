@@ -81,6 +81,7 @@
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
               <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem"/>
+              <OrderChat />
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
               <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
@@ -243,6 +244,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
+import OrderChat from "@/components/OrderChat.vue";
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -253,6 +255,7 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
+    OrderChat,
     CartModal,
     CustomTabs,
     ConfirmModal,
@@ -380,7 +383,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public shared_link = ''
   public extractedcolorclass = ""
   private isFront = true;
-
+  public showchat(){
+    this.$modal.show('orderchat')
+  }
 
   private switchTabs (e:Record<any, any>){
     this.ref['custom-mobile-tabs'].hideOtherTab()
