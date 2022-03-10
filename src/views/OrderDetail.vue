@@ -157,7 +157,7 @@
                     <!--  add reply starts -->
                     <AddUpdateComment :key="`activity_comment-edit-${activity_comment_index}`" action="reply" v-if="activity_comment.reply_comment"
                                       v-on:hideCommentBox = "hideCommentBox(activity_comment, 'reply_comment')"
-                                      v-on:commentActionCompleted="handleCommentActionCompleted($event, item_status_activity, activity_comment_index)"
+                                      v-on:commentActionCompleted = "item_status_activity.comments.unshift($event)"
                                       :comment_obj="activity_comment" :url="`order_item/${item_status_activity.id}/comment`"
                     ></AddUpdateComment>
                     <!--  add reply ends -->
