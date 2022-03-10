@@ -19,7 +19,7 @@
                             <!-- <router-link class="btn btn-secondary ml-3" to="/">Customizer</router-link> -->
                         </b-nav>
                         <b-nav class="align-items-center justify-content-end text-uppercase" v-if="isCustomerAuthenticated">
-                          <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'/'" exact>Customize</router-link></li>
+                          <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'/'" exact>Customizer</router-link></li>
                           <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'customer-orders'">Orders</router-link></li>
                           <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'dashboard'">My Account</router-link></li>
                         </b-nav>

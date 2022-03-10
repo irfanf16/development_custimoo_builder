@@ -27,14 +27,23 @@ import {http} from "@/httpCommon";
 
 export default class Orders extends Mixins() {
   public customer_orders = []
+  public pagination:Record<any, any> ={
+    rows:null,
+    currentPage:1,
+    perPage:10,
+    total:0
+  }
+  public showLoader = false;
 
-  public async getOrders(params:string){
+  public async getOrders(params:string|void){
     const res =  await http.get('order').then((successResponse) => {
       let response_data = successResponse.data;
       this.showLoader = false
       if(response_data.success) {
         this.customer_orders = response_data.result.data;
-        this.makePagination(res.data.result)
+        console.log(res);
+        console.log(response_data);
+        this.makePagination(response_data.result)
       }
       console.log("shsha", successResponse)
 

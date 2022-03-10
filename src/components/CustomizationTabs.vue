@@ -424,7 +424,7 @@ export default class CustomizationProcess extends Vue {
 
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
-    let shadow_dom = this.$root.$options.shadowRoot;
+    let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
     productFonts.forEach((fonts: any, key: number) => {
       let fontNameParam = fonts.file_url.split('/').reverse()
       fontNameParam = fontNameParam[0].split('.')
