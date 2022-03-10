@@ -10,6 +10,7 @@ import ShareRoster from '../views/ShareRoster.vue'
 import CustomizationProcess from '../views/CustomizationProcess.vue'
 import ConfirmOrder from '../views/ConfirmOrder.vue'
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
+import CustomerOrders from "@/components/CustomerOrders.vue"
 
 Vue.use(VueRouter)
 
@@ -63,6 +64,11 @@ const routes: Array<RouteConfig> = [
     path:'/admin/login',
     name:'LoginAsAdmin',
     component: Home,
+  },
+  {
+    path: '/orders-chat',
+    name: 'CustomerOrders',
+    component: CustomerOrders
   }
 ]
 
