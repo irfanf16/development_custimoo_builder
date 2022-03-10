@@ -64,7 +64,9 @@
               {{order.roster_quantity}}
             </td>
             <td>
-              <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-secondary mx-2">PDF</a><router-link  :to="`order/${order.id}/detail`" class="btn btn-secondary mx-2">Details</router-link>
+              <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-secondary mx-2">PDF</a>
+              <router-link  :to="`order/${order.id}/detail`" class="btn btn-secondary mx-2">Details</router-link>
+              <a  target="_blank" class="btn btn-secondary mx-2">Chat</a>
             </td>
 
           </tr>
