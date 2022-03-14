@@ -24,10 +24,10 @@
             <div class="order-step" :class="(order_item.status == ORDERINPRODUCTION) ? 'active' : ''">
               In<br>Production
             </div>
-            <div class="order-step">
+            <div class="order-step" :class="(order_item.status == ORDERSHIPPED) ? 'active' : ''">
               Order<br>Shipped
             </div>
-            <div class="order-step">
+            <div class="order-step" :class="(order_item.status == ORDERCOMPLETED) ? 'active' : ''">
               Order<br>Completed
             </div>
           </div>
@@ -52,7 +52,7 @@
                           <img :src="`${storage_url}${activity_file.url}`" alt=""
                                :key="`activity_file_${activity_file_index}-${activity_file.name}`">
                         </template>
-
+                        <div v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                       </template>
                     </div>
 
@@ -414,7 +414,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       let actObj:Record<any,any> = {};
       actObj.action = null;
       actObj.status = activity_item.status;
-      actObj.message = null;
+      actObj.message = '';
       actObj.files = [];
       actObj.factory_product_id = actItem.factory_product_id;
       for(let actfile of actItem.activity_files){
@@ -513,7 +513,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
     if((this.activity_items.activity_item_data.length - 1) == this.activity_navigation_index && direction == 'next'){
       this.showToast('No more items to show','error');
-    } else if((activityObj.message == null || activityObj.message == '') && direction == 'next'){
+    } else if(activityObj.action == 'reject' && (activityObj.message == null || activityObj.message == '') && direction == 'next'){
       this.showToast('Please provide feedback before navigate','error');
     } else if(activityObj.action == null && direction == 'next'){
       this.showToast('Please accept or reject designs before navigate','error');
