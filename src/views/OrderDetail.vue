@@ -47,12 +47,12 @@
                   </div>
                   <div class="images-grid p-2 d-flex gap-1">
                     <div class="d-flex flex-wrap gap-1">
-                      <template v-for="(activity_item) in item_status_activity.activity_items">
+                      <template v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
                         <template v-for="(activity_file, activity_file_index) in activity_item.activity_files">
                           <img :src="`${storage_url}${activity_file.url}`" alt=""
                                :key="`activity_file_${activity_file_index}-${activity_file.name}`">
                         </template>
-                        <div v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
+                        <div :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                       </template>
                     </div>
 
@@ -65,8 +65,6 @@
                         <button class="btn approve" @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)"><BIconCheckSquareFill /></button>
                       </div>
                     </template>
-
-
 
                   </div>
 
@@ -179,7 +177,7 @@
            :reset="true"
            name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true" title="Locker Room"
            @close="$store.commit('Change_Locker_Active_Tab', 0)">
-
+      <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="font-weight-bold pl-1">
           Reject Artwork
@@ -293,6 +291,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   private order_id = this.$route.params.order_id;
   private order:Record<any,any> = {};
   public logData = logData
+  public showLoader = false
 
   // -------- Order Status Constants
   public FACTORYREVIEW = "submitted_for_factory_review"
@@ -435,7 +434,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   public submitActivity(submit_type:string) {
-
+    this.showLoader = true;
     let form_data = this.activity_items;
     if(submit_type == 'form_data'){
       // form_data = null;
@@ -474,12 +473,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         console.log('response',response_data.result.order_item);
         Vue.set(this.order.items, this.activity_items.order_item_index, response_data.result.order_item)
         this.$modal.hide('customer-review-modal');
+        this.showLoader = false;
         // this.$modal.hide('test-sample-modal');
 
         // this.resetActivityData();
         // console.log("sdfsdf", response_data.result.order_activity);
 
       }).catch((errorResponse) => {
+      this.showLoader = false;
       console.log(errorResponse);
       //handleResponseException(errorResponse)
     });
