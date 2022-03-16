@@ -10,33 +10,12 @@
             {{ order_item.factory_name }}
           </template>
 
-          <div class="order-flow">
-            <div class="order-step" :class="order_item.status == FACTORYREVIEW ? 'active' : ''">
-              Order<br>Created
-            </div>
-            <div class="order-step" :class="order_item.status == FACTORYAPPROVED ? 'active' : ''">
-              Artwork<br>Approval
-            </div>
-            <div class="order-step" :class="(order_item.status == CUSTOMERREVIEW
-            || order_item.status == CUSTOMERREJECTED || order_item.status == CUSTOMERAPPROVED ) ? 'active' : ''">
-              Sample<br>Design
-            </div>
-            <div class="order-step" :class="(order_item.status == ORDERINPRODUCTION) ? 'active' : ''">
-              In<br>Production
-            </div>
-            <div class="order-step" :class="(order_item.status == ORDERSHIPPED) ? 'active' : ''">
-              Order<br>Shipped
-            </div>
-            <div class="order-step" :class="(order_item.status == ORDERCOMPLETED) ? 'active' : ''">
-              Order<br>Completed
-            </div>
-          </div>
+          <OrderFlowStatusLine :item_status="order_item.status" />
+
           <div class="order-activities">
             <template v-for="(item_status_activity, item_status_activity_index) in order_item.status_activities">
               <div class="activity-status" :key="`item_status_activity_${item_status_activity_index}`">
-                <div class="activity-icon">
-                  <BIconLightningFill/>
-                </div>
+                <ActivityStatusIcons :activity_status="item_status_activity.status" />
 
                 <div class="activity-content">
                   <div class="activity-title">
@@ -244,8 +223,11 @@
 import Vue from 'vue'
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
+import $ from 'jquery'
 import {handleResponseException, logData, pathInfo} from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
+import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
+import OrderFlowStatusLine from "@/components/OrderFlowStatusLine";
 import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -257,7 +239,9 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     self.getOrderDetail();
   },
   components: {
-    AddUpdateComment
+    AddUpdateComment,
+    OrderFlowStatusLine,
+    ActivityStatusIcons
   },
   filters: {
     initials(value: string) {
@@ -318,6 +302,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     status:null,
     message:null
   }
+  public markerActive = false
 
 
 
@@ -492,7 +477,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.activity_data.message = null
   }
   public showMarkerArea(ref_index: number){
-
+    this.markerActive = true
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
 
 
@@ -534,6 +519,12 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   }
   public approveRejectDesigns(action:string){
+
+    if (this.markerActive){
+      $(".modal-header").next(".d-flex").children("div:not(.fs-5)").each(function(){
+        $(this).find(".__markerjs2_toolbar-block:eq(2) .__markerjs2_toolbar_button_colors:eq(0)").trigger("click")
+      })
+    }
 
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
     if(action == 'reject'){
