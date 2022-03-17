@@ -1,70 +1,94 @@
 <template>
-  <modal name="orderchat" :width="600"
-         :resizable="true"
-         :scrollable="true"
-         height="auto"
-         :reset="true"
-         :shiftY="0">
-    <div class="modal-header d-flex justify-content-between">
-      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
-    </div>
-    <div class="modal-body">
-      <div class="page-content page-container" id="page-content">
-    <div class="padding">
-      <div class="row container d-flex justify-content-center">
-        <div class="col-md-10">
-          <div class="card card-bordered">
-            <div class="card-header">
-              <h4 class="card-title"><strong>Chat</strong></h4> <a class="btn btn-xs btn-secondary" href="#" data-abc="true">Let's Chat App</a>
-            </div>
-            <div class="ps-container ps-theme-default ps-active-y" id="chat-content" style="overflow-y: scroll !important; height:400px !important;">
-<!--              <div class="media media-chat"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">-->
-<!--                <div class="media-body">-->
-<!--                  <p>Hi</p>-->
-<!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--              <div class="media media-chat media-chat-reverse">-->
-<!--                <div class="media-body">-->
-<!--                  <p>Hiii, I'm good.</p>-->
-<!--                  <p class="meta"><time datetime="2018">00:06</time></p>-->
-<!--                </div>-->
-<!--              </div>-->
-             <template  v-for="(message, i) in messages">
-              <div v-if="message"   :key="i" class="media media-chat" :class="message.from  == 'factory' ? 'media-chat-reverse':''"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                <div class="media-body">
-                  <p>{{ message.message }}</p>
-                  <template v-for="(urls, inn) in message.file_urls">
-                    <div v-if="message.file_urls" :key="inn">
-                      <img width="100" height="100" :src="storageUrl+urls.url" alt="" >
+  <modal name="orderChat" class="orderChat" :width="1000"
+           :resizable="true"
+           :scrollable="true"
+           height="auto"
+           :reset="true"
+            >
+      <div class="modal-header d-flex w-100 align-items-center justify-content-between">
+        <span class="fs-3 font-weight-bold">Order ID: 235354</span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex align-items-stretch factory-chat" id="page-content">
+<!--          <div class="factory-listing">-->
+<!--            <div class="list-heading">Factories</div>-->
+<!--            <div class="list-container">-->
+<!--              <ul>-->
+<!--                <li v-for="link in 10" :key="link">-->
+<!--                  <a href="#!">Factory {{link}}</a>-->
+<!--                </li>-->
+<!--              </ul>-->
+<!--            </div>-->
+<!--          </div>-->
+
+          <div class="padding w-100">
+          <div class="d-flex justify-content-center w-100">
+              <div class="w-100">
+                <div class="ps-container ps-theme-default ps-active-y theme-scroll" id="chat-content" style="overflow-y: scroll !important; height:400px !important;">
+    <!--              <div class="media media-chat"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">-->
+    <!--                <div class="media-body">-->
+    <!--                  <p>Hi</p>-->
+    <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
+    <!--                </div>-->
+    <!--              </div>-->
+    <!--              <div class="media media-chat media-chat-reverse">-->
+    <!--                <div class="media-body">-->
+    <!--                  <p>Hiii, I'm good.</p>-->
+    <!--                  <p class="meta"><time datetime="2018">00:06</time></p>-->
+    <!--                </div>-->
+    <!--              </div>-->
+                 <template  v-for="(message, i) in messages">
+                  <div v-if="message"   :key="i" class="media media-chat" :class="message.from  == 'factory' ? 'media-chat-reverse':''"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
+                    <div class="media-body">
+                      <p>{{ message.message }}</p>
+                      <template v-for="(urls, inn) in message.file_urls">
+                        <div v-if="message.file_urls" :key="inn">
+                          <img width="100" height="100" :src="storageUrl+urls.url" alt="" >
+                        </div>
+                      </template>
+    <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
                     </div>
-                  </template>
-<!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
+                  </div>
+                 </template>
+
+                  <div class="media media-chat" v-for="item in 10" :key="item" :class="item % 2  == 0 ? 'media-chat-reverse':''">
+                    <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
+                    <div class="media-body">
+                      <div class="message">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aliquid consequatur deleniti, dignissimos doloribus expedita explicabo hic illum laudantium modi non sed sunt veritatis vero voluptatem? Alias id illum necessitatibus!
+                        <div class="attachments theme-scroll-h">
+                          <img width="100" height="100" src="https://via.placeholder.com/100" alt="" v-for="item in 20" :key="item">
+                        </div>
+                      </div>
+                      <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
+                    </div>
+                  </div>
+
+                  <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;">
+                    <div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div>
+                  </div>
+                  <div class="ps-scrollbar-y-rail" style="top: 0px; height: 0px; right: 2px;">
+                    <div class="ps-scrollbar-y" tabindex="0" style="top: 0px; height: 2px;"></div>
+                  </div>
+                </div>
+                <div class="publisher bt-1 border-light">
+                  <img class="avatar avatar-xs" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
+                  <input class="publisher-input" v-model="text" type="text" placeholder="Write something">
+    <!--              <span class="publisher-btn file-group"><i class="fa fa-paperclip file-browser"></i>-->
+                  <button class="attach-file">
+                    <BIconPaperclip />
+                    <input  type="file" v-on:keyup.enter="sendMessage" @change="uploadImage" multiple>
+                  </button>
+    <!--              </span>-->
+                  <a @click="sendMessage"  class="publisher-btn text-info" href="#" data-abc="true"><i class="fa fa-paper-plane"></i></a>
                 </div>
               </div>
-             </template>
-              <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;">
-                <div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div>
-              </div>
-              <div class="ps-scrollbar-y-rail" style="top: 0px; height: 0px; right: 2px;">
-                <div class="ps-scrollbar-y" tabindex="0" style="top: 0px; height: 2px;"></div>
-              </div>
-            </div>
-            <div class="publisher bt-1 border-light">
-              <img class="avatar avatar-xs" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-              <input class="publisher-input" v-model="text" type="text" placeholder="Write something">
-<!--              <span class="publisher-btn file-group"><i class="fa fa-paperclip file-browser"></i>-->
-                <input  type="file" v-on:keyup.enter="sendMessage" @change="uploadImage" multiple>
-<!--              </span>-->
-              <a @click="sendMessage"  class="publisher-btn text-info" href="#" data-abc="true"><i class="fa fa-paper-plane"></i></a>
-            </div>
           </div>
         </div>
+        </div>
       </div>
-    </div>
-  </div>
-    </div>
-  </modal>
+    </modal>
 </template>
 
 <script lang="ts">
@@ -81,6 +105,7 @@ import {http} from "@/httpCommon";
 })
 export default class OrderChat extends Vue{
   public order_id = 0
+  private screenWidth = (window.screen.availWidth - 100)
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public customer_id = 0
   public factory_ids:Record<any, any> = []
@@ -88,6 +113,8 @@ export default class OrderChat extends Vue{
   public text = ''
   public fileObject: Record<any, any> = {}
   public files: Record<any, any> = []
+
+
   public async show(oid:number, cid:number, f_ids:Record<any, any>){
     this.order_id = oid
     this.customer_id = cid
@@ -104,10 +131,10 @@ export default class OrderChat extends Vue{
       console.log(res.data)
       this.messages =   res.data.messages && typeof(res.data.messages.messages) == 'string' ? JSON.parse(res.data.messages.messages) : []
     }
-    this.$modal.show('orderchat')
+    this.$modal.show('orderChat')
   }
   public hide(){
-    this.$modal.hide('orderchat')
+    this.$modal.hide('orderChat')
   }
   public async sendMessage() {
     let message = {
@@ -141,52 +168,9 @@ export default class OrderChat extends Vue{
 }
 </script>
 
-<style scoped>
-.card-bordered {
-  border: 1px solid #ebebeb
-}
-
-.card {
-  border: 0;
-  border-radius: 0px;
-  margin-bottom: 30px;
-  -webkit-box-shadow: 0 2px 3px rgba(0, 0, 0, 0.03);
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.03);
-  -webkit-transition: .5s;
-  transition: .5s
-}
-
-.padding {
-  padding: 3rem !important
-}
-
+<style scoped lang="scss">
 body {
   background-color: #f9f9fa
-}
-
-.card-header:first-child {
-  border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0
-}
-
-.card-header {
-  display: -webkit-box;
-  display: flex;
-  -webkit-box-pack: justify;
-  justify-content: space-between;
-  -webkit-box-align: center;
-  align-items: center;
-  padding: 15px 20px;
-  background-color: transparent;
-  border-bottom: 1px solid rgba(77, 82, 89, 0.07)
-}
-
-.card-header .card-title {
-  padding: 0;
-  border: none
-}
-
-h4.card-title {
-  font-size: 17px
 }
 
 .card-header>*:last-child {
@@ -196,32 +180,6 @@ h4.card-title {
 .card-header>* {
   margin-left: 8px;
   margin-right: 8px
-}
-
-.btn-secondary {
-  color: #4d5259 !important;
-  background-color: #e4e7ea;
-  border-color: #e4e7ea;
-  color: #fff
-}
-
-.btn-xs {
-  font-size: 11px;
-  padding: 2px 8px;
-  line-height: 18px
-}
-
-.btn-xs:hover {
-  color: #fff !important
-}
-
-.card-title {
-  font-family: Roboto, sans-serif;
-  font-weight: 300;
-  line-height: 1.5;
-  margin-bottom: 0;
-  padding: 15px 20px;
-  border-bottom: 1px solid rgba(77, 82, 89, 0.07)
 }
 
 .ps-container {
@@ -273,7 +231,7 @@ h4.card-title {
   min-width: 0
 }
 
-.media-chat .media-body p {
+.media-chat .media-body .message {
   position: relative;
   padding: 6px 8px;
   margin: 4px 0;
@@ -287,7 +245,7 @@ h4.card-title {
   margin: 0 8px
 }
 
-.media-chat .media-body p.meta {
+.media-chat .media-body .message.meta {
   background-color: transparent !important;
   padding: 0;
   opacity: .8
@@ -352,19 +310,39 @@ h4.card-title {
   transition: background-color .2s linear
 }
 
-.media-chat.media-chat-reverse .media-body p {
+.media-chat.media-chat-reverse .media-body .message {
   float: right;
   clear: right;
-  background-color: #48b0f7;
-  color: #fff
+  background-color: #1e8f77;
+  color: #fff;
 }
 
-.media-chat .media-body p {
+.media-chat .media-body .message {
   position: relative;
   padding: 6px 8px;
   margin: 4px 0;
   background-color: #f5f6f7;
-  border-radius: 3px
+  border-radius: 3px;
+  text-align: left;
+  max-width: 600px;
+}
+
+.media-chat .media-body .message .attachments {
+  display: flex;
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  width: 100%;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 7px;
+}
+.media-chat .media-body .message .attachments img{
+  border-radius: 5px;
+}
+
+.media-chat.media-chat-reverse .media-body .message .attachments {
+  flex-direction: row-reverse;
 }
 
 .border-light {
@@ -445,6 +423,48 @@ textarea {
 }
 
 .text-info {
-  color: #48b0f7 !important
+  color: #219F84 !important
+}
+
+.orderChat{
+  .modal-body{
+    //background: #eee;
+    padding: 0;
+  }
+
+  .attach-file{
+    border: none;
+    background: transparent;
+    color: #219F84;
+    position: relative;
+    height: 25px;
+    width: 20px;
+    overflow: hidden;
+    padding: 0 30px 0 0;
+    //background: red;
+    font-size: 1.2rem;
+    border-right: 1px solid rgba(0,0,0,0.1);
+
+    input{
+      position: absolute;
+      appearance: none;
+      height: 1000px;
+      width: 1000px;
+      opacity: 0;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+    }
+  }
+}
+
+.factory-listing{
+  min-width: 250px;
+  background: #fff;
+  text-align: left;
+
+  .list-heading{
+    font-size: 1.2rem;
+  }
 }
 </style>
