@@ -31,7 +31,7 @@
                           <img :src="`${storage_url}${activity_file.url}`" alt=""
                                :key="`activity_file_${activity_file_index}-${activity_file.name}`">
                         </template>
-                        <div v-if="(order_item.status == ORDERSHIPPED && item_status_activity.status == ORDERSHIPPED)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
+                        <div v-if="(item_status_activity.status == ORDERSHIPPED)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
                         <template v-else >
                           <div :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                         </template>
