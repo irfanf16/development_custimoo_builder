@@ -537,21 +537,24 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     }
 
     this.markerActive = false
-    let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
-    if(action == 'reject'){
-      //console.log(activityObj);
-      if((activityObj.message == null || activityObj.message == '' ) && !imageEdit ){
-        this.showToast('Please provide feedback before rejection','error');
-      }else{
+    setTimeout(() => {
+      let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
+      if(action == 'reject'){
+        //console.log(activityObj);
+        if((activityObj.message == null || activityObj.message == '' ) && !imageEdit ){
+          this.showToast('Please provide feedback before rejection','error');
+        }else{
+          this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
+          this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
+          this.navigateActivitySlider('next')
+        }
+      }else if(action == 'accept'){
         this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
-        this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
+        this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERAPPROVED;
         this.navigateActivitySlider('next')
       }
-    }else if(action == 'accept'){
-      this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
-      this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERAPPROVED;
-      this.navigateActivitySlider('next')
-    }
+    },1000)
+
   }
 
 
