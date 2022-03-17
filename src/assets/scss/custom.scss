@@ -4630,3 +4630,39 @@ $fontSize: 0.5;
         top: 0px;
     }
 }
+
+.theme-scroll{
+    &::-webkit-scrollbar{
+        width: 3px;
+    }
+    &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #219F84;
+    }
+
+    scrollbar-color: #219F84 #f1f1f1;
+    scrollbar-width: thin;
+}
+.theme-scroll-h{
+    &::-webkit-scrollbar{
+        height: 3px;
+    }
+    &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #219F84;
+    }
+
+    scrollbar-color: #219F84 #f1f1f1;
+    scrollbar-width: thin;
+}
+
+.page-item.active{
+    .page-link{
+        background: #219F84;
+        border-color: #219F84;
+    }
+}
