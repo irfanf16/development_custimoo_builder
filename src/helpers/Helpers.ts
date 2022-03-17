@@ -373,7 +373,7 @@ const getActiveProductData = async () => {
         // front_design:front_design,
         front_image: scene_ref.$refs.front.toDataURL("image/png"),
         back_image: scene_ref.$refs.back.toDataURL("image/png"),
-        production_url: selected_design.production_design.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null
+        production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null
       }
     }
     //todo Yasir needs to look at it why customTextObjects is undefined in case of no logos. Instated it should be empty array instead of undefined
