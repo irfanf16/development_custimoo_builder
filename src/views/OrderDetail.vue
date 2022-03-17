@@ -10,33 +10,12 @@
             {{ order_item.factory_name }}
           </template>
 
-          <div class="order-flow">
-            <div class="order-step" :class="order_item.status == FACTORYREVIEW ? 'active' : ''">
-              Order<br>Created
-            </div>
-            <div class="order-step" :class="order_item.status == FACTORYAPPROVED ? 'active' : ''">
-              Artwork<br>Approval
-            </div>
-            <div class="order-step" :class="(order_item.status == CUSTOMERREVIEW
-            || order_item.status == CUSTOMERREJECTED || order_item.status == CUSTOMERAPPROVED ) ? 'active' : ''">
-              Sample<br>Design
-            </div>
-            <div class="order-step" :class="(order_item.status == ORDERINPRODUCTION) ? 'active' : ''">
-              In<br>Production
-            </div>
-            <div class="order-step">
-              Order<br>Shipped
-            </div>
-            <div class="order-step">
-              Order<br>Completed
-            </div>
-          </div>
+          <OrderFlowStatusLine :item_status="order_item.status" />
+
           <div class="order-activities">
             <template v-for="(item_status_activity, item_status_activity_index) in order_item.status_activities">
               <div class="activity-status" :key="`item_status_activity_${item_status_activity_index}`">
-                <div class="activity-icon">
-                  <BIconLightningFill/>
-                </div>
+                <ActivityStatusIcons :activity_status="item_status_activity.status" />
 
                 <div class="activity-content">
                   <div class="activity-title">
@@ -47,12 +26,12 @@
                   </div>
                   <div class="images-grid p-2 d-flex gap-1">
                     <div class="d-flex flex-wrap gap-1">
-                      <template v-for="(activity_item) in item_status_activity.activity_items">
+                      <template v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
                         <template v-for="(activity_file, activity_file_index) in activity_item.activity_files">
                           <img :src="`${storage_url}${activity_file.url}`" alt=""
                                :key="`activity_file_${activity_file_index}-${activity_file.name}`">
                         </template>
-
+                        <div :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                       </template>
                     </div>
 
@@ -65,8 +44,6 @@
                         <button class="btn approve" @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)"><BIconCheckSquareFill /></button>
                       </div>
                     </template>
-
-
 
                   </div>
 
@@ -179,7 +156,7 @@
            :reset="true"
            name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true" title="Locker Room"
            @close="$store.commit('Change_Locker_Active_Tab', 0)">
-
+      <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="font-weight-bold pl-1">
           Reject Artwork
@@ -246,8 +223,11 @@
 import Vue from 'vue'
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
+import $ from 'jquery'
 import {handleResponseException, logData, pathInfo} from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
+import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
+import OrderFlowStatusLine from "@/components/OrderFlowStatusLine";
 import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -259,7 +239,9 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     self.getOrderDetail();
   },
   components: {
-    AddUpdateComment
+    AddUpdateComment,
+    OrderFlowStatusLine,
+    ActivityStatusIcons
   },
   filters: {
     initials(value: string) {
@@ -293,6 +275,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   private order_id = this.$route.params.order_id;
   private order:Record<any,any> = {};
   public logData = logData
+  public showLoader = false
 
   // -------- Order Status Constants
   public FACTORYREVIEW = "submitted_for_factory_review"
@@ -319,6 +302,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     status:null,
     message:null
   }
+  public markerActive = false
 
 
 
@@ -414,7 +398,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       let actObj:Record<any,any> = {};
       actObj.action = null;
       actObj.status = activity_item.status;
-      actObj.message = null;
+      actObj.message = '';
       actObj.files = [];
       actObj.factory_product_id = actItem.factory_product_id;
       for(let actfile of actItem.activity_files){
@@ -435,7 +419,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   public submitActivity(submit_type:string) {
-
+    this.showLoader = true;
     let form_data = this.activity_items;
     if(submit_type == 'form_data'){
       // form_data = null;
@@ -474,12 +458,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         console.log('response',response_data.result.order_item);
         Vue.set(this.order.items, this.activity_items.order_item_index, response_data.result.order_item)
         this.$modal.hide('customer-review-modal');
+        this.showLoader = false;
         // this.$modal.hide('test-sample-modal');
 
         // this.resetActivityData();
         // console.log("sdfsdf", response_data.result.order_activity);
 
       }).catch((errorResponse) => {
+      this.showLoader = false;
       console.log(errorResponse);
       //handleResponseException(errorResponse)
     });
@@ -491,7 +477,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.activity_data.message = null
   }
   public showMarkerArea(ref_index: number){
-
+    this.markerActive = true
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
 
 
@@ -513,7 +499,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
     if((this.activity_items.activity_item_data.length - 1) == this.activity_navigation_index && direction == 'next'){
       this.showToast('No more items to show','error');
-    } else if((activityObj.message == null || activityObj.message == '') && direction == 'next'){
+    } else if(activityObj.action == 'reject' && (activityObj.message == null || activityObj.message == '') && direction == 'next'){
       this.showToast('Please provide feedback before navigate','error');
     } else if(activityObj.action == null && direction == 'next'){
       this.showToast('Please accept or reject designs before navigate','error');
@@ -533,6 +519,12 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   }
   public approveRejectDesigns(action:string){
+
+    if (this.markerActive){
+      $(".modal-header").next(".d-flex").children("div:not(.fs-5)").each(function(){
+        $(this).find(".__markerjs2_toolbar-block:eq(2) .__markerjs2_toolbar_button_colors:eq(0)").trigger("click")
+      })
+    }
 
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
     if(action == 'reject'){
