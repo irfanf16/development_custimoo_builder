@@ -31,17 +31,22 @@
                           <img :src="`${storage_url}${activity_file.url}`" alt=""
                                :key="`activity_file_${activity_file_index}-${activity_file.name}`">
                         </template>
-                        <div :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
+                        <div v-if="(order_item.status == ORDERSHIPPED && item_status_activity.status == ORDERSHIPPED)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
+                        <template v-else >
+                          <div :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
+                        </template>
+
+
                       </template>
                     </div>
 
                     <template v-if="item_status_activity_index==0">
                       <div class="actions" v-if="order_item.status == FACTORYREVIEW && item_status_activity.status == FACTORYREJECTED">
-                        <button class="btn approve" @click="editCustomerProducts(order_item, order_item_index)"><BIconCheckSquareFill/></button>
+                        <button class="btn" @click="editCustomerProducts(order_item, order_item_index)">Take action</button>
                       </div>
 
                       <div class="actions" v-if="order_item.status == CUSTOMERREVIEW && item_status_activity.status == CUSTOMERREVIEW">
-                        <button class="btn approve" @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)"><BIconCheckSquareFill /></button>
+                        <button class="btn" @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)">Take action</button>
                       </div>
                     </template>
 
@@ -204,9 +209,9 @@
             <button class="btn btn-secondary" @click="approveRejectDesigns('reject')">Reject</button>
           </template>
 
-          <template v-if="((activity_items.activity_item_data.length - 1) == activity_navigation_index) && activity_items.activity_item_data[activity_navigation_index].action">
-            <button class="btn btn-secondary" @click="submitActivity('')">Submit Changes</button>
-          </template>
+<!--          <template v-if="((activity_items.activity_item_data.length - 1) == activity_navigation_index) && activity_items.activity_item_data[activity_navigation_index].action">-->
+<!--            <button class="btn btn-secondary" @click="submitActivity('')">Submit Changes</button>-->
+<!--          </template>-->
 
 
         </div>
@@ -497,22 +502,25 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public navigateActivitySlider(direction:string){
 
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
-    if((this.activity_items.activity_item_data.length - 1) == this.activity_navigation_index && direction == 'next'){
-      this.showToast('No more items to show','error');
-    } else if(activityObj.action == 'reject' && (activityObj.message == null || activityObj.message == '') && direction == 'next'){
-      this.showToast('Please provide feedback before navigate','error');
-    } else if(activityObj.action == null && direction == 'next'){
-      this.showToast('Please accept or reject designs before navigate','error');
-    }else{
-      let limit = this.activity_items.activity_item_data.length;
-      if(direction == 'next'){
+
+    if(direction == 'next'){
+      if(activityObj.action == null){
+        this.showToast('Please accept or reject designs before navigate');
+      }else{
+        let limit = this.activity_items.activity_item_data.length;
         if((this.activity_navigation_index+1) < limit){
           this.activity_navigation_index ++
         }
-      }else{
-        if((this.activity_navigation_index-1) >= 0) {
-          this.activity_navigation_index--
+        if(
+          (this.activity_items.activity_item_data.length - 1) == this.activity_navigation_index
+          && this.activity_items.activity_item_data[this.activity_navigation_index].action )
+        {
+          this.submitActivity('')
         }
+      }
+    }else{
+      if((this.activity_navigation_index-1) >= 0) {
+        this.activity_navigation_index--
       }
     }
 
@@ -520,16 +528,19 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
   public approveRejectDesigns(action:string){
 
+    let imageEdit = false
     if (this.markerActive){
+      imageEdit = true
       $(".modal-header").next(".d-flex").children("div:not(.fs-5)").each(function(){
         $(this).find(".__markerjs2_toolbar-block:eq(2) .__markerjs2_toolbar_button_colors:eq(0)").trigger("click")
       })
     }
 
+    this.markerActive = false
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
     if(action == 'reject'){
       //console.log(activityObj);
-      if(activityObj.message == null || activityObj.message == ''){
+      if((activityObj.message == null || activityObj.message == '' ) && !imageEdit ){
         this.showToast('Please provide feedback before rejection','error');
       }else{
         this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
@@ -667,7 +678,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
             button {
               padding: 0;
               border: none;
-              font-size: 1.3rem;
+              font-size: 1.1rem;
               transition: 0.2s ease all;
 
               &:hover {
