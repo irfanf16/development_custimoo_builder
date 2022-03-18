@@ -10,83 +10,166 @@
         <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
       </div>
       <div class="modal-body">
-        <div class="d-flex align-items-stretch factory-chat" id="page-content">
-<!--          <div class="factory-listing">-->
-<!--            <div class="list-heading">Factories</div>-->
-<!--            <div class="list-container">-->
-<!--              <ul>-->
-<!--                <li v-for="link in 10" :key="link">-->
-<!--                  <a href="#!">Factory {{link}}</a>-->
-<!--                </li>-->
-<!--              </ul>-->
-<!--            </div>-->
-<!--          </div>-->
+        <b-tabs id="page-content">
+          <b-tab title="Factory 1">
+            <div class="d-flex align-items-stretch factory-chat">
+              <!--          <div class="factory-listing">-->
+              <!--            <div class="list-heading">Factories</div>-->
+              <!--            <div class="list-container">-->
+              <!--              <ul>-->
+              <!--                <li v-for="link in 10" :key="link">-->
+              <!--                  <a href="#!">Factory {{link}}</a>-->
+              <!--                </li>-->
+              <!--              </ul>-->
+              <!--            </div>-->
+              <!--          </div>-->
 
-          <div class="padding w-100">
-          <div class="d-flex justify-content-center w-100">
-              <div class="w-100">
-                <div class="ps-container ps-theme-default ps-active-y theme-scroll" id="chat-content" style="overflow-y: scroll !important; height:400px !important;">
-    <!--              <div class="media media-chat"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">-->
-    <!--                <div class="media-body">-->
-    <!--                  <p>Hi</p>-->
-    <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
-    <!--                </div>-->
-    <!--              </div>-->
-    <!--              <div class="media media-chat media-chat-reverse">-->
-    <!--                <div class="media-body">-->
-    <!--                  <p>Hiii, I'm good.</p>-->
-    <!--                  <p class="meta"><time datetime="2018">00:06</time></p>-->
-    <!--                </div>-->
-    <!--              </div>-->
-                 <template  v-for="(message, i) in messages">
-                  <div v-if="message"   :key="i" class="media media-chat" :class="message.from  == 'factory' ? 'media-chat-reverse':''"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                    <div class="media-body">
-                      <p>{{ message.message }}</p>
-                      <template v-for="(urls, inn) in message.file_urls">
-                        <div v-if="message.file_urls" :key="inn">
-                          <img width="100" height="100" :src="storageUrl+urls.url" alt="" >
+              <div class="padding w-100">
+                <div class="d-flex justify-content-center w-100">
+                  <div class="w-100">
+                    <div class="ps-container ps-theme-default ps-active-y theme-scroll chat-content" style="overflow-y: scroll !important; height:400px !important;">
+                      <!--              <div class="media media-chat"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">-->
+                      <!--                <div class="media-body">-->
+                      <!--                  <p>Hi</p>-->
+                      <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
+                      <!--                </div>-->
+                      <!--              </div>-->
+                      <!--              <div class="media media-chat media-chat-reverse">-->
+                      <!--                <div class="media-body">-->
+                      <!--                  <p>Hiii, I'm good.</p>-->
+                      <!--                  <p class="meta"><time datetime="2018">00:06</time></p>-->
+                      <!--                </div>-->
+                      <!--              </div>-->
+                      <template  v-for="(message, i) in messages">
+                        <div v-if="message"   :key="i" class="media media-chat" :class="message.from  == 'factory' ? 'media-chat-reverse':''"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
+                          <div class="media-body">
+                            <p>{{ message.message }}</p>
+                            <template v-for="(urls, inn) in message.file_urls">
+                              <div v-if="message.file_urls" :key="inn">
+                                <img width="100" height="100" :src="storageUrl+urls.url" alt="" >
+                              </div>
+                            </template>
+                            <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
+                          </div>
                         </div>
                       </template>
-    <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
-                    </div>
-                  </div>
-                 </template>
 
-                  <div class="media media-chat" v-for="item in 10" :key="item" :class="item % 2  == 0 ? 'media-chat-reverse':''">
-                    <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                    <div class="media-body">
-                      <div class="message">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aliquid consequatur deleniti, dignissimos doloribus expedita explicabo hic illum laudantium modi non sed sunt veritatis vero voluptatem? Alias id illum necessitatibus!
-                        <div class="attachments theme-scroll-h">
-                          <img width="100" height="100" src="https://via.placeholder.com/100" alt="" v-for="item in 20" :key="item">
+                      <div class="media media-chat" v-for="item in 10" :key="item" :class="item % 2  == 0 ? 'media-chat-reverse':''">
+                        <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
+                        <div class="media-body">
+                          <div class="message">
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aliquid consequatur deleniti, dignissimos doloribus expedita explicabo hic illum laudantium modi non sed sunt veritatis vero voluptatem? Alias id illum necessitatibus!
+                            <div class="attachments theme-scroll-h">
+                              <img width="100" height="100" src="https://via.placeholder.com/100" alt="" v-for="item in 20" :key="item">
+                            </div>
+                          </div>
+                          <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
                         </div>
                       </div>
-                      <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
+
+                      <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;">
+                        <div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div>
+                      </div>
+                      <div class="ps-scrollbar-y-rail" style="top: 0px; height: 0px; right: 2px;">
+                        <div class="ps-scrollbar-y" tabindex="0" style="top: 0px; height: 2px;"></div>
+                      </div>
+                    </div>
+                    <div class="publisher bt-1 border-light">
+                      <img class="avatar avatar-xs" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
+                      <input class="publisher-input" v-model="text" type="text" placeholder="Write something">
+                      <!--              <span class="publisher-btn file-group"><i class="fa fa-paperclip file-browser"></i>-->
+                      <button class="attach-file">
+                        <BIconPaperclip />
+                        <input  type="file" v-on:keyup.enter="sendMessage" @change="uploadImage" multiple>
+                      </button>
+                      <!--              </span>-->
+                      <a @click="sendMessage"  class="publisher-btn text-info" href="#" data-abc="true"><i class="fa fa-paper-plane"></i></a>
                     </div>
                   </div>
-
-                  <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;">
-                    <div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div>
-                  </div>
-                  <div class="ps-scrollbar-y-rail" style="top: 0px; height: 0px; right: 2px;">
-                    <div class="ps-scrollbar-y" tabindex="0" style="top: 0px; height: 2px;"></div>
-                  </div>
-                </div>
-                <div class="publisher bt-1 border-light">
-                  <img class="avatar avatar-xs" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                  <input class="publisher-input" v-model="text" type="text" placeholder="Write something">
-    <!--              <span class="publisher-btn file-group"><i class="fa fa-paperclip file-browser"></i>-->
-                  <button class="attach-file">
-                    <BIconPaperclip />
-                    <input  type="file" v-on:keyup.enter="sendMessage" @change="uploadImage" multiple>
-                  </button>
-    <!--              </span>-->
-                  <a @click="sendMessage"  class="publisher-btn text-info" href="#" data-abc="true"><i class="fa fa-paper-plane"></i></a>
                 </div>
               </div>
-          </div>
-        </div>
-        </div>
+            </div>
+          </b-tab>
+          <b-tab title="Factory 2">
+            <div class="d-flex align-items-stretch factory-chat">
+              <!--          <div class="factory-listing">-->
+              <!--            <div class="list-heading">Factories</div>-->
+              <!--            <div class="list-container">-->
+              <!--              <ul>-->
+              <!--                <li v-for="link in 10" :key="link">-->
+              <!--                  <a href="#!">Factory {{link}}</a>-->
+              <!--                </li>-->
+              <!--              </ul>-->
+              <!--            </div>-->
+              <!--          </div>-->
+
+              <div class="padding w-100">
+                <div class="d-flex justify-content-center w-100">
+                  <div class="w-100">
+                    <div class="ps-container ps-theme-default ps-active-y theme-scroll chat-content" style="overflow-y: scroll !important; height:400px !important;">
+                      <!--              <div class="media media-chat"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">-->
+                      <!--                <div class="media-body">-->
+                      <!--                  <p>Hi</p>-->
+                      <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
+                      <!--                </div>-->
+                      <!--              </div>-->
+                      <!--              <div class="media media-chat media-chat-reverse">-->
+                      <!--                <div class="media-body">-->
+                      <!--                  <p>Hiii, I'm good.</p>-->
+                      <!--                  <p class="meta"><time datetime="2018">00:06</time></p>-->
+                      <!--                </div>-->
+                      <!--              </div>-->
+                      <template  v-for="(message, i) in messages">
+                        <div v-if="message"   :key="i" class="media media-chat" :class="message.from  == 'factory' ? 'media-chat-reverse':''"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
+                          <div class="media-body">
+                            <p>{{ message.message }}</p>
+                            <template v-for="(urls, inn) in message.file_urls">
+                              <div v-if="message.file_urls" :key="inn">
+                                <img width="100" height="100" :src="storageUrl+urls.url" alt="" >
+                              </div>
+                            </template>
+                            <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
+                          </div>
+                        </div>
+                      </template>
+
+                      <div class="media media-chat" v-for="item in 10" :key="item" :class="item % 2  == 0 ? 'media-chat-reverse':''">
+                        <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
+                        <div class="media-body">
+                          <div class="message">
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aliquid consequatur deleniti, dignissimos doloribus expedita explicabo hic illum laudantium modi non sed sunt veritatis vero voluptatem? Alias id illum necessitatibus!
+                            <div class="attachments theme-scroll-h">
+                              <img width="100" height="100" src="https://via.placeholder.com/100" alt="" v-for="item in 20" :key="item">
+                            </div>
+                          </div>
+                          <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
+                        </div>
+                      </div>
+
+                      <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;">
+                        <div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div>
+                      </div>
+                      <div class="ps-scrollbar-y-rail" style="top: 0px; height: 0px; right: 2px;">
+                        <div class="ps-scrollbar-y" tabindex="0" style="top: 0px; height: 2px;"></div>
+                      </div>
+                    </div>
+                    <div class="publisher bt-1 border-light">
+                      <img class="avatar avatar-xs" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
+                      <input class="publisher-input" v-model="text" type="text" placeholder="Write something">
+                      <!--              <span class="publisher-btn file-group"><i class="fa fa-paperclip file-browser"></i>-->
+                      <button class="attach-file">
+                        <BIconPaperclip />
+                        <input  type="file" v-on:keyup.enter="sendMessage" @change="uploadImage" multiple>
+                      </button>
+                      <!--              </span>-->
+                      <a @click="sendMessage"  class="publisher-btn text-info" href="#" data-abc="true"><i class="fa fa-paper-plane"></i></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </b-tab>
+        </b-tabs>
       </div>
     </modal>
 </template>
