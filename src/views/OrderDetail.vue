@@ -31,7 +31,7 @@
                           <img :src="`${storage_url}${activity_file.url}`" alt=""
                                :key="`activity_file_${activity_file_index}-${activity_file.name}`">
                         </template>
-                        <div v-if="(order_item.status == ORDERSHIPPED && item_status_activity.status == ORDERSHIPPED)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
+                        <div v-if="(item_status_activity.status == ORDERSHIPPED)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
                         <template v-else >
                           <div :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                         </template>
@@ -537,21 +537,24 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     }
 
     this.markerActive = false
-    let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
-    if(action == 'reject'){
-      //console.log(activityObj);
-      if((activityObj.message == null || activityObj.message == '' ) && !imageEdit ){
-        this.showToast('Please provide feedback before rejection','error');
-      }else{
+    setTimeout(() => {
+      let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
+      if(action == 'reject'){
+        //console.log(activityObj);
+        if((activityObj.message == null || activityObj.message == '' ) && !imageEdit ){
+          this.showToast('Please provide feedback before rejection','error');
+        }else{
+          this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
+          this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
+          this.navigateActivitySlider('next')
+        }
+      }else if(action == 'accept'){
         this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
-        this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
+        this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERAPPROVED;
         this.navigateActivitySlider('next')
       }
-    }else if(action == 'accept'){
-      this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
-      this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERAPPROVED;
-      this.navigateActivitySlider('next')
-    }
+    },1000)
+
   }
 
 
