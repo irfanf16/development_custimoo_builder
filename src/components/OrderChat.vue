@@ -26,45 +26,22 @@
           <div class="d-flex justify-content-center w-100">
               <div class="w-100">
                 <div class="ps-container ps-theme-default ps-active-y theme-scroll" id="chat-content" style="overflow-y: scroll !important; height:400px !important;">
-    <!--              <div class="media media-chat"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">-->
-    <!--                <div class="media-body">-->
-    <!--                  <p>Hi</p>-->
-    <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
-    <!--                </div>-->
-    <!--              </div>-->
-    <!--              <div class="media media-chat media-chat-reverse">-->
-    <!--                <div class="media-body">-->
-    <!--                  <p>Hiii, I'm good.</p>-->
-    <!--                  <p class="meta"><time datetime="2018">00:06</time></p>-->
-    <!--                </div>-->
-    <!--              </div>-->
-                 <template  v-for="(message, i) in messages">
-                  <div v-if="message"   :key="i" class="media media-chat" :class="message.from  == 'factory' ? 'media-chat-reverse':''"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                    <div class="media-body">
-                      <p>{{ message.message }}</p>
-                      <template v-for="(urls, inn) in message.file_urls">
-                        <div v-if="message.file_urls" :key="inn">
-                          <img width="100" height="100" :src="storageUrl+urls.url" alt="" >
-                        </div>
-                      </template>
-    <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
-                    </div>
-                  </div>
-                 </template>
-
-                  <div class="media media-chat" v-for="item in 10" :key="item" :class="item % 2  == 0 ? 'media-chat-reverse':''">
+                  <template  v-for="(message, i) in messages">
+                  <div class="media media-chat"  :key="i" :class="message.from  == 'factory' ? 'media-chat-reverse':''">
                     <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
                     <div class="media-body">
                       <div class="message">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aliquid consequatur deleniti, dignissimos doloribus expedita explicabo hic illum laudantium modi non sed sunt veritatis vero voluptatem? Alias id illum necessitatibus!
-                        <div class="attachments theme-scroll-h">
-                          <img width="100" height="100" src="https://via.placeholder.com/100" alt="" v-for="item in 20" :key="item">
-                        </div>
+                        {{ message.message }}
+                        <template v-for="(urls, inn) in message.file_urls">
+                              <div class="attachments theme-scroll-h" v-if="message.file_urls" :key="`file-${inn}`">
+                                <img width="100" height="100" :src="storageUrl+urls.url" alt="">
+                              </div>
+                        </template>
                       </div>
                       <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
                     </div>
                   </div>
-
+                  </template>
                   <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;">
                     <div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div>
                   </div>
@@ -74,11 +51,11 @@
                 </div>
                 <div class="publisher bt-1 border-light">
                   <img class="avatar avatar-xs" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                  <input class="publisher-input" v-model="text" type="text" placeholder="Write something">
+                  <input class="publisher-input" v-on:keyup.enter="sendMessage" v-model="text" type="text" placeholder="Write something">
     <!--              <span class="publisher-btn file-group"><i class="fa fa-paperclip file-browser"></i>-->
                   <button class="attach-file">
                     <BIconPaperclip />
-                    <input  type="file" v-on:keyup.enter="sendMessage" @change="uploadImage" multiple>
+                    <input  type="file"  @change="uploadImage" multiple>
                   </button>
     <!--              </span>-->
                   <a @click="sendMessage"  class="publisher-btn text-info" href="#" data-abc="true"><i class="fa fa-paper-plane"></i></a>
@@ -108,25 +85,24 @@ export default class OrderChat extends Vue{
   private screenWidth = (window.screen.availWidth - 100)
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public customer_id = 0
-  public factory_ids:Record<any, any> = []
+  public factory_ids  = 0
+  // public factory_ids:Record<any, any> = []
   public messages:any[] = []
   public text = ''
   public fileObject: Record<any, any> = {}
   public files: Record<any, any> = []
 
 
-  public async show(oid:number, cid:number, f_ids:Record<any, any>){
+  public async show(oid:number, cid:number, f_ids:number){
     this.order_id = oid
     this.customer_id = cid
     this.factory_ids = f_ids
-    console.log('f', f_ids)
     const res  = await http.get('chat/get',{
       params: {
         order_id: this.order_id,
         customer_id: this.customer_id
       }
     })
-    console.log(res.status)
     if (res.status == 200){
       console.log(res.data)
       this.messages =   res.data.messages && typeof(res.data.messages.messages) == 'string' ? JSON.parse(res.data.messages.messages) : []
@@ -152,7 +128,7 @@ export default class OrderChat extends Vue{
     fd.append('customer_id', this.customer_id)
     fd.append('message', message.message)
     fd.append('from', message.from)
-    fd.append('user_id', this.factory_ids[0])
+    fd.append('user_id', this.factory_ids)
     const res = await http.post('chat/send', fd, header)
     if (res.status == 201){
       console.log()
