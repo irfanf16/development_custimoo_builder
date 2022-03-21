@@ -10,33 +10,12 @@
             {{ order_item.factory_name }}
           </template>
 
-          <div class="order-flow">
-            <div class="order-step" :class="order_item.status == FACTORYREVIEW ? 'active' : ''">
-              Order<br>Created
-            </div>
-            <div class="order-step" :class="order_item.status == FACTORYAPPROVED ? 'active' : ''">
-              Artwork<br>Approval
-            </div>
-            <div class="order-step" :class="(order_item.status == CUSTOMERREVIEW
-            || order_item.status == CUSTOMERREJECTED || order_item.status == CUSTOMERAPPROVED ) ? 'active' : ''">
-              Sample<br>Design
-            </div>
-            <div class="order-step" :class="(order_item.status == ORDERINPRODUCTION) ? 'active' : ''">
-              In<br>Production
-            </div>
-            <div class="order-step">
-              Order<br>Shipped
-            </div>
-            <div class="order-step">
-              Order<br>Completed
-            </div>
-          </div>
+          <OrderFlowStatusLine :item_status="order_item.status" />
+
           <div class="order-activities">
             <template v-for="(item_status_activity, item_status_activity_index) in order_item.status_activities">
               <div class="activity-status" :key="`item_status_activity_${item_status_activity_index}`">
-                <div class="activity-icon">
-                  <BIconLightningFill/>
-                </div>
+                <ActivityStatusIcons :activity_status="item_status_activity.status" />
 
                 <div class="activity-content">
                   <div class="activity-title">
@@ -47,11 +26,16 @@
                   </div>
                   <div class="images-grid p-2 d-flex gap-1">
                     <div class="d-flex flex-wrap gap-1">
-                      <template v-for="(activity_item) in item_status_activity.activity_items">
+                      <template v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
                         <template v-for="(activity_file, activity_file_index) in activity_item.activity_files">
                           <img :src="`${storage_url}${activity_file.url}`" alt=""
                                :key="`activity_file_${activity_file_index}-${activity_file.name}`">
                         </template>
+                        <div v-if="(item_status_activity.status == ORDERSHIPPED)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
+                        <template v-else >
+                          <div :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
+                        </template>
+
 
                       </template>
                     </div>
@@ -60,14 +44,13 @@
                       <div class="actions" v-if="order_item.status == FACTORYREVIEW && item_status_activity.status == FACTORYREJECTED">
                         <button class="btn approve" @click="editCustomerProducts(order_item, order_item_index)"><BIconCheckSquareFill/></button>
                         <button class="btn approve" @click="updateOrderProducts(order_item_index, item_status_activity_index)">Edit Products</button>
+                        <button class="btn" @click="editCustomerProducts(order_item, order_item_index)">Take action</button>
                       </div>
 
                       <div class="actions" v-if="order_item.status == CUSTOMERREVIEW && item_status_activity.status == CUSTOMERREVIEW">
-                        <button class="btn approve" @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)"><BIconCheckSquareFill /></button>
+                        <button class="btn" @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)">Take action</button>
                       </div>
                     </template>
-
-
 
                   </div>
 
@@ -180,7 +163,7 @@
            :reset="true"
            name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true" title="Locker Room"
            @close="$store.commit('Change_Locker_Active_Tab', 0)">
-
+      <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="font-weight-bold pl-1">
           Reject Artwork
@@ -228,9 +211,9 @@
             <button class="btn btn-secondary" @click="approveRejectDesigns('reject')">Reject</button>
           </template>
 
-          <template v-if="((activity_items.activity_item_data.length - 1) == activity_navigation_index) && activity_items.activity_item_data[activity_navigation_index].action">
-            <button class="btn btn-secondary" @click="submitActivity('')">Submit Changes</button>
-          </template>
+<!--          <template v-if="((activity_items.activity_item_data.length - 1) == activity_navigation_index) && activity_items.activity_item_data[activity_navigation_index].action">-->
+<!--            <button class="btn btn-secondary" @click="submitActivity('')">Submit Changes</button>-->
+<!--          </template>-->
 
 
         </div>
@@ -247,8 +230,11 @@
 import Vue from 'vue'
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
+import $ from 'jquery'
 import {handleResponseException, logData, pathInfo} from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
+import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
+import OrderFlowStatusLine from "@/components/OrderFlowStatusLine";
 import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -262,7 +248,9 @@ import {findIndex, find, filter} from "lodash";
 
   },
   components: {
-    AddUpdateComment
+    AddUpdateComment,
+    OrderFlowStatusLine,
+    ActivityStatusIcons
   },
   filters: {
     initials(value: string) {
@@ -296,6 +284,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   private order_id = this.$route.params.order_id;
   private order:Record<any,any> = {};
   public logData = logData
+  public showLoader = false
 
   // -------- Order Status Constants
   public FACTORYREVIEW = "submitted_for_factory_review"
@@ -323,6 +312,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     status:null,
     message:null
   }
+  public markerActive = false
 
   public auth_customer = this.$store.getters.getCustomer
 
@@ -427,7 +417,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       let actObj:Record<any,any> = {};
       actObj.action = null;
       actObj.status = activity_item.status;
-      actObj.message = null;
+      actObj.message = '';
       actObj.files = [];
       actObj.factory_product_id = actItem.factory_product_id;
       for(let actfile of actItem.activity_files){
@@ -448,7 +438,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   public submitActivity(submit_type:string) {
-
+    this.showLoader = true;
     let form_data = this.activity_items;
     if(submit_type == 'form_data'){
       // form_data = null;
@@ -487,12 +477,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         console.log('response',response_data.result.order_item);
         Vue.set(this.order.items, this.activity_items.order_item_index, response_data.result.order_item)
         this.$modal.hide('customer-review-modal');
+        this.showLoader = false;
         // this.$modal.hide('test-sample-modal');
 
         // this.resetActivityData();
         // console.log("sdfsdf", response_data.result.order_activity);
 
       }).catch((errorResponse) => {
+      this.showLoader = false;
       console.log(errorResponse);
       //handleResponseException(errorResponse)
     });
@@ -504,7 +496,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.activity_data.message = null
   }
   public showMarkerArea(ref_index: number){
-
+    this.markerActive = true
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
 
 
@@ -524,22 +516,25 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public navigateActivitySlider(direction:string){
 
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
-    if((this.activity_items.activity_item_data.length - 1) == this.activity_navigation_index && direction == 'next'){
-      this.showToast('No more items to show','error');
-    } else if((activityObj.message == null || activityObj.message == '') && direction == 'next'){
-      this.showToast('Please provide feedback before navigate','error');
-    } else if(activityObj.action == null && direction == 'next'){
-      this.showToast('Please accept or reject designs before navigate','error');
-    }else{
-      let limit = this.activity_items.activity_item_data.length;
-      if(direction == 'next'){
+
+    if(direction == 'next'){
+      if(activityObj.action == null){
+        this.showToast('Please accept or reject designs before navigate');
+      }else{
+        let limit = this.activity_items.activity_item_data.length;
         if((this.activity_navigation_index+1) < limit){
           this.activity_navigation_index ++
         }
-      }else{
-        if((this.activity_navigation_index-1) >= 0) {
-          this.activity_navigation_index--
+        if(
+          (this.activity_items.activity_item_data.length - 1) == this.activity_navigation_index
+          && this.activity_items.activity_item_data[this.activity_navigation_index].action )
+        {
+          this.submitActivity('')
         }
+      }
+    }else{
+      if((this.activity_navigation_index-1) >= 0) {
+        this.activity_navigation_index--
       }
     }
 
@@ -547,21 +542,33 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
   public approveRejectDesigns(action:string){
 
-    let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
-    if(action == 'reject'){
-      //console.log(activityObj);
-      if(activityObj.message == null || activityObj.message == ''){
-        this.showToast('Please provide feedback before rejection','error');
-      }else{
+    let imageEdit = false
+    if (this.markerActive){
+      imageEdit = true
+      $(".modal-header").next(".d-flex").children("div:not(.fs-5)").each(function(){
+        $(this).find(".__markerjs2_toolbar-block:eq(2) .__markerjs2_toolbar_button_colors:eq(0)").trigger("click")
+      })
+    }
+
+    this.markerActive = false
+    setTimeout(() => {
+      let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
+      if(action == 'reject'){
+        //console.log(activityObj);
+        if((activityObj.message == null || activityObj.message == '' ) && !imageEdit ){
+          this.showToast('Please provide feedback before rejection','error');
+        }else{
+          this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
+          this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
+          this.navigateActivitySlider('next')
+        }
+      }else if(action == 'accept'){
         this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
-        this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
+        this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERAPPROVED;
         this.navigateActivitySlider('next')
       }
-    }else if(action == 'accept'){
-      this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
-      this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERAPPROVED;
-      this.navigateActivitySlider('next')
-    }
+    },1000)
+
   }
 
   updateOrderProducts(order_item_index: number, item_status_activity_index: number) {
@@ -719,7 +726,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
             button {
               padding: 0;
               border: none;
-              font-size: 1.3rem;
+              font-size: 1.1rem;
               transition: 0.2s ease all;
 
               &:hover {
