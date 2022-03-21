@@ -49,10 +49,14 @@
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">{{editCart.cartId > 0 ? 'Update Item' : 'Add to Cart Collection'}}</button>
-            <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
-              <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
-            </button>
+            <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+              <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
+                {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart Collection'}}
+              </button>
+              <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
+                <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+              </button>
+            </template>
           </template>
           <template v-else>
             <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"   class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Add to Cart</button>
@@ -87,7 +91,7 @@ import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
-import {getActiveProductData} from '@/helpers/Helpers';
+import { getActiveProductData } from "@/helpers/Helpers";
 
 import {compact} from 'lodash';
 type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
@@ -119,6 +123,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     url: null, content: null
   }
   public isLoading = false;
+
+  get updateOrderItemProducts() {
+    return this.$store.getters.getUpdateOrderItemProducts
+  }
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -281,8 +289,13 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       //     back_image: this.canvasImage.ref_back.toDataURL("image/png") ? this.canvasImage.ref_back.toDataURL("image/png") : null
       //   }
       // }
-      let post_data = await getActiveProductData()?? {};
-
+     let cart_product = await getActiveProductData();
+     if(cart_product == null) {
+       return false;
+     }
+      let post_data = {
+        factory_product: cart_product
+      };
       let url = "carts"
       if(this.$store.getters.getEditCart.cartId > 0) {
         post_data.factory_product.id = this.$store.getters.getEditCart.cartItemId
