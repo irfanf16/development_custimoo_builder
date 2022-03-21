@@ -4666,3 +4666,28 @@ $fontSize: 0.5;
         border-color: #219F84;
     }
 }
+
+.orderChat{
+    .tabs{
+        .nav-tabs{
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            border: none;
+
+            .nav-item{
+                a{
+                    border: none;
+                    font-size: 1.1rem;
+                    border-bottom: 1px solid transparent;
+
+                    &.active{
+                        color: #219F84;
+                        border-bottom: 1px solid #219F84;
+                    }
+                }
+            }
+        }
+    }
+}
