@@ -3,6 +3,7 @@ import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {default as $} from "jquery";
 import Axios, {AxiosError} from "axios";
+import Vue from "vue";
 
 const getLogoSettingsObject = () => {
   return {
@@ -306,6 +307,13 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
     const { message } = errorResponse.response?.data;
     console.error("Error (Axios): ", message)
   } else {
+    Vue.$toast.open({
+      message: errorResponse.message,
+      type: "error",
+      dismissible: true,
+      duration: 5000,
+      position: 'bottom-left'
+    })
     console.error(`Error (${errorResponse.name}): `, {
       name: errorResponse.name,
       message: errorResponse.message,
@@ -340,9 +348,72 @@ const pathInfo = (file_path: string, ) => {
   };
 }
 
+const getActiveProductData = async () => {
+  const scene_ref = Store.getters.getCanvasImage.scene
+  if (scene_ref) {
+    const style_index = Store.getters.getCurrentStyleIndex;
+    const selected_product = Store.getters.getSelectedProduct;
+    const product_style = selected_product.productstyles[style_index];
+    //selected_design will always return array having single object
+    const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
+    const product_models = Store.getters.getProductModels;
+    const selected_model_index = Store.getters.getSelectedModelIndex;
+    const post_data: Record<any, any> = {
+      back_image: scene_ref.$refs.back.toDataURL("image/png"),
+      custom_logos: Store.getters.getCustomLogos(),
+      custom_logo_svgs: [],
+      custom_texts: Store.getters.getCustomTexts(),
+      custom_text_svgs: [],
+      colors: Store.getters.getLogosColors,
+      design_id: selected_design.id,
+      defaultcolors: Store.getters.getDefaultColors,
+      front_image: scene_ref.$refs.front.toDataURL("image/png"),
+      groupcolors: Store.getters.getGroupColors,
+      logo_colors: Store.getters.getLogosColors,
+      model_id: product_models[selected_model_index].id,
+      product_id: selected_product.product_id,
+      product_type: selected_product.product_type,
+      product_name: selected_product.product_name,
+      pdf_file: null,
+      production_url: selected_design.production_design.file_url ?? null,
+      // front_design:front_design,
+      roster_detail: Store.getters.getRosterDetails,
+      style_id: product_style.id,
+      svg_groups: Store.getters.getSvgGroups
+    }
+    //todo Yasir needs to look at it why customTextObjects is undefined in case of no logos. Instated it should be empty array instead of undefined
+    if(scene_ref.customTextObjects) {
+      for (const custom_text_object of scene_ref.customTextObjects) {
+        if (custom_text_object && custom_text_object.constructor.name == "klass") {
+          post_data.custom_text_svgs.push(custom_text_object.toSVG());
+        }
+      }
+    }
+    //todo Yasir needs to look at it why customLogoObjects is undefined in case of no logos. Instated it should be empty array instead of undefined
+    if(scene_ref.customLogoObjects) {
+      for (const custom_logo_svg of scene_ref.customLogoObjects) {
+        if(custom_logo_svg && custom_logo_svg.constructor.name == "klass") {
+          post_data.custom_logo_svgs.push(custom_logo_svg.toSVG());
+        }
+      }
+    }
+    console.log("post data", post_data, scene_ref.customTextObjects)
+    return post_data;
+  } else {
+    alert("Please let scene load")
+    return null;
+  }
+}
+
+const getMainScene = (compo: Record<any, any>) => {
+  console.log("keys", Object.keys(compo.$root.$children[0].$children[1].$refs))
+  console.log("Object", compo.$root.$children[0].$children[1].$refs)
+  console.log("mainScenes", compo.$root.$children[0].$children[1].$refs["mainScene"])
+}
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses
+  CustimooOrderFlowStatuses, getActiveProductData, getMainScene
 };

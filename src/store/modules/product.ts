@@ -16,7 +16,8 @@ const Product:Module<any, any> = {
       has_more_products: false,
       next_page: null,
       active_product_id: null
-    }
+    },
+    update_order_item_products: null
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -48,6 +49,9 @@ const Product:Module<any, any> = {
     },
     async getMainProductsInfo(state:Record<any, any>){
       return state.main_products_info
+    },
+    getUpdateOrderItemProducts(state:Record<any, any>){
+      return state.update_order_item_products
     }
   },
   mutations:{
@@ -115,6 +119,17 @@ const Product:Module<any, any> = {
     },
     UPDATE_MAIN_PRODUCTS_INFO(state:Record<any, any>, payload){
       state.main_products_info = payload
+    },
+    UPDATE_ORDER_ITEM_PRODUCTS(state:Record<any, any>, payload){
+      /*
+      * if we want to update specific key instead of whole object then pass payload as
+      * {update_key: 'contains the key name that we want to update': key_value: 'contains Value with which we want to update key value'}
+      * */
+      if('update_key' in payload) {
+        Vue.set(state.update_order_item_products, payload.update_key, payload.key_value)
+      } else {
+        state.update_order_item_products = payload
+      }
     },
   },
   actions: {
@@ -276,6 +291,9 @@ const Product:Module<any, any> = {
     },
     async updateMainProductsInfo({commit}, payload){
       commit('UPDATE_MAIN_PRODUCTS_INFO', payload)
+    },
+    async updateOrderItemProducts({commit}, payload){
+      commit('UPDATE_ORDER_ITEM_PRODUCTS', payload)
     },
 
   }

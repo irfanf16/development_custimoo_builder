@@ -10,7 +10,7 @@ const Auth:Module<any, any> = {
   },
   getters:{
     isCustomerAuthenticated: (state: any) => !!state.jwtToken,
-    getCustomer:(state:any) => {
+    getCustomer: (state:any) => {
       return state.customer || localStorage.getItem("customer") ? JSON.parse(localStorage.getItem("customer") as string) : ''
     },
     getCustomerPermissions:state => {
