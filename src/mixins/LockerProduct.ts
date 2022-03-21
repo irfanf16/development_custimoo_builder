@@ -150,10 +150,12 @@ export class handleMainProducts extends Vue {
   public async handleMainProducts(response: Record<any, any>){
     let self =this;
     let main_products_info = await self.$store.getters.getMainProductsInfo;
+    let first_page_url_obj = new URL(response.data.products.first_page_url);
+    main_products_info.active_product_id  = first_page_url_obj.searchParams.get("active_product_id");
     let append_products = main_products_info.next_page && main_products_info.next_page > 1;
     if(response.data.products.next_page_url) {
-      let nex_page_url_obj = new URL(response.data.products.next_page_url);
-      main_products_info.active_product_id  = nex_page_url_obj.searchParams.get("active_product_id");
+      // let nex_page_url_obj = new URL(response.data.products.next_page_url);
+      // main_products_info.active_product_id  = nex_page_url_obj.searchParams.get("active_product_id");
       main_products_info.has_more_products = true;
       main_products_info.next_page = response.data.products.current_page + 1;
     } else {
@@ -219,5 +221,59 @@ export class handleMainProducts extends Vue {
     this.$store.dispatch("getModels", selected_product.product_id);
 
     this.$root.$emit('sliderEvent');
+  }
+
+  public async updateFactoryProduct(factory_product: Record<any, any>) {
+    let selected_product = this.$store.getters.getSelectedProduct;
+    let selected_product_style_index = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === factory_product.style_id);
+    console.log("selected productsssssss", selected_product, selected_product_style_index)
+    await this.$store.commit('CHANGE_STYLE_INDEX', selected_product_style_index);
+    let customLogos = this.$store.getters.getCustomLogoObject
+    if(!customLogos[factory_product.product_id]) {
+      await this.$store.dispatch('setCustomObj', factory_product.product_id)
+    }
+    let logos = {
+      custom_logos: JSON.stringify(factory_product.custom_logos),
+      product_id:factory_product.product_id
+    }
+    await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
+    let texts = {
+      text: JSON.stringify(factory_product.custom_texts),
+      product_id:factory_product.product_id
+    }
+    await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', texts);
+    await this.$store.dispatch('overRideDefaultColors', factory_product.defaultcolors);
+    console.log("testsss", factory_product.groupcolors, factory_product.defaultcolors)
+    await this.$store.dispatch('overRideGroupColors', factory_product.groupcolors);
+    selected_product.productstyles[selected_product_style_index].productdesigns.forEach((item: Record<any, any>) => {
+      if (item.id == factory_product.design_id) {
+        Vue.set(item, 'design_show', 1)
+        this.$store.dispatch('setSelectedProductDesignID', item.id)
+      } else {
+        Vue.set(item, 'design_show', 0)
+      }
+    });
+    //set logo colors
+    let logo_colors = []
+    console.log("logo colorsss", factory_product.colors, factory_product.custom_logos, !factory_product.colors && factory_product.custom_logos)
+    if(!factory_product.colors && factory_product.custom_logos) {
+      //fetch from server
+      let logos = factory_product.custom_logos
+      if(logos.length > 0) {
+        let color_str:any = await this.fetchLogoColors(logos[0].id);
+        let image_colors = processColorsCustom(JSON.parse(color_str))
+        let image_color_count = image_colors.length;
+        while(image_color_count < 4 ) {
+          image_colors.push({hex: null, pantone: null, name: null});
+          ++image_color_count;
+        }
+        logo_colors = image_colors
+      }
+    }
+    else {
+      logo_colors = factory_product.colors
+    }
+    await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
+    await this.$store.dispatch('setProductType', {prd_type: factory_product.product_type, value: true});
   }
 }

@@ -41,7 +41,7 @@
 
                     <template v-if="item_status_activity_index==0">
                       <div class="actions" v-if="order_item.status == FACTORYREVIEW && item_status_activity.status == FACTORYREJECTED">
-                        <button class="btn btn-secondary" @click="editCustomerProducts(order_item, order_item_index)">Take action</button>
+                        <button class="btn btn-secondary" @click="updateOrderProducts(order_item_index, item_status_activity_index)">Edit Products</button>
                       </div>
 
                       <div class="actions" v-if="order_item.status == CUSTOMERREVIEW && item_status_activity.status == CUSTOMERREVIEW">
@@ -86,13 +86,13 @@
                                 </a>
                               </li>
                               <li>
-                                <a @click="activity_comment.edit_comment = !activity_comment.edit_comment">
+                                <a v-if="canPerformCommentAction(activity_comment)" @click="activity_comment.edit_comment = !activity_comment.edit_comment">
                                   <BIconPencil/>
                                   Edit
                                 </a>
                               </li>
                               <li>
-                                <a @click="deleteComment(activity_comment,item_status_activity)">
+                                <a v-if="canPerformCommentAction(activity_comment)" @click="deleteComment(activity_comment,item_status_activity)">
                                   <BIconTrash/>
                                   Delete
                                 </a>
@@ -235,12 +235,14 @@ import OrderFlowStatusLine from "@/components/OrderFlowStatusLine";
 import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
+import {findIndex, find, filter} from "lodash";
 
 
 @Component<OrderDetail>({
   mounted() {
     let self = this;
     self.getOrderDetail();
+
   },
   components: {
     AddUpdateComment,
@@ -292,6 +294,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public ORDERSHIPPED = "shipped"
   public ORDERCOMPLETED = "completed"
 
+  //data props starts
   public activity_sample_files = []
   public activity_navigation_index = 0
   public activity_items :Record<any, any> = {
@@ -308,6 +311,10 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
   public markerActive = false
 
+  public auth_customer = this.$store.getters.getCustomer
+
+  //data props ends
+
 
 
   getOrderDetail() {
@@ -316,7 +323,12 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     http.get(url)
       .then((successResponse: Record<any, any>) => {
         let response_data = successResponse.data;
-        self.order = response_data.result;
+        if(response_data.success == true) {
+          self.order = response_data.result;
+        } else {
+          self.showToast(response_data.message, "error")
+          self.$router.push({name: "CustomerOrders"})
+        }
       }).catch((errorResponse: any) => {
       handleResponseException(errorResponse)
     });
@@ -349,41 +361,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
   ///////////////// Activity Methods
-
-  public editCustomerProducts(orderItem: any, orderItemIndex:number){
-
-    let prod_ids = [];
-    for(let factoryProd of orderItem.factory_products){
-      if(factoryProd.status == this.FACTORYREJECTED){
-        prod_ids.push(factoryProd.id)
-      }
-    }
-
-      let post_data:Record<any,any> = {};
-      post_data.product_ids = prod_ids
-      post_data.order_item_id = orderItem.id;
-
-      let url = `customer-orders/${orderItem.id}/temp-activity`
-      http.post(url, post_data)
-        .then((successResponse) => {
-          let response_data = successResponse.data;
-
-          // console.log('response',response_data.result.order_item);
-          // console.log(orderItemIndex);
-           Vue.set(this.order.items, orderItemIndex, response_data.result.order_item)
-          // this.$modal.hide('rejection-modal');
-          // this.$modal.hide('test-sample-modal');
-
-          // this.resetActivityData();
-          // console.log("sdfsdf", response_data.result.order_activity);
-
-        }).catch((errorResponse) => {
-        console.log(errorResponse);
-        //handleResponseException(errorResponse)
-      });
-
-
-  }
 
 
   public showSampleDesigns(order_item: Record<any, any>, order_item_index :number, activity_item_index:number){
@@ -554,6 +531,37 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       }
     },1000)
 
+  }
+
+  updateOrderProducts(order_item_index: number, item_status_activity_index: number) {
+    let self = this;
+    let order_item = JSON.parse(JSON.stringify(self.order.items[order_item_index]));
+    let order_item_status_activity = order_item.status_activities[item_status_activity_index];
+    let update_factory_product_ids: string[] = [];
+    order_item_status_activity.activity_items.forEach((activity_item: Record<any, any>) => {
+      update_factory_product_ids.push(activity_item.factory_product_id);
+    })
+    let factory_products = filter( order_item.factory_products, function(factory_product: Record<any, any>) {
+      return findIndex(update_factory_product_ids, (update_factory_product_id) => {
+        return update_factory_product_id == factory_product.id
+      }) >= 0 ? true : false;
+    })
+    //active_index key represents the product index that is currently being updated
+    let update_order_item_products_data = {
+      'active_index': 0, order_item_id: order_item.id, factory_id: order_item.factory_id, factory_products: factory_products
+    }
+    self.$store.dispatch("updateOrderItemProducts", update_order_item_products_data);
+    self.$router.push("/");
+  }
+
+  canPerformCommentAction(comment_obj: Record<any, any>) {
+    let self = this;
+    console.log("shaha", self.auth_customer, comment_obj)
+    if(self.auth_customer) {
+      return comment_obj.comment_by_id == self.auth_customer.id && comment_obj.comment_by == "App\\Models\\Customer";
+    } else {
+      return false;
+    }
   }
 
 

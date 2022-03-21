@@ -29,13 +29,14 @@
                       <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                     </template>
                   </template>
-
-                  <!-- <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
+                  <template v-if="updateOrderItemProducts">
+                    <button class="btn btn-info" @click="loadOrderItemProduct('previous')"
+                            v-if="updateOrderItemProducts.active_index != 0">Previous</button>
+                    <button class="btn btn-info" @click="loadOrderItemProduct('next')"
+                            v-if="updateOrderItemProducts.active_index != (updateOrderItemProducts.factory_products.length - 1)">Next</button>
+                    <button class="btn btn-info" @click="UpdateOrderProducts"
+                            v-if="updateOrderItemProducts.active_index == (updateOrderItemProducts.factory_products.length - 1)">Update Products</button>
                   </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'" variant="outline-secondary" v-b-modal.modal-login>Summary</b-button>
-                  </template> -->
                 </div>
 
                 <ul class="preview-header-icons">
@@ -245,6 +246,7 @@ import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
 import OrderChat from "@/components/OrderChat.vue";
+import {logData, getActiveProductData, getMainScene} from "@/helpers/Helpers";
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -275,6 +277,7 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
+    getMainScene(this)
     //get recent logos
     this.setRecentLogos()
 
@@ -297,50 +300,6 @@ Vue.filter('formatDate', function(value:string) {
       this.showLoader = true
       await this.editProduct(0, 0, this.getPath());
       this.showLoader = false
-
-      // setTimeout(async () => {
-      //   let url = this.getPath()
-      //   let res = await this.$store.dispatch('getShareProductDetails', url)
-      //   const exist = this.products.find((prd:Record<any, any>) => {
-      //     return prd.id == res.data.product_id
-      //   })
-      //   let ind = 0
-      //   if (!exist){
-      //     await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.data.product_id);
-      //     ind = this.products.length -1
-      //   }else {
-      //     const index = this.products.findIndex((prd:Record<any, any>) => prd.id == res.data.product_id)
-      //     ind = index >= 0 ? index : 0
-      //   }
-      //   await this.$store.dispatch('setSelectedIndex', { selectedIndex: ind});
-      //   let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.data.style_id);
-      //   await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-      //   let logoObj = {
-      //     custom_logos: res.data.custom_logos,
-      //     product_id: res.data.product_id
-      //   }
-      //   let customLogos = this.$store.getters.getCustomLogoObject
-      //   if(!customLogos[res.data.product_id]) {
-      //     await this.$store.dispatch('setCustomObj',res.data.product_id)
-      //   }
-      //   await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logoObj);
-      //   await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', res.data);
-      //   await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.data.defaultcolors));
-      //   await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.data.groupcolors));
-      //   await  this.$store.dispatch('setColorSectionVisibility')
-      //   this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-      //     if (item.id == res.data.design_id){
-      //       Vue.set(item, 'design_show', 1)
-      //       this.$store.dispatch('setSelectedProductDesignID', item.id)
-      //     }else{
-      //       Vue.set(item, 'design_show', 0)
-      //     }
-      //   });
-      // }, 2000)
-      // setTimeout(() => {
-      //   this.showLoader = false
-      //   this.productUpdated = true
-      // }, 4000)
     } else {
       await this.retrieveProducts()
     }
@@ -357,10 +316,15 @@ Vue.filter('formatDate', function(value:string) {
     }
 
 
+  },
+   destroyed() {
+    this.$store.dispatch("updateOrderItemProducts", null);
   }
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts) {
+  public logData = logData;
+  public getActiveProductData = getActiveProductData;
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -383,6 +347,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public shared_link = ''
   public extractedcolorclass = ""
   private isFront = true;
+  public updated_order_products: Record<any, any>[] = []
   public showchat(){
     this.$modal.show('orderchat')
   }
@@ -405,6 +370,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public setRecentLogos() {
     this.$store.commit('SET_RECENT_LOGOS')
+  }
+
+  get updateOrderItemProducts() {
+    return this.$store.getters.getUpdateOrderItemProducts
   }
 
   get notifications(){
@@ -950,15 +919,21 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getSearchLoader
   }
 
-  public async retrieveProducts() {
+  public async retrieveProducts(url:string|null=null) {
     let self = this;
-    let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
-    if(self.search_products) {
-      url += `&title=${self.search_products}`
+    if(url == null) {
+       url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
+      if(self.search_products) {
+        url += `&title=${self.search_products}`
+      }
     }
     http.get(url).then(async (response: Record<any, any>) => {
       if(response.data.products.data.length > 0 ){
         await self.handleMainProducts(response);
+        if(self.updateOrderItemProducts) {
+          await self.updateFactoryProduct(self.updateOrderItemProducts.factory_products[self.updateOrderItemProducts.active_index]);
+        }
+
         if(self["showLoader"] || self["searchLoader"]) {
           self.showLoader = false;
           await self.$store.dispatch('setSearchLoader', false)
@@ -969,8 +944,44 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         await self.$store.dispatch('setSearchLoader', false)
       }
     }, (error) => {
-      console.error("Error while getting order detail", error.response.data.message)
+      console.log("fdsfdsdf")
+      // console.error("Error while getting order detail", error.response.data.message)
     })
+  }
+
+  async loadOrderItemProduct(action: string) {
+    let self = this;
+    let updated_product = await getActiveProductData();
+    if(updated_product == null) {
+      return false;
+    }
+    let order_item_factory_product_index = self.updateOrderItemProducts.active_index;
+    updated_product["id"] = self.updateOrderItemProducts.factory_products[order_item_factory_product_index].id;
+    updated_product["status"] = "submitted_for_factory_review";
+    self.updated_order_products[self.updateOrderItemProducts.active_index] = updated_product
+    let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
+    order_item_factory_product_index = (action == "next") ? ++order_item_factory_product_index : --order_item_factory_product_index;
+    url    += `&active_product_id=${self.updateOrderItemProducts.factory_products[order_item_factory_product_index].product_id}`;
+    await self.$store.dispatch("updateOrderItemProducts", {update_key: 'active_index', key_value: order_item_factory_product_index});
+    await self.retrieveProducts(url);
+  }
+  async UpdateOrderProducts() {
+    let self = this;
+    let updated_product = await getActiveProductData();
+    if(updated_product == null) {
+      return false;
+    }
+    updated_product["id"] = self.updateOrderItemProducts.factory_products[self.updateOrderItemProducts.active_index].id;
+    updated_product["status"] = "submitted_for_factory_review";
+    self.updated_order_products[self.updateOrderItemProducts.active_index] = updated_product;
+    let url = `order_item/${self.updateOrderItemProducts.order_item_id}/update/products`;
+    http.post(url, {factory_products: self.updated_order_products}).then((res: any) => {
+      if (res.data.success == true) {
+        self.$router.push({name: "OrderDetail", params: { order_id: self.updateOrderItemProducts.order_item_id }});
+      }
+    }).catch(err => {
+      this.showErrorArr(err.response.data.errors)
+    });
   }
 
 }

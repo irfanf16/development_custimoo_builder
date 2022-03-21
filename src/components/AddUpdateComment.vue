@@ -51,10 +51,11 @@
 
 <script lang="ts">
 
-import {Component, Vue, Prop} from 'vue-property-decorator'
+import {Component, Prop, Mixins} from 'vue-property-decorator'
 import {handleResponseException, logData} from "@/helpers/Helpers";
 import {http} from "@/httpCommon";
 import moment from "moment";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 
 @Component<AddUpdateComment>({
@@ -99,7 +100,7 @@ import moment from "moment";
     }
   }
 })
-export default class AddUpdateComment extends Vue {
+export default class AddUpdateComment extends  Mixins(ErrorMessages) {
   /*
   * props section starts
   * */
@@ -209,9 +210,15 @@ export default class AddUpdateComment extends Vue {
       let form_data = await self.getPayloadData();
       http.post(self.url, form_data).then((successResponse: Record<any, any>) => {
         let response_data = successResponse.data;
+
+        if(response_data.success == true) {
+          self.$emit("commentActionCompleted", response_data.result.item_activity_comment);
+          self.hideCommentBox();
+        } else {
+          self.showToast(response_data.message, "error")
+        }
         self.adding_comment = false;
-        self.hideCommentBox();
-        self.$emit("commentActionCompleted", response_data.result.item_activity_comment);
+
       }).catch((errorResponse: any) => {
         handleResponseException(errorResponse)
       })
