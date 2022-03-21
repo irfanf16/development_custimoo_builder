@@ -42,10 +42,14 @@
 <!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">{{editCart.cartId > 0 ? 'Update Item' : 'Add to Cart Collection'}}</button>
-            <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
-              <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
-            </button>
+            <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+              <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
+                {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart Collection'}}
+              </button>
+              <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
+                <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+              </button>
+            </template>
           </template>
           <template v-else>
             <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"   class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Add to Cart</button>
@@ -80,7 +84,7 @@ import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
-import {getActiveProductData} from '@/helpers/Helpers';
+import { getActiveProductData } from "@/helpers/Helpers";
 
 import {compact} from 'lodash';
 
@@ -113,6 +117,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     url: null, content: null
   }
   public isLoading = false;
+
+  get updateOrderItemProducts() {
+    return this.$store.getters.getUpdateOrderItemProducts
+  }
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -225,59 +233,13 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     let self = this;
     try {
       this.isLoading = true;
-      // let style_index = this.$store.getters.getCurrentStyleIndex;
-      // let selected_product = this.$store.getters.getSelectedProduct;
-      // const product_id = selected_product.product_id;
-      // const product_type = selected_product.product_type;
-      // let product_style = selected_product.productstyles[style_index];
-      // const product_style_id = product_style.id;
-      // let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
-      // const product_design_id = selectedDesign[0].id;
-      // let product_models = this.$store.getters.getProductModels;
-      // let selected_model_index = this.$store.getters.getSelectedModelIndex;
-      //
-      // let product_model_id = 0;
-      // if(product_models.length > 0) {
-      //   const selected_model = product_models[selected_model_index];
-      //   product_model_id = selected_model.id;
-      // }
-      // let order_detail = await this.getOrderDetail();
-      // //remove base64 key from logos array
-      // if(order_detail.custom_logos.length > 0) {
-      //   order_detail.custom_logos.forEach(function(logo:Record<any, any>){ delete logo.base64_logo });
-      // }
-      // let front_design = null
-      // if(selectedDesign.length) {
-      //    front_design = (({ design_name, file_base_url }) => ({ design_name, file_base_url }))(selectedDesign[0].front_design);
-      // }
-      // self.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
-      // self.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
-      //
-      // let post_data:Record<any, any> = {
-      //   factory_product:{
-      //     style_id:product_style_id,
-      //     design_id:product_design_id,
-      //     model_id:product_model_id,
-      //     product_id:product_id,
-      //     product_type:product_type,
-      //     product_name:selected_product.product_name,
-      //     svg_groups: order_detail.svg_groups?order_detail.svg_groups:[],
-      //     custom_logos: order_detail.custom_logos?order_detail.custom_logos:[],
-      //     custom_texts: order_detail.custom_texts?order_detail.custom_texts:[],
-      //     roster_detail: order_detail.roster_detail?order_detail.roster_detail:[],
-      //     custom_logo_svgs: order_detail.custom_logo_svgs?order_detail.custom_logo_svgs:[],
-      //     custom_text_svgs: order_detail.custom_text_svgs?order_detail.custom_text_svgs:[],
-      //     pdf_file:null,
-      //     defaultcolors: this.defaultColors,
-      //     groupcolors: this.groupColors,
-      //     colors:this.$store.getters.getLogosColors,
-      //     front_design:front_design,
-      //     front_image: this.canvasImage.ref_front.toDataURL("image/png") ? this.canvasImage.ref_front.toDataURL("image/png") : null,
-      //     back_image: this.canvasImage.ref_back.toDataURL("image/png") ? this.canvasImage.ref_back.toDataURL("image/png") : null
-      //   }
-      // }
-      let post_data = await getActiveProductData()?? {};
-
+     let cart_product = await getActiveProductData();
+     if(cart_product == null) {
+       return false;
+     }
+      let post_data = {
+        factory_product: cart_product
+      };
       let url = "carts"
       if(this.$store.getters.getEditCart.cartId > 0) {
         post_data.factory_product.id = this.$store.getters.getEditCart.cartItemId

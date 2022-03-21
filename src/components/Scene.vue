@@ -326,6 +326,11 @@ export default class Scene extends Vue {
           }
         }
       })
+      if (this.mainPreview) {
+        console.log("before1", this.$refs)
+        //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
+        this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
+      }
     }
   }
 
@@ -409,6 +414,12 @@ export default class Scene extends Vue {
           }
         }
       })
+
+      if (this.mainPreview) {
+        console.log("before2", this.$refs)
+        //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
+        this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
+      }
     }
   }
 
@@ -422,6 +433,12 @@ export default class Scene extends Vue {
         this.changeDefaultColors(defaultColors)
       }else{
         this.setInitialColors();
+      }
+
+      if (this.mainPreview) {
+        console.log("before3", this.$refs)
+        //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
+        this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
       }
     }
   }
@@ -1827,6 +1844,7 @@ export default class Scene extends Vue {
       self.customTextObjects[textIndex as number] = textBox
       canvas.add(textBox)
       if(this.productType == 'customized') {
+        console.log("model", model)
         model.bringToFront()
       }
       canvas.renderAll()

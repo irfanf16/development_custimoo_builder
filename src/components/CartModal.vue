@@ -118,6 +118,23 @@ import {findIndex} from "lodash";
           this.showErrorArr(err.response.data.errors)
         });
       }
+      // public async editCartItem(cart_item:Record<any, any>,cart_id:number) {
+      //   let self = this;
+      //   let is_customized = this.$store.getters.getCustomized
+      //   let is_personalized = this.$store.getters.getPersonalized
+      //   let locker_product: null | Record<any, any> = null;
+      //   await this.$store.dispatch('setProductType', {prd_type: cart_item.product_type, value: true});
+      //   let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&active_product_id=${cart_item.product_id}`;
+      //   await http.get(url).then(async (response: Record<any, any>) => {
+      //     await this.handleMainProducts(response);
+      //     await self.updateFactoryProduct(cart_item);
+      //     await this.$store.dispatch('setEditCart', {key:'cartId',value:cart_id});
+      //     await this.$store.dispatch('setEditCart', {key:'cartItemId',value:cart_item.id});
+      //     this.hide()
+      //   }).catch(err => {
+      //     console.error("Error while updating cart item", err)
+      //   })
+      // }
       public editCartItem(cart_item:Record<any, any>,cart_id:number) {
         let self = this;
         let is_customized = this.$store.getters.getCustomized
