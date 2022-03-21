@@ -1,22 +1,21 @@
 <template>
   <div class="order-flow">
-    <div class="order-step" :class="item_status == FACTORYREVIEW ? 'active' : ''">
+    <div class="order-step" :class="order_created ? 'active' : ''">
       Order<br>Created
     </div>
-    <div class="order-step" :class="item_status == FACTORYAPPROVED ? 'active' : ''">
+    <div class="order-step" :class="artwork_approval ? 'active' : ''">
       Artwork<br>Approval
     </div>
-    <div class="order-step" :class="(item_status == CUSTOMERREVIEW
-            || item_status == CUSTOMERREJECTED || item_status == CUSTOMERAPPROVED ) ? 'active' : ''">
+    <div class="order-step" :class="sample_design ? 'active' : ''">
       Sample<br>Design
     </div>
-    <div class="order-step" :class="(item_status == ORDERINPRODUCTION) ? 'active' : ''">
+    <div class="order-step" :class="in_production ? 'active' : ''">
       In<br>Production
     </div>
-    <div class="order-step" :class="(item_status == ORDERSHIPPED) ? 'active' : ''">
+    <div class="order-step" :class="shipped ? 'active' : ''">
       Order<br>Shipped
     </div>
-    <div class="order-step" :class="(item_status == ORDERCOMPLETED) ? 'active' : ''">
+    <div class="order-step" :class="completed ? 'active' : ''">
       Order<br>Completed
     </div>
   </div>
@@ -34,20 +33,81 @@ const ORDERSHIPPED = "shipped"
 const ORDERCOMPLETED = "completed"
 
 export default {
-    props: {
-        item_status:null
+  mounted() {
+    this.setStatuses()
+  },
+  props: {
+    item_status: null
+  },
+  data() {
+    return {
+      FACTORYREVIEW: FACTORYREVIEW,
+      FACTORYAPPROVED: FACTORYAPPROVED,
+      FACTORYREJECTED: FACTORYREJECTED,
+      CUSTOMERREVIEW: CUSTOMERREVIEW,
+      CUSTOMERAPPROVED: CUSTOMERAPPROVED,
+      CUSTOMERREJECTED: CUSTOMERREJECTED,
+      ORDERINPRODUCTION: ORDERINPRODUCTION,
+      ORDERSHIPPED: ORDERSHIPPED,
+      ORDERCOMPLETED: ORDERCOMPLETED,
+
+      order_created: false,
+      artwork_approval: false,
+      sample_design: false,
+      in_production: false,
+      shipped: false,
+      completed: false,
+    }
+  },
+  methods: {
+    setStatuses() {
+     this.resetStatuses();
+      if(this.item_status == FACTORYREVIEW){
+        this.order_created = true
+      }else if(this.item_status == FACTORYAPPROVED){
+        this.order_created = true
+        this.artwork_approval = true
+      }else if(this.item_status == CUSTOMERREVIEW
+        || this.item_status == CUSTOMERREJECTED || this.item_status == CUSTOMERAPPROVED){
+        this.order_created = true
+        this.artwork_approval = true
+        this.sample_design = true
+      }else if(this.item_status == ORDERINPRODUCTION ){
+        this.order_created = true
+        this.artwork_approval = true
+        this.sample_design = true
+        this.in_production = true
+      }else if(this.item_status == ORDERSHIPPED ){
+        this.order_created = true
+        this.artwork_approval = true
+        this.sample_design = true
+        this.in_production = true
+        this.shipped = true
+      }else if(this.item_status == ORDERCOMPLETED ){
+        this.order_created = true
+        this.artwork_approval = true
+        this.sample_design = true
+        this.in_production = true
+        this.shipped = true
+        this.completed = true
+      }
     },
-  data(){
-      return {
-        FACTORYREVIEW : FACTORYREVIEW,
-        FACTORYAPPROVED : FACTORYAPPROVED,
-        FACTORYREJECTED : FACTORYREJECTED,
-        CUSTOMERREVIEW : CUSTOMERREVIEW,
-        CUSTOMERAPPROVED : CUSTOMERAPPROVED,
-        CUSTOMERREJECTED : CUSTOMERREJECTED,
-        ORDERINPRODUCTION : ORDERINPRODUCTION,
-        ORDERSHIPPED : ORDERSHIPPED,
-        ORDERCOMPLETED : ORDERCOMPLETED,
+    resetStatuses() {
+      this.order_created = false
+      this.artwork_approval = false
+      this.sample_design = false
+      this.in_production = false
+      this.shipped = false
+      this.completed = false
+    }
+  },
+  watch:{
+    item_status :
+      {
+        handler: function (val, oldVal) {
+          this.setStatuses(); // call it in the context of your component object
+        },
+        deep: true
       }
   }
 }
