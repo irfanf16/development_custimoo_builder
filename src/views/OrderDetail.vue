@@ -42,9 +42,7 @@
 
                     <template v-if="item_status_activity_index==0">
                       <div class="actions" v-if="order_item.status == FACTORYREVIEW && item_status_activity.status == FACTORYREJECTED">
-                        <button class="btn approve" @click="editCustomerProducts(order_item, order_item_index)"><BIconCheckSquareFill/></button>
                         <button class="btn approve" @click="updateOrderProducts(order_item_index, item_status_activity_index)">Edit Products</button>
-                        <button class="btn" @click="editCustomerProducts(order_item, order_item_index)">Take action</button>
                       </div>
 
                       <div class="actions" v-if="order_item.status == CUSTOMERREVIEW && item_status_activity.status == CUSTOMERREVIEW">
@@ -364,41 +362,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
   ///////////////// Activity Methods
-
-  public editCustomerProducts(orderItem: any, orderItemIndex:number){
-
-    let prod_ids = [];
-    for(let factoryProd of orderItem.factory_products){
-      if(factoryProd.status == this.FACTORYREJECTED){
-        prod_ids.push(factoryProd.id)
-      }
-    }
-
-      let post_data:Record<any,any> = {};
-      post_data.product_ids = prod_ids
-      post_data.order_item_id = orderItem.id;
-
-      let url = `customer-orders/${orderItem.id}/temp-activity`
-      http.post(url, post_data)
-        .then((successResponse) => {
-          let response_data = successResponse.data;
-
-          // console.log('response',response_data.result.order_item);
-          // console.log(orderItemIndex);
-           Vue.set(this.order.items, orderItemIndex, response_data.result.order_item)
-          // this.$modal.hide('rejection-modal');
-          // this.$modal.hide('test-sample-modal');
-
-          // this.resetActivityData();
-          // console.log("sdfsdf", response_data.result.order_activity);
-
-        }).catch((errorResponse) => {
-        console.log(errorResponse);
-        //handleResponseException(errorResponse)
-      });
-
-
-  }
 
 
   public showSampleDesigns(order_item: Record<any, any>, order_item_index :number, activity_item_index:number){
