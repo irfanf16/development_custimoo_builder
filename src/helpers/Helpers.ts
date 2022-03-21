@@ -358,6 +358,8 @@ const getActiveProductData = async () => {
     const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
     const product_models = Store.getters.getProductModels;
     const selected_model_index = Store.getters.getSelectedModelIndex;
+    scene_ref.frontCanvas.discardActiveObject().renderAll()
+    scene_ref.backCanvas.discardActiveObject().renderAll()
     const post_data: Record<any, any> = {
       back_image: scene_ref.$refs.back.toDataURL("image/png"),
       custom_logos: Store.getters.getCustomLogos(),
@@ -397,10 +399,15 @@ const getActiveProductData = async () => {
         }
       }
     }
-    console.log("post data", post_data, scene_ref.customTextObjects)
     return post_data;
   } else {
-    alert("Please let scene load")
+    Vue.$toast.open({
+      message: "Please let scene load",
+      type: "info",
+      dismissible: true,
+      duration: 5000,
+      position: 'bottom-left'
+    })
     return null;
   }
 }
