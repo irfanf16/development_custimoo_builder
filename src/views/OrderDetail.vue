@@ -25,28 +25,27 @@
                 </span>
                   </div>
                   <div class="images-grid p-2 d-flex gap-1">
-                    <div class="d-flex flex-wrap gap-1">
-                      <template v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
-                        <template v-for="(activity_file, activity_file_index) in activity_item.activity_files">
-                          <img :src="`${storage_url}${activity_file.url}`" alt=""
-                               :key="`activity_file_${activity_file_index}-${activity_file.name}`">
-                        </template>
-                        <div v-if="(item_status_activity.status == ORDERSHIPPED)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
-                        <template v-else >
-                          <div :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
+                    <div class="d-flex align-items-stretch flex-wrap gap-1">
+                      <div class="feedback-block" :key="activity_itm_ind" v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
+                        <div class="feedback-images">
+                          <img :key="activity_file_index" v-for="(activity_file, activity_file_index) in activity_item.activity_files" :src="`${storage_url}${activity_file.url}`" alt="">
+                        </div>
+                        <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
+                        <template v-else>
+                          <div class="feedback-text" :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                         </template>
 
 
-                      </template>
+                      </div>
                     </div>
 
                     <template v-if="item_status_activity_index==0">
                       <div class="actions" v-if="order_item.status == FACTORYREVIEW && item_status_activity.status == FACTORYREJECTED">
-                        <button class="btn" @click="editCustomerProducts(order_item, order_item_index)">Take action</button>
+                        <button class="btn btn-secondary" @click="editCustomerProducts(order_item, order_item_index)">Take action</button>
                       </div>
 
                       <div class="actions" v-if="order_item.status == CUSTOMERREVIEW && item_status_activity.status == CUSTOMERREVIEW">
-                        <button class="btn" @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)">Take action</button>
+                        <button class="btn btn-secondary" @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)">Take action</button>
                       </div>
                     </template>
 
@@ -678,23 +677,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
             align-items: flex-start;
             gap: 7px;
 
-            button {
-              padding: 0;
-              border: none;
-              font-size: 1.1rem;
-              transition: 0.2s ease all;
-
-              &:hover {
-                opacity: 0.85;
-              }
-
-              &.reject {
-                color: #D53943;
-              }
-
-              &.approve {
-                color: #219F84;
-              }
+            .btn{
+              white-space: nowrap;
             }
           }
 
@@ -870,6 +854,30 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       color: rgba(0, 0, 0, 0.4);
       align-self: flex-end;
     }
+  }
+}
+
+.feedback-block{
+  width: 100%;
+  max-width: 370px;
+  display: flex;
+  flex-direction: column;
+  background: #eee;
+  padding: 10px;
+  border-radius: 7px;
+
+  .feedback-images{
+    display: flex;
+    gap: 10px;
+    padding: 7px;
+    background: #fff;
+    border-radius: 7px;
+  }
+
+  .feedback-text{
+    color: #555;
+    font-size: 1rem;
+    padding-top: 7px;
   }
 }
 </style>
