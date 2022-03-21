@@ -350,7 +350,8 @@ const pathInfo = (file_path: string, ) => {
 
 const getActiveProductData = async () => {
   const scene_ref = Store.getters.getCanvasImage.scene
-  if (scene_ref) {
+  const getCanvasImage = Store.getters.getCanvasImage
+  if (getCanvasImage) {
     const style_index = Store.getters.getCurrentStyleIndex;
     const selected_product = Store.getters.getSelectedProduct;
     const product_style = selected_product.productstyles[style_index];
@@ -361,7 +362,7 @@ const getActiveProductData = async () => {
     scene_ref.frontCanvas.discardActiveObject().renderAll()
     scene_ref.backCanvas.discardActiveObject().renderAll()
     const post_data: Record<any, any> = {
-      back_image: scene_ref.$refs.back.toDataURL("image/png"),
+      back_image: getCanvasImage.ref_front.toDataURL("image/png"),
       custom_logos: Store.getters.getCustomLogos(),
       custom_logo_svgs: [],
       custom_texts: Store.getters.getCustomTexts(),
@@ -369,7 +370,7 @@ const getActiveProductData = async () => {
       colors: Store.getters.getLogosColors,
       design_id: selected_design.id,
       defaultcolors: Store.getters.getDefaultColors,
-      front_image: scene_ref.$refs.front.toDataURL("image/png"),
+      front_image: getCanvasImage.ref_back.toDataURL("image/png"),
       groupcolors: Store.getters.getGroupColors,
       logo_colors: Store.getters.getLogosColors,
       model_id: product_models[selected_model_index].id,
