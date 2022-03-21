@@ -375,7 +375,7 @@ const getActiveProductData = async () => {
       product_type: selected_product.product_type,
       product_name: selected_product.product_name,
       pdf_file: null,
-      production_url: selected_design.production_design.file_url ?? null,
+      production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
       // front_design:front_design,
       roster_detail: Store.getters.getRosterDetails,
       style_id: product_style.id,
