@@ -125,7 +125,7 @@ const Product:Module<any, any> = {
       * if we want to update specific key instead of whole object then pass payload as
       * {update_key: 'contains the key name that we want to update': key_value: 'contains Value with which we want to update key value'}
       * */
-      if('update_key' in payload) {
+      if(payload && 'update_key' in payload) {
         Vue.set(state.update_order_item_products, payload.update_key, payload.key_value)
       } else {
         state.update_order_item_products = payload

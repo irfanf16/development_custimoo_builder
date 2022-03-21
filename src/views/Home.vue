@@ -316,6 +316,9 @@ Vue.filter('formatDate', function(value:string) {
     }
 
 
+  },
+   destroyed() {
+    this.$store.dispatch("updateOrderItemProducts", null);
   }
 })
 
