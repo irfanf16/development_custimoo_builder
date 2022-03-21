@@ -24,7 +24,7 @@
                   {{ item_status_activity.created_at | formatDate('HH:mm Do MMM YY ')  }}
                 </span>
                   </div>
-                  <div class="images-grid p-2 d-flex gap-1">
+                  <div class="images-grid p-2 d-flex gap-1 w-100">
                     <div class="d-flex align-items-stretch flex-wrap gap-1">
                       <div class="feedback-block" :key="activity_itm_ind" v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
                         <div class="feedback-images">
@@ -293,6 +293,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public ORDERINPRODUCTION = "in_production"
   public ORDERSHIPPED = "shipped"
   public ORDERCOMPLETED = "completed"
+  public status_icons:Record<any, any> = {}
 
   //data props starts
   public activity_sample_files = []
