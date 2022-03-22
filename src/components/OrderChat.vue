@@ -69,8 +69,9 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from "vue-property-decorator";
+import {Component, Mixins, Vue} from "vue-property-decorator";
 import {http} from "@/httpCommon";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<OrderChat>({
   mounted(){
@@ -86,7 +87,7 @@ import {http} from "@/httpCommon";
     })
   }
 })
-export default class OrderChat extends Vue{
+export default class OrderChat extends Mixins(ErrorMessages) {
   public order_id = 0
   private screenWidth = (window.screen.availWidth - 100)
   private storageUrl = process.env.VUE_APP_STORAGE_URL
@@ -115,33 +116,38 @@ export default class OrderChat extends Vue{
     this.$modal.hide('orderChat')
   }
   public async sendMessage(facotry:Record<any, any>, ind:number) {
-    let user_id = 0
-    if (facotry){
-      console.log(facotry)
-      user_id = facotry.user_id
-    }
-    let message = {
-      from:'customer',
-      message: this.text
-    }
-    let fd = new FormData()
-    let header = {
-      headers: {
-        'Content-Type': 'multipart/form-data'
+
+    if (this.text || this.fileObject.name){
+      let user_id = 0
+      if (facotry){
+        console.log(facotry)
+        user_id = facotry.user_id
       }
-    }
-    fd.append( 'files', this.fileObject as Blob)
-    fd.append('order_id', this.order_id)
-    fd.append('customer_id', this.customer_id)
-    fd.append('message', message.message)
-    fd.append('from', message.from)
-    fd.append('user_id', user_id)
-    const res = await http.post('chat/send', fd, header)
-    if (res.status == 201){
-      Vue.set(this.items[ind] , 'messages', res.data.message)
-      this.text = ''
-      this.fileObject = {}
-      user_id = 0
+      let message = {
+        from:'customer',
+        message: this.text
+      }
+      let fd = new FormData()
+      let header = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+      fd.append( 'files', this.fileObject as Blob)
+      fd.append('order_id', this.order_id)
+      fd.append('customer_id', this.customer_id)
+      fd.append('message', message.message)
+      fd.append('from', message.from)
+      fd.append('user_id', user_id)
+      const res = await http.post('chat/send', fd, header)
+      if (res.status == 201){
+        Vue.set(this.items[ind] , 'messages', res.data.message)
+        this.text = ''
+        this.fileObject = {}
+        user_id = 0
+      }
+    }else{
+      this.showError("Please input something")
     }
   }
   public uploadImage(e: any) {
