@@ -183,8 +183,9 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
   }
   public toggletText =  ['show', 'hide']
 
-  public showChat(oid:number, cid:number){
-    this.ref.chatOrder.show(oid, cid, 1);
+  public async showChat(oid:number, cid:number){
+    let res = await http.get(`factory/chat/${oid}`)
+    this.ref.chatOrder.show(oid, cid, res);
   }
 
 
