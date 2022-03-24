@@ -52,9 +52,11 @@
                     <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
                     <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
                       <template v-for="(notification, ind) in notifications" >
-                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]" @click="readNotification(notification)">
-                          <div class="text d-flex align-items-start justify-content-between">
-                            <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]">
+                          <div @click="readNotification(notification)" class="text d-flex align-items-start justify-content-between">
+                            <p v-if="!notification.order_id" @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                            <p v-if="notification.order_id"><router-link  :to="{ name: 'OrderDetail', params: { order_id: notification.order_id }}">{{notification.description}}</router-link>
+                            </p>
                             <div class="date">
                               <div class="day">{{ notification.created_at | formatDate }}</div>
                             </div>

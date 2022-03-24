@@ -75,7 +75,7 @@
                       <span class="comment-avatar">
                         {{ activity_comment.user ? `${activity_comment.user.first_name} ${activity_comment.user.last_name}` : "" | initials }}
                       </span>
-                        <div class="comment-msg">
+                        <div class="comment-msg" :id="`comment-${activity_comment.id}-box`">
                         <!-- Comment action buttons starts -->
                           <div class="comment-action" style="right: -165px">
                             <ul class="fs-1 d-flex gap-2">
@@ -102,8 +102,16 @@
                         <!-- Comment action buttons ends -->
 
                           <blockquote class="blockquote mb-0">
-                            <footer class="blockquote-footer" v-if="activity_comment.parent_message_id">
-                              <cite title="Source Title">{{ activity_comment.parent_message }}</cite>
+                            <footer class="blockquote-footer" v-if="activity_comment.parent_message_id" style="cursor: pointer"
+                                    @click="goToParentMessage(activity_comment.parent_message_id)">
+                              <cite title="Source Title">
+                                <template v-if="activity_comment.parent_message">
+                                  {{ activity_comment.parent_message }}
+                                </template>
+                                <template v-else>
+                                  Click me to go to parent
+                                </template>
+                              </cite>
                             </footer>
                           </blockquote>
                           <template v-for="(activity_comment_file, activity_comment_file_index) in activity_comment.files">
@@ -207,12 +215,6 @@
             <button class="btn btn-secondary" @click="approveRejectDesigns('accept')">Accept</button>
             <button class="btn btn-secondary" @click="approveRejectDesigns('reject')">Reject</button>
           </template>
-
-<!--          <template v-if="((activity_items.activity_item_data.length - 1) == activity_navigation_index) && activity_items.activity_item_data[activity_navigation_index].action">-->
-<!--            <button class="btn btn-secondary" @click="submitActivity('')">Submit Changes</button>-->
-<!--          </template>-->
-
-
         </div>
 
       </template>
@@ -557,12 +559,17 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   canPerformCommentAction(comment_obj: Record<any, any>) {
     let self = this;
-    console.log("shaha", self.auth_customer, comment_obj)
     if(self.auth_customer) {
       return comment_obj.comment_by_id == self.auth_customer.id && comment_obj.comment_by == "App\\Models\\Customer";
     } else {
       return false;
     }
+  }
+
+  goToParentMessage(parent_message_id: number) {
+    document.getElementById(`comment-${parent_message_id}-box`)?.scrollIntoView({
+      behavior: 'smooth'
+    });
   }
 
 
