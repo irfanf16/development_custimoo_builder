@@ -70,7 +70,7 @@ window.Echo = new Echo({
 })
 export default class App extends Mixins(LockerProducts,ErrorMessages) {
   public storageUrl = process.env.VUE_APP_STORAGE_URL
-  public enviorment = process.env.VUE_APP_MY_ENV
+  public enviorment = process.env.SOCKET_ENV
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
