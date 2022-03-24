@@ -75,9 +75,8 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<OrderChat>({
   mounted(){
-    console.log("customer", this.customer.id)
-    window.Echo.channel(`customer_factory_chat.${this.customer.id}`).listen('SendMessageEvent',  (e: Record<any,any>) => {
-      console.log(e.content)
+
+    window.Echo.channel(`customer_factory_chat_${this.enviorment}_${this.customer.id}`).listen('SendMessageEvent',  (e: Record<any,any>) => {
       let fact_id = e.content.fact_id
       let ind = this.items.findIndex((item:Record<any, any>)=> item.factory_id == fact_id)
       if (ind != -1){
@@ -100,6 +99,7 @@ export default class OrderChat extends Mixins(ErrorMessages) {
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
   }
+  public enviorment = process.env.VUE_APP_SOCKET_ENV
 
   public async show(oid:number, cid:number, items:Record<any, any>){
     this.order_id = oid
