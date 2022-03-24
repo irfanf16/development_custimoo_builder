@@ -9,7 +9,7 @@
           </div>
         </div>
         <div class="col-md-4">
-          <b-button @click="openChatModal(order.id, order.customer_id, order.factories)">Inquire About this order</b-button>
+          <b-button @click="openChatModal(order.id, order.customer_id, order.items)">Inquire About this order</b-button>
         </div>
       </div>
     </template>
@@ -30,7 +30,7 @@ import OrderChat from "@/components/OrderChat.vue";
 })
 export default class CustomerOrders extends Vue{
  public orders:Record<any, any> = []
- public factory_ids:number[] = []
+ public factory_ids:Record<any, any> = []
   public ref = this.$refs as Record<any, any>
 
   public async getOrders(){
@@ -38,8 +38,9 @@ export default class CustomerOrders extends Vue{
     this.orders = orders.data.result.data
   }
   public openChatModal(oid:number, cid:number, factories:Record<any, any>){
+    console.log(factories)
     factories.forEach((item:Record<any, any>) => {
-      this.factory_ids.push(item.id)
+      this.factory_ids.push({id:item.id},{name: item.factory_name})
     })
    this.ref['chatmodal'].show(oid, cid, this.factory_ids)
   }

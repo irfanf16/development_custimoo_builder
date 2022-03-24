@@ -11,61 +11,33 @@
       </div>
       <div class="modal-body">
         <b-tabs id="page-content">
-          <b-tab title="Factory 1">
+          <template v-for="(factory, ind) in items">
+          <b-tab :title="`Factory ${factory.factory_name}`" :key="ind">
             <div class="d-flex align-items-stretch factory-chat">
-              <!--          <div class="factory-listing">-->
-              <!--            <div class="list-heading">Factories</div>-->
-              <!--            <div class="list-container">-->
-              <!--              <ul>-->
-              <!--                <li v-for="link in 10" :key="link">-->
-              <!--                  <a href="#!">Factory {{link}}</a>-->
-              <!--                </li>-->
-              <!--              </ul>-->
-              <!--            </div>-->
-              <!--          </div>-->
-
               <div class="padding w-100">
                 <div class="d-flex justify-content-center w-100">
                   <div class="w-100">
                     <div class="ps-container ps-theme-default ps-active-y theme-scroll chat-content" style="overflow-y: scroll !important; height:400px !important;">
-                      <!--              <div class="media media-chat"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">-->
-                      <!--                <div class="media-body">-->
-                      <!--                  <p>Hi</p>-->
-                      <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
-                      <!--                </div>-->
-                      <!--              </div>-->
-                      <!--              <div class="media media-chat media-chat-reverse">-->
-                      <!--                <div class="media-body">-->
-                      <!--                  <p>Hiii, I'm good.</p>-->
-                      <!--                  <p class="meta"><time datetime="2018">00:06</time></p>-->
-                      <!--                </div>-->
-                      <!--              </div>-->
-                      <template  v-for="(message, i) in messages">
-                        <div v-if="message"   :key="i" class="media media-chat" :class="message.from  == 'factory' ? 'media-chat-reverse':''"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                          <div class="media-body">
-                            <p>{{ message.message }}</p>
-                            <template v-for="(urls, inn) in message.file_urls">
-                              <div v-if="message.file_urls" :key="inn">
-                                <img width="100" height="100" :src="storageUrl+urls.url" alt="" >
-                              </div>
-                            </template>
-                            <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
-                          </div>
-                        </div>
-                      </template>
-
-                      <div class="media media-chat" v-for="item in 10" :key="item" :class="item % 2  == 0 ? 'media-chat-reverse':''">
+                      <template v-if="factory.messages">
+                      <template  v-for="(message, i) in JSON.parse(factory.messages.messages)">
+                        <div  class="media media-chat" :key="`message-${i}`" :class="message.from  == 'factory' ? 'media-chat-reverse':''">
                         <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
                         <div class="media-body">
                           <div class="message">
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aliquid consequatur deleniti, dignissimos doloribus expedita explicabo hic illum laudantium modi non sed sunt veritatis vero voluptatem? Alias id illum necessitatibus!
-                            <div class="attachments theme-scroll-h">
-                              <img width="100" height="100" src="https://via.placeholder.com/100" alt="" v-for="item in 20" :key="item">
+                            <template v-if="message">
+                              {{ message.message }}
+                            </template>
+                            <template  v-for="(urls, inn) in message.file_urls" >
+                            <div v-if="message.file_urls" class="attachments theme-scroll-h" :key="`file-${inn}`">
+                              <img width="100" height="100" :src="storageUrl+urls.url" alt="">
                             </div>
+                            </template>
                           </div>
                           <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
                         </div>
                       </div>
+                      </template>
+                      </template>
 
                       <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;">
                         <div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div>
@@ -76,172 +48,106 @@
                     </div>
                     <div class="publisher bt-1 border-light">
                       <img class="avatar avatar-xs" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                      <input class="publisher-input" v-model="text" type="text" placeholder="Write something">
+                      <input class="publisher-input" v-on:keyup.enter="sendMessage(factory, ind)" v-model="text" type="text" placeholder="Write something">
                       <!--              <span class="publisher-btn file-group"><i class="fa fa-paperclip file-browser"></i>-->
                       <button class="attach-file">
                         <BIconPaperclip />
-                        <input  type="file" v-on:keyup.enter="sendMessage" @change="uploadImage" multiple>
+                        <input  type="file"  @change="uploadImage" multiple>
                       </button>
                       <!--              </span>-->
-                      <a @click="sendMessage"  class="publisher-btn text-info" href="#" data-abc="true"><i class="fa fa-paper-plane"></i></a>
+                      <a @click="sendMessage(factory, ind)"  class="publisher-btn text-info" data-abc="true"><i class="fa fa-paper-plane"></i></a>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </b-tab>
-          <b-tab title="Factory 2">
-            <div class="d-flex align-items-stretch factory-chat">
-              <!--          <div class="factory-listing">-->
-              <!--            <div class="list-heading">Factories</div>-->
-              <!--            <div class="list-container">-->
-              <!--              <ul>-->
-              <!--                <li v-for="link in 10" :key="link">-->
-              <!--                  <a href="#!">Factory {{link}}</a>-->
-              <!--                </li>-->
-              <!--              </ul>-->
-              <!--            </div>-->
-              <!--          </div>-->
-
-              <div class="padding w-100">
-                <div class="d-flex justify-content-center w-100">
-                  <div class="w-100">
-                    <div class="ps-container ps-theme-default ps-active-y theme-scroll chat-content" style="overflow-y: scroll !important; height:400px !important;">
-                      <!--              <div class="media media-chat"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">-->
-                      <!--                <div class="media-body">-->
-                      <!--                  <p>Hi</p>-->
-                      <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
-                      <!--                </div>-->
-                      <!--              </div>-->
-                      <!--              <div class="media media-chat media-chat-reverse">-->
-                      <!--                <div class="media-body">-->
-                      <!--                  <p>Hiii, I'm good.</p>-->
-                      <!--                  <p class="meta"><time datetime="2018">00:06</time></p>-->
-                      <!--                </div>-->
-                      <!--              </div>-->
-                      <template  v-for="(message, i) in messages">
-                        <div v-if="message"   :key="i" class="media media-chat" :class="message.from  == 'factory' ? 'media-chat-reverse':''"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                          <div class="media-body">
-                            <p>{{ message.message }}</p>
-                            <template v-for="(urls, inn) in message.file_urls">
-                              <div v-if="message.file_urls" :key="inn">
-                                <img width="100" height="100" :src="storageUrl+urls.url" alt="" >
-                              </div>
-                            </template>
-                            <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
-                          </div>
-                        </div>
-                      </template>
-
-                      <div class="media media-chat" v-for="item in 10" :key="item" :class="item % 2  == 0 ? 'media-chat-reverse':''">
-                        <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                        <div class="media-body">
-                          <div class="message">
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aliquid consequatur deleniti, dignissimos doloribus expedita explicabo hic illum laudantium modi non sed sunt veritatis vero voluptatem? Alias id illum necessitatibus!
-                            <div class="attachments theme-scroll-h">
-                              <img width="100" height="100" src="https://via.placeholder.com/100" alt="" v-for="item in 20" :key="item">
-                            </div>
-                          </div>
-                          <!--                  <p class="meta"><time datetime="2018">23:58</time></p>-->
-                        </div>
-                      </div>
-
-                      <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;">
-                        <div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div>
-                      </div>
-                      <div class="ps-scrollbar-y-rail" style="top: 0px; height: 0px; right: 2px;">
-                        <div class="ps-scrollbar-y" tabindex="0" style="top: 0px; height: 2px;"></div>
-                      </div>
-                    </div>
-                    <div class="publisher bt-1 border-light">
-                      <img class="avatar avatar-xs" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
-                      <input class="publisher-input" v-model="text" type="text" placeholder="Write something">
-                      <!--              <span class="publisher-btn file-group"><i class="fa fa-paperclip file-browser"></i>-->
-                      <button class="attach-file">
-                        <BIconPaperclip />
-                        <input  type="file" v-on:keyup.enter="sendMessage" @change="uploadImage" multiple>
-                      </button>
-                      <!--              </span>-->
-                      <a @click="sendMessage"  class="publisher-btn text-info" href="#" data-abc="true"><i class="fa fa-paper-plane"></i></a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </b-tab>
+          </template>
         </b-tabs>
       </div>
     </modal>
 </template>
 
 <script lang="ts">
-import {Component, Vue} from "vue-property-decorator";
+import {Component, Mixins, Vue} from "vue-property-decorator";
 import {http} from "@/httpCommon";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<OrderChat>({
   mounted(){
-    window.Echo.channel("customer_factory_chat.88").listen('SendMessageEvent',  (e: Record<any,any>) => {
+    console.log("customer", this.customer.id)
+    window.Echo.channel(`customer_factory_chat.${this.customer.id}`).listen('SendMessageEvent',  (e: Record<any,any>) => {
       console.log(e.content)
-      this.messages.push(e.content)
+      let fact_id = e.content.fact_id
+      let ind = this.items.findIndex((item:Record<any, any>)=> item.factory_id == fact_id)
+      if (ind != -1){
+        console.log(ind)
+        Vue.set(this.items[ind] , 'messages', e.content)
+      }
     })
   }
 })
-export default class OrderChat extends Vue{
+export default class OrderChat extends Mixins(ErrorMessages) {
   public order_id = 0
   private screenWidth = (window.screen.availWidth - 100)
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public customer_id = 0
-  public factory_ids:Record<any, any> = []
+  public items:Record<any, any> = []
   public messages:any[] = []
   public text = ''
   public fileObject: Record<any, any> = {}
   public files: Record<any, any> = []
+  get customer():Record<any, any>{
+    return  this.$store.getters.getCustomer
+  }
 
-
-  public async show(oid:number, cid:number, f_ids:Record<any, any>){
+  public async show(oid:number, cid:number, items:Record<any, any>){
     this.order_id = oid
     this.customer_id = cid
-    this.factory_ids = f_ids
-    console.log('f', f_ids)
-    const res  = await http.get('chat/get',{
-      params: {
-        order_id: this.order_id,
-        customer_id: this.customer_id
-      }
-    })
-    console.log(res.status)
-    if (res.status == 200){
-      console.log(res.data)
-      this.messages =   res.data.messages && typeof(res.data.messages.messages) == 'string' ? JSON.parse(res.data.messages.messages) : []
+    if (items.status == 200){
+      this.items = items.data.messages
     }
     this.$modal.show('orderChat')
   }
+  // public getChat(oid:number){
+  //
+  // }
   public hide(){
     this.$modal.hide('orderChat')
   }
-  public async sendMessage() {
-    let message = {
-      from:'customer',
-      message: this.text
-    }
-    let fd = new FormData()
-    let header = {
-      headers: {
-        'Content-Type': 'multipart/form-data'
+  public async sendMessage(facotry:Record<any, any>, ind:number) {
+
+    if (this.text || this.fileObject.name){
+      let user_id = 0
+      if (facotry){
+        console.log(facotry)
+        user_id = facotry.user_id
       }
-    }
-    fd.append( 'files', this.fileObject as Blob)
-    fd.append('order_id', this.order_id)
-    fd.append('customer_id', this.customer_id)
-    fd.append('message', message.message)
-    fd.append('from', message.from)
-    fd.append('user_id', this.factory_ids[0])
-    const res = await http.post('chat/send', fd, header)
-    if (res.status == 201){
-      console.log()
-      this.messages.push(res.data.message)
-      this.text = ''
-      this.fileObject = {}
+      let message = {
+        from:'customer',
+        message: this.text
+      }
+      let fd = new FormData()
+      let header = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+      fd.append( 'files', this.fileObject as Blob)
+      fd.append('order_id', this.order_id)
+      fd.append('customer_id', this.customer_id)
+      fd.append('message', message.message)
+      fd.append('from', message.from)
+      fd.append('user_id', user_id)
+      const res = await http.post('chat/send', fd, header)
+      if (res.status == 201){
+        Vue.set(this.items[ind] , 'messages', res.data.message)
+        this.text = ''
+        this.fileObject = {}
+        user_id = 0
+      }
+    }else{
+      this.showError("Please input something")
     }
   }
   public uploadImage(e: any) {
