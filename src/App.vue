@@ -53,10 +53,14 @@ window.Echo = new Echo({
       this.$store.commit('SET_RECENT_LOGOS')
     }
     const customer =  this.$store.getters.getCustomer;
+
     window.Echo.channel(`notification.${this.enviorment}.${customer.id}`).listen('RoasterUpdatedEvent',  (e: Record<any,any>) => {
       this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
     })
-    window.Echo.channel(`order-activity-for-user-${customer.id}`).listen('OrderActivityEvent',  (e: Record<any,any>) => {
+    window.Echo.channel(`order_activity_for_user_${this.enviorment}_${customer.id}`).listen('OrderActivityEvent',  (e: Record<any,any>) => {
+      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
+    })
+    window.Echo.channel(`Notify_to_user_${this.enviorment}_${customer.id}`).listen('NotifyUser',  (e: Record<any,any>) => {
       this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
     })
     window.Echo.channel(`orderfile.${customer.id}`).listen('OrderFileCreatedEvent',  (e: Record<any,any>) => {
@@ -70,7 +74,7 @@ window.Echo = new Echo({
 })
 export default class App extends Mixins(LockerProducts,ErrorMessages) {
   public storageUrl = process.env.VUE_APP_STORAGE_URL
-  public enviorment = process.env.VUE_APP_MY_ENV
+  public enviorment = process.env.VUE_APP_SOCKET_ENV
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
