@@ -40,7 +40,7 @@
                     </div>
 
                     <template v-if="item_status_activity_index==0">
-                      <div class="actions" v-if="order_item.status == FACTORYREVIEW && item_status_activity.status == FACTORYREJECTED">
+                      <div class="actions" v-if="item_status_activity.status == FACTORYREJECTED">
                         <button class="btn btn-secondary" @click="updateOrderProducts(order_item_index, item_status_activity_index)">Edit Products</button>
                       </div>
 
