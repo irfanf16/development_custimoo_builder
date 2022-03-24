@@ -60,6 +60,9 @@ window.Echo = new Echo({
     window.Echo.channel(`order_activity_for_user_${this.enviorment}_${customer.id}`).listen('OrderActivityEvent',  (e: Record<any,any>) => {
       this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
     })
+    window.Echo.channel(`Notify_to_user_${this.enviorment}_${customer.id}`).listen('NotifyUser',  (e: Record<any,any>) => {
+      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
+    })
     window.Echo.channel(`orderfile.${customer.id}`).listen('OrderFileCreatedEvent',  (e: Record<any,any>) => {
       if(e.design_file.length) {
         this.downloadPdfFile(e.design_file)
