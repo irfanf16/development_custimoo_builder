@@ -933,7 +933,7 @@ export default class Scene extends Vue {
       self.addToOtherSide(e.target, side)
     })
 
-    var ctx = canvas.getSelectionContext()
+    let ctx = canvas.getSelectionContext()
 
     canvas.on('mouse:up', function() {
       self.verticalLines.length = self.horizontalLines.length = 0;
