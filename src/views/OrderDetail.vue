@@ -167,7 +167,7 @@
            height="auto"
            :reset="true"
            name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true" title="Locker Room"
-           @close="$store.commit('Change_Locker_Active_Tab', 0)">
+           @close="$store.commit('Change_Locker_Active_Tab', 0)"  @opened="showMarkerActionButtons">
       <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="font-weight-bold pl-1">
@@ -186,8 +186,8 @@
           </div>
 
           <div v-for="(actFile, fileInd) in activity_items.activity_item_data[activity_navigation_index].files" :key="`actfile-${fileInd}`">
-            <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
-            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`"  :src="`${actFile.file}?not-from-cache-please`" alt="" class="w-100" crossorigin="anonymous" style="max-height: 500px">
+            <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`" :key="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
+            <img crossorigin="anonymous" @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`"  :src="`${actFile.file}`" alt="" class="w-100" style="max-height: 500px">
           </div>
 
 
@@ -474,6 +474,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       activityObj.files[ref_index].file_type = 'encode'
     });
     markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+    markerArea.renderAtNaturalSize = true;
     markerArea.show();
     //markerArea.close();
   }
@@ -502,7 +503,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       }
     }
 
-
+    this.showMarkerActionButtons()
   }
   public approveRejectDesigns(action:string){
 
@@ -569,6 +570,12 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     document.getElementById(`comment-${parent_message_id}-box`)?.scrollIntoView({
       behavior: 'smooth'
     });
+  }
+  async showMarkerActionButtons() {
+    setTimeout(() => {
+      this.showMarkerArea(0);
+      this.showMarkerArea(1);
+    }, 2000)
   }
 
 
