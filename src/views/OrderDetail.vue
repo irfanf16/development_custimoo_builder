@@ -14,7 +14,7 @@
 
           <div class="order-activities">
             <template v-for="(item_status_activity, item_status_activity_index) in order_item.status_activities">
-              <div class="activity-status" :key="`item_status_activity_${item_status_activity_index}`">
+              <div v-if="(item_status_activity.status != ORDERCOMPLETED)" class="activity-status" :key="`item_status_activity_${item_status_activity_index}`">
                 <ActivityStatusIcons :activity_status="item_status_activity.status" />
 
                 <div class="activity-content">
