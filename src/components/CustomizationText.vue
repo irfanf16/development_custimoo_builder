@@ -11,9 +11,8 @@
           @input="updateTextField(customTextIndex, $event)"
         ></b-form-input>
         <button v-b-toggle="'accordion-'+(customTextIndex+1)" class="d-flex align-items-center btn btn-secondary light">
-          <BIconDash class="minus" />
-          <BIconPlus class="plus" />
-          Customize
+          <span class="minus d-flex align-items-center"><BIconDash class="minus" /> Collapse</span>
+          <span class="plus d-flex align-items-center"><BIconPlus class="plus" /> Expand</span>
         </button>
       </div>
 
@@ -253,16 +252,18 @@ export default class CustomizationText extends Vue {
   }
 }
 .btn{
+  min-width: 108px;
+
   .minus{
-    display: none;
+    display: none !important;
   }
 
   &.not-collapsed{
     .minus{
-      display: block;
+      display: flex !important;
     }
     .plus{
-      display: none;
+      display: none !important;
     }
   }
 }
