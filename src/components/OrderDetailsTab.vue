@@ -51,7 +51,7 @@
           <template v-if="isCustomerAuthenticated">
             <template v-if="$store.getters.getUpdateOrderItemProducts == null">
               <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
-                {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart Collection'}}
+                {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
               </button>
               <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
                 <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
