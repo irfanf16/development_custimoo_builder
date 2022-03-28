@@ -14,7 +14,8 @@
 
           <div class="order-activities">
             <template v-for="(item_status_activity, item_status_activity_index) in order_item.status_activities">
-              <div class="activity-status" :class="status_icons[item_status_activity.status]" :key="`item_status_activity_${item_status_activity_index}`">
+              <div v-if="(item_status_activity.status != ORDERCOMPLETED)" class="activity-status" :class="status_icons[item_status_activity.status]" :key="`item_status_activity_${item_status_activity_index}`">
+              <div  class="activity-status" :key="`item_status_activity_${item_status_activity_index}`">
                 <ActivityStatusIcons :activity_status="item_status_activity.status" />
 
                 <div class="activity-content">
@@ -40,7 +41,7 @@
                     </div>
 
                     <template v-if="item_status_activity_index==0">
-                      <div class="actions" v-if="order_item.status == FACTORYREVIEW && item_status_activity.status == FACTORYREJECTED">
+                      <div class="actions" v-if="item_status_activity.status == FACTORYREJECTED">
                         <button class="btn btn-secondary" @click="updateOrderProducts(order_item_index, item_status_activity_index)">Edit Products</button>
                       </div>
 
@@ -75,7 +76,7 @@
                       <span class="comment-avatar">
                         {{ activity_comment.user ? `${activity_comment.user.first_name} ${activity_comment.user.last_name}` : "" | initials }}
                       </span>
-                        <div class="comment-msg">
+                        <div class="comment-msg" :id="`comment-${activity_comment.id}-box`">
                         <!-- Comment action buttons starts -->
                           <div class="comment-action" style="right: -165px">
                             <ul class="fs-1 d-flex gap-2">
@@ -102,8 +103,16 @@
                         <!-- Comment action buttons ends -->
 
                           <blockquote class="blockquote mb-0">
-                            <footer class="blockquote-footer" v-if="activity_comment.parent_message_id">
-                              <cite title="Source Title">{{ activity_comment.parent_message }}</cite>
+                            <footer class="blockquote-footer" v-if="activity_comment.parent_message_id" style="cursor: pointer"
+                                    @click="goToParentMessage(activity_comment.parent_message_id)">
+                              <cite title="Source Title">
+                                <template v-if="activity_comment.parent_message">
+                                  {{ activity_comment.parent_message }}
+                                </template>
+                                <template v-else>
+                                  Click me to go to parent
+                                </template>
+                              </cite>
                             </footer>
                           </blockquote>
                           <template v-for="(activity_comment_file, activity_comment_file_index) in activity_comment.files">
@@ -159,7 +168,7 @@
            height="auto"
            :reset="true"
            name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true" title="Locker Room"
-           @close="$store.commit('Change_Locker_Active_Tab', 0)">
+           @close="$store.commit('Change_Locker_Active_Tab', 0)"  @opened="showMarkerActionButtons">
       <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="font-weight-bold pl-1">
@@ -178,8 +187,8 @@
           </div>
 
           <div v-for="(actFile, fileInd) in activity_items.activity_item_data[activity_navigation_index].files" :key="`actfile-${fileInd}`">
-            <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
-            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`"  :src="actFile.file" alt="" class="w-100" style="max-height: 500px">
+            <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`" :key="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
+            <img crossorigin="anonymous" @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`"  :src="`${actFile.file}`" alt="" class="w-100" style="max-height: 500px">
           </div>
 
 
@@ -207,12 +216,6 @@
             <button class="btn btn-secondary" @click="approveRejectDesigns('accept')">Accept</button>
             <button class="btn btn-secondary" @click="approveRejectDesigns('reject')">Reject</button>
           </template>
-
-<!--          <template v-if="((activity_items.activity_item_data.length - 1) == activity_navigation_index) && activity_items.activity_item_data[activity_navigation_index].action">-->
-<!--            <button class="btn btn-secondary" @click="submitActivity('')">Submit Changes</button>-->
-<!--          </template>-->
-
-
         </div>
 
       </template>
@@ -474,7 +477,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
     let image = (this.$refs as Record<any,any>)['designImage'+ref_index+this.activity_navigation_index][0];
-    image.crossOrigin="anonymous"
 
     const markerArea:Record<any,any> = new markerjs2.MarkerArea(image)
     markerArea.addEventListener('render', (event:Record<any,any>) => {
@@ -483,6 +485,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       activityObj.files[ref_index].file_type = 'encode'
     });
     markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+    markerArea.renderAtNaturalSize = true;
     markerArea.show();
     //markerArea.close();
   }
@@ -511,7 +514,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       }
     }
 
-
+    this.showMarkerActionButtons()
   }
   public approveRejectDesigns(action:string){
 
@@ -567,12 +570,23 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   canPerformCommentAction(comment_obj: Record<any, any>) {
     let self = this;
-    console.log("shaha", self.auth_customer, comment_obj)
     if(self.auth_customer) {
       return comment_obj.comment_by_id == self.auth_customer.id && comment_obj.comment_by == "App\\Models\\Customer";
     } else {
       return false;
     }
+  }
+
+  goToParentMessage(parent_message_id: number) {
+    document.getElementById(`comment-${parent_message_id}-box`)?.scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
+  async showMarkerActionButtons() {
+    setTimeout(() => {
+      this.showMarkerArea(0);
+      this.showMarkerArea(1);
+    }, 2000)
   }
 
 

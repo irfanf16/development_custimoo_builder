@@ -52,9 +52,11 @@
                     <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
                     <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
                       <template v-for="(notification, ind) in notifications" >
-                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]" @click="readNotification(notification)">
-                          <div class="text d-flex align-items-start justify-content-between">
-                            <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]">
+                          <div @click="readNotification(notification)" class="text d-flex align-items-start justify-content-between">
+                            <p v-if="notification.type == 'roster_updated'" @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                            <p v-if="notification.type == 'order_activity'"><router-link  :to="{ name: 'OrderDetail', params: { order_id: notification.order_id }}">{{notification.description}}</router-link>
+                            <p v-if="notification.type == 'message'" @click="showchat(notification.order_id, notification.customer_id)">{{notification.description}}</p>
                             <div class="date">
                               <div class="day">{{ notification.created_at | formatDate }}</div>
                             </div>
@@ -82,11 +84,12 @@
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
               <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem"/>
-              <OrderChat />
+              <OrderChat ref="orderchats"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
               <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
               <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
+
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                 <div>
                   <b-button variant="outline-secondary mr-2" :disabled="undoItems.length < 1" @click="undoAction"><span class="d-sm-block d-none">Undo</span><span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span></b-button>
@@ -348,8 +351,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public extractedcolorclass = ""
   private isFront = true;
   public updated_order_products: Record<any, any>[] = []
-  public showchat(){
-    this.$modal.show('orderchat')
+  public async showchat(oid:number, cid:number){
+    let res = await http.get(`factory/chat/${oid}`)
+    this.ref['orderchats'].show(oid, cid, res)
   }
 
   private switchTabs (e:Record<any, any>){
