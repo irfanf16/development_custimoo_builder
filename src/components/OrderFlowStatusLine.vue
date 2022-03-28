@@ -1,25 +1,26 @@
 <template>
-  <div class="order-flow">
-    <div class="order-step" :class="order_created ? 'active' : ''">
-      Order<br>Created
-    </div>
-    <div class="order-step" :class="artwork_approval ? 'active' : ''">
-      Artwork<br>Approval
-    </div>
-    <div class="order-step" :class="sample_design ? 'active' : ''">
-      Sample<br>Design
-    </div>
-    <div class="order-step" :class="in_production ? 'active' : ''">
-      In<br>Production
-    </div>
-    <div class="order-step" :class="shipped ? 'active' : ''">
-      Order<br>Shipped
-    </div>
-    <div class="order-step" :class="completed ? 'active' : ''">
-      Order<br>Completed
+  <div class="overflow-auto">
+    <div class="order-flow">
+      <div class="order-step" :class="order_created ? 'active' : ''">
+        Order<br>Created
+      </div>
+      <div class="order-step" :class="artwork_approval ? 'active' : ''">
+        Artwork<br>Approval
+      </div>
+      <div class="order-step" :class="sample_design ? 'active' : ''">
+        Sample<br>Design
+      </div>
+      <div class="order-step" :class="in_production ? 'active' : ''">
+        In<br>Production
+      </div>
+      <div class="order-step" :class="shipped ? 'active' : ''">
+        Order<br>Shipped
+      </div>
+      <div class="order-step" :class="completed ? 'active' : ''">
+        Order<br>Completed
+      </div>
     </div>
   </div>
-
 </template>
 <script>
 const FACTORYREVIEW = "submitted_for_factory_review"

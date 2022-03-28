@@ -14,7 +14,7 @@
 
           <div class="order-activities">
             <template v-for="(item_status_activity, item_status_activity_index) in order_item.status_activities">
-              <div class="activity-status" :key="`item_status_activity_${item_status_activity_index}`">
+              <div class="activity-status" :class="status_icons[item_status_activity.status]" :key="`item_status_activity_${item_status_activity_index}`">
                 <ActivityStatusIcons :activity_status="item_status_activity.status" />
 
                 <div class="activity-content">
@@ -27,7 +27,7 @@
                   <div class="images-grid p-2 d-flex gap-1 w-100">
                     <div class="d-flex align-items-stretch flex-wrap gap-1">
                       <div class="feedback-block" :key="activity_itm_ind" v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
-                        <div class="feedback-images">
+                        <div class="feedback-images" v-if="activity_item.activity_files">
                           <img :key="activity_file_index" v-for="(activity_file, activity_file_index) in activity_item.activity_files" :src="`${storage_url}${activity_file.url}`" alt="">
                         </div>
                         <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
@@ -293,7 +293,17 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public ORDERINPRODUCTION = "in_production"
   public ORDERSHIPPED = "shipped"
   public ORDERCOMPLETED = "completed"
-  public status_icons:Record<any, any> = {}
+  public status_icons:Record<any, any> = {
+    submitted_for_factory_review: 'submitted_for_factory_review',
+    factory_approved: 'factory_approved',
+    factory_rejected: 'factory_rejected',
+    submitted_for_customer_review: 'submitted_for_customer_review',
+    customer_approved: 'customer_approved',
+    customer_rejected: 'customer_rejected',
+    in_production: 'in_production',
+    shipped: 'shipped',
+    completed: 'completed'
+  }
 
   //data props starts
   public activity_sample_files = []
@@ -867,13 +877,16 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 }
 
 .feedback-block{
-  width: 100%;
-  max-width: 370px;
+  align-items: flex-start;
   display: flex;
   flex-direction: column;
   background: #eee;
   padding: 10px;
   border-radius: 7px;
+
+  &:empty{
+    display: none;
+  }
 
   .feedback-images{
     display: flex;
@@ -881,6 +894,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     padding: 7px;
     background: #fff;
     border-radius: 7px;
+    overflow: hidden;
+    align-items: flex-start;
   }
 
   .feedback-text{
