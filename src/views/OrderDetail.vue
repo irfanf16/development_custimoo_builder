@@ -31,7 +31,7 @@
                         <div class="feedback-images" v-if="activity_item.activity_files">
                           <img :key="activity_file_index" v-for="(activity_file, activity_file_index) in activity_item.activity_files" :src="`${storage_url}${activity_file.url}`" alt="">
                         </div>
-                        <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
+                        <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_itm_ind == 0 && order_item.tracking_no)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
                         <template v-else>
                           <div class="feedback-text" :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                         </template>
