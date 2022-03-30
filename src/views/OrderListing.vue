@@ -43,7 +43,13 @@
             Created At
           </th>
           <th>
+            Order Status
+          </th>
+          <th>
             Items Count
+          </th>
+          <th>
+            Order Reference
           </th>
           <th>
             Actions
@@ -59,23 +65,27 @@
                 {{ order.created_at | orderDate }}
               </td>
               <td>
+                {{ order.status }}
+              </td>
+              <td>
                 {{order.roster_quantity}}
               </td>
-              <!--            <td>-->
-              <!--              {{order}}-->
-              <!--            </td>-->
+              <td>
+                ref
+              </td>
               <td>
                 <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-dark mx-2">PDF</a>
                 <router-link  :to="`order/${order.id}/detail`" class="btn btn-dark mx-2">Details</router-link>
                 <button class="btn btn-dark mx-2" @click="showChat(order.id, order.customer_id)">Chat</button>
               </td>
             </tr>
-            <tr :key="'order-detail'+index" v-if="order.visible">
-              <td colspan="4" class="order-detail-container">
+            <tr :key="'order-detail'+index" v-if="order.visible" class="order-detail-row">
+              <td>&nbsp;</td>
+              <td colspan="5" class="order-detail-container bg-light">
                 <template v-for="(item,indexItem) in order.items" >
                   <div class="order-detail" :key="indexItem+index">
                     <div class="factory-container">
-                      <h1 class="factory-name">{{item.factory_name}}</h1>
+                      <h2 class="factory-name">{{item.factory_name}}</h2>
                     </div>
                     <table class="w-100">
                       <template v-for="(product,indexProduct) in item.factory_products">
@@ -291,9 +301,6 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
   background-color: gray;
   margin-bottom: 10px;
 }
-.p-8{
-  padding: 8px;
-}
 .list-item-head{
   background-color: #35495E;
   color: #fff;
@@ -329,22 +336,45 @@ table.order-listing th {
   text-align: center;
 }
 
+.order-detail{
+  margin: 0 -1px;
+}
+
 .order-detail .factory-container{
   font-weight: bold;
   text-align: left;
   font-size: large;
-  text-decoration: underline;
 }
 .order-detail .factory-container .factory-name {
-  margin: 1rem 0;
+  margin: 0;
+  padding: 15px;
 }
 .product-details td {
   text-align: left;
   vertical-align: middle;
 }
 
-td.order-detail-container{
-  padding: 0rem 0rem 1rem 0rem !important;
+.order-detail-row{
+  background: none !important;
+
+  td.order-detail-container{
+    padding: 0rem;
+
+    .order-detail{
+      background: #f5f5f5;
+
+      table{
+        tr{
+          background: transparent;
+
+          td{
+            background: transparent;
+            padding: 5px 10px;
+          }
+        }
+      }
+    }
+  }
 }
 
 .product-details td.image{
