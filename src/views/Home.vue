@@ -249,7 +249,7 @@ import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
 import OrderChat from "@/components/OrderChat.vue";
-import {logData, getActiveProductData, getMainScene} from "@/helpers/Helpers";
+import {logData, getActiveProductData} from "@/helpers/Helpers";
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -280,7 +280,6 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    getMainScene(this)
     //get recent logos
     this.setRecentLogos()
 

@@ -1,6 +1,6 @@
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
-    <Header />
+<!--    <Header />-->
     <router-view/>
   </div>
 </template>

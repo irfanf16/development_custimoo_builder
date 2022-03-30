@@ -414,15 +414,9 @@ const getActiveProductData = async () => {
   }
 }
 
-const getMainScene = (compo: Record<any, any>) => {
-  console.log("keys", Object.keys(compo.$root.$children[0].$children[1].$refs))
-  console.log("Object", compo.$root.$children[0].$children[1].$refs)
-  console.log("mainScenes", compo.$root.$children[0].$children[1].$refs["mainScene"])
-}
-
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getMainScene
+  CustimooOrderFlowStatuses, getActiveProductData
 };
