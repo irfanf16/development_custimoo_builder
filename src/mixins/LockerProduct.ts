@@ -226,7 +226,6 @@ export class handleMainProducts extends Vue {
   public async updateFactoryProduct(factory_product: Record<any, any>) {
     let selected_product = this.$store.getters.getSelectedProduct;
     let selected_product_style_index = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === factory_product.style_id);
-    console.log("selected productsssssss", selected_product, selected_product_style_index)
     await this.$store.commit('CHANGE_STYLE_INDEX', selected_product_style_index);
     let customLogos = this.$store.getters.getCustomLogoObject
     if(!customLogos[factory_product.product_id]) {
@@ -243,7 +242,6 @@ export class handleMainProducts extends Vue {
     }
     await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', texts);
     await this.$store.dispatch('overRideDefaultColors', factory_product.defaultcolors);
-    console.log("testsss", factory_product.groupcolors, factory_product.defaultcolors)
     await this.$store.dispatch('overRideGroupColors', factory_product.groupcolors);
     selected_product.productstyles[selected_product_style_index].productdesigns.forEach((item: Record<any, any>) => {
       if (item.id == factory_product.design_id) {
@@ -255,7 +253,6 @@ export class handleMainProducts extends Vue {
     });
     //set logo colors
     let logo_colors = []
-    console.log("logo colorsss", factory_product.colors, factory_product.custom_logos, !factory_product.colors && factory_product.custom_logos)
     if(!factory_product.colors && factory_product.custom_logos) {
       //fetch from server
       let logos = factory_product.custom_logos

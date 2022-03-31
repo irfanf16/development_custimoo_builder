@@ -76,7 +76,6 @@ import {findIndex} from "lodash";
                  quantity += parseInt(roster.quantity);
             });
             return quantity
-            // return value.reduce((a:Record<any, any>, b:Record<any, any>) => a + (b['quantity'] || 0), 0);
           }
           return 0
         }
@@ -118,23 +117,7 @@ import {findIndex} from "lodash";
           this.showErrorArr(err.response.data.errors)
         });
       }
-      // public async editCartItem(cart_item:Record<any, any>,cart_id:number) {
-      //   let self = this;
-      //   let is_customized = this.$store.getters.getCustomized
-      //   let is_personalized = this.$store.getters.getPersonalized
-      //   let locker_product: null | Record<any, any> = null;
-      //   await this.$store.dispatch('setProductType', {prd_type: cart_item.product_type, value: true});
-      //   let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&active_product_id=${cart_item.product_id}`;
-      //   await http.get(url).then(async (response: Record<any, any>) => {
-      //     await this.handleMainProducts(response);
-      //     await self.updateFactoryProduct(cart_item);
-      //     await this.$store.dispatch('setEditCart', {key:'cartId',value:cart_id});
-      //     await this.$store.dispatch('setEditCart', {key:'cartItemId',value:cart_item.id});
-      //     this.hide()
-      //   }).catch(err => {
-      //     console.error("Error while updating cart item", err)
-      //   })
-      // }
+
       public editCartItem(cart_item:Record<any, any>,cart_id:number) {
         let self = this;
         let is_customized = this.$store.getters.getCustomized
@@ -142,38 +125,16 @@ import {findIndex} from "lodash";
         let lockerIndex: null | number = null;
         let productIndex: null | number = null;
         let locker_product: null | Record<any, any> = null;
-        // if(room_id) {
-        //   lockerIndex = await findIndex(this.getLockerProducts, {id: room_id});
-        //   productIndex = findIndex(this.getLockerProducts[lockerIndex].product, {id: room_product_id});
-        //   locker_product =  this.getLockerProducts[lockerIndex].product[productIndex];
-        // }
         let url = "product_detail";
-        // let data = null;
-        // if(locker_product) {
-        //   data = {id: locker_product.id}
-        //   // url += `?id=${locker_product.id}`;
-        // } else {
-        //   data = {share_url: share_url}
-        //   // url += `?share_url=${share_url}`;
-        // }
-
         http.get(url, {params: {id: cart_item.product_id}}).then(async (selected_product_detail) => {
           let prod_res = selected_product_detail;
           let locker_product_type = prod_res.data.product_type;
           locker_product = prod_res.data;
-          // if(room_id) {
-          //   // @ts-ignore
-          //   Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
-          // }
           this.$store.commit('UPDATE_ROSTER', cart_item.roster_detail)
           this.$root.$emit('rostershared', '')
           const designId = cart_item.design_id
           const styleId = cart_item.style_id
           const product_id = cart_item.product_id
-
-
-          //this.$store.commit('CHANGE_EDIT_STATUS', {id: locker_product?.id, status: true, designId: designId, styleId: styleId, product_id: product_id})
-
 
           // const element = prod_res.data;
           is_customized = locker_product_type == "customized" ? true: is_customized;

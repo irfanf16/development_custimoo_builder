@@ -362,7 +362,7 @@ const getActiveProductData = async () => {
     scene_ref.frontCanvas.discardActiveObject().renderAll()
     scene_ref.backCanvas.discardActiveObject().renderAll()
     const post_data: Record<any, any> = {
-      back_image: getCanvasImage.ref_front.toDataURL("image/png"),
+      back_image: getCanvasImage.ref_back.toDataURL("image/png"),
       custom_logos: Store.getters.getCustomLogos(),
       measurement_ratio: selected_design.measurement_ratio,
       custom_logo_svgs: [],
@@ -371,7 +371,7 @@ const getActiveProductData = async () => {
       colors: Store.getters.getLogosColors,
       design_id: selected_design.id,
       defaultcolors: Store.getters.getDefaultColors,
-      front_image: getCanvasImage.ref_back.toDataURL("image/png"),
+      front_image: getCanvasImage.ref_front.toDataURL("image/png"),
       groupcolors: Store.getters.getGroupColors,
       logo_colors: Store.getters.getLogosColors,
       model_id: product_models[selected_model_index].id,
