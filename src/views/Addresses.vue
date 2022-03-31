@@ -99,7 +99,7 @@ export default class Addresses extends Mixins(ErrorMessages) {
   getAddressDetails(): void {
     this.showLoader = true;
     http.get(`/addresses`).then((response: any) => {
-      console.log(response);
+      //console.log(response);
       this.addresses = response.data.result
       this.showLoader = false
     })
@@ -124,20 +124,25 @@ export default class Addresses extends Mixins(ErrorMessages) {
 
   async deleteAddress(address:Record<any,any>){
     const response = await this.ref['delete-address'].showConfirm();
-    console.log(address);
+    //console.log(address);
     if(response){
       const url = `addresses/${address.id}`
       http.delete(url).then(async (response:Record<any,any>) => {
         this.getAddressDetails();
         this.showToast(response.data.message, 'SUCCESS')
       }).catch((e:any)=>{
-        console.log(e);
+        //console.log(e);
         this.showError(e);
         this.ref['cartModal'].hide();
       });
     }
   }
   async actionAfterAddressSave(){
+    if(this.$route.query && this.$route.query.cart == 1){
+        this.$store.commit('SHOW_CART_MODAL',true);
+        this.$router.push({name:'Home'})
+    }
+
     await this.getAddressDetails();
   }
 

@@ -1,7 +1,9 @@
 <template>
   <modal :minWidth ="800"
          :minHeight="600" :resizable="true"
-         :adaptive="true" name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl"  title="User Cart" modal-class="modal-fullscreen2"  content-class="lockerroom-modal"
+         :adaptive="true" name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl"  t
+         itle="User Cart" modal-class="modal-fullscreen2"  content-class="lockerroom-modal"
+         @closed="customer_reference_no=null" @before-open="getAddresses"
         >
 
     <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
@@ -44,13 +46,32 @@
           </a></td>
         </tr>
       </template>
+      <tr>
+        <td>Customer Reference No : </td>
+        <td>
+          <b-form-input   class="form-input" placeholder="Customer Reference No." type="text" name="customer_reference_no"
+                                                    v-model="customer_reference_no">
+      </b-form-input>
+        </td>
+      </tr>
+      <tr v-if="shipping_address">
+        <td>Shipping Address : </td>
+        <td>
+          <div>{{shipping_address.first_name}} {{shipping_address.last_name}}</div>
+          <div>{{shipping_address.address1}}</div>
+          <div>{{shipping_address.address2}}</div>
+          <div>{{shipping_address.zip_code}}</div>
+          <div>{{shipping_address.country.name}} {{shipping_address.city}}</div>
+          <div>{{shipping_address.phone_number}}</div>
+        </td>
+        <td> <router-link :to="'address?cart=1'" class="my-orders">Edit</router-link> </td>
+      </tr>
       </tbody>
     </table>
 
     <template #modal-footer>
       <div class="text-right">
         <b-button   v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
-
       </div>
     </template>
     <b-button class="mt-4" @click="createOrder">Finalize Order</b-button>
@@ -89,6 +110,8 @@ import {findIndex} from "lodash";
 
       public viewLoader = false;
       private storageUrl = process.env.VUE_APP_STORAGE_URL
+      public customer_reference_no : string = null
+      public shipping_address: Record<any, any> = null
 
       public hide() {
         this.$modal.hide('cart-modal')
@@ -100,8 +123,19 @@ import {findIndex} from "lodash";
         return this.$store.getters.getCartItems
       }
       public createOrder(){
+        let payload = {}
+         payload['customer_reference_no'] = this.customer_reference_no
+        if(!this.customer_reference_no){
+          this.showToast('Please provide customer reference number.', 'ERROR');
+          return false;
+        }
+
+        if(this.shipping_address){
+          payload['address_id'] = this.shipping_address.id
+        }
+
         this.viewLoader = true;
-        http.post('order', {}).then((res:Record<any, any>) => {
+        http.post('order', payload).then((res:Record<any, any>) => {
           if (res.data.success){
             this.$store.dispatch('addToCart',[])
             this.showToast(res.data.message, 'SUCCESS');
@@ -117,6 +151,18 @@ import {findIndex} from "lodash";
           this.viewLoader = false
           this.showErrorArr(err.response.data.errors)
         });
+      }
+
+      async public getAddresses() {
+        this.$store.commit('SHOW_CART_MODAL',false);
+        let address = this.$store.getters.getShippingAddress
+        if(!address){
+          address  = await this.$store.dispatch('getCartAddresses');
+          this.shipping_address = address
+        }else{
+          this.shipping_address = address
+        }
+
       }
       // public async editCartItem(cart_item:Record<any, any>,cart_id:number) {
       //   let self = this;
@@ -248,6 +294,7 @@ import {findIndex} from "lodash";
       }
 
     }
+
 </script>
 
 <style lang="scss" scoped>

@@ -5,7 +5,9 @@ import {Vue} from "vue-property-decorator";
 
 const Cart:Module<any, any> = {
   state: {
-    cart_items: []
+    cart_items: [],
+    shipping_address: null,
+    show_cart_modal:false
   },
   getters: {
     getCartItemsCount(state:Record<any, any>){
@@ -18,11 +20,23 @@ const Cart:Module<any, any> = {
     getCartItems(state:Record<any, any>){
       return state.cart_items;
     },
+    getShippingAddress(state:Record<any, any>){
+      return state.shipping_address;
+    },
+    getShowCart(state:Record<any, any>){
+      return state.show_cart_modal;
+    },
   },
   mutations: {
     ADD_TO_CART(state: Record<any, any>, payload: boolean){
       state.cart_items = payload
     },
+    ADD_SHIPPING_ADDRESS(state: Record<any, any>, payload: Record<any, any>){
+      state.shipping_address = payload
+    },
+    SHOW_CART_MODAL(state: Record<any, any>, payload: boolean){
+      state.show_cart_modal = payload
+    }
   },
   actions: {
     addToCart({commit},payload){
@@ -49,6 +63,18 @@ const Cart:Module<any, any> = {
         console.error(e)
       });
     },
+    async getCartAddresses({commit}) {
+      let address = null
+      const response = await http.get(`/addresses`);
+      let addresses = response.data.result
+      addresses = addresses.filter(obj => obj.default == 1)
+      if (addresses.length > 0){
+        address = addresses[0]
+        commit('ADD_SHIPPING_ADDRESS',addresses[0])
+      }
+
+      return address
+    }
   }
 }
 export default Cart;

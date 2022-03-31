@@ -173,8 +173,10 @@
       try {
           this.isLoading = true;
           http.post(`/addresses`,this.form).then((response: any) => {
-            console.log(response);
+
             if(response.data.success){
+             // console.log(response.data.result)
+              this.$store.commit('ADD_SHIPPING_ADDRESS', response.data.result)
               this.isLoading = false;
               this.$modal.hide('AddAdressModal');
               this.clearForm();
@@ -196,7 +198,7 @@
 
       }catch (error){
         this.isLoading = false
-        console.log(error)
+        //console.log(error)
         this.showError(error)
       }
     }
@@ -215,7 +217,7 @@
 
     public getCountries() {
       http.get(`/addresses/countries`).then((response: any) => {
-        console.log(response);
+        //console.log(response);
         this.countries = response.data.result
       })
         .catch((e: any) => {

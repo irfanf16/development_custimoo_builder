@@ -316,8 +316,11 @@ Vue.filter('formatDate', function(value:string) {
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
       await  this.$store.dispatch('permissions')
+      let show_cart = await this.$store.getters.getShowCart
+      if(show_cart){
+        this.openCartModal();
+      }
     }
-
 
   },
    destroyed() {

@@ -174,8 +174,9 @@
       try {
           this.isLoading = true;
           http.put(`/addresses/${this.form.id}`,this.form).then((response: any) => {
-            console.log(response);
+            //console.log(response);
             if(response.data.success){
+              this.$store.commit('ADD_SHIPPING_ADDRESS', response.data.result)
               this.isLoading = false;
               this.$modal.hide('EditAddressModal');
               this.clearForm();
@@ -196,7 +197,7 @@
           });
 
       }catch (error){
-        console.log(error)
+       // console.log(error)
         this.isLoading = false;
         this.showError(error)
       }
@@ -215,7 +216,7 @@
       this.form.default = false
     }
     public updateForm(address:Record<any,any>){
-      console.log(address);
+     // console.log(address);
       this.form.id = address.id;
       this.form.first_name = address.first_name;
       this.form.last_name= address.last_name;
@@ -230,7 +231,7 @@
 
     public getCountries() {
       http.get(`/addresses/countries`).then((response: any) => {
-        console.log(response);
+       // console.log(response);
         this.countries = response.data.result
       })
         .catch((e: any) => {
