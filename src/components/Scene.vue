@@ -43,7 +43,7 @@ import {setLogoSettings} from "@/helpers/Helpers";
     }
 
     let scaleImg = document.createElement('img');
-    scaleImg.src = "./img/images/scale.png";
+    scaleImg.src = `${this.storageUrl}assets/images/scale.png`
     let fabricObj: Record<any, any> = fabric
     fabricObj.Object.prototype.controls.br = new fabricObj.Control({
       x: 0.5,
@@ -65,7 +65,7 @@ import {setLogoSettings} from "@/helpers/Helpers";
     }
 
     let rotationImg = document.createElement('img');
-    rotationImg.src = "./img/images/rotate.png";
+    rotationImg.src = `${this.storageUrl}assets/images/rotate.png`;
     fabricObj.Object.prototype.controls.tr = new fabricObj.Control({
       x: 0.5,
       y: -0.5,
@@ -86,7 +86,7 @@ import {setLogoSettings} from "@/helpers/Helpers";
     }
 
     let deleteImg = document.createElement('img');
-    deleteImg.src = "./img/images/remove.png";
+    deleteImg.src = `${this.storageUrl}assets/images/remove.png`;
 
     //custom
     fabricObj.Object.prototype.controls.deleteControl = new fabricObj.Control({
