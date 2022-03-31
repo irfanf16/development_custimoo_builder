@@ -43,9 +43,6 @@
             Created At
           </th>
           <th>
-            Order Status
-          </th>
-          <th>
             Items Count
           </th>
           <th>
@@ -65,9 +62,6 @@
                 {{ order.created_at | orderDate }}
               </td>
               <td>
-                {{ order.status }}
-              </td>
-              <td>
                 {{order.roster_quantity}}
               </td>
               <td>
@@ -81,11 +75,11 @@
             </tr>
             <tr :key="'order-detail'+index" v-if="order.visible" class="order-detail-row">
               <td>&nbsp;</td>
-              <td colspan="5" class="order-detail-container bg-light">
+              <td colspan="4" class="order-detail-container bg-light">
                 <template v-for="(item,indexItem) in order.items" >
                   <div class="order-detail" :key="indexItem+index">
                     <div class="factory-container">
-                      <h2 class="factory-name">{{item.factory_name}}</h2>
+                      <h2 class="factory-name">{{item.factory_name}} <span class="factory_status">{{item.status.replace(/_/g, " ")}}</span></h2>
                     </div>
                     <table class="w-100">
                       <template v-for="(product,indexProduct) in item.factory_products">
@@ -400,6 +394,14 @@ table.order-listing{
       background: #2c3e50;
       color: #fff;
     }
+  }
+}
+
+.factory_status{
+  display: inline-block;
+
+  &:first-letter{
+    text-transform: uppercase;
   }
 }
 </style>
