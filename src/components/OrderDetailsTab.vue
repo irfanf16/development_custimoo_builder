@@ -35,18 +35,10 @@
       <div class="pricing-are">
         <div class="order-details">
           <div class="order-row">
-<!--            <template v-if="isCustomerAuthenticated">-->
-<!--              <button class="btn btn-secondary fw-bold w-100 mb-2" @click="buyNow">Summary</button>-->
-<!--            </template>-->
-<!--            <template v-else>-->
-<!--              <b-button class="btn btn-secondary fw-bold w-100 mb-2" v-b-modal.modal-login>Summary</b-button>-->
-<!--            </template>-->
             <template>
-<!--              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share roster url</b-button>-->
               <AddLockerRoomModal modal_name="share" :rosterUrl="true"  ref="share" />
             </template>
           </div>
-<!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
             <template v-if="$store.getters.getUpdateOrderItemProducts == null">
@@ -69,13 +61,6 @@
     <div class="d-none">
       <ProductionScene ref="production-scene" v-bind:production_file_obj.sync="production_file_obj"/>
     </div>
-
-<!--    <div class="d-none">
-      <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
-      </canvas>
-      <canvas width="600" height="600" ref="pdfBack" style="text-align: center; display: block">
-      </canvas>
-    </div>-->
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 </template>
@@ -521,18 +506,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
 <style scoped>
 
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
-/*body {*/
-/* min-width: 320px;*/
-/* overflow-x: hidden;*/
-/* width: 100%;*/
-/* font-family: 'Ubuntu', sans-serif;*/
-/* font-size: 14px;*/
-/* line-height: 1.3;*/
-/* background: #fff;*/
-/* color: #03142E;*/
-/* margin: 0;*/
-/* box-sizing: border-box;*/
-/*}*/
 div {
   box-sizing: border-box;
 }

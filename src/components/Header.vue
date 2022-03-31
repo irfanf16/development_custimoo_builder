@@ -11,12 +11,6 @@
                     <div class="d-flex flex-wrap justify-content-end justify-content-lg-between">
                         <b-nav class="align-items-center text-uppercase">
                             <li class="nav-item">DESIGN HUMMEL</li>
-<!--                            <li class="nav-item"><router-link class="nav-link" to="#">Women</router-link></li>-->
-<!--                            <li class="nav-item"><router-link class="nav-link" to="#">Kids</router-link></li>-->
-<!--                            <li class="nav-item"><router-link class="nav-link" to="#">Sports</router-link></li>-->
-<!--                            <li class="nav-item"><router-link class="nav-link" to="#">Karma</router-link></li>-->
-<!--                            <li class="nav-item"><router-link class="nav-link" to="#">Copenhagen 2021</router-link></li>-->
-                            <!-- <router-link class="btn btn-secondary ml-3" to="/">Customizer</router-link> -->
                         </b-nav>
                         <b-nav class="align-items-center justify-content-end text-uppercase" v-if="isCustomerAuthenticated">
                           <li class="nav-item"><router-link class="nav-link" active-class="active" :to="'/'" exact>Customizer</router-link></li>
@@ -25,11 +19,6 @@
                         </b-nav>
                     </div>
                 </b-col>
-<!--                <b-col cols="4 d-none d-lg-block">-->
-<!--                    <div class="header-links">-->
-<!--                        <img class="d-block" src="@/assets/images/img-header-links.png" alt="" />-->
-<!--                    </div>-->
-<!--                </b-col>-->
             </b-row>
         </b-container>
     </header>

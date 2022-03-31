@@ -15,7 +15,7 @@
             <div class="customization-preview-process w-100">
               <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
-                  <template v-if="editCart.cartId < 1">
+                  <template v-if="editCart.cartId < 1 && updateOrderItemProducts == null">
                     <template v-if="isCustomerAuthenticated">
                       <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                     </template>
@@ -30,12 +30,12 @@
                     </template>
                   </template>
                   <template v-if="updateOrderItemProducts">
-                    <button class="btn btn-info" @click="loadOrderItemProduct('previous')"
-                            v-if="updateOrderItemProducts.active_index != 0">Previous</button>
-                    <button class="btn btn-info" @click="loadOrderItemProduct('next')"
-                            v-if="updateOrderItemProducts.active_index != (updateOrderItemProducts.factory_products.length - 1)">Next</button>
-                    <button class="btn btn-info" @click="UpdateOrderProducts"
-                            v-if="updateOrderItemProducts.active_index == (updateOrderItemProducts.factory_products.length - 1)">Update Products</button>
+                    <b-button @click="loadOrderItemProduct('previous')" variant="outline-secondary"
+                            v-if="updateOrderItemProducts.active_index != 0">Previous</b-button>
+                    <b-button  @click="loadOrderItemProduct('next')"  variant="outline-secondary"
+                            v-if="updateOrderItemProducts.active_index != (updateOrderItemProducts.factory_products.length - 1)">Next</b-button>
+                    <b-button  @click="UpdateOrderProducts" variant="outline-secondary"
+                            v-if="updateOrderItemProducts.active_index == (updateOrderItemProducts.factory_products.length - 1)">Update Products</b-button>
                   </template>
                 </div>
 
@@ -249,7 +249,7 @@ import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
 import OrderChat from "@/components/OrderChat.vue";
-import {logData, getActiveProductData, getMainScene} from "@/helpers/Helpers";
+import {logData, getActiveProductData} from "@/helpers/Helpers";
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -280,7 +280,6 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    getMainScene(this)
     //get recent logos
     this.setRecentLogos()
 
