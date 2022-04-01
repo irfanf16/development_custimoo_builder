@@ -66,6 +66,10 @@
         </td>
         <td> <router-link :to="'address?cart=1'" class="my-orders">Edit</router-link> </td>
       </tr>
+      <tr v-else>
+        <td>Shipping Address : </td><td></td>
+        <td> <router-link :to="'address?cart=1'" class="my-orders">Add</router-link> </td>
+      </tr>
       </tbody>
     </table>
 
@@ -131,6 +135,9 @@ import {findIndex} from "lodash";
 
         if(this.shipping_address){
           payload['address_id'] = this.shipping_address.id
+        }else{
+          this.showToast('Please select shipping address.', 'ERROR');
+          return false;
         }
 
         this.viewLoader = true;
