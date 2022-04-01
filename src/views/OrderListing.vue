@@ -35,6 +35,7 @@
 
     <div class="orders-container my-4">
       <table class="order-listing">
+        <tbody>
         <tr>
           <th>
             Order No
@@ -44,6 +45,9 @@
           </th>
           <th>
             Items Count
+          </th>
+          <th class="text-left">
+            Order Status
           </th>
           <th>
             Order Reference
@@ -65,7 +69,23 @@
                 {{order.roster_quantity}}
               </td>
               <td>
-                ref
+                <div class="d-flex gap-1 flex-wrap">
+                  <div v-for="(item, index) in order.items" :key="index" class="d-inline-flex well py-1 px-2 bg-light gap-1 align-items-center">
+                    <span class="font-weight-bold">{{item.factory_name}}</span>
+                    <span class="factory_status" :class="item.status">{{item.status | Status}}</span>
+                  </div>
+                  <div v-for="(item, index) in order.items" :key="index" class="d-inline-flex well py-1 px-2 bg-light gap-1 align-items-center">
+                    <span class="font-weight-bold">{{item.factory_name}}</span>
+                    <span class="factory_status" :class="item.status">{{item.status | Status}}</span>
+                  </div>
+                  <div v-for="(item, index) in order.items" :key="index" class="d-inline-flex well py-1 px-2 bg-light gap-1 align-items-center">
+                    <span class="font-weight-bold">{{item.factory_name}}</span>
+                    <span class="factory_status" :class="item.status">{{item.status | Status}}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                {{ order.customer_reference_no ? order.customer_reference_no : 'N / A' }}
               </td>
               <td>
                 <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-dark mx-2">PDF</a>
@@ -75,11 +95,11 @@
             </tr>
             <tr :key="'order-detail'+index" v-if="order.visible" class="order-detail-row">
               <td>&nbsp;</td>
-              <td colspan="4" class="order-detail-container bg-light">
+              <td colspan="5" class="order-detail-container bg-light">
                 <template v-for="(item,indexItem) in order.items" >
                   <div class="order-detail" :key="indexItem+index">
                     <div class="factory-container">
-                      <h2 class="factory-name">{{item.factory_name}} <span class="factory_status">{{item.status.replace(/_/g, " ")}}</span></h2>
+                      <h2 class="factory-name d-flex align-items-center gap-1">{{item.factory_name}} <span class="factory_status" :class="item.status">{{item.status | Status}}</span></h2>
                     </div>
                     <table class="w-100">
                       <template v-for="(product,indexProduct) in item.factory_products">
@@ -88,7 +108,7 @@
                           <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
                           <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
                           <td>{{ product.roster_quantity }}</td>
-                          <td>{{ product.status | Status }}</td>
+                          <td><span class="factory_status" :class="product.status">{{ product.status | Status }}</span></td>
                         </tr>
                       </template>
                     </table>
@@ -104,6 +124,7 @@
             <td colspan="4">No records found</td>
           </tr>
         </template>
+        </tbody>
       </table>
     </div>
     <b-pagination
@@ -306,10 +327,36 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
   cursor: pointer;
 }
 
-table.order-listing{
+.order-listing{
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   width: 100%;
+  table-layout: fixed;
+
+  &>tbody{
+    &>tr{
+     &>th{
+       &:nth-child(1){
+         width: 10%;
+       }
+       &:nth-child(2){
+         width: 10%;
+       }
+       &:nth-child(3){
+         width: 10%;
+       }
+       &:nth-child(4){
+         width: 45%;
+       }
+       &:nth-child(5){
+         width: 10%;
+       }
+       &:nth-child(6){
+         width: 15%;
+       }
+     }
+    }
+  }
 }
 
 table.order-listing td, table.order-listing th {
@@ -399,9 +446,55 @@ table.order-listing{
 
 .factory_status{
   display: inline-block;
+  padding: 7px 10px;
+  background: #e3e3e3;
+  font-size: 12px;
+  border-radius: 4px;
+  line-height: normal;
+  flex-shrink: 1;
 
   &:first-letter{
     text-transform: uppercase;
+  }
+
+  &.submitted_for_factory_review{
+    background: #B997C6;
+    color: #fff;
+  }
+  &.factory_approved{
+    background: #57A2AC;
+    color: #fff;
+  }
+  &.factory_rejected{
+    background: #CE2220;
+    color: #fff;
+  }
+  &.submitted_for_customer_review{
+    background: #B997C6;
+    color: #fff;
+  }
+  &.customer_approved{
+    background: #57A2AC;
+    color: #fff;
+  }
+  &.customer_rejected{
+    background: #CE2220;
+    color: #fff;
+  }
+  &.in_production{
+    background: #D0B440;
+    color: #fff;
+  }
+  &.shipped{
+    background: #4E79C4;
+    color: #fff;
+  }
+  &.completed{
+    background: #7EB875;
+    color: #fff;
+  }
+  &.unknown_status{
+
   }
 }
 </style>
