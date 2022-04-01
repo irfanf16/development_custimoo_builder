@@ -53,7 +53,7 @@
                   </div>
 
 
-                  <div class="comment-button text-left px-2">
+                  <div class="comment-button text-left px-2" v-if="item_status_activity_index == 0">
                     <a class="text-info" @click="item_status_activity.add_comment = !item_status_activity.add_comment">
                       <BIconChatDots/>
                       Add comment</a>
