@@ -56,9 +56,8 @@
                           <div @click="readNotification(notification)" class="text d-flex align-items-start justify-content-between">
                             <p v-if="notification.type == 'roster_updated'" @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
                             <p v-if="notification.type == 'order_activity'"><router-link  :to="{ name: 'OrderDetail', params: { order_id: notification.order_id }}">{{notification.description}}</router-link>
-                            <p v-if="notification.type == 'message'" @click="showchat(notification.order_id, notification.customer_id)">{{notification.description}}</p>
                             <div class="date">
-                              <div class="day">{{ notification.created_at | formatDate }}</div>
+                              <div class="day" >{{ notification.created_at | formatDate }}</div>
                             </div>
                           </div>
                         </div>
@@ -84,7 +83,6 @@
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
               <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem"/>
-              <OrderChat ref="orderchats"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
               <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
@@ -248,7 +246,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
-import OrderChat from "@/components/OrderChat.vue";
 import {logData, getActiveProductData} from "@/helpers/Helpers";
 
 
@@ -260,7 +257,6 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
-    OrderChat,
     CartModal,
     CustomTabs,
     ConfirmModal,
@@ -352,10 +348,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public extractedcolorclass = ""
   private isFront = true;
   public updated_order_products: Record<any, any>[] = []
-  public async showchat(oid:number, cid:number){
-    let res = await http.get(`factory/chat/${oid}`)
-    this.ref['orderchats'].show(oid, cid, res)
-  }
+
 
   private switchTabs (e:Record<any, any>){
     this.ref['custom-mobile-tabs'].hideOtherTab()

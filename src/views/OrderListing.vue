@@ -67,7 +67,6 @@
               <td>
                 <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-dark mx-2">PDF</a>
                 <router-link  :to="`order/${order.id}/detail`" class="btn btn-dark mx-2">Details</router-link>
-                <button class="btn btn-dark mx-2" @click="showChat(order.id, order.customer_id)">Chat</button>
               </td>
             </tr>
             <tr :key="'order-detail'+index" v-if="order.visible">
@@ -111,7 +110,6 @@
       @change="handlePagination"
       v-if="pagination.total > 0"
     ></b-pagination>
-    <OrderChat ref="chatOrder" />
   </div>
 </template>
 
@@ -122,7 +120,6 @@ import {http} from "@/httpCommon";
 import moment from "moment";
 import {CustimooOrderFlowStatuses} from '@/helpers/Helpers';
 import Search from '@/components/Search.vue';
-import OrderChat from "@/components/OrderChat.vue";
 
 Vue.filter('orderDate', function(value:string) {
   if (value) {
@@ -138,8 +135,7 @@ Vue.filter('Status', function(value:string) {
 
 @Component<OrderListing>({
   components:{
-    Search,
-    OrderChat
+    Search
   },
   created(){
     Object.entries(CustimooOrderFlowStatuses).forEach(([key, value]) => {
@@ -183,10 +179,7 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
   }
   public toggletText =  ['show', 'hide']
 
-  public async showChat(oid:number, cid:number){
-    let res = await http.get(`factory/chat/${oid}`)
-    this.ref.chatOrder.show(oid, cid, res);
-  }
+
 
 
   public toggleHideShow(index:number,val:boolean) {
