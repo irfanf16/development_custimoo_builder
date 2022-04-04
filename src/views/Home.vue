@@ -338,7 +338,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public search_products = ''
   public colors = []
   public product_id !: number
-  public provider_id = 'oVXYIzKY'
   public logoUrl = ''
   public ref = this.$refs as Record<any, any>
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
