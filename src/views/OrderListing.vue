@@ -46,6 +46,9 @@
             Items Count
           </th>
           <th>
+            Order Reference No
+          </th>
+          <th>
             Actions
           </th>
         </tr>
@@ -60,6 +63,9 @@
               </td>
               <td>
                 {{order.roster_quantity}}
+              </td>
+              <td>
+                {{order.customer_reference_no}}
               </td>
               <!--            <td>-->
               <!--              {{order}}-->
