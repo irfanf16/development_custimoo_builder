@@ -414,9 +414,21 @@ const getActiveProductData = async () => {
   }
 }
 
+const getRosterDetailDefaultObject = () => {
+  return {
+    text: '',
+    number: '',
+    size: '',
+    size_index: 0,
+    code: '',
+    quantity: 1,
+    information: ''
+  }
+}
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject
 };

@@ -2,6 +2,7 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
+import {getRosterDetailDefaultObject} from "../../helpers/Helpers";
 
 import {
   fontsColorsManipulation, fontsList,
@@ -459,8 +460,17 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     rosterDetailAttribute(state: Record<any, any>, rosterDetailAttribute: Record<any, any>) {
-      if(rosterDetailAttribute){
+      if(state.rosterDetails.length > 0) {
         Vue.set(state.rosterDetails[rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)
+      } else {
+        const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
+        const selected_product = state.products[state.selectedIndex];
+        const product_sizes = selected_product.sizes;
+        if(product_sizes.length > 0) {
+          roster_detail_default_obj.size = product_sizes[0].name;
+          roster_detail_default_obj.code = product_sizes[0].code;
+        }
+        state.rosterDetails.push(roster_detail_default_obj)
       }
     },
     productionSVGs(state: Record<any, any>, productionSvg: Record<any, any>) {
@@ -641,6 +651,8 @@ const ProductAttributes:Module<any, any> = {
         cartId: 0,
         cartItemId: ''
       }
+
+      state.rosterDetails = []
 
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
@@ -924,7 +936,9 @@ const ProductAttributes:Module<any, any> = {
     //   return state.customTexts
     // },
 
-    getCustomTexts: state => (prd_id = state.selectedPrdId) => {
+    getCustomTexts: state => (prd_id = state.selectedPrdId, for_all_products= false) => {
+      if(for_all_products)
+        return state.customTexts
       if(!state.customTexts[prd_id]) {
         return []
       }

@@ -134,7 +134,7 @@ import {getClosestColor} from '@/pantoneColor'
 import RecentLogos from "@/components/RecentLogos.vue";
 import {sortTextsArray} from "@/helpers/Helpers";
 
-@Component<CustomizationProcess>({
+@Component<CustomizationTabs>({
   components: {
     RecentLogos,
     ColorAccordion,
@@ -154,7 +154,7 @@ import {sortTextsArray} from "@/helpers/Helpers";
    // console.log('customTexts',this.customTexts)
   },
 })
-export default class CustomizationProcess extends Vue {
+export default class CustomizationTabs extends Vue {
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
   private ops = {
