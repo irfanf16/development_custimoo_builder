@@ -36,6 +36,13 @@
                             v-if="updateOrderItemProducts.active_index != (updateOrderItemProducts.factory_products.length - 1)">Next</b-button>
                     <b-button  @click="UpdateOrderProducts" variant="outline-secondary"
                             v-if="updateOrderItemProducts.active_index == (updateOrderItemProducts.factory_products.length - 1)">Update Products</b-button>
+                    <b-button  variant="outline-info" @click="$modal.show('product-rejection-info-modal')">Show Reason</b-button>
+                    <modal name="product-rejection-info-modal">
+                        <h1>{{updateOrderItemProducts.activity_items[updateOrderItemProducts.active_index].message}}</h1>
+                      <template v-for="(activity_file, activity_file_index) in updateOrderItemProducts.activity_items[updateOrderItemProducts.active_index].activity_files">
+                        <img width="250" :src="`${storageUrl}${activity_file.url}`" alt="" :key="`activity-file-${activity_file_index}`">
+                      </template>
+                    </modal>
                   </template>
                 </div>
 

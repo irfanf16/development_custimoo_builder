@@ -56,7 +56,7 @@
                   <div class="comment-button text-left px-2" v-if="item_status_activity_index == 0">
                     <a class="text-info" @click="item_status_activity.add_comment = !item_status_activity.add_comment">
                       <BIconChatDots/>
-                      Add comment</a>
+                      Add comment 1</a>
                   </div>
                   <!-- add comment starts -->
                   <template v-if="item_status_activity.add_comment">
@@ -552,6 +552,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     let self = this;
     let order_item = JSON.parse(JSON.stringify(self.order.items[order_item_index]));
     let order_item_status_activity = order_item.status_activities[item_status_activity_index];
+    console.log("order_item_status_activity", order_item_status_activity)
     let update_factory_product_ids: string[] = [];
     order_item_status_activity.activity_items.forEach((activity_item: Record<any, any>) => {
       update_factory_product_ids.push(activity_item.factory_product_id);
@@ -563,7 +564,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     })
     //active_index key represents the product index that is currently being updated
     let update_order_item_products_data = {
-      'active_index': 0, order_item_id: order_item.id, factory_id: order_item.factory_id, factory_products: factory_products
+      'active_index': 0, order_item_id: order_item.id, factory_id: order_item.factory_id, factory_products: factory_products,
+      activity_items: order_item_status_activity.activity_items
     }
     self.$store.dispatch("updateOrderItemProducts", update_order_item_products_data);
     self.$router.push("/");

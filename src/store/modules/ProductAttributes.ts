@@ -161,11 +161,6 @@ const ProductAttributes:Module<any, any> = {
     SET_SEARCH_LOADER(state: Record<any, any>, payload: boolean){
       state.searchLoader = payload;
     },
-    // DELETE_PRODUCT(state: Record<any, any>, logoIndex: number){
-    //   console.log("deleteeeeeee", state.products, state.selectedIndex)
-    //   Vue.delete(state.products[state.selectedIndex]["customLogos"], logoIndex)
-    //   console.log("afet", state.products[state.selectedIndex]["customLogos"])
-    // },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
       state.selectedPrdId = state.products[payload.selectedIndex].id;
@@ -487,9 +482,7 @@ const ProductAttributes:Module<any, any> = {
       state.products.push(payload);
     },
     OVERRIDE_LOGOS(state:Record<any, any>, payload){
-      console.log('payload',payload)
       const locker_logos = JSON.parse(payload.custom_logos)
-      console.log('after parse',locker_logos)
       Object.keys(state.customLogos).map(function(key:any, index:any) {
         if(key == payload.product_id) {
           Vue.set(state.customLogos,key,locker_logos)
@@ -1079,7 +1072,6 @@ const ProductAttributes:Module<any, any> = {
       commit('defaultColor', payload)
     },
     removeDefaultColor ({commit}, payload) {
-      console.log("payload",payload);
       commit('removeDefaultColor', payload)
     },
     setGroupColors ({commit}, payload) {
@@ -1166,7 +1158,6 @@ const ProductAttributes:Module<any, any> = {
       commit('ADD_DESIGN_COLLECTION', payload);
     },
     async updateSharedProduct({commit}, payload){
-      console.log(commit)
       const res = await http.post('updatesharedproduct', payload);
       return res
     },
@@ -1221,7 +1212,6 @@ const ProductAttributes:Module<any, any> = {
     },
     async updateNewCollection({commit},payload:Record<any, any>){
       let resp =  {status:false,message:""};
-      //console.log(payload)
       await http.put(`collection/${payload.collection_id}`, payload).then((res) => {
         if (res.status == 201 || res.status == 200){
           resp = {status:true,message:"Collection updated successfully"};
