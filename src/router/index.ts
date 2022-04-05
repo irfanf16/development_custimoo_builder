@@ -15,7 +15,7 @@ import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
 import OrderListing from "@/views/OrderListing.vue";
 import Dashboard from "@/views/Dashboard.vue";
 
-import CustomerOrders from "@/components/CustomerOrders.vue"
+
 
 Vue.use(VueRouter)
 
@@ -89,11 +89,6 @@ const routes: Array<RouteConfig> = [
     path:'/admin/login',
     name:'LoginAsAdmin',
     component: Home,
-  },
-  {
-    path: '/orders-chat',
-    name: 'CustomerOrders',
-    component: CustomerOrders
   }
 ]
 
