@@ -34,7 +34,13 @@
             <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
 
           </td>
-          <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>
+          <td>
+            <template v-for="(roster_detail,index) in factory_product.roster_detail">
+              <div :key="index"><span>{{roster_detail.size}} : {{roster_detail.quantity}}</span></div>
+            </template>
+            <div>Total : {{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</div>
+          </td>
+<!--          <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>-->
           <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id)">
             <font-awesome-icon
               :icon="['fas', 'edit']"/>
