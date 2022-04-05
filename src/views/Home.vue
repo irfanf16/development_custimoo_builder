@@ -84,7 +84,7 @@
               </div>
               <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
-              <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
+              <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
               <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
               <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
 
@@ -247,6 +247,7 @@ import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
 import {logData, getActiveProductData} from "@/helpers/Helpers";
+import ModalAction from "@/mixins/ModalAction";
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -313,7 +314,7 @@ Vue.filter('formatDate', function(value:string) {
       await  this.$store.dispatch('permissions')
       let show_cart = await this.$store.getters.getShowCart
       if(show_cart){
-        this.openCartModal();
+        this.showVModal('cart-modal');
       }
     }
 
@@ -323,7 +324,7 @@ Vue.filter('formatDate', function(value:string) {
   }
 })
 
-export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts) {
+export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
   public logData = logData;
   public getActiveProductData = getActiveProductData;
   public tabIndex = 0
@@ -456,7 +457,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   public openCartModal = () =>{
     if(this.cartItemsCount > 0) {
-      this.ref.cartModal.show()
+      this.showVModal('cart-modal')
     }
   }
   // public async openOrdersModal(){
@@ -630,7 +631,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
       this.getLockerRoomProducts(null)
-      this.ref['lockerModal'].showLockerRoomModal()
+      this.showVModal('locker-modal')
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
       // this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
@@ -640,10 +641,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
-  }
-  showLockerRoomModal() {
-    this.ref['lockerModal'].showLockerRoomModal()
-
   }
   getFillColors() {
     const url = '/product/colors?default_color=1'
@@ -807,7 +804,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           }
         }
 
-        this.showLockerRoomModal()
+        this.showVModal('locker-modal')
 
         if(this.ref.saveToLockerModal) {
           this.ref['saveToLockerModal'].hideModal()

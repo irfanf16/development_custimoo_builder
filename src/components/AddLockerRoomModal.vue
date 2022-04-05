@@ -2,8 +2,9 @@
   <modal :name="modal_name" :minWidth ="800"
          :minHeight="600" :resizable="true"
          :adaptive="true" id="modal-center-addlockerroom" hide-footer centered scrollable size="xl" title="Add to Locker Room"  modal-class="add_locker" content-class="lockerroom-modal">
-    <div class="text-right">
-      <b-button>close</b-button>
+    <div class="modal-header d-flex justify-content-between">
+      <span class="fs-5 font-weight-bold">Save</span>
+      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('locker-modal')"><BIconX /></span>
     </div>
     <div class="lockerroom-header">
             <div class="locker-opener">
@@ -63,6 +64,7 @@ import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import LockerRoom from "@/components/LockerRoom.vue";
+import ModalAction from "@/mixins/ModalAction";
     @Component<AddLockerRoomModal>({
         components: {
           ConfirmModal,
@@ -71,7 +73,7 @@ import LockerRoom from "@/components/LockerRoom.vue";
             CreateLockerRoomModal
         },
     })
-    export default class AddLockerRoomModal extends Mixins(ErrorMessages) {
+    export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalAction) {
       @Prop({required: false, default: true}) readonly close_on_add !: boolean
       @Prop({required: false, default: false})  rosterUrl !: boolean
       @Prop({required: true, default: "addlockermodal"})  modal_name !: string

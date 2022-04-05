@@ -9,11 +9,11 @@
            @close="$store.commit('Change_Locker_Active_Tab', 0)">
       <div class="modal-header d-flex justify-content-between">
         <span class="fs-5 font-weight-bold">Locker Room</span>
-        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideLockerRoomModal"><BIconX /></span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('locker-modal')"><BIconX /></span>
       </div>
       <div class="modal-content lockerroom-modal">
         <div id="modal-center-lockerroom" class="modal-body">
-          <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
+          <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideVModal('locker-modal')"
                       @showCollectionModal="showCollectionModal"
                       @editCollectionModal="editCollectionModal"
                       />
@@ -31,17 +31,18 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator'
+import {Component, Vue, Mixins} from 'vue-property-decorator'
 import LockerRoom from '@/components/LockerRoom.vue'
 import DesignCollection from '@/components/DesignCollection.vue'
+import ModalAction from '@/mixins/ModalAction'
 
 @Component({
   components: {
     LockerRoom,
-    DesignCollection
+    DesignCollection,
   }
 })
-export default class LockerRoomModal extends Vue {
+export default class LockerRoomModal extends Mixins(ModalAction){
   public ref = this.$refs as Record<any, any>
   private screenWidth = (window.screen.availWidth - 100)
 
@@ -67,14 +68,13 @@ export default class LockerRoomModal extends Vue {
     })
   }
 
-
-  public hideLockerRoomModal () {
-    (this.$modal as Record<any, any>).hide('locker-modal')
-  }
-
-  public showLockerRoomModal () {
-    (this.$modal as Record<any, any>).show('locker-modal')
-  }
+  // public hideLockerRoomModal (modalName:string) {
+  //   (this.$modal as Record<any, any>).hide(modalName)
+  // }
+  //
+  // public showLockerRoomModal () {
+  //   (this.$modal as Record<any, any>).show('locker-modal')
+  // }
 
   public addDesignCollection () {
     this.ref['lockerRoom'].addDesignCollection();
