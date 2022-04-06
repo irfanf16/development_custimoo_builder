@@ -6,7 +6,7 @@
           <div class="text-center">
             You can alter the appearance of a logo, select a function from the list on the left
           </div>
-          <span @click="cancelEditing" class="modal-close"><BIconX /></span>
+          <span @click="cancelEditing" class="fs-5 modal-close position-absolute text-muted cursor-pointer" style="top: 5px; right: 7px"><BIconX /></span>
         </div>
       </template>
         <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
