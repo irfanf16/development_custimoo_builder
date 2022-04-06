@@ -2,6 +2,7 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
+import {getRosterDetailDefaultObject} from "../../helpers/Helpers";
 
 import {
   fontsColorsManipulation, fontsList,
@@ -86,7 +87,14 @@ const ProductAttributes:Module<any, any> = {
 
     },
     editLockerProduct: [],
-    notifications:[]
+    notifications:[],
+    customTextObjects:[],
+    customLogoObjects:[],
+    cartItemId:'',
+    editCart: {
+      cartId: 0,
+      cartItemId: ''
+    }
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -155,11 +163,6 @@ const ProductAttributes:Module<any, any> = {
     SET_SEARCH_LOADER(state: Record<any, any>, payload: boolean){
       state.searchLoader = payload;
     },
-    // DELETE_PRODUCT(state: Record<any, any>, logoIndex: number){
-    //   console.log("deleteeeeeee", state.products, state.selectedIndex)
-    //   Vue.delete(state.products[state.selectedIndex]["customLogos"], logoIndex)
-    //   console.log("afet", state.products[state.selectedIndex]["customLogos"])
-    // },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
       state.selectedPrdId = state.products[payload.selectedIndex].id;
@@ -170,6 +173,9 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state, 'personalized', payload.value)
       else
         Vue.set(state, 'customized', payload.value)*/
+    },
+    SET_EDIT_CART(state: Record<any, any>, payload: Record<any, any>){
+      Vue.set(state.editCart,payload.key,payload.value)
     },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
@@ -362,8 +368,24 @@ const ProductAttributes:Module<any, any> = {
       const logo_setting = {...default_setting,...prod_logo_setting}
       arr.push(logo_setting)
       Vue.set(state.customLogos,prd_id,arr)
-      // Object.assign(state.customLogos,prd_id)
-      //  state.customLogos[prd_id] = arr
+
+      //set team logo url of new product
+      const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
+
+
+      for (const prop in custom_obj) {
+        const any_logo = custom_obj[prop][0];
+        if(any_logo && any_logo.url) {
+          logo_setting.original_logo = any_logo.original_logo
+          logo_setting.transparent_logo = any_logo.transparent_logo
+          logo_setting.smart_transparent_logo = any_logo.smart_transparent_logo
+          logo_setting.is_smart_transparent = false
+          logo_setting.is_transparent = false
+          logo_setting.url = any_logo.url
+          Vue.set(state.customLogos[prop],0, logo_setting)
+          break;
+        }
+      }
     },
     SET_TEAM_LOGO_URL(state:  Record<any, any>,logo:any){
       const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
@@ -451,8 +473,17 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     rosterDetailAttribute(state: Record<any, any>, rosterDetailAttribute: Record<any, any>) {
-      if(rosterDetailAttribute){
+      if(state.rosterDetails.length > 0) {
         Vue.set(state.rosterDetails[rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)
+      } else {
+        const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
+        const selected_product = state.products[state.selectedIndex];
+        const product_sizes = selected_product.sizes;
+        if(product_sizes.length > 0) {
+          roster_detail_default_obj.size = product_sizes[0].name;
+          roster_detail_default_obj.code = product_sizes[0].code;
+        }
+        state.rosterDetails.push(roster_detail_default_obj)
       }
     },
     productionSVGs(state: Record<any, any>, productionSvg: Record<any, any>) {
@@ -626,6 +657,14 @@ const ProductAttributes:Module<any, any> = {
         mainProductId: 0,
         editStatus: false
       }
+
+      state.editCart = {
+        cartId: 0,
+        cartItemId: ''
+      }
+
+      state.rosterDetails = []
+
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
         let arr:any = []
@@ -643,6 +682,8 @@ const ProductAttributes:Module<any, any> = {
 
         //state.customLogos.push(setLogoSettings(0));
         state.logoTabIndex = 0;
+        state.customTextObjects = [];
+        state.customLogoObjects = [];
       }
 
       //rest custom texts
@@ -798,6 +839,20 @@ const ProductAttributes:Module<any, any> = {
     STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
       state.canvasImage.ref_front = payload.front
       state.canvasImage.ref_back = payload.back
+    },
+    UPDATE_CUSTOM_TEXT_OBJECTS(state:Record<any, any>, payload){
+      if(Object.prototype.hasOwnProperty.call(payload, "index")) {
+        state.customTextObjects[payload.index] = payload.data
+      } else {
+        state.customTextObjects.push(payload.data)
+      }
+    },
+    UPDATE_CUSTOM_LOGO_OBJECTS(state:Record<any, any>, payload){
+      if(Object.prototype.hasOwnProperty.call(payload, "index")) {
+        state.customLogoObjects[payload.index] = payload.data
+      } else {
+        state.customLogoObjects.push(payload.data)
+      }
       state.canvasImage.scene = payload.scene
     }
   },
@@ -807,6 +862,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getEditLockerProduct: state => {
       return state.editLockerProduct
+    },
+    getEditCart: state => {
+      return state.editCart
     },
     getNotifications: state => {
       return state.notifications
@@ -905,7 +963,9 @@ const ProductAttributes:Module<any, any> = {
     //   return state.customTexts
     // },
 
-    getCustomTexts: state => (prd_id = state.selectedPrdId) => {
+    getCustomTexts: state => (prd_id = state.selectedPrdId, for_all_products= false) => {
+      if(for_all_products)
+        return state.customTexts
       if(!state.customTexts[prd_id]) {
         return []
       }
@@ -962,6 +1022,12 @@ const ProductAttributes:Module<any, any> = {
     },
     getUsingColorLogos(state:Record<any, any>){
       return state.using_logo_colors
+    },
+    customTextObjects(state:Record<any, any>){
+      return state.customTextObjects
+    },
+    customLogoObjects(state:Record<any, any>){
+      return state.customLogoObjects
     }
   },
   actions: {
@@ -988,6 +1054,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setProductType({commit}, payload) {
       commit('SET_PRODUCT_TYPE', payload)
+    },
+    setEditCart({commit}, payload) {
+      commit('SET_EDIT_CART', payload)
     },
     setCategories({commit}){
       const url = '/product/categories'
@@ -1043,7 +1112,6 @@ const ProductAttributes:Module<any, any> = {
       commit('defaultColor', payload)
     },
     removeDefaultColor ({commit}, payload) {
-      console.log("payload",payload);
       commit('removeDefaultColor', payload)
     },
     setGroupColors ({commit}, payload) {
@@ -1130,7 +1198,6 @@ const ProductAttributes:Module<any, any> = {
       commit('ADD_DESIGN_COLLECTION', payload);
     },
     async updateSharedProduct({commit}, payload){
-      console.log(commit)
       const res = await http.post('updatesharedproduct', payload);
       return res
     },
@@ -1185,7 +1252,6 @@ const ProductAttributes:Module<any, any> = {
     },
     async updateNewCollection({commit},payload:Record<any, any>){
       let resp =  {status:false,message:""};
-      //console.log(payload)
       await http.put(`collection/${payload.collection_id}`, payload).then((res) => {
         if (res.status == 201 || res.status == 200){
           resp = {status:true,message:"Collection updated successfully"};
@@ -1248,8 +1314,7 @@ const ProductAttributes:Module<any, any> = {
         }
         return res
       })
-    }
-
+    },
   }
 }
 export default ProductAttributes;

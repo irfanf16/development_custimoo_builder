@@ -134,7 +134,7 @@ import {getClosestColor} from '@/pantoneColor'
 import RecentLogos from "@/components/RecentLogos.vue";
 import {sortTextsArray} from "@/helpers/Helpers";
 
-@Component<CustomizationProcess>({
+@Component<CustomizationTabs>({
   components: {
     RecentLogos,
     ColorAccordion,
@@ -151,10 +151,9 @@ import {sortTextsArray} from "@/helpers/Helpers";
     this.fontsColorsManipulation()
     this.fontsList()
     this.customTextInit()
-   // console.log('customTexts',this.customTexts)
   },
 })
-export default class CustomizationProcess extends Vue {
+export default class CustomizationTabs extends Vue {
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
   private ops = {
@@ -424,6 +423,7 @@ export default class CustomizationProcess extends Vue {
 
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
+    let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
     productFonts.forEach((fonts: any, key: number) => {
       let fontNameParam = fonts.file_url.split('/').reverse()
       fontNameParam = fontNameParam[0].split('.')
@@ -439,6 +439,12 @@ export default class CustomizationProcess extends Vue {
       style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
       headElement.appendChild(style_tag)
       $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
+      if(shadow_dom) {
+        $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
+        setTimeout(() => {
+          $(shadow_dom).find("#delete_after_load").remove()
+        }, 100)
+      }
       setTimeout(() => {
         $("#delete_after_load").remove()
       }, 100)

@@ -15,29 +15,40 @@
             <div class="customization-preview-process w-100">
               <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                 <div class="buttons-preview text-left">
-                  <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                  <template v-if="editCart.cartId < 1 && updateOrderItemProducts == null">
+                    <template v-if="isCustomerAuthenticated">
+                      <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                    </template>
+                    <template v-else>
+                      <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                    </template>
+                    <template v-if="isCustomerAuthenticated">
+                      <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
+                    </template>
+                    <template v-else>
+                      <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                    </template>
                   </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                  <template v-if="updateOrderItemProducts">
+                    <b-button @click="loadOrderItemProduct('previous')" variant="outline-secondary"
+                            v-if="updateOrderItemProducts.active_index != 0">Previous</b-button>
+                    <b-button  @click="loadOrderItemProduct('next')"  variant="outline-secondary"
+                            v-if="updateOrderItemProducts.active_index != (updateOrderItemProducts.factory_products.length - 1)">Next</b-button>
+                    <b-button  @click="UpdateOrderProducts" variant="outline-secondary"
+                            v-if="updateOrderItemProducts.active_index == (updateOrderItemProducts.factory_products.length - 1)">Update Products</b-button>
+                    <b-button  variant="outline-info" @click="$modal.show('product-rejection-info-modal')">Show Reason</b-button>
+                    <modal name="product-rejection-info-modal">
+                        <h1>{{updateOrderItemProducts.activity_items[updateOrderItemProducts.active_index].message}}</h1>
+                      <template v-for="(activity_file, activity_file_index) in updateOrderItemProducts.activity_items[updateOrderItemProducts.active_index].activity_files">
+                        <img width="250" :src="`${storageUrl}${activity_file.url}`" alt="" :key="`activity-file-${activity_file_index}`">
+                      </template>
+                    </modal>
                   </template>
-                  <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
-                  </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary" v-b-modal.modal-login>Save to locker room</b-button>
-                  </template>
-                  <!-- <template v-if="isCustomerAuthenticated">
-                    <b-button :key="'summarybutton'" variant="outline-secondary" @click="buyNow">Summary</b-button>
-                  </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'" variant="outline-secondary" v-b-modal.modal-login>Summary</b-button>
-                  </template> -->
                 </div>
 
                 <ul class="preview-header-icons">
                   <li class="d-flex flex-wrap align-items-center">
-                    <b-button v-if="!isCustomerAuthenticated" v-b-modal.modal-login><font-awesome-icon :icon="['fas', 'user']"/></b-button>
+                    <b-button v-if="!isCustomerAuthenticated" @click="$modal.show('loginModal')"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                     <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                   </li>
@@ -48,17 +59,28 @@
                     <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
                     <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
                       <template v-for="(notification, ind) in notifications" >
-                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]" @click="readNotification(notification)">
-                          <div class="text d-flex align-items-start justify-content-between">
-                            <p @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]">
+                          <div @click="readNotification(notification)" class="text d-flex align-items-start justify-content-between">
+                            <p v-if="notification.type == 'roster_updated'" @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                            <p v-if="notification.type == 'order_activity'"><router-link  :to="{ name: 'OrderDetail', params: { order_id: notification.order_id }}">{{notification.description}}</router-link>
                             <div class="date">
-                              <div class="day">{{ notification.created_at | formatDate }}</div>
+                              <div class="day" >{{ notification.created_at | formatDate }}</div>
                             </div>
                           </div>
                         </div>
                       </template>
                     </div>
                   </li>
+                  <li v-if="isCustomerAuthenticated">
+                    <a  class="icon mr-0" @click="openCartModal">
+                      <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
+                    </a>
+                  </li>
+<!--                  <li v-if="isCustomerAuthenticated">-->
+<!--                    <a  class="icon mr-0" @click="openOrdersModal">-->
+<!--                      <font-awesome-icon :icon="['fas', 'cart-arrow-down']" />-->
+<!--                    </a>-->
+<!--                  </li>-->
                 </ul>
                 <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
                 </div>
@@ -67,10 +89,11 @@
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
+              <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="this.showLockerRoomModal" ref="collectionModal"  />
-              <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
-              <LoginForm @actionAfterLogin="actionAfterLogin()" />
+              <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
+              <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
 
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                 <div>
@@ -199,9 +222,10 @@
         </template>
       </b-row>
     </b-container>
-    <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
+    <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes" name="delete-cart-item" ref="delete-cart-item"></confirm-modal>
+    <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" name="reset-modal" ref="reset-modal"></confirm-modal>
     <confirm-modal message="This will reset everything. All design changes will be lost.
- Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes"></confirm-modal>
+ Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes" name="reset-changes"></confirm-modal>
   </div>
 </template>
 
@@ -228,6 +252,8 @@ import CustomTabs from "@/components/CustomTabs.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
+import CartModal from "@/components/CartModal.vue";
+import {logData, getActiveProductData} from "@/helpers/Helpers";
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -238,6 +264,7 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
+    CartModal,
     CustomTabs,
     ConfirmModal,
     DesignCollectionModal,
@@ -267,58 +294,17 @@ Vue.filter('formatDate', function(value:string) {
     await this.$store.dispatch('setCustomToken');
     // await this.retrieveProducts()
     await this.getFillColors()
+
+
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
       await this.$store.dispatch('getLockerRoomColors')
+      await this.$store.dispatch('getCartServer', {})
     }
     if (this.$route.params.name) {
       this.showLoader = true
       await this.editProduct(0, 0, this.getPath());
       this.showLoader = false
-
-      // setTimeout(async () => {
-      //   let url = this.getPath()
-      //   let res = await this.$store.dispatch('getShareProductDetails', url)
-      //   const exist = this.products.find((prd:Record<any, any>) => {
-      //     return prd.id == res.data.product_id
-      //   })
-      //   let ind = 0
-      //   if (!exist){
-      //     await this.$store.dispatch('ADD_CUSTOMIZED_PRODUCT', res.data.product_id);
-      //     ind = this.products.length -1
-      //   }else {
-      //     const index = this.products.findIndex((prd:Record<any, any>) => prd.id == res.data.product_id)
-      //     ind = index >= 0 ? index : 0
-      //   }
-      //   await this.$store.dispatch('setSelectedIndex', { selectedIndex: ind});
-      //   let selectedIndex = this.products[ind].productstyles.findIndex((x:Record<any, any>) => x.id === res.data.style_id);
-      //   await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-      //   let logoObj = {
-      //     custom_logos: res.data.custom_logos,
-      //     product_id: res.data.product_id
-      //   }
-      //   let customLogos = this.$store.getters.getCustomLogoObject
-      //   if(!customLogos[res.data.product_id]) {
-      //     await this.$store.dispatch('setCustomObj',res.data.product_id)
-      //   }
-      //   await  this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logoObj);
-      //   await  this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', res.data);
-      //   await  this.$store.dispatch('overRideDefaultColors', JSON.parse(res.data.defaultcolors));
-      //   await  this.$store.dispatch('overRideGroupColors', JSON.parse(res.data.groupcolors));
-      //   await  this.$store.dispatch('setColorSectionVisibility')
-      //   this.products[ind].productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-      //     if (item.id == res.data.design_id){
-      //       Vue.set(item, 'design_show', 1)
-      //       this.$store.dispatch('setSelectedProductDesignID', item.id)
-      //     }else{
-      //       Vue.set(item, 'design_show', 0)
-      //     }
-      //   });
-      // }, 2000)
-      // setTimeout(() => {
-      //   this.showLoader = false
-      //   this.productUpdated = true
-      // }, 4000)
     } else {
       await this.retrieveProducts()
     }
@@ -332,13 +318,21 @@ Vue.filter('formatDate', function(value:string) {
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
       await  this.$store.dispatch('permissions')
+      let show_cart = await this.$store.getters.getShowCart
+      if(show_cart){
+        this.openCartModal();
+      }
     }
 
-
+  },
+   destroyed() {
+    this.$store.dispatch("updateOrderItemProducts", null);
   }
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts) {
+  public logData = logData;
+  public getActiveProductData = getActiveProductData;
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -347,7 +341,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public search_products = ''
   public colors = []
   public product_id !: number
-  public provider_id = 'oVXYIzKY'
   public logoUrl = ''
   public ref = this.$refs as Record<any, any>
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
@@ -361,6 +354,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public shared_link = ''
   public extractedcolorclass = ""
   private isFront = true;
+  public updated_order_products: Record<any, any>[] = []
 
 
   private switchTabs (e:Record<any, any>){
@@ -383,8 +377,15 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('SET_RECENT_LOGOS')
   }
 
+  get updateOrderItemProducts() {
+    return this.$store.getters.getUpdateOrderItemProducts
+  }
+
   get notifications(){
     return this.$store.getters.getNotifications
+  }
+  get editCart(): Record<any, any> {
+    return this.$store.getters.getEditCart
   }
   get lastRouteName() {
     let returnVal = '';
@@ -411,6 +412,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       })
     }
     return unread_notification_counter
+  }
+
+  get cartItemsCount(){
+    return this.$store.getters.getCartItemsCount
   }
 
   public showConfirm(){
@@ -456,6 +461,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public editCollectionModal = () =>{
     this.ref['collectionModal'].editCollectionModal()
   }
+  public openCartModal = () =>{
+    if(this.cartItemsCount > 0) {
+      this.ref.cartModal.show()
+    }
+  }
+  // public async openOrdersModal(){
+  //   this.ref['orderlisting'].showOdersPopup()
+  // }
   public getPath(){
     let url = ''
     url = this.$route.path
@@ -508,6 +521,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
+  }
+  get cartItems() {
+    return this.$store.getters.getCartItems
   }
   @Watch('customTexts', {
     deep: true
@@ -624,11 +640,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.ref['lockerModal'].showLockerRoomModal()
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
-      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+      // this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
-    } else if(this.actionBeforeLogin == 'downloadDesign') {
-      (this.$root.$refs as Record<any,any>).Order_Details.generateProductionPdf()
+    } else if(this.actionBeforeLogin == 'addToCart') {
+      (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
@@ -645,9 +661,28 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     });
   }
 
+  async deleteCartItem(item:Record<any,any>){
+    const response = await this.ref['delete-cart-item'].showConfirm();
+    if(response){
+      const url = `carts/cart-items/${item.cart_item.id}/factory_product/${item.factory_product.id}`
+      http.delete(url).then(async (response:Record<any,any>) => {
+        await this.$store.dispatch('getCartServer', {});
+        if(this.cartItems && !this.cartItems.length){
+          this.ref['cartModal'].hide();
+        }
+        this.showToast(response.data.message, 'SUCCESS')
+      }).catch((e:any)=>{
+        console.log(e);
+        this.showError(e);
+        this.ref['cartModal'].hide();
+      });
+    }
+  }
+
 
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$modal.show('loginModal')
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
       collectionAddmoreMode:false,
@@ -742,6 +777,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
       await this.$store.dispatch('logoutCustomer');
+      this.$store.commit('ADD_LOCKER_ROOM_COLORS', [])
       await this.$store.commit('SET_RECENT_LOGOS')
     }
   }
@@ -782,7 +818,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.showLockerRoomModal()
 
         if(this.ref.saveToLockerModal) {
-          this.ref.saveToLockerModal.ref['my-modal'].hide();
+          this.ref['saveToLockerModal'].hideModal()
           this.ref.saveToLockerModal.showLoader = false;
         }
 
@@ -889,15 +925,21 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getSearchLoader
   }
 
-  public async retrieveProducts() {
+  public async retrieveProducts(url:string|null=null) {
     let self = this;
-    let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
-    if(self.search_products) {
-      url += `&title=${self.search_products}`
+    if(url == null) {
+       url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
+      if(self.search_products) {
+        url += `&title=${self.search_products}`
+      }
     }
     http.get(url).then(async (response: Record<any, any>) => {
       if(response.data.products.data.length > 0 ){
         await self.handleMainProducts(response);
+        if(self.updateOrderItemProducts) {
+          await self.updateFactoryProduct(self.updateOrderItemProducts.factory_products[self.updateOrderItemProducts.active_index]);
+        }
+
         if(self["showLoader"] || self["searchLoader"]) {
           self.showLoader = false;
           await self.$store.dispatch('setSearchLoader', false)
@@ -908,21 +950,50 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         await self.$store.dispatch('setSearchLoader', false)
       }
     }, (error) => {
-      console.error("Error while getting order detail", error.response.data.message)
+      console.log("fdsfdsdf")
+      // console.error("Error while getting order detail", error.response.data.message)
     })
+  }
+
+  async loadOrderItemProduct(action: string) {
+    let self = this;
+    let updated_product = await getActiveProductData();
+    if(updated_product == null) {
+      return false;
+    }
+    let order_item_factory_product_index = self.updateOrderItemProducts.active_index;
+    updated_product["id"] = self.updateOrderItemProducts.factory_products[order_item_factory_product_index].id;
+    updated_product["status"] = "submitted_for_factory_review";
+    self.updated_order_products[self.updateOrderItemProducts.active_index] = updated_product
+    let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
+    order_item_factory_product_index = (action == "next") ? ++order_item_factory_product_index : --order_item_factory_product_index;
+    url    += `&active_product_id=${self.updateOrderItemProducts.factory_products[order_item_factory_product_index].product_id}`;
+    await self.$store.dispatch("updateOrderItemProducts", {update_key: 'active_index', key_value: order_item_factory_product_index});
+    await self.retrieveProducts(url);
+  }
+  async UpdateOrderProducts() {
+    let self = this;
+    let updated_product = await getActiveProductData();
+    if(updated_product == null) {
+      return false;
+    }
+    updated_product["id"] = self.updateOrderItemProducts.factory_products[self.updateOrderItemProducts.active_index].id;
+    updated_product["status"] = "submitted_for_factory_review";
+    self.updated_order_products[self.updateOrderItemProducts.active_index] = updated_product;
+    let url = `order_item/${self.updateOrderItemProducts.order_item_id}/update/products`;
+    http.post(url, {factory_products: self.updated_order_products}).then((res: any) => {
+      if (res.data.success == true) {
+        self.$router.push({name: "OrderDetail", params: { order_id: self.updateOrderItemProducts.order_item_id }});
+      }
+    }).catch(err => {
+      this.showErrorArr(err.response.data.errors)
+    });
   }
 
 }
 </script>
 
 <style lang="scss" scoped>
-.page-wrapper {
-  @media only screen and (min-width: 992px) {
-    border: 1px solid #dee2e6;
-    background: #fff;
-  }
-}
-
 .home-color-area {
   @media only screen and (min-width: 992px) {
     padding-bottom: 12rem !important;
@@ -1411,5 +1482,4 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 }
-
 </style>

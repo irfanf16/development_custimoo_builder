@@ -377,7 +377,6 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     this.colors = colors
     this.getLogoColors()
   }
-
 }
 
 </script>

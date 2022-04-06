@@ -43,7 +43,7 @@ import {setLogoSettings} from "@/helpers/Helpers";
     }
 
     let scaleImg = document.createElement('img');
-    scaleImg.src = "./img/images/scale.png";
+    scaleImg.src = `${this.storageUrl}assets/images/scale.png`
     let fabricObj: Record<any, any> = fabric
     fabricObj.Object.prototype.controls.br = new fabricObj.Control({
       x: 0.5,
@@ -65,7 +65,7 @@ import {setLogoSettings} from "@/helpers/Helpers";
     }
 
     let rotationImg = document.createElement('img');
-    rotationImg.src = "./img/images/rotate.png";
+    rotationImg.src = `${this.storageUrl}assets/images/rotate.png`;
     fabricObj.Object.prototype.controls.tr = new fabricObj.Control({
       x: 0.5,
       y: -0.5,
@@ -86,7 +86,7 @@ import {setLogoSettings} from "@/helpers/Helpers";
     }
 
     let deleteImg = document.createElement('img');
-    deleteImg.src = "./img/images/remove.png";
+    deleteImg.src = `${this.storageUrl}assets/images/remove.png`;
 
     //custom
     fabricObj.Object.prototype.controls.deleteControl = new fabricObj.Control({
@@ -109,7 +109,6 @@ import {setLogoSettings} from "@/helpers/Helpers";
     }
 
     function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
-      console.log('delete')
       let target = transform.target;
       let canvas = target.canvas;
       if('textIndex' in target) {
@@ -264,6 +263,9 @@ export default class Scene extends Vue {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
           }
           this.customLogoObjects[logo.logoIndex] = null
+          if(this.mainPreview) {
+            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: logo.logoIndex, data: null, scene: this});
+          }
           if(this.otherSideLogos[index]) {
             this.frontCanvas.remove(this.otherSideLogos[index])
             if (this.backCanvas) {
@@ -278,6 +280,9 @@ export default class Scene extends Vue {
               this.backCanvas.remove(this.customLogoObjects[index])
             }
             this.customLogoObjects[index] = null
+            if(this.mainPreview) {
+              this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: index, data: null, scene: this});
+            }
             if(this.otherSideLogos[index]) {
               this.frontCanvas.remove(this.otherSideLogos[index])
               if (this.backCanvas) {
@@ -320,6 +325,10 @@ export default class Scene extends Vue {
           }
         }
       })
+      if (this.mainPreview) {
+        //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
+        this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
+      }
     }
   }
 
@@ -336,6 +345,9 @@ export default class Scene extends Vue {
             self.backCanvas.remove(customTextObject)
           }
           this.customTextObjects[index] = null
+          if(this.mainPreview) {
+            this.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", {index: index, data: null})
+          }
         })
         this.otherSideTexts.forEach((otherSideText: fabric.Object, index: number) => {
           self.frontCanvas.remove(otherSideText)
@@ -352,6 +364,9 @@ export default class Scene extends Vue {
             self.backCanvas.remove(this.customTextObjects[text.textIndex])
           }
           this.customTextObjects[text.textIndex] = null
+          if(this.mainPreview) {
+            this.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", {index: text.textIndex, data: null})
+          }
           if(this.otherSideTexts[text.textIndex]) {
             self.frontCanvas.remove(this.otherSideTexts[text.textIndex])
             if (self.backCanvas) {
@@ -397,6 +412,11 @@ export default class Scene extends Vue {
           }
         }
       })
+
+      if (this.mainPreview) {
+        //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
+        this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
+      }
     }
   }
 
@@ -410,6 +430,11 @@ export default class Scene extends Vue {
         this.changeDefaultColors(defaultColors)
       }else{
         this.setInitialColors();
+      }
+
+      if (this.mainPreview) {
+        //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
+        this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
       }
     }
   }
@@ -904,7 +929,7 @@ export default class Scene extends Vue {
       self.addToOtherSide(e.target, side)
     })
 
-    var ctx = canvas.getSelectionContext()
+    let ctx = canvas.getSelectionContext()
 
     canvas.on('mouse:up', function() {
       self.verticalLines.length = self.horizontalLines.length = 0;
@@ -1596,7 +1621,6 @@ export default class Scene extends Vue {
       })
     }else{
       fabric.Image.fromURL(textureUrl, (img: any) => {
-       // console.log(img)
         img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
           hasControls: false,
           selectable: false,
@@ -1708,6 +1732,9 @@ export default class Scene extends Vue {
             })
           }
           this.customLogoObjects[logoIndex as number] = img
+          if(this.mainPreview) {
+            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: logoIndex, data: img, scene: this});
+          }
         } else {
           this.logoObjects.push(img)
         }
@@ -1819,6 +1846,7 @@ export default class Scene extends Vue {
       this.addToOtherSide(textBox, text.side)
 
       if(this.mainPreview) {
+        self.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", {index: textIndex, data: textBox});
         const scaleX = textBox.scaleX as number
         const scaleY = textBox.scaleY as number
         const width = (textBox.width as number * scaleX * this.measurementRatio).toFixed(1)

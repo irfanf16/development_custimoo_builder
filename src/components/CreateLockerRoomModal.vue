@@ -1,5 +1,5 @@
 <template>
-    <b-modal ref="create-modal" hide-footer id="modal-center-createlockerroom" centered scrollable size="xl" title="Create Locker Room" content-class="lockerroom-modal create-lockerroom-modal">
+    <modal ref="create-modal" name="create-modal" hide-footer id="modal-center-createlockerroom" centered scrollable size="xl" title="Create Locker Room" content-class="lockerroom-modal create-lockerroom-modal">
         <div class="pt-4 design-name-form">
             <b-form inline @submit.prevent="createLocker">
                 <label for="inline-form-input-productname" class="w-100 d-block mb-2">Name</label>
@@ -11,7 +11,7 @@
                 </div>
             </b-form>
         </div>
-    </b-modal>
+    </modal>
 </template>
 
 <script lang="ts">
@@ -34,11 +34,17 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         if (res.status == 201){
           this.name = ''
           await this.$store.dispatch('GET_LOCKER_PRODUCTS');
-          this.ref['create-modal'].hide();
+          this.hideModal()
           this.$emit('lockerAdded')
        }else if (res.status == 422){
          this.showError(res.message)
        }
+      }
+      public showModal(){
+        this.$modal.show('create-modal')
+      }
+      public hideModal(){
+        this.$modal.hide('create-modal');
       }
     }
 

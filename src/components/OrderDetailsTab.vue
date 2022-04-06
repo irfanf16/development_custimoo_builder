@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <DesignPdfView :pdf_front_image="pdf_front_image" :pdf_back_image="pdf_back_image"/>
 
     <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
@@ -35,24 +34,23 @@
       <div class="pricing-are">
         <div class="order-details">
           <div class="order-row">
-<!--            <template v-if="isCustomerAuthenticated">-->
-<!--              <button class="btn btn-secondary fw-bold w-100 mb-2" @click="buyNow">Summary</button>-->
-<!--            </template>-->
-<!--            <template v-else>-->
-<!--              <b-button class="btn btn-secondary fw-bold w-100 mb-2" v-b-modal.modal-login>Summary</b-button>-->
-<!--            </template>-->
             <template>
-<!--              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share roster url</b-button>-->
-              <AddLockerRoomModal :rosterUrl="true"  ref="share" />
+              <AddLockerRoomModal modal_name="share" :rosterUrl="true"  ref="share" />
             </template>
           </div>
-<!--          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <button  class="btn btn-secondary fw-bold w-100" @click="generateProductionPdf">Download Design File</button>
+            <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+              <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
+                {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart Collection'}}
+              </button>
+              <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
+                <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+              </button>
+            </template>
           </template>
           <template v-else>
-            <button  @click="setActionBeforeLogin('downloadDesign')" :key="'loginmodal'"  class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Download Design File</button>
+            <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"   class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Add to Cart</button>
           </template>
 
 
@@ -62,13 +60,6 @@
     <div class="d-none">
       <ProductionScene ref="production-scene" v-bind:production_file_obj.sync="production_file_obj"/>
     </div>
-
-<!--    <div class="d-none">
-      <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
-      </canvas>
-      <canvas width="600" height="600" ref="pdfBack" style="text-align: center; display: block">
-      </canvas>
-    </div>-->
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 </template>
@@ -84,6 +75,9 @@ import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
+import { getActiveProductData } from "@/helpers/Helpers";
+
+import {compact} from 'lodash';
 
 type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
@@ -113,9 +107,17 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   public production_file_obj = {
     url: null, content: null
   }
+  public isLoading = false;
+
+  get updateOrderItemProducts() {
+    return this.$store.getters.getUpdateOrderItemProducts
+  }
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
+  }
+  get editCart(): Record<any, any> {
+    return this.$store.getters.getEditCart
   }
 
   get rosterDetails(): [Record<any, any>] {
@@ -163,17 +165,32 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
+    return this.$store.getters.getCustomLogos()
   }
 
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
+
   get actionBeforeLogin(): string {
     return this.$store.getters.getActionBeforeLogin
   }
+
+  get customTextObjects(): Record<any, any>[] {
+    return this.$store.getters.customTextObjects;
+  }
+  get customLogoObjects(): Record<any, any>[] {
+    return compact(this.$store.getters.customLogoObjects);
+  }
+  get defaultColors() : [Record<any, any>] {
+    return this.$store.getters.getDefaultColors
+  }
+  get groupColors() : [Record<any, any>] {
+    return this.$store.getters.getGroupColors
+  }
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$modal.show('loginModal')
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
       collectionAddmoreMode:false,
@@ -203,6 +220,50 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     })
   }
 
+  public async addToCart() {
+    let self = this;
+    try {
+      this.isLoading = true;
+     let cart_product = await getActiveProductData();
+     if(cart_product == null) {
+       return false;
+     }
+      let post_data = {
+        factory_product: cart_product
+      };
+      let url = "carts"
+      if(this.$store.getters.getEditCart.cartId > 0) {
+        post_data.factory_product.id = this.$store.getters.getEditCart.cartItemId
+        url = `carts/cart-items/${this.$store.getters.getEditCart.cartId}/update`
+      }
+      http.post(url, post_data).then((res: any) => {
+        if (res.data.success == true){
+          let api_res:Record<any, any> = res.data.result
+          this.$store.dispatch('addToCart',api_res.items)
+          this.$store.dispatch('setEditCart', {key:'cartId',value:0});
+          this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
+          this.showToast(res.data.message, 'SUCCESS');
+          this.isLoading = false;
+        }else{
+          if(res.data.status_code === 422){
+            this.showErrorValidation(res.data.errors);
+            this.isLoading = false
+          }
+          else{
+            this.showError(res)
+            this.isLoading = false
+          }
+        }
+      }).catch(err => {
+        this.isLoading = false
+        this.showErrorArr(err.response.data.errors)
+      });
+    }
+    catch (e) {
+      console.error('error in add to cart',e)
+      this.isLoading = false
+    }
+  }
    public async  generateProductionPdf() {
     let self = this;
     self.showLoader = true;
@@ -224,7 +285,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     }
     let form_data = new FormData();
     if(self.production_file_obj.url) {
-      form_data.append('original_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "original_file.svg", {
+      form_data.append('production_cutting_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "production_cutting_file.svg", {
         type: "image/svg+xml",
       }));
     }
@@ -258,10 +319,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
         };
         html2pdf().set(opt).from(element).toPdf().get("pdf")
           .output('datauristring')
-          .then(function(pdfAsString: string) {
+          .then(async function(pdfAsString: string) {
             form_data.append("order_file", pdfAsString)
-            const res = http.post('orders/create', form_data);
-            self.showLoader = false
+            await http.post('orders/create', form_data).then(() => {
+              self.showLoader = false
+            }).catch(error => {
+              self.showLoader = false
+              console.log("Error wilde creating order", error)
+            });
           }).save('final_design');
 
       }
@@ -271,47 +336,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   public async getDocFromString(doc_string: string, type:DOMParserSupportedType ="image/svg+xml") {
     let parser = new DOMParser();
     return  parser.parseFromString(doc_string, type);
-  }
-
-  public generateProductionPdf_back(e: any) {
-    this.showLoader = true
-    $('meta[name=viewport]').attr('content', 'width=1024')
-    let frontCanvas = this.productionSVGs.front
-    let backCanvas = this.productionSVGs.back
-
-    let front = new fabric.Canvas(this.$refs.pdfFront as HTMLCanvasElement)
-    front.setHeight(600);
-    front.setWidth(600);
-    let back = new fabric.Canvas(this.$refs.pdfBack as HTMLCanvasElement)
-    back.setHeight(600);
-    back.setWidth(600);
-    let emptyCallback = () => { console }
-    front.loadFromJSON(JSON.stringify(frontCanvas), emptyCallback, emptyCallback)
-    back.loadFromJSON(JSON.stringify(backCanvas), emptyCallback, emptyCallback)
-
-    let front2dCtx = front.getContext()
-    let back2dCtx = back.getContext()
-    let front2D = $(front2dCtx.canvas)
-    let back2D = $(back2dCtx.canvas)
-
-    $(front2D).attr("id", "front-pdf")
-    $(back2D).attr("id", "back-pdf")
-    $(front2D).attr("class", "canvas")
-    $(back2D).attr("class", "canvas")
-
-    $.each($(front2D).data(), (i) => {
-      $(front2D).removeAttr("data-" + i)
-    })
-    $.each($(back2D).data(), (i) => {
-      $(back2D).removeAttr("data-" + i)
-    })
-
-    let frontViewPdf = front2D.get(0)
-    let backViewPdf = back2D.get(0)
-
-    $("#front-svg").html(frontViewPdf)
-    $("#back-svg").html(backViewPdf)
-    this.logosConversionToBase64()
   }
 
   public htmlPdfGenerator() {
@@ -416,31 +440,36 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     let order_detail: { [key: string]: Record<any, any> } = {}
     order_detail.roster_detail = self.rosterDetails;
     order_detail.svg_groups = self.svgGroups;
-    order_detail.custom_texts = self.customTexts;
+    order_detail.custom_texts = this.customTexts.filter((custom_text) => custom_text.text.length > 0);
     order_detail.custom_logos = self.customLogos;
     if(self.$store.getters.getUsingColorLogos) {
       order_detail.logo_colors = self.logoColors
     }
+    let custom_text_objects = compact(this.customTextObjects);
+    let custom_logo_objects = compact(this.customLogoObjects);
+    let custom_text_svgs = [];
+    for (const custom_text_object of custom_text_objects) {
+      if (custom_text_object.constructor.name == "klass") {
+        custom_text_svgs.push(custom_text_object.toSVG());
+      }
+    }
+    order_detail.custom_text_svgs = custom_text_svgs
+    let custom_logo_svgs = [];
+    for (const custom_logo_svg of custom_logo_objects) {
+      if(custom_logo_svg.constructor.name == "klass") {
+        custom_logo_svgs.push(custom_logo_svg.toSVG());
+      }
+    }
+    order_detail.custom_logo_svgs = custom_logo_svgs
     return order_detail;
   }
+
 }
 </script>
 
 <style scoped>
 
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
-/*body {*/
-/* min-width: 320px;*/
-/* overflow-x: hidden;*/
-/* width: 100%;*/
-/* font-family: 'Ubuntu', sans-serif;*/
-/* font-size: 14px;*/
-/* line-height: 1.3;*/
-/* background: #fff;*/
-/* color: #03142E;*/
-/* margin: 0;*/
-/* box-sizing: border-box;*/
-/*}*/
 div {
   box-sizing: border-box;
 }

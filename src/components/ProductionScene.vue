@@ -14,9 +14,7 @@ import $ from "jquery";
 type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
 @Component<ProductionScene>({
-  mounted() {
-    console.log("mounted")
-  }
+
 })
 
 export default class ProductionScene extends Vue {
@@ -101,6 +99,7 @@ export default class ProductionScene extends Vue {
     this.production_file_obj = {
       url: null, content: null
     };
+    this.$emit("update:production_file_obj", this.production_file_obj)
   }
 
   public async fetchUrlContent(url:string) {

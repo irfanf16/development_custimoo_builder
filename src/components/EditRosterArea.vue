@@ -45,6 +45,7 @@ import RosterDetails from '@/components/RosterDetails.vue'
 import {http} from "@/httpCommon";
 import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
+import {getRosterDetailDefaultObject} from "@/helpers/Helpers";
 
 
 @Component<EditRosterArea>({
@@ -106,15 +107,20 @@ export default class EditRosterArea extends Vue {
   }
 
   public rosterDetailsInit() {
-    let payload = {
-      text: '',
-      number: '',
-      size: this.sizeOptions[0].value ? this.sizeOptions[0].value : '',
-      size_index: 0,
-      code: this.sizeOptions[0].code ? this.sizeOptions[0].code : '',
-      quantity: 1,
-      information: ''
+    let payload = getRosterDetailDefaultObject()
+    if(this.sizeOptions.length > 0) {
+      payload.size = this.sizeOptions[0].value;
+      payload.code = this.sizeOptions[0].code;
     }
+    // let payload = {
+    //   text: '',
+    //   number: '',
+    //   size: this.sizeOptions[0].value ? this.sizeOptions[0].value : '',
+    //   size_index: 0,
+    //   code: this.sizeOptions[0].code ? this.sizeOptions[0].code : '',
+    //   quantity: 1,
+    //   information: ''
+    // }
     this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
   }
 

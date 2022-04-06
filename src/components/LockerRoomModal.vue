@@ -1,21 +1,33 @@
 <template>
-    <b-modal ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room" modal-class="modal-fullscreen2" content-class="lockerroom-modal"
-    @close="$store.commit('Change_Locker_Active_Tab', 0)">
-      <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
-                  @showCollectionModal="showCollectionModal"
-                  @editCollectionModal="editCollectionModal"
-      ></LockerRoom>
+    <modal :width="screenWidth"
+           :resizable="true"
+           :scrollable="true"
+           height="auto"
+           :reset="true"
+           :shiftY="0"
+           name="locker-modal" ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room"
+           @close="$store.commit('Change_Locker_Active_Tab', 0)">
+      <div class="modal-header d-flex justify-content-between">
+        <span class="fs-5 font-weight-bold">Locker Room</span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideLockerRoomModal"><BIconX /></span>
+      </div>
+      <div class="modal-content lockerroom-modal">
+        <div id="modal-center-lockerroom" class="modal-body">
+          <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideLockerRoomModal"
+                      @showCollectionModal="showCollectionModal"
+                      @editCollectionModal="editCollectionModal"
+                      />
+        </div>
+      </div>
 
-      <template #modal-footer>
-        <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right">
-          <b-button v-if="selectedCollectionProducts.length>0 && totalCollections > 0"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
-          <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Create new collection</b-button>
-        </div>
-        <div v-else class="text-right">
-          <b-button v-if="selectedCollectionProducts.length > 0 && ($store.getters.getSelectionMode.readonly && $store.getters.getSelectionMode.collectionAddmoreMode)" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
-        </div>
-      </template>
-    </b-modal>
+      <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right modal-footer">
+        <b-button v-if="selectedCollectionProducts.length>0 && totalCollections > 0"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
+        <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Create new collection</b-button>
+      </div>
+      <div v-else class="text-right modal-footer">
+        <b-button v-if="selectedCollectionProducts.length > 0 && ($store.getters.getSelectionMode.readonly && $store.getters.getSelectionMode.collectionAddmoreMode)" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
+      </div>
+    </modal>
 </template>
 
 <script lang="ts">
@@ -31,6 +43,7 @@ import DesignCollection from '@/components/DesignCollection.vue'
 })
 export default class LockerRoomModal extends Vue {
   public ref = this.$refs as Record<any, any>
+  private screenWidth = (window.screen.availWidth - 100)
 
   private showCollectionModal = () => {
     // alert("asd")
@@ -56,11 +69,11 @@ export default class LockerRoomModal extends Vue {
 
 
   public hideLockerRoomModal () {
-    this.ref['locker-modal'].hide()
+    (this.$modal as Record<any, any>).hide('locker-modal')
   }
 
   public showLockerRoomModal () {
-    this.ref['locker-modal'].show()
+    (this.$modal as Record<any, any>).show('locker-modal')
   }
 
   public addDesignCollection () {

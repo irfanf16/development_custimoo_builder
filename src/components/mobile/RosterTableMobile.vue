@@ -32,7 +32,7 @@
           </td>
           <td style="width: 10%; text-align: center">
             <b-form-input
-              class="text-center" ref="myInputs"
+              class="text-center" ref="myInputs" type="number"
               v-model="roster.number" />
           </td>
           <td style="width: 10%; text-align: center">
@@ -40,7 +40,7 @@
           </td>
           <td style="width: 10%; text-align: center">
             <b-form-input
-              class="text-center" ref="myInputs"
+              class="text-center" ref="myInputs" type="number"
               placeholder="0" v-model="roster.quantity"
             ></b-form-input>
           </td>
@@ -76,7 +76,8 @@
           <b-form-file  class="mb-2"></b-form-file>
           <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
             <font-awesome-icon :icon="['fas', 'info-circle']"/>
-          </a></b-button>
+          </a>
+        </b-button>
       </div>
     </b-modal>
   </div>

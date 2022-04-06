@@ -1,60 +1,68 @@
 <template>
-  <b-modal ref="contact-modal" @hide="hideContactModal" hide-footer id="modal-center-contact" centered scrollable>
-    <template #modal-title>
-      <h4 class="fs-3 font-weight-bold">Add Contact</h4>
-    </template>
-    <div class="design-name-form">
+  <modal name="contact-modal" :width="700"
+         :resizable="true"
+         :scrollable="true"
+         height="auto"
+         :reset="true"
+         :shiftY="0" ref="contact-modal"  hide-footer id="modal-center-contact" centered>
+    <div class="modal-header d-flex justify-content-between">
+      <span class="fs-5 font-weight-bold">Add Contact</span>
+      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideContactModal"><BIconX /></span>
+    </div>
+    <div class="modal-body">
+      <div class="design-name-form">
 
-      <ValidationObserver v-slot="{ handleSubmit, invalid }">
-        <b-form @submit.prevent="handleSubmit(saveContact)" >
-        <div class="d-flex w-100 align-items-center">
-          <validation-provider class="w-100" rules="required|email" v-slot="{ errors }">
-            <label for="inline-form-input-productname" class="w-100 d-block mb-2">Contact Email</label>
-            <div class="w-100 d-flex align-items-center gap-2">
-              <b-form-input class="w-100" placeholder="Enter contact email" v-model="email"></b-form-input>
+        <ValidationObserver v-slot="{ handleSubmit, invalid }">
+          <b-form @submit.prevent="handleSubmit(saveContact)" >
+            <div class="d-flex w-100 align-items-center">
+              <validation-provider class="w-100" rules="required|email" v-slot="{ errors }">
+                <label for="inline-form-input-productname" class="w-100 d-block mb-2 text-left">Contact Email</label>
+                <div class="w-100 d-flex align-items-center gap-2">
+                  <b-form-input class="w-100" placeholder="Enter contact email" v-model="email"></b-form-input>
 
-              <div class="d-flex gap-1">
-                <button type="button"  class="btn light btn-secondary" @click="hideContactModal">Cancel</button>
-                <button :disabled="invalid" type="submit" class="btn btn-secondary" >Add</button>
-              </div>
+                  <div class="d-flex gap-1">
+                    <button type="button"  class="btn light btn-secondary" @click="hideContactModal">Cancel</button>
+                    <button :disabled="invalid" type="submit" class="btn btn-secondary" >Add</button>
+                  </div>
+                </div>
+                <span class="error mt-1 d-block">{{ errors[0] }}</span>
+              </validation-provider>
             </div>
-            <span class="error mt-1 d-block">{{ errors[0] }}</span>
-          </validation-provider>
-         </div>
 
-      </b-form>
-      </ValidationObserver>
-    </div>
-    <div v-if="getContacts.length > 0">
-      <div class="mt-3" style="max-height: 300px; overflow-y:auto">
-        <table class="table table-bordered b-table-fixed mb-0 w-100 ">
-          <thead class="bg-light">
-          <th class="font-weight-bold">
-            Email
-          </th>
-          <th class="font-weight-bold">
-            Action
-          </th>
-          </thead>
-          <tbody>
-          <tr  v-for="(contact) in getContacts" :key="contact.id">
-            <td>{{contact.email}}</td>
-            <td class="cursor-pointer">
-              <a data-title="Delete Contact" @click="deleteContact(contact.id)">
-                <font-awesome-icon
-                  :icon="['fas', 'trash-alt']"/>
-              </a>
-            </td>
-          </tr>
-          </tbody>
-
-        </table>
+          </b-form>
+        </ValidationObserver>
       </div>
+      <div v-if="getContacts.length > 0">
+        <div class="mt-3" style="max-height: 300px; overflow-y:auto">
+          <table class="table table-bordered b-table-fixed mb-0 w-100 ">
+            <thead class="bg-light">
+            <th class="font-weight-bold">
+              Email
+            </th>
+            <th class="font-weight-bold">
+              Action
+            </th>
+            </thead>
+            <tbody>
+            <tr  v-for="(contact) in getContacts" :key="contact.id">
+              <td>{{contact.email}}</td>
+              <td class="cursor-pointer">
+                <a data-title="Delete Contact" @click="deleteContact(contact.id)">
+                  <font-awesome-icon
+                    :icon="['fas', 'trash-alt']"/>
+                </a>
+              </td>
+            </tr>
+            </tbody>
+
+          </table>
+        </div>
 
 
+      </div>
+      <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
     </div>
-    <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
-  </b-modal>
+  </modal>
 </template>
 
 <script lang="ts">
@@ -87,15 +95,16 @@ export default class ContactModal extends Mixins(ErrorMessages) {
   public ref = this.$refs as Record<any, any>
   private email  = '';
   public viewLoader = false
+  private screenWidth = (window.screen.availWidth - 100)
 
   public showContactPopup(room_id:number, room_index:number) {
     this.room_id = room_id
     this.room_index = room_index
-    this.ref['contact-modal'].show()
+    this.$modal.show('contact-modal')
   }
 
   public hideContactModal() {
-    this.ref['contact-modal'].hide()
+    this.$modal.hide('contact-modal')
   }
 
   get getContacts(){

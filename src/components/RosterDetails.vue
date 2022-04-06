@@ -1,8 +1,8 @@
 <template>
   <div class="roster-section">
     <div class="d-none d-md-block roster-upload-area">
-      <h3>Import Roster from Excel sheet</h3>
-      <b-button  v-b-modal.modal-center-uploadroster class="btn btn-secondary fw-bold">Download/Upload Roster Template <a href="#" v-b-tooltip.hover
+      <h3>Import Roster from Excel sheets</h3>
+      <b-button  @click="$modal.show('rosterfilemodal')" class="btn btn-secondary fw-bold">Download/Upload Roster Template <a href="#" v-b-tooltip.hover
                                                                                   title="Import roster details from excel sheet">
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
             </a></b-button>
@@ -10,6 +10,11 @@
 
       <p>Or insert details manually below</p>
     </div>
+   <div class="row" v-if="rosterDetails.length > 0">
+     <b-button @click="updateRosterPlayerNameFormat('capitalized')" class="btn btn-info col-md-4">Capitalize</b-button>
+     <b-button @click="updateRosterPlayerNameFormat('toUpperCase')" class="btn btn-info col-md-4">All Capitalized</b-button>
+     <b-button @click="updateRosterPlayerNameFormat('toLowerCase')" class="btn btn-info col-md-4">All Lower</b-button>
+   </div>
     <div class="roster-row mb-2">
       <div class="align-left">
         <div class="hide-show"></div>
@@ -25,19 +30,16 @@
     <template v-for="(roster, index) in rosterDetails">
       <div class="roster-row mb-2"  :key="index">
         <div class="align-left">
-          <div class="hide-show" :class="{ active: isActive }">
-            <a  @click="changeText(roster.text, roster.number, index)">
+          <div class="hide-show" >
+            <a >
               <font-awesome-icon  :icon="['fas',  index === eyeIndex ? 'eye' : 'eye-slash']"/>
             </a>
           </div>
           <div class="roster-name">
-            <b-form-input ref="myInputs" v-model="roster.text"></b-form-input>
+            <b-form-input ref="myInputs" v-model="roster.text" @focus="editRosterPlayer(index)"></b-form-input>
           </div>
         <div class="shirt-no">
-          <b-form-input ref="myInputs"
-
-            class="text-center"
-            v-model="roster.number"
+          <b-form-input ref="myInputs" class="text-center" v-model="roster.number" @focus="editRosterPlayer(index)"
           ></b-form-input>
         </div>
         <div class="shirt-size">
@@ -71,10 +73,11 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import readXlsxFile from "read-excel-file";
 import {default as $} from "jquery";
 import {http} from "@/httpCommon";
+import {findIndex} from 'lodash';
 
 @Component<RosterDetails>({
   mounted() {
@@ -103,12 +106,42 @@ export default class RosterDetails extends Vue {
   public rosters:any[]=[]
   public fontsColors: any[] = []
   public fontOptions: Record<any, any>[] = []
+  public editing_roster_player_index = 0;
 
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
+  }
+  get rosterFirstNameAndNumber(): string|null {
+    let editing_roster_player_index = this.editing_roster_player_index
+    if(this.rosterDetails && this.rosterDetails.length > 0) {
+      // |;| is just name and n umber separator
+      return `${this.rosterDetails[editing_roster_player_index].text}|;|${this.rosterDetails[editing_roster_player_index].number}`;
+    } else {
+      return null;
+    }
+  }
+
+  @Watch('rosterFirstNameAndNumber', {deep: true })
+  async onRosterFirstNameAndNumberChanged(newVal: string) {
+    let name = "";
+    let number = "";
+    if(newVal) {
+      let name_and_number_array = newVal.split("|;|");
+      name = name_and_number_array[0]
+      number = name_and_number_array[1]
+    }
+    let all_products_custom_texts = this.$store.getters.getCustomTexts(null,true)
+    if(all_products_custom_texts) {
+      for (let product_id in all_products_custom_texts) {
+        let custom_name_index = findIndex(all_products_custom_texts[product_id], {type: 'name'});
+        let custom_number_index = findIndex(all_products_custom_texts[product_id], {type: 'number'});
+        this.$store.dispatch('updateCustomTextAttribute', {index: custom_name_index, on_all: true, attribute: 'text', value: name})
+        this.$store.dispatch('updateCustomTextAttribute', {index: custom_number_index, on_all: true, attribute: 'text', value: number})
+      }
+    }
   }
   get customText():Record<any, any>[]{
     return this.$store.getters.getCustomTexts();
@@ -268,6 +301,35 @@ export default class RosterDetails extends Vue {
       roster.size = selected_size.name
       roster.code = selected_size.code
     }
+  }
+
+  public editRosterPlayer(index: number) {
+    this.editing_roster_player_index = index;
+    this.$store.commit('CHANGE_EYE_INDEX', index)
+  }
+
+  public updateRosterPlayerNameFormat(selected_format:string) {
+    let updated_roster: Record<any, any>[] = [];
+    this.rosterDetails.forEach(roster_detail => {
+      if(roster_detail.text) {
+        let roster_player_name = roster_detail.text;
+        if(selected_format == "capitalized") {
+          roster_detail.text = roster_player_name.charAt(0).toUpperCase() + roster_player_name.slice(1).toLowerCase();
+        } else {
+          roster_detail.text = roster_player_name[selected_format]();
+        }
+        updated_roster.push(roster_detail);
+      }
+      this.$store.commit('UPDATE_ROSTER', updated_roster)
+    })
+
+    // let all_products_custom_texts = this.$store.getters.getCustomTexts(null,true);
+    // for (const product_id in all_products_custom_texts) {
+    //   all_products_custom_texts[product_id].forEach(() => {
+    //     console.log("sdfd")
+    //   })
+    //
+    // }
   }
 
 }

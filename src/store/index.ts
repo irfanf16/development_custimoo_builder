@@ -5,6 +5,7 @@ import ProductAttributes from "@/store/modules/ProductAttributes";
 import Main from "@/store/modules/main";
 import Product from "@/store/modules/product";
 import Event from "@/store/modules/event";
+import Cart from "@/store/modules/cart";
 import createPersistedState from "vuex-persistedstate";
 
 Vue.use(Vuex)
@@ -15,7 +16,8 @@ export default new Vuex.Store({
     ProductAttributes,
     Main,
     Product,
-    Event
+    Event,
+    Cart
   },
   plugins: [createPersistedState({
     key: 'custimo',
@@ -34,6 +36,9 @@ export default new Vuex.Store({
       'Product.initialExtractedColors',
       'Main.windowView',
       'Main.tabIndexMain',
+      'ProductAttributes.customTextObjects',
+      'ProductAttributes.customLogoObjects',
+      'Auth.jwtToken',
      ]
 
 
