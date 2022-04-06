@@ -175,6 +175,17 @@
         <div class="font-weight-bold pl-1">
           Reject Artwork
         </div>
+        <div class="d-flex justify-content-end" style="flex-grow: 8;">
+          <button class="btn btn-secondary light mx-1" @click="$modal.hide('customer-review-modal')">Cancel</button>
+          <template v-if="activity_items.activity_item_data[activity_navigation_index] && activity_items.activity_item_data[activity_navigation_index].action">
+            <span v-if="activity_items.activity_item_data[activity_navigation_index].action == 'accept'" class="mx-1">Accepted</span>
+            <span v-else class="mx-1">Rejected</span>
+          </template>
+          <template v-else>
+            <button class="btn btn-secondary mx-1" @click="approveRejectDesigns('accept')">Accept</button>
+            <button class="btn btn-secondary mx-1" @click="approveRejectDesigns('reject')">Reject</button>
+          </template>
+        </div>
         <span class="modal-close cursor-pointer" @click="$modal.hide('customer-review-modal')">
           <BIconX />
         </span>
