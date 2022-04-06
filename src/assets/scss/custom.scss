@@ -4485,11 +4485,13 @@ $fontSize: 0.5;
 }
 
 #modal-center-lockerroom{
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
     .modal-content.lockerroom-modal{
         border: none !important;
     }
+}
+
+.vm--container{
+    padding: 1.5rem 0;
 }
 
 .vm--modal {
@@ -4754,5 +4756,13 @@ $fontSize: 0.5;
     input{
         text-indent: 25px;
         border-color: #eee;
+    }
+}
+.add-address{
+    .form-group {
+        label{
+            margin-bottom: 5px;
+            font-weight: bolder;
+        }
     }
 }

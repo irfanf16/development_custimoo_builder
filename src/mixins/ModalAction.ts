@@ -1,12 +1,12 @@
 /* eslint-disable */
 import { Component, Vue } from 'vue-property-decorator'
 @Component
-export class Modal extends Vue {
-  public showModal (modalClass:string){
+export default class ModalAction extends Vue {
+  public showVModal (modalClass:string){
     // console.log(this.$modal as Record<any, any>);
     (this.$modal as Record<any, any>).show(modalClass)
   }
-  public hideModal (modalClass:string){
+  public hideVModal (modalClass:string){
     (this.$modal as Record<any, any>).hide(modalClass)
   }
 }

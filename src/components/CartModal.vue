@@ -1,10 +1,13 @@
 <template>
   <modal :minWidth ="800"
          :minHeight="600" :resizable="true"
-         :adaptive="true" name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl"  t
-         itle="User Cart" modal-class="modal-fullscreen2"  content-class="lockerroom-modal"
+         :adaptive="true" name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl" modal-class="modal-fullscreen2"  content-class="lockerroom-modal"
          @closed="customer_reference_no=null" @before-open="getAddresses"
         >
+    <div class="modal-header d-flex justify-content-between">
+      <span class="fs-5 font-weight-bold">Cart</span>
+      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('cart-modal')"><BIconX /></span>
+    </div>
 
     <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
@@ -131,6 +134,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {getReminderOptions, processColorsCustom} from "@/helpers/Helpers";
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import {findIndex} from "lodash";
+import ModalAction from "@/mixins/ModalAction";
     @Component<CartModal>({
         components: {},
       filters: {
@@ -149,7 +153,7 @@ import {findIndex} from "lodash";
         // this.getColors()
       }
     })
-    export default class CartModal extends Mixins(ErrorMessages,LockerProducts, handleMainProducts) {
+    export default class CartModal extends Mixins(ErrorMessages,LockerProducts, handleMainProducts, ModalAction) {
 
       public viewLoader = false;
       private userData = JSON.parse(localStorage.customer);
@@ -157,12 +161,6 @@ import {findIndex} from "lodash";
       public customer_reference_no : string = null
       public shipping_address: Record<any, any> = null
 
-      public hide() {
-        this.$modal.hide('cart-modal')
-      }
-      public show() {
-        this.$modal.show('cart-modal')
-      }
       get cartItems() {
         return this.$store.getters.getCartItems
       }
