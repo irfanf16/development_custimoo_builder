@@ -85,6 +85,34 @@
       </tbody>
     </table>
 
+    <div class="p-3 text-left">
+      <div class="well border-0" style="background: #f5f5f5">
+        <div class="fs-2 font-weight-bold py-2">Fill the form below to finalize your order</div>
+        <div class="mt-2 grid grid-2 gap-2">
+          <div class="input_icons">
+            <span class="icon"><BIconPerson /></span>
+            <b-form-input type="text" :value="userData.first_name +' '+ userData.last_name" placeholder="Full Name" />
+          </div>
+          <div class="input_icons">
+            <span class="icon"><BIconReceiptCutoff /></span>
+            <b-form-input type="text" placeholder="Order Reference" />
+          </div>
+          <div class="input_icons">
+            <span class="icon"><BIconEnvelope /></span>
+            <b-form-input type="text" :value="userData.email" placeholder="Email" />
+          </div>
+          <div class="input_icons">
+            <span class="icon"><BIconPhone /></span>
+            <b-form-input type="text" placeholder="Phone" />
+          </div>
+          <div class="input_icons grid-span-2">
+            <span class="icon"><BIconGeoAlt /></span>
+            <b-form-input type="text" placeholder="Address" />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <template #modal-footer>
       <div class="text-right">
         <b-button   v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
@@ -124,6 +152,7 @@ import {findIndex} from "lodash";
     export default class CartModal extends Mixins(ErrorMessages,LockerProducts, handleMainProducts) {
 
       public viewLoader = false;
+      private userData = JSON.parse(localStorage.customer);
       private storageUrl = process.env.VUE_APP_STORAGE_URL
       public customer_reference_no : string = null
       public shipping_address: Record<any, any> = null
