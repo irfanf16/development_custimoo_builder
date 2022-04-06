@@ -52,32 +52,35 @@
           </a></td>
         </tr>
       </template>
-      <tr>
-        <td>Customer Reference No : </td>
-        <td>
-          <b-form-input   class="form-input" placeholder="Customer Reference No." type="text" name="customer_reference_no"
-                                                    v-model="customer_reference_no">
-      </b-form-input>
-        </td>
-      </tr>
-      <tr v-if="shipping_address">
-        <td>Shipping Address : </td>
-        <td>
+      </tbody>
+    </table>
+
+    <div class="p-3 grid grid-mobile-2 gap-2 text-left">
+      <div class="well border-0" style="background: #f5f5f5">
+        <div class="fs-2 font-weight-bold px-2 pt-1 pb-2">Shipping Address</div>
+        <div class="px-2 pt-1 pb-2" v-if="shipping_address">
           <div>{{shipping_address.first_name}} {{shipping_address.last_name}}</div>
           <div>{{shipping_address.address1}}</div>
           <div>{{shipping_address.address2}}</div>
           <div>{{shipping_address.zip_code}}</div>
           <div>{{shipping_address.country.name}} {{shipping_address.city}}</div>
           <div>{{shipping_address.phone_number}}</div>
-        </td>
-        <td> <router-link :to="'address?cart=1'" class="my-orders">Edit</router-link> </td>
-      </tr>
-      <tr v-else>
-        <td>Shipping Address : </td><td></td>
-        <td> <router-link :to="'address?cart=1'" class="my-orders">Add</router-link> </td>
-      </tr>
-      </tbody>
-    </table>
+        </div>
+        <div v-else class="px-2 pt-1 pb-2">
+          <router-link :to="'address?cart=1'" class="btn btn-secondary light my-orders">
+            Add
+          </router-link>
+        </div>
+      </div>
+
+      <div class="align-self-end">
+        <div class="fs-2 font-weight-bold ">Reference No:</div>
+        <div class="mt-1">
+          <b-form-input   class="form-input" placeholder="Customer Reference No." type="text" name="customer_reference_no"
+                          v-model="customer_reference_no" />
+        </div>
+      </div>
+    </div>
 
     <template #modal-footer>
       <div class="text-right">
