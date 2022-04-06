@@ -7,7 +7,6 @@
 
 <script>
 import Vue from 'vue'
-import Header from '@/components/Header.vue';
 import {LockerProducts} from "@/mixins/LockerProduct";
 import router from './router'
 import store from '../store'
@@ -102,9 +101,6 @@ window.Echo = new Echo({
 export default {
   store, router,
   name: "Customizer",
-  components: {
-    Header
-  },
   mixins: [LockerProducts],
   computed: {
     isCustomerAuthenticated: function() {
@@ -164,7 +160,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 * {
   touch-action: manipulation;
 }
