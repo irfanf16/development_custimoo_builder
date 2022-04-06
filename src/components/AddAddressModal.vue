@@ -1,18 +1,18 @@
 <template>
-  <modal  :width="screenWidth"
+  <modal  :width="1000"
          :resizable="true"
          :scrollable="true"
          height="auto"
          :reset="true"
-         :shiftY="0" name="AddAdressModal" ref="AddAdressModal" id="modal-login" class="login-modal" size="lg" hide-title hide-footer>
+         :shiftY="0" name="AddAdressModal" ref="AddAdressModal" hide-title hide-footer>
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Add Address</span>
       <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
     </div>
     <div class="modal-body">
     <div class="form-holder" :class="{active: isActive}">
-      <div class="form-area form-signin p-4">
-        <b-form>
+      <div class="form-area add-address p-4">
+        <b-form class="grid grid-mobile-2 gap-x-3 gap-y-1">
           <b-form-group
             label="First Name *"
             label-for="input-1" class="text-left"
@@ -115,12 +115,12 @@
               :value="true"
               unchecked-value="false"
             >
-              Default Address
+              <span class="d-inline-flex mt-1">Default Address</span>
             </b-form-checkbox>
           </b-form-group>
 
 
-          <b-button v-if="!isLoading" @click="submitForm" variant="primary">Submit</b-button>
+          <b-button v-if="!isLoading" @click="submitForm" variant="secondary">Save</b-button>
           <b-button v-else variant="primary" :disabled="isLoading"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></b-button>
 
         </b-form>
@@ -143,7 +143,7 @@
   export default class AddAddressModal extends Mixins(ErrorMessages) {
 
     public ref = this.$refs as Record<any, any>
-    private screenWidth = (window.screen.availWidth - 100)
+    // private screenWidth = (window.screen.availWidth - 100)
     public isLoading = false
     public addresses = null;
     public countries = [];
