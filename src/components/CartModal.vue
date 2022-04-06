@@ -17,6 +17,9 @@
           Design Image
         </th>
         <th class="font-weight-bold">
+          Size
+        </th>
+        <th class="font-weight-bold">
           Quantity
         </th>
         <th colspan="2" class="font-weight-bold">
@@ -30,9 +33,12 @@
           <td>
             {{factory_product.product_name}}
           </td>
-          <td><b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
-            <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
-
+          <td>
+            <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
+            <b-img style="width: 80px; margin-left: 10px;" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
+          </td>
+          <td style="word-break: break-all">
+            {{factory_product.roster_detail[0].size}}
           </td>
           <td>
             <template v-for="(roster_detail,index) in factory_product.roster_detail">
