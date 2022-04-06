@@ -88,7 +88,7 @@
       </tbody>
     </table>
 
-    <div class="p-3 text-left">
+    <div class="p-3 text-left" v-if="false">
       <div class="well border-0" style="background: #f5f5f5">
         <div class="fs-2 font-weight-bold py-2">Fill the form below to finalize your order</div>
         <div class="mt-2 grid grid-2 gap-2">
