@@ -57,9 +57,12 @@
 
     </template>
 
-    <h2 class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
+    <h2 v-if="mobileScreen" class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
       <span>Designs Available</span>
       <span class="mt-1 toggleArrow" :class="showDesigns ? 'opened' : ''"><BIconChevronDown /></span>
+    </h2>
+    <h2 v-else class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between">
+      <span>Designs Available</span>
     </h2>
     <div class="select-designs" :class="showDesigns ? 'opened' : ''">
       <DesignAvailable />

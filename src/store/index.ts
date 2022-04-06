@@ -36,6 +36,8 @@ export default new Vuex.Store({
       'Product.initialExtractedColors',
       'Main.windowView',
       'Main.tabIndexMain',
+      'ProductAttributes.customTextObjects',
+      'ProductAttributes.customLogoObjects',
       'Auth.jwtToken',
      ]
 

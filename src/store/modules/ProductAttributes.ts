@@ -88,6 +88,8 @@ const ProductAttributes:Module<any, any> = {
     },
     editLockerProduct: [],
     notifications:[],
+    customTextObjects:[],
+    customLogoObjects:[],
     cartItemId:'',
     editCart: {
       cartId: 0,
@@ -366,8 +368,24 @@ const ProductAttributes:Module<any, any> = {
       const logo_setting = {...default_setting,...prod_logo_setting}
       arr.push(logo_setting)
       Vue.set(state.customLogos,prd_id,arr)
-      // Object.assign(state.customLogos,prd_id)
-      //  state.customLogos[prd_id] = arr
+
+      //set team logo url of new product
+      const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
+
+
+      for (const prop in custom_obj) {
+        const any_logo = custom_obj[prop][0];
+        if(any_logo && any_logo.url) {
+          logo_setting.original_logo = any_logo.original_logo
+          logo_setting.transparent_logo = any_logo.transparent_logo
+          logo_setting.smart_transparent_logo = any_logo.smart_transparent_logo
+          logo_setting.is_smart_transparent = false
+          logo_setting.is_transparent = false
+          logo_setting.url = any_logo.url
+          Vue.set(state.customLogos[prop],0, logo_setting)
+          break;
+        }
+      }
     },
     SET_TEAM_LOGO_URL(state:  Record<any, any>,logo:any){
       const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
@@ -664,6 +682,8 @@ const ProductAttributes:Module<any, any> = {
 
         //state.customLogos.push(setLogoSettings(0));
         state.logoTabIndex = 0;
+        state.customTextObjects = [];
+        state.customLogoObjects = [];
       }
 
       //rest custom texts
@@ -819,6 +839,20 @@ const ProductAttributes:Module<any, any> = {
     STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
       state.canvasImage.ref_front = payload.front
       state.canvasImage.ref_back = payload.back
+    },
+    UPDATE_CUSTOM_TEXT_OBJECTS(state:Record<any, any>, payload){
+      if(Object.prototype.hasOwnProperty.call(payload, "index")) {
+        state.customTextObjects[payload.index] = payload.data
+      } else {
+        state.customTextObjects.push(payload.data)
+      }
+    },
+    UPDATE_CUSTOM_LOGO_OBJECTS(state:Record<any, any>, payload){
+      if(Object.prototype.hasOwnProperty.call(payload, "index")) {
+        state.customLogoObjects[payload.index] = payload.data
+      } else {
+        state.customLogoObjects.push(payload.data)
+      }
       state.canvasImage.scene = payload.scene
     }
   },
@@ -988,6 +1022,12 @@ const ProductAttributes:Module<any, any> = {
     },
     getUsingColorLogos(state:Record<any, any>){
       return state.using_logo_colors
+    },
+    customTextObjects(state:Record<any, any>){
+      return state.customTextObjects
+    },
+    customLogoObjects(state:Record<any, any>){
+      return state.customLogoObjects
     }
   },
   actions: {

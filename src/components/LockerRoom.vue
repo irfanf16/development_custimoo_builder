@@ -54,7 +54,6 @@
                              @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
                             :icon="['fas', 'trash-alt']"/></a>
                         </li>
-                        <li>
                         <li v-if="!getSelectionMode.readonly">
                           <a v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product.id)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                           <a v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product.id)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
@@ -132,12 +131,16 @@
 
                 </b-tab>
                 <b-tab v-if="!getSelectionMode.readonly" title="Assets" class="assets-file">
-                  <template v-for="(logo, inda) in room.logos">
-                    <div :key="inda" class="assets-logo-block">
-                      <img :src="storageUrl+logo.logo_url " crossorigin="anonymous"/>
-                      <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
-                    </div>
-                  </template>
+                  <div class="grid grid-mobile-3 gap-1">
+                    <template v-for="(logo, inda) in room.logos">
+                      <div :key="inda" class="assets-logo-block">
+                        <span class="d-block p-2">
+                          <img :src="storageUrl+logo.logo_url " crossorigin="anonymous"/>
+                        </span>
+                        <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
+                      </div>
+                    </template>
+                  </div>
                 </b-tab>
                 <b-tab v-if="!getSelectionMode.readonly" title="Colors">
                   <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
@@ -1479,27 +1482,14 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
 .assets-logo-block {
   position: relative;
-
-  &:hover {
-    .use-logo-btn {
-      transform: scale(1);
-    }
-  }
 }
 
 .use-logo-btn {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.15);
   z-index: 1;
-  color: #fff;
+  color: #666;
   text-transform: uppercase;
-  font-size: 1.5rem;
-  transition: all 0.3s ease;
-  transform: scale(0);
+  font-size: 1rem;
   width: 100%;
   border: none;
 }

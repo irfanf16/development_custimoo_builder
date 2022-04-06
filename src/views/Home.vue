@@ -777,6 +777,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
       await this.$store.dispatch('logoutCustomer');
+      this.$store.commit('ADD_LOCKER_ROOM_COLORS', [])
       await this.$store.commit('SET_RECENT_LOGOS')
     }
   }

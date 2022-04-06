@@ -151,7 +151,6 @@ import {sortTextsArray} from "@/helpers/Helpers";
     this.fontsColorsManipulation()
     this.fontsList()
     this.customTextInit()
-   // console.log('customTexts',this.customTexts)
   },
 })
 export default class CustomizationTabs extends Vue {

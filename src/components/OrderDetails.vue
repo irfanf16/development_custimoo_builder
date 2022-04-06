@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Vue} from 'vue-property-decorator'
+import {Component, Mixins} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
@@ -71,7 +71,8 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
 
 @Component<OrderDetails>({
   components: {
-    DesignPdfView, ProductionScene,
+    DesignPdfView,
+    ProductionScene,
     AddLockerRoomModal
   },
   mounted(){
@@ -128,16 +129,16 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
 
   public showLoader = false
 
-  get svgGroups(): [Record<any, any>] {
-    return this.$store.getters.getSvgGroups
-  }
-
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
   }
 
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
+  }
+
+  get svgGroups(): [Record<any, any>] {
+    return this.$store.getters.getSvgGroups
   }
 
 
@@ -381,6 +382,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     order_detail.svg_groups = self.svgGroups;
     order_detail.custom_texts = self.customTexts;
     order_detail.custom_logos = self.customLogos;
+    //if logo colors are being used then we will send it otherwise not
     if(self.$store.getters.getUsingColorLogos) {
       order_detail.logo_colors = self.logoColors
     }

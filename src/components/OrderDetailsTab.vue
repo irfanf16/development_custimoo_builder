@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <DesignPdfView :pdf_front_image="pdf_front_image" :pdf_back_image="pdf_back_image"/>
 
     <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
@@ -79,6 +78,7 @@ import ProductionScene from '@/components/ProductionScene.vue'
 import { getActiveProductData } from "@/helpers/Helpers";
 
 import {compact} from 'lodash';
+
 type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
 @Component<OrderDetailsTab>({
@@ -171,6 +171,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
+
   get actionBeforeLogin(): string {
     return this.$store.getters.getActionBeforeLogin
   }
@@ -284,7 +285,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     }
     let form_data = new FormData();
     if(self.production_file_obj.url) {
-      form_data.append('original_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "original_file.svg", {
+      form_data.append('production_cutting_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "production_cutting_file.svg", {
         type: "image/svg+xml",
       }));
     }
@@ -318,10 +319,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
         };
         html2pdf().set(opt).from(element).toPdf().get("pdf")
           .output('datauristring')
-          .then(function(pdfAsString: string) {
+          .then(async function(pdfAsString: string) {
             form_data.append("order_file", pdfAsString)
-            const res = http.post('orders/create', form_data);
-            self.showLoader = false
+            await http.post('orders/create', form_data).then(() => {
+              self.showLoader = false
+            }).catch(error => {
+              self.showLoader = false
+              console.log("Error wilde creating order", error)
+            });
           }).save('final_design');
 
       }
@@ -331,47 +336,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   public async getDocFromString(doc_string: string, type:DOMParserSupportedType ="image/svg+xml") {
     let parser = new DOMParser();
     return  parser.parseFromString(doc_string, type);
-  }
-
-  public generateProductionPdf_back(e: any) {
-    this.showLoader = true
-    $('meta[name=viewport]').attr('content', 'width=1024')
-    let frontCanvas = this.productionSVGs.front
-    let backCanvas = this.productionSVGs.back
-
-    let front = new fabric.Canvas(this.$refs.pdfFront as HTMLCanvasElement)
-    front.setHeight(600);
-    front.setWidth(600);
-    let back = new fabric.Canvas(this.$refs.pdfBack as HTMLCanvasElement)
-    back.setHeight(600);
-    back.setWidth(600);
-    let emptyCallback = () => { console }
-    front.loadFromJSON(JSON.stringify(frontCanvas), emptyCallback, emptyCallback)
-    back.loadFromJSON(JSON.stringify(backCanvas), emptyCallback, emptyCallback)
-
-    let front2dCtx = front.getContext()
-    let back2dCtx = back.getContext()
-    let front2D = $(front2dCtx.canvas)
-    let back2D = $(back2dCtx.canvas)
-
-    $(front2D).attr("id", "front-pdf")
-    $(back2D).attr("id", "back-pdf")
-    $(front2D).attr("class", "canvas")
-    $(back2D).attr("class", "canvas")
-
-    $.each($(front2D).data(), (i) => {
-      $(front2D).removeAttr("data-" + i)
-    })
-    $.each($(back2D).data(), (i) => {
-      $(back2D).removeAttr("data-" + i)
-    })
-
-    let frontViewPdf = front2D.get(0)
-    let backViewPdf = back2D.get(0)
-
-    $("#front-svg").html(frontViewPdf)
-    $("#back-svg").html(backViewPdf)
-    this.logosConversionToBase64()
   }
 
   public htmlPdfGenerator() {
@@ -476,7 +440,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
     let order_detail: { [key: string]: Record<any, any> } = {}
     order_detail.roster_detail = self.rosterDetails;
     order_detail.svg_groups = self.svgGroups;
-    order_detail.custom_texts = this.customTexts;
+    order_detail.custom_texts = this.customTexts.filter((custom_text) => custom_text.text.length > 0);
     order_detail.custom_logos = self.customLogos;
     if(self.$store.getters.getUsingColorLogos) {
       order_detail.logo_colors = self.logoColors

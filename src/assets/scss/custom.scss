@@ -1820,9 +1820,13 @@ button{
             position: relative;
             padding: 0;
             display: block;
+            outline: none !important;
+            box-shadow: none !important;
 
             a{
                 display: block;
+                outline: none !important;
+                box-shadow: none !important;
             }
 
             @media only screen and (min-width: 992px){
@@ -1910,10 +1914,15 @@ button{
                 flex-direction: row;
                 max-height: 50vh;
                 overflow-y: auto;
-                div{
+
+                .assets-logo-block{
+                    border: 1px solid rgba(0,0,0,0.1);
                     display: flex;
-                    flex-basis: 33.3%;
-                    justify-content: center;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+                div{
                     margin-bottom: 20px;
                     align-items: center;
                     @media only screen and (min-width: 768px){
@@ -4413,19 +4422,19 @@ $fontSize: 0.5;
     }
 }
 
-.vuescroll-panel{
-    margin-right: -17px !important;
-    overflow-y: scroll !important;
-}
-.well{
+.well {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
 
-    &.custom{
+    &.custom {
         border: none;
-        box-shadow: 1px 4px 7px rgba(0,0,0,0.1);
+        box-shadow: 1px 4px 7px rgba(0, 0, 0, 0.1);
     }
+}
+.vuescroll-panel {
+    margin-right: -17px !important;
+    overflow-y: scroll !important;
 }
 
 .slither-slider-slides{
