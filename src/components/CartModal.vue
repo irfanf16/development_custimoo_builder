@@ -57,18 +57,30 @@
 
     <div class="p-3 grid grid-mobile-2 gap-2 text-left">
       <div class="well border-0" style="background: #f5f5f5">
-        <div class="fs-2 font-weight-bold px-2 pt-1 pb-2">Shipping Address</div>
-        <div class="px-2 pt-1 pb-2" v-if="shipping_address">
-          <div>{{shipping_address.first_name}} {{shipping_address.last_name}}</div>
-          <div>{{shipping_address.address1}}</div>
-          <div>{{shipping_address.address2}}</div>
-          <div>{{shipping_address.zip_code}}</div>
-          <div>{{shipping_address.country.name}} {{shipping_address.city}}</div>
-          <div>{{shipping_address.phone_number}}</div>
+        <div class="fs-2 font-weight-bold px-2 pt-1 pb-2">
+          Shipping Address
         </div>
+        <template v-if="shipping_address">
+          <div class="px-2 pt-1 pb-2">
+            <div>{{shipping_address.first_name}} {{shipping_address.last_name}}</div>
+            <div>{{shipping_address.address1}}</div>
+            <div>{{shipping_address.address2}}</div>
+            <div>{{shipping_address.zip_code}}</div>
+            <div>{{shipping_address.country.name}} {{shipping_address.city}}</div>
+
+            <div class="d-flex flex-wrap w-100">
+              <div>{{shipping_address.phone_number}}</div>
+
+              <router-link :to="'address?cart=1'" class="btn ml-auto align-self-end btn-dark medium btn-sm my-orders">
+                <span style="font-size: 0.85em"><b-icon-pencil /></span> Change
+              </router-link>
+            </div>
+
+          </div>
+        </template>
         <div v-else class="px-2 pt-1 pb-2">
-          <router-link :to="'address?cart=1'" class="btn btn-secondary light my-orders">
-            Add
+          <router-link :to="'address?cart=1'" class="btn btn-secondary btn-sm my-orders">
+            <span style="font-size: 0.9em"><b-icon-plus /></span> Add
           </router-link>
         </div>
       </div>
