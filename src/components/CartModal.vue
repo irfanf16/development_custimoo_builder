@@ -28,8 +28,8 @@
       </tr>
       </thead>
       <tbody>
-      <template v-for="(cart_item, cart_item_index) in cartItems1">
-        <tr :key="factory_product.id" v-for="(factory_product, cart_item_product_index) in cart_item.factory_products">
+      <template v-for="(cart_item) in cartItems1">
+        <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
           <td>
             {{factory_product.product_name}}
           </td>
