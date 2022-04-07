@@ -66,8 +66,9 @@
     </div>
     </template>
 
-    <div class="roster-row mb-2 button-holder">
-      <button class="btn btn-secondary fw-bold pl-4 pr-4 pl-lg-5 pr-lg-5" @click="addPlayer(roster)">Add Player</button>
+    <div class="roster-row mb-2 button-holder d-flex justify-content-between">
+      <button class="btn btn-secondary fw-bold px-5" @click="addPlayer(roster)">Add Player</button>
+      <button class="btn btn-secondary fw-bold px-5" @click="close">OK</button>
     </div>
   </div>
 </template>
@@ -79,7 +80,10 @@ import {default as $} from "jquery";
 import {http} from "@/httpCommon";
 import {findIndex} from 'lodash';
 
+
 @Component<RosterDetails>({
+  components: {
+  },
   mounted() {
     this.fontsColorsManipulation()
     this.fontsList()
@@ -279,6 +283,11 @@ export default class RosterDetails extends Vue {
       this.firstColor = this.fontsColors[0].color_text[0]
       this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1] : this.fontsColors[0].color_text[0]
     }
+  }
+  public close(){
+    this.$modal.hide('rostermodal');
+    this.ref['order-details'].addToCart();
+    this.$modal.show('cart-modal');
   }
 
   public fontsList(): void {

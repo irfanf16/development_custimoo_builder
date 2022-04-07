@@ -10,7 +10,7 @@
     </div>
 
     <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
-    <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
+    <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems1">
       <thead class="bg-light">
       <tr>
         <th class="font-weight-bold">
@@ -20,10 +20,7 @@
           Design Image
         </th>
         <th class="font-weight-bold">
-          Size
-        </th>
-        <th class="font-weight-bold">
-          Quantity
+          Size : Quantity
         </th>
         <th colspan="2" class="font-weight-bold">
           Actions
@@ -31,8 +28,8 @@
       </tr>
       </thead>
       <tbody>
-      <template v-for="(cart_item) in cartItems">
-        <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
+      <template v-for="(cart_item, cart_item_index) in cartItems1">
+        <tr :key="factory_product.id" v-for="(factory_product, cart_item_product_index) in cart_item.factory_products">
           <td>
             {{factory_product.product_name}}
           </td>
@@ -40,21 +37,18 @@
             <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
             <b-img style="width: 80px; margin-left: 10px;" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
           </td>
-          <td style="word-break: break-all">
-            {{factory_product.roster_detail[0].size}}
-          </td>
-          <td>
+          <td class="cursor-pointer" @click="editCartItem(factory_product,cart_item.id,false)">
             <template v-for="(roster_detail,index) in factory_product.roster_detail">
               <div :key="index"><span>{{roster_detail.size}} : {{roster_detail.quantity}}</span></div>
             </template>
             <div>Total : {{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</div>
           </td>
 <!--          <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>-->
-          <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id)">
+          <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id,true)">
             <font-awesome-icon
               :icon="['fas', 'edit']"/>
           </a></td>
-          <td class="cursor-pointer">  <a data-title="Delete Event" @click="deleteConfirm(cart_item,factory_product)"
+          <td class="cursor-pointer">  <a data-title="Delete Event" @click="deleteConfirm(cart_item, factory_product)"
                                         >
             <font-awesome-icon
               :icon="['fas', 'trash-alt']"/>
@@ -160,6 +154,7 @@ import ModalAction from "@/mixins/ModalAction";
       private storageUrl = process.env.VUE_APP_STORAGE_URL
       public customer_reference_no : string = null
       public shipping_address: Record<any, any> = null
+      public cartItems1 = this.$store.getters.getCartItems
 
       get cartItems() {
         return this.$store.getters.getCartItems
@@ -227,7 +222,7 @@ import ModalAction from "@/mixins/ModalAction";
       //   })
       // }
 
-      public editCartItem(cart_item:Record<any, any>,cart_id:number) {
+      public editCartItem(cart_item:Record<any, any>,cart_id:number,edit:boolean) {
         let self = this;
         let is_customized = this.$store.getters.getCustomized
         let is_personalized = this.$store.getters.getPersonalized
@@ -307,13 +302,16 @@ import ModalAction from "@/mixins/ModalAction";
           await this.$store.dispatch('setProductType', {prd_type: locker_product_type, value: true});
           await this.$store.dispatch('setEditCart', {key:'cartId',value:cart_id});
           await this.$store.dispatch('setEditCart', {key:'cartItemId',value:cart_item.id});
-          this.hide()
+          this.$modal.hide('cart-modal');
+          if(!edit){
+            this.$modal.show('rostermodal');
+          }
         }).catch(err => {
           console.error("Error while getting order detail", err)
         })
       }
 
-      public deleteConfirm(cart_item:Record<any,any>,factory_product:Record<any,any>){
+      public deleteConfirm(cart_item: Record<any,any>,factory_product:Record<any,any>){
         this.$emit("deleteCartItem",{cart_item:cart_item,factory_product:factory_product});
       }
 
