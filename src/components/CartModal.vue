@@ -234,7 +234,7 @@ import ModalAction from "@/mixins/ModalAction";
           let prod_res = selected_product_detail;
           let locker_product_type = prod_res.data.product_type;
           locker_product = prod_res.data;
-          this.$store.commit('UPDATE_ROSTER', cart_item.roster_detail)
+          this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item.roster_detail)));
           this.$root.$emit('rostershared', '')
           const designId = cart_item.design_id
           const styleId = cart_item.style_id
