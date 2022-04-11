@@ -10,7 +10,7 @@
     </div>
 
     <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
-    <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems1">
+    <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems.length > 0">
       <thead class="bg-light">
       <tr>
         <th class="font-weight-bold">
@@ -28,7 +28,7 @@
       </tr>
       </thead>
       <tbody>
-      <template v-for="(cart_item) in cartItems1">
+      <template v-for="(cart_item) in cartItems">
         <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
           <td>
             {{factory_product.product_name}}
@@ -154,7 +154,6 @@ import ModalAction from "@/mixins/ModalAction";
       private storageUrl = process.env.VUE_APP_STORAGE_URL
       public customer_reference_no : string = null
       public shipping_address: Record<any, any> = null
-      public cartItems1 = this.$store.getters.getCartItems
 
       get cartItems() {
         return this.$store.getters.getCartItems

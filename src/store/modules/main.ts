@@ -86,7 +86,13 @@ const Main:Module<any, any> = {
         browserTokenString += Math.random().toString(16).slice(-4)
       }
       localStorage.setItem('browserToken', browserTokenString)
+     },
+   async getPlatform(){
+     const res = await http.get('platform')
+     if (res.status == 200){
+       localStorage.setItem('platform', res.data.company.platform)
      }
+    }
   }
 }
 export default Main;

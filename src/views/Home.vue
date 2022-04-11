@@ -123,11 +123,11 @@
                     </template>
                     <b-dropdown-item><button @click="showDesign">Change Design / Item</button></b-dropdown-item>
                     <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'lockerRoom'" @click="getLockerRoomProducts(null)">Open locker room</button></b-dropdown-item>
-                    <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" v-b-modal.modal-login>Open locker room</button></b-dropdown-item>
+                    <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'">Open locker room</button></b-dropdown-item>
                     <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'summarybutton'" @click="buyNow">Summary</button></b-dropdown-item>
-                    <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'" v-b-modal.modal-login>Summary</b-button></b-dropdown-item>
+                    <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
                     <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
-                    <b-dropdown-item v-if="!isCustomerAuthenticated"><button v-b-modal.modal-login>Login</button></b-dropdown-item>
+                    <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
                     <b-dropdown-item v-else><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                   </b-dropdown>
                 </div>
@@ -677,17 +677,25 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
 
-  public setActionBeforeLogin(type: string) {
+  public async setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
-    this.$modal.show('loginModal')
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
       collectionAddmoreMode:false,
       eventProductMode:false,
       eventCollectionMode:false
     })
+    this.gotoLogin()
   }
-
+  public gotoLogin(){
+    let platform = localStorage.getItem('platform')
+    if (platform == 'self'){
+      this.$modal.show('loginModal')
+    }
+    else if(platform == "wordpress"){
+      window.location.href = "/my-account"
+    }
+  }
   public async getLockers(){
     if (!this.editStatus){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
