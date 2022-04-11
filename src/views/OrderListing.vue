@@ -77,14 +77,6 @@
                     <span class="font-weight-bold">{{item.factory_name}}</span>
                     <span class="factory_status" :class="item.status">{{item.status | Status}}</span>
                   </div>
-                  <div v-for="(item, index) in order.items" :key="index" class="d-inline-flex well py-1 px-2 bg-light gap-1 align-items-center">
-                    <span class="font-weight-bold">{{item.factory_name}}</span>
-                    <span class="factory_status" :class="item.status">{{item.status | Status}}</span>
-                  </div>
-                  <div v-for="(item, index) in order.items" :key="index" class="d-inline-flex well py-1 px-2 bg-light gap-1 align-items-center">
-                    <span class="font-weight-bold">{{item.factory_name}}</span>
-                    <span class="factory_status" :class="item.status">{{item.status | Status}}</span>
-                  </div>
                 </div>
               </td>
               <td>
@@ -211,19 +203,15 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
 
 
   public toggleHideShow(index:number,val:boolean) {
-    console.log(index,val)
     Vue.set(this.orders[index], 'visible', val)
-    console.log(this.orders)
   }
   public async getOrders(params: string | void){
     if(!params)
       params = ''
     http.get('orders'+params).then((res:Record<any, any>) => {
-      console.log('res',res)
       this.orders =  res.data.result.data
       this.makePagination(res.data.result)
     }).catch((e:any) => {
-      console.log('e',e)
       this.showError(e.response.data.message)
     })
   }
@@ -256,7 +244,6 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
     else{
       params = '?page='+page;
     }
-    console.log('params',params)
     this.getOrders(params);
   }
 

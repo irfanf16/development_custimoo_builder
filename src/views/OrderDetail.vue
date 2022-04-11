@@ -56,7 +56,7 @@
                   <div class="comment-button text-left px-2" v-if="item_status_activity_index == 0">
                     <a class="text-info" @click="item_status_activity.add_comment = !item_status_activity.add_comment">
                       <BIconChatDots/>
-                      Add comment 1</a>
+                      Add comment</a>
                   </div>
                   <!-- add comment starts -->
                   <template v-if="item_status_activity.add_comment">
@@ -390,9 +390,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
   public showSampleDesigns(order_item: Record<any, any>, order_item_index :number, activity_item_index:number){
-
-    console.log('order',order_item);
-
     this.$modal.show('customer-review-modal');
     this.activity_items.order_item_id = order_item.id
     this.activity_items.order_item_index = order_item_index
@@ -410,8 +407,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       actObj.factory_product_id = actItem.factory_product_id;
       for(let actfile of actItem.activity_files){
         let fileObj:Record<any,any> = {};
-        console.log(actfile.url);
-        //fileObj.file = 'http://localhost:8081/sample.jpg';
          fileObj.file = `${this.storage_url}${actfile.url}`;
         fileObj.file_type = null;
         actObj.files.push(fileObj);
@@ -461,16 +456,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     http.post(url, form_data)
       .then((successResponse) => {
         let response_data = successResponse.data;
-
-        console.log('response',response_data.result.order_item);
         Vue.set(this.order.items, this.activity_items.order_item_index, response_data.result.order_item)
         this.$modal.hide('customer-review-modal');
         this.showLoader = false;
-        // this.$modal.hide('test-sample-modal');
-
-        // this.resetActivityData();
-        // console.log("sdfsdf", response_data.result.order_activity);
-
       }).catch((errorResponse) => {
       this.showLoader = false;
       console.log(errorResponse);
@@ -492,7 +480,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
     const markerArea:Record<any,any> = new markerjs2.MarkerArea(image)
     markerArea.addEventListener('render', (event:Record<any,any>) => {
-      // console.log('event',event);
       activityObj.files[ref_index].file = event.dataUrl
       activityObj.files[ref_index].file_type = 'encode'
     });
@@ -542,7 +529,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     setTimeout(() => {
       let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
       if(action == 'reject'){
-        //console.log(activityObj);
         if((activityObj.message == null || activityObj.message == '' ) && !imageEdit ){
           this.showToast('Please provide feedback before rejection','error');
         }else{
@@ -563,7 +549,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     let self = this;
     let order_item = JSON.parse(JSON.stringify(self.order.items[order_item_index]));
     let order_item_status_activity = order_item.status_activities[item_status_activity_index];
-    console.log("order_item_status_activity", order_item_status_activity)
     let update_factory_product_ids: string[] = [];
     order_item_status_activity.activity_items.forEach((activity_item: Record<any, any>) => {
       update_factory_product_ids.push(activity_item.factory_product_id);
