@@ -48,7 +48,7 @@
 
                 <ul class="preview-header-icons">
                   <li class="d-flex flex-wrap align-items-center">
-                    <b-button v-if="!isCustomerAuthenticated" @click="$modal.show('loginModal')"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
+                    <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                     <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
                     <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                   </li>
@@ -128,7 +128,7 @@
                     <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
                     <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
                     <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
-                    <b-dropdown-item v-else><button @click="logoutCustomer">Logout</button></b-dropdown-item>
+                    <b-dropdown-item v-if="isCustomerAuthenticated && platform == 'self'"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                   </b-dropdown>
                 </div>
               </div>
@@ -523,6 +523,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
+  get platform():string{
+    return localStorage.getItem('platform') as string
+  }
   get cartItems() {
     return this.$store.getters.getCartItems
   }
@@ -658,6 +661,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     });
   }
 
+
   async deleteCartItem(item:Record<any,any>){
     const response = await this.ref['delete-cart-item'].showConfirm();
     if(response){
@@ -688,11 +692,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.gotoLogin()
   }
   public gotoLogin(){
-    let platform = localStorage.getItem('platform')
-    if (platform == 'self'){
+    if (this.platform == 'self'){
       this.$modal.show('loginModal')
     }
-    else if(platform == "wordpress"){
+    else if(this.platform == "wordpress"){
       window.location.href = "/my-account"
     }
   }
