@@ -924,10 +924,19 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async retrieveProducts(url:string|null=null) {
     let self = this;
+    let sync_id = this.$route.query.sync_id;
     if(url == null) {
        url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
       if(self.search_products) {
-        url += `&title=${self.search_products}`
+        url += `&title=${self.search_products}`;
+
+      }
+    }
+    if(sync_id) {
+      if(url.indexOf("?") > 0) {
+        url += `&sync_id=${sync_id}`;
+      } else {
+        url = `?sync_id=${sync_id}`;
       }
     }
     http.get(url).then(async (response: Record<any, any>) => {
