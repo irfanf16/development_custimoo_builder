@@ -89,7 +89,7 @@
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
-              <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem"/>
+              <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem" v-if="customer"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
               <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
