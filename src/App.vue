@@ -32,7 +32,7 @@ window.Echo = new Echo({
     Header
   },
   async mounted() {
-
+    await this.$store.dispatch('getPlatform');
     const token = this.$router.currentRoute.query.token
     if (token){
       let customer = await this.$store.dispatch('getCustomerFromToken', token)

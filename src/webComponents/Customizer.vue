@@ -121,7 +121,7 @@ export default {
       document.head.append(ubuntu_font)
       console.log("font appended")
     }
-
+    await this.$store.dispatch('getPlatform');
     if (!this.$store.getters.getCustomer && localStorage.getItem('jwtToken')) {
       let token = localStorage.getItem('jwtToken')
       let response = await this.$store.dispatch('getCustomerFromToken', token)
