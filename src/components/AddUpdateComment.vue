@@ -30,7 +30,7 @@
           </button>
           <button class="align-self-end btn btn-dark bordered" @click="handleCommentAction" :disabled="adding_comment"
                   :title="adding_comment ? action == 'edit' ? 'Updating comment' : 'Adding comment' :  action == 'edit' ? 'Update comment' : 'Add new comment'">
-            <BIconChatDots/>
+            <b-icon-arrow-right-short scale="1.4"/>
           </button>
         </div>
       </div>
