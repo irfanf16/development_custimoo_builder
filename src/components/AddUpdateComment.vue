@@ -28,7 +28,8 @@
             <input type="file" multiple @change="uploadFiles($event)" :disabled="adding_comment">
             <BIconPaperclip/>
           </button>
-          <button class="align-self-end btn btn-dark bordered" @click="handleCommentAction" :disabled="adding_comment">
+          <button class="align-self-end btn btn-dark bordered" @click="handleCommentAction" :disabled="adding_comment"
+                  :title="adding_comment ? action == 'edit' ? 'Updating comment' : 'Adding comment' :  action == 'edit' ? 'Update comment' : 'Add new comment'">
             <BIconChatDots/>
           </button>
         </div>
@@ -220,6 +221,7 @@ export default class AddUpdateComment extends  Mixins(ErrorMessages) {
         self.adding_comment = false;
 
       }).catch((errorResponse: any) => {
+        self.adding_comment = false;
         handleResponseException(errorResponse)
       })
     } else {

@@ -104,7 +104,7 @@
 
                           <blockquote class="blockquote mb-0">
                             <footer class="blockquote-footer" v-if="activity_comment.parent_message_id" style="cursor: pointer"
-                                    @click="goToParentMessage(activity_comment.parent_message_id)">
+                                    @click="goToMessage(activity_comment.parent_message_id)">
                               <cite title="Source Title">
                                 <template v-if="activity_comment.parent_message">
                                   {{ activity_comment.parent_message }}
@@ -126,7 +126,7 @@
                               </a>
                             </template>
                           </template>
-                          <p> {{ activity_comment.message }}</p>
+                          <p> {{ activity_comment.message }} </p>
 
                         </div>
                       </div>
@@ -250,13 +250,22 @@ import OrderFlowStatusLine from "@/components/OrderFlowStatusLine";
 import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {findIndex, find, filter} from "lodash";
+import {findIndex, debounce, filter} from "lodash";
 
 
 @Component<OrderDetail>({
-  mounted() {
+  async mounted() {
     let self = this;
-    self.getOrderDetail();
+    await self.getOrderDetail();
+    let comment_id = this.$route.query.comment_id;
+    if(comment_id) {
+      let timer = setInterval(function() {
+        self.goToMessage(Number(comment_id))
+        if( document.getElementById(`comment-${comment_id}-box`)) {
+          clearInterval(timer)
+        }
+      }, 2000)
+    }
 
   },
   components: {
@@ -343,7 +352,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
 
-  getOrderDetail() {
+  async getOrderDetail() {
+    console.log("i9nside")
     let self = this;
     let url = `order/${self.order_id}`
     http.get(url)
@@ -576,7 +586,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     }
   }
 
-  goToParentMessage(parent_message_id: number) {
+  goToMessage(parent_message_id: number) {
+    console.log("goto message",document.getElementById(`comment-${parent_message_id}-box`))
     document.getElementById(`comment-${parent_message_id}-box`)?.scrollIntoView({
       behavior: 'smooth'
     });
