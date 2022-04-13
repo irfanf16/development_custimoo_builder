@@ -172,9 +172,16 @@
            @close="$store.commit('Change_Locker_Active_Tab', 0)"  @opened="showMarkerActionButtons">
       <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
-        <div class="font-weight-bold pl-1">
-          Reject Artwork
+        <div class="d-flex align-items-center gap-2">
+          <div class="font-weight-bold pl-1">
+            Artwork Approval
+          </div>
+
+          <span class="badge badge-dark font-weight-lighter" style="line-height: normal">
+            {{activity_navigation_index+1}} / {{activity_items.activity_item_data.length}}
+          </span>
         </div>
+
         <div class="d-flex justify-content-end" style="flex-grow: 8;">
           <button class="btn btn-secondary light mx-1" @click="$modal.hide('customer-review-modal')">Cancel</button>
           <template v-if="activity_items.activity_item_data[activity_navigation_index] && activity_items.activity_item_data[activity_navigation_index].action">
