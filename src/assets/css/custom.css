@@ -1050,7 +1050,7 @@ button:focus, button:active {
 @media only screen and (min-width: 992px) {
   .customization-tabs .team-roaster-area .btn {
     display: block;
-    width: 40%;
+    width: 100%;
     font-size: 1rem;
   }
 }
@@ -1910,9 +1910,13 @@ button:focus, button:active {
   position: relative;
   padding: 0;
   display: block;
+  outline: none !important;
+  box-shadow: none !important;
 }
 .lockerroom-modal .nav-tabs .nav-link a {
   display: block;
+  outline: none !important;
+  box-shadow: none !important;
 }
 @media only screen and (min-width: 992px) {
   .lockerroom-modal .nav-tabs .nav-link {
@@ -1997,10 +2001,14 @@ button:focus, button:active {
   max-height: 50vh;
   overflow-y: auto;
 }
-.lockerroom-modal .lockerroom-tabs .card .assets-file div {
+.lockerroom-modal .lockerroom-tabs .card .assets-file .assets-logo-block {
+  border: 1px solid rgba(0, 0, 0, 0.1);
   display: flex;
-  flex-basis: 33.3%;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+.lockerroom-modal .lockerroom-tabs .card .assets-file div {
   margin-bottom: 20px;
   align-items: center;
 }
@@ -3039,6 +3047,58 @@ button:focus, button:active {
 }
 
 @media only screen and (max-width: 600px) {
+  .grid-2 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+@media only screen and (min-width: 600px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media only screen and (min-width: 768px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media only screen and (min-width: 992px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media only screen and (min-width: 1200px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .grid-3 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+@media only screen and (min-width: 600px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media only screen and (min-width: 768px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media only screen and (min-width: 992px) {
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media only screen and (min-width: 1200px) {
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media only screen and (max-width: 600px) {
   .grid-4 {
     grid-template-columns: repeat(1, 1fr);
   }
@@ -3120,24 +3180,48 @@ button:focus, button:active {
   grid-template-columns: repeat(1, 1fr);
 }
 
+.grid-span-1 {
+  grid-column: 1/span 1;
+}
+
 .grid-mobile-2 {
   grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-span-2 {
+  grid-column: 1/span 2;
 }
 
 .grid-mobile-3 {
   grid-template-columns: repeat(3, 1fr);
 }
 
+.grid-span-3 {
+  grid-column: 1/span 3;
+}
+
 .grid-mobile-4 {
   grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-span-4 {
+  grid-column: 1/span 4;
 }
 
 .grid-mobile-5 {
   grid-template-columns: repeat(5, 1fr);
 }
 
+.grid-span-5 {
+  grid-column: 1/span 5;
+}
+
 .grid-mobile-6 {
   grid-template-columns: repeat(6, 1fr);
+}
+
+.grid-span-6 {
+  grid-column: 1/span 6;
 }
 
 @media only screen and (max-width: 600px) {
@@ -4345,11 +4429,6 @@ button:focus, button:active {
   outline: none !important;
 }
 
-.vuescroll-panel {
-  margin-right: -17px !important;
-  overflow-y: scroll !important;
-}
-
 .well {
   padding: 10px;
   border: 1px solid #ccc;
@@ -4360,16 +4439,21 @@ button:focus, button:active {
   box-shadow: 1px 4px 7px rgba(0, 0, 0, 0.1);
 }
 
+.vuescroll-panel {
+  margin-right: -17px !important;
+  overflow-y: scroll !important;
+}
+
 .slither-slider-slides {
   height: auto !important;
 }
 
-#modal-center-lockerroom {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
 #modal-center-lockerroom .modal-content.lockerroom-modal {
   border: none !important;
+}
+
+.vm--container {
+  padding: 1.5rem 0;
 }
 
 .vm--modal .modal-close {
@@ -4570,6 +4654,31 @@ button:focus, button:active {
 .orderChat .tabs .nav-tabs .nav-item a.active {
   color: #219F84;
   border-bottom: 1px solid #219F84;
+}
+
+.input_icons {
+  position: relative;
+}
+.input_icons .icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  bottom: 0;
+  left: 0;
+  top: 0;
+  color: #219F84;
+  font-size: 1.2em;
+}
+.input_icons input {
+  text-indent: 25px;
+  border-color: #eee;
+}
+
+.add-address .form-group label {
+  margin-bottom: 5px;
+  font-weight: bolder;
 }
 
 /*# sourceMappingURL=custom.css.map */
