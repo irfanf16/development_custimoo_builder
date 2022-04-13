@@ -168,7 +168,7 @@
            :scrollable="true"
            height="auto"
            :reset="true"
-           name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true" title="Locker Room"
+           name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true"
            @close="$store.commit('Change_Locker_Active_Tab', 0)"  @opened="showMarkerActionButtons">
       <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
