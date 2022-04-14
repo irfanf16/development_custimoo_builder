@@ -22,7 +22,6 @@
               </div>
 
               <div class="mt-3">
-                <img src="../assets/images/sample.png" class="w-100" alt="Image">
               </div>
 
               <div class="mt-3">
