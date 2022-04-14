@@ -109,7 +109,7 @@
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-              <EditRosterAreaTab :productSizes="selectedProduct.sizes"/>
+              <EditRosterAreaTab @open-add-to-locker="openAddToLocker" :productSizes="selectedProduct.sizes"/>
             </div>
           </b-tab>
           <!--        </vuescroll>-->
@@ -278,6 +278,10 @@ export default class CustomizationTabs extends Vue {
 
   lockerColorsChanged(newval:any, old:any) {
     this.productColorsManipulation()
+  }
+
+  public openAddToLocker () {
+    this.$emit('open-add-to-locker')
   }
 
   public productColorsManipulation() {

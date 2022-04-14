@@ -34,11 +34,11 @@
       </div>
       <div class="pricing-are">
         <div class="order-details">
-          <div class="order-row">
-            <template>
-              <AddLockerRoomModal modal_name="share" :rosterUrl="true"  ref="share" />
-            </template>
-          </div>
+<!--          <div class="order-row">-->
+<!--            <template>-->
+<!--              <AddLockerRoomModal :rosterUrl="true"  ref="saveToLockerModal" />-->
+<!--            </template>-->
+<!--          </div>-->
 
           <template v-if="isCustomerAuthenticated">
             <template v-if="$store.getters.getUpdateOrderItemProducts == null">
@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
@@ -75,6 +75,7 @@ import ConfirmOrderTab from "@/views/ConfirmOrderTab.vue";
 import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
+import ModalAction from "@/mixins/ModalAction";
 import ProductionScene from '@/components/ProductionScene.vue'
 import { getActiveProductData } from "@/helpers/Helpers";
 
@@ -96,7 +97,7 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
   }
 })
 
-export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
+export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction)  {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>
@@ -136,6 +137,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
       })
     }
     return sum;
+  }
+
+  public openAddToLocker () {
+    this.$emit('open-add-to-locker')
   }
 
   get isCustomerAuthenticated(): boolean {
@@ -450,7 +455,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   public async getLockers(){
     if (!this.editStatus){
       await this.$store.dispatch("getLockers");
-      this.ref['share'].showSaveToLockerRoomModal()
+      // this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+      this.$emit('open-add-to-locker')
     }else{
       let res  = await this.$store.dispatch('regenerateRosterLink', { id: this.$store.getters.getEditProductId })
       this.shared_url = res.data

@@ -53,7 +53,7 @@
       <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>
     </div>
     <div class="team-order-details">
-      <OrderDetailsTab ref="order-details"/>
+      <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details"/>
     </div>
   </div>
 </template>
@@ -116,6 +116,10 @@ export default class EditRosterAreaTab extends Vue {
   }
   get notifications(){
     return this.$store.getters.getNotifications
+  }
+
+  public openAddToLocker () {
+    this.$emit('open-add-to-locker')
   }
 
   retrieveProducts(): void {

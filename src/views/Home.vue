@@ -6,7 +6,7 @@
       <b-row>
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs v-if="!mobileScreen" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
+            <CustomizationTabs v-if="!mobileScreen" @open-add-to-locker="getLockers" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
             <CustomTabs ref="custom-mobile-tabs" v-else />
           </b-col>
 
@@ -85,7 +85,7 @@
               <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
-              <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
+              <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
               <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
 
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
@@ -224,7 +224,7 @@
 
 <script lang="ts">
 
-import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
@@ -634,7 +634,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showVModal('locker-modal')
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
-      // this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
     } else if(this.actionBeforeLogin == 'addToCart') {
@@ -807,7 +807,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.showVModal('locker-modal')
 
         if(this.ref.saveToLockerModal) {
-          this.ref['saveToLockerModal'].hideModal()
+          this.hideVModal('add-to-lockerroom')
           this.ref.saveToLockerModal.showLoader = false;
         }
 
