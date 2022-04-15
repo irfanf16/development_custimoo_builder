@@ -256,7 +256,7 @@
     <template #tabs-end>
       <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getSelectionMode.readonly"
                   role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
-        <span class="btn btn-secondary light" @click="openCreateLockerModal">Add <BIconPlus/></span>
+        <span class="btn btn-secondary light" @click="showVModal('create-modal')">Add <BIconPlus/></span>
       </b-nav-item>
      </template>
 
@@ -332,6 +332,7 @@ import ContactModal from "@/components/ContactModal.vue";
 // import 'vue-popperjs/dist/vue-popper.css';
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
+import ModalAction from "@/mixins/ModalAction";
 
 @Component<LockerRoom>({
   components: {
@@ -356,7 +357,7 @@ import 'popper-vue/dist/popper-vue.css'
     }
   }
 })
-export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts) {
+export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   private baseUrl = location.host + "/#/"
@@ -527,9 +528,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   get logoTabIndex(): number {
     return this.$store.getters.getActiveLogoIndex
-  }
-  public openCreateLockerModal(){
-    this.ref['create-modal'].showModal()
   }
 
   public lockerAdded() {
