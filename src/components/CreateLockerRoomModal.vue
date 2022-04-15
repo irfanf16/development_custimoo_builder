@@ -1,16 +1,23 @@
 <template>
     <modal ref="create-modal" name="create-modal" hide-footer id="modal-center-createlockerroom" centered scrollable size="xl" title="Create Locker Room" content-class="lockerroom-modal create-lockerroom-modal">
-        <div class="pt-4 design-name-form">
-            <b-form inline @submit.prevent="createLocker">
-                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Name</label>
-                <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
-                    <b-input-group>
-                        <b-form-input id="inline-form-input-productname" v-model="name"  placeholder="Locker Room Name"></b-form-input>
-                    </b-input-group>
-                    <b-button variant="primary" @click="createLocker">Create</b-button>
-                </div>
-            </b-form>
-        </div>
+      <div class="modal-header d-flex justify-content-between">
+        <span class="fs-4 font-weight-bold">Create Locker Room</span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('create-modal')"><BIconX /></span>
+      </div>
+      <div class="p-4 design-name-form">
+          <b-form inline @submit.prevent="createLocker">
+              <label for="inline-form-input-productname" class="w-100 text-left d-block mb-2">Name</label>
+              <div class="w-100 d-flex gap-2 flex-wrap align-items-center">
+                  <b-input-group>
+                      <b-form-input id="inline-form-input-productname" v-model="name"  placeholder="Locker Room Name"></b-form-input>
+                  </b-input-group>
+                  <div class="d-flex gap-2">
+                    <b-button variant="secondary" class="w-100" @click="createLocker">Create</b-button>
+                    <b-button variant="secondary" class="w-100 light" @click="hideVModal('create-modal')">Cancel</b-button>
+                  </div>
+              </div>
+          </b-form>
+      </div>
     </modal>
 </template>
 
@@ -18,10 +25,11 @@
 
 import {Component, Mixins, Vue} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
+import ModalAction from "@/mixins/ModalAction";
     // @Component<CreateLockerRoomModal>({
     // })
    @Component
-    export default class CreateLockerRoomModal extends Mixins(ErrorMessages) {
+    export default class CreateLockerRoomModal extends Mixins(ErrorMessages, ModalAction) {
       public name = ''
       public ref = this.$refs as Record<any, any>
 
@@ -34,17 +42,11 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         if (res.status == 201){
           this.name = ''
           await this.$store.dispatch('GET_LOCKER_PRODUCTS');
-          this.hideModal()
+          this.hideVModal('create-modal')
           this.$emit('lockerAdded')
        }else if (res.status == 422){
          this.showError(res.message)
        }
-      }
-      public showModal(){
-        this.$modal.show('create-modal')
-      }
-      public hideModal(){
-        this.$modal.hide('create-modal');
       }
     }
 
@@ -117,14 +119,15 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     .design-name-form{
         label{font-size: 16px;}
         .input-group{
-            flex: 0 0 55%;
-            max-width: 55%;
-        }
-        .btn{
-            flex: 0 0 44%;
-            max-width: 44%;
-            background: #219f84;
-            border-color: #219f84;
+            flex: 0 0 60%;
+            max-width: 60%;
+            margin: 0;
+
+          &+div{
+            flex: 0 0 37%;
+            max-width: 37%;
+            margin: 0;
+          }
         }
     }
 

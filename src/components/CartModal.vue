@@ -150,7 +150,7 @@ import ModalAction from "@/mixins/ModalAction";
     export default class CartModal extends Mixins(ErrorMessages,LockerProducts, handleMainProducts, ModalAction) {
 
       public viewLoader = false;
-      private userData = JSON.parse(localStorage.customer);
+      private userData = this.$store.getters.getCustomer;
       private storageUrl = process.env.VUE_APP_STORAGE_URL
       public customer_reference_no : string = null
       public shipping_address: Record<any, any> = null

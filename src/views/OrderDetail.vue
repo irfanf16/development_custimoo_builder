@@ -56,7 +56,7 @@
                   <div class="comment-button text-left px-2" v-if="item_status_activity_index == 0">
                     <a class="text-info" @click="item_status_activity.add_comment = !item_status_activity.add_comment">
                       <BIconChatDots/>
-                      Add comment 1</a>
+                      Add comment</a>
                   </div>
                   <!-- add comment starts -->
                   <template v-if="item_status_activity.add_comment">
@@ -104,7 +104,7 @@
 
                           <blockquote class="blockquote mb-0">
                             <footer class="blockquote-footer" v-if="activity_comment.parent_message_id" style="cursor: pointer"
-                                    @click="goToParentMessage(activity_comment.parent_message_id)">
+                                    @click="goToMessage(activity_comment.parent_message_id)">
                               <cite title="Source Title">
                                 <template v-if="activity_comment.parent_message">
                                   {{ activity_comment.parent_message }}
@@ -126,7 +126,7 @@
                               </a>
                             </template>
                           </template>
-                          <p> {{ activity_comment.message }}</p>
+                          <p> {{ activity_comment.message }} </p>
 
                         </div>
                       </div>
@@ -168,13 +168,20 @@
            :scrollable="true"
            height="auto"
            :reset="true"
-           name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true" title="Locker Room"
+           name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true"
            @close="$store.commit('Change_Locker_Active_Tab', 0)"  @opened="showMarkerActionButtons">
       <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
-        <div class="font-weight-bold pl-1">
-          Reject Artwork
+        <div class="d-flex align-items-center gap-2">
+          <div class="font-weight-bold pl-1">
+            Artwork Approval
+          </div>
+
+          <span class="badge badge-dark font-weight-lighter" style="line-height: normal">
+            {{activity_navigation_index+1}} / {{activity_items.activity_item_data.length}}
+          </span>
         </div>
+
         <div class="d-flex justify-content-end" style="flex-grow: 8;">
           <button class="btn btn-secondary light mx-1" @click="$modal.hide('customer-review-modal')">Cancel</button>
           <template v-if="activity_items.activity_item_data[activity_navigation_index] && activity_items.activity_item_data[activity_navigation_index].action">
@@ -250,13 +257,22 @@ import OrderFlowStatusLine from "@/components/OrderFlowStatusLine";
 import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {findIndex, find, filter} from "lodash";
+import {findIndex, debounce, filter} from "lodash";
 
 
 @Component<OrderDetail>({
-  mounted() {
+  async mounted() {
     let self = this;
-    self.getOrderDetail();
+    await self.getOrderDetail();
+    let comment_id = this.$route.query.comment_id;
+    if(comment_id) {
+      let timer = setInterval(function() {
+        self.goToMessage(Number(comment_id))
+        if( document.getElementById(`comment-${comment_id}-box`)) {
+          clearInterval(timer)
+        }
+      }, 2000)
+    }
 
   },
   components: {
@@ -343,7 +359,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
 
-  getOrderDetail() {
+  async getOrderDetail() {
+    console.log("i9nside")
     let self = this;
     let url = `order/${self.order_id}`
     http.get(url)
@@ -390,9 +407,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
   public showSampleDesigns(order_item: Record<any, any>, order_item_index :number, activity_item_index:number){
-
-    console.log('order',order_item);
-
     this.$modal.show('customer-review-modal');
     this.activity_items.order_item_id = order_item.id
     this.activity_items.order_item_index = order_item_index
@@ -410,8 +424,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       actObj.factory_product_id = actItem.factory_product_id;
       for(let actfile of actItem.activity_files){
         let fileObj:Record<any,any> = {};
-        console.log(actfile.url);
-        //fileObj.file = 'http://localhost:8081/sample.jpg';
          fileObj.file = `${this.storage_url}${actfile.url}`;
         fileObj.file_type = null;
         actObj.files.push(fileObj);
@@ -461,16 +473,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     http.post(url, form_data)
       .then((successResponse) => {
         let response_data = successResponse.data;
-
-        console.log('response',response_data.result.order_item);
         Vue.set(this.order.items, this.activity_items.order_item_index, response_data.result.order_item)
         this.$modal.hide('customer-review-modal');
         this.showLoader = false;
-        // this.$modal.hide('test-sample-modal');
-
-        // this.resetActivityData();
-        // console.log("sdfsdf", response_data.result.order_activity);
-
       }).catch((errorResponse) => {
       this.showLoader = false;
       console.log(errorResponse);
@@ -492,7 +497,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
     const markerArea:Record<any,any> = new markerjs2.MarkerArea(image)
     markerArea.addEventListener('render', (event:Record<any,any>) => {
-      // console.log('event',event);
       activityObj.files[ref_index].file = event.dataUrl
       activityObj.files[ref_index].file_type = 'encode'
     });
@@ -542,7 +546,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     setTimeout(() => {
       let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
       if(action == 'reject'){
-        //console.log(activityObj);
         if((activityObj.message == null || activityObj.message == '' ) && !imageEdit ){
           this.showToast('Please provide feedback before rejection','error');
         }else{
@@ -563,7 +566,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     let self = this;
     let order_item = JSON.parse(JSON.stringify(self.order.items[order_item_index]));
     let order_item_status_activity = order_item.status_activities[item_status_activity_index];
-    console.log("order_item_status_activity", order_item_status_activity)
     let update_factory_product_ids: string[] = [];
     order_item_status_activity.activity_items.forEach((activity_item: Record<any, any>) => {
       update_factory_product_ids.push(activity_item.factory_product_id);
@@ -591,7 +593,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     }
   }
 
-  goToParentMessage(parent_message_id: number) {
+  goToMessage(parent_message_id: number) {
+    console.log("goto message",document.getElementById(`comment-${parent_message_id}-box`))
     document.getElementById(`comment-${parent_message_id}-box`)?.scrollIntoView({
       behavior: 'smooth'
     });

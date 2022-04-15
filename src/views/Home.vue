@@ -6,7 +6,7 @@
       <b-row>
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs v-if="!mobileScreen" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
+            <CustomizationTabs v-if="!mobileScreen" @open-add-to-locker="getLockers" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
             <CustomTabs ref="custom-mobile-tabs" v-else />
           </b-col>
 
@@ -48,9 +48,9 @@
 
                 <ul class="preview-header-icons">
                   <li class="d-flex flex-wrap align-items-center">
-                    <b-button v-if="!isCustomerAuthenticated" @click="$modal.show('loginModal')"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
+                    <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                     <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
+                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                   </li>
                   <li><a>
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
@@ -89,10 +89,10 @@
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                 <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
               </div>
-              <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem"/>
+              <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem" v-if="customer"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
-              <AddLockerRoomModal modal_name="saveToLockerModal"  @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
+              <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
               <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
 
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
@@ -123,12 +123,12 @@
                     </template>
                     <b-dropdown-item><button @click="showDesign">Change Design / Item</button></b-dropdown-item>
                     <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'lockerRoom'" @click="getLockerRoomProducts(null)">Open locker room</button></b-dropdown-item>
-                    <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" v-b-modal.modal-login>Open locker room</button></b-dropdown-item>
+                    <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'">Open locker room</button></b-dropdown-item>
                     <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'summarybutton'" @click="buyNow">Summary</button></b-dropdown-item>
-                    <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'" v-b-modal.modal-login>Summary</b-button></b-dropdown-item>
+                    <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
                     <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
-                    <b-dropdown-item v-if="!isCustomerAuthenticated"><button v-b-modal.modal-login>Login</button></b-dropdown-item>
-                    <b-dropdown-item v-else><button @click="logoutCustomer">Logout</button></b-dropdown-item>
+                    <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
+                    <b-dropdown-item v-if="isCustomerAuthenticated && platform == 'self'"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                   </b-dropdown>
                 </div>
               </div>
@@ -231,7 +231,7 @@
 
 <script lang="ts">
 
-import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
@@ -523,6 +523,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
+  get platform():string{
+    return localStorage.getItem('platform') as string
+  }
   get cartItems() {
     return this.$store.getters.getCartItems
   }
@@ -641,7 +644,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showVModal('locker-modal')
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
-      // this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
     } else if(this.actionBeforeLogin == 'addToCart') {
@@ -657,6 +660,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       console.log(e)
     });
   }
+
 
   async deleteCartItem(item:Record<any,any>){
     const response = await this.ref['delete-cart-item'].showConfirm();
@@ -677,17 +681,24 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
 
-  public setActionBeforeLogin(type: string) {
+  public async setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
-    this.$modal.show('loginModal')
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
       collectionAddmoreMode:false,
       eventProductMode:false,
       eventCollectionMode:false
     })
+    this.gotoLogin()
   }
-
+  public gotoLogin(){
+    if (this.platform == 'self'){
+      this.$modal.show('loginModal')
+    }
+    else if(this.platform == "wordpress"){
+      window.location.href = "/my-account"
+    }
+  }
   public async getLockers(){
     if (!this.editStatus){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
@@ -815,7 +826,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.showVModal('locker-modal')
 
         if(this.ref.saveToLockerModal) {
-          this.ref['saveToLockerModal'].hideModal()
+          this.hideVModal('add-to-lockerroom')
           this.ref.saveToLockerModal.showLoader = false;
         }
 

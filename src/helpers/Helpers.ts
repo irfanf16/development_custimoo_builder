@@ -302,24 +302,26 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number):Promise<
 }
 
 const handleResponseException = (errorResponse: AxiosError | TypeError) => {
+  let message = null
   if("isAxiosError" in errorResponse) {
     // errorResponse.response.data object have keys { exception, file, line, message, trace }
-    const { message } = errorResponse.response?.data;
+    message = errorResponse.response?.data?.message;
     console.error("Error (Axios): ", message)
   } else {
-    Vue.$toast.open({
-      message: errorResponse.message,
-      type: "error",
-      dismissible: true,
-      duration: 5000,
-      position: 'bottom-left'
-    })
+    message = errorResponse.message;
     console.error(`Error (${errorResponse.name}): `, {
       name: errorResponse.name,
       message: errorResponse.message,
       stack: errorResponse.stack
     })
   }
+  Vue.$toast.open({
+    message: message,
+    type: "error",
+    dismissible: true,
+    duration: 5000,
+    position: 'bottom-left'
+  })
 }
 
 const logData = (data: any) => {

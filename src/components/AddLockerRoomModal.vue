@@ -1,5 +1,5 @@
 <template>
-  <modal :name="modal_name"
+  <modal name="add-to-lockerroom"
          :width="screenWidth"
          :resizable="true"
          :scrollable="true"
@@ -9,13 +9,13 @@
          id="modal-center-addlockerroom" hide-footer centered size="xl"  modal-class="add_locker" content-class="lockerroom-modal">
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Save</span>
-      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal(modal_name)"><BIconX /></span>
+      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('add-to-lockerroom')"><BIconX /></span>
     </div>
     <div class="p-4">
       <div class="lockerroom-header">
               <div class="locker-opener w-100" style="max-width: 100%; overflow-x: auto">
                 <b-button style="white-space: nowrap" v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-                <span class="btn btn-secondary light add_new_locker_btn" @click="showVModal(modal_name)">Add <BIconPlus /></span>
+                <span class="btn btn-secondary light add_new_locker_btn" @click="showVModal('create-modal')">Add <BIconPlus /></span>
               </div>
   <!--            <div class="add_new_locker">-->
   <!--              -->
@@ -59,7 +59,7 @@
           </div>
         </div>
         <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
-      <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+      <div class="loader" v-if="showLoader || showAddLoader"><img src="../../src/assets/images/loading.gif" /></div>
     </div>
     </modal>
 </template>
@@ -83,9 +83,10 @@ import ModalAction from "@/mixins/ModalAction";
     export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalAction) {
       @Prop({required: false, default: true}) readonly close_on_add !: boolean
       @Prop({required: false, default: false})  rosterUrl !: boolean
-      @Prop({required: true, default: "addlockermodal"})  modal_name !: string
       async recallProducts(){
+        this.showLoader = true;
         await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+        this.showLoader = false;
         if (this.roomWithProducts.length){
           this.productData = this.roomWithProducts[0].product
           this.tabIndex = 0
@@ -165,9 +166,6 @@ import ModalAction from "@/mixins/ModalAction";
           this.productData = this.roomWithProducts[index].product;
         }
       }
-      public hideModal(){
-        (this.$modal as Record<any, any>).hide(this.modal_name)
-      }
 
       public async saveToLocker(){
         this.showLoader = true
@@ -212,7 +210,7 @@ import ModalAction from "@/mixins/ModalAction";
             this.product_name = ''
             this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
             if(this.close_on_add) {
-              this.hideModal();
+              this.hideVModal('add-to-lockerroom');
               this.showLoader = false
             } else {
               this.$emit('open-locker-room', this.tabIndex);
@@ -242,7 +240,7 @@ import ModalAction from "@/mixins/ModalAction";
         }
       }
       public showSaveToLockerRoomModal() {
-        (this.$modal as Record<any, any>).show(this.modal_name)
+        this.showVModal('add-to-lockerroom')
         this.recallProducts();
       }
       public async deleteProduct(ind:number, id:number){
