@@ -376,6 +376,8 @@ const getActiveProductData = async () => {
       logo_colors: Store.getters.getLogosColors,
       model_id: product_models[selected_model_index].id,
       product_id: selected_product.product_id,
+      ecommerce_post_id: selected_product.ecommerce_product_id,
+      sync_id: selected_product.sync_id,
       product_type: selected_product.product_type,
       product_name: selected_product.product_name,
       pdf_file: null,

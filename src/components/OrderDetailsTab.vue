@@ -39,6 +39,11 @@
             </template>
           </div>
 
+
+          <button  class="btn btn-secondary fw-bold w-100" @click="addToCart">
+            Add to Cart
+          </button>
+
           <template v-if="isCustomerAuthenticated">
             <template v-if="$store.getters.getUpdateOrderItemProducts == null">
               <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
@@ -221,10 +226,12 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
   }
 
   public async addToCart() {
+
     let self = this;
     try {
       this.isLoading = true;
      let cart_product = await getActiveProductData();
+
      if(cart_product == null) {
        return false;
      }
@@ -236,28 +243,58 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages)  {
         post_data.factory_product.id = this.$store.getters.getEditCart.cartItemId
         url = `carts/cart-items/${this.$store.getters.getEditCart.cartId}/update`
       }
-      http.post(url, post_data).then((res: any) => {
-        if (res.data.success == true){
-          let api_res:Record<any, any> = res.data.result
-          this.$store.dispatch('addToCart',api_res.items)
-          this.$store.dispatch('setEditCart', {key:'cartId',value:0});
-          this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
-          this.showToast(res.data.message, 'SUCCESS');
-          this.isLoading = false;
-        }else{
-          if(res.data.status_code === 422){
-            this.showErrorValidation(res.data.errors);
-            this.isLoading = false
-          }
-          else{
-            this.showError(res)
-            this.isLoading = false
-          }
-        }
+
+      let santacart = true;
+
+      if(cart_product.sync_id === "" || cart_product.ecommerce_post_id === ""){
+        return false;
+      }
+
+      let ecom_url = 'http://custimoo_santa.local/wp-admin/admin-ajax.php'
+      let ecom_form_data = new FormData();
+      ecom_form_data.append('action', 'custimoo_add_to_cart');
+      ecom_form_data.append('product_id', cart_product.ecommerce_post_id);
+      ecom_form_data.append('quantity', 1);
+
+     await http.post(ecom_url, ecom_form_data).then((res: any) => {
+      if(!res.data.status){
+         santacart = false
+         this.showToast(res.data.message, 'ERROR');
+       }
       }).catch(err => {
+       santacart = false
         this.isLoading = false
         this.showErrorArr(err.response.data.errors)
       });
+
+     console.log(santacart);
+
+      if(santacart){
+        this.isLoading = true;
+        http.post(url, post_data).then((res: any) => {
+          if (res.data.success == true){
+            let api_res:Record<any, any> = res.data.result
+            this.$store.dispatch('addToCart',api_res.items)
+            this.$store.dispatch('setEditCart', {key:'cartId',value:0});
+            this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
+            this.showToast(res.data.message, 'SUCCESS');
+            this.isLoading = false;
+          }else{
+            if(res.data.status_code === 422){
+              this.showErrorValidation(res.data.errors);
+              this.isLoading = false
+            }
+            else{
+              this.showError(res)
+              this.isLoading = false
+            }
+          }
+        }).catch(err => {
+          this.isLoading = false
+          this.showErrorArr(err.response.data.errors)
+        })
+      }
+
     }
     catch (e) {
       console.error('error in add to cart',e)
