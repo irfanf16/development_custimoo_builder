@@ -40,9 +40,9 @@
 <!--          </div>-->
 
 
-          <button  class="btn btn-secondary fw-bold w-100" @click="addToCart">
-            Add to Cart
-          </button>
+<!--          <button  class="btn btn-secondary fw-bold w-100" @click="addToCart">-->
+<!--            Add to Cart-->
+<!--          </button>-->
 
           <template v-if="isCustomerAuthenticated">
             <template v-if="$store.getters.getUpdateOrderItemProducts == null">
@@ -250,29 +250,32 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
       }
 
       let santacart = true;
+      let company_domain = localStorage.getItem('company_domain');
+      let platform = localStorage.getItem('platform');
 
-      if(cart_product.sync_id === "" || cart_product.ecommerce_post_id === ""){
-        return false;
+      if(platform === 'wordpress'){
+        if(cart_product.sync_id === "" || cart_product.ecommerce_post_id === ""){
+          return false;
+        }
+
+        let ecom_url = company_domain + '/wp-admin/admin-ajax.php';
+        let ecom_form_data = new FormData();
+        ecom_form_data.append('action', 'custimoo_add_to_cart');
+        ecom_form_data.append('product_id', cart_product.ecommerce_post_id);
+        ecom_form_data.append('quantity', this.total);
+
+        await http.post(ecom_url, ecom_form_data).then((res: any) => {
+          if(!res.data.status){
+            santacart = false
+            this.showToast(res.data.message, 'ERROR');
+          }
+        }).catch(err => {
+          santacart = false
+          this.isLoading = false
+          this.showErrorArr(err.response.data.errors)
+        });
       }
 
-      let ecom_url = 'http://custimoo_santa.local/wp-admin/admin-ajax.php'
-      let ecom_form_data = new FormData();
-      ecom_form_data.append('action', 'custimoo_add_to_cart');
-      ecom_form_data.append('product_id', cart_product.ecommerce_post_id);
-      ecom_form_data.append('quantity', 1);
-
-     await http.post(ecom_url, ecom_form_data).then((res: any) => {
-      if(!res.data.status){
-         santacart = false
-         this.showToast(res.data.message, 'ERROR');
-       }
-      }).catch(err => {
-       santacart = false
-        this.isLoading = false
-        this.showErrorArr(err.response.data.errors)
-      });
-
-     console.log(santacart);
 
       if(santacart){
         this.isLoading = true;
@@ -283,6 +286,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
             this.$store.dispatch('setEditCart', {key:'cartId',value:0});
             this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
             this.showToast(res.data.message, 'SUCCESS');
+            if(platform === 'wordpress'){
+              window.location.href = company_domain + '/cart'
+            }
             this.isLoading = false;
           }else{
             if(res.data.status_code === 422){

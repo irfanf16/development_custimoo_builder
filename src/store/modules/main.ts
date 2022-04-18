@@ -91,6 +91,8 @@ const Main:Module<any, any> = {
      const res = await http.get('platform')
      if (res.status == 200){
        localStorage.setItem('platform', res.data.company.platform)
+       const company_domains = JSON.parse(res.data.company.company_domains);
+       localStorage.setItem('company_domain', company_domains[0])
      }
     }
   }
