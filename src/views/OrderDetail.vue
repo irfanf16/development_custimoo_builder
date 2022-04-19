@@ -22,9 +22,13 @@
                   <div class="activity-title">
                     {{ item_status_activity.message }}
                     <span class="date-time">
-                  {{ item_status_activity.created_at | formatDate('HH:mm Do MMM YY ')  }}
-                </span>
+                      {{ item_status_activity.created_at | formatDate('HH:mm Do MMM YY ')  }}
+                    </span>
                   </div>
+                  <div class="activity-text p-2 fs-2 text-muted">
+                    {{ statusMsgs[item_status_activity.status] }}
+                  </div>
+
                   <div class="images-grid p-2 d-flex gap-1 w-100">
                     <div class="d-flex align-items-stretch flex-wrap gap-1">
                       <div class="feedback-block" :key="activity_itm_ind" v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
@@ -35,8 +39,6 @@
                         <template v-else>
                           <div class="feedback-text" :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                         </template>
-
-
                       </div>
                     </div>
 
@@ -324,6 +326,17 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public ORDERINPRODUCTION = "in_production"
   public ORDERSHIPPED = "shipped"
   public ORDERCOMPLETED = "completed"
+  private statusMsgs = {
+    submitted_for_factory_review: "Waiting for manufacturer review artwork.",
+    factory_approved: "Artwork has been approved by the manufacturer. The manufacturer will now produce a sample and upload it here.",
+    factory_rejected: "Artwork rejected by manufacturer. Please read comments and edit product accordingly.",
+    submitted_for_customer_review: "Manufacturer has submitted these samples. Please review carefully and take action.",
+    customer_approved: "You have approved samples.",
+    customer_rejected: "You have rejected the sample. Please wait for new samples from the manufacturer.",
+    in_production: "The manufacturer has begun creating the products.",
+    shipped: "The manufacturer has shipped your products.",
+    completed: "You order has completed successfully.",
+  }
   public status_icons:Record<any, any> = {
     submitted_for_factory_review: 'submitted_for_factory_review',
     factory_approved: 'factory_approved',
