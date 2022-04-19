@@ -108,6 +108,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
 import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
+import ModalAction from "@/mixins/ModalAction";
 
 @Component<UploadLogo>({
   components: {LogoEditorModal},
@@ -119,7 +120,7 @@ import LogoEditorModal from "@/components/LogoEditorModal.vue";
       }
  }
 })
-export default class UploadLogo extends Mixins(ErrorMessages) {
+export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   public status = 'accepted'
   public open_modal!: boolean
   public mounted!: boolean
@@ -187,7 +188,7 @@ export default class UploadLogo extends Mixins(ErrorMessages) {
     this.$store.dispatch('editLogo',{key:'originalBase64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
     this.$store.dispatch('toggleLogoCheck', {type:'color',val:false})
     this.$store.dispatch('toggleLogoCheck', {type:'background',val:false})
-    this.ref.logoEditorModal.showLogoModal()
+    this.showVModal('logo-modal')
   }
 
   public showModal() {

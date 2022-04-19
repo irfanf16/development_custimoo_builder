@@ -1,16 +1,25 @@
 <template>
-    <b-modal  ref="logo-modal" hide-footer id="modal-center-savecolormodal" centered scrollable size="xl" content-class="edit-logo-modal">
-      <template #modal-header>
-        <div class="w-100">
-          <div class="fs-5 text-center font-weight-bold">Logo Editor</div>
+    <modal name="logo-modal"
+             ref="logo-modal"
+             :width="screenWidth"
+             :resizable="true"
+             :scrollable="true"
+             height="auto"
+             :reset="true"
+             :shiftY="0"
+             id="modal-center-savecolormodal" hide-footer centered size="xl" class="edit-logo-modal">
+      <div class="w-100 modal-header d-block">
+        <div>
+          <div class="fs-5 text-center text-secondary font-weight-bold">Logo Editor</div>
           <div class="text-center">
             You can alter the appearance of a logo, select a function from the list on the left
           </div>
-          <span @click="cancelEditing" class="fs-5 modal-close position-absolute text-muted cursor-pointer" style="top: 5px; right: 7px"><BIconX /></span>
         </div>
-      </template>
+        <span @click="cancelEditing" class="fs-5 modal-close position-absolute text-muted cursor-pointer" style="top: 5px; right: 7px"><BIconX /></span>
+      </div>
+
         <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
-      <div class="container">
+      <div class="p-5">
         <div class="d-flex w-100 gap-3">
           <div style="flex-basis: 50%; padding-top: 27px" class="checkboxes_container">
             <div>
@@ -55,20 +64,20 @@
           </div>
         </div>
 
-
-
-        <div class="d-flex align-items-center justify-content-center mt-3 gap-2">
-          <b-button @click="cancelEditing" variant="secondary" class="use-btn light flex-shrink-1" style="white-space: nowrap; max-width: 200px">
-            <template>Cancel</template>
-          </b-button>
-          <b-button @click="useLogo()" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px">
-            <template> Save and use this Logo</template>
-          </b-button>
+        <div class="text-right">
+          <div class="d-inline-flex align-items-center justify-content-center mt-3 gap-2">
+            <b-button @click="cancelEditing" variant="secondary" class="use-btn light flex-shrink-1" style="white-space: nowrap; max-width: 200px">
+              <template>Cancel</template>
+            </b-button>
+            <b-button @click="useLogo()" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px">
+              <template> Save and use this Logo</template>
+            </b-button>
+          </div>
         </div>
 
       </div>
 
-    </b-modal>
+    </modal>
 
 </template>
 
@@ -83,6 +92,7 @@ import {http} from "@/httpCommon";
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import ErrorMessages from "@/mixins/ErrorMessages";
+import ModalAction from "@/mixins/ModalAction";
     @Component<LogoEditorModal>({
         components: {
           ColorTabs,
@@ -93,7 +103,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
         this.getColors()
       }
     })
-    export default class LogoEditorModal extends Mixins(ErrorMessages) {
+    export default class LogoEditorModal extends Mixins(ErrorMessages, ModalAction) {
       public timeout =  0;
       public locker_selected = true;
       public colorTabClick = false;
@@ -104,6 +114,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       public colors: any = [];
       public productColors: any[] = []
       public showLoader = false;
+      private screenWidth = 1200
       public selectedColor = '#000000'
       @Prop({ required: true }) logo_id!: number
       @Prop({ required: true }) customLogoIndex!: number
@@ -132,7 +143,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       }
       public  cancelEditing() {
         this.$store.dispatch('unsetLogoEditor')
-        this.ref['logo-modal'].hide();
+        this.hideVModal('logo-modal')
       }
       public  useLogo() {
         this.showLoader = true
@@ -169,7 +180,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
             }
             this.showToast('Logo Applied','SUCCESS')
             this.showLoader = false
-            this.ref['logo-modal'].hide();
+            this.hideVModal('logo-modal')
           }).catch((e) => {
           this.showLoader = false
           this.showError('Something went wrong')
