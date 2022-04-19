@@ -109,7 +109,7 @@
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-              <EditRosterAreaTab :productSizes="selectedProduct.sizes"/>
+              <EditRosterAreaTab :productSizes="productSizes"/>
             </div>
           </b-tab>
           <!--        </vuescroll>-->
@@ -231,6 +231,30 @@ export default class CustomizationTabs extends Vue {
     return this.$store.getters.getLogosColors
   }
 
+  get productSizes(){
+    let cumulative_size:Record<any,any> = [];
+    Object.values(this.selectedProduct.sizes).forEach((value)=>{
+      console.log(value)
+      if(Object.prototype.hasOwnProperty.call(value,'json_data')){
+        cumulative_size.push(JSON.parse(value.json_data));
+      }
+    })
+    console.log(cumulative_size)
+    let sizes = [] as Record<any,any>;
+    if(cumulative_size.length > 0){
+      cumulative_size.forEach((size_array:Record<any,any>) => {
+        if(size_array.length > 0){
+          size_array.forEach((size:Record<any,any>) => {
+              sizes.push(size);
+          })
+        }
+      })
+    }
+    // let cumulative_size = this.selectedProduct.sizes.reduce((r:Record<any,any>, e:Record<any,any>) => (r.push(...e), r), [])
+    // console.log(typeof(this.selectedProduct.sizes));
+    return sizes;
+  }
+
   public tabIndex = 0
 
   public productColors: any[] = []
@@ -297,6 +321,18 @@ export default class CustomizationTabs extends Vue {
       let teamLogoColors = [{name: 'Team Logo Colors', color_text: logoColorsNew, selectedColor: ''}]
       this.productColors = this.productColors.concat(teamLogoColors)
     }
+  }
+
+  public flattenObj(obj: Record<any, any>, parent: string, res: Record<any, any> = {}){
+    for(let key in obj){
+      let propName = parent ? parent + '_' + key : key;
+      if(typeof obj[key] == 'object'){
+        this.flattenObj(obj[key], propName, res);
+      } else {
+        res[propName] = obj[key];
+      }
+    }
+    return res;
   }
 
   public fontsColorsManipulation() {

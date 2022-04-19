@@ -152,7 +152,7 @@ export default class EditRosterAreaTab extends Vue {
 
   public setProductSizes() {
     this.productSizes.forEach((size: any, key: number) => {
-      let sizes = {value: size.name, text: size.name, code: size.code}
+      let sizes = {value: size.name, text: size.name}
       this.sizeOptions = this.sizeOptions.concat([sizes])
     })
   }
