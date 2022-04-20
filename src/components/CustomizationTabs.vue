@@ -109,7 +109,7 @@
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-              <EditRosterAreaTab @open-add-to-locker="openAddToLocker" :productSizes="selectedProduct.sizes"/>
+              <EditRosterAreaTab @open-add-to-locker="openAddToLocker" :productSizes="productSizes"/>
             </div>
           </b-tab>
           <!--        </vuescroll>-->
@@ -229,6 +229,28 @@ export default class CustomizationTabs extends Vue {
 
   get logoColors(): [] {
     return this.$store.getters.getLogosColors
+  }
+
+  get productSizes(){
+    let cumulative_size:Record<any,any> = [];
+    Object.values(this.selectedProduct.sizes).forEach((value)=>{
+      console.log(value)
+      if(Object.prototype.hasOwnProperty.call(value as Record<any,any>,'json_data')){
+        cumulative_size.push(JSON.parse(value.json_data));
+      }
+    })
+    console.log(cumulative_size)
+    let sizes = [] as Record<any,any>;
+    if(cumulative_size.length > 0){
+      cumulative_size.forEach((size_array:Record<any,any>) => {
+        if(size_array.length > 0){
+          size_array.forEach((size:Record<any,any>) => {
+            sizes.push(size);
+          })
+        }
+      })
+    }
+    return sizes;
   }
 
 
