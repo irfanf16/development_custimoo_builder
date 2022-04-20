@@ -8,7 +8,7 @@
                     </div>
                 </b-col>
                 <b-col cols="6" lg="10">
-                    <div class="d-flex flex-wrap justify-content-end justify-content-lg-between">
+                    <div v-if="false" class="d-flex flex-wrap justify-content-end justify-content-lg-between">
                         <b-nav class="align-items-center text-uppercase">
                             <li class="nav-item">DESIGN HUMMEL</li>
                         </b-nav>

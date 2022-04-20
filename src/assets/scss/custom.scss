@@ -4766,3 +4766,12 @@ $fontSize: 0.5;
         }
     }
 }
+
+.main-nav{
+    .dropdown-nav{
+        .btn.dropdown-toggle{
+            padding: 0;
+            line-height: 1;
+        }
+    }
+}
