@@ -66,9 +66,9 @@
     </div>
     </template>
 
-    <div class="roster-row mb-2 button-holder d-flex justify-content-between">
-      <button class="btn btn-secondary fw-bold px-5" @click="addPlayer(roster)">Add Player</button>
-      <button class="btn btn-secondary fw-bold px-5" @click="close">OK</button>
+    <div class="roster-row mb-2 button-holder d-flex justify-content-space-between">
+      <button class="btn btn-secondary fw-bold px-2 mr-2" @click="addPlayer(roster)">Add Player</button>
+      <button class="btn btn-secondary fw-bold px-2 ml-2" @click="close">OK</button>
     </div>
   </div>
 </template>
