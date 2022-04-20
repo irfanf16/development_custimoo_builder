@@ -170,7 +170,7 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
 
   selectedProduct.namecolors.forEach((colors: any, key: number) => {
     const finalColor = {color_text: []}
-    finalColor.color_text = JSON.parse(colors.color_text)
+    finalColor.color_text = JSON.parse(colors.json_data)
     fontsColors = fontsColors.concat(finalColor)
   })
   if (fontsColors.length) {
