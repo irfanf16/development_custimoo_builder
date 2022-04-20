@@ -291,6 +291,7 @@ export default class CustomizationTabs extends Vue {
 
   selectedProductChanged() {
     this.productColorsManipulation()
+    this.fontsList()
   }
 
   @Watch('lockerColors', {
@@ -451,33 +452,35 @@ export default class CustomizationTabs extends Vue {
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
     let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
-    let item = JSON.parse(productFonts[0].json_data)
-    if(item) {
-      item.forEach((fonts: any, key: number) => {
-        let fontNameParam = fonts.path.split('/').reverse()
-        fontNameParam = fontNameParam[0].split('.')
-        let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-        let font = {
-          value: fontNameParam[0] as string,
-          text: fontName as string
-        }
-        this.fontOptions = this.fontOptions.concat([font])
-        let fontUrl = this.storageUrl + fonts.path
-        const headElement = document.querySelector('head') as Record<any, any>
-        let style_tag = document.createElement('style')
-        style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
-        headElement.appendChild(style_tag)
-        if (shadow_dom) {
-          $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
+    if (productFonts){
+      let item = JSON.parse(productFonts[0].json_data)
+      if(item) {
+        item.forEach((fonts: any, key: number) => {
+          let fontNameParam = fonts.path.split('/').reverse()
+          fontNameParam = fontNameParam[0].split('.')
+          let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+          let font = {
+            value: fontNameParam[0] as string,
+            text: fontName as string
+          }
+          this.fontOptions = this.fontOptions.concat([font])
+          let fontUrl = this.storageUrl + fonts.path
+          const headElement = document.querySelector('head') as Record<any, any>
+          let style_tag = document.createElement('style')
+          style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
+          headElement.appendChild(style_tag)
+          if (shadow_dom) {
+            $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
+            setTimeout(() => {
+              console.log($(shadow_dom).find("#delete_after_load"))
+              $(shadow_dom).find("#delete_after_load").remove()
+            }, 100)
+          }
           setTimeout(() => {
-            console.log($(shadow_dom).find("#delete_after_load"))
-            $(shadow_dom).find("#delete_after_load").remove()
+            $("#delete_after_load").remove()
           }, 100)
-        }
-        setTimeout(() => {
-          $("#delete_after_load").remove()
-        }, 100)
-      })
+        })
+      }
     }
   }
 
