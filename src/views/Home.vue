@@ -937,12 +937,22 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self = this;
     let sync_id = this.$route.query.sync_id;
     if(url == null) {
-       url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
-      if(self.search_products) {
-        url += `&title=${self.search_products}`;
-
-      }
+       url = `/list/products`;
     }
+    let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
+    if(!url_obj.searchParams.has("customized")) {
+      url_obj.searchParams.append('customized', this.$store.getters.getCustomized)
+    }
+    if(!url_obj.searchParams.has("personalized")) {
+      url_obj.searchParams.append('personalized', this.$store.getters.getPersonalized)
+    }
+    if(self.search_products){
+      url += `&title=${self.search_products}`;
+    }
+    if(self.search_products && !url_obj.searchParams.has("title")) {
+      url_obj.searchParams.append('title', self.search_products)
+    }
+    url = url_obj.pathname + url_obj.search;
     if(sync_id) {
       if(url.indexOf("?") > 0) {
         url += `&sync_id=${sync_id}`;
