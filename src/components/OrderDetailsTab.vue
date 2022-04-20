@@ -231,8 +231,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
   }
 
   public async addToCart() {
-
-    let self = this;
     try {
       this.isLoading = true;
      let cart_product = await getActiveProductData();
