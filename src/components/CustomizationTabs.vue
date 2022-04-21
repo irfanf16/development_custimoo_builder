@@ -234,12 +234,10 @@ export default class CustomizationTabs extends Vue {
   get productSizes(){
     let cumulative_size:Record<any,any> = [];
     Object.values(this.selectedProduct.sizes).forEach((value)=>{
-      console.log(value)
       if(Object.prototype.hasOwnProperty.call(value as Record<any,any>,'json_data')){
         cumulative_size.push(JSON.parse(value.json_data));
       }
     })
-    console.log(cumulative_size)
     let sizes = [] as Record<any,any>;
     if(cumulative_size.length > 0){
       cumulative_size.forEach((size_array:Record<any,any>) => {

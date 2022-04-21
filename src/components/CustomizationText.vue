@@ -110,7 +110,6 @@ import {getClosestColor} from '@/pantoneColor'
       this.selectType(this.selectTypeIndex)
     })
     this.getColors()
-    console.log(this.openIndex)
   },
   filters: {
     capitalize: (value: string) => {
