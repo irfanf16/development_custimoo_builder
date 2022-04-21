@@ -276,7 +276,7 @@ export default class RosterDetails extends Vue {
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: []}
-      finalColor.color_text = JSON.parse(colors.color_text)
+      finalColor.color_text = JSON.parse(colors.json_data)
       this.fontsColors = this.fontsColors.concat(finalColor)
     })
     if (this.fontsColors.length) {

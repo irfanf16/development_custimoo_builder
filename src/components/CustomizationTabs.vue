@@ -109,7 +109,7 @@
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-              <EditRosterAreaTab @open-add-to-locker="openAddToLocker" :productSizes="selectedProduct.sizes"/>
+              <EditRosterAreaTab @open-add-to-locker="openAddToLocker" :productSizes="productSizes"/>
             </div>
           </b-tab>
           <!--        </vuescroll>-->
@@ -231,6 +231,28 @@ export default class CustomizationTabs extends Vue {
     return this.$store.getters.getLogosColors
   }
 
+  get productSizes(){
+    let cumulative_size:Record<any,any> = [];
+    Object.values(this.selectedProduct.sizes).forEach((value)=>{
+      console.log(value)
+      if(Object.prototype.hasOwnProperty.call(value as Record<any,any>,'json_data')){
+        cumulative_size.push(JSON.parse(value.json_data));
+      }
+    })
+    console.log(cumulative_size)
+    let sizes = [] as Record<any,any>;
+    if(cumulative_size.length > 0){
+      cumulative_size.forEach((size_array:Record<any,any>) => {
+        if(size_array.length > 0){
+          size_array.forEach((size:Record<any,any>) => {
+            sizes.push(size);
+          })
+        }
+      })
+    }
+    return sizes;
+  }
+
 
   public tabIndex = 0
 
@@ -269,6 +291,7 @@ export default class CustomizationTabs extends Vue {
 
   selectedProductChanged() {
     this.productColorsManipulation()
+    this.fontsList()
   }
 
   @Watch('lockerColors', {
@@ -288,7 +311,7 @@ export default class CustomizationTabs extends Vue {
     this.productColors = []
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
-      finalColor.color_text = JSON.parse(colors.color_text)
+      finalColor.color_text = JSON.parse(colors.json_data)
       this.productColors = this.productColors.concat(finalColor)
     })
     if (this.lockerColors.length > 0){
@@ -307,7 +330,7 @@ export default class CustomizationTabs extends Vue {
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: []}
-      finalColor.color_text = JSON.parse(colors.color_text)
+      finalColor.color_text = JSON.parse(colors.json_data)
       this.fontsColors = this.fontsColors.concat(finalColor)
     })
     if (this.fontsColors.length) {
@@ -429,31 +452,36 @@ export default class CustomizationTabs extends Vue {
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
     let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
-    productFonts.forEach((fonts: any, key: number) => {
-      let fontNameParam = fonts.file_url.split('/').reverse()
-      fontNameParam = fontNameParam[0].split('.')
-      let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-      let font = {
-        value: fontNameParam[0] as string,
-        text: fontName as string
+    if (productFonts){
+      let item = JSON.parse(productFonts[0].json_data)
+      if(item) {
+        item.forEach((fonts: any, key: number) => {
+          let fontNameParam = fonts.path.split('/').reverse()
+          fontNameParam = fontNameParam[0].split('.')
+          let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+          let font = {
+            value: fontNameParam[0] as string,
+            text: fontName as string
+          }
+          this.fontOptions = this.fontOptions.concat([font])
+          let fontUrl = this.storageUrl + fonts.path
+          const headElement = document.querySelector('head') as Record<any, any>
+          let style_tag = document.createElement('style')
+          style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
+          headElement.appendChild(style_tag)
+          if (shadow_dom) {
+            $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
+            setTimeout(() => {
+              console.log($(shadow_dom).find("#delete_after_load"))
+              $(shadow_dom).find("#delete_after_load").remove()
+            }, 100)
+          }
+          setTimeout(() => {
+            $("#delete_after_load").remove()
+          }, 100)
+        })
       }
-      this.fontOptions = this.fontOptions.concat([font])
-      let fontUrl = this.storageUrl + fonts.file_url
-      const headElement = document.querySelector('head') as Record<any, any>
-      let style_tag = document.createElement('style')
-      style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
-      headElement.appendChild(style_tag)
-      $("#app").append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
-      if(shadow_dom) {
-        $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: '+font.value+'">aa</p>')
-        setTimeout(() => {
-          $(shadow_dom).find("#delete_after_load").remove()
-        }, 100)
-      }
-      setTimeout(() => {
-        $("#delete_after_load").remove()
-      }, 100)
-    })
+    }
   }
 
   public addTab(index: number) {
