@@ -1,6 +1,7 @@
 <template>
   <div id="app" v-cloak>
     <Header />
+    <Navbar />
     <router-view/>
   </div>
 </template>
@@ -8,6 +9,7 @@
 <script lang="ts">
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import Header from '@/components/Header.vue';
+import Navbar from '@/components/Navbar.vue';
 import {LockerProducts} from "@/mixins/LockerProduct";
 
 import Echo from "laravel-echo";
@@ -29,7 +31,8 @@ window.Echo = new Echo({
 
 @Component<App>({
   components: {
-    Header
+    Header,
+    Navbar
   },
   async mounted() {
     await this.$store.dispatch('getPlatform');
