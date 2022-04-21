@@ -655,7 +655,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
-      this.colors = JSON.parse(response.data.color_text)
+      this.colors = JSON.parse(response.data.json_data)
     }).catch((e: any) => {
       console.log(e)
     });
