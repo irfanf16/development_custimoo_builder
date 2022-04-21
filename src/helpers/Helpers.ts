@@ -430,9 +430,47 @@ const getRosterDetailDefaultObject = () => {
   }
 }
 
+const activityStatus = {
+  submitted_for_factory_review: {
+    title: "Artwork Created",
+    message: "Waiting for manufacturer review artwork.",
+  },
+  factory_approved: {
+    title: "Artwork Approved",
+    message: "Artwork has been approved by the manufacturer. The manufacturer will now produce a sample and upload it here.",
+  },
+  factory_rejected: {
+    title: "Artwork Rejected",
+    message: "Artwork rejected by manufacturer. Please read comments and edit product accordingly.",
+  },
+  submitted_for_customer_review: {
+    title: "Design Sample Submitted",
+    message: "Manufacturer has submitted these samples. Please review carefully and take action.",
+  },
+  customer_approved: {
+    title: "Design Sample Approved",
+    message: "You have approved samples.",
+  },
+  customer_rejected: {
+    title: "Design Sample Rejected",
+    message: "You have rejected the sample. Please wait for new samples from the manufacturer.",
+  },
+  in_production: {
+    title: "In Production",
+    message: "The manufacturer has begun creating the products.",
+  },
+  shipped: {
+    title: "Order Shipped",
+    message: "The manufacturer has shipped your products.",
+  },
+  completed: {
+    title: "Order Completed",
+    message: "You order has completed successfully.",
+  },
+}
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus
 };

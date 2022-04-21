@@ -20,13 +20,17 @@
 
                 <div class="activity-content">
                   <div class="activity-title">
-                    {{ item_status_activity.message }}
+                    {{
+                        item_status_activity.status === FACTORYREVIEW && (item_status_activity_index + 1) !== order_item.status_activities.length ?
+                        "Artwork Updated" :
+                        activityStatus[item_status_activity.status].title
+                    }}
                     <span class="date-time">
                       {{ item_status_activity.created_at | formatDate('HH:mm Do MMM YY ')  }}
                     </span>
                   </div>
                   <div class="activity-text p-2 fs-2 text-muted">
-                    {{ statusMsgs[item_status_activity.status] }}
+                    {{ activityStatus[item_status_activity.status].message }}
                   </div>
 
                   <div class="images-grid p-2 d-flex gap-1 w-100">
@@ -252,10 +256,10 @@ import Vue from 'vue'
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import $ from 'jquery'
-import {handleResponseException, logData, pathInfo} from "@/helpers/Helpers";
+import {handleResponseException, logData, activityStatus} from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
-import OrderFlowStatusLine from "@/components/OrderFlowStatusLine";
+import OrderFlowStatusLine from "@/components/OrderFlowStatusLine.vue";
 import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -314,6 +318,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   private order_id = this.$route.params.order_id;
   private order:Record<any,any> = {};
   public logData = logData
+  public activityStatus = activityStatus
   public showLoader = false
 
   // -------- Order Status Constants
@@ -326,17 +331,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public ORDERINPRODUCTION = "in_production"
   public ORDERSHIPPED = "shipped"
   public ORDERCOMPLETED = "completed"
-  private statusMsgs = {
-    submitted_for_factory_review: "Waiting for manufacturer review artwork.",
-    factory_approved: "Artwork has been approved by the manufacturer. The manufacturer will now produce a sample and upload it here.",
-    factory_rejected: "Artwork rejected by manufacturer. Please read comments and edit product accordingly.",
-    submitted_for_customer_review: "Manufacturer has submitted these samples. Please review carefully and take action.",
-    customer_approved: "You have approved samples.",
-    customer_rejected: "You have rejected the sample. Please wait for new samples from the manufacturer.",
-    in_production: "The manufacturer has begun creating the products.",
-    shipped: "The manufacturer has shipped your products.",
-    completed: "You order has completed successfully.",
-  }
   public status_icons:Record<any, any> = {
     submitted_for_factory_review: 'submitted_for_factory_review',
     factory_approved: 'factory_approved',
