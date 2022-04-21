@@ -59,7 +59,7 @@
           </div>
         </div>
         <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
-      <div class="loader" v-if="showLoader || showAddLoader"><img src="../../src/assets/images/loading.gif" /></div>
+      <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     </div>
     </modal>
 </template>
