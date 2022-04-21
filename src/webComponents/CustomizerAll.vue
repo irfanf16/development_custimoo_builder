@@ -1,6 +1,6 @@
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
-<!--    <Header />-->
+    <Navbar />
     <router-view/>
   </div>
 </template>
@@ -10,6 +10,7 @@ import Vue from 'vue'
 import {LockerProducts} from "@/mixins/LockerProduct";
 import router from './../router'
 import store from '../store'
+import Navbar from '@/components/Navbar.vue';
 import VueToast from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 Vue.use(VueToast);
@@ -106,6 +107,9 @@ export default {
     isCustomerAuthenticated: function() {
       return this.$store.getters.isCustomerAuthenticated
     }
+  },
+  components: {
+    Navbar
   },
   watch: {
     isCustomerAuthenticated: async function(newVal, oldVaL) {
