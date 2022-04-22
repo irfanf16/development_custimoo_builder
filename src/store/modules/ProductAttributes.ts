@@ -837,8 +837,9 @@ const ProductAttributes:Module<any, any> = {
       state.using_logo_colors = payload
     },
     STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
-      state.canvasImage.ref_front = payload.front
-      state.canvasImage.ref_back = payload.back
+      state.canvasImage.ref_front = payload.scene.$refs.front
+      state.canvasImage.ref_back = payload.scene.$refs.back
+      state.canvasImage.scene = payload.scene
     },
     UPDATE_CUSTOM_TEXT_OBJECTS(state:Record<any, any>, payload){
       if(Object.prototype.hasOwnProperty.call(payload, "index")) {

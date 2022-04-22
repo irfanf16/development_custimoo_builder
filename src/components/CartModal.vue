@@ -1,6 +1,6 @@
 <template>
-  <modal :minWidth ="800"
-         :minHeight="600" :resizable="true"
+  <modal :minWidth ="1000"
+         :minHeight="800"
          :adaptive="true" name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl" modal-class="modal-fullscreen2"  content-class="lockerroom-modal"
          @closed="customer_reference_no=null" @before-open="getAddresses"
         >
@@ -10,77 +10,80 @@
     </div>
 
     <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
-    <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems.length > 0">
-      <thead class="bg-light">
-      <tr>
-        <th class="font-weight-bold">
-          Product Name
-        </th>
-        <th class="font-weight-bold">
-          Design Image
-        </th>
-        <th class="font-weight-bold">
-          Size : Quantity
-        </th>
-        <th colspan="2" class="font-weight-bold">
-          Actions
-        </th>
-      </tr>
-      </thead>
-      <tbody>
-      <template v-for="(cart_item) in cartItems">
-        <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
-          <td>
-            {{factory_product.product_name}}
-          </td>
-          <td>
-            <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
-            <b-img style="width: 80px; margin-left: 10px;" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
-          </td>
-          <td class="cursor-pointer" @click="editCartItem(factory_product,cart_item.id,false)">
-            <template v-for="(roster_detail,index) in factory_product.roster_detail">
-              <div :key="index"><span>{{roster_detail.size}} : {{roster_detail.quantity}}</span></div>
-            </template>
-            <div>Total : {{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</div>
-          </td>
-<!--          <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>-->
-          <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id,true)">
-            <font-awesome-icon
-              :icon="['fas', 'edit']"/>
-          </a></td>
-          <td class="cursor-pointer">  <a data-title="Delete Event" @click="deleteConfirm(cart_item, factory_product)"
-                                        >
-            <font-awesome-icon
-              :icon="['fas', 'trash-alt']"/>
-          </a></td>
+
+    <div style="overflow-y: auto; height: calc(100% - 150px)">
+      <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems.length > 0">
+        <thead class="bg-light">
+        <tr>
+          <th class="font-weight-bold">
+            Product Name
+          </th>
+          <th class="font-weight-bold">
+            Design Image
+          </th>
+          <th class="font-weight-bold">
+            Size : Quantity
+          </th>
+          <th colspan="2" class="font-weight-bold">
+            Actions
+          </th>
         </tr>
-      </template>
-      <tr>
-        <td>Customer Reference No : </td>
-        <td>
-          <b-form-input   class="form-input" placeholder="Customer Reference No." type="text" name="customer_reference_no"
-                                                    v-model="customer_reference_no">
-      </b-form-input>
-        </td>
-      </tr>
-      <tr v-if="shipping_address">
-        <td>Shipping Address : </td>
-        <td>
-          <div>{{shipping_address.first_name}} {{shipping_address.last_name}}</div>
-          <div>{{shipping_address.address1}}</div>
-          <div>{{shipping_address.address2}}</div>
-          <div>{{shipping_address.zip_code}}</div>
-          <div>{{shipping_address.country.name}} {{shipping_address.city}}</div>
-          <div>{{shipping_address.phone_number}}</div>
-        </td>
-        <td> <router-link :to="'address?cart=1'" class="my-orders">Edit</router-link> </td>
-      </tr>
-      <tr v-else>
-        <td>Shipping Address : </td><td></td>
-        <td> <router-link :to="'address?cart=1'" class="my-orders">Add</router-link> </td>
-      </tr>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+        <template v-for="(cart_item) in cartItems">
+          <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
+            <td>
+              {{factory_product.product_name}}
+            </td>
+            <td>
+              <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
+              <b-img style="width: 80px; margin-left: 10px;" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
+            </td>
+            <td class="cursor-pointer" @click="editCartItem(factory_product,cart_item.id,false)">
+              <template v-for="(roster_detail,index) in factory_product.roster_detail">
+                <div :key="index"><span>{{roster_detail.size}} : {{roster_detail.quantity}}</span></div>
+              </template>
+              <div>Total : {{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</div>
+            </td>
+            <!--          <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>-->
+            <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id,true)">
+              <font-awesome-icon
+                :icon="['fas', 'edit']"/>
+            </a></td>
+            <td class="cursor-pointer">  <a data-title="Delete Event" @click="deleteConfirm(cart_item, factory_product)"
+            >
+              <font-awesome-icon
+                :icon="['fas', 'trash-alt']"/>
+            </a></td>
+          </tr>
+        </template>
+        <tr>
+          <td>Customer Reference No : </td>
+          <td>
+            <b-form-input   class="form-input" placeholder="Customer Reference No." type="text" name="customer_reference_no"
+                            v-model="customer_reference_no">
+            </b-form-input>
+          </td>
+        </tr>
+        <tr v-if="shipping_address">
+          <td>Shipping Address : </td>
+          <td>
+            <div>{{shipping_address.first_name}} {{shipping_address.last_name}}</div>
+            <div>{{shipping_address.address1}}</div>
+            <div>{{shipping_address.address2}}</div>
+            <div>{{shipping_address.zip_code}}</div>
+            <div>{{shipping_address.country.name}} {{shipping_address.city}}</div>
+            <div>{{shipping_address.phone_number}}</div>
+          </td>
+          <td> <router-link :to="'address?cart=1'" class="my-orders">Edit</router-link> </td>
+        </tr>
+        <tr v-else>
+          <td>Shipping Address : </td><td></td>
+          <td> <router-link :to="'address?cart=1'" class="my-orders">Add</router-link> </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div class="p-3 text-left" v-if="false">
       <div class="well border-0" style="background: #f5f5f5">
