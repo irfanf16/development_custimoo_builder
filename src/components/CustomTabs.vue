@@ -423,7 +423,7 @@ export default class CustomTabs extends Vue {
     this.productColors = []
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
-      finalColor.color_text = JSON.parse(colors.color_text)
+      finalColor.color_text = JSON.parse(colors.json_data)
       this.productColors = this.productColors.concat(finalColor)
     })
     this.productColors = this.productColors.concat(this.lockerColors)
@@ -441,7 +441,7 @@ export default class CustomTabs extends Vue {
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: []}
-      finalColor.color_text = JSON.parse(colors.color_text)
+      finalColor.color_text = JSON.parse(colors.json_data)
       this.fontsColors = this.fontsColors.concat(finalColor)
     })
     if (this.fontsColors.length) {
