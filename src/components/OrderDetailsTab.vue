@@ -263,6 +263,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         ecom_form_data.append('action', 'custimoo_add_to_cart');
         ecom_form_data.append('product_id', cart_product.ecommerce_post_id);
         ecom_form_data.append('quantity', this.total);
+        ecom_form_data.append('product_front_image', cart_product.front_image);
 
         await http.post(ecom_url, ecom_form_data).then((res: any) => {
           if(!res.data.status){
