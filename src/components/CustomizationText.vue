@@ -1,7 +1,9 @@
 <template>
   <div class="customization-text-area">
     <div class="px-3 pt-3 p-lg-4">
-      <h2 class="fw-bold mb-2 fz-18">Player {{ customTexts[customTextIndex].type | capitalize }} {{ customTexts[customTextIndex].side }}</h2>
+      <h2 class="fw-bold mb-2 fz-18" v-if="customTexts[customTextIndex].add_type && customTexts[customTextIndex].add_type == 'manual'">Additional Text # {{ customTexts[customTextIndex].added_count }}</h2>
+      <h2 class="fw-bold mb-2 fz-18" v-else>Player  {{ customTexts[customTextIndex].type | capitalize }} {{ customTexts[customTextIndex].side }}</h2>
+
       <div class="d-flex">
         <b-form-input
           @click="isHidden = !isHidden"
@@ -124,6 +126,7 @@ export default class CustomizationText extends Vue {
   @Prop({required: true}) fontsColors!: any
   @Prop({required: true}) customTextIndex!: any
   @Prop({required: true}) fontOptions!: any
+
   public selectedFont = null
   public colorImage = '/img/images/color-placeholder.png'
   public fontColorType!: string
@@ -134,6 +137,7 @@ export default class CustomizationText extends Vue {
   public productColors: any[] = []
   public showSVGs = false
   public openIndex = -1
+
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;

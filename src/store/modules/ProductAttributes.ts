@@ -353,6 +353,11 @@ const ProductAttributes:Module<any, any> = {
     EDIT_LOGO(state: Record<any, any>, payload:any) {
       Vue.set(state.logoEditor,payload.key,payload.value)
     },
+    REMOVE_CUSTOMIZATION_TEXT_ELEMENT(state:Record<any, any>, payload:Record<any, any>){
+      if (payload.product_id){
+        Vue.delete(state.customTexts[payload.product_id], payload.index)
+      }
+    },
     UNSET_LOGO_EDITOR(state: Record<any, any>, payload:any) {
       Vue.set(state.logoEditor,'remove_background','')
       state.backgroundCheck = false

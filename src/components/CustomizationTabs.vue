@@ -54,8 +54,13 @@
             </template>
             <div class="d-none d-lg-block">
               <div v-for="(customText, index) in customTexts" :key="index">
-                <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
+                <CustomizationText :productFonts="selectedProduct.namefonts"  :customTextIndex="index"
                                    :fontsColors="fontsColors" :fontOptions="fontOptions"/>
+                <template v-if="index + 1  > selectedProduct.productnames.length">
+                  <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">
+                    -
+                  </b-button>
+                </template>
               </div>
               <div class="px-3 pt-3 p-lg-4 text-right">
                 <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
@@ -156,6 +161,7 @@ import {sortTextsArray} from "@/helpers/Helpers";
 export default class CustomizationTabs extends Vue {
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
+  public text_add_count = 0
   private ops = {
     // vuescroll: {
     //   mode: 'native'
@@ -483,6 +489,15 @@ export default class CustomizationTabs extends Vue {
   }
 
   public addTab(index: number) {
+    let set = false
+    if (set == false){
+      this.customTexts.forEach((text:Record<any, any>) =>{
+        if ('add_type' in text){
+          this.text_add_count = text.added_count
+          set = true
+        }
+      })
+    }
     let text = {
       text: '',
       type: 'name',
@@ -499,10 +514,31 @@ export default class CustomizationTabs extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 0
+      outLineWidth: 0,
+      add_type: 'manual',
+      added_count: this.text_add_count + 1
     }
+    this.text_add_count +=1
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text,prd_id:this.selectedProduct.id})
   }
+  public removeTab(index:number, prd_id:number){
+    let payload  = {
+      index: index,
+      product_id :prd_id
+    }
+    this.$store.commit('REMOVE_CUSTOMIZATION_TEXT_ELEMENT', payload)
+    let ind = 0
+    this.customTexts.forEach((text:Record<any, any>, index:number) =>{
+      if (text.add_type == 'manual' && ind >=0){
+        ind = ind + 1
+        this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: false, attribute: 'added_count', value: ind})
+        this.text_add_count = ind
+      }else if (ind == 0){
+        this.text_add_count = 0
+      }
+    })
+  }
+
 }
 </script>
 

@@ -120,15 +120,15 @@
           <div class="order-logo-holder">
             <div v-if="customTexts" class="overflow-hidden roster-details-table">
               <div class="roster-row head d-flex flex-wrap align-items-center justify-content-between">
-                <span class="name">Text/Number</span>
+                <span class="name">Field</span>
                 <span>Height</span>
-                <span>Width</span>
+<!--                <span>Width</span>-->
               </div>
               <template v-for="(text, index) in customTexts">
                 <div :key="index" v-if="text.text" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
                   <span class="name">{{ text.text }}</span>
                   <span>{{ text.originalHeight }}cm</span>
-                  <span>{{ text.originalWidth }}cm</span>
+<!--                  <span>{{ text.originalWidth }}cm</span>-->
                 </div>
               </template>
             </div>

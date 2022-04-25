@@ -12,7 +12,7 @@
                 <div class="choose-collar mb-3">
                     <div class="collar-designs">
                       <template v-for="(style, i) in selectedProduct.productstyles">
-                        <template v-if="selectedProduct.productstyles > 1">
+                        <template v-if="selectedProduct.productstyles.length > 1">
                           <b-button :key="i"  v-if="model.model_styles.includes(style.id)" variant="outline-light" @click="changeStyleIndex(i)"><img :src="storageUrl+style.front.file_url " /></b-button>
                         </template>
                       </template>
