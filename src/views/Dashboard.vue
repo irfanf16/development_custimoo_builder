@@ -143,7 +143,6 @@ export default class Dashboard extends Mixins(ErrorMessages) {
   getDashboardDetails(): void {
     this.showLoader = true;
     http.get(`/dashboards`).then((response: any) => {
-      console.log(response);
       this.counters = response.data.result
       this.showLoader = false
     })
