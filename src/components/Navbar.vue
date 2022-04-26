@@ -57,16 +57,29 @@ export default {
 <style lang="scss" scoped>
   .main-nav{
     justify-content: center;
-    background: #E1E6EA;
+    background: rgba(17, 17, 17, 0.3);
     padding: 15px 20px;
+    transition: 0.3s ease all;
+
+    &:hover{
+      background: rgba(17, 17, 17, 1);
+    }
 
     @media (min-width: 991px) {
       justify-content: right;
     }
 
     & > li {
+      display: inline-flex;
+
       a {
         text-decoration: none;
+        color: #fff;
+        font-size: 16px;
+
+        &:hover{
+          color: #FF4E00;
+        }
       }
       & > a {
         gap: 5px;
