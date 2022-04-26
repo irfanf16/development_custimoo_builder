@@ -253,6 +253,11 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number):Promise<
       index: customTabIndex,
       attribute: 'is_smart_transparent',
       value: false
+    },
+    {
+      index: customTabIndex,
+      attribute: 'original_logo_url',
+      value: logo.original_logo_url
     }
 
   ];
