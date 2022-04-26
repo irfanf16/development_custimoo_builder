@@ -526,6 +526,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get platform():string{
     return localStorage.getItem('platform') as string
   }
+  get login_url():string{
+    return localStorage.getItem('login_url') as string
+  }
   get cartItems() {
     return this.$store.getters.getCartItems
   }
@@ -695,8 +698,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if (this.platform == 'self'){
       this.$modal.show('loginModal')
     }
-    else if(this.platform == "wordpress"){
-      window.location.href = "/my-account"
+    else{
+      window.location.href = this.login_url
     }
   }
   public async getLockers(){
