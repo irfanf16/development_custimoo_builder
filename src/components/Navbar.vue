@@ -57,7 +57,7 @@ export default {
 <style lang="scss" scoped>
   .main-nav{
     justify-content: center;
-    background: rgba(17, 17, 17, 0.3);
+    background: rgba(17, 17, 17, 0.25);
     padding: 15px 20px;
     transition: 0.3s ease all;
 
