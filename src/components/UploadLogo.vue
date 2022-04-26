@@ -273,7 +273,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.original_logo = resp.data.file.logo_url;
         custom_logo.transparent_logo = resp.data.file.transparent_logo_url;
         custom_logo.smart_transparent_logo = resp.data.file.smart_transparent_logo_url;
-        custom_logo.original_logo_url = resp.data.file.original_logo_url;
         custom_logo.is_smart_transparent = false;
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
