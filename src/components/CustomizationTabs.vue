@@ -526,6 +526,7 @@ export default class CustomizationTabs extends Vue {
       index: index,
       product_id :prd_id
     }
+    this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: false, attribute: 'text', value: ''})
     this.$store.commit('REMOVE_CUSTOMIZATION_TEXT_ELEMENT', payload)
     let ind = 0
     this.customTexts.forEach((text:Record<any, any>, index:number) =>{
