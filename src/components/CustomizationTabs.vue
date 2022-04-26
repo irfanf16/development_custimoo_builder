@@ -546,7 +546,7 @@ export default class CustomizationTabs extends Vue {
 }
 
 .myscroll{
-  height: calc(100vh - 220px);
+  height: calc(100vh - 227px);
   overflow-y: auto;
 
   &::-webkit-scrollbar{
