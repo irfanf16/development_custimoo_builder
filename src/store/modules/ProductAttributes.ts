@@ -426,9 +426,9 @@ const ProductAttributes:Module<any, any> = {
         }
       }
     },
-    customTextsDelete(state: Record<any, any>, delCustomText: Record<any, any>) {
-      if(delCustomText){
-        state.customTexts.splice(delCustomText.index, 1)
+    REMOVE_CUSTOMIZATION_TEXT_ELEMENT(state:Record<any, any>, payload:Record<any, any>){
+      if (payload.product_id){
+        Vue.set(state.customTexts[payload.product_id], payload.index, {})
       }
     },
     defaultColor (state: Record<any, any>, color: Record<any, any>) {
@@ -486,9 +486,23 @@ const ProductAttributes:Module<any, any> = {
         state.rosterDetails.push(roster_detail_default_obj)
       }
     },
+    rosterDetailAttributeWithoutTrigger(state: Record<any, any>, rosterDetailAttribute: Record<any, any>) {
+      if(state.rosterDetails.length > 0) {
+        state.rosterDetails[rosterDetailAttribute.index][rosterDetailAttribute.attribute] = rosterDetailAttribute.value
+      }
+    },
     productionSVGs(state: Record<any, any>, productionSvg: Record<any, any>) {
       if(productionSvg){
         state.productionSVGs = productionSvg
+      } else {
+        const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
+        const selected_product = state.products[state.selectedIndex];
+        const product_sizes = selected_product.sizes;
+        if(product_sizes.length > 0) {
+          roster_detail_default_obj.size = product_sizes[0].name;
+          roster_detail_default_obj.code = product_sizes[0].code;
+        }
+        Object.assign(state.rosterDetails[0], roster_detail_default_obj);
       }
     },
     SET_CURRENT_COLOR_APPLIED (state: Record<any, any>, colorApplied: Record<any, any>) {
@@ -757,8 +771,6 @@ const ProductAttributes:Module<any, any> = {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
         }
-      }else{
-        console.log('nothing')
       }
     },
     DO_REDO(state:Record<any, any>){

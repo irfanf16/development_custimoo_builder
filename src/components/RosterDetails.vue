@@ -121,7 +121,7 @@ export default class RosterDetails extends Vue {
   get rosterFirstNameAndNumber(): string|null {
     let editing_roster_player_index = this.editing_roster_player_index
     if(this.rosterDetails && this.rosterDetails.length > 0) {
-      // |;| is just name and n umber separator
+      // |;| is just name and number separator
       return `${this.rosterDetails[editing_roster_player_index].text}|;|${this.rosterDetails[editing_roster_player_index].number}`;
     } else {
       return null;

@@ -53,10 +53,17 @@
               </a>
             </template>
             <div class="d-none d-lg-block">
-              <div v-for="(customText, index) in customTexts" :key="index">
-                <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
-                                   :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-              </div>
+              <template v-for="(customText, index) in customTexts">
+                <div :key="index" v-if="customText.hasOwnProperty('text')">
+                  <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
+                                     :fontsColors="fontsColors" :fontOptions="fontOptions"/>
+                  <template v-if="index + 1  > selectedProduct.productnames.length">
+                    <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">
+                      -
+                    </b-button>
+                  </template>
+                </div>
+              </template>
               <div class="px-3 pt-3 p-lg-4 text-right">
                 <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
                   +
@@ -70,15 +77,22 @@
                     +
                   </b-button>
                 </div> -->
-                <b-tab v-for="(customText, index) in customTexts" :key="index">
-                  <template #title>
-                    Player Name
-                  </template>
-                  <div>
-                    <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
-                                       :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-                  </div>
-                </b-tab>
+                <template v-for="(customText, index) in customTexts">
+                  <b-tab :key="index" v-if="customText.hasOwnProperty('text')">
+                    <template #title>
+                      Player Name
+                    </template>
+                    <div>
+                      <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
+                                         :fontsColors="fontsColors" :fontOptions="fontOptions"/>
+                      <template v-if="index + 1  > selectedProduct.productnames.length">
+                        <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">
+                          -
+                        </b-button>
+                      </template>
+                    </div>
+                  </b-tab>
+                </template>
               </b-tabs>
             </div>
           </b-tab>
@@ -156,6 +170,8 @@ import {sortTextsArray} from "@/helpers/Helpers";
 export default class CustomizationTabs extends Vue {
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
+  public text_add_count = 0
+  public set = false
   private ops = {
     // vuescroll: {
     //   mode: 'native'
@@ -483,6 +499,14 @@ export default class CustomizationTabs extends Vue {
   }
 
   public addTab(index: number) {
+    if (this.set == false){
+      this.customTexts.forEach((text:Record<any, any>) =>{
+        if ('add_type' in text){
+          this.text_add_count = text.added_count
+          this.set = true
+        }
+      })
+    }
     let text = {
       text: '',
       type: 'name',
@@ -499,10 +523,32 @@ export default class CustomizationTabs extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 0
+      outLineWidth: 0,
+      add_type: 'manual',
+      added_count: this.text_add_count + 1
     }
+    this.text_add_count +=1
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text,prd_id:this.selectedProduct.id})
   }
+  public removeTab(index:number, prd_id:number){
+    let payload  = {
+      index: index,
+      product_id :prd_id
+    }
+    this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: false, attribute: 'text', value: ''})
+    this.$store.commit('REMOVE_CUSTOMIZATION_TEXT_ELEMENT', payload)
+    let ind = 0
+    this.customTexts.forEach((text:Record<any, any>, index:number) =>{
+      if (text.add_type == 'manual' && ind >=0){
+        ind = ind + 1
+        this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: false, attribute: 'added_count', value: ind})
+        this.text_add_count = ind
+      }else if (ind == 0){
+        this.text_add_count = 0
+      }
+    })
+  }
+
 }
 </script>
 

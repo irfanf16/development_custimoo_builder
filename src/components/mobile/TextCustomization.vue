@@ -5,6 +5,11 @@
         <template #title>
           {{ customText.side ? customText.side : 'text' | capitalize}} {{ customText.type | capitalize }}
         </template>
+            <div v-if="tabIndex + 1  > selectedProduct.productnames.length">
+              <b-button class="add-logo-btn ml-1" @click="removeTab(tabIndex, selectedProduct.id)">
+                -
+              </b-button>
+            </div>
         <div class="grid mobile-cols-2 gap-1">
           <div class="mobile_controls d-flex gap-1 align-items-center">
 <!--            <label class="d-flex align-items-center justify-content-between"><span>{{ customTexts[tabIndex].type | capitalize }} {{ customTexts[tabIndex].side }}</span></label>-->
@@ -158,6 +163,8 @@ export default class TextCustomization extends Vue {
   public showOtherColors = false
   public pantoneColorVal= '13-4411'
   public color= '#59c7f9'
+  public set = false
+  public text_add_count = 0
 
 
   private showOther(){
@@ -230,6 +237,15 @@ export default class TextCustomization extends Vue {
   }
 
   public addTab() {
+    if (this.set == false){
+      this.customTexts.forEach((text:Record<any, any>) =>{
+        if ('add_type' in text){
+          this.text_add_count = text.added_count
+          this.set = true
+        }
+      })
+    }
+    console.log("selected", this.customTexts)
     let text = {
       text: '',
       type: 'name',
@@ -246,10 +262,30 @@ export default class TextCustomization extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 0
+      outLineWidth: 0,
+      add_type: 'manual',
+      added_count: this.text_add_count + 1
     }
-    console.log('asdsd', {index: this.customTexts})
+    this.text_add_count +=1
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text, prd_id:this.selectedProduct.id})
+  }
+  public removeTab(index:number, prd_id:number){
+    let payload  = {
+      index: index,
+      product_id :prd_id
+    }
+    this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: false, attribute: 'text', value: ''})
+    this.$store.commit('REMOVE_CUSTOMIZATION_TEXT_ELEMENT', payload)
+    let ind = 0
+    this.customTexts.forEach((text:Record<any, any>, index:number) =>{
+      if (text.add_type == 'manual' && ind >=0){
+        ind = ind + 1
+        this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: false, attribute: 'added_count', value: ind})
+        this.text_add_count = ind
+      }else if (ind == 0){
+        this.text_add_count = 0
+      }
+    })
   }
 
   public fontOptionChanged(index:number, i:number, val:string){

@@ -1,7 +1,9 @@
 <template>
   <div class="customization-text-area">
     <div class="px-3 pt-3 p-lg-4">
-      <h2 class="fw-bold mb-2 fz-18">Player {{ customTexts[customTextIndex].type | capitalize }} {{ customTexts[customTextIndex].side }}</h2>
+      <h2 class="fw-bold mb-2 fz-18" v-if="customTexts[customTextIndex].add_type && customTexts[customTextIndex].add_type == 'manual'">Additional Text # {{ customTexts[customTextIndex].added_count }}</h2>
+      <h2 class="fw-bold mb-2 fz-18" v-else>Player  {{ customTexts[customTextIndex].type | capitalize }} {{ customTexts[customTextIndex].side }}</h2>
+
       <div class="d-flex">
         <b-form-input
           @click="isHidden = !isHidden"
@@ -98,6 +100,7 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
 import {getClosestColor} from '@/pantoneColor'
+import { findIndex } from 'lodash'
 
 
 @Component<CustomizationText>({
@@ -124,6 +127,7 @@ export default class CustomizationText extends Vue {
   @Prop({required: true}) fontsColors!: any
   @Prop({required: true}) customTextIndex!: any
   @Prop({required: true}) fontOptions!: any
+
   public selectedFont = null
   public colorImage = '/img/images/color-placeholder.png'
   public fontColorType!: string
@@ -134,6 +138,7 @@ export default class CustomizationText extends Vue {
   public productColors: any[] = []
   public showSVGs = false
   public openIndex = -1
+
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
@@ -159,6 +164,10 @@ export default class CustomizationText extends Vue {
   get lockerColors(){
     return this.$store.getters.getLockerColors
   }
+  get customText():Record<any, any>[]{
+    return this.$store.getters.getCustomTexts();
+  }
+
   public getColors() {
     this.productColors = []
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
@@ -234,9 +243,16 @@ export default class CustomizationText extends Vue {
   updateTextField(index: number, value: string) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'text', value: value})
-    const type = this.customTexts[index].type == 'name' ? 'text' : 'number'
-    if (index == 0 || index == 1){
-      this.$store.commit('rosterDetailAttribute',{index: 0, attribute: type, value: value})
+    this.initRosterFromTexts()
+  }
+  public initRosterFromTexts() {
+    const custom_name_index = findIndex(this.customText, {type: 'name'});
+    const custom_number_index = findIndex(this.customText, {type: 'number'});
+    if(custom_name_index != -1) {
+      this.$store.commit('rosterDetailAttributeWithoutTrigger',{index: 0, attribute: 'text', value: this.customText[custom_name_index].text})
+    }
+    if(custom_number_index != -1) {
+      this.$store.commit('rosterDetailAttributeWithoutTrigger',{index: 0, attribute: 'name', value: this.customText[custom_number_index].text})
     }
   }
 }
