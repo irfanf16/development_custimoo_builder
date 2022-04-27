@@ -234,13 +234,13 @@ export default class Scene extends Vue {
     if(this.mounted && this.logoAllowed) {
       const self = this
       if(this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
-        let deleteIndex: number[] = []
         this.customLogoObjects.forEach((item: Record<any, any>, index: number) => {
           if(item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '' || this.customLogos[item.logoIndex].url == null)) {
             this.frontCanvas.remove(this.customLogoObjects[item.logoIndex])
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
             }
+            this.customLogoObjects[item.logoIndex] = null
             if(this.otherSideLogos[item.logoIndex]) {
               this.frontCanvas.remove(this.otherSideLogos[item.logoIndex])
               if (this.backCanvas) {
@@ -248,12 +248,8 @@ export default class Scene extends Vue {
               }
               this.otherSideLogos[item.logoIndex] = null
             }
-            deleteIndex.push(index)
           }
         })
-       /* deleteIndex.forEach((item: number) => {
-          Vue.delete(this.customLogoObjects, item)
-        })*/
       }
       newVal.forEach((logo: Record<any, any>, index: number) => {
         let logoUrl = logo? (this.storageUrl + logo.url).trim().split(' ').join('%20') : ''
@@ -338,23 +334,23 @@ export default class Scene extends Vue {
   customTextsChanged(newVal: [Record<any, any>]) {
     if (this.mounted) {
       const self = this
-      if(!newVal.filter((item: Record<any, any>) => item.text).length) {
-        this.customTextObjects.forEach((customTextObject: fabric.Object, index: number) => {
-          self.frontCanvas.remove(customTextObject)
-          if (self.backCanvas) {
-            self.backCanvas.remove(customTextObject)
+      if(this.customTextObjects.length != this.customTexts.filter((text: Record<any, any>) => text && text.text).length) {
+        this.customTextObjects.forEach((item: Record<any, any>, index: number) => {
+          if(item && (!Object.keys(this.customTexts[item.textIndex]).length || this.customTexts[item.textIndex].text == '' || !this.customTexts[item.textIndex].text)) {
+            console.log('remove it here', item.textIndex, this.customTexts[item.textIndex], item)
+            this.frontCanvas.remove(this.customTextObjects[item.textIndex])
+            if (this.backCanvas) {
+              this.backCanvas.remove(this.customTextObjects[item.textIndex])
+            }
+            this.customTextObjects[item.textIndex] = null
+            if(this.otherSideTexts[item.textIndex]) {
+              this.frontCanvas.remove(this.otherSideTexts[item.textIndex])
+              if (this.backCanvas) {
+                this.backCanvas.remove(this.otherSideTexts[item.textIndex])
+              }
+              this.otherSideTexts[item.textIndex] = null
+            }
           }
-          this.customTextObjects[index] = null
-          if(this.mainPreview) {
-            this.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", {index: index, data: null})
-          }
-        })
-        this.otherSideTexts.forEach((otherSideText: fabric.Object, index: number) => {
-          self.frontCanvas.remove(otherSideText)
-          if (self.backCanvas) {
-            self.backCanvas.remove(otherSideText)
-          }
-          this.otherSideTexts[index] = null
         })
       }
       newVal.forEach((text: Record<any, any>) => {

@@ -54,7 +54,7 @@
             </template>
             <div class="d-none d-lg-block">
               <template v-for="(customText, index) in customTexts">
-                <div :key="index" v-if="customText">
+                <div :key="index" v-if="customText.hasOwnProperty('text')">
                   <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
                                      :fontsColors="fontsColors" :fontOptions="fontOptions"/>
                   <template v-if="index + 1  > selectedProduct.productnames.length">
@@ -78,7 +78,7 @@
                   </b-button>
                 </div> -->
                 <template v-for="(customText, index) in customTexts">
-                  <b-tab :key="index" v-if="customText">
+                  <b-tab :key="index" v-if="customText.hasOwnProperty('text')">
                     <template #title>
                       Player Name
                     </template>

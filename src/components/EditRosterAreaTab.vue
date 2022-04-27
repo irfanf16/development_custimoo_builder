@@ -66,6 +66,8 @@ import RosterDetails from '@/components/RosterDetails.vue'
 import {http} from "@/httpCommon";
 import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
+import { getRosterDetailDefaultObject } from '@/helpers/Helpers'
+import { findIndex } from 'lodash'
 
 
 @Component<EditRosterAreaTab>({
@@ -88,8 +90,6 @@ import Scene from "@/components/Scene.vue"
 export default class EditRosterAreaTab extends Vue {
   @Prop({required: true}) productSizes!: any
   private products: any[] = []
-  private company_id !: string
-  private product_id !: string
   public designsIndex = 0
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
@@ -121,19 +121,6 @@ export default class EditRosterAreaTab extends Vue {
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
   }
-
-  retrieveProducts(): void {
-    this.product_id = '1'
-    this.company_id = '1'
-    let param = '?product_id=' + this.product_id + '&company_id=' + this.company_id
-    http.get(param)
-      .then((response: any) => {
-        this.products = response.data.products.data;
-      })
-      .catch((e: any) => {
-        console.log(e)
-      });
-  }
   public show(){
     this.$modal.show('rostermodal')
   }
@@ -142,14 +129,10 @@ export default class EditRosterAreaTab extends Vue {
   }
 
   public rosterDetailsInit() {
-    let payload = {
-      text: '',
-      number: '',
-      size: this.sizeOptions[0].value ? this.sizeOptions[0].value : '',
-      size_index: 0,
-      code: this.sizeOptions[0].code ? this.sizeOptions[0].code : '',
-      quantity: 1,
-      information: ''
+    let payload = getRosterDetailDefaultObject()
+    if(this.sizeOptions.length > 0) {
+      payload.size = this.sizeOptions[0].value;
+      payload.code = this.sizeOptions[0].code;
     }
     this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
   }
