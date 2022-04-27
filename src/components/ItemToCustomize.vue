@@ -7,7 +7,7 @@
       </h2>
 
       <div class="select-items" :class="showItems ? 'opened' : ''">
-        <div class="collection-btn mb-2 mt-3 px-1 d-flex align-items-center checkbox_buttons gap-2">
+        <div class="collection-btn mb-2 mt-3 px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0">
 <!--          <b-form-checkbox :checked="customized" @change="changeProductType('customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
 <!--          <b-form-checkbox :checked="personalized" @change="changeProductType('personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
           <button type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
@@ -28,7 +28,7 @@
 
     <template v-else>
       <div class="collection-btn mb-2 mt-3 d-flex gap-1">
-        <div class="px-1 d-flex align-items-center checkbox_buttons gap-2">
+        <div class="px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0" >
           <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
                   @click="changeProductType(!$store.getters.getCustomized, 'customized')">
             <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
@@ -170,6 +170,9 @@ export default class ItemToCustomize extends Vue {
   }
   get getCustomized(): boolean {
     return this.$store.getters.getCustomized
+  }
+  get StockCount():number{
+    return this.$store.getters.getStockCount
   }
 }
 </script>
