@@ -15,6 +15,7 @@ import {log} from "fabric/fabric-impl";
 import {getClosestColor} from "@/pantoneColor";
 const ProductAttributes:Module<any, any> = {
   state: {
+    stock_count:0,
     searchLoader: false,
     lockerActiveTabIndex:0,
     lockerTabsIndex:0,
@@ -159,6 +160,9 @@ const ProductAttributes:Module<any, any> = {
       } else {
         state.products = payload.products;
       }
+    },
+    SET_STOCK_COUNT(state:Record<any,any>, payload:number){
+      state.stock_count = payload;
     },
     SET_SEARCH_LOADER(state: Record<any, any>, payload: boolean){
       state.searchLoader = payload;
@@ -1041,6 +1045,9 @@ const ProductAttributes:Module<any, any> = {
     },
     customLogoObjects(state:Record<any, any>){
       return state.customLogoObjects
+    },
+    getStockCount(state:Record<any,any>){
+      return state.stock_count;
     }
   },
   actions: {
@@ -1141,6 +1148,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setRosterDetails({commit}, payload){
       commit('rosterDetails', payload)
+    },
+    setStockCount({commit},payload){
+      commit('SET_STOCK_COUNT',payload);
     },
     updateRosterDetailAttribute({commit}, payload){
       commit('rosterDetailAttribute', payload)

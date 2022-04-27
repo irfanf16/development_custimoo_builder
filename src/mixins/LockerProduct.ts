@@ -163,8 +163,10 @@ export class handleMainProducts extends Vue {
     }
     self.$store.dispatch("updateMainProductsInfo", main_products_info);
     let retrieved_products = response.data.products.data;
+    let stock_count = response.data.stock_count;
     await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: append_products});
     await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
+    await this.$store.dispatch('setStockCount',stock_count);
     let selected_product = this.$store.getters.getSelectedProduct;
     let customLogos = this.$store.getters.getCustomLogoObject
     for (const product of retrieved_products) {
