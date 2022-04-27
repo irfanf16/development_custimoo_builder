@@ -162,6 +162,7 @@ export default class CustomizationTabs extends Vue {
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
   public text_add_count = 0
+  public set = false
   private ops = {
     // vuescroll: {
     //   mode: 'native'
@@ -489,12 +490,11 @@ export default class CustomizationTabs extends Vue {
   }
 
   public addTab(index: number) {
-    let set = false
-    if (set == false){
+    if (this.set == false){
       this.customTexts.forEach((text:Record<any, any>) =>{
         if ('add_type' in text){
           this.text_add_count = text.added_count
-          set = true
+          this.set = true
         }
       })
     }
