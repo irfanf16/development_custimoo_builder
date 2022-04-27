@@ -85,6 +85,11 @@
                     <div>
                       <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
                                          :fontsColors="fontsColors" :fontOptions="fontOptions"/>
+                      <template v-if="index + 1  > selectedProduct.productnames.length">
+                        <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">
+                          -
+                        </b-button>
+                      </template>
                     </div>
                   </b-tab>
                 </template>
