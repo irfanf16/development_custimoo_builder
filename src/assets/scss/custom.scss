@@ -2640,7 +2640,7 @@ $fontSize: 0.5;
 @for $i from 1 through 10 {
     $fontSize : $fontSize + 0.2;
 
-    .fs-#{$i}{ font-size: #{$fontSize}rem }
+    .fs-#{$i}{ font-size: #{$fontSize}rem !important;}
 }
 
 .btn-secondary{

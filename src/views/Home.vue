@@ -161,6 +161,21 @@
               <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
                 <b-button v-if="tabIndex > 0" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                 <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= 2) || (!hideColorSection && tabIndex <= 3)">Next</b-button>
+                <template v-else>
+                  <template v-if="isCustomerAuthenticated">
+                    <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                      <b-button v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                        {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
+                      </b-button>
+                      <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
+                        <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+                      </b-button>
+                    </template>
+                  </template>
+                  <template v-else>
+                    <b-button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary" v-b-modal.modal-login>Add to Cart</b-button>
+                  </template>
+                </template>
                 <!-- <template v-if="isCustomerAuthenticated">
                   <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
                 </template>
@@ -387,6 +402,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   get editCart(): Record<any, any> {
     return this.$store.getters.getEditCart
+  }
+  get canvasImage() {
+    return this.$store.getters.getCanvasImage
   }
   get lastRouteName() {
     let returnVal = '';
@@ -651,9 +669,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
     } else if(this.actionBeforeLogin == 'addToCart') {
-      (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
+      this.addToCart()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
+  }
+  private addToCart() {
+    (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
   }
   getFillColors() {
     const url = '/product/colors?default_color=1'

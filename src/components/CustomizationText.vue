@@ -31,14 +31,14 @@
         <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
         <div class="text-color-holder" :class="{ active: customTexts[customTextIndex].selectColor }">
   <!--      <div class="text-color-holder active" >-->
-          <a @click="showColor('fill', customTextIndex)">
+          <a @click="showColor('fill', customTextIndex)" :style="[{borderColor: textColorType === 'fill' ? customTexts[customTextIndex].fillColor : null}]">
             <div class="text-color-box">
               <div class="color-circle"
                    :style="{ background : customTexts[customTextIndex].fillColor? customTexts[customTextIndex].fillColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
               <strong>Fill Color</strong>
             </div>
           </a>
-          <a @click="showColor('outline', customTextIndex)" v-if="customTexts[customTextIndex].outlineEnabled &&  customTexts[customTextIndex].outLineWidth > 0">
+          <a @click="showColor('outline', customTextIndex)" v-if="customTexts[customTextIndex].outlineEnabled &&  customTexts[customTextIndex].outLineWidth > 0" :style="[{borderColor: textColorType === 'outline' ? customTexts[customTextIndex].outLineColor : null}]">
             <div class="text-color-box">
                <div class="color-circle"
                    :style="{ background : customTexts[customTextIndex].outLineColor? customTexts[customTextIndex].outLineColor : ' url(' + colorImage + ') no-repeat 50% 50% / 12px' }"></div>
@@ -130,8 +130,8 @@ export default class CustomizationText extends Vue {
 
   public selectedFont = null
   public colorImage = '/img/images/color-placeholder.png'
-  public fontColorType!: string
-  public fontColorIndex!: number
+  public textColorType = ''
+  public fontColorIndex = -1
   public selectTypeIndex = 0
   public fontColor: any[] = []
   public outLineWidthValue = 0
@@ -190,14 +190,19 @@ export default class CustomizationText extends Vue {
   }
 
   public showColor(fontColorType: any, fontColorIndex: number) {
-    this.fontColorType = fontColorType
     this.fontColorIndex = fontColorIndex
     this.customTexts.forEach((customText: Record<any, any>, index: number) => {
       if(index == fontColorIndex) {
         this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'selectColor', value: !customText.selectColor})
+
+        if(this.textColorType === fontColorType && customText.selectColor){
+          this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'selectColor', value: true})
+        }
       } else {
         this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'selectColor', value: false})
       }
+
+      this.textColorType = fontColorType
     })
   }
 
@@ -220,7 +225,7 @@ export default class CustomizationText extends Vue {
       color_pantone = pantone.pantone;
     }
 
-    if (this.fontColorType == 'fill') {
+    if (this.textColorType == 'fill') {
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'fillColor', value: color.value})
       this.$store.dispatch('updateCustomTextAttribute', {index: this.fontColorIndex, on_all: true, attribute: 'fillColorPantone', value: color_pantone})
     } else {

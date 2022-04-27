@@ -1,74 +1,99 @@
 <template>
   <div class="roster-section">
-    <div class="d-none d-md-block roster-upload-area">
-      <h3>Import Roster from Excel sheets</h3>
-      <b-button  @click="$modal.show('rosterfilemodal')" class="btn btn-secondary fw-bold">Download/Upload Roster Template <a href="#" v-b-tooltip.hover
-                                                                                  title="Import roster details from excel sheet">
-              <font-awesome-icon :icon="['fas', 'info-circle']"/>
-            </a></b-button>
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-none d-md-block roster-upload-area">
+        <h3>Import Roster from Excel sheets</h3>
+        <b-button  @click="$modal.show('rosterfilemodal')" class="btn btn-secondary fw-bold">Download/Upload Roster Template <a href="#" v-b-tooltip.hover
+                                                                                                                                title="Import roster details from excel sheet">
+          <font-awesome-icon :icon="['fas', 'info-circle']"/>
+        </a></b-button>
 
 
-      <p>Or insert details manually below</p>
-    </div>
-   <div class="row" v-if="rosterDetails.length > 0">
-     <b-button @click="updateRosterPlayerNameFormat('capitalized')" class="btn btn-info col-md-4">Capitalize</b-button>
-     <b-button @click="updateRosterPlayerNameFormat('toUpperCase')" class="btn btn-info col-md-4">All Capitalized</b-button>
-     <b-button @click="updateRosterPlayerNameFormat('toLowerCase')" class="btn btn-info col-md-4">All Lower</b-button>
-   </div>
-    <div class="roster-row mb-2">
-      <div class="align-left">
-        <div class="hide-show"></div>
-        <div class="roster-name">Name</div>
-        <div class="shirt-no">No</div>
-        <div class="shirt-size">Size</div>
+        <p>Or insert details manually below</p>
       </div>
-      <div class="align-right">
-        <div class="qty">Qty</div>
-        <div class="remove"></div>
+      <div class="d-flex gap-1" v-if="rosterDetails.length > 0">
+        <b-button @click="updateRosterPlayerNameFormat('capitalized')" class="btn btn-secondary fs-3 btn-sm" title="Capitalize">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+            <path d="m2.244 13.081.943-2.803H6.66l.944 2.803H8.86L5.54 3.75H4.322L1 13.081h1.244zm2.7-7.923L6.34 9.314H3.51l1.4-4.156h.034zm9.146 7.027h.035v.896h1.128V8.125c0-1.51-1.114-2.345-2.646-2.345-1.736 0-2.59.916-2.666 2.174h1.108c.068-.718.595-1.19 1.517-1.19.971 0 1.518.52 1.518 1.464v.731H12.19c-1.647.007-2.522.8-2.522 2.058 0 1.319.957 2.18 2.345 2.18 1.06 0 1.716-.43 2.078-1.011zm-1.763.035c-.752 0-1.456-.397-1.456-1.244 0-.65.424-1.115 1.408-1.115h1.805v.834c0 .896-.752 1.525-1.757 1.525z"/>
+          </svg>
+        </b-button>
+        <b-button @click="updateRosterPlayerNameFormat('toUpperCase')" class="btn btn-secondary fs-3 btn-sm" title="Uppercase">
+          <svg height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+               viewBox="0 0 16 16" fill="currentColor">
+            <path d="M1.3,13l0.9-2.8h3.4L6.6,13h1.2L4.5,3.8H3.3L0,13H1.3z M4,5.2l1.4,4.1H2.5L4,5.2C3.9,5.2,4,5.2,4,5.2z"/>
+            <path d="M9.4,13l0.9-2.8h3.4l0.9,2.8H16l-3.3-9.2h-1.2L8.2,13H9.4z M12.1,5.2l1.4,4.1h-2.8L12.1,5.2C12.1,5.2,12.1,5.2,12.1,5.2z"/>
+          </svg>
+        </b-button>
+        <b-button @click="updateRosterPlayerNameFormat('toLowerCase')" class="btn btn-secondary fs-3 btn-sm" title="Lowercase">
+          <svg height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+               viewBox="0 0 16 16" fill="currentColor">
+            <path d="M13.9,11.4L13.9,11.4l0,1h1.3V6.8c0-1.7-1.3-2.7-3-2.7c-2,0-3,1-3,2.5h1.3c0.1-0.8,0.7-1.4,1.7-1.4c1.1,0,1.7,0.6,1.7,1.7
+              v0.8h-2.2c-1.9,0-2.9,0.9-2.9,2.3c0,1.5,1.1,2.5,2.7,2.5C12.8,12.6,13.5,12.1,13.9,11.4L13.9,11.4z M11.9,11.5
+              c-0.9,0-1.7-0.5-1.7-1.4c0-0.7,0.5-1.3,1.6-1.3h2.1v1C13.9,10.7,13.1,11.5,11.9,11.5z"/>
+            <path d="M5.8,11.4L5.8,11.4l0,1h1.3V6.8c0-1.7-1.3-2.7-3-2.7c-2,0-3,1-3,2.5h1.3C2.4,5.8,3,5.2,4,5.2c1.1,0,1.7,0.6,1.7,1.7v0.8H3.6
+              c-1.9,0-2.9,0.9-2.9,2.3c0,1.5,1.1,2.5,2.7,2.5C4.6,12.6,5.3,12.1,5.8,11.4L5.8,11.4z M3.7,11.5c-0.9,0-1.7-0.5-1.7-1.4
+              c0-0.7,0.5-1.3,1.6-1.3h2.1v1C5.8,10.7,4.9,11.5,3.7,11.5z"/>
+          </svg>
+        </b-button>
       </div>
     </div>
-    <template v-for="(roster, index) in rosterDetails">
-      <div class="roster-row mb-2"  :key="index">
+
+    <div>
+      <div class="roster-row mb-2">
         <div class="align-left">
-          <div class="hide-show" >
-            <a >
-              <font-awesome-icon  :icon="['fas',  index === eyeIndex ? 'eye' : 'eye-slash']"/>
+          <div class="hide-show"></div>
+          <div class="roster-name">Name</div>
+          <div class="shirt-no">No</div>
+          <div class="shirt-size">Size</div>
+        </div>
+        <div class="align-right">
+          <div class="qty">Qty</div>
+          <div class="remove"></div>
+        </div>
+      </div>
+      <template v-for="(roster, index) in rosterDetails">
+        <div class="roster-row mb-2"  :key="index">
+          <div class="align-left">
+            <div class="hide-show" >
+              <a >
+                <font-awesome-icon  :icon="['fas',  index === eyeIndex ? 'eye' : 'eye-slash']"/>
+              </a>
+            </div>
+            <div class="roster-name">
+              <b-form-input ref="myInputs" v-model="roster.text" @focus="editRosterPlayer(index)"></b-form-input>
+            </div>
+          <div class="shirt-no">
+            <b-form-input ref="myInputs" class="text-center" v-model="roster.number" @focus="editRosterPlayer(index)"
+            ></b-form-input>
+          </div>
+          <div class="shirt-size">
+            <b-form-select ref="myInputs" @input="updateRosterSize($event, roster)" v-model="roster.size_index">
+              <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx" >{{productSize.text}}</b-form-select-option>
+            </b-form-select>
+          </div>
+        </div>
+        <div class="align-right">
+          <div class="qty">
+            <b-form-input
+
+              class="text-center" ref="myInputs"
+              placeholder="0" v-model="roster.quantity"
+            ></b-form-input>
+          </div>
+          <div class="remove" v-if="rosterDetails.length > 1">
+            <a @click="removeIndex(index, roster.text, roster.number)">
+              <font-awesome-icon :icon="['fas', 'trash-alt']"/>
             </a>
           </div>
-          <div class="roster-name">
-            <b-form-input ref="myInputs" v-model="roster.text" @focus="editRosterPlayer(index)"></b-form-input>
-          </div>
-        <div class="shirt-no">
-          <b-form-input ref="myInputs" class="text-center" v-model="roster.number" @focus="editRosterPlayer(index)"
-          ></b-form-input>
         </div>
-        <div class="shirt-size">
-          <b-form-select ref="myInputs" @input="updateRosterSize($event, roster)" v-model="roster.size_index">
-            <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx" >{{productSize.text}}</b-form-select-option>
-          </b-form-select>
-        </div>
-      </div>
-      <div class="align-right">
-        <div class="qty">
-          <b-form-input
 
-            class="text-center" ref="myInputs"
-            placeholder="0" v-model="roster.quantity"
-          ></b-form-input>
-        </div>
-        <div class="remove" v-if="rosterDetails.length > 1">
-          <a @click="removeIndex(index, roster.text, roster.number)">
-            <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-          </a>
-        </div>
       </div>
-
+      </template>
     </div>
-    </template>
 
-    <div class="roster-row mb-2 button-holder d-flex justify-content-space-between">
-      <button class="btn btn-secondary fw-bold px-2 mr-2" @click="addPlayer(roster)">Add Player</button>
-      <button class="btn btn-secondary fw-bold px-2 ml-2" @click="close">OK</button>
+    <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
+      <button class="btn btn-secondary w-auto fw-bold" @click="addPlayer(roster)">Add Player</button>
+      <button class="btn btn-secondary w-auto fw-bold" @click="close">OK</button>
     </div>
   </div>
 </template>

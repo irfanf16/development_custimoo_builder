@@ -14,6 +14,7 @@
            name="rostermodal"  title="Roster" class="roster-modal" size="xl"
              footer-class="hide-modal-footer d-none">
       <div class="modal-header d-flex justify-content-between">
+        <span class="fs-5 font-weight-bolder">Edit Roster</span>
         <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
       </div>
       <div class="modal-body">
