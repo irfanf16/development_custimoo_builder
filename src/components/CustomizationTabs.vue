@@ -53,15 +53,17 @@
               </a>
             </template>
             <div class="d-none d-lg-block">
-              <div v-for="(customText, index) in customTexts" :key="index">
-                <CustomizationText :productFonts="selectedProduct.namefonts"  :customTextIndex="index"
-                                   :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-                <template v-if="index + 1  > selectedProduct.productnames.length">
-                  <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">
-                    -
-                  </b-button>
-                </template>
-              </div>
+              <template v-for="(customText, index) in customTexts">
+                <div :key="index" v-if="customText">
+                  <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
+                                     :fontsColors="fontsColors" :fontOptions="fontOptions"/>
+                  <template v-if="index + 1  > selectedProduct.productnames.length">
+                    <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">
+                      -
+                    </b-button>
+                  </template>
+                </div>
+              </template>
               <div class="px-3 pt-3 p-lg-4 text-right">
                 <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
                   +
@@ -75,15 +77,17 @@
                     +
                   </b-button>
                 </div> -->
-                <b-tab v-for="(customText, index) in customTexts" :key="index">
-                  <template #title>
-                    Player Name
-                  </template>
-                  <div>
-                    <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
-                                       :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-                  </div>
-                </b-tab>
+                <template v-for="(customText, index) in customTexts">
+                  <b-tab :key="index" v-if="customText">
+                    <template #title>
+                      Player Name
+                    </template>
+                    <div>
+                      <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
+                                         :fontsColors="fontsColors" :fontOptions="fontOptions"/>
+                    </div>
+                  </b-tab>
+                </template>
               </b-tabs>
             </div>
           </b-tab>
