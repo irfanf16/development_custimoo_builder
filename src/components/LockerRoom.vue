@@ -26,7 +26,7 @@
                              v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}"
                              @update="lockerProductsChanged($event)">
                     <template v-for="(product, ind) in room.product">
-                      <div :key="`${ind}-${product.id}`" class="products-block" :data-room-id="room.id"
+                      <div :key="`${ind}-${product.id}`" class="products-block" :class=" product.disable_style ? 'notactive' : ''" :data-room-id="room.id"
                            :data-room-index="i"
                            :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                            :data-product-index="ind">
@@ -1046,6 +1046,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 </script>
 
 <style lang="scss" scoped>
+.notactive{
+  pointer-events: none;
+}
 .lockerroom-modal .nav-tabs .add_new_locker .nav-link {
   border: none !important;
   padding: 0;
