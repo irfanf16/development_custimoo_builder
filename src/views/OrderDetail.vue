@@ -3,6 +3,11 @@
     <div class="order-wrapper" v-if="order">
       <div class="d-flex justify-content-between align-items-center">
         <div class="fs-4 font-weight-bolder order-title p-2">Order # {{ order.order_no }}</div>
+        <div class="font-weight-bolder order-title p-2">
+          <button class="btn p-0 fs-5 btn-dark" @click="$router.push({path: '/customer-orders'})" title="Go Back" style="line-height: 0">
+            <b-icon-arrow-left-short />
+          </button>
+        </div>
       </div>
       <b-tabs content-class="mt-3">
         <b-tab :key="`order_item_${order_item_index}`" v-for="(order_item, order_item_index) in order.items">
