@@ -20,11 +20,19 @@
 
                 <div class="activity-content">
                   <div class="activity-title">
-                    {{ item_status_activity.message }}
+                    {{
+                        item_status_activity.status === FACTORYREVIEW && (item_status_activity_index + 1) !== order_item.status_activities.length ?
+                        "Artwork Updated" :
+                        activityStatus[item_status_activity.status].title
+                    }}
                     <span class="date-time">
-                  {{ item_status_activity.created_at | formatDate('HH:mm Do MMM YY ')  }}
-                </span>
+                      {{ item_status_activity.created_at | formatDate('HH:mm Do MMM YY ')  }}
+                    </span>
                   </div>
+                  <div class="activity-text p-2 fs-2 text-muted">
+                    {{ activityStatus[item_status_activity.status].message }}
+                  </div>
+
                   <div class="images-grid p-2 d-flex gap-1 w-100">
                     <div class="d-flex align-items-stretch flex-wrap gap-1">
                       <div class="feedback-block" :key="activity_itm_ind" v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
@@ -35,8 +43,6 @@
                         <template v-else>
                           <div class="feedback-text" :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                         </template>
-
-
                       </div>
                     </div>
 
@@ -250,10 +256,10 @@ import Vue from 'vue'
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import $ from 'jquery'
-import {handleResponseException, logData, pathInfo} from "@/helpers/Helpers";
+import {handleResponseException, logData, activityStatus} from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
-import OrderFlowStatusLine from "@/components/OrderFlowStatusLine";
+import OrderFlowStatusLine from "@/components/OrderFlowStatusLine.vue";
 import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -312,6 +318,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   private order_id = this.$route.params.order_id;
   private order:Record<any,any> = {};
   public logData = logData
+  public activityStatus = activityStatus
   public showLoader = false
 
   // -------- Order Status Constants

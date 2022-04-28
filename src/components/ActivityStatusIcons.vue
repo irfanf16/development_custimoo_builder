@@ -1,7 +1,7 @@
 <template>
   <div class="activity-icon">
     <template v-if="activity_status == FACTORYREVIEW">
-      <BIconLightningFill />
+      <BIconLightning />
     </template>
     <template v-else-if="activity_status == FACTORYAPPROVED">
       <BIconCheck2 />
