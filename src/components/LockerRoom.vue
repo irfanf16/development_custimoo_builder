@@ -62,7 +62,7 @@
                         </li>
                         <li v-if="!getSelectionMode.readonly">
                           <b-button data-title="Share design" :ref="'share'+i+''+ind" :id="'share'+i+''+ind"
-                                  @click="shareProduct(product, ind, i)"><font-awesome-icon
+                                  @click.stop="shareProduct(product, ind, i)"><font-awesome-icon
                           :icon="['fas', 'share-alt']"/>
                           </b-button>
                           <Popper
@@ -375,7 +375,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public collection_base_url = ''
   public yearly_planner_template_id = null;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
-  private popperID = "";
   // public isSafari = () => {
   //   let ua = navigator.userAgent.toLowerCase();
   //   if (ua.indexOf('safari') != -1) {
@@ -615,16 +614,21 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public lockerStatus = 'not_accepted'
 
+  public get popperID() {
+    return this.$store.getters.getPopperID
+  }
+
   public showPopper(id:string){
-    this.popperID = id;
+    this.$store.commit('setPopper', id)
   }
   public hidePopper(){
-    this.popperID = '';
+    this.$store.commit('setPopper', '')
   }
 
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {
       if(product){
+        console.log(this.popperID)
           let payload = {
             type: 'locker',
             id: product.id,
@@ -661,6 +665,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public copyLink(product: Record<any, any>, ind: number) {
     let testingCodeToCopy = document.querySelector('#copy-' + ind) as Record<any, any>
+    if(!testingCodeToCopy){
+      let elem = document.getElementById('elem') as Record<any, any>
+      testingCodeToCopy = elem.shadowRoot.querySelector('#copy-' + ind) as Record<any, any>
+    }
     testingCodeToCopy.select()
     try {
       document.execCommand('copy');

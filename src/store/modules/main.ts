@@ -19,12 +19,16 @@ const Main:Module<any, any> = {
       styleHide: !mobileScreen,
       teamHide: !mobileScreen
     },
-    tabIndexMain: 0
+    tabIndexMain: 0,
+    popperID: ''
 
   },
   mutations: {
     manageComponents(state: Record<any, any>, payload: Record<any, any>) {
       state.manageComponents[payload.index] = payload.value
+    },
+    setPopper(state: Record<any, any>, payload: string) {
+      state.popperID = payload
     },
     SET_HIDE_TAB(state: Record<any, any>, payload: Record<any, any>) {
       state.hideTab = {
@@ -49,6 +53,9 @@ const Main:Module<any, any> = {
     },
     getMainTab: state => {
       return state.tabIndexMain
+    },
+    getPopperID : state => {
+      return state.popperID
     }
   },
   actions: {
