@@ -1,23 +1,23 @@
 import { Component, Vue } from 'vue-property-decorator'
+import VsToast from '@vuesimple/vs-toast';
+
 @Component
 export default class ErrorMessages extends Vue{
   public showToast(message:string, title:string):void{
-    Vue.$toast.open({
-      message: message,
-      type: title === 'SUCCESS' ? 'success' : 'error',
-      dismissible: true,
-      duration: 5000,
-      position: 'bottom-left'
-    })
+    VsToast.show({
+      title: message,
+      variant: title == 'SUCCESS' ? 'success' : 'error',
+      timeout: 5000,
+      position: "bottom-left"
+    });
   }
   public showError(err: any):void{
     if(typeof err === 'string') {
-      Vue.$toast.open({
-        message: err,
-        type: 'error',
-        dismissible: true,
-        duration: 5000,
-        position: 'bottom-left'
+      VsToast.show({
+        title: err,
+        variant: 'error',
+        timeout: 5000,
+        position: "bottom-left"
       });
     }
     else {
@@ -69,5 +69,5 @@ export default class ErrorMessages extends Vue{
        });
      })
    }
-  
+
 }

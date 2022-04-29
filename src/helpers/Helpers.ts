@@ -4,6 +4,7 @@ import {getClosestColor} from "@/pantoneColor";
 import {default as $} from "jquery";
 import Axios, {AxiosError} from "axios";
 import Vue from "vue";
+import VsToast from '@vuesimple/vs-toast';
 
 const getLogoSettingsObject = () => {
   return {
@@ -320,13 +321,11 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
       stack: errorResponse.stack
     })
   }
-  Vue.$toast.open({
-    message: message,
-    type: "error",
-    dismissible: true,
-    duration: 5000,
-    position: 'bottom-left'
-  })
+  VsToast.show({
+    title: message,
+    variant: 'info',
+    timeout: 5000
+  });
 }
 
 const logData = (data: any) => {
@@ -412,13 +411,11 @@ const getActiveProductData = async () => {
     }
     return post_data;
   } else {
-    Vue.$toast.open({
-      message: "Please let scene load",
-      type: "info",
-      dismissible: true,
-      duration: 5000,
-      position: 'bottom-left'
-    })
+    VsToast.show({
+      title: 'Please let scene load',
+      variant: 'info',
+      timeout: 5000
+    });
     return null;
   }
 }
