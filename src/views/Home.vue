@@ -544,8 +544,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get platform():string{
     return localStorage.getItem('platform') as string
   }
-  get login_url():string{
-    return localStorage.getItem('login_url') as string
+  get login_code(): Record<any, any>{
+    return JSON.parse(localStorage.getItem('login_code') as string)
   }
   get cartItems() {
     return this.$store.getters.getCartItems
@@ -720,7 +720,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.$modal.show('loginModal')
     }
     else{
-      window.location.href = this.login_url
+      if(this.login_code.type == 'url') {
+        window.location.href = this.login_code.action
+      } else {
+        eval(this.login_code.action)
+      }
     }
   }
   public async getLockers(){

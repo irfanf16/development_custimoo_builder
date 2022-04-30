@@ -91,7 +91,9 @@ const Main:Module<any, any> = {
      const res = await http.get('platform')
      if (res.status == 200){
        localStorage.setItem('platform', res.data.company.platform)
-       localStorage.setItem('login_url', res.data.company.login_url)
+       if(res.data.company.login_code) {
+         localStorage.setItem('login_code', res.data.company.login_code)
+       }
        localStorage.setItem('company_domain', JSON.parse(res.data.company.company_domain))
      }
     }
