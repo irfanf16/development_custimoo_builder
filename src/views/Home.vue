@@ -338,6 +338,9 @@ Vue.filter('formatDate', function(value:string) {
       if(show_cart){
         this.showVModal('cart-modal');
       }
+      if(this.actionBeforeLogin) {
+        this.actionAfterLogin();
+      }
     }
 
   },

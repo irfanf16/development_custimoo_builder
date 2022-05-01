@@ -645,6 +645,11 @@ const ProductAttributes:Module<any, any> = {
     },
     ACTION_BEFORE_LOGIN(state: Record<any, any>, action: string){
       state.actionBeforeLogin = action
+      if(action) {
+        localStorage.setItem('actionBeforeLogin', action)
+      } else {
+        localStorage.removeItem('actionBeforeLogin')
+      }
     },
     SET_COLLECTIONS (state: Record<any, any>, collections: Record<any, any>) {
         state.collections = collections
@@ -1008,7 +1013,10 @@ const ProductAttributes:Module<any, any> = {
       return state.lockerColors
     },
     getActionBeforeLogin: state => {
-      return state.actionBeforeLogin
+      if(state.actionBeforeLogin) {
+        return state.actionBeforeLogin
+      }
+      return localStorage.getItem('actionBeforeLogin')
     },
     getUndoItems:(state)=> state.undoItems,
     getRedoItems:(state)=> state.redoItems,
