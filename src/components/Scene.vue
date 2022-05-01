@@ -911,7 +911,9 @@ export default class Scene extends Vue {
         if (this.mainPreview && (!this.back || (this.back && side == 'back'))) {
           this.setProductionSVG()
           this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
-          this.$store.commit('SET_CANVAS_READY', true);
+          setTimeout(() => {
+            this.$store.commit('SET_CANVAS_READY', true);
+          }, 2000)
         }
         clearInterval(timer)
       }
