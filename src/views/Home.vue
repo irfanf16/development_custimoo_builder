@@ -338,9 +338,6 @@ Vue.filter('formatDate', function(value:string) {
       if(show_cart){
         this.showVModal('cart-modal');
       }
-      if(this.actionBeforeLogin) {
-        this.actionAfterLogin();
-      }
     }
 
   },
@@ -434,6 +431,20 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       })
     }
     return unread_notification_counter
+  }
+
+  get canvasReady() {
+    return this.$store.getters.getCanvasReady
+  }
+
+  @Watch('canvasReady', {
+    deep: true
+  })
+  canvasReadyChanged(newValL: [Record<any, any>]){
+    if(newValL && this.actionBeforeLogin) {
+      console.log('in actionbeforelogin check')
+      this.actionAfterLogin()
+    }
   }
 
   get cartItemsCount(){
@@ -664,6 +675,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
+      console.log('in open locker room')
       this.getLockerRoomProducts(null)
       this.showVModal('locker-modal')
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {

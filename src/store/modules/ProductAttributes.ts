@@ -88,6 +88,7 @@ const ProductAttributes:Module<any, any> = {
 
     },
     editLockerProduct: [],
+    canvas_ready: false,
     notifications:[],
     customTextObjects:[],
     customLogoObjects:[],
@@ -857,6 +858,9 @@ const ProductAttributes:Module<any, any> = {
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
       state.using_logo_colors = payload
     },
+    SET_CANVAS_READY(state:Record<any, any>, payload: boolean){
+      state.canvas_ready = payload
+    },
     STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
       state.canvasImage.ref_front = payload.scene.$refs.front
       state.canvasImage.ref_back = payload.scene.$refs.back
@@ -890,6 +894,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getNotifications: state => {
       return state.notifications
+    },
+    getCanvasReady: state => {
+      return state.canvas_ready
     },
     getCanvasImage: state => {
       return state.canvasImage
