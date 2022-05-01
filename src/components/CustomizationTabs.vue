@@ -486,7 +486,6 @@ export default class CustomizationTabs extends Vue {
           if (shadow_dom) {
             $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
             setTimeout(() => {
-              console.log($(shadow_dom).find("#delete_after_load"))
               $(shadow_dom).find("#delete_after_load").remove()
             }, 100)
           }

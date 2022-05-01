@@ -76,11 +76,11 @@
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
                                   <b-form inline>
-                                    <b-form-input :id="'copy-'+ind"
+                                    <b-form-input :ref="'copylink_product_'+ind"
                                                   :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
                                     ></b-form-input>
-                                    <button @click="copyLink(product, ind)" class="btn" type="button">Copy Link</button>
+                                    <button @click="copyLink(ind)" class="btn" type="button">Copy Link</button>
                                   </b-form>
                                 </div>
                               </div>
@@ -321,14 +321,9 @@ import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {getRandom, setCustomLogo} from "@/helpers/Helpers";
-import rgbHex from "rgb-hex";
-import {getClosestColor} from "@/pantoneColor";
-import {processColorsCustom} from "../helpers/Helpers"
 import {differenceBy, intersectionBy, union, includes} from 'lodash';
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
-// import Popper from 'vue-popperjs';
-// import 'vue-popperjs/dist/vue-popper.css';
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import ModalAction from "@/mixins/ModalAction";
@@ -661,13 +656,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public copyLink(product: Record<any, any>, ind: number) {
-    let testingCodeToCopy = document.querySelector('#copy-' + ind) as Record<any, any>
-    if(!testingCodeToCopy){
-      let elem = document.getElementById('elem') as Record<any, any>
-      testingCodeToCopy = elem.shadowRoot.querySelector('#copy-' + ind) as Record<any, any>
-    }
-    testingCodeToCopy.select()
+  public copyLink(ind: number) {
+    let toCopy = this.$refs['copylink_product_' + ind] as Record<any, any>
+    toCopy = toCopy[0].$el as Record<any, any>
+    toCopy.select()
     try {
       document.execCommand('copy');
       this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
@@ -920,32 +912,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
     this.getLockerProducts[lockerIndex].product[productIndex] = product;
   }
-
-
-
-  // public processColorsCustom(colors: [],customLogoIndex:number):void {
-  //   let imageColors: any[] = []
-  //   let uniqueColors: string[] = []
-  //   colors.forEach((color: number[]) => {
-  //     const hex = rgbHex(color[0], color[1], color[2])
-  //     if ((!uniqueColors.includes(hex))) {
-  //       uniqueColors.push(hex)
-  //     }
-  //   })
-  //   let deletedCount = uniqueColors.length - 4
-  //   uniqueColors.splice(4, deletedCount)
-  //   uniqueColors.forEach((color: string) => {
-  //     // console.log(color)
-  //     let pantoneColor = getClosestColor(color)
-  //     //console.log(JSON.parse(JSON.stringify(pantoneColor)))
-  //     imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
-  //   })
-  //   //only set logo colors if index is 0
-  //   if(customLogoIndex == 0) {
-  //     this.$store.dispatch("SET_LOGO_COLORS", imageColors);
-  //     this.$store.dispatch("initialLogoColors", JSON.stringify(imageColors));
-  //   }
-  // }
 
 
   public async createYearlyPlanner(locker_room_id:number, index:number){

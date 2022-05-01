@@ -177,7 +177,7 @@ import ModalAction from "@/mixins/ModalAction";
             this.showLoader = false
             return false
           }
-          let parent = this.$parent as Record<any, any>
+
           this.canvasImage.front = this.canvasImage.ref_front.toDataURL("image/png").split(',')[1]
           this.canvasImage.back = this.canvasImage.ref_back.toDataURL("image/png").split(',')[1]
           let locker_front_png = this.canvasImage.front
