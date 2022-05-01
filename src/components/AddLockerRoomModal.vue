@@ -66,7 +66,6 @@
 
 <script lang="ts">
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
-import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
@@ -76,8 +75,7 @@ import ModalAction from "@/mixins/ModalAction";
         components: {
           ConfirmModal,
           LockerRoom,
-            LockerRoomProducts,
-            CreateLockerRoomModal
+          CreateLockerRoomModal
         },
     })
     export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalAction) {

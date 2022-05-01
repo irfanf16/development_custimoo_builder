@@ -22,12 +22,10 @@
 <script lang="ts">
 
 import {Component, Prop, Mixins ,Vue, Watch} from 'vue-property-decorator'
-import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
     @Component<SaveLogoModal>({
       components: {
-        LockerRoomProducts,
         CreateLockerRoomModal
       },
       mounted() {

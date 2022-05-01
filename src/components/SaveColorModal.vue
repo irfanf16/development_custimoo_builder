@@ -43,11 +43,9 @@
 <script lang="ts">
 
 import {Component, Vue, Watch} from 'vue-property-decorator'
-    import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     @Component<SaveColorModal>({
         components: {
-            LockerRoomProducts,
             CreateLockerRoomModal
         },
       mounted() {

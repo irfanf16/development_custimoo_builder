@@ -146,8 +146,6 @@ export default class CustomizationText extends Vue {
 
   public setOpenIndex(index:any){
     this.openIndex = index;
-    console.log('log custom text index ', index)
-    console.log('log text index ', this.openIndex)
   }
 
   get customTexts(): [Record<any, any>] {
@@ -186,7 +184,6 @@ export default class CustomizationText extends Vue {
       this.productColors = this.productColors.concat(teamLogoColors)
 
     }
-   // console.log('this.productColors',this.productColors)
   }
 
   public showColor(fontColorType: any, fontColorIndex: number) {
@@ -220,7 +217,6 @@ export default class CustomizationText extends Vue {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     let pantone = getClosestColor(color.value);
     let color_pantone = color.name;
-   // console.log(pantone.pantone);
     if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
       color_pantone = pantone.pantone;
     }

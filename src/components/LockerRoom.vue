@@ -310,7 +310,6 @@
 
 <script lang="ts">
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
-import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue'
 import YearlyPlanner from '@/components/YearlyPlanner.vue'
@@ -337,7 +336,6 @@ import ModalAction from "@/mixins/ModalAction";
 @Component<LockerRoom>({
   components: {
     ConfirmModal,
-    LockerRoomProducts,
     Scene,
     CreateLockerRoomModal,
     ExistingCollectionModal,

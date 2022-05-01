@@ -22,14 +22,12 @@
 
 <script lang="ts">
 import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
-    import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
     import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
     import ErrorMessages from "@/mixins/ErrorMessages";
     import Scene from "@/components/Scene.vue"
 
 @Component<DesignCollection>({
   components: {
-    LockerRoomProducts,
     Scene,
     CreateLockerRoomModal
   }

@@ -42,11 +42,9 @@
 <script lang="ts">
 import draggable from 'vuedraggable'
 import {Component, Vue, Watch} from 'vue-property-decorator'
-import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 @Component<AddDesignCollectionModal>({
   components: {
-    LockerRoomProducts,
     CreateLockerRoomModal,
     draggable
   }

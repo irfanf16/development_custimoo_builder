@@ -84,19 +84,15 @@
 <script lang="ts">
 
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
-    import LockerRoomProducts from '@/components/LockerRoomProducts.vue'
-    import CreateLockerRoomModal from '@/components/LogoEditorModal.vue'
+import CreateLockerRoomModal from '@/components/LogoEditorModal.vue'
 
 import ColorTabs from "@/components/ColorTabs.vue";
 import {http} from "@/httpCommon";
-import rgbHex from "rgb-hex";
-import {getClosestColor} from "@/pantoneColor";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
     @Component<LogoEditorModal>({
         components: {
           ColorTabs,
-            LockerRoomProducts,
             CreateLockerRoomModal
         },
       mounted() {
