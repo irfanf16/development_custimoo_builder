@@ -437,12 +437,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getCanvasReady
   }
 
-  @Watch('canvasReady', {
-    deep: true
-  })
+  @Watch('canvasReady')
   canvasReadyChanged(newValL: [Record<any, any>]){
-    if(newValL && this.actionBeforeLogin) {
-      console.log('in actionbeforelogin check')
+    if(this.isCustomerAuthenticated && newValL && this.actionBeforeLogin) {
       this.actionAfterLogin()
     }
   }
