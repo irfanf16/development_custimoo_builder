@@ -1,7 +1,7 @@
 <template>
   <div>
     <DesignPdfView :pdf_front_image="pdf_front_image" :pdf_back_image="pdf_back_image"/>
-
+    <LoginForm ref="loginModal"   />
     <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
       <b-input-group class="w-100">
         <b-form-input id="shared_url_link" class="w-100" v-model="shared_url" ></b-form-input>
@@ -55,7 +55,7 @@
             </template>
           </template>
           <template v-else>
-            <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"   class="btn btn-secondary fw-bold w-100" v-b-modal.modal-login>Add to Cart</button>
+            <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"   class="btn btn-secondary fw-bold w-100">Add to Cart</button>
           </template>
 
 
@@ -82,6 +82,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
 import ProductionScene from '@/components/ProductionScene.vue'
 import { getActiveProductData } from "@/helpers/Helpers";
+import LoginForm from '@/components/LoginForm.vue'
 
 import {compact} from 'lodash';
 
@@ -90,7 +91,8 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
 @Component<OrderDetailsTab>({
   components: {
     DesignPdfView, ProductionScene,
-    AddLockerRoomModal, ConfirmOrderTab
+    AddLockerRoomModal, ConfirmOrderTab,
+    LoginForm
   },
   mounted(){
     this.$root.$on('rostershared', (val:string) =>{
@@ -117,6 +119,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
 
   get updateOrderItemProducts() {
     return this.$store.getters.getUpdateOrderItemProducts
+  }
+
+  get platform():string{
+    return localStorage.getItem('platform') as string
   }
 
   get selectedProduct(): Record<any, any> {
@@ -195,18 +201,22 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
   get defaultColors() : [Record<any, any>] {
     return this.$store.getters.getDefaultColors
   }
+
+  get login_code(): Record<any, any>{
+    return JSON.parse(localStorage.getItem('login_code') as string)
+  }
   get groupColors() : [Record<any, any>] {
     return this.$store.getters.getGroupColors
   }
   public setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
-    this.$modal.show('loginModal')
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
       collectionAddmoreMode:false,
       eventProductMode:false,
       eventCollectionMode:false
     })
+    this.gotoLogin()
   }
 
   public logosConversionToBase64() {
@@ -228,6 +238,19 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         })
       }
     })
+  }
+
+  public gotoLogin(){
+    if (this.platform == 'self'){
+      this.$modal.show('loginModal')
+    }
+    else{
+      if(this.login_code.type == 'url') {
+        window.location.href = this.login_code.action
+      } else {
+        eval(this.login_code.action)
+      }
+    }
   }
 
   public async addToCart() {
