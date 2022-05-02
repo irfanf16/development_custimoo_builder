@@ -6,7 +6,7 @@
       <b-row>
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs v-if="!mobileScreen" @open-add-to-locker="getLockers" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
+            <CustomizationTabs v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
             <CustomTabs ref="custom-mobile-tabs" v-else />
           </b-col>
 
@@ -92,7 +92,7 @@
               <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem" v-if="customer"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
-              <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :close_on_add="false"/>
+              <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url"/>
               <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
 
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
@@ -368,6 +368,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public logoColorUsed = false
   public showModal = false
   public shared_link = ''
+  public generate_share_url = false
   public extractedcolorclass = ""
   private isFront = true;
   public updated_order_products: Record<any, any>[] = []
@@ -739,7 +740,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     }
   }
-  public async getLockers(){
+  public async getLockers(share_url = false){
+    this.generate_share_url = share_url
     if (!this.editStatus){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     }

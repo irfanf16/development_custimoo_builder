@@ -33,13 +33,6 @@
       </div>
       <div class="pricing-are">
         <div class="order-details">
-<!--          <div class="order-row">-->
-<!--            <template>-->
-<!--              <AddLockerRoomModal :rosterUrl="true"  ref="saveToLockerModal" />-->
-<!--            </template>-->
-<!--          </div>-->
-
-
 <!--          <button  class="btn btn-secondary fw-bold w-100" @click="addToCart">-->
 <!--            Add to Cart-->
 <!--          </button>-->
@@ -461,7 +454,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
   public async getLockers(){
     if (!this.editStatus){
       await this.$store.dispatch("getLockers");
-      // this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
       this.$emit('open-add-to-locker')
     }else{
       let res  = await this.$store.dispatch('regenerateRosterLink', { id: this.$store.getters.getEditProductId })
