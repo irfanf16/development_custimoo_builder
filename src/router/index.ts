@@ -14,6 +14,7 @@ import ConfirmOrder from '../views/ConfirmOrder.vue'
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
 import OrderListing from "@/views/OrderListing.vue";
 import Dashboard from "@/views/Dashboard.vue";
+import Thankyou from "@/views/Thankyou.vue";
 
 
 
@@ -74,6 +75,11 @@ const routes: Array<RouteConfig> = [
     path:'/share/:product/:name',
     name: 'ShareUrl',
     component: Home
+  },
+  {
+    path:'/thank-you',
+    name: 'Thankyou',
+    component: Thankyou
   },
   {
     path:'/collection/:collection_file_name/view',
