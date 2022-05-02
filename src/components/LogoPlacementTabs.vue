@@ -575,8 +575,8 @@ export default class LogoPlacementTabs extends Vue {
     .nav-link {
       .remove-logo {
         position: absolute;
-        //right: 135px;
-        top: 158px;
+        top: -5px;
+        right: -10px;
         width: 20px;
         height: 20px;
         border-radius: 50%;

@@ -3774,9 +3774,9 @@ button:focus, button:active {
   bottom: 0;
   height: 100%;
   width: 30px;
-  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
-  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
+  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
+  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, white 100%);
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr="#00ffffff", endColorstr="#ffffff",GradientType=1 );
 }
 
@@ -3802,15 +3802,15 @@ button:focus, button:active {
   bottom: 0;
   height: 100%;
   width: 30px;
-  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
-  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
+  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
+  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, white 100%);
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr="#00ffffff", endColorstr="#ffffff",GradientType=1 );
 }
 .fade-right.fade-gray:after {
-  background: -moz-linear-gradient(left, rgba(239, 239, 239, 0) 0%, rgb(239, 239, 239) 100%);
-  background: -webkit-linear-gradient(left, rgba(239, 239, 239, 0) 0%, rgb(239, 239, 239) 100%);
-  background: linear-gradient(to right, rgba(239, 239, 239, 0) 0%, rgb(239, 239, 239) 100%);
+  background: -moz-linear-gradient(left, rgba(239, 239, 239, 0) 0%, #efefef 100%);
+  background: -webkit-linear-gradient(left, rgba(239, 239, 239, 0) 0%, #efefef 100%);
+  background: linear-gradient(to right, rgba(239, 239, 239, 0) 0%, #efefef 100%);
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr="#00efefef", endColorstr="#ffffff",GradientType=1 );
 }
 
@@ -3861,9 +3861,9 @@ button:focus, button:active {
   bottom: 0;
   height: 100%;
   width: 30px;
-  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
-  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
+  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
+  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, white 100%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#00ffffff", endColorstr="#ffffff", GradientType=1);
 }
 .customize_controls .tabs > div:first-child li:last-child {
@@ -3893,7 +3893,7 @@ button:focus, button:active {
   z-index: 99999;
   height: 100%;
   width: 100%;
-  background: rgb(255, 255, 255);
+  background: white;
 }
 .customize_controls .hover_tooltip {
   position: fixed;
