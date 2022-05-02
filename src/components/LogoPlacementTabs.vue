@@ -4,11 +4,11 @@
       <b-tab v-for="(logo_tab, ltIdx) in customLogos" :key="ltIdx" :active="tabIndex === ltIdx" @click="changeTab(ltIdx)">
         <template #title>
           <span>{{ ltIdx == 0 ? 'Team Logo' : 'logo ' + ltIdx }}</span>
-          <div v-if="ltIdx > 0">
+          <template v-if="ltIdx > 0">
             <span class="remove-logo" @click="removeLogoTab(ltIdx)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
             </span>
-          </div>
+          </template>
         </template>
 
         <div class="tabs-logo-container">
@@ -575,8 +575,8 @@ export default class LogoPlacementTabs extends Vue {
     .nav-link {
       .remove-logo {
         position: absolute;
-        //right: 135px;
-        top: 158px;
+        top: -5px;
+        right: -10px;
         width: 20px;
         height: 20px;
         border-radius: 50%;
