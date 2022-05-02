@@ -103,7 +103,9 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       let res = await this.$store.dispatch('getShareProductDetails', url)
       if (res.status ==200){
         this.custom_arr = JSON.parse(res.data.roster_detail)? JSON.parse(res.data.roster_detail) : []
-        this.productSizes = res.data.sizes
+        if (res.data.sizes.length){
+          this.productSizes = JSON.parse(res.data.sizes[0].json_data)
+        }
         this.id = res.data.id
         this.frontImage = res.data.product_front_url
         this.backImage  = res.data.product_back_url

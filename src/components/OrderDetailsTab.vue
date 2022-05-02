@@ -4,7 +4,7 @@
     <LoginForm ref="loginModal"   />
     <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
       <b-input-group class="w-100">
-        <b-form-input id="shared_url_link" class="w-100" v-model="shared_url" ></b-form-input>
+        <b-form-input ref="shared_url_link" class="w-100" v-model="shared_url" ></b-form-input>
       </b-input-group>
       <b-button class="btn btn-secondary fw-bold w-auto" style="white-space: nowrap" @click="copyLink">Copy URL</b-button>
       <button class="closeBtn" @click="closeCopyUrl">
@@ -487,8 +487,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
     this.shared_url = ""
   }
   public copyLink() {
-    let testingCodeToCopy = document.querySelector("#shared_url_link") as Record<any, any>
-    testingCodeToCopy.select()
+    let toCopy = this.$refs['shared_url_link'] as Record<any, any>
+    toCopy = toCopy[0].$el as Record<any, any>
+    toCopy.select()
     try {
       document.execCommand('copy');
       this.closeCopyUrl();
