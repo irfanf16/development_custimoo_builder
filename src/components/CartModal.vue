@@ -183,7 +183,8 @@ import ModalAction from "@/mixins/ModalAction";
             this.showToast(res.data.message, 'SUCCESS');
             this.showToast('Your pdf is generating', 'SUCCESS');
             this.viewLoader = false;
-            this.hide()
+            // this.hideVModal('cart-modal')
+            this.$router.push('/thank-you')
           }
           else {
             this.viewLoader = false
