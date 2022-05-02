@@ -913,7 +913,7 @@ export default class Scene extends Vue {
           this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
           setTimeout(() => {
             this.$store.commit('SET_CANVAS_READY', true);
-          }, 2000)
+          }, 500)
         }
         clearInterval(timer)
       }
