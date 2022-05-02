@@ -1,18 +1,17 @@
 <template>
   <modal :minWidth ="1000"
-         :minHeight="800"
+         :minHeight="600"
          :adaptive="true" name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl" modal-class="modal-fullscreen2"  content-class="lockerroom-modal"
-         @closed="customer_reference_no=null" @before-open="getAddresses"
+         @closed="customer_reference_no=''" @before-open="getAddresses"
         >
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Cart</span>
       <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('cart-modal')"><BIconX /></span>
     </div>
 
-    <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
-
-    <div style="overflow-y: auto; height: calc(100% - 150px)">
-      <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems.length > 0">
+    <div class="theme-scroll" style="height: calc(100% - 65px); overflow-y: auto; padding-bottom: 20px">
+      <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+      <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
         <thead class="bg-light">
         <tr>
           <th class="font-weight-bold">
@@ -22,7 +21,7 @@
             Design Image
           </th>
           <th class="font-weight-bold">
-            Size : Quantity
+            Quantity
           </th>
           <th colspan="2" class="font-weight-bold">
             Actions
@@ -35,90 +34,77 @@
             <td>
               {{factory_product.product_name}}
             </td>
-            <td>
-              <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
-              <b-img style="width: 80px; margin-left: 10px;" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
+            <td><b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
+              <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
+
             </td>
-            <td class="cursor-pointer" @click="editCartItem(factory_product,cart_item.id,false)">
+            <td>
               <template v-for="(roster_detail,index) in factory_product.roster_detail">
                 <div :key="index"><span>{{roster_detail.size}} : {{roster_detail.quantity}}</span></div>
               </template>
               <div>Total : {{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</div>
             </td>
             <!--          <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>-->
-            <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id,true)">
+            <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id)">
               <font-awesome-icon
                 :icon="['fas', 'edit']"/>
             </a></td>
-            <td class="cursor-pointer">  <a data-title="Delete Event" @click="deleteConfirm(cart_item, factory_product)"
+            <td class="cursor-pointer">  <a data-title="Delete Event" @click="deleteConfirm(cart_item,factory_product)"
             >
               <font-awesome-icon
                 :icon="['fas', 'trash-alt']"/>
             </a></td>
           </tr>
         </template>
-        <tr>
-          <td>Customer Reference No : </td>
-          <td>
-            <b-form-input   class="form-input" placeholder="Customer Reference No." type="text" name="customer_reference_no"
-                            v-model="customer_reference_no">
-            </b-form-input>
-          </td>
-        </tr>
-        <tr v-if="shipping_address">
-          <td>Shipping Address : </td>
-          <td>
-            <div>{{shipping_address.first_name}} {{shipping_address.last_name}}</div>
-            <div>{{shipping_address.address1}}</div>
-            <div>{{shipping_address.address2}}</div>
-            <div>{{shipping_address.zip_code}}</div>
-            <div>{{shipping_address.country.name}} {{shipping_address.city}}</div>
-            <div>{{shipping_address.phone_number}}</div>
-          </td>
-          <td> <router-link :to="'address?cart=1'" class="my-orders">Edit</router-link> </td>
-        </tr>
-        <tr v-else>
-          <td>Shipping Address : </td><td></td>
-          <td> <router-link :to="'address?cart=1'" class="my-orders">Add</router-link> </td>
-        </tr>
         </tbody>
       </table>
-    </div>
 
-    <div class="p-3 text-left" v-if="false">
-      <div class="well border-0" style="background: #f5f5f5">
-        <div class="fs-2 font-weight-bold py-2">Fill the form below to finalize your order</div>
-        <div class="mt-2 grid grid-2 gap-2">
-          <div class="input_icons">
-            <span class="icon"><BIconPerson /></span>
-            <b-form-input type="text" :value="userData.first_name +' '+ userData.last_name" placeholder="Full Name" />
+      <div class="p-3 grid grid-mobile-2 gap-2 text-left">
+        <div class="well border-0" style="background: #f5f5f5">
+          <div class="fs-2 font-weight-bold px-2 pt-1 pb-2">
+            Shipping Address
           </div>
-          <div class="input_icons">
-            <span class="icon"><BIconReceiptCutoff /></span>
-            <b-form-input type="text" placeholder="Order Reference" />
+          <template v-if="shipping_address">
+            <div class="px-2 pt-1 pb-2">
+              <div>{{shipping_address.first_name}} {{shipping_address.last_name}}</div>
+              <div>{{shipping_address.address1}}</div>
+              <div>{{shipping_address.address2}}</div>
+              <div>{{shipping_address.zip_code}}</div>
+              <div>{{shipping_address.country.name}} {{shipping_address.city}}</div>
+
+              <div class="d-flex flex-wrap w-100">
+                <div>{{shipping_address.phone_number}}</div>
+
+                <router-link :to="'address?cart=1'" class="btn ml-auto align-self-end btn-dark medium btn-sm my-orders">
+                  <span style="font-size: 0.85em"><b-icon-pencil /></span> Change
+                </router-link>
+              </div>
+
+            </div>
+          </template>
+          <div v-else class="px-2 pt-1 pb-2">
+            <router-link :to="'address?cart=1'" class="btn btn-secondary btn-sm my-orders">
+              <span style="font-size: 0.9em"><b-icon-plus /></span> Add
+            </router-link>
           </div>
-          <div class="input_icons">
-            <span class="icon"><BIconEnvelope /></span>
-            <b-form-input type="text" :value="userData.email" placeholder="Email" />
-          </div>
-          <div class="input_icons">
-            <span class="icon"><BIconPhone /></span>
-            <b-form-input type="text" placeholder="Phone" />
-          </div>
-          <div class="input_icons grid-span-2">
-            <span class="icon"><BIconGeoAlt /></span>
-            <b-form-input type="text" placeholder="Address" />
+        </div>
+
+        <div class="align-self-start">
+          <div class="fs-2 font-weight-bold ">Reference No:</div>
+          <div class="mt-1">
+            <b-form-input   class="form-input" placeholder="Customer Reference No." type="text" name="customer_reference_no"
+                            v-model="customer_reference_no" />
           </div>
         </div>
       </div>
-    </div>
 
-    <template #modal-footer>
-      <div class="text-right">
-        <b-button   v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
-      </div>
-    </template>
-    <b-button class="mt-4" @click="createOrder">Finalize Order</b-button>
+      <!--    <template #modal-footer>-->
+      <!--      <div class="text-right">-->
+      <!--        <b-button   v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>-->
+      <!--      </div>-->
+      <!--    </template>-->
+      <b-button class="mt-4" @click="createOrder">Finalize Order</b-button>
+    </div>
   </modal>
 
 </template>
@@ -155,7 +141,7 @@ import ModalAction from "@/mixins/ModalAction";
       public viewLoader = false;
       private userData = this.$store.getters.getCustomer;
       private storageUrl = process.env.VUE_APP_STORAGE_URL
-      public customer_reference_no : string = null
+      public customer_reference_no  = ""
       public shipping_address: Record<any, any> = null
 
       get cartItems() {
@@ -183,7 +169,7 @@ import ModalAction from "@/mixins/ModalAction";
             this.showToast(res.data.message, 'SUCCESS');
             this.showToast('Your pdf is generating', 'SUCCESS');
             this.viewLoader = false;
-            this.hide()
+            this.hideVModal('cart-modal')
           }
           else {
             this.viewLoader = false
@@ -195,7 +181,7 @@ import ModalAction from "@/mixins/ModalAction";
         });
       }
 
-      async public getAddresses() {
+      public async getAddresses() {
         this.$store.commit('SHOW_CART_MODAL',false);
         let address = this.$store.getters.getShippingAddress
         if(!address){
