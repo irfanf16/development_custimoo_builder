@@ -44,7 +44,9 @@ import ModalAction from '@/mixins/ModalAction'
 })
 export default class LockerRoomModal extends Mixins(ModalAction){
   public ref = this.$refs as Record<any, any>
-  private screenWidth = (window.screen.availWidth - 100)
+  private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+  private screenWidth = this.mobileScreen ? window.screen.availWidth : (window.screen.availWidth - 100)
 
   private showCollectionModal = () => {
     // alert("asd")

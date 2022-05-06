@@ -313,6 +313,11 @@ export default class CustomTabs extends Vue {
   private setMinMax = (idx: number) => {
     let element = document.querySelector('.customize_controls') as Record<any, any>;
 
+    if(!element){
+      let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
+      element = shadow_dom.querySelector('.customize_controls') as Record<any, any>;
+    }
+
     if(element.clientHeight <= (window.screen.availHeight/2)){
       element.style.top = 15 + 'px';
       element.classList.remove('setMax')
@@ -353,6 +358,10 @@ export default class CustomTabs extends Vue {
       // }
       // this.tabTop = cursorPosition;
       let element = document.querySelector('.customize_controls') as Record<any, any>;
+      if(!element){
+        let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
+        element = shadow_dom.querySelector('.customize_controls') as Record<any, any>;
+      }
       element.style.top = cursorPosition + 'px';
     }
   }
