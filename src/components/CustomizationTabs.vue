@@ -466,9 +466,10 @@ export default class CustomizationTabs extends Vue {
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
     let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
-    if (productFonts){
+    if (productFonts.length){
       let item = JSON.parse(productFonts[0].json_data)
       if(item) {
+        this.fontOptions = []
         item.forEach((fonts: any, key: number) => {
           let fontNameParam = fonts.path.split('/').reverse()
           fontNameParam = fontNameParam[0].split('.')
@@ -477,7 +478,17 @@ export default class CustomizationTabs extends Vue {
             value: fontNameParam[0] as string,
             text: fontName as string
           }
-          this.fontOptions = this.fontOptions.concat([font])
+          let hasMatch = false;
+          for (let index = 0; index < this.fontOptions.length; ++index) {
+            let obj = this.fontOptions[index];
+            if(obj.text == font.text){
+              hasMatch = true;
+              break;
+            }
+          }
+          if (!hasMatch){
+            this.fontOptions.push(font)
+          }
           let fontUrl = this.storageUrl + fonts.path
           const headElement = document.querySelector('head') as Record<any, any>
           let style_tag = document.createElement('style')
