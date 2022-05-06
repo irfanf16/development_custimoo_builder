@@ -134,6 +134,8 @@
               </div>
             </div>
           </template>
+          <div>asd {{ activeTab }}</div>
+
           <div class="customization-area" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
             <div v-bind:class="{active: isActive}">
               <div class="twoD-view">
@@ -185,7 +187,6 @@
               </div>
             </div>
           </div>
-
           <div class="sideNav" v-if="mobileScreen">
             <ul>
               <li>
@@ -375,9 +376,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
 
   private switchTabs (e:Record<any, any>){
+    console.log('tabs click', $(".sideNav li a").length)
     this.ref['custom-mobile-tabs'].hideOtherTab()
     let self = this;
-    $(".sideNav li a").removeClass('active')
+    if($(".sideNav li a").length){
+      $(".sideNav li a").removeClass('active')
+    }else{
+      let customizer_root = $("v-customizer").shadowRoot
+      let customizer = $(customizer_root).find('.sideNav li a').length
+      console.log('customizer_root', customizer_root)
+      console.log('customizer', customizer)
+    }
     // e.target.classes.push('active');
     e.currentTarget.classList.add('active');
     $(".sideNav li a").each(function (index){
@@ -385,6 +394,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         self.$store.dispatch('setActiveTab', index);
       }
     })
+  }
+
+  public get activeTab () {
+    return this.$store.getters.getActiveTab
   }
 
   public showLoader = true;
