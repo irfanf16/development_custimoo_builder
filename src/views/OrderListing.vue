@@ -34,92 +34,94 @@
     </div>
 
     <div class="orders-container my-4">
-      <table class="order-listing">
-        <tbody>
-        <tr>
-          <th>
-            Order No
-          </th>
-          <th>
-            Created At
-          </th>
-          <th>
-            Items Count
-          </th>
-          <th class="text-left">
-            Order Status
-          </th>
-          <th>
-            Order Reference
-          </th>
-          <th>
-            Order Reference No
-          </th>
-          <th>
-            Actions
-          </th>
-        </tr>
-        <template v-if="orders.length !== 0">
-          <template v-for="(order,index) in orders" >
-            <tr  @click="toggleHideShow(index,!order.visible)" :key="index" >
-              <td>
-                {{order.order_no}}
-              </td>
-              <td>
-                {{ order.created_at | orderDate }}
-              </td>
-              <td>
-                {{order.roster_quantity}}
-              </td>
-              <td>
-                <div class="d-flex gap-1 flex-wrap">
-                  <div v-for="(item, index) in order.items" :key="index" class="d-inline-flex well py-1 px-2 bg-light gap-1 align-items-center">
-                    <span class="font-weight-bold">{{item.factory_name}}</span>
-                    <span class="factory_status" :class="item.status">{{item.status | Status}}</span>
-                  </div>
-                </div>
-              </td>
-              <td>
-                {{ order.customer_reference_no ? order.customer_reference_no : 'N / A' }}
-              </td>
-              <td>
-                <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-dark mx-2">PDF</a>
-                <router-link  :to="`order/${order.id}/detail`" class="btn btn-dark mx-2">Details</router-link>
-              </td>
-            </tr>
-            <tr :key="'order-detail'+index" v-if="order.visible" class="order-detail-row">
-              <td>&nbsp;</td>
-              <td colspan="5" class="order-detail-container bg-light">
-                <template v-for="(item,indexItem) in order.items" >
-                  <div class="order-detail" :key="indexItem+index">
-                    <div class="factory-container">
-                      <h2 class="factory-name d-flex align-items-center gap-1">{{item.factory_name}} <span class="factory_status" :class="item.status">{{item.status | Status}}</span></h2>
+      <div class="table-responsive">
+        <table class="order-listing">
+          <tbody>
+          <tr>
+            <th>
+              Order No
+            </th>
+            <th>
+              Created At
+            </th>
+            <th>
+              Items Count
+            </th>
+            <th class="text-left">
+              Order Status
+            </th>
+            <th>
+              Order Reference
+            </th>
+            <th>
+              Order Reference No
+            </th>
+            <th>
+              Actions
+            </th>
+          </tr>
+          <template v-if="orders.length !== 0">
+            <template v-for="(order,index) in orders" >
+              <tr  @click="toggleHideShow(index,!order.visible)" :key="index" >
+                <td>
+                  {{order.order_no}}
+                </td>
+                <td>
+                  {{ order.created_at | orderDate }}
+                </td>
+                <td>
+                  {{order.roster_quantity}}
+                </td>
+                <td>
+                  <div class="d-flex gap-1 flex-wrap">
+                    <div v-for="(item, index) in order.items" :key="index" class="d-inline-flex well py-1 px-2 bg-light gap-1 align-items-center">
+                      <span class="font-weight-bold">{{item.factory_name}}</span>
+                      <span class="factory_status" :class="item.status">{{item.status | Status}}</span>
                     </div>
-                    <table class="w-100">
-                      <template v-for="(product,indexProduct) in item.factory_products">
-                        <tr class="product-details" :key="indexItem + indexProduct + index">
-                          <td>{{ product.product_name }}</td>
-                          <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
-                          <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
-                          <td>{{ product.roster_quantity }}</td>
-                          <td><span class="factory_status" :class="product.status">{{ product.status | Status }}</span></td>
-                        </tr>
-                      </template>
-                    </table>
-
                   </div>
-                </template>
-              </td>
+                </td>
+                <td>
+                  {{ order.customer_reference_no ? order.customer_reference_no : 'N / A' }}
+                </td>
+                <td>
+                  <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-dark mx-2">PDF</a>
+                  <router-link  :to="`order/${order.id}/detail`" class="btn btn-dark mx-2">Details</router-link>
+                </td>
+              </tr>
+              <tr :key="'order-detail'+index" v-if="order.visible" class="order-detail-row">
+                <td>&nbsp;</td>
+                <td colspan="5" class="order-detail-container bg-light">
+                  <template v-for="(item,indexItem) in order.items" >
+                    <div class="order-detail" :key="indexItem+index">
+                      <div class="factory-container">
+                        <h2 class="factory-name d-flex align-items-center gap-1">{{item.factory_name}} <span class="factory_status" :class="item.status">{{item.status | Status}}</span></h2>
+                      </div>
+                      <table class="w-100">
+                        <template v-for="(product,indexProduct) in item.factory_products">
+                          <tr class="product-details" :key="indexItem + indexProduct + index">
+                            <td>{{ product.product_name }}</td>
+                            <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                            <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                            <td>{{ product.roster_quantity }}</td>
+                            <td><span class="factory_status" :class="product.status">{{ product.status | Status }}</span></td>
+                          </tr>
+                        </template>
+                      </table>
+
+                    </div>
+                  </template>
+                </td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
+            <tr class="text-center">
+              <td colspan="4">No records found</td>
             </tr>
           </template>
-        </template>
-        <template v-else>
-          <tr class="text-center">
-            <td colspan="4">No records found</td>
-          </tr>
-        </template>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
     <b-pagination
       v-model="pagination.currentPage"
@@ -315,6 +317,10 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
+
+  @media (max-width: 991px) {
+    table-layout: auto;
+  }
 
   &>tbody{
     &>tr{
