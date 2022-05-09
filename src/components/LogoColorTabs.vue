@@ -3,7 +3,7 @@
     <b-card-body style="padding: 0 !important;">
           <b-nav class="d-flex flex-wrap align-items-center">
             <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
-            <b-nav-item :class="{ active: othersActive }" @click="selectType(0, true)">Others</b-nav-item>
+            <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(0, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
@@ -119,6 +119,10 @@ export default class LogoColorTabs extends Vue {
   @Watch('swatchPantone')
   swatchPantoneChanged(val: string) {
     this.pantoneColorVal = val
+  }
+
+  get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
   }
 
   get svgGroups() {
