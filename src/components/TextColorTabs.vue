@@ -3,7 +3,7 @@
     <b-card-body style="padding: 0 !important;">
           <b-nav class="d-flex flex-wrap align-items-center">
             <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
-            <b-nav-item :class="{ active: othersActive }" @click="selectType(0, true)">Others</b-nav-item>
+            <b-nav-item v-if="selectedProduct.choose_other_color" :class="{ active: othersActive }" @click="selectType(0, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
@@ -79,6 +79,9 @@ export default class TextColorTabs extends Vue {
   }
   get groupColors(){
     return this.$store.getters.getGroupColors
+  }
+  get selectedProduct(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct
   }
   public showColor(index: number) {
     this.selectAccordionIndex = index

@@ -13,9 +13,9 @@
       </b-card-header>
       <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
         <b-card-body>
-          <b-nav class="d-flex flex-wrap align-items-center">
+          <b-nav class="d-flex flex-wrap align-items-center" style="display: none">
             <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
-            <b-nav-item :class="{ active: othersActive }" @click="selectType(index, true)">Others</b-nav-item>
+            <b-nav-item v-if="selectedProduct.choose_other_color" :class="{ active: othersActive }" @click="selectType(index, true)">Others {{ selectedProduct.choose_other_color }}</b-nav-item>
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
@@ -104,6 +104,9 @@ export default class ColorAccordion extends Vue {
   }
   public showColor(index: number) {
     this.selectAccordionIndex = index
+  }
+  get selectedProduct(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct
   }
 
   public selectType(index: number, showOther = false) {
