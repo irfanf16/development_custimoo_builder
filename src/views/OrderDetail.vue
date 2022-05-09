@@ -262,13 +262,13 @@ import {findIndex, debounce, filter} from "lodash";
 
 @Component<OrderDetail>({
   async mounted() {
+    
     let self = this;
     let comment_id = null;
     this.isWebComponent = this.$root.$options.name == 'shadow-root'
-    console.log("this.isWebComponent", this.isWebComponent)
     if(this.isWebComponent) {
       let params = (new URL(document.location)).searchParams;
-      this.order_id = params.get("order_id");
+      this.order_id = this.$route.query.order_id;
        comment_id = params.get("comment_id");
     } else {
       this.order_id = this.$route.params.order_id;
