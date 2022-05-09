@@ -78,6 +78,10 @@
     <modal :width="500" :resizable="true" :scrollable="true" height="auto" :reset="true"
            :shiftY="0" name="upload-logo-disclaimer" id="upload-logo-disclaimer" size="md" :hide-footer="true"
            :hide-header="true" class="upload-logo-disclaimer" ref="upload-logo-disclaimer">
+      <div class="modal-header d-flex justify-content-between">
+        <span class="fs-5 font-weight-bold">Attention!</span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('upload-logo-disclaimer')"><BIconX /></span>
+      </div>
       <div class="modal-body">
         <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or
           laws. You may
@@ -92,10 +96,10 @@
             Don't show again.
           </b-form-checkbox>
         </div>
-        <div class="upload-logo-buttons">
-          <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
-          <b-button v-if="this.uploadType=='click'" class="btn-upload" @click="uploadLogoBtn">Confirm and Upload logo</b-button>
-          <b-button v-if="this.uploadType=='drag'" class="btn-upload" @click="uploadLogoDraged">Confirm and Upload logo</b-button>
+        <div class="upload-logo-buttons d-flex gap-1">
+          <button class="btn btn-secondary light text-center justify-content-center p-2" @click="hideModal">Cancel</button>
+          <button v-if="this.uploadType=='click'" class="btn btn-secondary text-center justify-content-center p-2" style="background: #219F84; color: #fff" @click="uploadLogoBtn">Confirm and Upload</button>
+          <button v-if="this.uploadType=='drag'" class="btn btn-secondary text-center justify-content-center p-2" style="background: #219F84; color: #fff" @click="uploadLogoDraged">Confirm and Upload</button>
         </div>
       </div>
     </modal>
