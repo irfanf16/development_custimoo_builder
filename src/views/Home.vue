@@ -331,6 +331,7 @@ Vue.filter('formatDate', function(value:string) {
     if(!localStorage.getItem('browserToken')){
       await this.$store.dispatch('setBrowserToken')
     }
+
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
       await  this.$store.dispatch('permissions')
@@ -338,6 +339,44 @@ Vue.filter('formatDate', function(value:string) {
       if(show_cart){
         this.showVModal('cart-modal');
       }
+
+        let ecommerce_update_id = this.$route.query.update_item;
+        let santa_cart_id = this.$route.query.update_cart;
+        console.log('ecommerce_update_id',ecommerce_update_id)
+
+
+
+        if(ecommerce_update_id){
+         let cart_items = await this.$store.getters.getCartItems;
+
+
+         let filter_items = cart_items.filter((item) => {
+           return item.id == parseInt(santa_cart_id)
+         });
+          console.log('filter_items',filter_items)
+          if(filter_items && filter_items.length > 0){
+
+            let factory_items = filter_items[0].factory_products.filter((factory_item)=>{
+              console.log('factory_item',factory_item)
+              console.log('factory_itemecommerce_cart_id',factory_item.ecommerce_cart_id)
+              console.log('ecommerce_update_id',ecommerce_update_id)
+              return factory_item.ecommerce_cart_id == ecommerce_update_id
+            } );
+
+            console.log('factory_items',factory_items);
+            if(factory_items && factory_items.length > 0){
+              let update_cart_item = factory_items[0]
+              console.log(update_cart_item);
+
+              this.ref.cartModal.editCartItem(update_cart_item, santa_cart_id, true);
+
+            }
+
+          }
+
+        }
+
+
     }
 
   },
