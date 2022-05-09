@@ -527,7 +527,7 @@ export default class CustomizationTabs extends Vue {
       rotation: 0,
       haveControls: true,
       outlineEnabled: true,
-      side: 'back',
+      side: 'front',
       fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
       fillColor: this.firstColor.value,
       fillColorPantone: this.firstColor.name,
