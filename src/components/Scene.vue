@@ -811,24 +811,7 @@ export default class Scene extends Vue {
 
     let model: any
     if(this.productType == 'customized') {
-      fabric.Image.fromURL(ImageData.modelUrl, (img: any) => {
-        img.scaleToHeight(canvas.getHeight() - 10).set({
-          hasControls: false,
-          selectable: false,
-          evented: false,
-          globalCompositeOperation: 'multiply'
-          // globalCompositeOperation: 'overlay'
-        })
-        img.center().setCoords()
-        model = img
-        if (side == 'back') {
-          this.backModel = img
-        } else {
-          this.frontModel = img
-        }
-      }, { crossOrigin: 'Anonymous' })
-    } else {
-      model = true
+      this.addModel(ImageData.modelUrl, side, canvas.getHeight())
     }
 
 
@@ -842,8 +825,13 @@ export default class Scene extends Vue {
 
     const timer = setInterval(() => {
       let texture = this.frontTexture
+      model = this.frontModel
       if (side == 'back') {
         texture = this.backTexture
+        model = this.backModel
+      }
+      if(this.productType == 'personalized') {
+        model = true
       }
       if (model && texture && (!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
         if (ImageData.file_extension == 'svg' && this.productType == 'customized' && (!this.back || (this.back && side == 'back'))) {
@@ -1591,10 +1579,28 @@ export default class Scene extends Vue {
     }
   }
 
-  public addTexture (textureUrl: string, side: string, file_ext: string): void {
+  public async addModel(modelUrl: string, side: string, canvas_height: number) {
+    await fabric.Image.fromURL(modelUrl+'?nocache=1', (img: any) => {
+      img.scaleToHeight(canvas_height - 10).set({
+        hasControls: false,
+        selectable: false,
+        evented: false,
+        globalCompositeOperation: 'multiply'
+        // globalCompositeOperation: 'overlay'
+      })
+      img.center().setCoords()
+      if(side == 'back') {
+        this.backModel = img
+      } else {
+        this.frontModel = img
+      }
+    }, { crossOrigin: 'Anonymous' })
+  }
+
+  public async addTexture (textureUrl: string, side: string, file_ext: string): void {
     const self = this
     if(file_ext == 'svg'){
-      fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
+      await fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
         options.crossOrigin = 'Anonymous'
         const img = fabric.util.groupSVGElements(objects) as fabric.Group
         img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
@@ -1619,7 +1625,7 @@ export default class Scene extends Vue {
         }
       })
     }else{
-      fabric.Image.fromURL(textureUrl, (img: any) => {
+      await fabric.Image.fromURL(textureUrl, (img: any) => {
         img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
           hasControls: false,
           selectable: false,
@@ -1640,11 +1646,11 @@ export default class Scene extends Vue {
 
   }
 
-  public addLogos(logo: Record<any, any>, logoIndex: null|number = null) {
+  public async addLogos(logo: Record<any, any>, logoIndex: null|number = null) {
     if ('logoIndex' in logo) {
       logoIndex = logo.logoIndex
     } else {
-      this.$store.dispatch('updateCustomLogoWithoutTrigger', {
+      await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
         index: logoIndex,
         data: {
           logoIndex: logoIndex,
@@ -1659,7 +1665,7 @@ export default class Scene extends Vue {
       }
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
-      fabric.Image.fromURL(logoUrl, (img: any) => {
+      await fabric.Image.fromURL(logoUrl, (img: any) => {
         img.scaleToWidth(this.canvasWidth / this.mainCanvasWidth * logo.width as number)
         img.set({
           left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,

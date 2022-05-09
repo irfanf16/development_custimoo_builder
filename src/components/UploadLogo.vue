@@ -75,26 +75,30 @@
     </div>
 
 
-    <b-modal ref="myModal" content-class="upload-logo-disclaimer" id="modal-center" centered title="Upload Logo">
-      <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or
-        laws. You may
-        review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
-      <div class="mb-2">
-        <b-form-checkbox
-          id="checkbox-1"
-          v-model="status"
-          name="checkbox-1"
-          value="accepted"
-          unchecked-value="not_accepted">
-          Don't show again.
-        </b-form-checkbox>
+    <modal :width="500" :resizable="true" :scrollable="true" height="auto" :reset="true"
+           :shiftY="0" name="upload-logo-disclaimer" id="upload-logo-disclaimer" size="md" :hide-footer="true"
+           :hide-header="true" class="upload-logo-disclaimer" ref="upload-logo-disclaimer">
+      <div class="modal-body">
+        <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or
+          laws. You may
+          review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
+        <div class="mb-2">
+          <b-form-checkbox
+            id="checkbox-1"
+            v-model="status"
+            name="checkbox-1"
+            value="accepted"
+            unchecked-value="not_accepted">
+            Don't show again.
+          </b-form-checkbox>
+        </div>
+        <div class="upload-logo-buttons">
+          <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
+          <b-button v-if="this.uploadType=='click'" class="btn-upload" @click="uploadLogoBtn">Confirm and Upload logo</b-button>
+          <b-button v-if="this.uploadType=='drag'" class="btn-upload" @click="uploadLogoDraged">Confirm and Upload logo</b-button>
+        </div>
       </div>
-      <div class="upload-logo-buttons">
-        <b-button class="btn-cancel" @click="hideModal">Cancel</b-button>
-        <b-button v-if="this.uploadType=='click'" class="btn-upload" @click="uploadLogoBtn">Confirm and Upload logo</b-button>
-        <b-button v-if="this.uploadType=='drag'" class="btn-upload" @click="uploadLogoDraged">Confirm and Upload logo</b-button>
-      </div>
-    </b-modal>
+    </modal>
   </div>
 </template>
 
@@ -192,11 +196,11 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   }
 
   public showModal() {
-    this.ref.myModal.show()
+    this.showVModal('upload-logo-disclaimer')
   }
 
   public hideModal() {
-    this.ref.myModal.hide()
+    this.hideVModal('upload-logo-disclaimer')
   }
 
   get customLogos(): Record<any, any>[] {
