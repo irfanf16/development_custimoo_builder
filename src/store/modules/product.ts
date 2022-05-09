@@ -8,7 +8,7 @@ const Product:Module<any, any> = {
     lockers:[],
     logoColors:[],
     logoUrl:'',
-    eyeIndex: -1,
+    eyeIndex: 0,
     selectedModelIndex: 0,
     initialExtractedColors:[],
     active_locker_index:0,
