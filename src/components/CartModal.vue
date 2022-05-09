@@ -1,11 +1,12 @@
 <template>
-  <modal :minWidth ="800"
+  <modal :minWidth ="800" :scrollable="true" :height="'auto'"
          :minHeight="600" :resizable="true"
-         :adaptive="true" name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl" modal-class="modal-fullscreen2"  content-class="lockerroom-modal"
+         :adaptive="true" name="cart-modal" ref="cart-modal" id="cart-center-lockerroom"
+         size="xl" modal-class="modal-fullscreen2"  content-class="lockerroom-modal"
          @closed="customer_reference_no=null" @before-open="getAddresses"
         >
     <div class="modal-header d-flex justify-content-between">
-      <span class="fs-5 font-weight-bold">Cart</span>
+      <span class="fs-5 font-weight-bold">Cartdddd</span>
       <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('cart-modal')"><BIconX /></span>
     </div>
 

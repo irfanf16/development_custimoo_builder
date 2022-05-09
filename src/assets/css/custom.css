@@ -1050,7 +1050,7 @@ button:focus, button:active {
 @media only screen and (min-width: 992px) {
   .customization-tabs .team-roaster-area .btn {
     display: block;
-    flex-grow:1;
+    width: 100%;
     font-size: 1rem;
   }
 }
