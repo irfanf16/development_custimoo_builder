@@ -64,7 +64,7 @@
 <!--                  </template>-->
                 </div>
               </template>
-              <div class="px-3 pt-3 p-lg-4 text-right">
+              <div v-if="selectedProduct.allow_extra_text" class="px-3 pt-3 p-lg-4 text-right">
                 <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
                   +
                 </b-button>

@@ -67,7 +67,7 @@
               <div class="color_circle" :key="index" v-for="(color, index) in productColors[activeCollection].color_text" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
             </div>
 
-            <div v-if="showOtherColors" class="mobile-other">
+            <div v-if="showOtherColors && selectedProduct.is_custom_color_allowed" class="mobile-other">
               <span class="close" @click="hideOther"><BIconX /></span>
               <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
             </div>
@@ -95,7 +95,7 @@
         </b-tabs>
       </b-tab>
 
-      <template #tabs-end>
+      <template #tabs-end v-if="selectedProduct.allow_extra_text">
           <li @click="addTab" class="add_text_tab" style="font-size: 0.9em">Add <BIconPlus/></li>
       </template>
     </b-tabs>
