@@ -1,5 +1,5 @@
 <template>
-  <div class="item-to-customize text-left py-lg-5">
+  <div class="item-to-customize text-left">
     <div class="p-3" style="border-bottom: 1px solid #eee" v-if="mobileScreen" >
       <h2 class="fw-bold p-lg-0 mb-lg-4 fz-18 bg-transparent d-flex align-items-center justify-content-between" @click="toggleItems">
         <span>Select Item to Customize</span>

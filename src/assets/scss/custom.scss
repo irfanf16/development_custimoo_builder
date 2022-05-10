@@ -2139,6 +2139,8 @@ button{
       }
 }
 .slither-slider-slide{
+    grid-template-columns: repeat(4, minmax(0px, 1fr)) !important;
+
     .image-holder{
         .canvas-container{
             height: 100px !important;

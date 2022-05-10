@@ -55,13 +55,13 @@
             <div class="d-none d-lg-block">
               <template v-for="(customText, index) in customTexts">
                 <div :key="index" v-if="customText.hasOwnProperty('text')">
-                  <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
+                  <CustomizationText @removeTab="removeTab(index, selectedProduct.id)" :productFonts="selectedProduct.namefonts" :customTextIndex="index"
                                      :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-                  <template v-if="index + 1  > selectedProduct.productnames.length">
-                    <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">
-                      -
-                    </b-button>
-                  </template>
+<!--                  <template v-if="index + 1  > selectedProduct.productnames.length">-->
+<!--                    <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">-->
+<!--                      - -->
+<!--                    </b-button>-->
+<!--                  </template>-->
                 </div>
               </template>
               <div class="px-3 pt-3 p-lg-4 text-right">
@@ -602,7 +602,7 @@ export default class CustomizationTabs extends Vue {
 }
 
 .myscroll{
-  height: calc(100vh - 227px);
+  height: calc(100vh - 255px);
   overflow-y: auto;
 
   &::-webkit-scrollbar{

@@ -3,13 +3,16 @@
     <b-tabs class="player_text mobile" v-if="this.selectedProductID">
       <b-tab v-for="(customText, tabIndex) in customTexts" :key="tabIndex" @click="setTextIndex(tabIndex)">
         <template #title>
-          {{ customText.side ? customText.side : 'text' | capitalize}} {{ customText.type | capitalize }}
+          <span>
+            {{ customText.side ? customText.side : 'text' | capitalize}} {{ customText.type | capitalize }}
+          </span>
+          <template v-if="tabIndex + 1  > selectedProduct.productnames.length">
+            <b-button class="add-logo-btn ml-1" @click="removeTab(tabIndex, selectedProduct.id)">
+              -
+            </b-button>
+          </template>
         </template>
-            <div v-if="tabIndex + 1  > selectedProduct.productnames.length">
-              <b-button class="add-logo-btn ml-1" @click="removeTab(tabIndex, selectedProduct.id)">
-                -
-              </b-button>
-            </div>
+
         <div class="grid mobile-cols-2 gap-1">
           <div class="mobile_controls d-flex gap-1 align-items-center">
 <!--            <label class="d-flex align-items-center justify-content-between"><span>{{ customTexts[tabIndex].type | capitalize }} {{ customTexts[tabIndex].side }}</span></label>-->
