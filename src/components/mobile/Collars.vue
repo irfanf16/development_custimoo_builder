@@ -27,7 +27,9 @@
       <div class="collar-designs">
         <template v-for="(style, i) in productModels[currentStyle].productstyles">
           <template v-if="productModels[currentStyle].productstyles > 1">
-            <b-button :key="i"  v-if="model.model_styles.includes(style.id)" variant="outline-light" @click="changeStyleIndex(i)"><img :src="storageUrl+style.front.file_url " /></b-button>
+            <b-button :key="i"  v-if="model.model_styles.includes(style.id)" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
+              <img :src="storageUrl+style.front.file_url " />
+            </b-button>
           </template>
         </template>
       </div>
