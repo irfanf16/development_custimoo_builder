@@ -262,7 +262,7 @@ import {findIndex, debounce, filter} from "lodash";
 
 @Component<OrderDetail>({
   async mounted() {
-    
+
     let self = this;
     let comment_id = null;
     this.isWebComponent = this.$root.$options.name == 'shadow-root'
@@ -511,7 +511,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       activityObj.files[ref_index].file = event.dataUrl
       activityObj.files[ref_index].file_type = 'encode'
     });
-    markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+    let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
+    console.log("shadow", shadow_dom)
+    console.log("shadow123", shadow_dom.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index))
+    if(shadow_dom) {
+      markerArea.targetRoot = shadow_dom.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+    } else {
+      markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+    }
     markerArea.renderAtNaturalSize = true;
     markerArea.show();
     //markerArea.close();
