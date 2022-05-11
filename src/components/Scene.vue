@@ -22,7 +22,7 @@ import rgbHex from 'rgb-hex'
 import {setLogoSettings} from "@/helpers/Helpers";
 
 @Component<Scene>({
-  mounted() {
+  async mounted() {
     if(this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -37,9 +37,9 @@ import {setLogoSettings} from "@/helpers/Helpers";
       })
     }
     const self = this
-    this.loadScene(this.front, 'front')
+    await this.loadScene(this.front, 'front')
     if (this.back) {
-      this.loadScene(this.back, 'back')
+      await this.loadScene(this.back, 'back')
     }
 
     let scaleImg = document.createElement('img');
@@ -795,7 +795,7 @@ export default class Scene extends Vue {
     return false
   }
 
-  public loadScene(ImageData: Record<any, any>, side: string): void {
+  public async loadScene(ImageData: Record<any, any>, side: string): void {
     this.mounted = false
     let element = this.$refs.front as HTMLCanvasElement
     if (side === 'back') {
@@ -810,46 +810,44 @@ export default class Scene extends Vue {
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
     let model: any
+    let promises = []
     if(this.productType == 'customized') {
-      this.addModel(ImageData.modelUrl, side, canvas.getHeight())
+      promises.push( this.addModel(ImageData.modelUrl, side, canvas.getHeight()))
     }
 
-
-    this.addTexture(ImageData.textureUrl, side, ImageData.file_extension)
+    promises.push(this.addTexture(ImageData.textureUrl, side, ImageData.file_extension))
 
     if(this.backTextureUrl && side == 'front') {
-      this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension)
+      promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension))
     }
 
     const self = this
 
-    const timer = setInterval(() => {
+    Promise.all(promises).then((values)=> {
       let texture = this.frontTexture
       model = this.frontModel
       if (side == 'back') {
         texture = this.backTexture
         model = this.backModel
       }
-      if(this.productType == 'personalized') {
-        model = true
-      }
-      if (model && texture && (!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
+
+      if ((!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
         if (ImageData.file_extension == 'svg' && this.productType == 'customized' && (!this.back || (this.back && side == 'back'))) {
           this.getSvgGroups()
         }
         canvas.add(texture)
         canvas.viewportCenterObject(texture)
-        this.logoObjects.forEach((logoObject) => {
-          canvas.add(logoObject)
-        })
-        this.customLogoObjects.forEach((logoObject) => {
-          canvas.add(logoObject)
-        })
-        this.customTextObjects.forEach((textObject) => {
-          canvas.add(textObject)
-        })
+        // this.logoObjects.forEach((logoObject) => {
+        //   canvas.add(logoObject)
+        // })
+        // this.customLogoObjects.forEach((logoObject) => {
+        //   canvas.add(logoObject)
+        // })
+        // this.customTextObjects.forEach((textObject) => {
+        //   canvas.add(textObject)
+        // })
 
-        if(this.productType == 'customized') {
+        if (this.productType == 'customized') {
           canvas.add(model)
           canvas.viewportCenterObject(model)
         }
@@ -860,15 +858,15 @@ export default class Scene extends Vue {
         }
         canvas.renderAll()
 
-        if(!this.back || (this.back && side == 'back')) {
-          if(this.logos.length) {
+        if (!this.back || (this.back && side == 'back')) {
+          if (this.logos.length) {
             this.logos.forEach((logo: Record<any, any>, index: number) => {
-              if(logo && logo.url) {
+              if (logo && logo.url) {
                 this.addLogos(logo, index)
               }
             })
           }
-          if(!this.preSetData) {
+          if (!this.preSetData) {
             let logos: Record<any, any>[] = []
             if (this.customLogos && this.logoAllowed) {
               let customLogos = JSON.parse(JSON.stringify(this.customLogos))
@@ -879,7 +877,7 @@ export default class Scene extends Vue {
             }
             if (logos.length) {
               logos.forEach((logo: Record<any, any>, index: number) => {
-                if(logo && logo.url) {
+                if (logo && logo.url) {
                   this.addLogos(logo, index)
                 }
               })
@@ -898,14 +896,20 @@ export default class Scene extends Vue {
 
         if (this.mainPreview && (!this.back || (this.back && side == 'back'))) {
           this.setProductionSVG()
-          this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
+          this.$store.commit('STORE_CANVAS_IMAGE', {
+            front: this.$refs.front,
+            back: this.$refs.back,
+            scene: this
+          })
           setTimeout(() => {
             this.$store.commit('SET_CANVAS_READY', true);
           }, 500)
         }
-        clearInterval(timer)
+
+        this.showLoader = false
+        this.mounted = true
       }
-    }, 1000)
+    })
     canvas.on('object:modified', (e: Record<any, any>) => {
       var objects = canvas.getObjects('line');
       for (let i in objects) {
@@ -1580,70 +1584,76 @@ export default class Scene extends Vue {
   }
 
   public async addModel(modelUrl: string, side: string, canvas_height: number) {
-    await fabric.Image.fromURL(modelUrl+'?nocache=1', (img: any) => {
-      img.scaleToHeight(canvas_height - 10).set({
-        hasControls: false,
-        selectable: false,
-        evented: false,
-        globalCompositeOperation: 'multiply'
-        // globalCompositeOperation: 'overlay'
-      })
-      img.center().setCoords()
-      if(side == 'back') {
-        this.backModel = img
-      } else {
-        this.frontModel = img
-      }
-    }, { crossOrigin: 'Anonymous' })
+    return new Promise((resolve, reject) => {
+      fabric.Image.fromURL(modelUrl + '?nocache=1', async (img: any) => {
+        img.scaleToHeight(canvas_height - 10).set({
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          globalCompositeOperation: 'multiply'
+          // globalCompositeOperation: 'overlay'
+        })
+
+        img.tainted = false
+        img.center().setCoords()
+        if (side == 'back') {
+          this.backModel = img
+        } else {
+          this.frontModel = img
+        }
+        resolve('done')
+      }, { crossOrigin: 'Anonymous' })
+    })
   }
 
-  public async addTexture (textureUrl: string, side: string, file_ext: string): void {
-    const self = this
-    if(file_ext == 'svg'){
-      await fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
-        options.crossOrigin = 'Anonymous'
-        const img = fabric.util.groupSVGElements(objects) as fabric.Group
-        img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
-          hasControls: false,
-          selectable: false,
-          evented: false,
-          lockMovementX: true,
-          lockMovementY: true,
+  public addTexture (textureUrl: string, side: string, file_ext: string) {
+    return new Promise((resolve, reject) => {
+      if (file_ext == 'svg') {
+        fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
+          options.crossOrigin = 'Anonymous'
+          const img = fabric.util.groupSVGElements(objects) as fabric.Group
+          img.scaleToHeight(this.frontCanvas.getHeight() - 10).set({
+            hasControls: false,
+            selectable: false,
+            evented: false,
+            lockMovementX: true,
+            lockMovementY: true,
+          })
+
+          // img._objects.forEach((element: any) => {
+          //   if(element.id === 'Laces') {
+          //     element.globalCompositeOperation = 'destination-out'
+          //   }
+          // })
+          img.center().setCoords();
+
+          if (side == 'back') {
+            this.backTexture = img
+          } else {
+            this.frontTexture = img
+          }
+          resolve('done')
         })
+      } else {
+        fabric.Image.fromURL(textureUrl, (img: any) => {
+          img.scaleToHeight(this.frontCanvas.getHeight() - 10).set({
+            hasControls: false,
+            selectable: false,
+            evented: false,
+            lockMovementX: true,
+            lockMovementY: true
+          })
+          img.center().setCoords()
 
-        // img._objects.forEach((element: any) => {
-        //   if(element.id === 'Laces') {
-        //     element.globalCompositeOperation = 'destination-out'
-        //   }
-        // })
-        img.center().setCoords();
-
-        if (side == 'back') {
-          this.backTexture = img
-        } else {
-          this.frontTexture = img
-        }
-      })
-    }else{
-      await fabric.Image.fromURL(textureUrl, (img: any) => {
-        img.scaleToHeight(self.frontCanvas.getHeight() - 10).set({
-          hasControls: false,
-          selectable: false,
-          evented: false,
-          lockMovementX: true,
-          lockMovementY: true
-        })
-        img.center().setCoords()
-
-
-        if (side == 'back') {
-          this.backTexture = img
-        } else {
-          this.frontTexture = img
-        }
-      }, { crossOrigin: 'Anonymous' })
-    }
-
+          if (side == 'back') {
+            this.backTexture = img
+          } else {
+            this.frontTexture = img
+          }
+          resolve('done')
+        }, { crossOrigin: 'Anonymous' })
+      }
+    })
   }
 
   public async addLogos(logo: Record<any, any>, logoIndex: null|number = null) {
@@ -1684,6 +1694,7 @@ export default class Scene extends Vue {
           cornerSize: 30
         })
 
+        img.tainted = false
         if (logo.scaleX && logo.scaleY) {
           img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX
           img.scaleY = this.canvasHeight / this.mainCanvasHeight * logo.scaleY

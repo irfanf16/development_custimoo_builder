@@ -11,6 +11,8 @@ import {LockerProducts} from "@/mixins/LockerProduct";
 import router from './../router'
 import store from '../store'
 import Navbar from '@/components/Navbar.vue';
+import Gleap from 'gleap';
+Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
 import VueToast from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 Vue.use(VueToast);
@@ -119,6 +121,12 @@ export default {
     }
   },
   mounted: async function() {
+    let elem = document.createElement('link');
+    elem.rel = ' stylesheet'
+    elem.type = 'text/css';
+    elem.href= 'https://cdn.custimoo.com/gulip/gulip.min.css';//Link of the css file
+    document.head.appendChild(elem);
+
     if(this.$root.$options.shadowRoot) {
       let ubuntu_font = document.createElement("style")
       ubuntu_font.append = '@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap")'

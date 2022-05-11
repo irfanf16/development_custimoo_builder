@@ -273,9 +273,19 @@ import {findIndex, debounce, filter} from "lodash";
 
 @Component<OrderDetail>({
   async mounted() {
+
     let self = this;
+    let comment_id = null;
+    this.isWebComponent = this.$root.$options.name == 'shadow-root'
+    if(this.isWebComponent) {
+      let params = (new URL(document.location)).searchParams;
+      this.order_id = this.$route.query.order_id;
+       comment_id = params.get("comment_id");
+    } else {
+      this.order_id = this.$route.params.order_id;
+      comment_id = this.$route.query.comment_id;
+    }
     await self.getOrderDetail();
-    let comment_id = this.$route.query.comment_id;
     if(comment_id) {
       let timer = setInterval(function() {
         self.goToMessage(Number(comment_id))
@@ -320,11 +330,12 @@ import {findIndex, debounce, filter} from "lodash";
 
 export default class OrderDetail extends Mixins(ErrorMessages) {
   public storage_url = process.env.VUE_APP_STORAGE_URL
-  private order_id = this.$route.params.order_id;
+  private order_id = null;
   private order:Record<any,any> = {};
   public logData = logData
   public activityStatus = activityStatus
   public showLoader = false
+  public isWebComponent = false
 
   // -------- Order Status Constants
   public FACTORYREVIEW = "submitted_for_factory_review"
@@ -512,7 +523,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       activityObj.files[ref_index].file = event.dataUrl
       activityObj.files[ref_index].file_type = 'encode'
     });
-    markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+    let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
+    console.log("shadow", shadow_dom)
+    console.log("shadow123", shadow_dom.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index))
+    if(shadow_dom) {
+      markerArea.targetRoot = shadow_dom.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+    } else {
+      markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+    }
     markerArea.renderAtNaturalSize = true;
     markerArea.show();
     //markerArea.close();
