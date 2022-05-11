@@ -18,7 +18,7 @@
 
       <div class="w-100 text-left pl-2 position-relative logo-edit-btn-updated">
         <div class="d-sm-block d-lg-block continue-btn-holder pt-1" style="padding: 0">
-          <b-button @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
+          <b-button v-if="false" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
           <LogoEditorModal @updateLogoFromLogoEditor="updateLogoFromLogoEditor" :customLogoIndex="this.customLogoIndex" ref="logoEditorModal" :logo_id="customLogos[customLogoIndex].id" />
         </div>
 <!--        <div>-->
@@ -66,6 +66,7 @@
         <template v-if="customLogoIndex === 0">
           <h3>{{ customLogos[0] && customLogos[0].url? 'Replace Team Logo' : 'Upload Team Logo' }}</h3>
         </template>
+
         <template v-else>
           <h3>{{ customLogos[customLogoIndex] && customLogos[customLogoIndex].url? 'Replace Logo' : 'Upload Logo' }}</h3>
         </template>
@@ -73,6 +74,9 @@
         <p>Need High Res Image</p>
       </div>
     </div>
+    <b-button style="position:absolute; left: 0; top: -38px; width: auto" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">
+      <b-icon-pencil fl /> Edit Logo
+    </b-button>
 
 
     <modal :width="500" :resizable="true" :scrollable="true" height="auto" :reset="true"
@@ -643,10 +647,12 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   background: #219F84 !important;
   color: #fff !important;
   font-size: 14px !important;
-  padding: 10px 20px !important;
+  padding: 8px 15px !important;
   display: flex;
+  gap: 7px;
   align-items: center;
   justify-content: center;
+
   @media only screen and (max-width: 767px){
     width: 100%;
   }

@@ -2534,7 +2534,7 @@ button{
 }
 .tabs-logo-container{
     .logo-placement-holder{
-        padding-bottom: 45px;
+        padding-bottom: 0px;
         position: relative;
     }
     .upload-logo-opener{
@@ -3224,7 +3224,7 @@ $fontSize: 0.5;
 .sideNav{
     position: absolute;
     left: 0;
-    top: 0;
+    top: 0 !important;
     bottom: 100px;
     display: flex;
     align-items: center;
@@ -3295,6 +3295,10 @@ $fontSize: 0.5;
         justify-content: center;
         border-radius: 999px;
         font-size: 1.5em;
+
+        &.maximizer{
+            background: #219F84;
+        }
     }
 }
 
@@ -4796,5 +4800,11 @@ $fontSize: 0.5;
         cursor: pointer;
         top: -8px;
         right: -8px;
+    }
+}
+
+.tabs.mobile{
+    .nav-item{
+        position: relative;
     }
 }

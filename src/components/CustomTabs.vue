@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="customize_controls" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 0" >
-      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div>
@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 1" >
-      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div class="grid gap-1 text-left">
@@ -61,7 +61,7 @@
       </div>
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2" >
-      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
       <div class="mt-2"></div>
@@ -71,14 +71,14 @@
         :fontsColors="fontsColors" :firstColor="firstColor" :secondColor="secondColor" :fontOptions="fontOptions" />
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 3" >
-      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(2)" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
       <div class="mt-2"></div>
 
       <Collars :productModels="productModels"/>
     </div>
     <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-if="this.$store.getters.getActiveTab === 4">
-      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(3)" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
       <div class="d-flex mt-2 flex-column h-100">
@@ -131,12 +131,11 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     // UploadLogo
   },
   async mounted() {
-    // this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
     this.customTextInit()
-   // console.log('customTexts', this.selectedProduct)
+    this.switchTabs(0)
 
     this.productSizes = this.selectedProduct.sizes
     this.setProductSizes()
@@ -394,9 +393,13 @@ export default class CustomTabs extends Vue {
   ]
 
   private hideAll(){
-    this.$store.dispatch('setActiveTab', -1);
-    $(".sideNav li a").removeClass('active')
+    this.$emit('switchTabs', -1, false)
   }
+
+  private switchTabs(ind:number){
+    this.$emit('switchTabs', ind, false)
+  }
+
   private showOther(){
     this.showOtherColors = true
     this.showOtherTab = true

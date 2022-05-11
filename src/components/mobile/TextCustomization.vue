@@ -1,99 +1,105 @@
 <template>
   <div>
     <b-tabs class="player_text mobile" v-if="this.selectedProductID">
-      <b-tab v-for="(customText, tabIndex) in customTexts" :key="tabIndex" @click="setTextIndex(tabIndex)">
-        <template #title>
-          <span>
+      <template v-for="(customText, tabIndex) in customTexts">
+        <b-tab v-if="customText.hasOwnProperty('text')" :key="tabIndex" @click="setTextIndex(tabIndex)">
+          <template #title>
+            <template v-if="tabIndex + 1  > selectedProduct.productnames.length">
+              <!--            <b-button class="add-logo-btn ml-1" @click="removeTab(tabIndex, selectedProduct.id)">-->
+              <!--              - -->
+              <!--            </b-button>-->
+              <b-button class="p-0 mr-1 light remove-text" size="sm" style="min-width: unset; line-height: normal" variant="dark" @click.stop="removeTab(tabIndex, selectedProduct.id)">
+                <b-icon-x />
+              </b-button>
+            </template>
+
+            <span>
             {{ customText.side ? customText.side : 'text' | capitalize}} {{ customText.type | capitalize }}
           </span>
-          <template v-if="tabIndex + 1  > selectedProduct.productnames.length">
-            <b-button class="add-logo-btn ml-1" @click="removeTab(tabIndex, selectedProduct.id)">
-              -
-            </b-button>
           </template>
-        </template>
 
-        <div class="grid mobile-cols-2 gap-1">
-          <div class="mobile_controls d-flex gap-1 align-items-center">
-<!--            <label class="d-flex align-items-center justify-content-between"><span>{{ customTexts[tabIndex].type | capitalize }} {{ customTexts[tabIndex].side }}</span></label>-->
-            <div @click="changeSide(tabIndex, customText.side)" class="fs-3">
-              <BIconArrowRepeat style="margin-top: 8px" />
-            </div>
-            <b-form-input
-              @click="isHidden = !isHidden"
-              class="mt-1"
-              :placeholder="customText.side + ' ' + customText.type | capitalize"
-              :value="customText.text"
-              @input="updateTextField(tabIndex, $event)"
-            ></b-form-input>
-          </div>
-
-          <div class="mt-2 mobile_controls" v-if="customTextIndex != '' || customTextIndex != undefined">
-            <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span v-if="+customText.outLineWidth">{{ customText.outLineWidth }}px</span></label>
-            <b-form-input id="range-2" style="margin-top: 7px" :value="customTexts[customTextIndex].outLineWidth" @change="outLineWidthValueChanged($event)" type="range" min="0" max="10" step="1"></b-form-input>
-          </div>
-          <div v-else>
-            {{customTextIndex}}
-          </div>
-        </div>
-        <div class="fade-right py-2">
-          <div class="overflow-auto d-flex align-items-center gap-2 hide-scroll fontList">
-            <div v-for="(item, i) in fontOptions" :key="i" @click="fontOptionChanged(tabIndex, i, item.value)" style="white-space: nowrap" :class="{'pr-3': i+1 == fontOptions.length, 'activeFont': activeFont == i}">
-              {{item.text}}</div>
-          </div>
-        </div>
-
-        <b-tabs class="mt-2">
-          <b-tab @click="setColorType('fill')">
-            <template #title>
-              <div class="d-flex align-items-center gap-1">
-                <span class="selected-color ml-2 flex-shrink-0" :style="{background: customText.fillColor}"></span>
-                <span>Fill Color</span>
+          <div class="grid mobile-cols-2 gap-1">
+            <div class="mobile_controls d-flex gap-1 align-items-center">
+              <!--            <label class="d-flex align-items-center justify-content-between"><span>{{ customTexts[tabIndex].type | capitalize }} {{ customTexts[tabIndex].side }}</span></label>-->
+              <div @click="changeSide(tabIndex, customText.side)" class="fs-3">
+                <BIconArrowRepeat style="margin-top: 8px" />
               </div>
-            </template>
-            <div class="overflow-hidden fade-right">
-              <!--          <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />-->
-              <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
-                <li v-for="(colorName, index) in productColors" :key="index">
-                  <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
-                </li>
-
-                <li>
-                  <a class="faded_text text-capitalize" @click="showOther">Other</a>
-                </li>
-              </ul>
-            </div>
-            <div v-if="productColors[activeCollection]" class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
-              <div class="color_circle" :key="index" v-for="(color, index) in productColors[activeCollection].color_text" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
+              <b-form-input
+                @click="isHidden = !isHidden"
+                class="mt-1"
+                :placeholder="customText.side + ' ' + customText.type | capitalize"
+                :value="customText.text"
+                @input="updateTextField(tabIndex, $event)"
+              ></b-form-input>
             </div>
 
-            <div v-if="showOtherColors && selectedProduct.is_custom_color_allowed" class="mobile-other">
-              <span class="close" @click="hideOther"><BIconX /></span>
-              <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
+            <div class="mt-2 mobile_controls" v-if="customTextIndex != '' || customTextIndex != undefined">
+              <label class="d-flex align-items-center justify-content-between"><span>Outline Width</span> <span v-if="+customText.outLineWidth">{{ customText.outLineWidth }}px</span></label>
+              <b-form-input id="range-2" style="margin-top: 7px" :value="customTexts[customTextIndex].outLineWidth" @change="outLineWidthValueChanged($event)" type="range" min="0" max="10" step="1"></b-form-input>
             </div>
-          </b-tab>
+            <div v-else>
+              {{customTextIndex}}
+            </div>
+          </div>
+          <div class="fade-right py-2">
+            <div class="overflow-auto d-flex align-items-center gap-2 hide-scroll fontList">
+              <div v-for="(item, i) in fontOptions" :key="i" @click="fontOptionChanged(tabIndex, i, item.value)" style="white-space: nowrap" :class="{'pr-3': i+1 == fontOptions.length, 'activeFont': activeFont == i}">
+                {{item.text}}</div>
+            </div>
+          </div>
 
-          <b-tab @click="setColorType('outline')" v-if="+customText.outLineWidth">
-            <template #title>
-              <div class="d-flex align-items-center gap-1">
-                <span class="selected-color ml-2 flex-shrink-0" :style="{background: customText.outLineColor}"></span>
-                <span>Outline Color</span>
+          <b-tabs class="mt-2">
+            <b-tab @click="setColorType('fill')">
+              <template #title>
+                <div class="d-flex align-items-center gap-1">
+                  <span class="selected-color ml-2 flex-shrink-0" :style="{background: customText.fillColor}"></span>
+                  <span>Fill Color</span>
+                </div>
+              </template>
+              <div class="overflow-hidden fade-right">
+                <!--          <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />-->
+                <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
+                  <li v-for="(colorName, index) in productColors" :key="index">
+                    <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
+                  </li>
+
+                  <li>
+                    <a class="faded_text text-capitalize" @click="showOther">Other</a>
+                  </li>
+                </ul>
               </div>
-            </template>
-            <div class="overflow-hidden fade-right">
-              <!--          <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />-->
-              <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
-                <li v-for="(colorName, index) in productColors" :key="index">
-                  <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
-                </li>
-              </ul>
-            </div>
-            <div v-if="productColors[activeCollection]" class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
-              <div class="color_circle" :key="index" v-for="(color, index) in productColors[activeCollection].color_text" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
-            </div>
-          </b-tab>
-        </b-tabs>
-      </b-tab>
+              <div v-if="productColors[activeCollection]" class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
+                <div class="color_circle" :key="index" v-for="(color, index) in productColors[activeCollection].color_text" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
+              </div>
+
+              <div v-if="showOtherColors && selectedProduct.is_custom_color_allowed" class="mobile-other">
+                <span class="close" @click="hideOther"><BIconX /></span>
+                <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
+              </div>
+            </b-tab>
+
+            <b-tab @click="setColorType('outline')" v-if="+customText.outLineWidth">
+              <template #title>
+                <div class="d-flex align-items-center gap-1">
+                  <span class="selected-color ml-2 flex-shrink-0" :style="{background: customText.outLineColor}"></span>
+                  <span>Outline Color</span>
+                </div>
+              </template>
+              <div class="overflow-hidden fade-right">
+                <!--          <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />-->
+                <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
+                  <li v-for="(colorName, index) in productColors" :key="index">
+                    <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
+                  </li>
+                </ul>
+              </div>
+              <div v-if="productColors[activeCollection]" class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
+                <div class="color_circle" :key="index" v-for="(color, index) in productColors[activeCollection].color_text" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
+              </div>
+            </b-tab>
+          </b-tabs>
+        </b-tab>
+      </template>
 
       <template #tabs-end v-if="selectedProduct.allow_extra_text">
           <li @click="addTab" class="add_text_tab" style="font-size: 0.9em">Add <BIconPlus/></li>
@@ -391,4 +397,15 @@ export default class TextCustomization extends Vue {
   display: inline-block;
   box-shadow: 0px 1px 5px rgba(0,0,0,0.4);
 }
+//.remove-text{
+//  height: 16px;
+//  width: 16px;
+//  display: flex;
+//  align-items: center;
+//  justify-content: center;
+//  padding: 0;
+//  position: absolute;
+//  top: -8px;
+//  right: -10px;
+//}
 </style>
