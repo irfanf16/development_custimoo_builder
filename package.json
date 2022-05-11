@@ -32,6 +32,7 @@
     "csq-vue-multi-draggable": "^1.0.1",
     "css-loader": "^6.5.1",
     "fabric": "^4.4.0",
+    "gleap": "^6.9.4",
     "hex-rgb": "^5.0.0",
     "html2pdf.js": "^0.9.3",
     "jquery": "^3.6.0",
