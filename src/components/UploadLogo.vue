@@ -16,9 +16,9 @@
         <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="B">Remove Smart Logo Background</b-form-radio>
       </b-form-group>-->
 
-      <div class="w-100 text-left pl-2 position-relative logo-edit-btn-updated">
+      <div class="w-100 text-left position-relative logo-edit-btn-updated">
         <div class="d-sm-block d-lg-block continue-btn-holder pt-1" style="padding: 0">
-          <b-button v-if="false" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
+          <b-button v-if="!mobileScreen" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
           <LogoEditorModal @updateLogoFromLogoEditor="updateLogoFromLogoEditor" :customLogoIndex="this.customLogoIndex" ref="logoEditorModal" :logo_id="customLogos[customLogoIndex].id" />
         </div>
 <!--        <div>-->
@@ -74,7 +74,7 @@
         <p>Need High Res Image</p>
       </div>
     </div>
-    <b-button style="position:absolute; left: 0; top: -38px; width: auto" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">
+    <b-button v-if="mobileScreen" style="position:absolute; left: 0; top: -38px; width: auto" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">
       <b-icon-pencil fl /> Edit Logo
     </b-button>
 
@@ -141,7 +141,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
   public showLoader = false;
-
+  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public fileObject: Record<any, any> = {}
   public uploadType = 'click'
 

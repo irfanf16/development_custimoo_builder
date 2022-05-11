@@ -17,8 +17,8 @@
 <!--        </div>-->
 
         <div class="tabs-logo-container">
-          <div v-if="getRecentLogos.length > 0" class="d-flex justify-content-end w-100 mt-3">
-            <div class="recent-logos" @click="showRecentLogosHandler">
+          <div style="min-height: 34px" class="d-flex justify-content-end w-100 mt-3">
+            <div v-if="getRecentLogos.length > 0" class="recent-logos" @click="showRecentLogosHandler">
               <BIconFileEarmarkImage />
               Recent Logos
             </div>

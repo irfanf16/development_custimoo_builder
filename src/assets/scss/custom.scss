@@ -2556,6 +2556,10 @@ button{
         }
     }
     .logo-placement-area{
+        @media (min-width: 786px) {
+            padding-bottom: 35px;
+        }
+
         &.extracted-color-area{
             .logo-placement-holder{padding-bottom: 0;}
         }
