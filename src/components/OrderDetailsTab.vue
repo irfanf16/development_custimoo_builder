@@ -266,16 +266,26 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
       let santacart = true;
       let company_domain = localStorage.getItem('company_domain');
       let platform = localStorage.getItem('platform');
+      let ecommerce_cart_id = null;
+      let ecom_url = company_domain + '/wp-admin/admin-ajax.php';
 
       if(platform === 'wordpress'){
         if(cart_product.sync_id === "" || cart_product.ecommerce_post_id === ""){
           return false;
         }
 
-        let ecom_url = company_domain + '/wp-admin/admin-ajax.php';
         let ecom_form_data = new FormData();
-        ecom_form_data.append('action', 'custimoo_add_to_cart');
+
+        let ecommerce_update_id = this.$route.query.update_item;
+        if(ecommerce_update_id){
+          ecom_form_data.append('action', 'custimoo_update_cart');
+          ecom_form_data.append('update_item', ecommerce_update_id);
+        }else{
+          ecom_form_data.append('action', 'custimoo_add_to_cart');
+        }
+
         ecom_form_data.append('product_id', cart_product.ecommerce_post_id);
+        ecom_form_data.append('product_name', cart_product.product_name);
         ecom_form_data.append('quantity', this.total);
         ecom_form_data.append('product_front_image', cart_product.front_image);
 
@@ -283,12 +293,16 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
           if(!res.data.status){
             santacart = false
             this.showToast(res.data.message, 'ERROR');
+          }else{
+            ecommerce_cart_id = res.data.ecommerce_cart_id;
           }
         }).catch(err => {
           santacart = false
           this.isLoading = false
           this.showErrorArr(err.response.data.errors)
         });
+
+        post_data.factory_product.ecommerce_cart_id = ecommerce_cart_id;
       }
 
 
@@ -302,7 +316,17 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
             this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
             this.showToast(res.data.message, 'SUCCESS');
             if(platform === 'wordpress'){
-              window.location.href = company_domain + '/cart'
+              let update_cart_id_data = new FormData();
+              update_cart_id_data.append('santa_cart_id', api_res.new_created_id);
+              update_cart_id_data.append('woocom_cart_id', ecommerce_cart_id);
+              update_cart_id_data.append('action', 'add_custimoo_cart_id');
+
+               http.post(ecom_url, update_cart_id_data).then((res: any) => {
+                 window.location.href = company_domain + '/cart'
+              }).catch(err => {
+                this.showErrorArr(err.response.data.errors)
+              });
+
             }
             this.isLoading = false;
           }else{

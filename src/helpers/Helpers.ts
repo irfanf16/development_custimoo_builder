@@ -391,7 +391,8 @@ const getActiveProductData = async () => {
       // front_design:front_design,
       roster_detail: Store.getters.getRosterDetails,
       style_id: product_style.id,
-      svg_groups: Store.getters.getSvgGroups
+      svg_groups: Store.getters.getSvgGroups,
+      ecommerce_cart_id:null
     }
     //todo Yasir needs to look at it why customTextObjects is undefined in case of no logos. Instated it should be empty array instead of undefined
     if(scene_ref.customTextObjects) {
