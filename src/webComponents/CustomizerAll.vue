@@ -12,7 +12,7 @@ import router from './../router'
 import store from '../store'
 import Navbar from '@/components/Navbar.vue';
 import Gleap from 'gleap';
-Gleap.initialize("pAuTvRFdBjB7tvjvJzDAw0iKOP5kkjqj");
+Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
 import VueToast from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 Vue.use(VueToast);

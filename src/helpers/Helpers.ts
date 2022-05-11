@@ -397,7 +397,7 @@ const getActiveProductData = async () => {
     //todo Yasir needs to look at it why customTextObjects is undefined in case of no logos. Instated it should be empty array instead of undefined
     if(scene_ref.customTextObjects) {
       for (const custom_text_object of scene_ref.customTextObjects) {
-        if (custom_text_object && custom_text_object.constructor.name == "klass") {
+        if (custom_text_object && Object.keys(custom_text_object).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
           post_data.custom_text_svgs.push(custom_text_object.toSVG());
         }
       }
@@ -405,7 +405,7 @@ const getActiveProductData = async () => {
     //todo Yasir needs to look at it why customLogoObjects is undefined in case of no logos. Instated it should be empty array instead of undefined
     if(scene_ref.customLogoObjects) {
       for (const custom_logo_svg of scene_ref.customLogoObjects) {
-        if(custom_logo_svg && custom_logo_svg.constructor.name == "klass") {
+        if(custom_logo_svg && Object.keys(custom_logo_svg).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
           post_data.custom_logo_svgs.push(custom_logo_svg.toSVG());
         }
       }
