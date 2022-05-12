@@ -181,7 +181,7 @@ export default {
 @import '~vue-js-modal/dist/styles.css';
 @import '../assets/css/custom.css';
 
-#app {
+#santa {
   font-family: 'Ubuntu', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
