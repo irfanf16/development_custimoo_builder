@@ -1,11 +1,8 @@
 import Vue from 'vue'
 import router from './router'
 import store from './store'
-import VueToast from 'vue-toast-notification';
-import 'vue-toast-notification/dist/theme-sugar.css';
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
-Vue.use(VueToast);
 
 import VModal from 'vue-js-modal'
 import 'vue-js-modal/dist/styles.css'

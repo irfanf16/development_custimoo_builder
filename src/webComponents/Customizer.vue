@@ -10,9 +10,8 @@ import Vue from 'vue'
 import {LockerProducts} from "@/mixins/LockerProduct";
 import router from './router'
 import store from '../store'
-import VueToast from 'vue-toast-notification';
-// import 'vue-toast-notification/dist/theme-sugar.css';
-Vue.use(VueToast);
+import Gleap from 'gleap';
+Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
 import { config, dom, library } from '@fortawesome/fontawesome-svg-core'
@@ -180,7 +179,6 @@ export default {
 @import '~bootstrap-vue/dist/bootstrap-vue.css';
 @import '~pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';
 @import '~vue-js-modal/dist/styles.css';
-@import '~vue-toast-notification/dist/theme-sugar.css';
 @import '../assets/css/custom.css';
 
 #app {

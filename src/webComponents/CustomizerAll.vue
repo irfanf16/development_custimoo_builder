@@ -13,9 +13,6 @@ import store from '../store'
 import Navbar from '@/components/Navbar.vue';
 import Gleap from 'gleap';
 Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
-import VueToast from 'vue-toast-notification';
-import 'vue-toast-notification/dist/theme-sugar.css';
-Vue.use(VueToast);
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
 import { config, dom, library } from '@fortawesome/fontawesome-svg-core'
