@@ -1,15 +1,16 @@
 <template>
-    <b-tabs>
+    <b-tabs :class="{'single-model': productModels.length === 1}">
         <b-tab v-for="(model, index)  in productModels" :key="index" @click="selectModelStyle(index)">
             <template #title>
               {{ model.model_name }}
             </template>
             <div class="collar-area">
                 <div class="collar-description">
-                    <h3>* {{ model.model_name }}</h3>
-                    <div v-html="model.product_model_description">  </div>
+                    <h3>{{ model.model_name }}</h3>
+                    <div v-html="model.product_model_description"></div>
                 </div>
-                <div class="choose-collar mb-3">
+                <div v-if="selectedProduct.productstyles.length > 1" class="choose-collar mb-3">
+                  <h2 class="fw-bold mb-2 fz-18">Choose option</h2>
                     <div class="collar-designs">
                       <template v-for="(style, i) in selectedProduct.productstyles">
                         <template v-if="selectedProduct.productstyles.length > 1">
@@ -94,3 +95,11 @@ import {http} from "@/httpCommon";
       }
     }
 </script>
+
+<style lang="scss">
+.single-model{
+  &>div:first-child{
+      display: none;
+   }
+}
+</style>

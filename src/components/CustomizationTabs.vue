@@ -107,7 +107,7 @@
               </a>
             </template>
             <div class="collar-section p-4" v-if="hideTab.styleHide">
-              <h2 class="fw-bold mb-2 fz-18">Choose Product</h2>
+              <h2 v-if="productModels.length > 1" class="fw-bold mb-2 fz-18">Choose Product</h2>
               <CollarStyle :productModels="productModels"/>
             </div>
           </b-tab>
