@@ -42,7 +42,8 @@ export class LockerProducts extends Vue {
       const designId = locker_product?.design_id
       const styleId = locker_product?.style_id
       const product_id = locker_product?.product_id;
-      this.$store.commit('CHANGE_EDIT_STATUS', {id: locker_product?.id, status: true, designId: designId, styleId: styleId, product_id: product_id})
+      const locker_product_name = locker_product?.product_name;
+      this.$store.commit('CHANGE_EDIT_STATUS', {id: locker_product?.id, status: true, designId: designId, styleId: styleId, product_id: product_id, productName: locker_product_name})
       const element = prod_res.data;
       is_customized = locker_product_type == "customized" ? true: is_customized;
       is_personalized = locker_product_type == "personalized" ? true : is_personalized;

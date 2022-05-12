@@ -383,6 +383,9 @@ Vue.filter('formatDate', function(value:string) {
 
         }
 
+      if(this.$route.query.tabIdx){
+        this.$store.dispatch('setTabMain',{value: this.$route.query.tabIdx})
+      }
 
     }
 
