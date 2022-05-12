@@ -12,7 +12,7 @@ const getLogoSettingsObject = () => {
     product_id: null,
     product_style_id: null,
     rotation: 0,
-    width: 200,
+    width: 100,
     height: 0,
     name_of_placement: "chest",
     side: "front",
@@ -107,6 +107,7 @@ const setLogoSettings = (logo_index: number, logo: Record<any, any> | null = nul
   logo.height =  logo_settings.height;
   logo.x_axis =  logo_settings.x_axis;
   logo.y_axis =  logo_settings.y_axis;
+  logo.side = logo_settings.side;
   logo.rotation =  logo_settings.rotation;
   logo.haveControls =  !logo_settings.is_locked;
   logo.originalWidth =  logo_settings.width;

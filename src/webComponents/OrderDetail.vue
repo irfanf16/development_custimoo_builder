@@ -15,10 +15,6 @@ import Vue from "vue";
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 
-import VueToast from 'vue-toast-notification';
-import 'vue-toast-notification/dist/theme-sugar.css';
-Vue.use(VueToast);
-
 import router from './router'
 
 export default {
