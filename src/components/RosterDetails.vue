@@ -311,8 +311,6 @@ export default class RosterDetails extends Vue {
   }
   public close(){
     this.$modal.hide('rostermodal');
-    this.ref['order-details'].addToCart();
-    this.$modal.show('cart-modal');
   }
 
   public fontsList(): void {

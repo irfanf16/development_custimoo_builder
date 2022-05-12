@@ -267,7 +267,7 @@ export default class CustomizationText extends Vue {
       this.$store.commit('rosterDetailAttributeWithoutTrigger',{index: 0, attribute: 'text', value: this.customText[custom_name_index].text})
     }
     if(custom_number_index != -1) {
-      this.$store.commit('rosterDetailAttributeWithoutTrigger',{index: 0, attribute: 'name', value: this.customText[custom_number_index].text})
+      this.$store.commit('rosterDetailAttributeWithoutTrigger',{index: 0, attribute: 'number', value: this.customText[custom_number_index].text})
     }
   }
 }
