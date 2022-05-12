@@ -83,8 +83,21 @@
 
       <div class="d-flex mt-2 flex-column h-100">
         <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
-<!--          <span>Team Players</span>-->
-          <span class="addPlayer" v-b-modal.modal-center-uploadroster><span class="fs-2 icon position-absolute"><BIconCloudUpload /></span> <span class="d-inline-block ml-1">Upload / Download Roster</span></span>
+            <template v-if="isCustomerAuthenticated">
+              <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                <span v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                  Add to cart
+                </span></span>
+                <span v-else class="addPlayer" style="background: #a9a9a9; color: #fff"><span class="fs-2 icon position-absolute"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
+                  Please wait
+                </span></span>
+              </template>
+            </template>
+            <template v-else>
+              <span v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                Add to cart
+              </span></span>
+            </template>
           <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Link</span></span>
         </div>
         <div class="players-table mt-2 hide-scroll h-100">
@@ -92,6 +105,7 @@
         </div>
       </div>
     </div>
+    <EditRosterAreaTab v-show="false" @open-add-to-locker="openAddToLocker" :productSizes="productSizes"/>
   </div>
 </template>
 
@@ -113,12 +127,14 @@ import readXlsxFile from "read-excel-file";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
+import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<CustomTabs>({
   components: {
     LogoUploader,
     TextCustomization,
+    EditRosterAreaTab,
     Collars,
     colorPicker,
     RosterTableMobile
@@ -171,8 +187,55 @@ export default class CustomTabs extends Vue {
   public showLoader = false
   public designsIndex = 0;
 
+  get platform():string{
+    return localStorage.getItem('platform') as string
+  }
+
+  get login_code(): Record<any, any>{
+    return JSON.parse(localStorage.getItem('login_code') as string)
+  }
+
+  public openAddToLocker () {
+    this.$emit('open-add-to-locker')
+  }
+
+  private addToCart() {
+    (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
+  }
+
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
+
+  get canvasImage() {
+    return this.$store.getters.getCanvasImage
+  }
+
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
+  }
+
+  public async setActionBeforeLogin(type: string) {
+    this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$store.commit('SET_SELECTION_MODE',{
+      readonly:false,
+      collectionAddmoreMode:false,
+      eventProductMode:false,
+      eventCollectionMode:false
+    })
+    this.gotoLogin()
+  }
+  public gotoLogin(){
+    if (this.platform == 'self'){
+      this.$modal.show('loginModal')
+    }
+    else{
+      if(this.login_code.type == 'url') {
+        window.location.href = this.login_code.action
+      } else {
+        eval(this.login_code.action)
+      }
+    }
   }
 
   public rosterDetailsInit() {
