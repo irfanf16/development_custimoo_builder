@@ -499,15 +499,6 @@ const ProductAttributes:Module<any, any> = {
     productionSVGs(state: Record<any, any>, productionSvg: Record<any, any>) {
       if(productionSvg){
         state.productionSVGs = productionSvg
-      } else {
-        const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
-        const selected_product = state.products[state.selectedIndex];
-        const product_sizes = selected_product.sizes;
-        if(product_sizes.length > 0) {
-          roster_detail_default_obj.size = product_sizes[0].name;
-          roster_detail_default_obj.code = product_sizes[0].code;
-        }
-        Object.assign(state.rosterDetails[0], roster_detail_default_obj);
       }
     },
     SET_CURRENT_COLOR_APPLIED (state: Record<any, any>, colorApplied: Record<any, any>) {
@@ -688,6 +679,15 @@ const ProductAttributes:Module<any, any> = {
       }
 
       state.rosterDetails = []
+
+      const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
+      const selected_product = state.products[state.selectedIndex];
+      const product_sizes = selected_product.sizes;
+      if(product_sizes.length > 0) {
+        roster_detail_default_obj.size = product_sizes[0].name;
+        roster_detail_default_obj.code = product_sizes[0].code;
+      }
+      state.rosterDetails.push(roster_detail_default_obj)
 
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
