@@ -7,7 +7,7 @@
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
-            <CustomTabs @switchTabs="switchTabs" ref="custom-mobile-tabs" v-else />
+            <CustomTabs @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" v-else />
           </b-col>
 
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column position-relative">
@@ -115,10 +115,34 @@
                 </div>
 
                 <div class="mobile-nav">
+                  <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="switchTabs(activeTab-1, false)" v-if="activeTab > 0" style="line-height: normal">
+                    <b-icon-arrow-left-short />
+                  </button>
+                  <button class="btn text-white fs-4 border-0 mr-3 p-0 btn-secondary btn-sm" @click="switchTabs(activeTab+1, false)" v-if="activeTab < 4" style="line-height: normal">
+                    <b-icon-arrow-right-short />
+                  </button>
+                  <template v-else>
+                    <template v-if="isCustomerAuthenticated">
+                      <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                        <button v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
+                          <b-icon-cart />
+                        </button>
+                        <button v-else :disabled="true" class="btn text-white fs-3 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4px 5px">
+                          <i class="fa fa-spinner fa-spin"></i>
+                        </button>
+                      </template>
+                    </template>
+                    <template v-else>
+                      <button v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
+                        <b-icon-cart />
+                      </button>
+                    </template>
+                  </template>
+
                   <strong class="user-name mr-1">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
 
                   <button @click="toggleDD" class="custom-link reset-btn" ref="toggler"><BIconThreeDotsVertical /></button>
-                  <b-dropdown ref="dd-menu" :right="true" :boundary="ref['toggler']" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
+                  <b-dropdown ref="dd-menu" :right="true" :offset="30" :boundary="ref['toggler']" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
                     <b-dropdown-item><button @click="showDesign">Change Design / Item</button></b-dropdown-item>
                     <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'lockerRoom'" @click="getLockerRoomProducts(null)">Open locker room</button></b-dropdown-item>
                     <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'">Open locker room</button></b-dropdown-item>
