@@ -217,8 +217,6 @@ export class handleMainProducts extends Vue {
         })
       }
     });
-    this.$store.dispatch('setSelectedProductAndStyle')
-    this.$store.dispatch('setSelectedProductDesign')
     this.$store.dispatch('setColorSectionVisibility')
     this.$store.dispatch("getModels", selected_product.product_id);
 

@@ -634,9 +634,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
   }
-  get selectedDesignId():number{
-  return  this.$store.getters.getSelectedDesignId;
-  }
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
@@ -1084,9 +1081,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
     if(!url_obj.searchParams.has("personalized")) {
       url_obj.searchParams.append('personalized', this.$store.getters.getPersonalized)
-    }
-    if(self.search_products){
-      url += `&title=${self.search_products}`;
     }
     if(self.search_products && !url_obj.searchParams.has("title")) {
       url_obj.searchParams.append('title', self.search_products)

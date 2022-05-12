@@ -185,47 +185,10 @@ const ProductAttributes:Module<any, any> = {
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
     },
-    SET_SELECTED_PRODUCT_AND_STYLE(state: Record<any, any>) {
-        if(typeof state.products[state.selectedIndex] === 'undefined'){
-          state.selectedIndex = 0;
-          state.styleIndex=0;
-          state.selectedDesignId =0;
-        }else{
-          if(typeof state.products[state.selectedIndex].productstyles[state.styleIndex] === 'undefined'){
-            state.products[state.selectedIndex].productstyles[state.styleIndex] = 0;
-            state.selectedDesignId =0;
-          }
-        }
-    },
     SET_SELECTED_PRODUCT_CUSTOM_LOGO(state: Record<any, any>,payload:any) {
       if(state.products[state.selectedIndex]) {
         state.products[state.selectedIndex].customLogos = payload;
       }
-    },
-    SET_SELECTED_PRODUCT_DESIGN(state: Record<any, any>) {
-      if (state.selectedDesignId > 0) {
-      const style_index = state.styleIndex;
-      const product_index = state.selectedIndex
-      if (typeof state.products[product_index].productstyles[style_index] !== 'undefined') {
-        let checkDesignFound = false;
-        let defaultDesignShow = 0;
-        state.products[product_index].productstyles[style_index].productdesigns.map((design: Record<any, any>, index:number) => {
-          if(design.design_show){
-            defaultDesignShow = index
-          }
-          if (design.id == state.selectedDesignId) {
-            checkDesignFound = true;
-            design.design_show = 1
-          } else {
-            design.design_show = 0
-          }
-        });
-        if(!checkDesignFound){
-          Vue.set(state.products[product_index].productstyles[style_index].productdesigns[defaultDesignShow], 'design_show', 1)
-          state.selectedDesignId = state.products[product_index].productstyles[style_index].productdesigns[defaultDesignShow].id
-        }
-      }
-    }
     },
     categories(state: Record<any, any>, categories: Record<any, any>) {
       if(categories){
@@ -1181,9 +1144,6 @@ const ProductAttributes:Module<any, any> = {
     },
     async setSelectedProductCustomLogo({commit},payload){
       await commit('SET_SELECTED_PRODUCT_CUSTOM_LOGO',payload);
-    },
-    async setSelectedProductDesign({commit}){
-      await commit('SET_SELECTED_PRODUCT_DESIGN');
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
       let done = false;

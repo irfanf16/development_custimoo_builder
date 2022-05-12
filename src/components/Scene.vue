@@ -337,7 +337,6 @@ export default class Scene extends Vue {
       if(this.customTextObjects.length != this.customTexts.filter((text: Record<any, any>) => text && text.text).length) {
         this.customTextObjects.forEach((item: Record<any, any>, index: number) => {
           if(item && (!Object.keys(this.customTexts[item.textIndex]).length || this.customTexts[item.textIndex].text == '' || !this.customTexts[item.textIndex].text)) {
-            console.log('remove it here', item.textIndex, this.customTexts[item.textIndex], item)
             this.frontCanvas.remove(this.customTextObjects[item.textIndex])
             if (this.backCanvas) {
               this.backCanvas.remove(this.customTextObjects[item.textIndex])
