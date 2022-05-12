@@ -230,15 +230,15 @@
         </b-col>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
           <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products"/>
-          <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 0">
+          <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
             <span class="close" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
             <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
-            <div v-if="mobileScreen">
+            <div>
               <LogoUploader @switchTabs="switchTabs" @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
             </div>
           </div>
-          <div v-else class="open-logo-uploader customize_controls">
+          <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">
             <span class="fs-3 font-weight-bold">Logo Uploader</span>
             <span @click="switchTabs(0, true)" class="maximizer close"><b-icon-plus flip-h /></span>
           </div>
