@@ -87,7 +87,7 @@
         <b-card-body class="border-top">
           <div class="order-logo-holder d-flex flex-wrap justify-content-between align-items-center">
             <template v-for="(logo, index) in customLogos">
-              <div class="logo-area d-flex flex-wrap align-items-center border p-3" :key="index">
+              <div class="logo-area d-flex flex-wrap align-items-center border p-3" :key="index" v-if="logo && logo.url">
                 <div class="image-holder border mr-3">
                   <img :src="storageUrl+logo.url" alt="logo" width="80px" />
                 </div>
@@ -101,7 +101,6 @@
                     <span class="ml-1">{{ logo.originalHeight }}cm</span>
                   </div>
                 </div>
-
               </div>
             </template>
 
