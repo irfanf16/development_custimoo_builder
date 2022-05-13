@@ -43,7 +43,7 @@
                 {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
               </button>
               <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
-                <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+                <img width="20" height="20" src="../../src/assets/images/loading.gif" />
               </button>
             </template>
           </template>
