@@ -98,7 +98,7 @@
                 Add to cart
               </span></span>
             </template>
-          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Link</span></span>
+          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Roster Link</span></span>
         </div>
         <div class="players-table mt-2 hide-scroll h-100">
           <RosterTableMobile :productSizes="sizeOptions" @addPlayer="rosterDetailsInit" />
