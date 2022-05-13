@@ -358,11 +358,20 @@ const pathInfo = (file_path: string, ) => {
 const getActiveProductData = async () => {
   const scene_ref = Store.getters.getCanvasImage.scene
   const getCanvasImage = Store.getters.getCanvasImage
+
+
   if (getCanvasImage) {
     const style_index = Store.getters.getCurrentStyleIndex;
     const selected_product = Store.getters.getSelectedProduct;
     const product_style = selected_product.productstyles[style_index];
-    //selected_design will always return array having single object
+    const lockerEditStatus = Store.getters.getEditStatus;
+    let product_name = selected_product.product_name
+    if(lockerEditStatus){
+      const lockerEditProductName = Store.getters.getEditProductName;
+       if(lockerEditProductName)
+        product_name = lockerEditProductName
+    }
+        //selected_design will always return array having single object
     const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
     const product_models = Store.getters.getProductModels;
     const selected_model_index = Store.getters.getSelectedModelIndex;
@@ -386,7 +395,7 @@ const getActiveProductData = async () => {
       ecommerce_post_id: selected_product.ecommerce_product_id,
       sync_id: selected_product.sync_id,
       product_type: selected_product.product_type,
-      product_name: selected_product.product_name,
+      product_name: product_name,
       pdf_file: null,
       production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
       // front_design:front_design,

@@ -191,7 +191,7 @@
                         {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
                       </b-button>
                       <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                        <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
                       </b-button>
                     </template>
                   </template>
@@ -407,7 +407,9 @@ Vue.filter('formatDate', function(value:string) {
 
         }
 
-
+    }
+    if(this.$route.query.tabIdx){
+      this.$store.dispatch('setTabMain',{value: this.$route.query.tabIdx})
     }
 
   },

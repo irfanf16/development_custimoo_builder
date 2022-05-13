@@ -63,7 +63,8 @@ const ProductAttributes:Module<any, any> = {
       editStyleId: 0,
       editDesignId: 0,
       mainProductId: 0,
-      editStatus: false
+      editStatus: false,
+      productName:null
     },
     activeTab : 0,
     showShuffle : true,
@@ -135,6 +136,9 @@ const ProductAttributes:Module<any, any> = {
       }
       if (payload.product_id){
         state.editProduct.mainProductId = payload.product_id
+      }
+      if (payload.productName){
+        state.editProduct.productName = payload.productName
       }
     },
 
@@ -914,6 +918,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getEditDesignId: state => {
       return state.editProduct.editDesignId
+    },
+    getEditProductName: state => {
+      return state.editProduct.productName
     },
     getHideColorSection: state => {
       return state.hideColorSection
