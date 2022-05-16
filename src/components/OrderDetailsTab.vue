@@ -1,6 +1,5 @@
 <template>
   <div>
-    <DesignPdfView :pdf_front_image="pdf_front_image" :pdf_back_image="pdf_back_image"/>
     <LoginForm ref="loginModal"   />
     <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
       <b-input-group class="w-100">

@@ -890,22 +890,19 @@ export default class Scene extends Vue {
             }
             this.showLoader = false
             this.mounted = true
-          }
 
-          if (this.mainPreview && (!this.back || (this.back && side == 'back'))) {
-            this.setProductionSVG()
-            this.$store.commit('STORE_CANVAS_IMAGE', {
-              front: this.$refs.front,
-              back: this.$refs.back,
-              scene: this
-            })
-            setTimeout(() => {
-              this.$store.commit('SET_CANVAS_READY', true);
-            }, 500)
+            if (this.mainPreview) {
+              this.setProductionSVG()
+              this.$store.commit('STORE_CANVAS_IMAGE', {
+                front: this.$refs.front,
+                back: this.$refs.back,
+                scene: this
+              })
+              setTimeout(() => {
+                this.$store.commit('SET_CANVAS_READY', true);
+              }, 500)
+            }
           }
-
-          this.showLoader = false
-          this.mounted = true
         }
       })
       canvas.on('object:modified', (e: Record<any, any>) => {
@@ -1634,7 +1631,7 @@ export default class Scene extends Vue {
           resolve('done')
         })
       } else {
-        fabric.Image.fromURL(textureUrl, (img: any) => {
+        fabric.Image.fromURL(textureUrl + '?nocache=1', async (img: any) => {
           img.scaleToHeight(this.frontCanvas.getHeight() - 10).set({
             hasControls: false,
             selectable: false,
@@ -1655,115 +1652,120 @@ export default class Scene extends Vue {
     })
   }
 
-  public async addLogos(logo: Record<any, any>, logoIndex: null|number = null) {
-    if ('logoIndex' in logo) {
-      logoIndex = logo.logoIndex
-    } else {
-      await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
-        index: logoIndex,
-        data: {
-          logoIndex: logoIndex,
-        }
-      })
-    }
-
-
-    if ((logo.side == 'front' || (logo.side == 'back' && this.back)) && (this.multipleLogo || (!this.multipleLogo && logoIndex as number == 0)) && !this.customLogoObjects[logoIndex as number]) {
-      if (logo.customLogo) {
-        this.customLogoObjects[logoIndex as number] = true
+  public addLogos(logo: Record<any, any>, logoIndex: null|number = null) {
+    return new Promise((resolve, reject) => {
+      if ('logoIndex' in logo) {
+        logoIndex = logo.logoIndex
+      } else {
+        this.$store.dispatch('updateCustomLogoWithoutTrigger', {
+          index: logoIndex,
+          data: {
+            logoIndex: logoIndex,
+          }
+        })
       }
-      logo.haveControls = Boolean(logo.haveControls)
-      let logoUrl = (this.storageUrl + logo.url).trim().split(' ').join('%20')
-      await fabric.Image.fromURL(logoUrl, (img: any) => {
-        img.scaleToWidth(this.canvasWidth / this.mainCanvasWidth * logo.width as number)
-        img.set({
-          left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
-          top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
-          angle: logo.rotation as number,
-          centeredScaling: true,
-          selectable: this.canvasSelection,
-          //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
-          hasControls: logo.haveControls,
-          hasBorders: false,
-          evented: logo.haveControls,
-          crossOrigin: 'Anonymous',
-          globalCompositeOperation: 'source-atop',
-          lockScalingFlip: true,
-          padding: 15,
-          cornerSize: 30
-        })
 
-        if (logo.scaleX && logo.scaleY) {
-          img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX
-          img.scaleY = this.canvasHeight / this.mainCanvasHeight * logo.scaleY
-        }
-
-        let model = this.frontModel
-        let canvas = this.frontCanvas
-        let dimText = this.dimTextFront
-        if (logo.side == 'back') {
-          canvas = this.backCanvas
-          model = this.backModel
-          dimText = this.dimTextBack
-        }
-
-        img.setControlsVisibility({
-          tl: false,
-          bl: false,
-          tr: true,
-          br: true,
-          ml: false,
-          mb: false,
-          mr: false,
-          mt: false,
-          mtr: false
-        })
-
-        Object.assign(img, {
-          logoIndex: logoIndex,
-          side: logo.side
-        })
-        canvas.add(img)
-        if(this.productType == 'customized') {
-          model.bringToFront()
-        }
-        canvas.renderAll()
-
-        this.addToOtherSide(img, logo.side)
-
+      if ((logo.side == 'front' || (logo.side == 'back' && this.back)) && (this.multipleLogo || (!this.multipleLogo && logoIndex as number == 0)) && !this.customLogoObjects[logoIndex as number]) {
         if (logo.customLogo) {
-          if (this.mainPreview) {
-            const width = (img.width * img.scaleX * this.measurementRatio).toFixed(1)
-            const height = (img.height * img.scaleY * this.measurementRatio).toFixed(1)
-            this.$store.dispatch('updateCustomLogoWithoutTrigger', {
-              index: logoIndex,
-              data: {
-                originalWidth: width,
-                originalHeight: height,
-                scaleX: img.scaleX,
-                scaleY: img.scaleY,
-              }
-            })
-          }
-          this.customLogoObjects[logoIndex as number] = img
-          if(this.mainPreview) {
-            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: logoIndex, data: img, scene: this});
-          }
-        } else {
-          this.logoObjects.push(img)
+          this.customLogoObjects[logoIndex as number] = true
         }
-
-        img.on('selected', (e: Record<any, any>) => {
-          this.$root.$emit('changeLogoTabIndex', logoIndex);
-          this.showDimensions(e, dimText)
-        })
-        canvas.on('selection:cleared', () => {
-          dimText.set({
-            visible: false
+        logo.haveControls = Boolean(logo.haveControls)
+        let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
+        fabric.Image.fromURL(logoUrl + '?nocache=1', async (img: any) => {
+          img.scaleToWidth(this.canvasWidth / this.mainCanvasWidth * logo.width as number)
+          img.set({
+            left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
+            top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
+            angle: logo.rotation as number,
+            centeredScaling: true,
+            selectable: this.canvasSelection,
+            //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
+            hasControls: logo.haveControls,
+            hasBorders: false,
+            evented: logo.haveControls,
+            globalCompositeOperation: 'source-atop',
+            lockScalingFlip: true,
+            padding: 15,
+            cornerSize: 30
           })
-        })
-      }, { crossOrigin: 'Anonymous' })
-    }
+
+          if (logo.scaleX && logo.scaleY) {
+            img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX
+            img.scaleY = this.canvasHeight / this.mainCanvasHeight * logo.scaleY
+          }
+
+          let model = this.frontModel
+          let canvas = this.frontCanvas
+          let dimText = this.dimTextFront
+          if (logo.side == 'back') {
+            canvas = this.backCanvas
+            model = this.backModel
+            dimText = this.dimTextBack
+          }
+
+          img.setControlsVisibility({
+            tl: false,
+            bl: false,
+            tr: true,
+            br: true,
+            ml: false,
+            mb: false,
+            mr: false,
+            mt: false,
+            mtr: false
+          })
+
+          Object.assign(img, {
+            logoIndex: logoIndex,
+            side: logo.side
+          })
+          canvas.add(img)
+          if (this.productType == 'customized') {
+            model.bringToFront()
+          }
+          canvas.renderAll()
+
+          this.addToOtherSide(img, logo.side)
+
+          if (logo.customLogo) {
+            if (this.mainPreview) {
+              const width = (img.width * img.scaleX * this.measurementRatio).toFixed(1)
+              const height = (img.height * img.scaleY * this.measurementRatio).toFixed(1)
+              await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
+                index: logoIndex,
+                data: {
+                  originalWidth: width,
+                  originalHeight: height,
+                  scaleX: img.scaleX,
+                  scaleY: img.scaleY,
+                }
+              })
+            }
+            this.customLogoObjects[logoIndex as number] = img
+            if (this.mainPreview) {
+              await this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {
+                index: logoIndex,
+                data: img,
+                scene: this
+              });
+            }
+          } else {
+            this.logoObjects.push(img)
+          }
+
+          img.on('selected', (e: Record<any, any>) => {
+            this.$root.$emit('changeLogoTabIndex', logoIndex);
+            this.showDimensions(e, dimText)
+          })
+          canvas.on('selection:cleared', () => {
+            dimText.set({
+              visible: false
+            })
+          })
+          resolve('done')
+        }, { crossOrigin: 'Anonymous' })
+      }
+    })
   }
 
   public showDimensions(e: any, dimText: Record<any, any>) {

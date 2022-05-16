@@ -7,7 +7,7 @@
 <!--          <font-awesome-icon :icon="['fas', 'trash-alt']"/>-->
           <BIconX class="position-relative" style="top: -1.7px" />
         </a>
-        <img crossorigin="anonymous"   @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer"  :src="storageUrl+logo.logo_url" alt="not working"  />
+        <img @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer" :src="storageUrl+logo.logo_url+'?nocache=1'" alt="not working" />
       </div>
 
     </div>
