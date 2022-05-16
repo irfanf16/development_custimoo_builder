@@ -16,87 +16,86 @@
 <!--          <div class="color_circle" :key="index" v-for="(color, index) in productColors[activeCollection].color_text" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>-->
 <!--        </div>-->
 
-        <div class="tabs-logo-container">
-          <div style="min-height: 34px" class="d-flex justify-content-end w-100 mt-3">
-            <div v-if="getRecentLogos.length > 0" class="recent-logos" @click="showRecentLogosHandler">
-              <BIconFileEarmarkImage />
-              Recent Logos
-            </div>
-          </div>
-          <div class="logo-placement-area mb-3 mb-lg-4 pt-0">
-            <div class="logo-placement-holder mb-lg-3" :class="logo_tab.url ? 'hasLogo': 'noLogo'">
-              <div class="logo-holder">
-                <UploadLogo :customLogoIndex="ltIdx" :showImage="true" :showActions="true"
-                            :ref="'logoUploadModalOpener'+ltIdx" :key="'top'+ltIdx">
-                  <span slot="upload_text">Click to upload logo or drag a file here</span>
-                </UploadLogo>
-              </div>
-
-              <div class="logo-placemet-content" v-if="logo_tab.url">
-                <h4>Logo Placement</h4>
-                <b-form-select class="mt-2" @change="changeSide(ltIdx, $event)" :value="logo_tab.side"
-                               :options="options"></b-form-select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0  && selectedProduct.product_type == 'customized'">
-          <h4 v-if="customLogos[0].url" class="mb-3 d-flex align-items-center justify-content-between mb-lg-4">
-            <div>
-              Color Extracted from Logo
-            </div>
-          </h4>
-          <div class="mb-lg-3 w-100">
-            <div class="color-holder">
-              <div class="color-container">
-                <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
-                     @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name"
-                     :class="{'active-swatch' : icIdx==selectedSwatchIndex, 'noColor': !imageColor.hex}"
-                     :style="{background: imageColor.hex ? imageColor.hex : '#fff'}" :key="icIdx">
-                  <template v-if="imageColor.hex">
-                        <span class="removeColor" @click="deleteLogoColor(icIdx)">
-                          <BIconX />
-                        </span>
-                  </template>
-                  <template v-else>
-                    <BIconPlus class="addColor" />
-                  </template>
-                  <span class="selected" @click="deleteLogoColor(icIdx)">
-                          <BIconCheck />
-                        </span>
-                </div>
-
-                <div v-if="showLogoColors" class="mobile-other">
-                  <span class="close" @click="hideOther"><BIconX /></span>
-                  <h2>Choose a color</h2>
-                  <LogoColorTabs @setSwatchColor="setSwatchColor"
-                                 :swatchPantone="defSwatchPantone"
-                                 :swatchcolor="defSwatchColor"
-                                 :productColors="productColors"
-                                 :showSVGS="Boolean(showSVGs)" :defSwatchColor.sync="defSwatchColor"
-                  />
-                </div>
-
-                <div v-if="showRecentLogos" class="mobile-other recent-logos-mobile">
-                  <span class="close" @click="hideRecentLogosHandler"><BIconX /></span>
-                  <div>
-                    <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
+        <div class="logo-uploader-main">
+          <div class="tabs-logo-container">
+            <div class="logo-placement-area mb-3 mb-lg-4 pt-0">
+              <div class="logo-placement-holder mb-lg-3" :class="logo_tab.url ? 'hasLogo': 'noLogo'">
+                <div class="logo-holder">
+                  <UploadLogo v-if="!mobileScreen" :customLogoIndex="ltIdx" :showImage="true" :showActions="true"
+                              :ref="'logoUploadModalOpener'+ltIdx" :key="'top'+ltIdx">
+                    <span slot="upload_text">Click to upload logo or drag a file here</span>
+                  </UploadLogo>
+                  <UploadLogoMobile v-else :customLogoIndex="ltIdx" :showImage="true" :showActions="true"
+                                    :ref="'logoUploadModalOpener'+ltIdx" :key="'top'+ltIdx">
+                    <span slot="upload_text">Click to upload logo or drag a file here</span>
+                  </UploadLogoMobile>
+                  <div class="logo-placemet-content" v-if="logo_tab.url">
+                    <b-button v-if="getRecentLogos.length > 0" class="logo-editor-button py-2" @click="showRecentLogosHandler" style="line-height: normal;" size="sm" variant="secondary">
+                        Logos
+                    </b-button>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="d-flex align-items-center justify-content-center gap-1">
-              <b-button @click="useLogoColors()" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px" v-if="imageColors.length > 1">
-                <template v-if="usingColorLogos"> Use Original Colors</template>
-                <template v-else> Use Logo Colors</template>
-              </b-button>
-              <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" :class="{'invisible': !(logoColorUsed && imageColors.length > 1 && usingColorLogos)}"
-                        variant="secondary">Shuffle
-              </b-button>
-              <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
-                <font-awesome-icon :icon="['fas', 'redo-alt']"/>
-              </b-button>
+          </div>
+
+          <div class="logo-placement-area extracted-color-area" style="margin-top: 15px;" v-if="ltIdx ==0  && selectedProduct.product_type == 'customized'">
+            <h4 v-if="customLogos[0].url" class="mb-3 d-flex align-items-center justify-content-between mb-lg-4">
+              <div>
+                Color Extracted from Logo
+              </div>
+            </h4>
+            <div class="mb-lg-3 w-100">
+              <div class="color-holder">
+                <div class="color-container">
+                  <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
+                       @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name"
+                       :class="{'active-swatch' : icIdx==selectedSwatchIndex, 'noColor': !imageColor.hex}"
+                       :style="{background: imageColor.hex ? imageColor.hex : '#fff'}" :key="icIdx">
+                    <template v-if="imageColor.hex">
+                          <span class="removeColor" @click="deleteLogoColor(icIdx)">
+                            <BIconX />
+                          </span>
+                    </template>
+                    <template v-else>
+                      <BIconPlus class="addColor" />
+                    </template>
+                    <span class="selected" @click="deleteLogoColor(icIdx)">
+                            <BIconCheck />
+                          </span>
+                  </div>
+
+                  <div v-if="showLogoColors" class="mobile-other">
+                    <span class="close" @click="hideOther"><BIconX /></span>
+                    <h2>Choose a color</h2>
+                    <LogoColorTabs @setSwatchColor="setSwatchColor"
+                                   :swatchPantone="defSwatchPantone"
+                                   :swatchcolor="defSwatchColor"
+                                   :productColors="productColors"
+                                   :showSVGS="Boolean(showSVGs)" :defSwatchColor.sync="defSwatchColor"
+                    />
+                  </div>
+
+                  <div v-if="showRecentLogos" class="mobile-other recent-logos-mobile">
+                    <span class="close" @click="hideRecentLogosHandler"><BIconX /></span>
+                    <div>
+                      <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex align-items-center justify-content-center gap-1">
+                <b-button @click="useLogoColors()" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px" v-if="imageColors.length > 1">
+                  <template v-if="usingColorLogos"> Original Colors</template>
+                  <template v-else> Logo Colors</template>
+                </b-button>
+                <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" :class="{'invisible': !(logoColorUsed && imageColors.length > 1 && usingColorLogos)}"
+                          variant="secondary"><b-icon-shuffle />
+                </b-button>
+                <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
+                  <font-awesome-icon :icon="['fas', 'redo-alt']"/>
+                </b-button>
+              </div>
             </div>
           </div>
         </div>
@@ -113,6 +112,7 @@
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import {getCustomLogos, setLogoSettings} from "@/helpers/Helpers";
 import UploadLogo from "@/components/UploadLogo.vue"
+import UploadLogoMobile from "@/components/UploadLogoMobile.vue"
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
 import LogoColorTabs from "@/components/LogoColorTabs.vue"
@@ -122,6 +122,7 @@ import RecentLogos from "@/components/RecentLogos.vue";
   components: {
     RecentLogos,
     UploadLogo,
+    UploadLogoMobile,
     SaveLogoModal,
     SaveColorModal,
     LogoColorTabs
@@ -149,6 +150,7 @@ export default class LogoUploader extends Vue {
   public allowedLogosLimit = 1000
   public previousImageColors = []
   public productColors: any[] = []
+  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public selectedSwatchIndex = -1
   public showLogoColors = false
   public logoColorUsed = false
@@ -156,10 +158,6 @@ export default class LogoUploader extends Vue {
   public defSwatchPantone = '11-0601'
   public showSVGs = false
   public showRecentLogos = false
-  public options = [
-    {value: 'front', text: 'Front'},
-    {value: 'back', text: 'Back'}
-  ]
 
   public async rollbackPreviousColors () {
     this.initialExtractedColors.forEach((defaultColor: Record<any, any>, index: number) => {
@@ -399,6 +397,11 @@ export default class LogoUploader extends Vue {
 
   public async changeSide(index: number, event:string) {
     await this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customLogos)), action: 'customLogos' })
+    if(event === 'front'){
+      event = 'back'
+    }else{
+      event = 'front'
+    }
     const payload = {
       index: index,
       attribute: 'side',
@@ -416,5 +419,9 @@ export default class LogoUploader extends Vue {
 </script>
 
 <style lang="scss" scoped>
-
+.logo-uploader-main{
+  @media (max-width: 600px) {
+    display: flex;
+  }
+}
 </style>

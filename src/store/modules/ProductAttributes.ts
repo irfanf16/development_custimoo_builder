@@ -225,6 +225,7 @@ const ProductAttributes:Module<any, any> = {
 
     },
     customLogoAttribute(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
+      console.log(customLogoAttribute)
       if(customLogoAttribute){
         Vue.set(state.customLogos[state.selectedPrdId][customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
       }

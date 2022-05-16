@@ -64,8 +64,8 @@
         <p>Need High Res Image</p>
       </div>
     </div>
-    <b-button v-if="mobileScreen" style="position:absolute; left: 0; top: -38px; width: auto" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">
-      <b-icon-pencil fl /> Edit Logo
+    <b-button v-if="mobileScreen" style="position:absolute; left: 66px; top: 93px; width: auto" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">
+      <b-icon-pencil />
     </b-button>
 
 
@@ -391,7 +391,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 15px;
+  padding: 15px 25px 15px 0;
   text-align: center;
   color: #808895;
   //border-radius: 20px 20px 0 0;
@@ -637,7 +637,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   background: #219F84 !important;
   color: #fff !important;
   font-size: 14px !important;
-  padding: 8px 15px !important;
+  padding: 8px !important;
   display: flex;
   gap: 7px;
   align-items: center;

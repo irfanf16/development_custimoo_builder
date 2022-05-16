@@ -1751,4 +1751,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 .open-logo-uploader{
   top: auto !important;
 }
+.customize_controls{
+  padding-bottom: 0 !important;
+}
 </style>
