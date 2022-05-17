@@ -29,8 +29,8 @@
                                     :ref="'logoUploadModalOpener'+ltIdx" :key="'top'+ltIdx">
                     <span slot="upload_text">Click to upload logo or drag a file here</span>
                   </UploadLogoMobile>
-                  <div class="logo-placemet-content" v-if="logo_tab.url">
-                    <b-button v-if="getRecentLogos.length > 0" class="logo-editor-button py-2" @click="showRecentLogosHandler" style="line-height: normal;" size="sm" variant="secondary">
+                  <div class="logo-placemet-content" :class="{'invisible': !logo_tab.url}">
+                    <b-button :class="{'invisible': !getRecentLogos.length > 0}" class="logo-editor-button py-2" @click="showRecentLogosHandler" style="line-height: normal;" size="sm" variant="secondary">
                         Logos
                     </b-button>
                   </div>
@@ -89,7 +89,7 @@
                   <template v-if="usingColorLogos"> Original Colors</template>
                   <template v-else> Logo Colors</template>
                 </b-button>
-                <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" :class="{'invisible': !(logoColorUsed && imageColors.length > 1 && usingColorLogos)}"
+                <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" :class="!(usingColorLogos && imageColors.length > 1) ? 'invisible': 'shuffle-mobile'"
                           variant="secondary"><b-icon-shuffle />
                 </b-button>
                 <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
@@ -128,7 +128,7 @@ import RecentLogos from "@/components/RecentLogos.vue";
     LogoColorTabs
   },
   mounted() {
-    console.log('ready')
+    console.log('ready', this.logoColorUsed)
   }
 })
 
@@ -153,7 +153,6 @@ export default class LogoUploader extends Vue {
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public selectedSwatchIndex = -1
   public showLogoColors = false
-  public logoColorUsed = false
   public defSwatchColor = '#ffffff'
   public defSwatchPantone = '11-0601'
   public showSVGs = false
@@ -232,7 +231,6 @@ export default class LogoUploader extends Vue {
   }
 
   useLogoColors() {
-    this.logoColorUsed = true
     if(this.usingColorLogos) {
       /*this.$store.commit('SET_LOGO_COLORS', [])*/
       for (let i = 0; i < 4; i++) {
@@ -422,6 +420,45 @@ export default class LogoUploader extends Vue {
 .logo-uploader-main{
   @media (max-width: 600px) {
     display: flex;
+  }
+}
+
+.shuffle-mobile{
+  position: relative;
+
+  &:after,&:before{
+    content: "";
+    display: block;
+    position: absolute;
+    //background: #fff;
+    background: lighten(#219F84, 40%);
+    height: 20px;
+    width: 20px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    border-radius: 1000px;
+    opacity: 0;
+  }
+  &:after{
+    animation: pulse 1s ease-out 3;
+  }
+  &:before{
+    animation: pulse 1s ease-out 3;
+    animation-delay: 0.2s;
+  }
+}
+
+@keyframes pulse {
+  from{
+    transform: scale(0);
+    opacity: .5;
+  }
+  to{
+    transform: scale(5);
+    opacity: 0;
   }
 }
 </style>
