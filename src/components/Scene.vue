@@ -256,8 +256,8 @@ export default class Scene extends Vue {
         })
       }
       newVal.forEach((logo: Record<any, any>, index: number) => {
-        let logoUrl = logo? (this.storageUrl + logo.url).trim().split(' ').join('%20') : ''
-        if(logo && ((this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && this.customLogoObjects[logo.logoIndex]._element.src != logoUrl))){
+        let logoUrl = logo? encodeURI((this.storageUrl + logo.url).trim()) : ''
+        if(logo && ((this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && this.customLogoObjects[logo.logoIndex]._element.src.split("?")[0] != logoUrl))){
           self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
           if (self.backCanvas) {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
@@ -1517,7 +1517,7 @@ export default class Scene extends Vue {
       this.customLogos.forEach((logo, index) => {
         if(logo) {
           let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
-          if (logoUrl == e.target._element.src && logo.logoIndex == e.target.logoIndex) {
+          if (logoUrl == e.target._element.src.split("?")[0] && logo.logoIndex == e.target.logoIndex) {
             if (e.action == 'drag') {
               let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)),{'action':e.action})
               self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
