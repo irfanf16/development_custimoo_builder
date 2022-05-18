@@ -43,8 +43,8 @@
           </div>
           <div class="fade-right py-2">
             <div class="overflow-auto d-flex align-items-center gap-2 hide-scroll fontList">
-              <div v-for="(item, i) in fontOptions" :key="i" @click="fontOptionChanged(tabIndex, i, item.value)" style="white-space: nowrap" :class="{'pr-3': i+1 == fontOptions.length, 'activeFont': activeFont == i}">
-                {{item.text}}</div>
+              <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontFamily: item.value}" @click="fontOptionChanged(tabIndex, i, item.value)" style="white-space: nowrap" :class="{'pr-3': i+1 == fontOptions.length, 'activeFont': activeFont == i}">
+                {{customText.text ? customText.text : item.text}}</div>
             </div>
           </div>
 
@@ -57,13 +57,12 @@
                 </div>
               </template>
               <div class="overflow-hidden fade-right">
-                <!--          <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />-->
                 <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
                   <li v-for="(colorName, index) in productColors" :key="index">
                     <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
                   </li>
 
-                  <li>
+                  <li v-if="selectedProduct.is_custom_color_allowed">
                     <a class="faded_text text-capitalize" @click="showOther">Other</a>
                   </li>
                 </ul>
@@ -86,7 +85,6 @@
                 </div>
               </template>
               <div class="overflow-hidden fade-right">
-                <!--          <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />-->
                 <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
                   <li v-for="(colorName, index) in productColors" :key="index">
                     <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>

@@ -38,13 +38,12 @@
           </div>
         </div>
         <div class="overflow-hidden fade-right">
-<!--          <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />-->
           <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
             <li v-for="(colorName, index) in productColors" :key="index">
               <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
             </li>
 
-            <li>
+            <li  v-if="selectedProduct.is_custom_color_allowed">
               <a class="faded_text text-capitalize" @click="showOther">Other</a>
             </li>
           </ul>
@@ -55,7 +54,7 @@
         <div class="color_circle" :key="index" v-for="(color, index) in (typeof productColors[activeCollection].color_text === 'string' ? JSON.parse(productColors[activeCollection].color_text) : productColors[activeCollection].color_text)" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
       </div>
 
-      <div v-if="showOtherColors" class="mobile-other">
+      <div v-if="showOtherColors && selectedProduct.is_custom_color_allowed" class="mobile-other">
         <span class="close" @click="hideOther"><BIconX /></span>
         <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
       </div>
@@ -122,7 +121,6 @@ import {default as $} from 'jquery';
 import TextCustomization from "@/components/mobile/TextCustomization.vue";
 import Collars from "@/components/mobile/Collars.vue";
 import {getClosestColor} from "@/pantoneColor";
-import colorPicker from '@caohenghu/vue-colorpicker'
 import readXlsxFile from "read-excel-file";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
@@ -136,7 +134,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     TextCustomization,
     EditRosterAreaTab,
     Collars,
-    colorPicker,
     RosterTableMobile
     // ColorAccordion,
     // LogoPlacementTabs,
@@ -174,7 +171,7 @@ export default class CustomTabs extends Vue {
   public color = '#59c7f9'
   public showOtherColors = false
   public pantoneColorVal= '13-4411'
-  // private tabTop = window.screen.availHeight - 190;
+  // privat tabTop = window.screen.availHeight - 190;
   public id = 0
   public custom_arr: Record<any, any>[] = [];
   public productSizes : any[] = []
@@ -690,21 +687,49 @@ export default class CustomTabs extends Vue {
 
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
-    productFonts.forEach((fonts: any, key: number) => {
-      let fontNameParam = fonts.file_url.split('/').reverse()
-      fontNameParam = fontNameParam[0].split('.')
-      let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-      let font = {
-        value: fontNameParam[0] as string,
-        text: fontName as string
+    let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
+    if (productFonts.length){
+      let item = JSON.parse(productFonts[0].json_data)
+      if(item) {
+        this.fontOptions = []
+        item.forEach((fonts: any, key: number) => {
+          let fontNameParam = fonts.path.split('/').reverse()
+          fontNameParam = fontNameParam[0].split('.')
+          let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+          let font = {
+            value: fontNameParam[0] as string,
+            text: fontName as string
+          }
+          let hasMatch = false;
+          for (let index = 0; index < this.fontOptions.length; ++index) {
+            let obj = this.fontOptions[index];
+            if(obj.text == font.text){
+              hasMatch = true;
+              break;
+            }
+          }
+          if (!hasMatch){
+            this.fontOptions.push(font)
+          }
+          let fontUrl = this.storageUrl + fonts.path
+          const headElement = document.querySelector('head') as Record<any, any>
+          let style_tag = document.createElement('style')
+          style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
+          headElement.appendChild(style_tag)
+          if (shadow_dom) {
+            $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
+            setTimeout(() => {
+              $(shadow_dom).find("#delete_after_load").remove()
+            }, 100)
+          }else {
+            $('#santa').append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
+            setTimeout(() => {
+              $("#delete_after_load").remove()
+            }, 100)
+          }
+        })
       }
-      this.fontOptions = this.fontOptions.concat([font])
-      let fontUrl = this.storageUrl + fonts.file_url
-      const headElement = document.querySelector('head') as Record<any, any>
-      let style_tag = document.createElement('style')
-      style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
-      headElement.appendChild(style_tag)
-    })
+    }
   }
 
   public addTab(index: number) {
