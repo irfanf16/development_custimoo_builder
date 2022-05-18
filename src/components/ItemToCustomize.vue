@@ -1,13 +1,14 @@
 <template>
   <div class="item-to-customize text-left">
-    <div class="p-3" style="border-bottom: 1px solid #eee" v-if="mobileScreen" >
+    <div class="px-3 py-1" style="border-bottom: 1px solid #eee" v-if="mobileScreen" >
       <h2 class="fw-bold p-lg-0 mb-lg-4 fz-18 bg-transparent d-flex align-items-center justify-content-between" @click="toggleItems">
-        <span>Select Item to Customize</span>
+        <span style="font-size: 16px">Select Item to Customize</span>
         <span v-if="mobileScreen" class="mt-1 toggleArrow" :class="showItems ? 'opened' : ''"><BIconChevronDown /></span>
       </h2>
 
       <div class="select-items" :class="showItems ? 'opened' : ''">
-        <div class="collection-btn mb-2 mt-3 px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0">
+<!--        <div class="collection-btn mt-1 px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0">-->
+        <div class="collection-btn mt-1 px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0">
 <!--          <b-form-checkbox :checked="customized" @change="changeProductType('customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
 <!--          <b-form-checkbox :checked="personalized" @change="changeProductType('personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
           <button type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
@@ -22,7 +23,7 @@
             Stock
           </button>
         </div>
-          <ItemsGrid />
+        <ItemsGrid :showItems="showItems" />
       </div>
     </div>
 
@@ -57,7 +58,7 @@
 
     </template>
 
-    <h2 v-if="mobileScreen" class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
+    <h2 v-if="mobileScreen" class="fw-bold px-3 py-1 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
       <span>Designs Available</span>
       <span class="mt-1 toggleArrow" :class="showDesigns ? 'opened' : ''"><BIconChevronDown /></span>
     </h2>
@@ -232,7 +233,7 @@ export default class ItemToCustomize extends Vue {
 
   .collection-btn{
     @media (max-width: 1680px) {
-      flex-direction: column;
+      //flex-direction: column;
       flex-wrap: wrap;
     }
   }
