@@ -187,13 +187,17 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
   const productFonts = product.namefonts;
    let fontOptions:any = [];
   productFonts.forEach((fonts: any, key: number) => {
+    console.log(fonts);
     let fontNameParam = fonts.file_url.split('/').reverse()
     fontNameParam = fontNameParam[0].split('.')
     const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
     const font = {
       value: fontNameParam[0] as string,
-      text: fontName as string
+      text: fontName as string,
+      json_data: JSON.parse(fonts.json_data),
+      file_url: fonts.file_url
     }
+    console.log(font);
     fontOptions = fontOptions.concat([font])
     return fontOptions
   })
@@ -404,7 +408,7 @@ const getActiveProductData = async () => {
     if(scene_ref.customLogoObjects) {
       for (const custom_logo_svg of scene_ref.customLogoObjects) {
         if(custom_logo_svg && Object.keys(custom_logo_svg).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
-          post_data.custom_logo_svgs.push(custom_logo_svg.toSVG());
+          post_data.custom_logo_svgs.push(custom_logo_svg);
         }
       }
     }
@@ -470,8 +474,44 @@ const activityStatus = {
   },
 }
 
+const urlToBase64 =  (url:string) => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+      if(xhr.status == 200) {
+        const reader = new FileReader();
+        reader.onloadend = function() {
+          resolve(reader.result);
+        }
+        reader.readAsDataURL(xhr.response);
+      } else {
+        reject(`Error (status = ${xhr.status}, status text = ${xhr.statusText}) while getting file from url ${xhr.responseURL}`);
+      }
+    };
+    xhr.open('GET', url);
+    xhr.responseType = 'blob';
+    xhr.send();
+  });
+}
+
+const getFileExtensionType = (type: string, file_extension:string) => {
+  const extensions: Record<any, any> = {
+    raster: ['jpg', 'jpeg', 'png'],
+    vector:['svg','ai','eps']
+  }
+  const type_extensions = extensions[type];
+  if(file_extension) {
+    const extension_index = file_extension.lastIndexOf(".");
+    if(extension_index > 0) {
+      file_extension = file_extension.substring(extension_index + 1)
+    }
+    return type_extensions.includes(file_extension);
+  }
+  return type_extensions;
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus,urlToBase64,getFileExtensionType
 };

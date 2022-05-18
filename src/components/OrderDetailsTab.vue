@@ -74,7 +74,7 @@ import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
 import ProductionScene from '@/components/ProductionScene.vue'
-import { getActiveProductData } from "@/helpers/Helpers";
+import { getActiveProductData,urlToBase64,getFileExtensionType,fontsList } from "@/helpers/Helpers";
 import LoginForm from '@/components/LoginForm.vue'
 
 import {compact} from 'lodash';
@@ -109,6 +109,20 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
     url: null, content: null
   }
   public isLoading = false;
+
+  public roster_detail: Record<any,any> = [];
+
+  public production_file_info: Record<any,any> = {};
+
+  public font_file : Record<any,any>[] = [];
+
+  public storage_url:string = process.env.VUE_APP_STORAGE_URL;
+
+  public svg_pattern_last_value_y = 0;
+
+  public logo_pattern_last_value_y = 0;
+
+  public INCH_TO_CENTIMETER = 2.54;
 
   get updateOrderItemProducts() {
     return this.$store.getters.getUpdateOrderItemProducts
@@ -250,10 +264,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
     try {
       this.isLoading = true;
      let cart_product = await getActiveProductData();
+     let content:string = await this.fetchUrlContent(cart_product?.production_url);
+
+      let production_content = await this.parseSvgString(content,cart_product as Record<any,any>);
 
      if(cart_product == null) {
        return false;
      }
+      cart_product.svg_content = production_content;
       let post_data = {
         factory_product: cart_product
       };
@@ -262,6 +280,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         post_data.factory_product.id = this.$store.getters.getEditCart.cartItemId
         url = `carts/cart-items/${this.$store.getters.getEditCart.cartId}/update`
       }
+
 
       let santacart = true;
       let company_domain = localStorage.getItem('company_domain');
@@ -545,11 +564,394 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
     let custom_logo_svgs = [];
     for (const custom_logo_svg of custom_logo_objects) {
       if(custom_logo_svg.constructor.name == "klass") {
-        custom_logo_svgs.push(custom_logo_svg.toSVG());
+        custom_logo_svgs.push({
+          width:custom_logo_svg.width,
+          height:custom_logo_svg.height,
+          svg: custom_logo_svg.toSVG(),
+          scaleX:custom_logo_svg.scaleX,
+          scaleY:custom_logo_svg.scaleY
+        });
       }
     }
     order_detail.custom_logo_svgs = custom_logo_svgs
     return order_detail;
+  }
+
+  public async fetchUrlContent(url:string) {
+    let fetch_content = await fetch(url);
+    let url_content   = await fetch_content.text();
+    return url_content;
+  }
+
+  public async parseSvgString(svg_string:string, factory_product: Record<any,any>) {
+    if(svg_string.substring(0, svg_string.lastIndexOf("</g>")) !== '') {
+      let self = this;
+      let production_content = "";
+      this.roster_detail = [];
+
+      //Applying Text and Logo on SVG
+      let custom_logos_texts_string = "";
+      let companies_name = [];
+
+      // let elements = await self.getDocFromString(self.factory_product.custom_text_svgs);
+
+      let custom_texts = factory_product.custom_texts;
+
+      let custom_name_index = custom_texts.findIndex((custom:Record<any,any>) => {
+        let is_roster_name = factory_product.roster_detail.findIndex((roaster:Record<any,any>) => {
+          return roaster.text == custom.text
+        });
+        return custom.type === 'name' && custom.text  && is_roster_name != -1;
+      })
+
+      let custom_number_index = custom_texts.findIndex((custom:Record<any,any>) => {
+        if(Object.prototype.hasOwnProperty.call(custom, 'text')){
+          let is_roster_number = factory_product.roster_detail.findIndex((roaster:Record<any,any>) => {
+            return roaster.number == custom.text
+          });
+          return custom.type === 'number' && custom.text && is_roster_number != -1;
+        }
+      })
+
+      let custom_text_svgs = factory_product.custom_text_svgs;
+
+      let sorted_custom_text_svgs = [];
+      if(custom_name_index > -1) {
+        if(factory_product.roster_detail.findIndex((roaster:Record<any,any>) => roaster.text == custom_texts[custom_name_index].text) > -1) {
+          sorted_custom_text_svgs.push({
+            svg: custom_text_svgs[custom_name_index],
+            type: 'name'
+          });
+        }
+      }
+
+      if(custom_number_index > -1) {
+        if(factory_product.roster_detail.findIndex((roaster:Record<any,any>) => roaster.number == custom_texts[custom_number_index].text) > -1) {
+          sorted_custom_text_svgs.push({
+            svg: custom_text_svgs[custom_number_index],
+            type: 'number'
+          });
+        }
+      }
+
+      let rest_of_text_svg : Record<any,any> = [];
+      custom_text_svgs.forEach((custom_text_svg:string,index:number) => {
+        if(index !== custom_name_index && index !== custom_number_index){
+          return rest_of_text_svg.push({
+            svg:custom_text_svg,
+            type:'common'
+          });
+        }
+      });
+
+
+      rest_of_text_svg.forEach((text_svg:string)=>{
+        sorted_custom_text_svgs.push(text_svg);
+      });
+
+      console.log(rest_of_text_svg)
+
+
+      for(let [indexrstr,roster_detail] of factory_product.roster_detail.entries()) {
+        let text = "";
+        let number = "";
+        let name_height = "";
+        let number_height = "";
+        companies_name = [];
+        for (let [index,custom_text_svg] of sorted_custom_text_svgs.entries()) {
+          let element = await self.getDocFromString(custom_text_svg.svg);
+          let el = element?.querySelector('g');
+          if(custom_text_svg.type === 'name' && el){
+            let tspan = el.querySelector('tspan');
+            if(tspan){
+              tspan.innerHTML = roster_detail.text
+              tspan.setAttribute('x','0');
+              tspan.setAttribute('y','0');
+              let el_text = el?.querySelector('text')
+              if(el_text){
+                text = new XMLSerializer().serializeToString(el_text);
+                name_height = factory_product.custom_texts[custom_name_index].originalHeight;
+              }
+            }
+
+          }
+          else if (custom_text_svg.type === 'number' && el){
+            let tspan = el.querySelector('tspan');
+            if(tspan){
+              tspan.innerHTML = roster_detail.number
+              tspan.setAttribute('x','0');
+              tspan.setAttribute('y','0');
+              let el_number = el?.querySelector('text')
+              if(el_number){
+                number = new XMLSerializer().serializeToString(el_number);
+                number_height = factory_product.custom_texts[custom_number_index].originalHeight;
+              }
+
+            }
+
+
+          }
+          else {
+            if(el){
+              let tspan = el.querySelector('tspan');
+              if(tspan){
+                tspan.setAttribute('x','0');
+                tspan.setAttribute('y','0');
+                let el_common = el?.querySelector('text');
+                if(el_common){
+                  companies_name.push({
+                    name: new XMLSerializer().serializeToString(el_common),
+                    size: 'For ALL'
+                  })
+                }
+              }
+              let custom_logos_texts_string_mod = new XMLSerializer().serializeToString(el);
+              custom_logos_texts_string += custom_logos_texts_string_mod;
+            }
+
+          }
+
+
+        }
+
+        this.roster_detail.push(
+          {
+            text: text,
+            number: number,
+            size: roster_detail.size,
+            name_height: name_height,
+            number_height: number_height,
+          }
+        );
+      }
+      companies_name.forEach((company) => {
+        this.roster_detail.push(
+          {
+            text: company.name,
+            number:null,
+            size:company.size,
+            name_height: null,
+            number_height:null
+          }
+        )
+      })
+      console.log(this.roster_detail);
+      console.log('Fonts');
+      console.log(fontsList(this.selectedProduct));
+
+
+
+
+
+
+
+
+
+
+      for(let custom_logo_svg of factory_product.custom_logo_svgs) {
+        let logo_url = $(custom_logo_svg).find("img:eq(0)").attr("xlink:href")
+        if( logo_url) {
+          try {
+
+            let base64_logo = await urlToBase64(logo_url);
+            custom_logo_svg = custom_logo_svg.replace(logo_url, base64_logo)
+          } catch (errorResponse) {
+            console.log(errorResponse)
+          }
+        }
+        custom_logos_texts_string += custom_logo_svg;
+      }
+      if(custom_logos_texts_string) {
+        svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
+        // svg_string += `${custom_logos_texts_string}\n`
+        // svg_string += `${this.getSVGTable('Roaster Detail',['Name','Number','Size','Dimension'],this.roster_detail)}\n</g>\n</svg>`
+        svg_string += `${this.getSVGPattern(this.roster_detail,factory_product.measurement_ratio)}\n`
+        if(!(factory_product.custom_logos.length == 1 && factory_product.custom_logos[0].url === null)){
+          svg_string += `${await this.getLogoPattern(factory_product.custom_logos,factory_product.measurement_ratio)}`
+        }
+        svg_string += `\n</g>\n</svg>`;
+      }
+      let svg_doc = await this.getDocFromString(svg_string);
+      this.production_file_info = {
+        width: $(svg_doc).find("svg").eq(0).attr("width"),
+        height: $(svg_doc).find("svg").eq(0).attr("height")
+      }
+      let scaled_file_info = {
+        width : parseFloat(this.production_file_info.width),
+        height : this.logo_pattern_last_value_y?this.logo_pattern_last_value_y:this.svg_pattern_last_value_y,
+      };
+
+
+      //Applying Color on SVG
+      factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
+        $(svg_doc).find(`[id][fill]`).each(function(doc_item) {
+          let doc_elem_id = $(this).attr("id");
+          if(doc_elem_id) {
+            doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
+            if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
+              $(this).attr("fill", svg_group_item.color);
+            }
+          }
+        })
+      })
+
+      //Add Fonts to SVgs Start
+      let font_style = document.createElementNS("http://www.w3.org/2000/svg","style");
+      for(let font of this.font_file){
+        font_style.innerHTML += ` @font-face{ font-family: ${font.file_name}; src: url('${font.font_url}');  }`;
+      }
+      $(svg_doc).find("svg").eq(0).prepend(font_style)
+      //Add Fonts to SVgs End
+
+      //Add Front and Back Images Side wise to svg
+      let group_back_image_tag = document.createElementNS("http://www.w3.org/2000/svg","g");
+      group_back_image_tag.setAttribute('transform',`matrix(1 0 0 1 ${parseFloat(self.production_file_info.width)} 0)`);
+      let back_image = document.createElementNS("http://www.w3.org/2000/svg","image");
+      back_image.setAttribute('xlink:href',`${factory_product.back_image}`);
+      back_image.setAttribute('height',`${(parseFloat(self.production_file_info.height)/2)}px`);
+      back_image.setAttribute('width',`${(parseFloat(self.production_file_info.height)/2)}px`);
+      group_back_image_tag.appendChild(back_image);
+      $(svg_doc).find("g").eq(0).prepend(group_back_image_tag)
+
+
+      let group_front_image_tag = document.createElementNS("http://www.w3.org/2000/svg","g");
+      group_front_image_tag.setAttribute('transform',`matrix(1 0 0 1 ${parseFloat(self.production_file_info.width)} ${(parseFloat(self.production_file_info.width)/2) + 500})`);
+      let front_image = document.createElementNS("http://www.w3.org/2000/svg","image")
+      front_image.setAttribute('xlink:href',`${factory_product.front_image}`);
+      front_image.setAttribute('height',`${(parseFloat(self.production_file_info.height)/2)}px`);
+      front_image.setAttribute('width',`${(parseFloat(self.production_file_info.height)/2)}px`);
+      group_front_image_tag.appendChild(front_image);
+      $(svg_doc).find("g").eq(0).prepend(group_front_image_tag)
+
+      //Add Front and Back Images Side wise to svg
+
+      $(svg_doc).find("svg").eq(0).attr({"width": (scaled_file_info.width * 2) + 'px', height: scaled_file_info.height + 'px'});
+      let view_box = svg_doc?.querySelector('svg')?.getAttribute('viewBox');
+      let view_box_dimensions = view_box?.split(" ");
+
+      svg_doc?.querySelector('svg')?.setAttribute('viewBox',`${view_box_dimensions[0]} ${view_box_dimensions[1]} ${parseFloat(self.production_file_info.width) * 2} ${this.logo_pattern_last_value_y?this.logo_pattern_last_value_y:this.svg_pattern_last_value_y}`);
+      production_content = new XMLSerializer().serializeToString(svg_doc);
+
+      return production_content;
+    }
+    else{
+      return 'No SVG Exists'
+    }
+
+    // self.$emit("update:production_file_obj", self.production_file_obj)
+  }
+  public getSVGPattern(values:Record<any,any>,measurement_ratio:number){
+    return `
+                <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${5000})" style="font-weight: bold;">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">Name </tspan>
+                    </text>
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="${1000}" y="0">Number </tspan>
+                    </text>
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="${2000}" y="0">Size </tspan>
+                    </text>
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="${3000}" y="0">Name Height </tspan>
+                    </text>
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="${4000}" y="0">Number Height </tspan>
+                    </text>
+                </g>
+        ${values.map((value:Record<any,any>,index:number) => {
+      return `
+                <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${5000})">
+                <g transform="matrix(${measurement_ratio?1/measurement_ratio:1} 0 0 ${measurement_ratio?1/measurement_ratio:1} 0 ${500 + index * 1000})">
+                     ${value.text?value.text : ''}
+                </g>
+                <g transform="matrix(${measurement_ratio?1/measurement_ratio:1} 0 0 ${measurement_ratio?1/measurement_ratio:1} 1000 ${500 + index * 1000})">
+                      ${value.number? value.number : ''}
+                </g>
+                <g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">${value.size? value.size : ''} </tspan>
+                    </text>
+                </g>
+                <g transform="matrix(1 0 0 1 3000 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">${value.name_height? value.name_height + 'cm /' + parseFloat(value.name_height/this.INCH_TO_CENTIMETER).toFixed(2) + 'in'  : ''} </tspan>
+                    </text>
+                </g>
+                <g transform="matrix(1 0 0 1 4000 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">${value.number_height? value.number_height + 'cm /' + parseFloat(value.number_height/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
+                    </text>
+                </g>
+                ${this.svg_pattern_last_value_y = ((500 + index * 1000) + 5000)}
+                </g>`
+
+    })
+    }
+        `
+  }
+  async getLogoPattern(values:Record<any,any>,measurement_ratio:string) {
+    let svg_group_el = `
+        <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})" style="font-weight: bold;">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">Logo </tspan>
+                    </text>
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="${1000}" y="0">Side </tspan>
+                    </text>
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="${2000}" y="0">Size </tspan>
+                    </text>
+                </g>
+       `;
+    let index = 0;
+    for(let index in values) {
+      let value = values[index];
+      console.log(value)
+      let original_url = Object.prototype.hasOwnProperty.call(value,'original_logo_url');
+      let updated_url = original_url?value.original_logo_url:value.url;
+      if(getFileExtensionType('raster', updated_url) ){
+        await urlToBase64(`${this.storage_url}${updated_url}`).then(async (base64) => {
+          svg_group_el += `
+                <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
+                <g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
+                    ${updated_url?`<image xlink:href="${base64}" height="${(value.height * value.scaleY)*measurement_ratio}px" width="${(value.width * value.scaleX)*measurement_ratio}px"/>`:''}
+                </g>
+                <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">${value.side? value.side : ''} </tspan>
+                    </text>
+                </g>
+                <g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">${value.originalWidth? value.originalWidth + 'cm x' + value.originalHeight + 'cm /' + parseFloat(value.originalWidth/this.INCH_TO_CENTIMETER).toFixed(2) + 'in x' + parseFloat(value.originalHeight/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
+                    </text>
+                </g>
+                ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500)}
+                </g>`
+        })
+      } else {
+        svg_group_el += `
+                <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
+                <g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
+                    ${updated_url?`<image xlink:href="${this.storage_url}${updated_url}" height="${(value.height * value.scaleY) * measurement_ratio}px" width="${(value.width * value.scaleX) * measurement_ratio}px"/>`:''}
+                </g>
+                <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">${value.side? value.side : ''} </tspan>
+                    </text>
+                </g>
+                <g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">${value.originalWidth? value.originalWidth + 'cm x' + value.originalHeight + 'cm /' + parseFloat(value.originalWidth/this.INCH_TO_CENTIMETER).toFixed(2) + 'in x' + parseFloat(value.originalHeight/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
+                    </text>
+                </g>
+                ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500 + value.height)}
+                </g>`
+      }
+      ++index;
+    }
+    return svg_group_el;
   }
 
 }
