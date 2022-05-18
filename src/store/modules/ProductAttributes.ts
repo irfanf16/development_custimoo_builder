@@ -291,8 +291,13 @@ const ProductAttributes:Module<any, any> = {
       if(delCustomTabLogo){
         // state.customLogos.splice(delCustomLogo.index, 1)
         Vue.delete(state.customLogos[state.selectedPrdId], delCustomTabLogo.index)
-        state.customLogos[state.selectedPrdId].forEach((custom_logo:any, clIdx:any) => {
-          Vue.set(state.customLogos[state.selectedPrdId][clIdx], "logoIndex", clIdx)
+        state.products.forEach((item:Record<any, any>) => {
+          if (item.logos_follows_product && item.id != state.selectedPrdId) {
+            Vue.delete(state.customLogos[item.id], delCustomTabLogo.index)
+          }
+          state.customLogos[item.id].forEach((logo:Record<any, any>, ind:number)=>{
+              Vue.set(state.customLogos[item.id][ind], 'logoIndex', ind)
+            })
         })
       }
     },
@@ -458,6 +463,18 @@ const ProductAttributes:Module<any, any> = {
     REMOVE_CUSTOMIZATION_TEXT_ELEMENT(state:Record<any, any>, payload:Record<any, any>){
       if (payload.product_id){
         Vue.set(state.customTexts[payload.product_id], payload.index, {})
+        state.products.forEach((item:Record<any, any>) => {
+          if (item.text_follows_product && item.id != state.selectedPrdId) {
+            Vue.delete(state.customTexts[item.id], payload.index)
+          }
+          let count = 0
+          state.customTexts[item.id].forEach((logo:Record<any, any>, ind:number)=>{
+            if ('add_type' in logo){
+              count++
+              Vue.set(state.customTexts[item.id][ind], 'added_count', count)
+            }
+          })
+        })
       }
     },
     defaultColor (state: Record<any, any>, color: Record<any, any>) {

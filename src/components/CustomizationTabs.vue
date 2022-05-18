@@ -547,16 +547,16 @@ export default class CustomizationTabs extends Vue {
     }
     this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: false, attribute: 'text', value: ''})
     this.$store.commit('REMOVE_CUSTOMIZATION_TEXT_ELEMENT', payload)
-    let ind = 0
-    this.customTexts.forEach((text:Record<any, any>, index:number) =>{
-      if (text.add_type == 'manual' && ind >=0){
-        ind = ind + 1
-        this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: false, attribute: 'added_count', value: ind})
-        this.text_add_count = ind
-      }else if (ind == 0){
-        this.text_add_count = 0
-      }
-    })
+    // let ind = 0
+    // this.customTexts.forEach((text:Record<any, any>, index:number) =>{
+    //   if (text.add_type == 'manual' && ind >=0){
+    //     ind = ind + 1
+    //     this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: false, attribute: 'added_count', value: ind})
+    //     this.text_add_count = ind
+    //   }else if (ind == 0){
+    //     this.text_add_count = 0
+    //   }
+    // })
   }
 
 }
