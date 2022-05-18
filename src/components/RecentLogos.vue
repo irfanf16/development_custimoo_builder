@@ -118,10 +118,11 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
       }
       let custom_logos = this.$store.getters.getCustomLogos()
       //check if logo is removed but the tab is still active
-      if(!custom_logos[index]) {
-        //add logo object in custom logos array
-        await this.addLogoObject(this.customLogoIndex)
-      }
+      // if(!custom_logos[index]) {
+      //   //add logo object in custom logos array
+      //   console.log("adding new custom object")
+      //   await this.addLogoObject(this.customLogoIndex)
+      // }
       this.$store.commit('SET_COLORS_FROM_RECENT',true)
       await setCustomLogo(logo,this.customLogoIndex)
     }

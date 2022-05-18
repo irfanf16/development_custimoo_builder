@@ -237,8 +237,13 @@ export default class LogoPlacementTabs extends Vue {
   public async addTab(index: number) {
     let new_tab_index = this.customLogos.length;
     let logo = setLogoSettings(new_tab_index);
-    await this.$store.dispatch('setCustomLogos', logo)
+    logo.adding_tab = true
+    const payload = {
+      custom_logo: logo
+    }
+    await this.$store.dispatch('setCustomLogos', payload)
     this.tabIndex = this.customLogos.length - 1
+    console.log("tabidex", this.tabIndex)
   }
 
 /*  public async addTab_back(index: number){
@@ -283,6 +288,7 @@ export default class LogoPlacementTabs extends Vue {
     }
     this.tabIndex = this.tabIndex - 1;
     let logo = setLogoSettings(index);
+    console.log("log", logo)
     logo.logoIndex = index;
     this.$store.commit('customLogos', logo)
     setTimeout(() => {

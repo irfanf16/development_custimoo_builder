@@ -114,7 +114,7 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
-import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
+import {fileToBase64, getLogoObject, setCustomLogo, setLogoSettings} from "../helpers/Helpers"
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import ModalAction from "@/mixins/ModalAction";
 
@@ -251,7 +251,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     this.processLogoImage();
   }
 
-  public processLogoImage() {
+  public  processLogoImage() {
     let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
     custom_logo.logoIndex = this.customLogoIndex;
     let img = this.fileObject
@@ -274,7 +274,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     fd.append('product_id', this.selectedProduct.product_id)
     this.showLoader = true;
       http.post('/customer/upload/logo', fd, header)
-      .then(resp => {
+      .then(async resp => {
         this.colors = resp.data.colors;
         const inputRef = this.$refs.fileInput as Record<any, any>
         inputRef.value = null;
@@ -285,6 +285,8 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.is_smart_transparent = false;
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
+        custom_logo.upload = true
+        let customObj = this.getUploadedLogoObject(resp.data.file)
         let getLogos = []
         if (this.customLogos.length > 1){
           getLogos = this.customLogos.slice(0, -1)
@@ -293,7 +295,14 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         }
         this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
-        this.$store.commit('customLogos', custom_logo)
+        custom_logo.adding_tab = false
+        let payload = {
+          customObj : customObj,
+          custom_logo: custom_logo
+        }
+        console.log("payload", payload)
+        this.$store.commit('customLogos', payload)
+        // await setCustomLogo(customObj, this.customLogoIndex)
         this.hideModal()
         this.getLogoColors()
         this.$store.commit('SET_RECENT_LOGOS');
@@ -316,7 +325,16 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
 
     return (new RegExp('(' + exts.join('|').replace(/\./g, '\\.') + ')$')).test(fileName);
   }
-
+ public getUploadedLogoObject(res:Record<any, any>){
+    return{
+      logo_url : res.logo_url,
+      transparent_logo_url : res.transparent_logo_url,
+      smart_transparent_logo_url : res.smart_transparent_logo_url,
+      is_smart_transparent : false,
+      url : res.logo_url,
+      id : res.id
+    }
+ }
   public getLogoColors() {
       if (this.customLogos.length) {
       if (this.customLogos[0] && this.customLogos[0].url) {
