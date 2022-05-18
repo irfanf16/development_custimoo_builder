@@ -93,7 +93,7 @@
         <div class="align-self-start">
           <div class="fs-2 font-weight-bold ">Reference No:</div>
           <div class="mt-1">
-            <b-form-input   class="form-input" placeholder="Customer Reference No." type="text" name="customer_reference_no"
+            <b-form-input   class="form-input" placeholder="Order reference" type="text" name="customer_reference_no"
                             v-model="customer_reference_no" />
           </div>
         </div>

@@ -12,7 +12,7 @@ const getLogoSettingsObject = () => {
     product_id: null,
     product_style_id: null,
     rotation: 0,
-    width: 200,
+    width: 100,
     height: 0,
     name_of_placement: "chest",
     side: "front",
@@ -107,6 +107,7 @@ const setLogoSettings = (logo_index: number, logo: Record<any, any> | null = nul
   logo.height =  logo_settings.height;
   logo.x_axis =  logo_settings.x_axis;
   logo.y_axis =  logo_settings.y_axis;
+  logo.side = logo_settings.side;
   logo.rotation =  logo_settings.rotation;
   logo.haveControls =  !logo_settings.is_locked;
   logo.originalWidth =  logo_settings.width;
@@ -185,22 +186,25 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
 
  const fontsList = (product:any) :any=> {
   const productFonts = product.namefonts;
-   let fontOptions:any = [];
-  productFonts.forEach((fonts: any, key: number) => {
-    console.log(fonts);
-    let fontNameParam = fonts.file_url.split('/').reverse()
-    fontNameParam = fontNameParam[0].split('.')
-    const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-    const font = {
-      value: fontNameParam[0] as string,
-      text: fontName as string,
-      json_data: JSON.parse(fonts.json_data),
-      file_url: fonts.file_url
-    }
-    console.log(font);
-    fontOptions = fontOptions.concat([font])
-    return fontOptions
-  })
+  const fontOptions:any = [];
+
+   if (productFonts.length){
+     const item = JSON.parse(productFonts[0].json_data)
+     if(item) {
+       item.forEach((fonts: any, key: number) => {
+         let fontNameParam = fonts.path.split('/').reverse()
+         fontNameParam = fontNameParam[0].split('.')
+         const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+         const font = {
+           value: fontNameParam[0] as string,
+           text: fontName as string,
+           json_data: JSON.parse(fonts.json_data),
+           file_url: fonts.file_url
+         }
+         fontOptions.push(font)
+       })
+     }
+   }
    return fontOptions
 }
 
@@ -361,11 +365,20 @@ const pathInfo = (file_path: string, ) => {
 const getActiveProductData = async () => {
   const scene_ref = Store.getters.getCanvasImage.scene
   const getCanvasImage = Store.getters.getCanvasImage
+
+
   if (getCanvasImage) {
     const style_index = Store.getters.getCurrentStyleIndex;
     const selected_product = Store.getters.getSelectedProduct;
     const product_style = selected_product.productstyles[style_index];
-    //selected_design will always return array having single object
+    const lockerEditStatus = Store.getters.getEditStatus;
+    let product_name = selected_product.product_name
+    if(lockerEditStatus){
+      const lockerEditProductName = Store.getters.getEditProductName;
+       if(lockerEditProductName)
+        product_name = lockerEditProductName
+    }
+        //selected_design will always return array having single object
     const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
     const product_models = Store.getters.getProductModels;
     const selected_model_index = Store.getters.getSelectedModelIndex;
@@ -389,7 +402,7 @@ const getActiveProductData = async () => {
       ecommerce_post_id: selected_product.ecommerce_product_id,
       sync_id: selected_product.sync_id,
       product_type: selected_product.product_type,
-      product_name: selected_product.product_name,
+      product_name: product_name,
       pdf_file: null,
       production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
       // front_design:front_design,

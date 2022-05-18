@@ -135,7 +135,7 @@
                     <template v-for="(logo, inda) in room.logos">
                       <div :key="inda" class="assets-logo-block">
                         <span class="d-block p-2">
-                          <img :src="storageUrl+logo.logo_url " crossorigin="anonymous"/>
+                          <img :src="storageUrl+logo.logo_url+'?nocache=1'" />
                         </span>
                         <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
                       </div>

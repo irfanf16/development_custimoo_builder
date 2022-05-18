@@ -107,7 +107,7 @@
               </a>
             </template>
             <div class="collar-section p-4" v-if="hideTab.styleHide">
-              <h2 class="fw-bold mb-2 fz-18">Choose Product</h2>
+              <h2 v-if="productModels.length > 1" class="fw-bold mb-2 fz-18">Choose Product</h2>
               <CollarStyle :productModels="productModels"/>
             </div>
           </b-tab>
@@ -499,10 +499,12 @@ export default class CustomizationTabs extends Vue {
             setTimeout(() => {
               $(shadow_dom).find("#delete_after_load").remove()
             }, 100)
+          }else {
+            $('#santa').append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
+            setTimeout(() => {
+              $("#delete_after_load").remove()
+            }, 100)
           }
-          setTimeout(() => {
-            $("#delete_after_load").remove()
-          }, 100)
         })
       }
     }

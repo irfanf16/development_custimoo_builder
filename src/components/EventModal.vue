@@ -110,7 +110,7 @@
                       <label class="upload-box position-relative">
                         <template v-if="file_data">
                           <div class="uploaded-logo-holder">
-                            <img crossorigin="anonymous" v-if="showPlaceholder" :src="file_data" style="width: 100%; max-width: 150px"/>
+                            <img v-if="showPlaceholder" :src="file_data+'?nocache=1'" style="width: 100%; max-width: 150px"/>
                             <div v-else> <BIconFileEarmark/></div>
                           </div>
                           <span class="file_name">{{ file_name }}</span>

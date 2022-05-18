@@ -21,16 +21,6 @@
           <b-button v-if="!mobileScreen" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
           <LogoEditorModal @updateLogoFromLogoEditor="updateLogoFromLogoEditor" :customLogoIndex="this.customLogoIndex" ref="logoEditorModal" :logo_id="customLogos[customLogoIndex].id" />
         </div>
-<!--        <div>-->
-<!--          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">-->
-<!--            Remove background color-->
-<!--          </b-form-checkbox>-->
-<!--        </div>-->
-<!--        <div class="mt-2">-->
-<!--          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">-->
-<!--            Smart remove background from logo-->
-<!--          </b-form-checkbox>-->
-<!--        </div>-->
       </div>
     </div>
 
@@ -39,7 +29,7 @@
       <div class="upload-box position-relative" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
         <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-          <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url+'?not-from-cache-please'" width="100%"/>
+          <img :src="storageUrl+customLogos[customLogoIndex].url+'?nocache=1'" width="100%"/>
         </div>
         <div v-else>
           <div class="icon-holder">

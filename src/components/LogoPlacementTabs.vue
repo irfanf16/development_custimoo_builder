@@ -188,23 +188,25 @@ export default class LogoPlacementTabs extends Vue {
     return this.$store.getters.getinitialExtractedColors
   }
 
-  get defaultColors() : [Record<any, any>] {
+  get defaultColors (): [Record<any, any>] {
     return this.$store.getters.getDefaultColors
   }
 
-  get usingColorLogos() : [Record<any, any>] {
-    return this.$store.getters.getUsingColorLogos;
+  get usingColorLogos (): [Record<any, any>] {
+    return this.$store.getters.getUsingColorLogos
   }
- public changeTab(index:number){
-   this.$store.dispatch('setLogoTab', index)
- }
-  public async initFirstLogoTab(index: number){
-    if(this.$store.getters.getCustomLogos().length < 1){
-      if(this.numberOfLogos < this.allowedLogosLimit) {
+
+  public changeTab (index: number) {
+    this.$store.dispatch('setLogoTab', index)
+  }
+
+  public async initFirstLogoTab (index: number) {
+    if (this.$store.getters.getCustomLogos().length < 1) {
+      if (this.numberOfLogos < this.allowedLogosLimit) {
         let logoSetting: Record<any, any>
-        if(this.logosSetting[index]) {
+        if (this.logosSetting[index]) {
           logoSetting = this.logosSetting[index] as Record<any, any>
-        }else {
+        } else {
           logoSetting = {
             width: 200,
             x_axis: 150,
@@ -215,7 +217,7 @@ export default class LogoPlacementTabs extends Vue {
           }
         }
         let logo = {
-          id:null,
+          id: null,
           url: '',
           width: logoSetting.width,
           height: logoSetting.height,
