@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="customize_controls" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 0" >
-      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div>
@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 1" >
-      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div class="grid gap-1 text-left">
@@ -61,7 +61,7 @@
       </div>
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2" >
-      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
       <div class="mt-2"></div>
@@ -71,27 +71,41 @@
         :fontsColors="fontsColors" :firstColor="firstColor" :secondColor="secondColor" :fontOptions="fontOptions" />
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 3" >
-      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(2)" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
       <div class="mt-2"></div>
 
       <Collars :productModels="productModels"/>
     </div>
     <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-if="this.$store.getters.getActiveTab === 4">
-      <span class="close" @click="hideAll"><BIconX /></span>
+      <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(3)" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
       <div class="d-flex mt-2 flex-column h-100">
         <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
-<!--          <span>Team Players</span>-->
-          <span class="addPlayer" v-b-modal.modal-center-uploadroster><span class="fs-2 icon position-absolute"><BIconCloudUpload /></span> <span class="d-inline-block ml-1">Upload / Download Roster</span></span>
-          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Link</span></span>
+            <template v-if="isCustomerAuthenticated">
+              <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                <span v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                  Add to cart
+                </span></span>
+                <span v-else class="addPlayer" style="background: #a9a9a9; color: #fff"><span class="fs-2 icon position-absolute"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
+                  Please wait
+                </span></span>
+              </template>
+            </template>
+            <template v-else>
+              <span v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                Add to cart
+              </span></span>
+            </template>
+          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Roster Link</span></span>
         </div>
         <div class="players-table mt-2 hide-scroll h-100">
           <RosterTableMobile :productSizes="sizeOptions" @addPlayer="rosterDetailsInit" />
         </div>
       </div>
     </div>
+    <EditRosterAreaTab v-show="false" @open-add-to-locker="openAddToLocker" :productSizes="productSizes"/>
   </div>
 </template>
 
@@ -113,12 +127,14 @@ import readXlsxFile from "read-excel-file";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
+import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<CustomTabs>({
   components: {
     LogoUploader,
     TextCustomization,
+    EditRosterAreaTab,
     Collars,
     colorPicker,
     RosterTableMobile
@@ -131,12 +147,11 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     // UploadLogo
   },
   async mounted() {
-    // this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
     this.customTextInit()
-   // console.log('customTexts', this.selectedProduct)
+    this.switchTabs(0)
 
     this.productSizes = this.selectedProduct.sizes
     this.setProductSizes()
@@ -172,8 +187,55 @@ export default class CustomTabs extends Vue {
   public showLoader = false
   public designsIndex = 0;
 
+  get platform():string{
+    return localStorage.getItem('platform') as string
+  }
+
+  get login_code(): Record<any, any>{
+    return JSON.parse(localStorage.getItem('login_code') as string)
+  }
+
+  public openAddToLocker () {
+    this.$emit('open-add-to-locker')
+  }
+
+  private addToCart() {
+    (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
+  }
+
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
+
+  get canvasImage() {
+    return this.$store.getters.getCanvasImage
+  }
+
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
+  }
+
+  public async setActionBeforeLogin(type: string) {
+    this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$store.commit('SET_SELECTION_MODE',{
+      readonly:false,
+      collectionAddmoreMode:false,
+      eventProductMode:false,
+      eventCollectionMode:false
+    })
+    this.gotoLogin()
+  }
+  public gotoLogin(){
+    if (this.platform == 'self'){
+      this.$modal.show('loginModal')
+    }
+    else{
+      if(this.login_code.type == 'url') {
+        window.location.href = this.login_code.action
+      } else {
+        eval(this.login_code.action)
+      }
+    }
   }
 
   public rosterDetailsInit() {
@@ -394,9 +456,13 @@ export default class CustomTabs extends Vue {
   ]
 
   private hideAll(){
-    this.$store.dispatch('setActiveTab', -1);
-    $(".sideNav li a").removeClass('active')
+    this.$emit('switchTabs', -1, false)
   }
+
+  private switchTabs(ind:number){
+    this.$emit('switchTabs', ind, false)
+  }
+
   private showOther(){
     this.showOtherColors = true
     this.showOtherTab = true

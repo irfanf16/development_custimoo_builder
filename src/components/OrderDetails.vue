@@ -1,7 +1,6 @@
 <template>
   <div>
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
-    <DesignPdfView :pdf_front_image="pdf_front_image" :pdf_back_image="pdf_back_image"/>
 
     <div class="order-details-area">
       <div class="qty-area">

@@ -16,21 +16,11 @@
         <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="B">Remove Smart Logo Background</b-form-radio>
       </b-form-group>-->
 
-      <div class="w-100 text-left pl-2 position-relative logo-edit-btn-updated">
+      <div class="w-100 text-left position-relative logo-edit-btn-updated">
         <div class="d-sm-block d-lg-block continue-btn-holder pt-1" style="padding: 0">
-          <b-button @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
+          <b-button v-if="!mobileScreen" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
           <LogoEditorModal @updateLogoFromLogoEditor="updateLogoFromLogoEditor" :customLogoIndex="this.customLogoIndex" ref="logoEditorModal" :logo_id="customLogos[customLogoIndex].id" />
         </div>
-<!--        <div>-->
-<!--          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground('transparent',$event)">-->
-<!--            Remove background color-->
-<!--          </b-form-checkbox>-->
-<!--        </div>-->
-<!--        <div class="mt-2">-->
-<!--          <b-form-checkbox  v-model="customLogos[customLogoIndex].is_smart_transparent" @change="toggleLogoBackground('smart_transparent',$event)">-->
-<!--            Smart remove background from logo-->
-<!--          </b-form-checkbox>-->
-<!--        </div>-->
       </div>
     </div>
 
@@ -39,7 +29,7 @@
       <div class="upload-box position-relative" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
         <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-          <img crossorigin="anonymous" :src="storageUrl+customLogos[customLogoIndex].url+'?not-from-cache-please'" width="100%"/>
+          <img :src="storageUrl+customLogos[customLogoIndex].url+'?nocache=1'" width="100%"/>
         </div>
         <div v-else>
           <div class="icon-holder">
@@ -66,6 +56,7 @@
         <template v-if="customLogoIndex === 0">
           <h3>{{ customLogos[0] && customLogos[0].url? 'Replace Team Logo' : 'Upload Team Logo' }}</h3>
         </template>
+
         <template v-else>
           <h3>{{ customLogos[customLogoIndex] && customLogos[customLogoIndex].url? 'Replace Logo' : 'Upload Logo' }}</h3>
         </template>
@@ -73,6 +64,9 @@
         <p>Need High Res Image</p>
       </div>
     </div>
+    <b-button v-if="mobileScreen" style="position:absolute; left: 0; top: -38px; width: auto" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">
+      <b-icon-pencil fl /> Edit Logo
+    </b-button>
 
 
     <modal :width="500" :resizable="true" :scrollable="true" height="auto" :reset="true"
@@ -137,7 +131,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   public ref = this.$refs as Record<any, any>
   public imageColors: any[] = []
   public showLoader = false;
-
+  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public fileObject: Record<any, any> = {}
   public uploadType = 'click'
 
@@ -661,10 +655,12 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   background: #219F84 !important;
   color: #fff !important;
   font-size: 14px !important;
-  padding: 10px 20px !important;
+  padding: 8px 15px !important;
   display: flex;
+  gap: 7px;
   align-items: center;
   justify-content: center;
+
   @media only screen and (max-width: 767px){
     width: 100%;
   }
