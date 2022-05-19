@@ -36,7 +36,6 @@
       </div>
 
       <b-collapse :id="'accordion-' + (customTextIndex + 1)" accordion="my-accordion" role="tabpanel">
-        <h4 class="mt-3 mb-2 fz-16">Font Type</h4>
         <div class="font-type-area">
           <!-- <div class="type-block">
             <b-form-select :value="customTexts[customTextIndex].fontFamily"
