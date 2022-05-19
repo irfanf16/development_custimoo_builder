@@ -57,8 +57,8 @@
           </div> -->
 
           <div class="fade-right w-100 py-2">
-            <div class="overflow-auto d-flex align-items-center font-slider-scrollbar pointer pb-2 gap-2 fontList">
-              <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontSize: '20px', fontFamily: item.value }"
+            <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList ">
+              <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontSize: '20px', fontFamily: item.value, color: customTexts[customTextIndex].fontFamily == item.value ? '#000000' : '#808895'}"
                 @click="fontOptionChanged(customTextIndex, item.value)" style="white-space: nowrap"
                 :class="{ 'pr-3': i + 1 == fontOptions.length }" role="button">
                 {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : item.value }}
@@ -109,7 +109,7 @@
         </div>
         <div class="outline-slider-area d-flex justify-content-between pt-4">
           <template v-if="customTexts[customTextIndex].outlineEnabled">
-            <div>
+            <div class="mr-sm-2 mb-sm-0">
               <label for="range-2 fz-16">Outline Width</label>
               <b-form-input class="mt-2" id="range-2" :value="customTexts[customTextIndex].outLineWidth"
                 @change="outLineWidthValueChanged($event)" type="range" min="0" max="10" step="1"></b-form-input>
