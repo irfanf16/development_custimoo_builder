@@ -57,8 +57,8 @@
           </div> -->
 
           <div class="fade-right w-100 py-2">
-            <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList">
-              <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontSize: '20px', fontFamily: item.value }"
+            <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList ">
+              <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontSize: '20px', fontFamily: item.value, color: customTexts[customTextIndex].fontFamily == item.value ? '#000000' : '#808895'}"
                 @click="fontOptionChanged(customTextIndex, item.value)" style="white-space: nowrap"
                 :class="{ 'pr-3': i + 1 == fontOptions.length }" role="button">
                 {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : item.value }}
