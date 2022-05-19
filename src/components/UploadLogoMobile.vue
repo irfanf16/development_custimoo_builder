@@ -481,8 +481,13 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     .uploaded-logo-holder{
       height: 100%;
       max-width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
       img{
-        display: block;
+        display: inline-flex;
+        width: auto;
         height: auto;
         margin: 0 auto;
         max-width: 100%;
@@ -665,7 +670,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     height: 100%;
     width: 100%;
     background: rgba(255, 255, 255, 0.9);
-    padding: 20px;
+    padding: 10px;
   }
 
   &.global {
@@ -678,6 +683,11 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     height: 100%;
     width: 100%;
     background: rgba(255, 255, 255, 1);
+  }
+
+  img{
+    max-width: 35px !important;
+
   }
 }
 </style>

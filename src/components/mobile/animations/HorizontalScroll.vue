@@ -1,5 +1,5 @@
 <template>
-  <div class="animation-holder" v-if="!animPlayed">
+  <div class="animation-holder" v-if="!animPlayed" @click="hideAnim">
     <div>
       <span class="icon arrow-left">
         <b-icon-arrow-left />
@@ -19,11 +19,11 @@ import {Component, Vue} from 'vue-property-decorator'
 
 @Component<HorizontalScroll>({
   mounted() {
-    this.animPlayed = localStorage.getItem('animPlayed')
+    this.animPlayed = Boolean(localStorage.getItem('animPlayed'))
     if (!this.animPlayed){
       setTimeout(()=>{
-        localStorage.setItem('animPlayed', true)
-        this.animPlayed = localStorage.getItem('animPlayed')
+        localStorage.setItem('animPlayed', 'true')
+        this.animPlayed = Boolean(localStorage.getItem('animPlayed'))
       }, 3000)
     }
   }
@@ -31,6 +31,11 @@ import {Component, Vue} from 'vue-property-decorator'
 
 export default class HorizontalScroll extends Vue {
   private animPlayed = false
+
+  private hideAnim = () => {
+    this.animPlayed = true
+    console.log('this', this.animPlayed)
+  }
 }
 </script>
 
