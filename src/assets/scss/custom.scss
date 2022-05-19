@@ -761,6 +761,17 @@ button{
                 .form-control{text-align: center;}
             }
         }
+        .font-slider-scrollbar{
+            &::-webkit-scrollbar{
+                height: 7px;
+                width: 7px;
+                background: #EFF2F4;
+            }
+            &::-webkit-scrollbar-thumb:horizontal{
+                background: #219f84;
+                border-radius: 10px;
+            }
+        }
         .custom-select,
         .form-control{
             border-color: #EFF2F4;
