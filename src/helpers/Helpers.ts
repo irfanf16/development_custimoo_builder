@@ -13,7 +13,7 @@ const getLogoSettingsObject = () => {
     product_id: null,
     product_style_id: null,
     rotation: 0,
-    width: 200,
+    width: 100,
     height: 0,
     name_of_placement: "chest",
     side: "front",
@@ -108,6 +108,7 @@ const setLogoSettings = (logo_index: number, logo: Record<any, any> | null = nul
   logo.height =  logo_settings.height;
   logo.x_axis =  logo_settings.x_axis;
   logo.y_axis =  logo_settings.y_axis;
+  logo.side = logo_settings.side;
   logo.rotation =  logo_settings.rotation;
   logo.haveControls =  !logo_settings.is_locked;
   logo.originalWidth =  logo_settings.width;
@@ -186,18 +187,23 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
 
  const fontsList = (product:any) :any=> {
   const productFonts = product.namefonts;
-   let fontOptions:any = [];
-  productFonts.forEach((fonts: any, key: number) => {
-    let fontNameParam = fonts.file_url.split('/').reverse()
-    fontNameParam = fontNameParam[0].split('.')
-    const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-    const font = {
-      value: fontNameParam[0] as string,
-      text: fontName as string
-    }
-    fontOptions = fontOptions.concat([font])
-    return fontOptions
-  })
+  const fontOptions:any = [];
+
+   if (productFonts.length){
+     const item = JSON.parse(productFonts[0].json_data)
+     if(item) {
+       item.forEach((fonts: any, key: number) => {
+         let fontNameParam = fonts.path.split('/').reverse()
+         fontNameParam = fontNameParam[0].split('.')
+         const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+         const font = {
+           value: fontNameParam[0] as string,
+           text: fontName as string
+         }
+         fontOptions.push(font)
+       })
+     }
+   }
    return fontOptions
 }
 
@@ -358,11 +364,20 @@ const pathInfo = (file_path: string, ) => {
 const getActiveProductData = async () => {
   const scene_ref = Store.getters.getCanvasImage.scene
   const getCanvasImage = Store.getters.getCanvasImage
+
+
   if (getCanvasImage) {
     const style_index = Store.getters.getCurrentStyleIndex;
     const selected_product = Store.getters.getSelectedProduct;
     const product_style = selected_product.productstyles[style_index];
-    //selected_design will always return array having single object
+    const lockerEditStatus = Store.getters.getEditStatus;
+    let product_name = selected_product.product_name
+    if(lockerEditStatus){
+      const lockerEditProductName = Store.getters.getEditProductName;
+       if(lockerEditProductName)
+        product_name = lockerEditProductName
+    }
+        //selected_design will always return array having single object
     const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
     const product_models = Store.getters.getProductModels;
     const selected_model_index = Store.getters.getSelectedModelIndex;
@@ -386,7 +401,7 @@ const getActiveProductData = async () => {
       ecommerce_post_id: selected_product.ecommerce_product_id,
       sync_id: selected_product.sync_id,
       product_type: selected_product.product_type,
-      product_name: selected_product.product_name,
+      product_name: product_name,
       pdf_file: null,
       production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
       // front_design:front_design,
@@ -395,7 +410,6 @@ const getActiveProductData = async () => {
       svg_groups: Store.getters.getSvgGroups,
       ecommerce_cart_id:null
     }
-    //todo Yasir needs to look at it why customTextObjects is undefined in case of no logos. Instated it should be empty array instead of undefined
     if(scene_ref.customTextObjects) {
       for (const custom_text_object of scene_ref.customTextObjects) {
         if (custom_text_object && Object.keys(custom_text_object).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
@@ -403,7 +417,6 @@ const getActiveProductData = async () => {
         }
       }
     }
-    //todo Yasir needs to look at it why customLogoObjects is undefined in case of no logos. Instated it should be empty array instead of undefined
     if(scene_ref.customLogoObjects) {
       for (const custom_logo_svg of scene_ref.customLogoObjects) {
         if(custom_logo_svg && Object.keys(custom_logo_svg).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok

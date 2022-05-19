@@ -1,5 +1,5 @@
 <template>
-  <div id="app" v-cloak>
+  <div id="santa" v-cloak>
     <Header />
     <Navbar />
     <router-view/>
@@ -111,7 +111,7 @@ export default class App extends Mixins(LockerProducts,ErrorMessages) {
 }
 @import '@/assets/scss/custom';
 
-#app {
+#santa {
   font-family: 'Ubuntu', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

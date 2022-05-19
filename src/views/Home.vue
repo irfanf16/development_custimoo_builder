@@ -7,7 +7,7 @@
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
-            <CustomTabs @switchTabs="switchTabs" ref="custom-mobile-tabs" v-else />
+            <CustomTabs @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" v-else />
           </b-col>
 
         <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column position-relative">
@@ -115,10 +115,34 @@
                 </div>
 
                 <div class="mobile-nav">
+                  <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="switchTabs(activeTab-1, false)" v-if="activeTab > 0" style="line-height: normal">
+                    <b-icon-arrow-left-short />
+                  </button>
+                  <button class="btn text-white fs-4 border-0 mr-3 p-0 btn-secondary btn-sm" @click="switchTabs(activeTab+1, false)" v-if="activeTab < 4" style="line-height: normal">
+                    <b-icon-arrow-right-short />
+                  </button>
+                  <template v-else>
+                    <template v-if="isCustomerAuthenticated">
+                      <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                        <button v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
+                          <b-icon-cart />
+                        </button>
+                        <button v-else :disabled="true" class="btn text-white fs-3 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4px 5px">
+                          <i class="fa fa-spinner fa-spin"></i>
+                        </button>
+                      </template>
+                    </template>
+                    <template v-else>
+                      <button v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
+                        <b-icon-cart />
+                      </button>
+                    </template>
+                  </template>
+
                   <strong class="user-name mr-1">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
 
                   <button @click="toggleDD" class="custom-link reset-btn" ref="toggler"><BIconThreeDotsVertical /></button>
-                  <b-dropdown ref="dd-menu" :right="true" :boundary="ref['toggler']" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
+                  <b-dropdown ref="dd-menu" :right="true" :offset="30" :boundary="ref['toggler']" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
                     <b-dropdown-item><button @click="showDesign">Change Design / Item</button></b-dropdown-item>
                     <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'lockerRoom'" @click="getLockerRoomProducts(null)">Open locker room</button></b-dropdown-item>
                     <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'">Open locker room</button></b-dropdown-item>
@@ -167,7 +191,7 @@
                         {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
                       </b-button>
                       <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                        <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
                       </b-button>
                     </template>
                   </template>
@@ -230,15 +254,15 @@
         </b-col>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
           <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products"/>
-          <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 0">
+          <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
             <span class="close" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
             <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
-            <div v-if="mobileScreen">
+            <div>
               <LogoUploader @switchTabs="switchTabs" @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
             </div>
           </div>
-          <div v-else class="open-logo-uploader customize_controls">
+          <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">
             <span class="fs-3 font-weight-bold">Logo Uploader</span>
             <span @click="switchTabs(0, true)" class="maximizer close"><b-icon-plus flip-h /></span>
           </div>
@@ -383,7 +407,9 @@ Vue.filter('formatDate', function(value:string) {
 
         }
 
-
+    }
+    if(this.$route.query.tabIdx){
+      this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
     }
 
   }
@@ -634,9 +660,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
-  }
-  get selectedDesignId():number{
-  return  this.$store.getters.getSelectedDesignId;
   }
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
@@ -1083,9 +1106,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
     if(!url_obj.searchParams.has("personalized")) {
       url_obj.searchParams.append('personalized', this.$store.getters.getPersonalized)
-    }
-    if(self.search_products){
-      url += `&title=${self.search_products}`;
     }
     if(self.search_products && !url_obj.searchParams.has("title")) {
       url_obj.searchParams.append('title', self.search_products)
@@ -1743,5 +1763,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 }
 .open-logo-uploader{
   top: auto !important;
+}
+.customize_controls{
+  padding-bottom: 0 !important;
 }
 </style>

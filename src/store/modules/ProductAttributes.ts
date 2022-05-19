@@ -63,7 +63,8 @@ const ProductAttributes:Module<any, any> = {
       editStyleId: 0,
       editDesignId: 0,
       mainProductId: 0,
-      editStatus: false
+      editStatus: false,
+      productName:null
     },
     activeTab : 0,
     showShuffle : true,
@@ -136,6 +137,9 @@ const ProductAttributes:Module<any, any> = {
       if (payload.product_id){
         state.editProduct.mainProductId = payload.product_id
       }
+      if (payload.productName){
+        state.editProduct.productName = payload.productName
+      }
     },
 
     CHANGE_EDIT_LOCKER_PRODUCT(state:Record<any, any>, payload){
@@ -185,47 +189,10 @@ const ProductAttributes:Module<any, any> = {
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
     },
-    SET_SELECTED_PRODUCT_AND_STYLE(state: Record<any, any>) {
-        if(typeof state.products[state.selectedIndex] === 'undefined'){
-          state.selectedIndex = 0;
-          state.styleIndex=0;
-          state.selectedDesignId =0;
-        }else{
-          if(typeof state.products[state.selectedIndex].productstyles[state.styleIndex] === 'undefined'){
-            state.products[state.selectedIndex].productstyles[state.styleIndex] = 0;
-            state.selectedDesignId =0;
-          }
-        }
-    },
     SET_SELECTED_PRODUCT_CUSTOM_LOGO(state: Record<any, any>,payload:any) {
       if(state.products[state.selectedIndex]) {
         state.products[state.selectedIndex].customLogos = payload;
       }
-    },
-    SET_SELECTED_PRODUCT_DESIGN(state: Record<any, any>) {
-      if (state.selectedDesignId > 0) {
-      const style_index = state.styleIndex;
-      const product_index = state.selectedIndex
-      if (typeof state.products[product_index].productstyles[style_index] !== 'undefined') {
-        let checkDesignFound = false;
-        let defaultDesignShow = 0;
-        state.products[product_index].productstyles[style_index].productdesigns.map((design: Record<any, any>, index:number) => {
-          if(design.design_show){
-            defaultDesignShow = index
-          }
-          if (design.id == state.selectedDesignId) {
-            checkDesignFound = true;
-            design.design_show = 1
-          } else {
-            design.design_show = 0
-          }
-        });
-        if(!checkDesignFound){
-          Vue.set(state.products[product_index].productstyles[style_index].productdesigns[defaultDesignShow], 'design_show', 1)
-          state.selectedDesignId = state.products[product_index].productstyles[style_index].productdesigns[defaultDesignShow].id
-        }
-      }
-    }
     },
     categories(state: Record<any, any>, categories: Record<any, any>) {
       if(categories){
@@ -499,15 +466,6 @@ const ProductAttributes:Module<any, any> = {
     productionSVGs(state: Record<any, any>, productionSvg: Record<any, any>) {
       if(productionSvg){
         state.productionSVGs = productionSvg
-      } else {
-        const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
-        const selected_product = state.products[state.selectedIndex];
-        const product_sizes = selected_product.sizes;
-        if(product_sizes.length > 0) {
-          roster_detail_default_obj.size = product_sizes[0].name;
-          roster_detail_default_obj.code = product_sizes[0].code;
-        }
-        Object.assign(state.rosterDetails[0], roster_detail_default_obj);
       }
     },
     SET_CURRENT_COLOR_APPLIED (state: Record<any, any>, colorApplied: Record<any, any>) {
@@ -688,6 +646,15 @@ const ProductAttributes:Module<any, any> = {
       }
 
       state.rosterDetails = []
+
+      const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
+      const selected_product = state.products[state.selectedIndex];
+      const product_sizes = selected_product.sizes;
+      if(product_sizes.length > 0) {
+        roster_detail_default_obj.size = product_sizes[0].name;
+        roster_detail_default_obj.code = product_sizes[0].code;
+      }
+      state.rosterDetails.push(roster_detail_default_obj)
 
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
@@ -952,6 +919,9 @@ const ProductAttributes:Module<any, any> = {
     getEditDesignId: state => {
       return state.editProduct.editDesignId
     },
+    getEditProductName: state => {
+      return state.editProduct.productName
+    },
     getHideColorSection: state => {
       return state.hideColorSection
     },
@@ -1181,9 +1151,6 @@ const ProductAttributes:Module<any, any> = {
     },
     async setSelectedProductCustomLogo({commit},payload){
       await commit('SET_SELECTED_PRODUCT_CUSTOM_LOGO',payload);
-    },
-    async setSelectedProductDesign({commit}){
-      await commit('SET_SELECTED_PRODUCT_DESIGN');
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
       let done = false;

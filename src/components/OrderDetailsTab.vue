@@ -1,6 +1,5 @@
 <template>
   <div>
-    <DesignPdfView :pdf_front_image="pdf_front_image" :pdf_back_image="pdf_back_image"/>
     <LoginForm ref="loginModal"   />
     <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
       <b-input-group class="w-100">
@@ -43,7 +42,7 @@
                 {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
               </button>
               <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
-                <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+                <img width="20" height="20" src="../../src/assets/images/loading.gif" />
               </button>
             </template>
           </template>
@@ -284,10 +283,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
           ecom_form_data.append('update_item', ecommerce_update_id);
         }else{
           ecom_form_data.append('action', 'custimoo_add_to_cart');
+          ecom_form_data.append('product_name', cart_product.product_name);
         }
 
         ecom_form_data.append('product_id', cart_product.ecommerce_post_id);
-        ecom_form_data.append('product_name', cart_product.product_name);
         ecom_form_data.append('quantity', this.total);
         ecom_form_data.append('product_front_image', cart_product.front_image);
 

@@ -38,13 +38,12 @@
           </div>
         </div>
         <div class="overflow-hidden fade-right">
-<!--          <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />-->
           <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
             <li v-for="(colorName, index) in productColors" :key="index">
               <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
             </li>
 
-            <li>
+            <li  v-if="selectedProduct.is_custom_color_allowed">
               <a class="faded_text text-capitalize" @click="showOther">Other</a>
             </li>
           </ul>
@@ -55,7 +54,7 @@
         <div class="color_circle" :key="index" v-for="(color, index) in (typeof productColors[activeCollection].color_text === 'string' ? JSON.parse(productColors[activeCollection].color_text) : productColors[activeCollection].color_text)" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
       </div>
 
-      <div v-if="showOtherColors" class="mobile-other">
+      <div v-if="showOtherColors && selectedProduct.is_custom_color_allowed" class="mobile-other">
         <span class="close" @click="hideOther"><BIconX /></span>
         <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
       </div>
@@ -83,15 +82,29 @@
 
       <div class="d-flex mt-2 flex-column h-100">
         <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
-<!--          <span>Team Players</span>-->
-          <span class="addPlayer" v-b-modal.modal-center-uploadroster><span class="fs-2 icon position-absolute"><BIconCloudUpload /></span> <span class="d-inline-block ml-1">Upload / Download Roster</span></span>
-          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Link</span></span>
+            <template v-if="isCustomerAuthenticated">
+              <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                <span v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                  Add to cart
+                </span></span>
+                <span v-else class="addPlayer" style="background: #a9a9a9; color: #fff"><span class="fs-2 icon position-absolute"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
+                  Please wait
+                </span></span>
+              </template>
+            </template>
+            <template v-else>
+              <span v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                Add to cart
+              </span></span>
+            </template>
+          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Roster Link</span></span>
         </div>
         <div class="players-table mt-2 hide-scroll h-100">
           <RosterTableMobile :productSizes="sizeOptions" @addPlayer="rosterDetailsInit" />
         </div>
       </div>
     </div>
+    <EditRosterAreaTab v-show="false" @open-add-to-locker="openAddToLocker" :productSizes="productSizes"/>
   </div>
 </template>
 
@@ -108,19 +121,19 @@ import {default as $} from 'jquery';
 import TextCustomization from "@/components/mobile/TextCustomization.vue";
 import Collars from "@/components/mobile/Collars.vue";
 import {getClosestColor} from "@/pantoneColor";
-import colorPicker from '@caohenghu/vue-colorpicker'
 import readXlsxFile from "read-excel-file";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
+import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component<CustomTabs>({
   components: {
     LogoUploader,
     TextCustomization,
+    EditRosterAreaTab,
     Collars,
-    colorPicker,
     RosterTableMobile
     // ColorAccordion,
     // LogoPlacementTabs,
@@ -158,7 +171,7 @@ export default class CustomTabs extends Vue {
   public color = '#59c7f9'
   public showOtherColors = false
   public pantoneColorVal= '13-4411'
-  // private tabTop = window.screen.availHeight - 190;
+  // privat tabTop = window.screen.availHeight - 190;
   public id = 0
   public custom_arr: Record<any, any>[] = [];
   public productSizes : any[] = []
@@ -171,8 +184,55 @@ export default class CustomTabs extends Vue {
   public showLoader = false
   public designsIndex = 0;
 
+  get platform():string{
+    return localStorage.getItem('platform') as string
+  }
+
+  get login_code(): Record<any, any>{
+    return JSON.parse(localStorage.getItem('login_code') as string)
+  }
+
+  public openAddToLocker () {
+    this.$emit('open-add-to-locker')
+  }
+
+  private addToCart() {
+    (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
+  }
+
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
+
+  get canvasImage() {
+    return this.$store.getters.getCanvasImage
+  }
+
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
+  }
+
+  public async setActionBeforeLogin(type: string) {
+    this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.$store.commit('SET_SELECTION_MODE',{
+      readonly:false,
+      collectionAddmoreMode:false,
+      eventProductMode:false,
+      eventCollectionMode:false
+    })
+    this.gotoLogin()
+  }
+  public gotoLogin(){
+    if (this.platform == 'self'){
+      this.$modal.show('loginModal')
+    }
+    else{
+      if(this.login_code.type == 'url') {
+        window.location.href = this.login_code.action
+      } else {
+        eval(this.login_code.action)
+      }
+    }
   }
 
   public rosterDetailsInit() {
@@ -627,21 +687,49 @@ export default class CustomTabs extends Vue {
 
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
-    productFonts.forEach((fonts: any, key: number) => {
-      let fontNameParam = fonts.file_url.split('/').reverse()
-      fontNameParam = fontNameParam[0].split('.')
-      let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-      let font = {
-        value: fontNameParam[0] as string,
-        text: fontName as string
+    let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
+    if (productFonts.length){
+      let item = JSON.parse(productFonts[0].json_data)
+      if(item) {
+        this.fontOptions = []
+        item.forEach((fonts: any, key: number) => {
+          let fontNameParam = fonts.path.split('/').reverse()
+          fontNameParam = fontNameParam[0].split('.')
+          let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+          let font = {
+            value: fontNameParam[0] as string,
+            text: fontName as string
+          }
+          let hasMatch = false;
+          for (let index = 0; index < this.fontOptions.length; ++index) {
+            let obj = this.fontOptions[index];
+            if(obj.text == font.text){
+              hasMatch = true;
+              break;
+            }
+          }
+          if (!hasMatch){
+            this.fontOptions.push(font)
+          }
+          let fontUrl = this.storageUrl + fonts.path
+          const headElement = document.querySelector('head') as Record<any, any>
+          let style_tag = document.createElement('style')
+          style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
+          headElement.appendChild(style_tag)
+          if (shadow_dom) {
+            $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
+            setTimeout(() => {
+              $(shadow_dom).find("#delete_after_load").remove()
+            }, 100)
+          }else {
+            $('#santa').append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
+            setTimeout(() => {
+              $("#delete_after_load").remove()
+            }, 100)
+          }
+        })
       }
-      this.fontOptions = this.fontOptions.concat([font])
-      let fontUrl = this.storageUrl + fonts.file_url
-      const headElement = document.querySelector('head') as Record<any, any>
-      let style_tag = document.createElement('style')
-      style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
-      headElement.appendChild(style_tag)
-    })
+    }
   }
 
   public addTab(index: number) {
