@@ -264,8 +264,14 @@ const ProductAttributes:Module<any, any> = {
     UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT(state:Record<any, any>, payload:Record<any, any>){
       if (payload.logo){
         const customLogoAttribute = payload.logo
-        if (state.customLogos[payload.id][customLogoAttribute.index])
+        if (state.customLogos[payload.id][customLogoAttribute.index]){
           Vue.set(state.customLogos[payload.id][customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
+        }
+        state.products.forEach((item:Record<any, any>) => {
+          if (item.logos_follows_product && item.id != state.selectedPrdId){
+            state.customLogos[item.id][customLogoAttribute.index][customLogoAttribute.attribute] = customLogoAttribute.value
+          }
+        })
       }
     },
     CUSTOM_LOGO_WITHOUT_TRIGGER(state: Record<any, any>, customLogoAttribute: Record<any, any>) {

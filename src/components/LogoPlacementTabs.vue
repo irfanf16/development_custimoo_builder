@@ -290,7 +290,6 @@ export default class LogoPlacementTabs extends Vue {
     }
     this.tabIndex = this.tabIndex - 1;
     let logo = setLogoSettings(index);
-    console.log("log", logo)
     logo.logoIndex = index;
     this.$store.commit('customLogos', logo)
     setTimeout(() => {

@@ -129,6 +129,7 @@ const getProductLogoSetting = (prd_id:number, index:number) => {
     logo.originalWidth =  logo_settings.width;
     logo.originalHeight =  logo_settings.height;
     logo.logoIndex =  index;
+    logo.side = logo_settings.side
   }else{
     logo = getLogoObject(index)
   }
@@ -237,7 +238,6 @@ const getReminderOptions = () => {
 }
 
 const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id = 0):Promise<void> => {
-  console.log("logo", logo)
   const customTabIndex = logoIndex
   const custom_logos = Store.getters.getCustomLogos()
   let logo_url = '';
@@ -286,7 +286,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
     },
 
   ];
-  if (prd_id){
+  if ('base64_logo' in logo){
     payload.push({
       index: customTabIndex,
       attribute: 'base64_logo',
@@ -309,7 +309,6 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
       }
       Store.commit('UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT', new_data)
     }else{
-      console.log("from else")
       await Store.dispatch('updateCustomLogoAttribute', data)
     }
   })
