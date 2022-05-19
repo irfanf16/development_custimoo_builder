@@ -985,22 +985,22 @@ button:focus, button:active {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  gap: 15px;
 }
 .customization-tabs .collar-section .collar-designs .btn {
-  width: 70px;
-  height: 60px;
+  width: 90px;
+  height: 80px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  border: 1px solid #707070;
+  border: 1px solid #ccc;
   background: none;
 }
 @media only screen and (min-width: 992px) {
   .customization-tabs .collar-section .collar-designs .btn {
-    width: 90px;
-    height: 80px;
+    width: 150px;
+    height: 140px;
   }
 }
 .customization-tabs .collar-section .collar-designs .btn.active, .customization-tabs .collar-section .collar-designs .btn:hover {
@@ -1008,7 +1008,8 @@ button:focus, button:active {
 }
 .customization-tabs .collar-section .collar-designs .btn img {
   display: block;
-  max-width: 50px;
+  max-width: 100%;
+  max-height: 100%;
   margin: 0 auto;
   height: auto;
 }
@@ -2231,6 +2232,9 @@ button:focus, button:active {
   }
 }
 
+.slither-slider-slide {
+  grid-template-columns: repeat(4, minmax(0px, 1fr)) !important;
+}
 .slither-slider-slide .image-holder .canvas-container {
   height: 100px !important;
   width: 100px !important;
@@ -2632,7 +2636,7 @@ button:focus, button:active {
 }
 
 .tabs-logo-container .logo-placement-holder {
-  padding-bottom: 45px;
+  padding-bottom: 0px;
   position: relative;
 }
 .tabs-logo-container .upload-logo-opener .logo-option-area {
@@ -2646,6 +2650,11 @@ button:focus, button:active {
 }
 .tabs-logo-container .logo-placement-holder .upload-logo-opener .logo-option-area {
   display: block;
+}
+@media (min-width: 786px) {
+  .tabs-logo-container .logo-placement-area {
+    padding-bottom: 35px;
+  }
 }
 .tabs-logo-container .logo-placement-area.extracted-color-area .logo-placement-holder {
   padding-bottom: 0;
@@ -3449,7 +3458,7 @@ button:focus, button:active {
 .sideNav {
   position: absolute;
   left: 0;
-  top: 0;
+  top: 0 !important;
   bottom: 100px;
   display: flex;
   align-items: center;
@@ -3523,6 +3532,9 @@ button:focus, button:active {
   justify-content: center;
   border-radius: 999px;
   font-size: 1.5em;
+}
+.customize_controls .close.maximizer, .upload-logo-opener .close.maximizer {
+  background: #219F84;
 }
 
 .mobile_controls input, .mobile_controls select {
@@ -3774,9 +3786,9 @@ button:focus, button:active {
   bottom: 0;
   height: 100%;
   width: 30px;
-  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
-  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, white 100%);
+  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
+  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr="#00ffffff", endColorstr="#ffffff",GradientType=1 );
 }
 
@@ -3802,15 +3814,15 @@ button:focus, button:active {
   bottom: 0;
   height: 100%;
   width: 30px;
-  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
-  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, white 100%);
+  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
+  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr="#00ffffff", endColorstr="#ffffff",GradientType=1 );
 }
 .fade-right.fade-gray:after {
-  background: -moz-linear-gradient(left, rgba(239, 239, 239, 0) 0%, #efefef 100%);
-  background: -webkit-linear-gradient(left, rgba(239, 239, 239, 0) 0%, #efefef 100%);
-  background: linear-gradient(to right, rgba(239, 239, 239, 0) 0%, #efefef 100%);
+  background: -moz-linear-gradient(left, rgba(239, 239, 239, 0) 0%, rgb(239, 239, 239) 100%);
+  background: -webkit-linear-gradient(left, rgba(239, 239, 239, 0) 0%, rgb(239, 239, 239) 100%);
+  background: linear-gradient(to right, rgba(239, 239, 239, 0) 0%, rgb(239, 239, 239) 100%);
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr="#00efefef", endColorstr="#ffffff",GradientType=1 );
 }
 
@@ -3861,9 +3873,9 @@ button:focus, button:active {
   bottom: 0;
   height: 100%;
   width: 30px;
-  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
-  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, white 100%);
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, white 100%);
+  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
+  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 100%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#00ffffff", endColorstr="#ffffff", GradientType=1);
 }
 .customize_controls .tabs > div:first-child li:last-child {
@@ -3893,7 +3905,7 @@ button:focus, button:active {
   z-index: 99999;
   height: 100%;
   width: 100%;
-  background: white;
+  background: rgb(255, 255, 255);
 }
 .customize_controls .hover_tooltip {
   position: fixed;
@@ -4702,6 +4714,10 @@ button:focus, button:active {
   cursor: pointer;
   top: -8px;
   right: -8px;
+}
+
+.tabs.mobile .nav-item {
+  position: relative;
 }
 
 /*# sourceMappingURL=custom.css.map */

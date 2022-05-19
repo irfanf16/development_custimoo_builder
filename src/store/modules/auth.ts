@@ -6,7 +6,8 @@ const Auth:Module<any, any> = {
   state:{
     jwtToken:'',
     customer:'',
-    customer_permissions:[]
+    customer_permissions:[],
+    platform: null
   },
   getters:{
     isCustomerAuthenticated: (state: any) => !!state.jwtToken,
@@ -15,7 +16,8 @@ const Auth:Module<any, any> = {
     },
     getCustomerPermissions:state => {
       return state.customer_permissions
-    }
+    },
+    getPlatform: (state: any) => state.platform
   },
   mutations:{
     SET_CUSTOMER(state:Record<any, any>, payload){
@@ -35,6 +37,9 @@ const Auth:Module<any, any> = {
     },
     SET_CUSTOMER_PERMISSIONS(state:Record<any, any>, payload){
       state.customer_permissions = payload
+    },
+    SET_PLATFORM(state:Record<any, any>, payload){
+      state.platform = payload
     }
   },
   actions:{
@@ -74,6 +79,9 @@ const Auth:Module<any, any> = {
       catch (e:any) {
         commit('SET_CUSTOMER_PERMISSIONS', [])
       }
+    },
+    async setPlatformAction({commit}, payload){
+      commit('SET_PLATFORM', payload)
     }
   }
 }

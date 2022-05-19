@@ -5,6 +5,7 @@ import {default as $} from "jquery";
 import Axios, {AxiosError} from "axios";
 import Vue from "vue";
 import VsToast from '@vuesimple/vs-toast';
+import {http} from "@/httpCommon";
 
 const getLogoSettingsObject = () => {
   return {
@@ -368,7 +369,7 @@ const getActiveProductData = async () => {
     scene_ref.frontCanvas.discardActiveObject().renderAll()
     scene_ref.backCanvas.discardActiveObject().renderAll()
     const post_data: Record<any, any> = {
-      back_image: getCanvasImage.ref_back.toDataURL("image/png"),
+      back_image: getCanvasImage.scene.$refs.back.toDataURL("image/png"),
       custom_logos: Store.getters.getCustomLogos(),
       measurement_ratio: selected_design.measurement_ratio,
       custom_logo_svgs: [],
@@ -377,7 +378,7 @@ const getActiveProductData = async () => {
       colors: Store.getters.getLogosColors,
       design_id: selected_design.id,
       defaultcolors: Store.getters.getDefaultColors,
-      front_image: getCanvasImage.ref_front.toDataURL("image/png"),
+      front_image: getCanvasImage.scene.$refs.front.toDataURL("image/png"),
       groupcolors: Store.getters.getGroupColors,
       logo_colors: Store.getters.getLogosColors,
       model_id: product_models[selected_model_index].id,
@@ -472,8 +473,20 @@ const activityStatus = {
   },
 }
 
+const getPlatform = async () => {
+  const res = await http.get('platform').catch(error => {
+    handleResponseException(error)
+    console.info("error while getting platform", error)
+  })
+  if (res && res.status == 200){
+    Store.dispatch("setPlatformAction", res.data.company)
+  } else {
+    Store.dispatch("setPlatformAction", null)
+  }
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getPlatform
 };

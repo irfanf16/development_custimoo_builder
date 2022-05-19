@@ -114,8 +114,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
     return this.$store.getters.getUpdateOrderItemProducts
   }
 
-  get platform():string{
-    return localStorage.getItem('platform') as string
+  get getPlatform():string{
+    return this.$store.getters.getPlatform
   }
 
   get selectedProduct(): Record<any, any> {
@@ -234,14 +234,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
   }
 
   public gotoLogin(){
-    if (this.platform == 'self'){
+    if (this.getPlatform.platform == 'self'){
       this.$modal.show('loginModal')
     }
     else{
-      if(this.login_code.type == 'url') {
-        window.location.href = this.login_code.action
+      if(this.getPlatform.login_code.type == 'url') {
+        window.location.href = this.getPlatform.login_code.action
       } else {
-        eval(this.login_code.action)
+        eval(this.getPlatform.login_code.action)
       }
     }
   }
@@ -264,10 +264,12 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
       }
 
       let santacart = true;
-      let company_domain = localStorage.getItem('company_domain');
-      let platform = localStorage.getItem('platform');
+      let company_domain = this.getPlatform.company_domain;
+      console.log("platform", this.getPlatform)
+      let platform = this.getPlatform.platform;
       let ecommerce_cart_id = null;
       let ecom_url = company_domain + '/wp-admin/admin-ajax.php';
+      console.log()
 
       if(platform === 'wordpress'){
         if(cart_product.sync_id === "" || cart_product.ecommerce_post_id === ""){

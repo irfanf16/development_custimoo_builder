@@ -50,7 +50,7 @@
                   <li class="d-flex flex-wrap align-items-center">
                     <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                     <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
+                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && getPlatform.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                   </li>
                   <li><a>
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
@@ -126,7 +126,7 @@
                     <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
                     <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
                     <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
-                    <b-dropdown-item v-if="isCustomerAuthenticated && platform == 'self'"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
+                    <b-dropdown-item v-if="isCustomerAuthenticated && getPlatform.platform == 'self'"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                   </b-dropdown>
                 </div>
               </div>
@@ -386,10 +386,10 @@ Vue.filter('formatDate', function(value:string) {
 
     }
 
-  },
-   destroyed() {
-    this.$store.dispatch("updateOrderItemProducts", null);
   }
+  //  destroyed() {
+  //   this.$store.dispatch("updateOrderItemProducts", null);
+  // }
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
@@ -421,6 +421,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public showOtherColors = false
   private playersDataHeight = 0
   public updated_order_products: Record<any, any>[] = []
+  public updateOrderItemProducts: Record<any, any> | null = null;
 
   private updateOtherTab(value:boolean){
     this.showOtherTab = value
@@ -487,9 +488,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('SET_RECENT_LOGOS')
   }
 
-  get updateOrderItemProducts() {
-    return this.$store.getters.getUpdateOrderItemProducts
-  }
+  // get updateOrderItemProducts() {
+  //   return this.$store.getters.getUpdateOrderItemProducts
+  // }
 
   get notifications(){
     return this.$store.getters.getNotifications
@@ -646,12 +647,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
-  get platform():string{
-    return localStorage.getItem('platform') as string
+  get getPlatform():string{
+    return this.$store.getters.getPlatform
   }
-  get login_code(): Record<any, any>{
-    return JSON.parse(localStorage.getItem('login_code') as string)
-  }
+
   get cartItems() {
     return this.$store.getters.getCartItems
   }
@@ -822,14 +821,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.gotoLogin()
   }
   public gotoLogin(){
-    if (this.platform == 'self'){
+    if (this.getPlatform.platform == 'self'){
       this.$modal.show('loginModal')
     }
     else{
-      if(this.login_code.type == 'url') {
-        window.location.href = this.login_code.action
+      if(this.getPlatform.login_code.type == 'url') {
+        window.location.href = this.getPlatform.login_code.action
       } else {
-        eval(this.login_code.action)
+        eval(this.getPlatform.action)
       }
     }
   }
@@ -1076,7 +1075,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self = this;
     let sync_id = this.$route.query.sync_id;
     if(url == null) {
-       url = `/list/products`;
+      url = `/list/products`;
     }
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
     if(!url_obj.searchParams.has("customized")) {
@@ -1090,6 +1089,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
     if(self.search_products && !url_obj.searchParams.has("title")) {
       url_obj.searchParams.append('title', self.search_products)
+    }
+    if(this.$route.query.update_order_product) {
+      url_obj.searchParams.append('update_order_product', this.$route.query.update_order_product);
+      url_obj.searchParams.append('order_item_id', this.$route.query.order_item_id);
+      url_obj.searchParams.append('activity_id', this.$route.query.activity_id);
+       //this.$router.replace('/')
     }
     url = url_obj.pathname + url_obj.search;
     if(sync_id) {
@@ -1116,8 +1121,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         await self.$store.dispatch('setSearchLoader', false)
       }
     }, (error) => {
-      console.log("fdsfdsdf")
-      // console.error("Error while getting order detail", error.response.data.message)
+      console.error("Error while getting order detail", error?.response?.data?.message)
     })
   }
 
@@ -1127,29 +1131,38 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if(updated_product == null) {
       return false;
     }
-    let order_item_factory_product_index = self.updateOrderItemProducts.active_index;
-    updated_product["id"] = self.updateOrderItemProducts.factory_products[order_item_factory_product_index].id;
+    let order_product_active_index =  self.updateOrderItemProducts.active_index;
+    let order_product_updated_index =  (action == "next") ? order_product_active_index + 1 : order_product_active_index - 1;
+
+    updated_product["id"] = self.updateOrderItemProducts.factory_products[order_product_active_index].id;
     updated_product["status"] = "submitted_for_factory_review";
-    self.updated_order_products[self.updateOrderItemProducts.active_index] = updated_product
+    self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
-    order_item_factory_product_index = (action == "next") ? ++order_item_factory_product_index : --order_item_factory_product_index;
-    url    += `&active_product_id=${self.updateOrderItemProducts.factory_products[order_item_factory_product_index].product_id}`;
-    await self.$store.dispatch("updateOrderItemProducts", {update_key: 'active_index', key_value: order_item_factory_product_index});
+    this.updateOrderItemProducts["active_index"] = order_product_updated_index;
+    url    += `&update_order_product_id=${self.updateOrderItemProducts.factory_products[order_product_updated_index].product_id}`;
+    //await self.$store.dispatch("updateOrderItemProducts", {update_key: 'active_index', key_value: order_item_factory_product_index});
     await self.retrieveProducts(url);
   }
+
   async UpdateOrderProducts() {
     let self = this;
     let updated_product = await getActiveProductData();
     if(updated_product == null) {
       return false;
     }
-    updated_product["id"] = self.updateOrderItemProducts.factory_products[self.updateOrderItemProducts.active_index].id;
+    let order_product_active_index =  self.updateOrderItemProducts.active_index;
+    let order_item_id = self.updateOrderItemProducts.order_item_id;
+    updated_product["id"] = self.updateOrderItemProducts.factory_products[order_product_active_index].id;
     updated_product["status"] = "submitted_for_factory_review";
-    self.updated_order_products[self.updateOrderItemProducts.active_index] = updated_product;
-    let url = `order_item/${self.updateOrderItemProducts.order_item_id}/update/products`;
-    http.post(url, {factory_products: self.updated_order_products}).then((res: any) => {
+    self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product;
+    let url = `order_item/${order_item_id}/update/products`;
+    http.post(url, {factory_products: self.updateOrderItemProducts.factory_products}).then((res: any) => {
       if (res.data.success == true) {
-        self.$router.push({name: "OrderDetail", params: { order_id: self.updateOrderItemProducts.order_item_id }});
+        if(this.$root.$options.shadowRoot) {
+          window.location.href = `http://santa_order_detail.test/#/?order_id=${self.updateOrderItemProducts?.order_id}`;
+        } else {
+          self.$router.push({name: "OrderDetail", params: { order_id: order_item_id }});
+        }
       }
     }).catch(err => {
       this.showErrorArr(err.response.data.errors)
