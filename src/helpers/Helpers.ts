@@ -313,8 +313,6 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
       await Store.dispatch('updateCustomLogoAttribute', data)
     }
   })
-
-
   if(customTabIndex == 0) {
     //update team logo url in all product logos
     const logo_:any = {}
