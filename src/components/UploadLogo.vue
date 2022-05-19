@@ -280,7 +280,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
         custom_logo.upload = true
-        let customObj = this.getUploadedLogoObject(resp.data.file)
+        let customObj = this.getUploadedLogoObject(resp.data.file, custom_logo.base64_logo)
         let getLogos = []
         if (this.customLogos.length > 1){
           getLogos = this.customLogos.slice(0, -1)
@@ -294,7 +294,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
           customObj : customObj,
           custom_logo: custom_logo
         }
-        console.log("payload", payload)
         this.$store.commit('customLogos', payload)
         // await setCustomLogo(customObj, this.customLogoIndex)
         this.hideModal()
@@ -319,8 +318,9 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
 
     return (new RegExp('(' + exts.join('|').replace(/\./g, '\\.') + ')$')).test(fileName);
   }
- public getUploadedLogoObject(res:Record<any, any>){
+ public getUploadedLogoObject(res:Record<any, any>, custom_logo:string){
     return{
+      base64_logo: custom_logo,
       logo_url : res.logo_url,
       transparent_logo_url : res.transparent_logo_url,
       smart_transparent_logo_url : res.smart_transparent_logo_url,

@@ -15,6 +15,7 @@ import {
 import {log} from "fabric/fabric-impl";
 import {getClosestColor} from "@/pantoneColor";
 import product from "@/store/modules/product";
+import {findIndex} from "lodash";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
@@ -441,12 +442,21 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     customTextAttribute(state: Record<any, any>, customTextAttribute: Record<any, any>) {
-      if (state.customTexts[state.selectedPrdId][customTextAttribute.index])
-        Vue.set(state.customTexts[state.selectedPrdId][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
+      const text_item = state.customTexts[state.selectedPrdId][customTextAttribute.index]
+      if (text_item){
+        Vue.set(text_item, customTextAttribute.attribute, customTextAttribute.value)
+      }
       state.products.forEach((item:Record<any, any>) => {
-        if (item.id != state.selectedPrdId && item.text_follows_product){
-          if(state.customTexts[item.id][customTextAttribute.index])
-            Vue.set(state.customTexts[item.id][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
+        if (item.id != state.selectedPrdId && item.text_follows_product) {
+          if (state.customTexts[item.id][customTextAttribute.index]) {
+            if ('add_type' in text_item){
+              const count = text_item.added_count
+              const index = state.customTexts[item.id].findIndex((text:Record<any, any>) => text.added_count == count)
+              Vue.set(state.customTexts[item.id][index], customTextAttribute.attribute, customTextAttribute.value)
+            }else{
+              Vue.set(state.customTexts[item.id][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
+            }
+          }
         }
       })
     },
@@ -462,10 +472,19 @@ const ProductAttributes:Module<any, any> = {
     },
     REMOVE_CUSTOMIZATION_TEXT_ELEMENT(state:Record<any, any>, payload:Record<any, any>){
       if (payload.product_id){
+        const text_item = state.customTexts[payload.product_id][payload.index]
         Vue.set(state.customTexts[payload.product_id], payload.index, {})
+        // Vue.delete(state.customTexts[payload.product_id], payload.index)
         state.products.forEach((item:Record<any, any>) => {
           if (item.text_follows_product && item.id != state.selectedPrdId) {
-            Vue.delete(state.customTexts[item.id], payload.index)
+            if ('add_type' in text_item){
+              const count = text_item.added_count
+              const index = state.customTexts[item.id].findIndex((text:Record<any, any>) => text.added_count == count)
+              // Vue.delete(state.customTexts[item.id], index)
+              Vue.set(state.customTexts[item.id], index, {})
+            }else{
+              Vue.set(state.customTexts[item.id], index, {})
+            }
           }
           let count = 0
           state.customTexts[item.id].forEach((logo:Record<any, any>, ind:number)=>{
