@@ -109,7 +109,7 @@
         </div>
         <div class="outline-slider-area d-flex justify-content-between pt-4">
           <template v-if="customTexts[customTextIndex].outlineEnabled">
-            <div>
+            <div class="mr-sm-2 mb-sm-0">
               <label for="range-2 fz-16">Outline Width</label>
               <b-form-input class="mt-2" id="range-2" :value="customTexts[customTextIndex].outLineWidth"
                 @change="outLineWidthValueChanged($event)" type="range" min="0" max="10" step="1"></b-form-input>
