@@ -412,9 +412,11 @@ const ProductAttributes:Module<any, any> = {
     SET_TEAM_LOGO_URL(state:  Record<any, any>,logo:any){
       const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
       Object.keys(custom_obj).map(function(key, index) {
-        let logo_ = custom_obj[key][0];
-        logo_ = {...logo_, ...logo}
-        Vue.set(state.customLogos[key],0, logo_)
+        if(state.selectedPrdId != key) {
+          let logo_ = custom_obj[key][0];
+          logo_ = {...logo_, ...logo}
+          Vue.set(state.customLogos[key],0, logo_)
+        }
       });
     },
     async customTexts(state: Record<any, any>, customText: Record<any, any>) {

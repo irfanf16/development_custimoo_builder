@@ -24,7 +24,8 @@
       <div class="d-flex">
         <b-form-input @click="isHidden = !isHidden" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here"
           :value="customTexts[customTextIndex].text" @input="updateTextField(customTextIndex, $event)"></b-form-input>
-        <button v-b-toggle="'accordion-' + (customTextIndex + 1)" class="d-flex align-items-center btn btn-secondary light">
+        <button v-b-toggle="'accordion-' + (customTextIndex + 1)"
+          class="d-flex align-items-center btn btn-secondary light">
           <span class="minus d-flex align-items-center">
             <BIconDash class="minus" /> Collapse
           </span>
@@ -35,27 +36,36 @@
       </div>
 
       <b-collapse :id="'accordion-' + (customTextIndex + 1)" accordion="my-accordion" role="tabpanel">
-        <h4 class="mt-3 mb-2 fz-16">Font Type</h4>
         <div class="font-type-area">
-          <div class="type-block">
-            <!-- <b-form-select :value="customTexts[customTextIndex].fontFamily"
-              @change="fontOptionChanged(customTextIndex, $event)" :options="fontOptions"></b-form-select> -->
+          <!-- <div class="type-block">
+            <b-form-select :value="customTexts[customTextIndex].fontFamily"
+              @change="fontOptionChanged(customTextIndex, $event)" :options="fontOptions"></b-form-select>
 
-            <!-- Custom Font Selector -->
-            <select class="custom-select" :style="{ fontFamily: customTexts[customTextIndex].fontFamily , fontSize: '20px'}" @change="fontOptionChanged(customTextIndex, $event.target.value)" >
-              <option
-                v-for="option in fontOptions" :key="option.value" 
-                :style="{ fontFamily: option.value}"
-                :selected="customTexts[customTextIndex].fontFamily == option.value"
-                :value="option.value">{{customTexts[customTextIndex].text ? customTexts[customTextIndex].text : option.text}}
+            <select class="custom-select"
+              :style="{ fontFamily: customTexts[customTextIndex].fontFamily, fontSize: '20px' }"
+              @change="fontOptionChanged(customTextIndex, $event.target.value)">
+              <option v-for="option in fontOptions" :key="option.value" :style="{ fontFamily: option.value }"
+                :selected="customTexts[customTextIndex].fontFamily == option.value" :value="option.value">
+                {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : option.text }}
               </option>
             </select>
-            <!-- *** End Custom Selector -->
+
           </div>
           <div class="arc-block">
-            <b-form-select :style="{fontSize: '18px', height: '44px'}" :value="customTexts[customTextIndex].side" @change="changeSide(customTextIndex, $event)"
-              :options="['front', 'back']"></b-form-select>
-          </div>
+            <b-form-select :style="{ fontSize: '18px', height: '44px' }" :value="customTexts[customTextIndex].side"
+              @change="changeSide(customTextIndex, $event)" :options="['front', 'back']"></b-form-select>
+          </div> -->
+
+          <div class="fade-right w-100 py-2">
+            <div class="overflow-auto d-flex align-items-center font-slider-scrollbar pointer pb-2 gap-2 fontList">
+              <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontSize: '20px', fontFamily: item.value }"
+                @click="fontOptionChanged(customTextIndex, item.value)" style="white-space: nowrap"
+                :class="{ 'pr-3': i + 1 == fontOptions.length }" role="button">
+                {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : item.value }}
+              </div>
+            </div>
+         </div>
+
         </div>
         <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
         <div class="text-color-holder" :class="{ active: customTexts[customTextIndex].selectColor }">
@@ -85,38 +95,19 @@
                 <b-nav-item class="mr-2" v-for="(colorType, index) in fontsColors" :key="index"
                   @click="selectType(index)">{{ colorType.file_type }}</b-nav-item>
               </b-nav>
-
-
-
               <!--            <div class="color-holder">-->
               <!--              <div class="">-->
               <!--                <div class="color-box" v-for="(color, index) in fontColor" @click="setColor(color)"
                        :title="color.name" :style="{background: color.value}" :key="index">
-
                   </div>-->
-
               <TextColorTabs ref="text-color-tab" @setColors="setColor" :productColors="productColors"
                 :showSVGS="Boolean(showSVGs)" />
-
-
-
-
               <!--              </div>-->
-
-
-
-
-
               <!--            </div>-->
-
-
-
             </b-card-body>
-
-
           </div>
         </div>
-        <div class="outline-slider-area pt-4">
+        <div class="outline-slider-area d-flex justify-content-between pt-4">
           <template v-if="customTexts[customTextIndex].outlineEnabled">
             <div>
               <label for="range-2 fz-16">Outline Width</label>
@@ -125,6 +116,11 @@
               <div class="mt-2">Outline Size: {{ customTexts[customTextIndex].outLineWidth }}px</div>
             </div>
           </template>
+          <div>
+            <label for="range-2 fz-16">Placement</label>
+            <b-form-select :style="{ fontSize: '18px', height: '44px' }" :value="customTexts[customTextIndex].side"
+            @change="changeSide(customTextIndex, $event)" :options="['front', 'back']"></b-form-select>
+          </div>
         </div>
       </b-collapse>
     </div>
@@ -241,7 +237,7 @@ export default class CustomizationText extends Vue {
   }
 
   public fontOptionChanged(index: number, event: any) {
-    console.log(index , event)
+    console.log(index, event)
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', { index: index, on_all: false, attribute: 'fontFamily', value: event })
   }
