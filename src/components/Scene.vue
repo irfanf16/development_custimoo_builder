@@ -19,7 +19,7 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import {setLogoSettings} from "@/helpers/Helpers";
+import {getProductLogoSetting, setLogoSettings} from "@/helpers/Helpers";
 
 @Component<Scene>({
   async mounted() {
@@ -117,9 +117,13 @@ import {setLogoSettings} from "@/helpers/Helpers";
         if('textIndex' in target) {
           self.$store.dispatch('updateCustomTextAttribute', {index: target.textIndex, on_all: true, attribute: 'text', value: ''})
         }else {
-          let logo = setLogoSettings(target.logoIndex);
+          let logo = getProductLogoSetting(self.selectedProductId, target.logoIndex);
+          logo.removeLogo = true
+          let payload = {
+            custom_logo : logo
+          }
           logo.logoIndex = target.logoIndex;
-          self.$store.commit('customLogos', logo)
+          self.$store.commit('customLogos', payload)
           self.$store.commit('SET_LOGO_COLORS', []);
           self.$store.commit('SET_INITIAL_LOGO_COLORS', []);
         }
