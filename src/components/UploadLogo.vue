@@ -108,9 +108,9 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
-import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import ModalAction from "@/mixins/ModalAction";
+import { setLogoSettings } from '@/helpers/Helpers'
 
 @Component<UploadLogo>({
   components: {LogoEditorModal},
@@ -185,11 +185,11 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   }
   public openLogoEditor() {
     //set logo id and default image of logo
-    this.$store.dispatch('editLogo',{key:'id',value:this.customLogos[this.customLogoIndex].id,api_call:false})
-    this.$store.dispatch('editLogo',{key:'base64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
-    this.$store.dispatch('editLogo',{key:'originalBase64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
-    this.$store.dispatch('toggleLogoCheck', {type:'color',val:false})
-    this.$store.dispatch('toggleLogoCheck', {type:'background',val:false})
+    this.$store.dispatch('editLogo',{key: 'id', value:this.customLogos[this.customLogoIndex].id, api_call:false})
+    this.$store.dispatch('editLogo',{key: 'image', value: this.customLogos[this.customLogoIndex].url, api_call:false})
+    this.$store.dispatch('editLogo',{key: 'originalImage', value:this.customLogos[this.customLogoIndex].original_logo, api_call:false})
+    this.$store.dispatch('toggleLogoCheck', {type: 'color', val:false})
+    this.$store.dispatch('toggleLogoCheck', {type: 'background', val:false})
     this.showVModal('logo-modal')
   }
 
@@ -254,9 +254,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
       this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','Error');
       return false;
     }
-    fileToBase64(img).then(base64_string => {
-      custom_logo.base64_logo = base64_string
-    })
 
     let fd = new FormData()
     let header = {
@@ -279,13 +276,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.is_smart_transparent = false;
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
-        let getLogos = []
-        if (this.customLogos.length > 1){
-          getLogos = this.customLogos.slice(0, -1)
-        }else{
-          getLogos = this.customLogos
-        }
-        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
+
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
         this.$store.commit('customLogos', custom_logo)
         this.hideModal()
@@ -295,8 +286,10 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
 
         if(this.customLogoIndex == 0) {
           //update team logo url in all product logos
-          this.$store.dispatch('setTeamLogoUrl',custom_logo)
+          this.$store.dispatch('setTeamLogoUrl', custom_logo)
         }
+
+        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
 
       })
       .catch((error: any) => {
