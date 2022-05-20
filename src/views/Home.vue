@@ -71,7 +71,7 @@
                       </template>
                     </div>
                   </li>
-                  <li v-if="isCustomerAuthenticated">
+                  <li v-if="isCustomerAuthenticated && getPlatform.platform == 'self'">
                     <a  class="icon mr-0" @click="openCartModal">
                       <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                     </a>
