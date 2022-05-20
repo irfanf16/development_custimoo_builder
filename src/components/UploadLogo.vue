@@ -185,11 +185,11 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   }
   public openLogoEditor() {
     //set logo id and default image of logo
-    this.$store.dispatch('editLogo',{key:'id',value:this.customLogos[this.customLogoIndex].id,api_call:false})
-    this.$store.dispatch('editLogo',{key:'base64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
-    this.$store.dispatch('editLogo',{key:'originalBase64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
-    this.$store.dispatch('toggleLogoCheck', {type:'color',val:false})
-    this.$store.dispatch('toggleLogoCheck', {type:'background',val:false})
+    this.$store.dispatch('editLogo',{key: 'id', value:this.customLogos[this.customLogoIndex].id, api_call:false})
+    this.$store.dispatch('editLogo',{key: 'image', value: this.customLogos[this.customLogoIndex].url, api_call:false})
+    this.$store.dispatch('editLogo',{key: 'originalImage', value:this.customLogos[this.customLogoIndex].original_logo, api_call:false})
+    this.$store.dispatch('toggleLogoCheck', {type: 'color', val:false})
+    this.$store.dispatch('toggleLogoCheck', {type: 'background', val:false})
     this.showVModal('logo-modal')
   }
 
@@ -303,9 +303,8 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
 
         if(this.customLogoIndex == 0) {
           //update team logo url in all product logos
-          this.$store.dispatch('setTeamLogoUrl',custom_logo)
+          this.$store.dispatch('setTeamLogoUrl', custom_logo)
         }
-
       })
       .catch((error: any) => {
         console.log(error)

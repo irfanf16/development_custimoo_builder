@@ -23,7 +23,7 @@
 
       <div class="d-flex">
         <b-form-input @click="isHidden = !isHidden" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here"
-          :value="customTexts[customTextIndex].text" @input="updateTextField(customTextIndex, $event)"></b-form-input>
+          :value="customTexts[customTextIndex].text" @input="updateTextField(customTextIndex, $event)" ></b-form-input>
         <button v-b-toggle="'accordion-' + (customTextIndex + 1)"
           class="d-flex align-items-center btn btn-secondary light">
           <span class="minus d-flex align-items-center">
@@ -35,7 +35,7 @@
         </button>
       </div>
 
-      <b-collapse :id="'accordion-' + (customTextIndex + 1)" accordion="my-accordion" role="tabpanel">
+      <b-collapse :ref="'accordion-' + (customTextIndex + 1)" :id="'accordion-' + (customTextIndex + 1)" accordion="my-accordion" role="tabpanel">
         <div class="font-type-area">
           <!-- <div class="type-block">
             <b-form-select :value="customTexts[customTextIndex].fontFamily"
@@ -61,7 +61,9 @@
               <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontSize: '20px', fontFamily: item.value, color: customTexts[customTextIndex].fontFamily == item.value ? '#000000' : '#808895'}"
                 @click="fontOptionChanged(customTextIndex, item.value)" style="white-space: nowrap"
                 :class="{ 'pr-3': i + 1 == fontOptions.length }" role="button">
-                {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : item.value }}
+                <span v-b-tooltip.right="customTexts[customTextIndex].text ? item.value : ''">
+                  {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : item.value }}
+                </span>
               </div>
             </div>
          </div>
@@ -146,6 +148,10 @@ import { findIndex, values } from 'lodash'
       this.selectType(this.selectTypeIndex)
     })
     this.getColors()
+
+    this.$root.$on('bv::show', () =>{
+      console.log('ishown');
+    })
   },
   filters: {
     capitalize: (value: string) => {
@@ -171,7 +177,6 @@ export default class CustomizationText extends Vue {
   public productColors: any[] = []
   public showSVGs = false
   public openIndex = -1
-
 
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
@@ -279,7 +284,14 @@ export default class CustomizationText extends Vue {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', { index: index, on_all: true, attribute: 'text', value: value })
     this.initRosterFromTexts()
+    
+    if(value){
+      this.$refs[`accordion-${index+1}`].show = true
+    }else{
+      this.$refs[`accordion-${index+1}`].show = false
+    }
   }
+
   public initRosterFromTexts() {
     const custom_name_index = findIndex(this.customText, { type: 'name' });
     const custom_number_index = findIndex(this.customText, { type: 'number' });

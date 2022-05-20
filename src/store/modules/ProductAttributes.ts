@@ -83,13 +83,12 @@ const ProductAttributes:Module<any, any> = {
     colorCheck: false,
     showColorsLogoEditor:false,
     logoEditor: {
-      id:0,
-      base64:"",
-      originalBase64:"",
-      remove_background:'',
-      color:'',
-      flood_fill:false
-
+      id: 0,
+      image: '',
+      originalImage: '',
+      remove_background: '',
+      color: '',
+      flood_fill: false
     },
     editLockerProduct: [],
     canvas_ready: false,
@@ -365,7 +364,7 @@ const ProductAttributes:Module<any, any> = {
           state.backgroundCheck = false
         }
 
-        Vue.set(state.logoEditor,'base64',state.logoEditor.originalBase64)
+        Vue.set(state.logoEditor,'image', state.logoEditor.originalImage)
         Vue.set(state.logoEditor,'remove_background','')
 
       }
@@ -376,12 +375,12 @@ const ProductAttributes:Module<any, any> = {
         }
         else {
           state.colorCheck = false
-          Vue.set(state.logoEditor,'base64',state.logoEditor.originalBase64)
+          Vue.set(state.logoEditor,'image',state.logoEditor.originalImage)
         }
       }
     },
     EDIT_LOGO(state: Record<any, any>, payload:any) {
-      Vue.set(state.logoEditor,payload.key,payload.value)
+      Vue.set(state.logoEditor, payload.key, payload.value)
     },
     UNSET_LOGO_EDITOR(state: Record<any, any>, payload:any) {
       Vue.set(state.logoEditor,'remove_background','')
@@ -728,8 +727,8 @@ const ProductAttributes:Module<any, any> = {
       state.using_logo_colors = false;
       state.logoEditor = {
         id:0,
-        base64:"",
-        originalBase64:"",
+        image:"",
+        originalImage:"",
         remove_background:'',
         color:'',
         flood_fill:false
