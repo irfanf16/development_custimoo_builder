@@ -14,11 +14,11 @@
             <b-nav-item v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
               {{ colorType.name | capitalize}}
             </b-nav-item>
-            <b-nav-item @click="selectType(null, true)">Others</b-nav-item>
+            <b-nav-item  v-if="selectedProduct.is_custom_color_allowed" @click="selectType(null, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
-              <div v-if="showOther" class="custom-color-picker">
+              <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
                 <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
               </div>
               <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
@@ -37,11 +37,11 @@
         <b-nav-item v-bind:class="{ 'color-tab-active' : index == selectTypeIndex && !othersActive}" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
           {{ colorType.name | capitalize}}
         </b-nav-item>
-        <b-nav-item @click="selectType(null, true)">Others</b-nav-item>
+        <b-nav-item  v-if="selectedProduct.is_custom_color_allowed" @click="selectType(null, true)">Others</b-nav-item>
       </b-nav>
       <div class="color-holder">
         <div class="color-container">
-          <div v-if="showOther" class="custom-color-picker">
+          <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
             <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
           </div>
           <div v-else class="color-box" v-for="(color, index) in productColor" @click="setColor(color)"
@@ -87,6 +87,10 @@ export default class ColorTabs extends Vue {
   public selectTypeIndex = 0
   public productColor: any[] = []
   public othersActive = false
+
+  get selectedProduct(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct
+  }
 
   get svgGroups() {
     return this.$store.getters.getSvgGroups
