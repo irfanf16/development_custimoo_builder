@@ -223,13 +223,11 @@ const ProductAttributes:Module<any, any> = {
             }
             else{
               if (item.logos_follows_product && item.id != state.selectedPrdId){
-                console.log("inddex", newCustomLogo.logoIndex)
                 await setCustomLogo(customLogo.customObj, newCustomLogo.logoIndex, item.id)
               }
             }
           })
         } else {
-          console.log("not in logo index")
           Vue.set(state.customLogos[state.selectedPrdId], state.customLogos[state.selectedPrdId].length, customLogo.custom_logo)
         }
       }
