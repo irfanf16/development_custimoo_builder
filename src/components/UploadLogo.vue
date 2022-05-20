@@ -379,7 +379,11 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     inputRef.value = null;
     let logo = setLogoSettings(this.customLogoIndex);
     logo.logoIndex = this.customLogoIndex;
-    this.$store.commit('customLogos', logo)
+    logo.removeLogo = true
+    let payload = {
+      custom_logo : logo
+    }
+    this.$store.commit('customLogos', payload)
     this.$store.commit('SET_LOGO_COLORS', []);
     this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
   }

@@ -120,6 +120,8 @@ const getProductLogoSetting = (prd_id:number, index:number) => {
   let logo : Record<any, any> ={}
   const logo_settings = getLogoSettings(index, false, prd_id);
   if (Object.keys(logo_settings).length){
+    logo.id = null;
+    logo.url = null;
     logo.width =  logo_settings.width;
     logo.height =  logo_settings.height;
     logo.x_axis =  logo_settings.x_axis;

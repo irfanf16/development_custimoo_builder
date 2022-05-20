@@ -209,9 +209,13 @@ const ProductAttributes:Module<any, any> = {
         if('logoIndex' in newCustomLogo && newCustomLogo.logoIndex != null) {
           Vue.set(state.customLogos[state.selectedPrdId], newCustomLogo.logoIndex, {...newCustomLogo})
           state.products.forEach(async (item:Record<any, any>) => {
-            if ('adding_tab' in newCustomLogo && newCustomLogo.adding_tab){
+            let removeLogo = false
+            if('removeLogo' in newCustomLogo){
+              removeLogo = true
+            }
+            if ('adding_tab' in newCustomLogo && newCustomLogo.adding_tab || removeLogo){
               if (item.logos_follows_product && item.id != state.selectedPrdId){
-                if (state.customLogos[item.id][newCustomLogo.logoIndex]){
+                if (state.customLogos[item.id][newCustomLogo.logoIndex] && !removeLogo){
                   newCustomLogo.adding_tab = true
                   newCustomLogo.logoIndex = state.customLogos[item.id].length
                 }
