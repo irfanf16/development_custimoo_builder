@@ -61,7 +61,9 @@
               <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontSize: '20px', fontFamily: item.value, color: customTexts[customTextIndex].fontFamily == item.value ? '#000000' : '#808895'}"
                 @click="fontOptionChanged(customTextIndex, item.value)" style="white-space: nowrap"
                 :class="{ 'pr-3': i + 1 == fontOptions.length }" role="button">
-                {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : item.value }}
+                <span v-b-tooltip.right="customTexts[customTextIndex].text ? item.value : ''">
+                  {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : item.value }}
+                </span>
               </div>
             </div>
          </div>
