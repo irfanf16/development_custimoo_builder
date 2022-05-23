@@ -288,13 +288,6 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
     },
 
   ];
-  if ('base64_logo' in logo){
-    payload.push({
-      index: customTabIndex,
-      attribute: 'base64_logo',
-      value: logo.base64_logo
-    })
-  }
   let getLogos = []
   if (custom_logos.length > 1){
     getLogos = custom_logos.slice(0, -1)
