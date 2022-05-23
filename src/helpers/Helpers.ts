@@ -61,7 +61,6 @@ const getLogoObject = () => {
     is_transparent: false,
     original_logo: null,
     transparent_logo: null,
-    base64_logo: null,
     originalWidth: logo_settings_object.width,
     originalHeight: logo_settings_object.height,
     logoIndex:0
