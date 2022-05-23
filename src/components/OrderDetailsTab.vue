@@ -736,8 +736,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
       })
       console.log(this.roster_detail);
       console.log('Fonts');
-      console.log(fontsList(this.selectedProduct));
-
+      let font_file = fontsList(this.selectedProduct)
 
 
 
@@ -796,8 +795,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
 
       //Add Fonts to SVgs Start
       let font_style = document.createElementNS("http://www.w3.org/2000/svg","style");
-      for(let font of this.font_file){
-        font_style.innerHTML += ` @font-face{ font-family: ${font.file_name}; src: url('${font.font_url}');  }`;
+      for(let font of font_file){
+        font_style.innerHTML += ` @font-face{ font-family: ${font.text}; src: url('${font.url}');  }`;
       }
       $(svg_doc).find("svg").eq(0).prepend(font_style)
       //Add Fonts to SVgs End

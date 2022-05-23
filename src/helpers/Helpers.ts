@@ -198,8 +198,7 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
          const font = {
            value: fontNameParam[0] as string,
            text: fontName as string,
-           json_data: JSON.parse(fonts.json_data),
-           file_url: fonts.file_url
+           url:`${process.env.VUE_APP_STORAGE_URL}${fonts.path}`,
          }
          fontOptions.push(font)
        })
