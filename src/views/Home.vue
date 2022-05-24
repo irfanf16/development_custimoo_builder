@@ -265,7 +265,7 @@
             <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
             <div>
-              <LogoUploader @switchTabs="switchTabs" @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
+              <LogoUploader @switchTabs="switchTabs" @ @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
             </div>
           </div>
           <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">
