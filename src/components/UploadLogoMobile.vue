@@ -276,6 +276,8 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.is_smart_transparent = false;
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
+        custom_logo.upload = true
+        let customObj = this.getUploadedLogoObject(resp.data.file)
         let getLogos = []
         if (this.customLogos.length > 1){
           getLogos = this.customLogos.slice(0, -1)
@@ -284,7 +286,12 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         }
         this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
-        this.$store.commit('customLogos', custom_logo)
+        custom_logo.adding_tab = false
+        let payload = {
+          customObj : customObj,
+          custom_logo: custom_logo
+        }
+        this.$store.commit('customLogos', payload)
         this.hideModal()
         this.getLogoColors()
         this.$store.commit('SET_RECENT_LOGOS');
@@ -302,7 +309,16 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         this.showError(error);
       })
   }
-
+  public getUploadedLogoObject(res:Record<any, any>){
+    return{
+      logo_url : res.logo_url,
+      transparent_logo_url : res.transparent_logo_url,
+      smart_transparent_logo_url : res.smart_transparent_logo_url,
+      is_smart_transparent : false,
+      url : res.logo_url,
+      id : res.id
+    }
+  }
   public hasExtension(fileName : string, exts: any) : boolean {
 
     return (new RegExp('(' + exts.join('|').replace(/\./g, '\\.') + ')$')).test(fileName);
@@ -358,7 +374,11 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     inputRef.value = null;
     let logo = setLogoSettings(this.customLogoIndex);
     logo.logoIndex = this.customLogoIndex;
-    this.$store.commit('customLogos', logo)
+    logo.removeLogo = true
+    let payload = {
+      custom_logo : logo
+    }
+    this.$store.commit('customLogos', payload)
     this.$store.commit('SET_LOGO_COLORS', []);
     this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
   }

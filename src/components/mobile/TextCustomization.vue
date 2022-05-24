@@ -46,7 +46,7 @@
               <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontFamily: item.value}" @click="fontOptionChanged(tabIndex, i, item.value)" style="white-space: nowrap" :class="{'pr-3': i+1 == fontOptions.length, 'activeFont': activeFont == i}">
                 <span v-b-tooltip.right="customText.text ? item.text : ''">
                   {{customText.text ? customText.text : item.text}}
-                </span>  
+                </span>
               </div>
             </div>
           </div>
@@ -247,15 +247,6 @@ export default class TextCustomization extends Vue {
   }
 
   public addTab() {
-    if (this.set == false){
-      this.customTexts.forEach((text:Record<any, any>) =>{
-        if ('add_type' in text){
-          this.text_add_count = text.added_count
-          this.set = true
-        }
-      })
-    }
-    console.log("selected", this.customTexts)
     let text = {
       text: '',
       type: 'name',
@@ -274,10 +265,8 @@ export default class TextCustomization extends Vue {
       outLineColorPantone: this.secondColor.name,
       outLineWidth: 2,
       add_type: 'manual',
-      added_count: this.text_add_count + 1
     }
-    this.text_add_count +=1
-    this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text, prd_id:this.selectedProduct.id})
+    this.$store.dispatch('setCustomTexts', {follow:true, index: this.customTexts.length, text: text, prd_id:this.selectedProduct.id})
   }
   public removeTab(index:number, prd_id:number){
     let payload  = {
@@ -286,16 +275,6 @@ export default class TextCustomization extends Vue {
     }
     this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: false, attribute: 'text', value: ''})
     this.$store.commit('REMOVE_CUSTOMIZATION_TEXT_ELEMENT', payload)
-    let ind = 0
-    this.customTexts.forEach((text:Record<any, any>, index:number) =>{
-      if (text.add_type == 'manual' && ind >=0){
-        ind = ind + 1
-        this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: false, attribute: 'added_count', value: ind})
-        this.text_add_count = ind
-      }else if (ind == 0){
-        this.text_add_count = 0
-      }
-    })
   }
 
   public fontOptionChanged(index:number, i:number, val:string){
