@@ -29,7 +29,6 @@ import {
   faEyeSlash,
   faFillDrip,
   faFolder,
-  faFolderOpen,
   faFutbol,
   faHockeyPuck,
   faImage,
@@ -123,6 +122,19 @@ export default {
     elem.type = 'text/css';
     elem.href= 'https://cdn.custimoo.com/gulip/gulip.min.css';//Link of the css file
     document.head.appendChild(elem);
+
+    if(process.env.NODE_ENV === 'production') {
+      window.addEventListener('keydown', (e) => {
+        if ((e.altKey === true || e.metaKey === true) && (e.key === 'u' ||  e.key === 'U')) {
+          Gleap.startFeedbackFlow("bugreporting")
+        }
+      });
+      window.addEventListener('touchstart', (e) => {
+        if(e.touches.length > 2) {
+          Gleap.startFeedbackFlow("bugreporting")
+        }
+      })
+    }
 
     if(this.$root.$options.shadowRoot) {
       let ubuntu_font = document.createElement("style")

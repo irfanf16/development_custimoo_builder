@@ -1,5 +1,7 @@
 <template>
-  <div class="grid grid-mobile-4 gap-2 pick-item mt-3">
+<!--  <div class="grid grid-mobile-4 gap-2 pick-item mt-3">-->
+  <div class="d-flex gap-1 pick-item mt-3 hide-scroll overflow-auto">
+    <HorizontalScroll v-if="showItems && !animPlayed" />
     <div v-for="(product, index) in products" :key="index">
       <div ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns">
@@ -20,21 +22,27 @@
 <script>
 
 import Scene from '@/components/Scene.vue'
+import HorizontalScroll from "@/components/mobile/animations/HorizontalScroll";
 
 export default {
-  components: { Scene },
+  components: {HorizontalScroll, Scene },
   data: function () {
     return {
       storageUrl: process.env.VUE_APP_STORAGE_URL,
       renderComponent : true,
-      multipleLogo:false
+      multipleLogo:false,
+      animPlayed: false
     }
+  },
+  props: {
+    showItems: Boolean
   },
   mounted() {
     // this.$root.$on('sliderEvent', () => { // here you need to use the arrow function
     //  if(this.$refs && this.$refs.slider)
     //   this.$refs.slider.goToIndex(0);
     // })
+    this.animPlayed = localStorage.getItem('animPlayed')
   },
   computed: {
     products: function() {
@@ -55,6 +63,12 @@ export default {
 
 <style lang="scss" scoped>
 .pick-item{
+  position: relative;
+
+  &>div{
+    width: 86px;
+    flex-shrink: 0;
+  }
   .image-holder{
     position: relative;
 

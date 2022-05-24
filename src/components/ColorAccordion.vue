@@ -19,7 +19,7 @@
           </b-nav>
           <div class="color-holder">
             <div class="color-container">
-              <div v-if="showOther" class="custom-color-picker">
+              <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
                   <label class="mb-2" for="inline-form-input-pantone-color">Pantone: (TCX Colors)</label>
                   <b-form-input
