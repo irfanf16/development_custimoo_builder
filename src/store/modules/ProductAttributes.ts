@@ -535,7 +535,7 @@ const ProductAttributes:Module<any, any> = {
                 fillColorPantone: fill_color_pantone,
                 outLineColor: obj.secondColor.value,
                 outLineColorPantone: outLine_color_pantone,
-                outLineWidth: 0,
+                outLineWidth: 2,
                 selectColor: false
               }
               Vue.set(state.customTexts[product.id], maxIndex, text)
@@ -561,7 +561,7 @@ const ProductAttributes:Module<any, any> = {
               fillColorPantone: fill_color_pantone,
               outLineColor: obj.secondColor.value,
               outLineColorPantone: outLine_color_pantone,
-              outLineWidth: 0,
+              outLineWidth: 2,
               selectColor: false
             }
             Vue.set(state.customTexts[product.id], index, text)
@@ -721,7 +721,7 @@ const ProductAttributes:Module<any, any> = {
             fillColorPantone: fill_color_pantone,
             outLineColor: obj.secondColor.value,
             outLineColorPantone: outLine_color_pantone,
-            outLineWidth: 0,
+            outLineWidth: 2,
             textIndex: textIndex,
             selectColor: false
             }

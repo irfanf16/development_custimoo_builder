@@ -723,7 +723,7 @@ export default class Scene extends Vue {
     this.initialSvgGroups = []
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if(!this.containsObject({ id: item.id })) {
+      if(!item.id.includes('noncustomizable') && !this.containsObject({ id: item.id })) {
         let count = 1
         if(item.id == 'base') {
           count = 100000 // to make base always at first color position

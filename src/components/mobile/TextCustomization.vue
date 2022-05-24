@@ -272,7 +272,7 @@ export default class TextCustomization extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 0,
+      outLineWidth: 2,
       add_type: 'manual',
       added_count: this.text_add_count + 1
     }
