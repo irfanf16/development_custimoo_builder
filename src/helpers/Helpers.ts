@@ -372,13 +372,16 @@ const getActiveProductData = async () => {
     const product_style = selected_product.productstyles[style_index];
     const lockerEditStatus = Store.getters.getEditStatus;
     let product_name = selected_product.product_name
+     //selected_design will always return array having single object
+    const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
+
+    let design_name = selected_design.design_name;
     if(lockerEditStatus){
       const lockerEditProductName = Store.getters.getEditProductName;
-       if(lockerEditProductName)
-        product_name = lockerEditProductName
+      if(lockerEditProductName)
+        design_name = lockerEditProductName
     }
-        //selected_design will always return array having single object
-    const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
+    product_name = `${product_name} - ${design_name}`;
     const product_models = Store.getters.getProductModels;
     const selected_model_index = Store.getters.getSelectedModelIndex;
     scene_ref.frontCanvas.discardActiveObject().renderAll()

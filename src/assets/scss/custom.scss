@@ -3302,7 +3302,9 @@ $fontSize: 0.5;
         font-size: 1.5em;
 
         &.maximizer{
-            background: #219F84;
+            background: #F1C242;
+            font-size: 0.7em;
+            opacity: 1;
         }
     }
 }
@@ -4205,7 +4207,9 @@ $fontSize: 0.5;
 .upload_logo {
     &.mobile {
         overflow-x: hidden;
-
+        a{
+            outline: 0;
+        }
         .upload-logo-content {
             display: none;
         }
