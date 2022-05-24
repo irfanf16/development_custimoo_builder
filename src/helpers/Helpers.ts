@@ -5,6 +5,7 @@ import {default as $} from "jquery";
 import Axios, {AxiosError} from "axios";
 import Vue from "vue";
 import VsToast from '@vuesimple/vs-toast';
+import {http} from "@/httpCommon";
 
 const getLogoSettingsObject = () => {
   return {
@@ -396,19 +397,22 @@ const getActiveProductData = async () => {
     const product_style = selected_product.productstyles[style_index];
     const lockerEditStatus = Store.getters.getEditStatus;
     let product_name = selected_product.product_name
+     //selected_design will always return array having single object
+    const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
+
+    let design_name = selected_design.design_name;
     if(lockerEditStatus){
       const lockerEditProductName = Store.getters.getEditProductName;
-       if(lockerEditProductName)
-        product_name = lockerEditProductName
+      if(lockerEditProductName)
+        design_name = lockerEditProductName
     }
-        //selected_design will always return array having single object
-    const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
+    product_name = `${product_name} - ${design_name}`;
     const product_models = Store.getters.getProductModels;
     const selected_model_index = Store.getters.getSelectedModelIndex;
     scene_ref.frontCanvas.discardActiveObject().renderAll()
     scene_ref.backCanvas.discardActiveObject().renderAll()
     const post_data: Record<any, any> = {
-      back_image: getCanvasImage.ref_back.toDataURL("image/png"),
+      back_image: getCanvasImage.scene.$refs.back.toDataURL("image/png"),
       custom_logos: Store.getters.getCustomLogos(),
       measurement_ratio: selected_design.measurement_ratio,
       custom_logo_svgs: [],
@@ -417,7 +421,7 @@ const getActiveProductData = async () => {
       colors: Store.getters.getLogosColors,
       design_id: selected_design.id,
       defaultcolors: Store.getters.getDefaultColors,
-      front_image: getCanvasImage.ref_front.toDataURL("image/png"),
+      front_image: getCanvasImage.scene.$refs.front.toDataURL("image/png"),
       groupcolors: Store.getters.getGroupColors,
       logo_colors: Store.getters.getLogosColors,
       model_id: product_models[selected_model_index].id,
@@ -510,8 +514,34 @@ const activityStatus = {
   },
 }
 
+const getCompany = async () => {
+  const res = await http.get('company').catch(error => {
+    handleResponseException(error)
+    console.info("error while getting company", error)
+  })
+  if (res && res.status == 200){
+    Store.dispatch("companyAction", res.data.company)
+  } else {
+    Store.dispatch("companyAction", null)
+  }
+}
+
+const getPermissions = async () => {
+  const res = await http.get('customer/permissions').catch(error => {
+    Store.commit('SET_CUSTOMER_PERMISSIONS', [])
+    handleResponseException(error)
+  })
+  if (res && res.status == 200) {
+    Store.commit('SET_CUSTOMER_PERMISSIONS', res.data)
+    return res.data;
+  } else {
+    Store.commit('SET_CUSTOMER_PERMISSIONS', [])
+    return [];
+  }
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions
 };

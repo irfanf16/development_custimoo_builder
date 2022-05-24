@@ -21,7 +21,7 @@ http.interceptors.request.use((request: AxiosRequestConfig ) => {
   if (token) {
     request.headers.Authorization = `Bearer ${token}`
   }
-  const jwtToken = localStorage.getItem('jwtToken')
+  const jwtToken = localStorage.getItem('jwtToken') ? localStorage.getItem('jwtToken') : 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvY3VzdGltb28udGVzdCIsImF1ZCI6Imh0dHBzOlwvXC9jdXN0aW1vby50ZXN0IiwiaWF0IjoxNjUxOTg1Njc4LCJleHAiOjE2NTcxNjk2NzgsInN1YiI6ODgsImNsaWVudF9pZCI6IiIsInNjb3BlIjoiIiwibWV0YWRhdGEiOnsiZmlyc3RfbmFtZSI6Inlhc2lyIiwibGFzdF9uYW1lIjoicmFzb29sIiwiZW1haWwiOiJ5YXNpci5kZXYxQGdtYWlsLmNvbSJ9fQ.pITiqq0RPBpg8fKgWuwXiFp2g9gvw7rLJY07wdBz_9I'
   if (jwtToken) {
     request.headers.CustomerToken = `${jwtToken}`
   }

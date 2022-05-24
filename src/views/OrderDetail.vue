@@ -53,7 +53,7 @@
 
                     <template v-if="item_status_activity_index==0">
                       <div class="actions" v-if="item_status_activity.status == FACTORYREJECTED">
-                        <button class="btn btn-secondary" @click="updateOrderProducts(order_item_index, item_status_activity_index)">Edit Products</button>
+                        <button class="btn btn-secondary" @click="updateOrderProducts(order_item.id, item_status_activity.id)">Edit Products</button>
                       </div>
 
                       <div class="actions" v-if="order_item.status == CUSTOMERREVIEW && item_status_activity.status == CUSTOMERREVIEW">
@@ -277,14 +277,12 @@ import {findIndex, debounce, filter} from "lodash";
     let self = this;
     let comment_id = null;
     this.isWebComponent = this.$root.$options.name == 'shadow-root'
-    if(this.isWebComponent) {
-      let params = (new URL(document.location)).searchParams;
-      this.order_id = this.$route.query.order_id;
-       comment_id = params.get("comment_id");
-    } else {
+    if(this.company.platform == "self") {
       this.order_id = this.$route.params.order_id;
-      comment_id = this.$route.query.comment_id;
+    } else {
+      this.order_id = this.$route.query.order_id;
     }
+    comment_id = this.$route.query.comment_id;
     await self.getOrderDetail();
     if(comment_id) {
       let timer = setInterval(function() {
@@ -379,6 +377,10 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public auth_customer = this.$store.getters.getCustomer
 
   //data props ends
+
+  get company():string{
+    return this.$store.getters.getCompany
+  }
 
 
 
@@ -517,23 +519,20 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
     let image = (this.$refs as Record<any,any>)['designImage'+ref_index+this.activity_navigation_index][0];
-
     const markerArea:Record<any,any> = new markerjs2.MarkerArea(image)
     markerArea.addEventListener('render', (event:Record<any,any>) => {
       activityObj.files[ref_index].file = event.dataUrl
       activityObj.files[ref_index].file_type = 'encode'
     });
-    let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
-    console.log("shadow", shadow_dom)
-    console.log("shadow123", shadow_dom.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index))
-    if(shadow_dom) {
+    if(this.isWebComponent) {
+      let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
       markerArea.targetRoot = shadow_dom.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+      markerjs2.Style.styleSheetRoot = shadow_dom;
     } else {
       markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
     }
     markerArea.renderAtNaturalSize = true;
     markerArea.show();
-    //markerArea.close();
   }
   public navigateActivitySlider(direction:string){
 
@@ -592,26 +591,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   }
 
-  updateOrderProducts(order_item_index: number, item_status_activity_index: number) {
+  updateOrderProducts(order_item_id: number, order_item_status_activity: number) {
     let self = this;
-    let order_item = JSON.parse(JSON.stringify(self.order.items[order_item_index]));
-    let order_item_status_activity = order_item.status_activities[item_status_activity_index];
-    let update_factory_product_ids: string[] = [];
-    order_item_status_activity.activity_items.forEach((activity_item: Record<any, any>) => {
-      update_factory_product_ids.push(activity_item.factory_product_id);
-    })
-    let factory_products = filter( order_item.factory_products, function(factory_product: Record<any, any>) {
-      return findIndex(update_factory_product_ids, (update_factory_product_id) => {
-        return update_factory_product_id == factory_product.id
-      }) >= 0 ? true : false;
-    })
-    //active_index key represents the product index that is currently being updated
-    let update_order_item_products_data = {
-      'active_index': 0, order_item_id: order_item.id, factory_id: order_item.factory_id, factory_products: factory_products,
-      activity_items: order_item_status_activity.activity_items
-    }
-    self.$store.dispatch("updateOrderItemProducts", update_order_item_products_data);
-    self.$router.push("/");
+    self.$router.push({path: "/", query: {update_order_product: true, order_item_id: order_item_id, activity_id: order_item_status_activity}});
   }
 
   canPerformCommentAction(comment_obj: Record<any, any>) {

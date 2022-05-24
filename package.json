@@ -11,7 +11,7 @@
     "generate-component:self": "vue-cli-service build --dest ../santa_customizer --target wc --name v-customizer ./src/webComponents/CustomizerAll.vue npm:sass-compile",
     "build:wc:customizer": "concurrently npm:sass-compile npm:generate-component",
     "build:wc:customizer:self": "concurrently npm:sass-compile npm:generate-component:self",
-    "wc-orderDetail": "vue-cli-service build --dest ../santa_order_detail --target wc --name v-order-detail ./src/webComponents/OrderDetail.vue && npm run sass-compile",
+    "wc-orderDetail": "vue-cli-service build --mode wcOrderDetail --dest ../santa_order_detail --target wc --name v-order-detail ./src/webComponents/orderDetail/wcOrderDetail.vue && npm run sass-compile",
     "build:wcOrderDetail": "concurrently npm:sass-compile npm:wc-orderDetail",
     "lint": "vue-cli-service lint"
   },
@@ -32,7 +32,7 @@
     "concurrently": "^7.0.0",
     "core-js": "^3.6.5",
     "csq-vue-multi-draggable": "^1.0.1",
-    "css-loader": "^6.5.1",
+    "css-loader": "^6.7.1",
     "fabric": "^4.4.0",
     "gleap": "^6.9.4",
     "hex-rgb": "^5.0.0",
