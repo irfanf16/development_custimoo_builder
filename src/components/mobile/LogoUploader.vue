@@ -350,13 +350,13 @@ export default class LogoUploader extends Vue {
     let payload = {
       index: index
     }
-    this.tabIndex = this.tabIndex - 1;
     let logo = setLogoSettings(index);
     logo.logoIndex = index;
     this.$store.commit('customLogos', logo)
     setTimeout(() => {
       this.$store.dispatch('deleteCustomLogoTab', payload)
     }, 500)
+    this.tabIndex = this.tabIndex - 1;
   }
   public async initFirstLogoTab(index: number){
     if(this.$store.getters.getCustomLogos().length < 1){
@@ -411,6 +411,10 @@ export default class LogoUploader extends Vue {
   public async addTab() {
     let new_tab_index = this.customLogos.length;
     let logo = setLogoSettings(new_tab_index);
+    logo.adding_tab = true
+    const payload = {
+      custom_logo: logo
+    }
     await this.$store.dispatch('setCustomLogos', logo)
     this.tabIndex = this.customLogos.length - 1
   }
