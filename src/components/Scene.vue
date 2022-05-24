@@ -1473,7 +1473,7 @@ export default class Scene extends Vue {
               index: index,
               on_all: false,
               attribute: 'originalWidth',
-              value: Math.floor(width * this.measurementRatio)
+              value: (width * this.measurementRatio).toFixed(1)
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
@@ -1485,13 +1485,13 @@ export default class Scene extends Vue {
               index: index,
               on_all: false,
               attribute: 'originalHeight',
-              value: Math.floor(height * this.measurementRatio)
+              value: (height * this.measurementRatio).toFixed(1)
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               on_all: false,
               attribute: 'originalOutLineWidth',
-              value: outLineWidth * this.measurementRatio
+              value: (outLineWidth * this.measurementRatio).toFixed(1)
             })
           } else if (e.action == 'rotate') {
             let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)),{'action':e.action})
