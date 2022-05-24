@@ -111,7 +111,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
     return this.$store.getters.getUpdateOrderItemProducts
   }
 
-  get company():string{
+  get company(): Record<any, any>{
     return this.$store.getters.getCompany
   }
 

@@ -71,7 +71,7 @@
                       </template>
                     </div>
                   </li>
-                  <li v-if="isCustomerAuthenticated && company.platform == 'self'">
+                  <li v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')">
                     <a  class="icon mr-0" @click="openCartModal">
                       <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                     </a>
@@ -153,7 +153,7 @@
                     <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
                     <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
                     <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
-                    <b-dropdown-item v-if="isCustomerAuthenticated && company.platform == 'self'"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
+                    <b-dropdown-item v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                   </b-dropdown>
                 </div>
               </div>
