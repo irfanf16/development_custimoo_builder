@@ -17,6 +17,8 @@ import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 window.io = require('socket.io-client');
 
+import { getCompany } from "@/helpers/Helpers";
+
 // console.log(localStorage.getItem('access_tokens'))
 window.Echo = new Echo({
   broadcaster: "socket.io",
@@ -35,7 +37,7 @@ window.Echo = new Echo({
     Navbar
   },
   async mounted() {
-    await this.$store.dispatch('getPlatform');
+    await getCompany();
     const token = this.$router.currentRoute.query.token
     if (token){
       let customer = await this.$store.dispatch('getCustomerFromToken', token)

@@ -39,6 +39,7 @@ export default new Vuex.Store({
       'ProductAttributes.customTextObjects',
       'ProductAttributes.customLogoObjects',
       'Auth.jwtToken',
+      'Auth.platform',
      ]
 
 

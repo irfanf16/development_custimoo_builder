@@ -6,7 +6,8 @@ const Auth:Module<any, any> = {
   state:{
     jwtToken:'',
     customer:'',
-    customer_permissions:[]
+    customer_permissions:[],
+    company: null
   },
   getters:{
     isCustomerAuthenticated: (state: any) => !!state.jwtToken,
@@ -15,7 +16,8 @@ const Auth:Module<any, any> = {
     },
     getCustomerPermissions:state => {
       return state.customer_permissions
-    }
+    },
+    getCompany: (state: any) => state.company
   },
   mutations:{
     SET_CUSTOMER(state:Record<any, any>, payload){
@@ -35,6 +37,9 @@ const Auth:Module<any, any> = {
     },
     SET_CUSTOMER_PERMISSIONS(state:Record<any, any>, payload){
       state.customer_permissions = payload
+    },
+    SET_COMPANY(state:Record<any, any>, payload){
+      state.company = payload
     }
   },
   actions:{
@@ -65,15 +70,8 @@ const Auth:Module<any, any> = {
      })
       return customer
     },
-    async permissions({commit}){
-      try {
-        return await http.get('customer/permissions').then((res) => {
-          commit('SET_CUSTOMER_PERMISSIONS', res.data)
-        })
-      }
-      catch (e:any) {
-        commit('SET_CUSTOMER_PERMISSIONS', [])
-      }
+    async companyAction({commit}, payload){
+      commit('SET_COMPANY', payload)
     }
   }
 }

@@ -156,6 +156,7 @@
 <script lang="ts">
   import {Vue, Component, Mixins } from 'vue-property-decorator'
   import ErrorMessages from "@/mixins/ErrorMessages";
+  import {getPermissions} from "@/helpers/Helpers";
 
   @Component<LoginForm>({})
   export default class LoginForm extends Mixins(ErrorMessages) {
@@ -193,7 +194,7 @@
           await this.$store.dispatch('getLockerRoomColors')
           await this.$store.dispatch('getLockers')
           await this.$store.dispatch('getNotifications')
-          await  this.$store.dispatch('permissions')
+          await getPermissions()
           await this.$store.dispatch('getCartServer', {})
           this.email = ''
           this.password = ''
@@ -212,7 +213,7 @@
           this.$store.commit('SET_RECENT_LOGOS')
           await this.$store.dispatch('getLockerRoomColors')
           await this.$store.dispatch('getNotifications')
-          await  this.$store.dispatch('permissions')
+          await  getPermissions()
           this.showToast(res.data.message, 'SUCCESS')
           for (let key in this.form) {
             Vue.set(this.form, key, '')

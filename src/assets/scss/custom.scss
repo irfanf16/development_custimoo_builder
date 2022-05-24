@@ -4207,7 +4207,9 @@ $fontSize: 0.5;
 .upload_logo {
     &.mobile {
         overflow-x: hidden;
-
+        a{
+            outline: 0;
+        }
         .upload-logo-content {
             display: none;
         }

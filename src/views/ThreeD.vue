@@ -216,6 +216,7 @@ import CustomTabs from "@/components/CustomTabs.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
+import {getPermissions} from "@/helpers/Helpers";
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -319,7 +320,7 @@ Vue.filter('formatDate', function(value:string) {
     }
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
-      await  this.$store.dispatch('permissions')
+      await  getPermissions()
     }
 
 

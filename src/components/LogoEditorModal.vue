@@ -40,15 +40,14 @@
                 Recolor Logo
               </b-form-checkbox>
 
-              <div style="width: 50%"  class="child-check" v-if="this.$store.getters.getColorCheck">
+              <div style="width: 50%" class="child-check" v-if="this.$store.getters.getColorCheck">
                 <div>
-                  <b-button  class="color-circle" :id="'colors'" @click="toggleColorTabs()"
+                  <b-button style="width:36px !important; height: 36px;" class="color-circle" :id="'colors-' + customLogoIndex" @click="toggleColorTabs()"
                         :style="{background: selectedColor}" >
                   </b-button>
-
-                  <b-popover  :show.sync="colorTabClick" :target="'colors'" custom-class="share-tooltip" triggers="click" >
+                  <b-popover  :show.sync="colorTabClick" :target="'colors-' + customLogoIndex" custom-class="share-tooltip" triggers="click" >
                     <span @click="closeColorTabs" class="modal-close"><BIconX /></span>
-                    <ColorTabs   :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
+                    <ColorTabs :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
                   </b-popover>
                 </div>
 
@@ -59,7 +58,7 @@
           <div style="flex-basis: 50%">
             <div class="text-center fs-3" style="line-height: 1">Preview</div>
             <div class="d-flex align-items-center justify-content-center mt-2 p-3" style="background: #cdcdcd; flex-basis: 50%;height: 206px">
-              <img :src="logoEditorObj.base64" style="max-height: 100%; max-width: 100%"/>
+              <img :src="storageUrl+logoEditorObj.image" style="max-height: 100%; max-width: 100%"/>
             </div>
           </div>
         </div>
@@ -100,6 +99,7 @@ import ModalAction from "@/mixins/ModalAction";
       }
     })
     export default class LogoEditorModal extends Mixins(ErrorMessages, ModalAction) {
+      private storageUrl = process.env.VUE_APP_STORAGE_URL
       public timeout =  0;
       public locker_selected = true;
       public colorTabClick = false;
@@ -132,8 +132,8 @@ import ModalAction from "@/mixins/ModalAction";
         if(this.timeout) clearTimeout(this.timeout);
         this.timeout = setTimeout(async () => {
           //search function
-          let res = await this.getLogoFromServer(this.logo_id,'floodfill',this.$store.getters.getLogoEditor.base64,color)
-          await this.$store.dispatch('editLogo',{key:'base64',value:res.data.logo})
+          let res = await this.getLogoFromServer(this.logo_id,'floodfill', this.$store.getters.getLogoEditor.image, color)
+          await this.$store.dispatch('editLogo',{key:'image', value: res.data.logo})
         }, 300);
 
       }
@@ -145,7 +145,7 @@ import ModalAction from "@/mixins/ModalAction";
         this.showLoader = true
         let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
         let data = new FormData();
-        data.append("logo" , this.$store.getters.getLogoEditor.base64);
+        data.append("logo" , this.$store.getters.getLogoEditor.image);
         data.append("product_id" , this.$store.getters.getSelectedProduct.id);
         http.post('/customer/update/logo', data)
           .then(resp => {
@@ -218,13 +218,13 @@ import ModalAction from "@/mixins/ModalAction";
 
 
       public async toggleRadio(type:string) {
-        let res = await this.getLogoFromServer(this.logo_id,type,this.$store.getters.getLogoEditor.originalBase64)
-        await this.$store.dispatch('editLogo',{key:'base64',value:res.data.logo})
+        let res = await this.getLogoFromServer(this.logo_id,type,this.$store.getters.getLogoEditor.originalImage)
+        await this.$store.dispatch('editLogo',{key: 'image', value: res.data.logo})
 
       }
 
-      public getLogoFromServer(logo_id:number,type:string,base64 = '',color='') {
-        return http.post('edit-logo', {logo_id,type,base64,color})
+      public getLogoFromServer(logo_id:number, type:string, image = '', color='') {
+        return http.post('edit-logo', {logo_id, type, image, color})
       }
 
       public getColors() {
@@ -248,9 +248,11 @@ import ModalAction from "@/mixins/ModalAction";
       }
       public toggleColorTabs() {
         this.colorTabClick = !this.colorTabClick
+        console.log("open" , this.colorTabClick)
       }
       public closeColorTabs() {
         this.colorTabClick = false
+        console.log("close" , this.colorTabClick)
       }
     }
 </script>
@@ -419,6 +421,24 @@ import ModalAction from "@/mixins/ModalAction";
           }
         }
       }
+    }
+
+    .checkboxes_container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    
+        & > div {
+            padding: 7px 10px;
+            border-radius: 4px;
+            &:hover {
+                background: #f5f5f5;
+            }
+        }
+    
+        .child-check {
+            padding: 7px 7px 7px 25px;
+        }
     }
 
 </style>
