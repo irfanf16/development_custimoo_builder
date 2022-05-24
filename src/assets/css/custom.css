@@ -88,7 +88,7 @@ button:focus, button:active {
   box-shadow: none !important;
 }
 
-#app {
+#santa {
   overflow: hidden;
   width: 100%;
   height: 100%;
@@ -3438,6 +3438,7 @@ button:focus, button:active {
 }
 
 .mobile-nav .dropdown-menu {
+  top: 20px !important;
   border: none;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -3534,7 +3535,9 @@ button:focus, button:active {
   font-size: 1.5em;
 }
 .customize_controls .close.maximizer, .upload-logo-opener .close.maximizer {
-  background: #219F84;
+  background: #F1C242;
+  font-size: 0.7em;
+  opacity: 1;
 }
 
 .mobile_controls input, .mobile_controls select {
@@ -4250,6 +4253,9 @@ button:focus, button:active {
 
 .upload_logo.mobile {
   overflow-x: hidden;
+}
+.upload_logo.mobile a {
+  outline: 0;
 }
 .upload_logo.mobile .upload-logo-content {
   display: none;

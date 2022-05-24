@@ -97,7 +97,7 @@ window.Echo = new Echo({
   },
 });
 
-import { getPlatform } from "@/helpers/Helpers";
+import { getCompany } from "@/helpers/Helpers";
 export default {
   store, router,
   name: "Customizer",
@@ -142,7 +142,7 @@ export default {
       ubuntu_font.append = '@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap")'
       document.head.append(ubuntu_font)
     }
-    await getPlatform();
+    await getCompany();
     if (!this.$store.getters.getCustomer && localStorage.getItem('jwtToken')) {
       let token = localStorage.getItem('jwtToken')
       let response = await this.$store.dispatch('getCustomerFromToken', token)
