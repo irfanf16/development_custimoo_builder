@@ -40,13 +40,12 @@
                 Recolor Logo
               </b-form-checkbox>
 
-              <div style="width: 50%"  class="child-check" v-if="this.$store.getters.getColorCheck">
+              <div style="width: 50%" class="child-check" v-if="this.$store.getters.getColorCheck">
                 <div>
-                  <b-button  class="color-circle" :id="'colors'" @click="toggleColorTabs()"
+                  <b-button style="width:36px !important; height: 36px;" class="color-circle" :id="'colors-' + customLogoIndex" @click="toggleColorTabs()"
                         :style="{background: selectedColor}" >
                   </b-button>
-
-                  <b-popover  :show.sync="colorTabClick" :target="'colors'" custom-class="share-tooltip" triggers="click" >
+                  <b-popover  :show.sync="colorTabClick" :target="'colors-' + customLogoIndex" custom-class="share-tooltip" triggers="click" >
                     <span @click="closeColorTabs" class="modal-close"><BIconX /></span>
                     <ColorTabs :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo"/>
                   </b-popover>
@@ -249,9 +248,11 @@ import ModalAction from "@/mixins/ModalAction";
       }
       public toggleColorTabs() {
         this.colorTabClick = !this.colorTabClick
+        console.log("open" , this.colorTabClick)
       }
       public closeColorTabs() {
         this.colorTabClick = false
+        console.log("close" , this.colorTabClick)
       }
     }
 </script>
@@ -420,6 +421,24 @@ import ModalAction from "@/mixins/ModalAction";
           }
         }
       }
+    }
+
+    .checkboxes_container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    
+        & > div {
+            padding: 7px 10px;
+            border-radius: 4px;
+            &:hover {
+                background: #f5f5f5;
+            }
+        }
+    
+        .child-check {
+            padding: 7px 7px 7px 25px;
+        }
     }
 
 </style>
