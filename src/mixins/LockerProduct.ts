@@ -169,7 +169,6 @@ export class handleMainProducts extends Vue {
     await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
     //let update_order_products_data = response.data.update_order_products_data;
     let update_order_product = response.data.update_order_product;
-    console.log("update_order_product", update_order_product)
     if(update_order_product) {
       this.updateOrderItemProducts = response.data.update_order_products_data;
     }

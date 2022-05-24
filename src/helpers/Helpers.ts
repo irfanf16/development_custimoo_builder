@@ -486,20 +486,34 @@ const activityStatus = {
   },
 }
 
-const getPlatform = async () => {
-  const res = await http.get('platform').catch(error => {
+const getCompany = async () => {
+  const res = await http.get('company').catch(error => {
     handleResponseException(error)
-    console.info("error while getting platform", error)
+    console.info("error while getting company", error)
   })
   if (res && res.status == 200){
-    Store.dispatch("setPlatformAction", res.data.company)
+    Store.dispatch("companyAction", res.data.company)
   } else {
-    Store.dispatch("setPlatformAction", null)
+    Store.dispatch("companyAction", null)
+  }
+}
+
+const getPermissions = async () => {
+  const res = await http.get('customer/permissions').catch(error => {
+    Store.commit('SET_CUSTOMER_PERMISSIONS', [])
+    handleResponseException(error)
+  })
+  if (res && res.status == 200) {
+    Store.commit('SET_CUSTOMER_PERMISSIONS', res.data)
+    return res.data;
+  } else {
+    Store.commit('SET_CUSTOMER_PERMISSIONS', [])
+    return [];
   }
 }
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getPlatform
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getCompany, getPermissions
 };

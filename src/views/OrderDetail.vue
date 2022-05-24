@@ -277,7 +277,7 @@ import {findIndex, debounce, filter} from "lodash";
     let self = this;
     let comment_id = null;
     this.isWebComponent = this.$root.$options.name == 'shadow-root'
-    if(this.getPlatform.platform == "self") {
+    if(this.company.platform == "self") {
       this.order_id = this.$route.params.order_id;
     } else {
       this.order_id = this.$route.query.order_id;
@@ -378,8 +378,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   //data props ends
 
-  get getPlatform():string{
-    return this.$store.getters.getPlatform
+  get company():string{
+    return this.$store.getters.getCompany
   }
 
 

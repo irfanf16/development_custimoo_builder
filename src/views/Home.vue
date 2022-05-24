@@ -50,7 +50,7 @@
                   <li class="d-flex flex-wrap align-items-center">
                     <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                     <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && getPlatform.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
+                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                   </li>
                   <li><a>
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
@@ -150,7 +150,7 @@
                     <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
                     <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
                     <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
-                    <b-dropdown-item v-if="isCustomerAuthenticated && getPlatform.platform == 'self'"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
+                    <b-dropdown-item v-if="isCustomerAuthenticated && company.platform == 'self'"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                   </b-dropdown>
                 </div>
               </div>
@@ -301,7 +301,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
-import {logData, getActiveProductData} from "@/helpers/Helpers";
+import {logData, getActiveProductData, getPermissions} from "@/helpers/Helpers";
 import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
 
@@ -370,7 +370,7 @@ Vue.filter('formatDate', function(value:string) {
 
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
-      await  this.$store.dispatch('permissions')
+      await  getPermissions()
       let show_cart = await this.$store.getters.getShowCart
       if(show_cart){
         this.showVModal('cart-modal');
@@ -670,8 +670,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
-  get getPlatform():string{
-    return this.$store.getters.getPlatform
+  get company():string{
+    return this.$store.getters.getCompany
   }
 
   get cartItems() {
@@ -844,14 +844,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.gotoLogin()
   }
   public gotoLogin(){
-    if (this.getPlatform.platform == 'self'){
+    if (this.company.platform == 'self'){
       this.$modal.show('loginModal')
     }
     else{
-      if(this.getPlatform.login_code.type == 'url') {
-        window.location.href = this.getPlatform.login_code.action
+      if(this.company.login_code.type == 'url') {
+        window.location.href = this.company.login_code.action
       } else {
-        eval(this.getPlatform.action)
+        eval(this.company.action)
       }
     }
   }
