@@ -184,8 +184,8 @@ export default class CustomTabs extends Vue {
   public showLoader = false
   public designsIndex = 0;
 
-  get platform():string{
-    return localStorage.getItem('platform') as string
+  get company(): Record<any, any>{
+    return this.$store.getters.getCompany
   }
 
   get login_code(): Record<any, any>{
@@ -223,7 +223,7 @@ export default class CustomTabs extends Vue {
     this.gotoLogin()
   }
   public gotoLogin(){
-    if (this.platform == 'self'){
+    if (this.company.platform == 'self'){
       this.$modal.show('loginModal')
     }
     else{
