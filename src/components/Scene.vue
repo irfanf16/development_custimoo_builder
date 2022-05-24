@@ -1737,8 +1737,8 @@ export default class Scene extends Vue {
             await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
               index: logoIndex,
               data: {
-                width: img.width,
-                height: img.height,
+                actualWidth: img.width,
+                actualHeight: img.height,
                 originalWidth: width,
                 originalHeight: height,
                 scaleX: img.scaleX,
@@ -1874,8 +1874,8 @@ export default class Scene extends Vue {
         self.$store.dispatch('updateCustomTextWithoutTrigger', {
           index: textIndex,
           data: {
-            width: textBox.width,
-            height: textBox.height,
+            actualWidth: textBox.width,
+            actualHeight: textBox.height,
             originalWidth: width,
             originalHeight: height,
             originalOutLineWidth: outLineWidth,
