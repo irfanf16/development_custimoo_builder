@@ -242,9 +242,12 @@ export default class CustomizationText extends Vue {
   }
 
   public fontOptionChanged(index: number, event: any) {
-    console.log(index, event)
+    console.log(index, event , this.isFontChanged)
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', { index: index, on_all: false, attribute: 'fontFamily', value: event })
+    if(index == 0 && !this.isFontChanged){
+      this.$store.dispatch('updateCustomTextAttribute', { index: 1, on_all: false, attribute: 'fontFamily', value: event })
+    } //  setting same font as text for number | Done by: Uzair
   }
 
   public changeSide(index: number, event: string) {

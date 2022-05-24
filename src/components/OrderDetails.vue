@@ -61,7 +61,6 @@ import {fabric} from 'fabric'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
-import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
@@ -70,7 +69,6 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
 
 @Component<OrderDetails>({
   components: {
-    DesignPdfView,
     ProductionScene,
     AddLockerRoomModal
   },

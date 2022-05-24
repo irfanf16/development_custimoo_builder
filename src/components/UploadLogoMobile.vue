@@ -108,7 +108,7 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
-import {fileToBase64, getLogoObject, setLogoSettings} from "../helpers/Helpers"
+import {getLogoObject, setLogoSettings} from "../helpers/Helpers"
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import ModalAction from "@/mixins/ModalAction";
 
@@ -186,8 +186,8 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   public openLogoEditor() {
     //set logo id and default image of logo
     this.$store.dispatch('editLogo',{key:'id',value:this.customLogos[this.customLogoIndex].id,api_call:false})
-    this.$store.dispatch('editLogo',{key:'base64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
-    this.$store.dispatch('editLogo',{key:'originalBase64',value:this.customLogos[this.customLogoIndex].base64_logo,api_call:false})
+    this.$store.dispatch('editLogo',{key: 'image', value: this.customLogos[this.customLogoIndex].url, api_call:false})
+    this.$store.dispatch('editLogo',{key: 'originalImage', value:this.customLogos[this.customLogoIndex].original_logo, api_call:false})
     this.$store.dispatch('toggleLogoCheck', {type:'color',val:false})
     this.$store.dispatch('toggleLogoCheck', {type:'background',val:false})
     this.showVModal('logo-modal')
@@ -254,9 +254,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
       this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','Error');
       return false;
     }
-    fileToBase64(img).then(base64_string => {
-      custom_logo.base64_logo = base64_string
-    })
 
     let fd = new FormData()
     let header = {

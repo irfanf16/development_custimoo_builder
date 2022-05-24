@@ -46,7 +46,7 @@ const getRandom = (length = 5, type = 'number') => {
   return rand_string;
 }
 
-const getLogoObject = () => {
+const getLogoObject = (index = 0) => {
   const logo_settings_object = getLogoSettingsObject();
   return {
     id: null,
@@ -62,10 +62,9 @@ const getLogoObject = () => {
     is_transparent: false,
     original_logo: null,
     transparent_logo: null,
-    base64_logo: null,
     originalWidth: logo_settings_object.width,
     originalHeight: logo_settings_object.height,
-    logoIndex:0
+    logoIndex:index
   }
 }
 
@@ -81,7 +80,7 @@ const getLogoSettings = (index = -1, default_obj = true,product_id = 0) => {
     const product = Store.getters.getProducts.find((prd:any) => {
       return prd.id == product_id
     })
-    return product ? product.logos_setting[index] : {}
+    return product && product.logos_setting[index] ? product.logos_setting[index] : {}
   }
   const logo_settings = Store.getters.getSelectedProduct ? Store.getters.getSelectedProduct.logos_setting : [];
   if (logo_settings.length > 0) {
@@ -114,6 +113,28 @@ const setLogoSettings = (logo_index: number, logo: Record<any, any> | null = nul
   logo.originalWidth =  logo_settings.width;
   logo.originalHeight =  logo_settings.height;
   logo.logoIndex =  logo_index;
+  return logo;
+}
+
+const getProductLogoSetting = (prd_id:number, index:number) => {
+  let logo : Record<any, any> ={}
+  const logo_settings = getLogoSettings(index, false, prd_id);
+  if (Object.keys(logo_settings).length){
+    logo.id = null;
+    logo.url = null;
+    logo.width =  logo_settings.width;
+    logo.height =  logo_settings.height;
+    logo.x_axis =  logo_settings.x_axis;
+    logo.y_axis =  logo_settings.y_axis;
+    logo.rotation =  logo_settings.rotation;
+    logo.haveControls =  !logo_settings.is_locked;
+    logo.originalWidth =  logo_settings.width;
+    logo.originalHeight =  logo_settings.height;
+    logo.logoIndex =  index;
+    logo.side = logo_settings.side
+  }else{
+    logo = getLogoObject(index)
+  }
   return logo;
 }
 
@@ -218,8 +239,7 @@ const getReminderOptions = () => {
   return optionArray;
 }
 
-const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number):Promise<void> => {
-
+const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id = 0):Promise<void> => {
   const customTabIndex = logoIndex
   const custom_logos = Store.getters.getCustomLogos()
   let logo_url = '';
@@ -228,7 +248,6 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number):Promise<
   const original_logo = logo.logo_url;
   const is_transparent = false;
   logo_url = original_logo;
-
   const payload = [{
     index: customTabIndex,
     attribute: 'url',
@@ -266,7 +285,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number):Promise<
       index: customTabIndex,
       attribute: 'original_logo_url',
       value: logo.original_logo_url
-    }
+    },
 
   ];
   let getLogos = []
@@ -278,10 +297,16 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number):Promise<
   Store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(Store.getters.getCustomLogoObject)), action: 'customLogos' })
   // Store.commit('SET_COLORS_FROM_RECENT',true)
   payload.forEach(async (data) => {
-    await Store.dispatch('updateCustomLogoAttribute', data)
+    if (prd_id){
+      const new_data = {
+        logo: data,
+        id:prd_id
+      }
+      Store.commit('UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT', new_data)
+    }else{
+      await Store.dispatch('updateCustomLogoAttribute', data)
+    }
   })
-
-
   if(customTabIndex == 0) {
     //update team logo url in all product logos
     const logo_:any = {}
@@ -518,5 +543,5 @@ const getPermissions = async () => {
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getCompany, getPermissions
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions
 };

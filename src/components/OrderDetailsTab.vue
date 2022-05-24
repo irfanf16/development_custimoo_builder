@@ -62,13 +62,11 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
-import {fabric} from 'fabric'
+import {Component, Mixins} from 'vue-property-decorator'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
 import ConfirmOrderTab from "@/views/ConfirmOrderTab.vue";
-import DesignPdfView from "@/components/DesignPdfView.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
@@ -82,7 +80,7 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
 
 @Component<OrderDetailsTab>({
   components: {
-    DesignPdfView, ProductionScene,
+    ProductionScene,
     AddLockerRoomModal, ConfirmOrderTab,
     LoginForm
   },
