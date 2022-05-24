@@ -165,6 +165,13 @@ export class handleMainProducts extends Vue {
     self.$store.dispatch("updateMainProductsInfo", main_products_info);
     let retrieved_products = response.data.products.data;
     let stock_count = response.data.stock_count;
+    await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
+    await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
+    //let update_order_products_data = response.data.update_order_products_data;
+    let update_order_product = response.data.update_order_product;
+    if(update_order_product) {
+      this.updateOrderItemProducts = response.data.update_order_products_data;
+    }
     await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: append_products});
     await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
     await this.$store.dispatch('setStockCount',stock_count);
@@ -210,7 +217,7 @@ export class handleMainProducts extends Vue {
             fillColorPantone: fill_color_pantone,
             outLineColor: obj.secondColor.value,
             outLineColorPantone: outLine_color_pantone,
-            outLineWidth: 0,
+            outLineWidth: 2,
             textIndex: index,
             selectColor: false
           }

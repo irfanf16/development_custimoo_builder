@@ -89,7 +89,7 @@
                   <template v-if="usingColorLogos"> Original Colors</template>
                   <template v-else> Logo Colors</template>
                 </b-button>
-                <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" :class="!(usingColorLogos && imageColors.length > 1) ? 'invisible': 'shuffle-mobile'"
+                <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors($event)" :class="!(usingColorLogos && imageColors.length > 1) ? 'invisible': 'shuffle-mobile'"
                           variant="secondary"><b-icon-shuffle />
                 </b-button>
                 <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
@@ -255,7 +255,8 @@ export default class LogoUploader extends Vue {
   }
 
 
-  shuffleLogoColors() {
+  shuffleLogoColors(e:Record<any, any>) {
+    e.currentTarget.classList.remove('shuffle-mobile')
     if(this.imageColors && this.imageColors.length > 1) {
       this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
       /*.filter((imageColor: Record<any, any>, icIdx) => {
@@ -349,13 +350,13 @@ export default class LogoUploader extends Vue {
     let payload = {
       index: index
     }
-    this.tabIndex = this.tabIndex - 1;
     let logo = setLogoSettings(index);
     logo.logoIndex = index;
     this.$store.commit('customLogos', logo)
     setTimeout(() => {
       this.$store.dispatch('deleteCustomLogoTab', payload)
     }, 500)
+    this.tabIndex = this.tabIndex - 1;
   }
   public async initFirstLogoTab(index: number){
     if(this.$store.getters.getCustomLogos().length < 1){
@@ -410,7 +411,11 @@ export default class LogoUploader extends Vue {
   public async addTab() {
     let new_tab_index = this.customLogos.length;
     let logo = setLogoSettings(new_tab_index);
-    await this.$store.dispatch('setCustomLogos', logo)
+    logo.adding_tab = true
+    const payload = {
+      custom_logo: logo
+    }
+    await this.$store.dispatch('setCustomLogos', payload)
     this.tabIndex = this.customLogos.length - 1
   }
 }
@@ -443,10 +448,10 @@ export default class LogoUploader extends Vue {
     opacity: 0;
   }
   &:after{
-    animation: pulse 1s ease-out 3;
+    animation: pulse 1s ease-out infinite;
   }
   &:before{
-    animation: pulse 1s ease-out 3;
+    animation: pulse 1s ease-out infinite;
     animation-delay: 0.2s;
   }
 }

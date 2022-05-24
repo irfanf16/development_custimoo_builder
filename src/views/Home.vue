@@ -50,7 +50,7 @@
                   <li class="d-flex flex-wrap align-items-center">
                     <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                     <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
+                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                   </li>
                   <li><a>
                     <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
@@ -71,7 +71,7 @@
                       </template>
                     </div>
                   </li>
-                  <li v-if="isCustomerAuthenticated">
+                  <li v-if="isCustomerAuthenticated && getPlatform.platform == 'self'">
                     <a  class="icon mr-0" @click="openCartModal">
                       <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                     </a>
@@ -118,6 +118,9 @@
                   <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="switchTabs(activeTab-1, false)" v-if="activeTab > 0" style="line-height: normal">
                     <b-icon-arrow-left-short />
                   </button>
+                  <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="showDesign" v-else-if="selectedProduct && (!activeTab || activeTab<0)" style="line-height: normal">
+                    <b-icon-arrow-left-short />
+                  </button>
                   <button class="btn text-white fs-4 border-0 mr-3 p-0 btn-secondary btn-sm" @click="switchTabs(activeTab+1, false)" v-if="activeTab < 4" style="line-height: normal">
                     <b-icon-arrow-right-short />
                   </button>
@@ -150,7 +153,7 @@
                     <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
                     <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
                     <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
-                    <b-dropdown-item v-if="isCustomerAuthenticated && platform == 'self'"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
+                    <b-dropdown-item v-if="isCustomerAuthenticated && company.platform == 'self'"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                   </b-dropdown>
                 </div>
               </div>
@@ -252,8 +255,11 @@
             </ul>
           </div>
         </b-col>
+          <div class="mobile-reset" v-if="mobileScreen && customLogos[0].url">
+            <b-button @click="resetStore" variant="secondary" class="p-1"><b-icon-arrow-repeat /></b-button>
+          </div>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-          <ItemToCustomize :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products"/>
+          <ItemToCustomize @switchTabs="switchTabs(0, true)" :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products"/>
           <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
             <span class="close" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
             <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
@@ -263,8 +269,14 @@
             </div>
           </div>
           <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">
-            <span class="fs-3 font-weight-bold">Logo Uploader</span>
-            <span @click="switchTabs(0, true)" class="maximizer close"><b-icon-plus flip-h /></span>
+            <span class="fs-3 font-weight-bold d-inline-flex pb-1">Logo Uploader</span>
+            <span @click="switchTabs(0, true)" class="maximizer close">
+              <svg height="1em" width="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                   viewBox="0 0 16 16">
+                <polygon points="0,11.8 0,0 11.8,0 "/>
+                <polygon points="16,4.3 16,16 4.3,16 "/>
+              </svg>
+            </span>
           </div>
         </b-col>
         </template>
@@ -301,7 +313,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
-import {logData, getActiveProductData} from "@/helpers/Helpers";
+import {logData, getActiveProductData, getPermissions} from "@/helpers/Helpers";
 import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
 
@@ -370,7 +382,7 @@ Vue.filter('formatDate', function(value:string) {
 
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
-      await  this.$store.dispatch('permissions')
+      await  getPermissions()
       let show_cart = await this.$store.getters.getShowCart
       if(show_cart){
         this.showVModal('cart-modal');
@@ -412,10 +424,10 @@ Vue.filter('formatDate', function(value:string) {
       this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
     }
 
-  },
-   destroyed() {
-    this.$store.dispatch("updateOrderItemProducts", null);
   }
+  //  destroyed() {
+  //   this.$store.dispatch("updateOrderItemProducts", null);
+  // }
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
@@ -447,6 +459,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public showOtherColors = false
   private playersDataHeight = 0
   public updated_order_products: Record<any, any>[] = []
+  public updateOrderItemProducts: Record<any, any> | null = null;
 
   private updateOtherTab(value:boolean){
     this.showOtherTab = value
@@ -513,9 +526,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('SET_RECENT_LOGOS')
   }
 
-  get updateOrderItemProducts() {
-    return this.$store.getters.getUpdateOrderItemProducts
-  }
+  // get updateOrderItemProducts() {
+  //   return this.$store.getters.getUpdateOrderItemProducts
+  // }
 
   get notifications(){
     return this.$store.getters.getNotifications
@@ -669,12 +682,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
-  get platform():string{
-    return localStorage.getItem('platform') as string
+  get company():string{
+    return this.$store.getters.getCompany
   }
-  get login_code(): Record<any, any>{
-    return JSON.parse(localStorage.getItem('login_code') as string)
-  }
+
   get cartItems() {
     return this.$store.getters.getCartItems
   }
@@ -845,14 +856,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.gotoLogin()
   }
   public gotoLogin(){
-    if (this.platform == 'self'){
+    if (this.company.platform == 'self'){
       this.$modal.show('loginModal')
     }
     else{
-      if(this.login_code.type == 'url') {
-        window.location.href = this.login_code.action
+      if(this.company.login_code.type == 'url') {
+        window.location.href = this.company.login_code.action
       } else {
-        eval(this.login_code.action)
+        eval(this.company.action)
       }
     }
   }
@@ -1099,7 +1110,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self = this;
     let sync_id = this.$route.query.sync_id;
     if(url == null) {
-       url = `/list/products`;
+      url = `/list/products`;
     }
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
     if(!url_obj.searchParams.has("customized")) {
@@ -1110,6 +1121,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
     if(self.search_products && !url_obj.searchParams.has("title")) {
       url_obj.searchParams.append('title', self.search_products)
+    }
+    if(this.$route.query.update_order_product) {
+      url_obj.searchParams.append('update_order_product', this.$route.query.update_order_product);
+      url_obj.searchParams.append('order_item_id', this.$route.query.order_item_id);
+      url_obj.searchParams.append('activity_id', this.$route.query.activity_id);
+       //this.$router.replace('/')
     }
     url = url_obj.pathname + url_obj.search;
     if(sync_id) {
@@ -1136,8 +1153,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         await self.$store.dispatch('setSearchLoader', false)
       }
     }, (error) => {
-      console.log("fdsfdsdf")
-      // console.error("Error while getting order detail", error.response.data.message)
+      console.error("Error while getting order detail", error?.response?.data?.message)
     })
   }
 
@@ -1147,29 +1163,38 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if(updated_product == null) {
       return false;
     }
-    let order_item_factory_product_index = self.updateOrderItemProducts.active_index;
-    updated_product["id"] = self.updateOrderItemProducts.factory_products[order_item_factory_product_index].id;
+    let order_product_active_index =  self.updateOrderItemProducts.active_index;
+    let order_product_updated_index =  (action == "next") ? order_product_active_index + 1 : order_product_active_index - 1;
+
+    updated_product["id"] = self.updateOrderItemProducts.factory_products[order_product_active_index].id;
     updated_product["status"] = "submitted_for_factory_review";
-    self.updated_order_products[self.updateOrderItemProducts.active_index] = updated_product
+    self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
-    order_item_factory_product_index = (action == "next") ? ++order_item_factory_product_index : --order_item_factory_product_index;
-    url    += `&active_product_id=${self.updateOrderItemProducts.factory_products[order_item_factory_product_index].product_id}`;
-    await self.$store.dispatch("updateOrderItemProducts", {update_key: 'active_index', key_value: order_item_factory_product_index});
+    this.updateOrderItemProducts["active_index"] = order_product_updated_index;
+    url    += `&update_order_product_id=${self.updateOrderItemProducts.factory_products[order_product_updated_index].product_id}`;
+    //await self.$store.dispatch("updateOrderItemProducts", {update_key: 'active_index', key_value: order_item_factory_product_index});
     await self.retrieveProducts(url);
   }
+
   async UpdateOrderProducts() {
     let self = this;
     let updated_product = await getActiveProductData();
     if(updated_product == null) {
       return false;
     }
-    updated_product["id"] = self.updateOrderItemProducts.factory_products[self.updateOrderItemProducts.active_index].id;
+    let order_product_active_index =  self.updateOrderItemProducts.active_index;
+    let order_item_id = self.updateOrderItemProducts.order_item_id;
+    updated_product["id"] = self.updateOrderItemProducts.factory_products[order_product_active_index].id;
     updated_product["status"] = "submitted_for_factory_review";
-    self.updated_order_products[self.updateOrderItemProducts.active_index] = updated_product;
-    let url = `order_item/${self.updateOrderItemProducts.order_item_id}/update/products`;
-    http.post(url, {factory_products: self.updated_order_products}).then((res: any) => {
+    self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product;
+    let url = `order_item/${order_item_id}/update/products`;
+    http.post(url, {factory_products: self.updateOrderItemProducts.factory_products}).then((res: any) => {
       if (res.data.success == true) {
-        self.$router.push({name: "OrderDetail", params: { order_id: self.updateOrderItemProducts.order_item_id }});
+        if(this.$root.$options.shadowRoot) {
+          window.location.href = `http://santa_order_detail.test/#/?order_id=${self.updateOrderItemProducts?.order_id}`;
+        } else {
+          self.$router.push({name: "OrderDetail", params: { order_id: order_item_id }});
+        }
       }
     }).catch(err => {
       this.showErrorArr(err.response.data.errors)
@@ -1753,5 +1778,20 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 }
 .customize_controls{
   padding-bottom: 0 !important;
+}
+
+.mobile-reset{
+  position: fixed;
+  top: 50%;
+  right: 0;
+  z-index: 1000;
+
+  .btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: normal;
+    border-radius: 5px 0 0 5px;
+  }
 }
 </style>

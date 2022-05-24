@@ -28,7 +28,6 @@ import {
   faEyeSlash,
   faFillDrip,
   faFolder,
-  faFolderOpen,
   faFutbol,
   faHockeyPuck,
   faImage,
@@ -97,6 +96,8 @@ window.Echo = new Echo({
   },
 });
 
+import { getCompany } from "@/helpers/Helpers";
+
 export default {
   store, router,
   name: "Customizer",
@@ -114,13 +115,31 @@ export default {
     }
   },
   mounted: async function() {
+    let elem = document.createElement('link');
+    elem.rel = ' stylesheet'
+    elem.type = 'text/css';
+    elem.href= 'https://cdn.custimoo.com/gulip/gulip.min.css';//Link of the css file
+    document.head.appendChild(elem);
+
+    if(process.env.NODE_ENV === 'production') {
+      window.addEventListener('keydown', (e) => {
+        if ((e.altKey === true || e.metaKey === true) && (e.key === 'u' ||  e.key === 'U')) {
+          Gleap.startFeedbackFlow("bugreporting")
+        }
+      });
+      window.addEventListener('touchstart', (e) => {
+        if(e.touches.length > 2) {
+          Gleap.startFeedbackFlow("bugreporting")
+        }
+      })
+    }
+
     if(this.$root.$options.shadowRoot) {
       let ubuntu_font = document.createElement("style")
       ubuntu_font.append = '@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap")'
       document.head.append(ubuntu_font)
-      console.log("font appended")
     }
-    await this.$store.dispatch('getPlatform');
+    await getCompany();
     if (!this.$store.getters.getCustomer && localStorage.getItem('jwtToken')) {
       let token = localStorage.getItem('jwtToken')
       let response = await this.$store.dispatch('getCustomerFromToken', token)

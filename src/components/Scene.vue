@@ -19,7 +19,7 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import {setLogoSettings} from "@/helpers/Helpers";
+import {getProductLogoSetting, setLogoSettings} from "@/helpers/Helpers";
 
 @Component<Scene>({
   async mounted() {
@@ -117,9 +117,13 @@ import {setLogoSettings} from "@/helpers/Helpers";
         if('textIndex' in target) {
           self.$store.dispatch('updateCustomTextAttribute', {index: target.textIndex, on_all: true, attribute: 'text', value: ''})
         }else {
-          let logo = setLogoSettings(target.logoIndex);
+          let logo = getProductLogoSetting(self.selectedProductId, target.logoIndex);
+          logo.removeLogo = true
+          let payload = {
+            custom_logo : logo
+          }
           logo.logoIndex = target.logoIndex;
-          self.$store.commit('customLogos', logo)
+          self.$store.commit('customLogos', payload)
           self.$store.commit('SET_LOGO_COLORS', []);
           self.$store.commit('SET_INITIAL_LOGO_COLORS', []);
         }
@@ -723,7 +727,7 @@ export default class Scene extends Vue {
     this.initialSvgGroups = []
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if(!this.containsObject({ id: item.id })) {
+      if(!item.id.includes('noncustomizable') && !this.containsObject({ id: item.id })) {
         let count = 1
         if(item.id == 'base') {
           count = 100000 // to make base always at first color position
@@ -798,8 +802,8 @@ export default class Scene extends Vue {
     return false
   }
 
-  public async loadScene(ImageData: Record<any, any>, side: string) {
-    return new Promise((resolve, reject) => {
+  public loadScene(ImageData: Record<any, any>, side: string) {
+    return new Promise((resolve) => {
       this.mounted = false
       let element = this.$refs.front as HTMLCanvasElement
       if (side === 'back') {
@@ -838,72 +842,72 @@ export default class Scene extends Vue {
           model = this.backModel
         }
 
-        if ((!this.backTextureUrl || (this.backTextureUrl && this.backTexture))) {
-          if (ImageData.file_extension == 'svg' && this.productType == 'customized' && (!this.back || (this.back && side == 'back'))) {
+        canvas.add(texture)
+        canvas.viewportCenterObject(texture)
+
+        if (this.productType == 'customized') {
+          canvas.add(model)
+          canvas.viewportCenterObject(model)
+        }
+        if (side == 'back') {
+          canvas.add(self.dimTextBack)
+        } else {
+          canvas.add(self.dimTextFront)
+        }
+        canvas.renderAll()
+
+        if (!this.back || (this.back && side == 'back')) {
+          if (ImageData.file_extension == 'svg' && this.productType == 'customized') {
             this.getSvgGroups()
           }
-          canvas.add(texture)
-          canvas.viewportCenterObject(texture)
 
-          if (this.productType == 'customized') {
-            canvas.add(model)
-            canvas.viewportCenterObject(model)
+          if (this.logos.length) {
+            this.logos.forEach((logo: Record<any, any>, index: number) => {
+              if (logo && logo.url) {
+                this.addLogos(logo, index)
+              }
+            })
           }
-          if (side == 'back') {
-            canvas.add(self.dimTextBack)
-          } else {
-            canvas.add(self.dimTextFront)
-          }
-          canvas.renderAll()
-
-          if (!this.back || (this.back && side == 'back')) {
-            if (this.logos.length) {
-              this.logos.forEach((logo: Record<any, any>, index: number) => {
+          if (!this.preSetData) {
+            let logos: Record<any, any>[] = []
+            if (this.customLogos && this.logoAllowed) {
+              let customLogos = JSON.parse(JSON.stringify(this.customLogos))
+              if (this.logosLimit) {
+                customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
+              }
+              logos = logos.concat(customLogos) as [Record<any, any>]
+            }
+            if (logos.length) {
+              logos.forEach((logo: Record<any, any>, index: number) => {
                 if (logo && logo.url) {
                   this.addLogos(logo, index)
                 }
               })
             }
-            if (!this.preSetData) {
-              let logos: Record<any, any>[] = []
-              if (this.customLogos && this.logoAllowed) {
-                let customLogos = JSON.parse(JSON.stringify(this.customLogos))
-                if (this.logosLimit) {
-                  customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
-                }
-                logos = logos.concat(customLogos) as [Record<any, any>]
-              }
-              if (logos.length) {
-                logos.forEach((logo: Record<any, any>, index: number) => {
-                  if (logo && logo.url) {
-                    this.addLogos(logo, index)
-                  }
-                })
-              }
-            }
-            if (this.customTexts.length || this.texts.length) {
-              let texts = this.texts
-              texts = texts.concat(this.customTexts) as [Record<any, any>]
-              texts.forEach((text: Record<any, any>, index: number) => {
-                this.addTexts(text, index)
-              })
-            }
-            this.showLoader = false
-            this.mounted = true
-
-            if (this.mainPreview) {
-              this.setProductionSVG()
-              this.$store.commit('STORE_CANVAS_IMAGE', {
-                front: this.$refs.front,
-                back: this.$refs.back,
-                scene: this
-              })
-              setTimeout(() => {
-                this.$store.commit('SET_CANVAS_READY', true);
-              }, 500)
-            }
           }
+          if (this.customTexts.length || this.texts.length) {
+            let texts = this.texts
+            texts = texts.concat(this.customTexts) as [Record<any, any>]
+            texts.forEach((text: Record<any, any>, index: number) => {
+              this.addTexts(text, index)
+            })
+          }
+
+          if (this.mainPreview) {
+            this.setProductionSVG()
+            this.$store.commit('STORE_CANVAS_IMAGE', {
+              front: this.$refs.front,
+              back: this.$refs.back,
+              scene: this
+            })
+            setTimeout(() => {
+              this.$store.commit('SET_CANVAS_READY', true);
+            }, 500)
+          }
+          this.showLoader = false
+          this.mounted = true
         }
+        resolve('done')
       })
       canvas.on('object:modified', (e: Record<any, any>) => {
         var objects = canvas.getObjects('line');
@@ -970,7 +974,6 @@ export default class Scene extends Vue {
         }
         this.showDimensions(e, dimText)
       });
-      resolve('done')
     })
   }
 
@@ -1470,7 +1473,7 @@ export default class Scene extends Vue {
               index: index,
               on_all: false,
               attribute: 'originalWidth',
-              value: Math.floor(width * this.measurementRatio)
+              value: (width * this.measurementRatio).toFixed(1)
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
@@ -1482,13 +1485,13 @@ export default class Scene extends Vue {
               index: index,
               on_all: false,
               attribute: 'originalHeight',
-              value: Math.floor(height * this.measurementRatio)
+              value: (height * this.measurementRatio).toFixed(1)
             })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
               on_all: false,
               attribute: 'originalOutLineWidth',
-              value: outLineWidth * this.measurementRatio
+              value: (outLineWidth * this.measurementRatio).toFixed(1)
             })
           } else if (e.action == 'rotate') {
             let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)),{'action':e.action})
@@ -1654,9 +1657,6 @@ export default class Scene extends Vue {
   }
 
   public addLogos(logo: Record<any, any>, logoIndex: null|number = null) {
-    if(this.mainPreview) {
-      console.log('in add logos call')
-    }
     if ('logoIndex' in logo) {
       logoIndex = logo.logoIndex
     } else {
@@ -1737,6 +1737,8 @@ export default class Scene extends Vue {
             await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
               index: logoIndex,
               data: {
+                width: img.width,
+                height: img.height,
                 originalWidth: width,
                 originalHeight: height,
                 scaleX: img.scaleX,
@@ -1872,6 +1874,8 @@ export default class Scene extends Vue {
         self.$store.dispatch('updateCustomTextWithoutTrigger', {
           index: textIndex,
           data: {
+            width: textBox.width,
+            height: textBox.height,
             originalWidth: width,
             originalHeight: height,
             originalOutLineWidth: outLineWidth,
