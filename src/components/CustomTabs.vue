@@ -66,6 +66,7 @@
       <div class="mt-2"></div>
       <TextCustomization
         @showOther="updateOtherTab"
+        ref="custom-text-mobile"
         :productFonts="selectedProduct.namefonts" :selectedProductID="selectedProduct.id"
         :fontsColors="fontsColors" :firstColor="firstColor" :secondColor="secondColor" :fontOptions="fontOptions" />
     </div>

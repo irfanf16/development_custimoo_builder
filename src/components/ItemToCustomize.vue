@@ -115,6 +115,11 @@ export default class ItemToCustomize extends Vue {
 
   private toggleItems () {
     this.showItems = !this.showItems
+    if(this.showItems){
+      this.$emit('hideAll')
+    }else{
+      this.$emit('switchTabs')
+    }
   }
   private toggleDesigns () {
     this.showDesigns = !this.showDesigns

@@ -46,7 +46,7 @@
               <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontFamily: item.value}" @click="fontOptionChanged(tabIndex, i, item.value)" style="white-space: nowrap" :class="{'pr-3': i+1 == fontOptions.length, 'activeFont': activeFont == i}">
                 <span v-b-tooltip.right="customText.text ? item.text : ''">
                   {{customText.text ? customText.text : item.text}}
-                </span>  
+                </span>
               </div>
             </div>
           </div>
@@ -159,7 +159,7 @@ export default class TextCustomization extends Vue {
   // @Prop({required: true}) customTextIndex!: any
   @Prop({required: true}) fontOptions!: any
   @Prop({required: true}) selectedProductID!: any
-  private customTextIndex: any = 0
+  public customTextIndex: any = 0
   public selectedFont = null
   public colorImage = '/img/images/color-placeholder.png'
   public fontColorType = 'fill'
@@ -365,7 +365,8 @@ export default class TextCustomization extends Vue {
 
   updateTextField(index: number, value: string) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
-    this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'text', value: value})
+    this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'text', value: value});
+    (this.$parent.$parent as Record<any, any>).swapSide(this.customTextIndex)
   }
 
   private setTextIndex(index:number){
