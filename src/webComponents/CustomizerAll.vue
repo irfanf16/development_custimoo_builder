@@ -97,7 +97,8 @@ window.Echo = new Echo({
   },
 });
 
-import { getPlatform } from "@/helpers/Helpers";
+import { getCompany } from "@/helpers/Helpers"
+
 export default {
   store, router,
   name: "Customizer",
@@ -118,6 +119,7 @@ export default {
     }
   },
   mounted: async function() {
+    await getCompany();
     let elem = document.createElement('link');
     elem.rel = ' stylesheet'
     elem.type = 'text/css';
@@ -138,11 +140,12 @@ export default {
     }
 
     if(this.$root.$options.shadowRoot) {
+      await getCompany();
       let ubuntu_font = document.createElement("style")
       ubuntu_font.append = '@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap")'
       document.head.append(ubuntu_font)
     }
-    await getPlatform();
+
     if (!this.$store.getters.getCustomer && localStorage.getItem('jwtToken')) {
       let token = localStorage.getItem('jwtToken')
       let response = await this.$store.dispatch('getCustomerFromToken', token)
