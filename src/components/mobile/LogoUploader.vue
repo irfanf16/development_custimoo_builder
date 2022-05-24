@@ -415,7 +415,7 @@ export default class LogoUploader extends Vue {
     const payload = {
       custom_logo: logo
     }
-    await this.$store.dispatch('setCustomLogos', logo)
+    await this.$store.dispatch('setCustomLogos', payload)
     this.tabIndex = this.customLogos.length - 1
   }
 }
