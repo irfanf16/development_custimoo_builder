@@ -192,9 +192,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
     return this.$store.getters.getDefaultColors
   }
 
-  get login_code(): Record<any, any>{
-    return JSON.parse(localStorage.getItem('login_code') as string)
-  }
   get groupColors() : [Record<any, any>] {
     return this.$store.getters.getGroupColors
   }
