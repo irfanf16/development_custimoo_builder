@@ -65,7 +65,7 @@
                 </div>
               </template>
               <div v-if="selectedProduct.allow_extra_text" class="px-3 pt-3 p-lg-4 text-right">
-                <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
+                <b-button class="add-logo-btn" @click="addTab(customTexts)">
                   +
                 </b-button>
               </div>
@@ -511,14 +511,14 @@ export default class CustomizationTabs extends Vue {
   }
 
   public addTab(index: number) {
-    if (this.set == false){
-      this.customTexts.forEach((text:Record<any, any>) =>{
-        if ('add_type' in text){
-          this.text_add_count = text.added_count
-          this.set = true
-        }
-      })
-    }
+    // if (this.set == false){
+    //   this.customTexts.forEach((text:Record<any, any>) =>{
+    //     if ('add_type' in text){
+    //       this.text_add_count = text.added_count
+    //       this.set = true
+    //     }
+    //   })
+    // }
     let text = {
       text: '',
       type: 'name',
@@ -537,10 +537,8 @@ export default class CustomizationTabs extends Vue {
       outLineColorPantone: this.secondColor.name,
       outLineWidth: 2,
       add_type: 'manual',
-      added_count: this.text_add_count + 1
     }
-    this.text_add_count +=1
-    this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text,prd_id:this.selectedProduct.id})
+    this.$store.dispatch('setCustomTexts', {follow:true, index: this.customTexts.length, text: text, prd_id:this.selectedProduct.id})
   }
   public removeTab(index:number, prd_id:number){
     let payload  = {
@@ -549,16 +547,16 @@ export default class CustomizationTabs extends Vue {
     }
     this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: false, attribute: 'text', value: ''})
     this.$store.commit('REMOVE_CUSTOMIZATION_TEXT_ELEMENT', payload)
-    let ind = 0
-    this.customTexts.forEach((text:Record<any, any>, index:number) =>{
-      if (text.add_type == 'manual' && ind >=0){
-        ind = ind + 1
-        this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: false, attribute: 'added_count', value: ind})
-        this.text_add_count = ind
-      }else if (ind == 0){
-        this.text_add_count = 0
-      }
-    })
+    // let ind = 0
+    // this.customTexts.forEach((text:Record<any, any>, index:number) =>{
+    //   if (text.add_type == 'manual' && ind >=0){
+    //     ind = ind + 1
+    //     this.$store.dispatch('updateCustomTextAttribute', { index:index, on_all: false, attribute: 'added_count', value: ind})
+    //     this.text_add_count = ind
+    //   }else if (ind == 0){
+    //     this.text_add_count = 0
+    //   }
+    // })
   }
 
 }
