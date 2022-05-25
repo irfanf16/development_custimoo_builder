@@ -119,6 +119,10 @@ export default {
     }
   },
   mounted: async function() {
+    if(localStorage.getItem('login_code')) {
+      localStorage.clear()
+      location.reload()
+    }
     await getCompany();
     let elem = document.createElement('link');
     elem.rel = ' stylesheet'
@@ -140,7 +144,6 @@ export default {
     }
 
     if(this.$root.$options.shadowRoot) {
-      await getCompany();
       let ubuntu_font = document.createElement("style")
       ubuntu_font.append = '@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap")'
       document.head.append(ubuntu_font)

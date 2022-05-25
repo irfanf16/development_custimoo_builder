@@ -181,12 +181,8 @@ export default class CustomTabs extends Vue {
   public showLoader = false
   public designsIndex = 0;
 
-  get platform():string{
-    return localStorage.getItem('platform') as string
-  }
-
-  get login_code(): Record<any, any>{
-    return JSON.parse(localStorage.getItem('login_code') as string)
+  get company(): Record<any, any>{
+    return this.$store.getters.getCompany
   }
 
   public openAddToLocker () {
@@ -220,14 +216,14 @@ export default class CustomTabs extends Vue {
     this.gotoLogin()
   }
   public gotoLogin(){
-    if (this.platform == 'self'){
+    if (this.company.platform == 'self'){
       this.$modal.show('loginModal')
     }
     else{
-      if(this.login_code.type == 'url') {
-        window.location.href = this.login_code.action
+      if(this.company.login_code.type == 'url') {
+        window.location.href = this.company.login_code.action
       } else {
-        eval(this.login_code.action)
+        eval(this.company.login_code.action)
       }
     }
   }

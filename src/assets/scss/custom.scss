@@ -3707,6 +3707,20 @@ $fontSize: 0.5;
     .modal-body {
         overflow-x: visible;
     }
+
+    // logo editor modal width adjustment on mobile | Added By: Uzair
+    .vm--modal{
+        @media screen and (max-width: 1366px) and (min-width: 993px) {
+            width: 80% !important;
+            margin: 0 auto;
+        }
+        @media screen and (max-width: 992px) {
+            width: 95% !important;
+            margin: 0 auto;
+        }
+    }
+
+
 }
 
 .customize_controls {
