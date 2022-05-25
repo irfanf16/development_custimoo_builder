@@ -10,7 +10,6 @@ import Vue from 'vue'
 import {LockerProducts} from "@/mixins/LockerProduct";
 import router from './router'
 import store from '../store'
-import { getCompany } from "@/helpers/Helpers";
 import Gleap from 'gleap';
 Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
 import Vue2TouchEvents from 'vue2-touch-events';
@@ -116,6 +115,10 @@ export default {
     }
   },
   mounted: async function() {
+    if(localStorage.getItem('login_code')) {
+      localStorage.clear()
+      location.reload()
+    }
     await getCompany();
     let elem = document.createElement('link');
     elem.rel = ' stylesheet'
@@ -141,7 +144,7 @@ export default {
       ubuntu_font.append = '@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap")'
       document.head.append(ubuntu_font)
     }
-    await getCompany();
+
     if (!this.$store.getters.getCustomer && localStorage.getItem('jwtToken')) {
       let token = localStorage.getItem('jwtToken')
       let response = await this.$store.dispatch('getCustomerFromToken', token)

@@ -188,10 +188,6 @@ export default class CustomTabs extends Vue {
     return this.$store.getters.getCompany
   }
 
-  get login_code(): Record<any, any>{
-    return JSON.parse(localStorage.getItem('login_code') as string)
-  }
-
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
   }
@@ -227,10 +223,10 @@ export default class CustomTabs extends Vue {
       this.$modal.show('loginModal')
     }
     else{
-      if(this.login_code.type == 'url') {
-        window.location.href = this.login_code.action
+      if(this.company.login_code.type == 'url') {
+        window.location.href = this.company.login_code.action
       } else {
-        eval(this.login_code.action)
+        eval(this.company.login_code.action)
       }
     }
   }
