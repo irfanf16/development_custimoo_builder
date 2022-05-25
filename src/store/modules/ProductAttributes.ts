@@ -491,8 +491,6 @@ const ProductAttributes:Module<any, any> = {
               const index = state.customTexts[item.id].findIndex((text:Record<any, any>) => text.added_count == count)
               // Vue.delete(state.customTexts[item.id], index)
               Vue.set(state.customTexts[item.id], index, {})
-            }else{
-              Vue.set(state.customTexts[item.id], index, {})
             }
           }
           let count = 0
