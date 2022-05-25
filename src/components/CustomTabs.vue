@@ -1,7 +1,8 @@
 <template>
   <div>
     <div class="customize_controls" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 0" >
-      <span class="close" @click="this.hideAll"><BIconX /></span>
+<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
+      <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div>
@@ -9,7 +10,8 @@
       </div>
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 1" >
-      <span class="close" @click="this.hideAll"><BIconX /></span>
+<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
+      <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div class="grid gap-1 text-left">
@@ -60,7 +62,8 @@
       </div>
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2" >
-      <span class="close" @click="this.hideAll"><BIconX /></span>
+<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
+      <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
       <div class="mt-2"></div>
@@ -71,14 +74,16 @@
         :fontsColors="fontsColors" :firstColor="firstColor" :secondColor="secondColor" :fontOptions="fontOptions" />
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 3" >
-      <span class="close" @click="this.hideAll"><BIconX /></span>
+<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
+      <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(2)" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
       <div class="mt-2"></div>
 
       <Collars :productModels="productModels"/>
     </div>
     <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-show="this.$store.getters.getActiveTab === 4">
-      <span class="close" @click="this.hideAll"><BIconX /></span>
+<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
+      <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(3)" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
       <div class="d-flex mt-2 flex-column h-100">
@@ -98,14 +103,27 @@
                 Add to cart
               </span></span>
             </template>
-          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Roster Link</span></span>
+          <span class="addPlayer" @click="shareRoster"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Roster Link</span></span>
         </div>
         <div class="players-table mt-2 hide-scroll h-100">
           <RosterTableMobile :productSizes="productSizes" ref="mobile-roster" @addPlayer="rosterDetailsInit" />
         </div>
       </div>
     </div>
-    <EditRosterAreaTab v-show="false" @open-add-to-locker="openAddToLocker" :productSizes="productSizes"/>
+    <div class="open-logo-uploader customize_controls d-flex align-items-center gap-1" v-if="!maximized">
+      <span v-html="tabIcons[sideTabIndex]" class="fs-4 d-inline-flex" style="line-height: normal; color: #219F84; padding-bottom: 2px;"></span>
+      <span class="fs-3 font-weight-bold d-inline-flex pb-0">
+        {{ tabTitles[sideTabIndex] }}
+      </span>
+      <span @click="maximizeTab(sideTabIndex)" class="maximizer close">
+        <svg height="1em" width="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+             viewBox="0 0 16 16">
+          <polygon points="0,11.8 0,0 11.8,0 "/>
+          <polygon points="16,4.3 16,16 4.3,16 "/>
+        </svg>
+      </span>
+    </div>
+    <EditRosterAreaTab v-show="false" @open-add-to-locker="openAddToLocker" ref="edit-roster" :productSizes="productSizes"/>
   </div>
 </template>
 
@@ -150,11 +168,14 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     this.fontsList()
     this.customTextInit()
     this.switchTabs(0)
-  },
+  }
 })
 
 export default class CustomTabs extends Vue {
   @Prop() activeTab!: number
+  @Prop() sideTabIndex!: number
+  @Prop() maximized!: boolean
+  @Prop() tabIcons!: Record<any, any>
   private showOtherTab = false
   private activePart = 0;
   private activeCollection = 0;
@@ -180,6 +201,21 @@ export default class CustomTabs extends Vue {
   public productName = ''
   public showLoader = false
   public designsIndex = 0;
+  private tabTitles = [
+    'Logo Uploader',
+    'Change Colors',
+    'Add Text',
+    'Variants',
+    'Roster Details',
+  ]
+
+  private shareRoster() {
+    if(this.isCustomerAuthenticated){
+      console.log(this.ref['edit-roster'].$refs['order-details'].getLockers())
+    }else{
+      this.gotoLogin()
+    }
+  }
 
   get company(): Record<any, any>{
     return this.$store.getters.getCompany
@@ -459,7 +495,11 @@ export default class CustomTabs extends Vue {
   ]
 
   private hideAll(){
-    this.$emit('switchTabs', -1, false)
+    this.$emit('maximizeTab', -1, false)
+  }
+
+  private maximizeTab(){
+    this.$emit('maximizeTab', this.sideTabIndex, true)
   }
 
   private switchTabs(ind:number){

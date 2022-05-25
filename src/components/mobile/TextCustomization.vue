@@ -134,14 +134,18 @@ import {lowerFirst} from "lodash";
     // this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
     console.log('customTexts' , this.customTexts)
-
     var roster: any = JSON.parse(JSON.stringify(this.rosterText));
+    var newRoster:Record<any, any> = []
+    roster.forEach((item:Record<any, any>, index:number) => {
+      if(item){
+        newRoster.push(item)
+      }
+    })
+    if(newRoster){
+      [newRoster[0], newRoster[this.eyeIndex]] = [newRoster[this.eyeIndex], newRoster[0]]
+      this.$store.commit('updateAllRoster', newRoster)
 
-    if(roster){
-      [roster[0], roster[this.eyeIndex]] = [roster[this.eyeIndex], roster[0]]
-      this.$store.commit('updateAllRoster', roster)
-
-      this.roster = roster[0]
+      this.roster = newRoster[0]
 
       this.$store.commit('CHANGE_EYE_INDEX', 0)
     }

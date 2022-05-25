@@ -257,6 +257,9 @@ export default class RosterTableMobile extends Vue {
       }
     })
   }
+  public shareRoster(){
+    this.ref['order-details'].getLockers();
+  }
   public async downloadTemplate(){
     await http.get('template/download',{
       responseType: 'blob',
