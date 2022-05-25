@@ -7,7 +7,7 @@ const Auth:Module<any, any> = {
     jwtToken:'',
     customer:'',
     customer_permissions:[],
-    company: null
+    company: {}
   },
   getters:{
     isCustomerAuthenticated: (state: any) => !!state.jwtToken,

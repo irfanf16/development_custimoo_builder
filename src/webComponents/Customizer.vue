@@ -115,6 +115,11 @@ export default {
     }
   },
   mounted: async function() {
+    if(localStorage.getItem('login_code')) {
+      localStorage.clear()
+      location.reload()
+    }
+    await getCompany();
     let elem = document.createElement('link');
     elem.rel = ' stylesheet'
     elem.type = 'text/css';
@@ -139,7 +144,7 @@ export default {
       ubuntu_font.append = '@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap")'
       document.head.append(ubuntu_font)
     }
-    await getCompany();
+
     if (!this.$store.getters.getCustomer && localStorage.getItem('jwtToken')) {
       let token = localStorage.getItem('jwtToken')
       let response = await this.$store.dispatch('getCustomerFromToken', token)
