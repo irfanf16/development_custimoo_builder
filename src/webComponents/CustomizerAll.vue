@@ -97,7 +97,7 @@ window.Echo = new Echo({
   },
 });
 
-import { getCompany } from "@/helpers/Helpers";
+import { getCompany } from "@/helpers/Helpers"
 export default {
   store, router,
   name: "Customizer",
@@ -118,6 +118,11 @@ export default {
     }
   },
   mounted: async function() {
+    if(localStorage.getItem('login_code')) {
+      localStorage.clear()
+      location.reload()
+    }
+    await getCompany();
     let elem = document.createElement('link');
     elem.rel = ' stylesheet'
     elem.type = 'text/css';

@@ -1657,9 +1657,6 @@ export default class Scene extends Vue {
   }
 
   public addLogos(logo: Record<any, any>, logoIndex: null|number = null) {
-    if(this.mainPreview) {
-      console.log('in add logos call')
-    }
     if ('logoIndex' in logo) {
       logoIndex = logo.logoIndex
     } else {
@@ -1740,6 +1737,8 @@ export default class Scene extends Vue {
             await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
               index: logoIndex,
               data: {
+                actualWidth: img.width,
+                actualHeight: img.height,
                 originalWidth: width,
                 originalHeight: height,
                 scaleX: img.scaleX,
@@ -1875,6 +1874,8 @@ export default class Scene extends Vue {
         self.$store.dispatch('updateCustomTextWithoutTrigger', {
           index: textIndex,
           data: {
+            actualWidth: textBox.width,
+            actualHeight: textBox.height,
             originalWidth: width,
             originalHeight: height,
             originalOutLineWidth: outLineWidth,
