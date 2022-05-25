@@ -77,7 +77,7 @@
 
       <Collars :productModels="productModels"/>
     </div>
-    <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-if="this.$store.getters.getActiveTab === 4">
+    <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-show="this.$store.getters.getActiveTab === 4">
       <span class="close" @click="this.hideAll"><BIconX /></span>
       <span class="dragControl" @dblclick="setMinMax(3)" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
@@ -101,7 +101,7 @@
           <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Roster Link</span></span>
         </div>
         <div class="players-table mt-2 hide-scroll h-100">
-          <RosterTableMobile :productSizes="sizeOptions" @addPlayer="rosterDetailsInit" />
+          <RosterTableMobile :productSizes="productSizes" ref="mobile-roster" @addPlayer="rosterDetailsInit" />
         </div>
       </div>
     </div>
@@ -150,9 +150,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     this.fontsList()
     this.customTextInit()
     this.switchTabs(0)
-
-    this.productSizes = this.selectedProduct.sizes
-    this.setProductSizes()
   },
 })
 
@@ -175,7 +172,6 @@ export default class CustomTabs extends Vue {
   // privat tabTop = window.screen.availHeight - 190;
   public id = 0
   public custom_arr: Record<any, any>[] = [];
-  public productSizes : any[] = []
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
@@ -247,11 +243,24 @@ export default class CustomTabs extends Vue {
     this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
   }
 
-  public setProductSizes() {
-    this.productSizes.forEach((size: any, key: number) => {
-      let sizes = {value: size.name, text: size.name}
-      this.sizeOptions = this.sizeOptions.concat([sizes])
+  get productSizes(){
+    let cumulative_size:Record<any,any> = [];
+    Object.values(this.selectedProduct.sizes).forEach((value: any)=>{
+      if(Object.prototype.hasOwnProperty.call(value as Record<any,any>,'json_data')){
+        cumulative_size.push(JSON.parse(value.json_data));
+      }
     })
+    let sizes = [] as Record<any,any>;
+    if(cumulative_size.length > 0){
+      cumulative_size.forEach((size_array:Record<any,any>) => {
+        if(size_array.length > 0){
+          size_array.forEach((size:Record<any,any>) => {
+            sizes.push(size);
+          })
+        }
+      })
+    }
+    return sizes;
   }
 
   public changeProduct(designsIndex: number) {

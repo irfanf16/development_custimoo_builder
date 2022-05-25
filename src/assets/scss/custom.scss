@@ -3292,19 +3292,42 @@ $fontSize: 0.5;
         right: 3px;
         height: 20px;
         width: 20px;
-        background-color: #e10000;
-        color: white;
+        background-color: rgb(232,110,91);
+        color: rgb(145,38,18);
         top: -10px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 999px;
         font-size: 1.5em;
+        opacity: 1;
+        text-shadow: none;
 
         &.maximizer{
-            background: #F1C242;
+            background: rgb(99,196,74);
+            color: rgb(42,98,14);
             font-size: 0.7em;
             opacity: 1;
+        }
+        &.minimizer{
+            background: rgb(240,195,67);
+            color: rgb(167,119,32);
+            opacity: 1;
+            font-size: 3em;
+            overflow: hidden;
+
+            &:after{
+                content: "";
+                display: block;
+                position: absolute;
+                top: 4px;
+                bottom: 4px;
+                left: 4px;
+                right: 4px;
+                border-radius: 1000px;
+                background: transparent;
+                box-shadow: 0 0 0 5px rgb(240,195,67);
+            }
         }
     }
 }
