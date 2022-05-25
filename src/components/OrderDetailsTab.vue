@@ -278,11 +278,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
 
       let santacart = true;
       let company_domain = this.company.company_domain;
-      console.log("platform", this.company)
+
       let platform = this.company.platform;
       let ecommerce_cart_id = null;
       let ecom_url = company_domain + '/wp-admin/admin-ajax.php';
-      console.log()
 
       if(platform === 'wordpress'){
         if(cart_product.sync_id === "" || cart_product.ecommerce_post_id === ""){
@@ -645,7 +644,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         sorted_custom_text_svgs.push(text_svg);
       });
 
-      console.log(rest_of_text_svg)
 
 
       for(let [indexrstr,roster_detail] of factory_product.roster_detail.entries()) {
@@ -731,8 +729,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
           }
         )
       })
-      console.log(this.roster_detail);
-      console.log('Fonts');
       let font_file = fontsList(this.selectedProduct)
 
 
@@ -823,7 +819,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
       $(svg_doc).find("svg").eq(0).attr({"width": (scaled_file_info.width * 2) + 'px', height: scaled_file_info.height + 'px'});
       let view_box = svg_doc?.querySelector('svg')?.getAttribute('viewBox');
       let view_box_dimensions = view_box?.split(" ");
-
       svg_doc?.querySelector('svg')?.setAttribute('viewBox',`${view_box_dimensions[0]} ${view_box_dimensions[1]} ${parseFloat(self.production_file_info.width) * 2} ${this.logo_pattern_last_value_y?this.logo_pattern_last_value_y:this.svg_pattern_last_value_y}`);
       production_content = new XMLSerializer().serializeToString(svg_doc);
 
@@ -902,7 +897,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
     let index = 0;
     for(let index in values) {
       let value = values[index];
-      console.log(value)
       let original_url = Object.prototype.hasOwnProperty.call(value,'original_logo_url');
       let updated_url = original_url?value.original_logo_url:value.url;
       if(getFileExtensionType('raster', updated_url) ){
@@ -910,7 +904,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
           svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
                 <g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
-                    ${updated_url?`<image xlink:href="${base64}" height="${(value.height * value.scaleY)*measurement_ratio}px" width="${(value.width * value.scaleX)*measurement_ratio}px"/>`:''}
+                    ${updated_url?`<image xlink:href="${base64}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/>`:''}
                 </g>
                 <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
@@ -922,14 +916,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
                         <tspan x="0" y="0">${value.originalWidth? value.originalWidth + 'cm x' + value.originalHeight + 'cm /' + parseFloat(value.originalWidth/this.INCH_TO_CENTIMETER).toFixed(2) + 'in x' + parseFloat(value.originalHeight/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
                     </text>
                 </g>
-                ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500)}
+                ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/measurement_ratio))}
                 </g>`
         })
       } else {
         svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
                 <g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
-                    ${updated_url?`<image xlink:href="${this.storage_url}${updated_url}" height="${(value.height * value.scaleY) * measurement_ratio}px" width="${(value.width * value.scaleX) * measurement_ratio}px"/>`:''}
+                    ${updated_url?`<image xlink:href="${this.storage_url}${updated_url}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/>`:''}
                 </g>
                 <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
@@ -941,7 +935,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
                         <tspan x="0" y="0">${value.originalWidth? value.originalWidth + 'cm x' + value.originalHeight + 'cm /' + parseFloat(value.originalWidth/this.INCH_TO_CENTIMETER).toFixed(2) + 'in x' + parseFloat(value.originalHeight/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
                     </text>
                 </g>
-                ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500 + value.height)}
+                ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/measurement_ratio))}
                 </g>`
       }
       ++index;
