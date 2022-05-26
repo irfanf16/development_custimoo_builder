@@ -1747,7 +1747,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   position: fixed;
   top: 50%;
   right: 0;
-  z-index: 1000;
+  z-index: 2;
 
   .btn{
     display: flex;
