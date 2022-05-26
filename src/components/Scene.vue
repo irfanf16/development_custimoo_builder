@@ -395,8 +395,21 @@ export default class Scene extends Vue {
             textObject.set('fill', text.fillColor)
             textObject.set('stroke', text.outLineColor)
             textObject.set('strokeWidth', parseInt(text.outLineWidth))
-            textObject.set('strokeWidth', parseInt(text.outLineWidth))
             canvas.renderAll()
+
+            const width = (textObject.width as number * textObject.scaleX * this.measurementRatio).toFixed(1)
+            const height = (textObject.height as number * textObject.scaleY * this.measurementRatio).toFixed(1)
+            const outLineWidth = (textObject.strokeWidth as number * this.measurementRatio).toFixed(1)
+            self.$store.dispatch('updateCustomTextWithoutTrigger', {
+              index: index,
+              data: {
+                actualWidth: textObject.width,
+                actualHeight: textObject.height,
+                originalWidth: width,
+                originalHeight: height,
+                originalOutLineWidth: outLineWidth,
+              }
+            })
 
             this.eventAction(text, textObject, otherSideObject)
             addText = false
@@ -1773,9 +1786,8 @@ export default class Scene extends Vue {
 
   public showDimensions(e: any, dimText: Record<any, any>) {
     let object = e.target;
-
-    let width = object.width * object.scaleX * this.measurementRatio;
-    let height = object.height * object.scaleY * this.measurementRatio;
+    const width = (object.width as number * object.scaleX * this.measurementRatio)
+    const height = (object.height as number * object.scaleY * this.measurementRatio)
 
     if(width != 0 || height != 0){
       dimText.set({
@@ -1825,7 +1837,6 @@ export default class Scene extends Vue {
         fontSize: self.canvasHeight / self.mainCanvasHeight * text.width
       })
 
-      textBox.set('height', this.canvasWidth / this.mainCanvasWidth * text.width)
       if(text.scaleX && text.scaleY) {
         textBox.scaleX = text.scaleX
         textBox.scaleY = text.scaleY
@@ -1870,7 +1881,7 @@ export default class Scene extends Vue {
         const scaleY = textBox.scaleY as number
         const width = (textBox.width as number * scaleX * this.measurementRatio).toFixed(1)
         const height = (textBox.height as number * scaleY * this.measurementRatio).toFixed(1)
-        const outLineWidth = textBox.strokeWidth as number * this.measurementRatio
+        const outLineWidth = (textBox.strokeWidth as number * this.measurementRatio).toFixed(1)
         self.$store.dispatch('updateCustomTextWithoutTrigger', {
           index: textIndex,
           data: {

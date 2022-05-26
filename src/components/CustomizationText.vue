@@ -37,24 +37,6 @@
 
       <b-collapse :ref="'accordion-' + (customTextIndex + 1)" :id="'accordion-' + (customTextIndex + 1)" accordion="my-accordion" role="tabpanel">
         <div class="font-type-area">
-          <!-- <div class="type-block">
-            <b-form-select :value="customTexts[customTextIndex].fontFamily"
-              @change="fontOptionChanged(customTextIndex, $event)" :options="fontOptions"></b-form-select>
-
-            <select class="custom-select"
-              :style="{ fontFamily: customTexts[customTextIndex].fontFamily, fontSize: '20px' }"
-              @change="fontOptionChanged(customTextIndex, $event.target.value)">
-              <option v-for="option in fontOptions" :key="option.value" :style="{ fontFamily: option.value }"
-                :selected="customTexts[customTextIndex].fontFamily == option.value" :value="option.value">
-                {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : option.text }}
-              </option>
-            </select>
-
-          </div>
-          <div class="arc-block">
-            <b-form-select :style="{ fontSize: '18px', height: '44px' }" :value="customTexts[customTextIndex].side"
-              @change="changeSide(customTextIndex, $event)" :options="['front', 'back']"></b-form-select>
-          </div> -->
 
           <div class="fade-right w-100 py-2">
             <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList ">
