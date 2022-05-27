@@ -1245,17 +1245,17 @@ export default class Scene extends Vue {
       bottom: modelBoundingRect.top + modelBoundingRect.height,
     }
 
-    if(e.target.left > boundingRect.right - (e.target.width / 4)) {
-      e.target.left = boundingRect.right - (e.target.width / 4)
+    if(e.target.left > boundingRect.right + (e.target.width * e.target.scaleX / 4)) { // object goes right
+      e.target.left = boundingRect.right + (e.target.width * e.target.scaleX / 4)
     }
-    else if(e.target.left < boundingRect.left + (e.target.width / 4)) {
-      e.target.left = boundingRect.left + (e.target.width / 4)
+    else if(e.target.left < boundingRect.left - (e.target.width * e.target.scaleX / 4)) { // object goes left
+      e.target.left = boundingRect.left - (e.target.width * e.target.scaleX / 4)
     }
-    if(e.target.top > boundingRect.bottom - (e.target.height / 6)){
-      e.target.top = boundingRect.bottom - (e.target.height / 6)
+    if(e.target.top < boundingRect.top + (e.target.height * e.target.scaleY / 3)) { // object goes top
+      e.target.top = boundingRect.top + (e.target.height * e.target.scaleY / 3)
     }
-    else if(e.target.top < boundingRect.top + (e.target.height / 6)) {
-      e.target.top = boundingRect.top + (e.target.height / 6)
+    else if(e.target.top > boundingRect.bottom - (e.target.height * e.target.scaleY / 3)){ // object goes bottom
+      e.target.top = boundingRect.bottom  - (e.target.height * e.target.scaleY / 3)
     }
 
     let centerPoint = e.target.getCenterPoint()
@@ -1271,8 +1271,12 @@ export default class Scene extends Vue {
           moveTo = key
         }
       })
+      let pointXCompare = e.target.left + (e.target.width * e.target.scaleX / 4)
+      if(moveTo == 'left') {
+        pointXCompare = e.target.left - (e.target.width * e.target.scaleX / 4)
+      }
 
-      let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, moveTo)
+      let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo)
 
       e.target.left = direction.left
     }
@@ -1284,23 +1288,40 @@ export default class Scene extends Vue {
     this.showDimensions(e, dimText)
   }
 
+  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string): Record<any, any> {
+    let pointXCompare = pointX + (width * scaleX / 4)
+    if(moveTo == 'left') {
+      pointXCompare = pointX - (width * scaleX / 4)
+    }
+    if(canvas.isTargetTransparent(model, pointXCompare, pointY)) {
+      if(moveTo == 'left') {
+        pointX = pointX - 1
+      } else {
+        pointX = pointX + 1
+      }
+      return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo)
+    } else {
+      return {left: pointX, top: pointY}
+    }
+  }
+
   public addToOtherSide(target: any, side: string) {
     if(side == 'back' || (this.back && side == 'front')) {
-      let model = this.frontTexture
+      let texture = this.frontTexture
       let canvas = this.frontCanvas
       if (side == 'back' && this.back) {
-        model = this.backTexture
+        texture = this.backTexture
         canvas = this.backCanvas
       }
 
-      let addIndex = 0
+      let addIndex
       if (target.text) {
         addIndex = target.textIndex
       } else {
         addIndex = target.logoIndex
       }
 
-      const modelBoundingRect = model.getBoundingRect()
+      const modelBoundingRect = texture.getBoundingRect()
       let boundingRect = {
         left: modelBoundingRect.left,
         right: modelBoundingRect.left + modelBoundingRect.width,
@@ -1323,32 +1344,31 @@ export default class Scene extends Vue {
         }
       })
 
-      const width = target.width * target.scaleX;
-      let checkPointX = target.left + width / 2
+      let checkPointX = target.left + (target.width * target.scaleX / 2)
       if (nearTo == 'left') {
-        checkPointX = target.left - width / 2
+        checkPointX = target.left - (target.width * target.scaleX / 2)
       }
 
       let otherSideObjects = this.otherSideLogos
       if(target.text) {
         otherSideObjects = this.otherSideTexts
       }
-      if (canvas.isTargetTransparent(model, checkPointX, centerPoint.y)) {
-        let addLeft = 0
-        let addTop = 0
-        const model_start = (model.left - ((model.width * model.scaleX) / 2)) - 1
-        const model_end = (model.left + ((model.width * model.scaleX) / 2)) + 1
+      if (canvas.isTargetTransparent(texture, checkPointX, centerPoint.y)) {
+        let addLeft
+        let addTop
+        const model_start = (texture.left - ((texture.width * texture.scaleX) / 2)) - 1
+        const model_end = (texture.left + ((texture.width * texture.scaleX) / 2)) + 1
         const width = target.width * target.scaleX;
         if (nearTo == 'left') {
-          const direction = this.targetNonTransparent(canvas, model, checkPointX, centerPoint.y, 'right')
-          const directionFromRight = this.targetNonTransparent(canvas, model, model_end, centerPoint.y, 'left')
+          const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')
+          const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, centerPoint.y, 0, 1, 'left')
           const outside = direction.left - checkPointX
           const modelSpaceLeft = directionFromRight.left + (width / 2) + 10
           addLeft = modelSpaceLeft - outside
           addTop = target.top
         } else {
-          const direction = this.targetNonTransparent(canvas, model, target.left + width, target.top, 'left')
-          const directionFromRight = this.targetNonTransparent(canvas, model, model_start, centerPoint.y, 'right')
+          const direction = this.targetNonTransparent(canvas, texture, target.left+ width, target.top, 0, 1, 'left')
+          const directionFromRight = this.targetNonTransparent(canvas, texture, model_start, centerPoint.y, 0, 1, 'right')
           const outside = checkPointX - direction.left
           const modelSpaceRight = directionFromRight.left - (width / 2) - 10
           addLeft = modelSpaceRight + outside
@@ -1399,32 +1419,6 @@ export default class Scene extends Vue {
           otherSideObjects.splice(addIndex, 1)
         }
       }
-    }
-  }
-
-  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
-    if(canvas.isTargetTransparent(model, pointX, pointY)) {
-      if(moveTo == 'left') {
-        pointX = pointX - 1
-      } else {
-        pointX = pointX + 1
-      }
-      return this.targetNonTransparent(canvas, model, pointX, pointY, moveTo)
-    } else {
-      return {left: pointX, top: pointY}
-    }
-  }
-
-  public targetTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
-    if(canvas.isTargetTransparent(model, pointX, pointY)) {
-      if(moveTo == 'left') {
-        pointX = pointX - 1
-      } else {
-        pointX = pointX + 1
-      }
-      return this.targetTransparent(canvas, model, pointX, pointY, moveTo)
-    } else {
-      return {left: pointX, top: pointY}
     }
   }
 
