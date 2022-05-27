@@ -1424,32 +1424,6 @@ export default class Scene extends Vue {
     }
   }
 
-  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
-    if (canvas.isTargetTransparent(model, pointX, pointY)) {
-      if (moveTo == 'left') {
-        pointX = pointX - 1
-      } else {
-        pointX = pointX + 1
-      }
-      return this.targetNonTransparent(canvas, model, pointX, pointY, moveTo)
-    } else {
-      return { left: pointX, top: pointY }
-    }
-  }
-
-  public targetTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
-    if (canvas.isTargetTransparent(model, pointX, pointY)) {
-      if (moveTo == 'left') {
-        pointX = pointX - 1
-      } else {
-        pointX = pointX + 1
-      }
-      return this.targetTransparent(canvas, model, pointX, pointY, moveTo)
-    } else {
-      return { left: pointX, top: pointY }
-    }
-  }
-
   public updateLogoObject(obj: Record<any, any>, update_obj: Record<any, any>) {
 
     Object.keys(obj).map(function (key, index) {
