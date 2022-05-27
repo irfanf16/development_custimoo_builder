@@ -302,7 +302,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
         logo: data,
         id:prd_id
       }
-      Store.commit('UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT', new_data)
+      await Store.commit('UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT', new_data)
     }else{
       await Store.dispatch('updateCustomLogoAttribute', data)
     }
