@@ -251,7 +251,7 @@
           </div>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
           <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll" :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products"/>
-          <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
+          <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
             <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
             <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
@@ -1131,6 +1131,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if(this.mobileScreen){
       this.showDesign()
+      this.switchTabs(0, true)
     }
   }
 
