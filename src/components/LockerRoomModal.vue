@@ -40,6 +40,9 @@ import ModalAction from '@/mixins/ModalAction'
   components: {
     LockerRoom,
     DesignCollection,
+  },
+  mounted() {
+    console.log(this.mobileScreen , this.screenWidth)
   }
 })
 export default class LockerRoomModal extends Mixins(ModalAction){

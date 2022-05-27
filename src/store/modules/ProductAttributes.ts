@@ -544,6 +544,9 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.rosterDetails, rosterDetail.index, rosterDetail.roster)
       }
     },
+    updateAllRoster(state: Record<any, any>, rosterDetail: [Record<any, any>]){
+      state.rosterDetails = rosterDetail
+    },
     rosterDetailAttribute(state: Record<any, any>, rosterDetailAttribute: Record<any, any>) {
       if(state.rosterDetails.length > 0) {
         Vue.set(state.rosterDetails[rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)

@@ -90,7 +90,7 @@
             Don't show again.
           </b-form-checkbox>
         </div>
-        <div class="upload-logo-buttons d-flex gap-1">
+        <div class="upload-logo-buttons justify-content-center d-flex gap-1">
           <button class="btn btn-secondary light text-center justify-content-center p-2" @click="hideModal">Cancel</button>
           <button v-if="this.uploadType=='click'" class="btn btn-secondary text-center justify-content-center p-2" style="background: #219F84; color: #fff" @click="uploadLogoBtn">Confirm and Upload</button>
           <button v-if="this.uploadType=='drag'" class="btn btn-secondary text-center justify-content-center p-2" style="background: #219F84; color: #fff" @click="uploadLogoDraged">Confirm and Upload</button>
