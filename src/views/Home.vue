@@ -967,7 +967,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public showDesign() {
     if(this.manageComponents.mobileScreen){
       this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
-      this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
+      this.$store.dispatch('setManageComponents',  {index: 'ItemToCustomize', value: true})
       this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
       this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
       this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
