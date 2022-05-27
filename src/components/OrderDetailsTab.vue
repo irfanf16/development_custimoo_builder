@@ -615,7 +615,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         if(factory_product.roster_detail.findIndex((roaster:Record<any,any>) => roaster.text == custom_texts[custom_name_index].text) > -1) {
           sorted_custom_text_svgs.push({
             svg: custom_text_svgs[custom_name_index],
-            type: 'name'
+            type: 'name',
+            scaleX:custom_texts[custom_name_index].scaleX,
+            scaleY:custom_texts[custom_name_index].scaleY,
+            rotation:custom_texts[custom_name_index].rotation,
           });
         }
       }
@@ -624,7 +627,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         if(factory_product.roster_detail.findIndex((roaster:Record<any,any>) => roaster.number == custom_texts[custom_number_index].text) > -1) {
           sorted_custom_text_svgs.push({
             svg: custom_text_svgs[custom_number_index],
-            type: 'number'
+            type: 'number',
+            scaleX:custom_texts[custom_number_index].scaleX,
+            scaleY:custom_texts[custom_number_index].scaleY,
+            rotation:custom_texts[custom_number_index].rotation,
           });
         }
       }
@@ -634,7 +640,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         if(index !== custom_name_index && index !== custom_number_index){
           return rest_of_text_svg.push({
             svg:custom_text_svg,
-            type:'common'
+            type:'common',
+            scaleX:custom_texts[index].scaleX,
+            scaleY:custom_texts[index].scaleY,
+            rotation:custom_texts[index].rotation,
           });
         }
       });
@@ -644,11 +653,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         sorted_custom_text_svgs.push(text_svg);
       });
 
-
-
       for(let [indexrstr,roster_detail] of factory_product.roster_detail.entries()) {
-        let text = "";
-        let number = "";
+        let text = {};
+        let number = {};
         let name_height = "";
         let number_height = "";
         companies_name = [];
@@ -663,7 +670,12 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
               tspan.setAttribute('y','0');
               let el_text = el?.querySelector('text')
               if(el_text){
-                text = new XMLSerializer().serializeToString(el_text);
+                text = {
+                  name :  new XMLSerializer().serializeToString(el_text),
+                  scaleX: custom_text_svg.scaleX,
+                  scaleY: custom_text_svg.scaleY,
+                  rotation: custom_text_svg.rotation,
+                };
                 name_height = factory_product.custom_texts[custom_name_index].originalHeight;
               }
             }
@@ -677,7 +689,12 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
               tspan.setAttribute('y','0');
               let el_number = el?.querySelector('text')
               if(el_number){
-                number = new XMLSerializer().serializeToString(el_number);
+                number = {
+                  name : new XMLSerializer().serializeToString(el_number),
+                  scaleX: custom_text_svg.scaleX,
+                  scaleY: custom_text_svg.scaleY,
+                  rotation: custom_text_svg.rotation,
+                }
                 number_height = factory_product.custom_texts[custom_number_index].originalHeight;
               }
 
@@ -694,7 +711,12 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
                 let el_common = el?.querySelector('text');
                 if(el_common){
                   companies_name.push({
-                    name: new XMLSerializer().serializeToString(el_common),
+                    name: {
+                      name: new XMLSerializer().serializeToString(el_common),
+                      scaleX: custom_text_svg.scaleX,
+                      scaleY: custom_text_svg.scaleY,
+                      rotation: custom_text_svg.rotation,
+                    },
                     size: 'For ALL'
                   })
                 }
@@ -852,11 +874,11 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         ${values.map((value:Record<any,any>,index:number) => {
       return `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${5000})">
-                <g transform="matrix(${measurement_ratio?1/measurement_ratio:1} 0 0 ${measurement_ratio?1/measurement_ratio:1} 0 ${500 + index * 1000})">
-                     ${value.text?value.text : ''}
+                <g transform="matrix(${value.text.scaleX/measurement_ratio} 0 0 ${value.text.scaleY/measurement_ratio} 0 ${500 + index * 1000})">
+                      <g style="transform: rotate(${value.text?value.text.rotation : '0'}deg)">${value.text.name?value.text.name : ''}</g>
                 </g>
-                <g transform="matrix(${measurement_ratio?1/measurement_ratio:1} 0 0 ${measurement_ratio?1/measurement_ratio:1} 1000 ${500 + index * 1000})">
-                      ${value.number? value.number : ''}
+                <g transform="matrix(${(value.number?value.number.scaleX:1)/measurement_ratio} 0 0 ${(value.number?value.number.scaleY:1)/measurement_ratio} 1000 ${500 + index * 1000})" >
+                      <g style="transform: rotate(${value.number?value.number.rotation : '0'}deg)">${value.number? value.number.name : ''}</g>
                 </g>
                 <g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
@@ -903,7 +925,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         await urlToBase64(`${this.storage_url}${updated_url}`).then(async (base64) => {
           svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
-                <g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
+                <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
                     ${updated_url?`<image xlink:href="${base64}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/>`:''}
                 </g>
                 <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
@@ -922,7 +944,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
       } else {
         svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
-                <g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
+                <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
                     ${updated_url?`<image xlink:href="${this.storage_url}${updated_url}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/>`:''}
                 </g>
                 <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
