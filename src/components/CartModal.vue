@@ -33,7 +33,7 @@
         <template v-for="(cart_item) in cartItems">
           <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
             <td>
-              <a href="#" style="cursor:pointer;text-decoration: none" @click="editCartItem(factory_product,cart_item.id,true)">{{factory_product.product_name}}</a>
+              <a href="#" style="cursor:pointer;color:blue" @click="editCartItem(factory_product,cart_item.id,true)">{{factory_product.product_name}}</a>
             </td>
             <td><b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
               <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
