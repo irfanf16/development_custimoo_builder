@@ -33,7 +33,7 @@
         <template v-for="(cart_item) in cartItems">
           <tr :key="factory_product.id" v-for="(factory_product) in cart_item.factory_products">
             <td>
-              {{factory_product.product_name}}
+              <a style="cursor:pointer;color:blue;text-decoration: underline" @click="editCartItem(factory_product,cart_item.id,true)">{{factory_product.product_name}}</a>
             </td>
             <td><b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.front_image" alt="Front Design"></b-img>
               <b-img style="width: 80px" thumbnail fluid :src="storageUrl+factory_product.back_image" alt="Back Design"></b-img>
@@ -41,15 +41,15 @@
             </td>
             <td>
               <template v-for="(roster_detail,index) in factory_product.roster_detail">
-                <div :key="index"><span>{{roster_detail.size}} : {{roster_detail.quantity}}</span></div>
+                <div :key="index" @click="editCartItem(factory_product,cart_item.id,false)"><a style="cursor:pointer;color:blue;text-decoration: underline">{{roster_detail.size}} : {{roster_detail.quantity}}</a></div>
               </template>
               <div>Total : {{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</div>
             </td>
             <!--          <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>-->
-            <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id)">
-              <font-awesome-icon
-                :icon="['fas', 'edit']"/>
-            </a></td>
+<!--            <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id)">-->
+<!--              <font-awesome-icon-->
+<!--                :icon="['fas', 'edit']"/>-->
+<!--            </a></td>-->
             <td class="cursor-pointer">  <a data-title="Delete Event" @click="deleteConfirm(cart_item,factory_product)"
             >
               <font-awesome-icon
