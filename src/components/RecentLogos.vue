@@ -127,7 +127,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
       //   await this.addLogoObject(this.customLogoIndex)
       // }
       this.$store.commit('SET_COLORS_FROM_RECENT',true)
-      await setCustomLogo(logo,this.customLogoIndex, this.selectedProduct.id)
+      await setCustomLogo(logo, this.customLogoIndex, this.selectedProduct.id)
     }
     catch (err) {
       console.log(err)

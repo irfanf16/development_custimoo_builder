@@ -277,7 +277,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
         custom_logo.upload = true
-        let customObj = this.getUploadedLogoObject(resp.data.file)
+        let customObj = await this.getUploadedLogoObject(resp.data.file)
         let getLogos = []
         if (this.customLogos.length > 1){
           getLogos = this.customLogos.slice(0, -1)
@@ -294,13 +294,13 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         this.$store.commit('customLogos', payload)
         // await setCustomLogo(customObj, this.customLogoIndex)
         this.hideModal()
-        this.getLogoColors()
+        await this.getLogoColors()
         this.$store.commit('SET_RECENT_LOGOS');
         this.showLoader = false;
 
         if(this.customLogoIndex == 0) {
           //update team logo url in all product logos
-          this.$store.dispatch('setTeamLogoUrl', custom_logo)
+          this.$store.dispatch('setTeamLogoUrl', payload)
         }
       })
       .catch((error: any) => {
@@ -316,10 +316,11 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   }
  public getUploadedLogoObject(res:Record<any, any>){
     return{
-      logo_url : res.logo_url,
-      transparent_logo_url : res.transparent_logo_url,
-      smart_transparent_logo_url : res.smart_transparent_logo_url,
+      original_logo : res.logo_url,
+      transparent_logo : res.transparent_logo_url,
+      smart_transparent_logo : res.smart_transparent_logo_url,
       is_smart_transparent : false,
+      is_transparent: false,
       url : res.logo_url,
       id : res.id
     }

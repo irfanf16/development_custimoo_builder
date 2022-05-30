@@ -420,7 +420,7 @@ const ProductAttributes:Module<any, any> = {
       const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
       Object.keys(custom_obj).map(function(key, index) {
         let logo_ = custom_obj[key][0];
-        logo_ = {...logo_, ...logo}
+        logo_ = {...logo_, ...logo.customObj}
         Vue.set(state.customLogos[key],0, logo_)
       });
     },
