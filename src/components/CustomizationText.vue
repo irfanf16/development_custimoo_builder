@@ -12,7 +12,7 @@
         </template>
       </h2>
       <h2 class="fw-bold mb-2 fz-18 d-flex align-items-center justify-content-between" v-else>
-        <span>Player {{ customTexts[customTextIndex].type | capitalize }} {{ customTexts[customTextIndex].side }}</span>
+        <span>Player {{ customTexts[customTextIndex].type | capitalize }}</span>
         <template v-if="customTextIndex + 1 > selectedProduct.productnames.length">
           <b-button class="ml-1 light" style="min-width: unset; line-height: normal" variant="dark"
             @click="$emit('removeTab')">

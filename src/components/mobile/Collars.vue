@@ -171,8 +171,17 @@ export default class Collars extends Vue {
     border-color: #ececec;
 
     &.active{
-      border-color: lighten(#219F84, 50%) !important;
+      animation: border-blink 2s infinite ease-in-out alternate;
     }
+  }
+}
+
+@keyframes border-blink {
+  from{
+    border-color: rgba(33, 159, 132, 0.85);
+  }
+  to{
+    border-color: #cbf4eb;
   }
 }
 </style>

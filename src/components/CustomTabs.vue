@@ -211,7 +211,7 @@ export default class CustomTabs extends Vue {
 
   private shareRoster() {
     if(this.isCustomerAuthenticated){
-      console.log(this.ref['edit-roster'].$refs['order-details'].getLockers())
+      this.ref['edit-roster'].$refs['order-details'].getLockers()
     }else{
       this.gotoLogin()
     }
