@@ -162,12 +162,14 @@ export default class RosterDetails extends Vue {
       name = name_and_number_array[0]
       number = name_and_number_array[1]
     }
-    let all_products_custom_texts = this.$store.getters.getCustomTexts(null,true)
-    if(all_products_custom_texts) {
-      for (let product_id in all_products_custom_texts) {
-        let custom_name_index = findIndex(all_products_custom_texts[product_id], {type: 'name'});
-        let custom_number_index = findIndex(all_products_custom_texts[product_id], {type: 'number'});
+    let custom_text = this.$store.getters.getCustomTexts()
+    if(custom_text) {
+      let custom_name_index = findIndex(custom_text, {type: 'name'});
+      let custom_number_index = findIndex(custom_text, {type: 'number'});
+      if(custom_name_index != -1) {
         this.$store.dispatch('updateCustomTextAttribute', {index: custom_name_index, on_all: true, attribute: 'text', value: name})
+      }
+      if(custom_number_index != -1) {
         this.$store.dispatch('updateCustomTextAttribute', {index: custom_number_index, on_all: true, attribute: 'text', value: number})
       }
     }
