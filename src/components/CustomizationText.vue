@@ -23,7 +23,7 @@
 
       <div class="d-flex">
         <b-form-input @click="isHidden = !isHidden" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here"
-          :value="customTexts[customTextIndex].text" @input="updateTextField(customTextIndex, $event)" ></b-form-input>
+          :value="customTexts[customTextIndex].text" @blur="toggleAccordian(customTextIndex, $event , 'blur')" @focus="toggleAccordian(customTextIndex, $event , 'focus')" @input="updateTextField(customTextIndex, $event)" ></b-form-input>
         <button v-b-toggle="'accordion-' + (customTextIndex + 1)"
           class="d-flex align-items-center btn btn-secondary light">
           <span class="minus d-flex align-items-center">
@@ -269,10 +269,13 @@ export default class CustomizationText extends Vue {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', { index: index, on_all: true, attribute: 'text', value: value })
     this.initRosterFromTexts()
-    
-    if(value){
+  }
+
+  toggleAccordian(index:number , value: string , action: string) {
+    if(action == "focus"){
       this.$refs[`accordion-${index+1}`].show = true
-    }else{
+    }
+    else if(action == "blur" && this.customText[index].text.length < 1){
       this.$refs[`accordion-${index+1}`].show = false
     }
   }

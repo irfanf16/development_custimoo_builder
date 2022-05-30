@@ -1,4 +1,3 @@
-const provider_id = process.env.VUE_APP_PROVIDER_ID
 import Vue from "vue";
 import {http, noTokenRequest} from "@/httpCommon";
 import { Module } from "vuex";

@@ -55,9 +55,11 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 import {getClosestColor} from '@/pantoneColor'
+import ModalAction from "@/mixins/ModalAction";
+
 
 @Component<ColorTabs>({
   components: {
@@ -77,9 +79,10 @@ import {getClosestColor} from '@/pantoneColor'
   }
 })
 
-export default class ColorTabs extends Vue {
+export default class ColorTabs extends Mixins(ModalAction) {
   @Prop({required: true}) productColors!: any
   @Prop({required: false}) onlyColorsTabs!: any
+  @Prop({required:false}) modalRef!: any
 
   public color = '#59c7f9'
   public showOther = false
@@ -130,7 +133,9 @@ export default class ColorTabs extends Vue {
       this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.getGroupColors)), action: 'groupColor' })
       this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectTabIndex].id, color: color.value, pantone: color.name })
     }
-
+    if(this.modalRef){
+      this.hideVModal(this.modalRef)
+    } // closing logo color selection modal here
   }
 
   public changeColor(color: Record<any, any>) {
