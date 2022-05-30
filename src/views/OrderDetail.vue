@@ -222,7 +222,6 @@
           </div>
 
 
-<!--          <div class="fs-5" v-if="(activity_items.activity_item_data.length - 1) != activity_navigation_index">-->
           <div class="fs-5">
             <BIconChevronRight @click="navigateActivitySlider('next')" />
           </div>
@@ -277,10 +276,10 @@ import {findIndex, debounce, filter} from "lodash";
     let self = this;
     let comment_id = null;
     this.isWebComponent = this.$root.$options.name == 'shadow-root'
-    if(this.company.platform == "self") {
-      this.order_id = this.$route.params.order_id;
-    } else {
+    if(this.company.platform == "wordpress") {
       this.order_id = this.$route.query.order_id;
+    } else {
+      this.order_id = this.$route.params.order_id;
     }
     comment_id = this.$route.query.comment_id;
     await self.getOrderDetail();
@@ -385,7 +384,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
   async getOrderDetail() {
-    console.log("i9nside")
     let self = this;
     let url = `order/${self.order_id}`
     http.get(url)
