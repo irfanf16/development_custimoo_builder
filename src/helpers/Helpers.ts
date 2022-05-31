@@ -317,7 +317,10 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
     logo_.is_transparent = false
     logo_.url = logo_url
     logo_.id = logo.id;
-    await Store.dispatch('setTeamLogoUrl',logo_)
+    const payload = {
+      customObj : logo_,
+    }
+    await Store.dispatch('setTeamLogoUrl', payload)
   }
   if(!logo.logo_colors) {
     Store.dispatch("SET_LOGO_COLORS", []);
