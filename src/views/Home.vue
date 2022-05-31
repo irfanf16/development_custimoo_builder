@@ -115,13 +115,13 @@
                 </div>
 
                 <div class="mobile-nav">
-                  <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="switchTabs(activeTab-1, false)" v-if="activeTab > 0" style="line-height: normal">
+                  <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="navigateTabs('prev')" v-if="activeTab > 0" style="line-height: normal">
                     <b-icon-arrow-left-short />
                   </button>
                   <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="showDesign" v-else-if="selectedProduct && (!activeTab || activeTab<0)" style="line-height: normal">
                     <b-icon-arrow-left-short />
                   </button>
-                  <button class="btn text-white fs-4 border-0 mr-3 p-0 btn-secondary btn-sm" @click="switchTabs(activeTab+1, false)" v-if="activeTab < 4" style="line-height: normal">
+                  <button class="btn text-white fs-4 border-0 mr-3 p-0 btn-secondary btn-sm" @click="navigateTabs('next')" v-if="activeTab < 4" style="line-height: normal">
                     <b-icon-arrow-right-short />
                   </button>
                   <template v-else>
@@ -213,7 +213,7 @@
           </div>
           <div class="sideNav" v-if="mobileScreen">
             <ul>
-              <li>
+              <li v-if="selectedProduct.is_logo_allowed">
                 <a @click="switchTabs(0, false)">
                   <span v-html="tabIcons[0]">
                   </span>
@@ -225,7 +225,7 @@
                   </span>
                 </a>
               </li>
-              <li>
+              <li v-if="selectedProduct.allow_extra_text">
                 <a @click="switchTabs(2, false)">
                   <span v-html="tabIcons[2]">
                   </span>
@@ -496,6 +496,32 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private maximizeTab(ind:number, maximize:boolean){
     this.switchTabs(ind, false)
     this.maximized = maximize
+  }
+
+  private navigateTabs(side: string){
+    let index = 0;
+    if(side === 'prev'){
+      index = this.activeTab - 1
+      if(!this.selectedProduct.is_logo_allowed && index === 0){
+        index = -1
+        this.showDesign()
+      }
+      if(!this.selectedProduct.allow_extra_text && index === 2) {
+        index = 1
+      }
+    }
+
+    if(side === 'next') {
+      index = this.activeTab + 1
+      if (!this.selectedProduct.is_logo_allowed && index === 0) {
+        index = 1
+      }
+      if (!this.selectedProduct.allow_extra_text && index === 2) {
+        index = 3
+      }
+    }
+
+    this.switchTabs(index, false)
   }
 
   private switchTabs (ind:number, isHome:boolean){
