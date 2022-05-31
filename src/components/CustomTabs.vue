@@ -90,7 +90,7 @@
         <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
             <template v-if="isCustomerAuthenticated">
               <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                <span v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                <span v-if="this.ref['edit-roster'] && !this.ref['edit-roster'].$refs['order-details'].isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
                   Add to cart
                 </span></span>
                 <span v-else class="addPlayer" style="background: #a9a9a9; color: #fff"><span class="fs-2 icon position-absolute"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
@@ -168,6 +168,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     this.fontsList()
     this.customTextInit()
     this.switchTabs(0)
+    console.log('this', this)
   }
 })
 
@@ -215,6 +216,10 @@ export default class CustomTabs extends Vue {
     }else{
       this.gotoLogin()
     }
+  }
+
+  private log(text:any){
+    console.log(text)
   }
 
   get company(): Record<any, any>{
