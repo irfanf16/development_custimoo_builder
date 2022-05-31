@@ -29,7 +29,7 @@
                                     :ref="'logoUploadModalOpener'+ltIdx" :key="'top'+ltIdx">
                     <span slot="upload_text">Click to upload logo or drag a file here</span>
                   </UploadLogoMobile>
-                  <div class="logo-placemet-content" :class="{'invisible': !logo_tab.url}">
+                  <div class="logo-placemet-content">
                     <b-button :class="{'invisible': !getRecentLogos.length > 0}" class="logo-editor-button py-2" @click="showRecentLogosHandler" style="line-height: normal;" size="sm" variant="secondary">
                         Logos
                     </b-button>

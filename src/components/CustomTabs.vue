@@ -110,7 +110,7 @@
         </div>
       </div>
     </div>
-    <div class="open-logo-uploader customize_controls d-flex align-items-center gap-1" v-if="!maximized">
+    <div class="open-logo-uploader customize_controls d-flex align-items-center gap-1" v-if="!maximized" style="top: auto">
       <span v-html="tabIcons[sideTabIndex]" class="fs-4 d-inline-flex" style="line-height: normal; color: #219F84; padding-bottom: 2px;"></span>
       <span class="fs-3 font-weight-bold d-inline-flex pb-0">
         {{ tabTitles[sideTabIndex] }}
@@ -211,7 +211,7 @@ export default class CustomTabs extends Vue {
 
   private shareRoster() {
     if(this.isCustomerAuthenticated){
-      console.log(this.ref['edit-roster'].$refs['order-details'].getLockers())
+      this.ref['edit-roster'].$refs['order-details'].getLockers()
     }else{
       this.gotoLogin()
     }
