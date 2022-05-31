@@ -269,18 +269,21 @@ import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {findIndex, debounce, filter} from "lodash";
+import {getCompany} from "@/helpers/Helpers";
 
 
 @Component<OrderDetail>({
   async mounted() {
+    await getCompany();
 
     let self = this;
     let comment_id = null;
     this.isWebComponent = this.$root.$options.name == 'shadow-root'
-    if(this.company.platform == "self") {
-      this.order_id = this.$route.params.order_id;
-    } else {
+
+     if(this.company.platform == "wordpress") {
       this.order_id = this.$route.query.order_id;
+    } else {
+      this.order_id = this.$route.params.order_id;
     }
     comment_id = this.$route.query.comment_id;
     await self.getOrderDetail();
