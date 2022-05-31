@@ -1,7 +1,7 @@
 <template>
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
-      <b-tabs v-model="tabIndex">
+      <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
         <!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
         <!--        <vue-scrollbar :speed="20" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">-->
         <div class="myscroll">
@@ -450,7 +450,7 @@ export default class CustomizationTabs extends Vue {
               fillColorPantone: fill_color_pantone,
               outLineColor: this.secondColor.value,
               outLineColorPantone: outLine_color_pantone,
-              outLineWidth: 2,
+              outLineWidth: 0,
               selectColor: false
             }
             await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
@@ -527,7 +527,7 @@ export default class CustomizationTabs extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 2,
+      outLineWidth: 0,
       add_type: 'manual',
     }
     this.$store.dispatch('setCustomTexts', {follow:true, index: this.customTexts.length, text: text, prd_id:this.selectedProduct.id})

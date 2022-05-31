@@ -723,7 +723,7 @@ export default class CustomTabs extends Vue {
           fillColorPantone: this.firstColor.name,
           outLineColor: this.secondColor.value,
           outLineColorPantone: this.secondColor.name,
-          outLineWidth: 2,
+          outLineWidth: 0,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
@@ -795,7 +795,7 @@ export default class CustomTabs extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 2
+      outLineWidth: 0
     }
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
   }

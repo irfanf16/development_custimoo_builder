@@ -217,7 +217,7 @@ export class handleMainProducts extends Vue {
             fillColorPantone: fill_color_pantone,
             outLineColor: obj.secondColor.value,
             outLineColorPantone: outLine_color_pantone,
-            outLineWidth: 2,
+            outLineWidth: 0,
             textIndex: index,
             selectColor: false
           }

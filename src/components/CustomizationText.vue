@@ -64,7 +64,7 @@
             </div>
           </a>
           <a @click="showColor('outline', customTextIndex)"
-            v-if="customTexts[customTextIndex].outlineEnabled && customTexts[customTextIndex].outLineWidth > 0"
+            v-if="customTexts[customTextIndex].outlineEnabled && customTexts[customTextIndex].outLineWidth >= 0"
             :style="[{ borderColor: textColorType === 'outline' ? customTexts[customTextIndex].outLineColor : null }]">
             <div class="text-color-box">
               <div class="color-circle"
