@@ -186,7 +186,7 @@
               </div>
               <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
                 <b-button v-if="tabIndex > 0" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= 2) || (!hideColorSection && tabIndex <= 3)">Next</b-button>
+                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= (totalTabs-2)) || (!hideColorSection && tabIndex <= (totalTabs-1))">Next</b-button>
                 <template v-else>
                   <template v-if="isCustomerAuthenticated">
                     <template v-if="$store.getters.getUpdateOrderItemProducts == null">
@@ -225,7 +225,7 @@
                   </span>
                 </a>
               </li>
-              <li v-if="selectedProduct.allow_extra_text">
+              <li v-if="selectedProduct.allow_name_number">
                 <a @click="switchTabs(2, false)">
                   <span v-html="tabIcons[2]">
                   </span>
@@ -338,6 +338,13 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
+    if(!this.selectedProduct.is_logo_allowed){
+      this.totalTabs = this.totalTabs - 1
+    }
+
+    if(!this.selectedProduct.allow_name_number){
+      this.totalTabs = this.totalTabs - 1
+    }
     //get recent logos
     this.setRecentLogos()
 
@@ -452,6 +459,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public updated_order_products: Record<any, any>[] = []
   public updateOrderItemProducts: Record<any, any> | null = null;
   private sideTabIndex = 0
+  private totalTabs = 4
   private maximized = true
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
@@ -506,7 +514,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         index = -1
         this.showDesign()
       }
-      if(!this.selectedProduct.allow_extra_text && index === 2) {
+      if(!this.selectedProduct.allow_name_number && index === 2) {
         index = 1
       }
     }
@@ -516,7 +524,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       if (!this.selectedProduct.is_logo_allowed && index === 0) {
         index = 1
       }
-      if (!this.selectedProduct.allow_extra_text && index === 2) {
+      if (!this.selectedProduct.allow_name_number && index === 2) {
         index = 3
       }
     }
