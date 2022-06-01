@@ -349,6 +349,8 @@ import ModalAction from "@/mixins/ModalAction";
     if (this.lockers.length >0 ){
       this.copiedProductLockerId = this.lockers[0].id
     }
+
+    console.log('getCollections', this.getCollections)
   }
 })
 export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
