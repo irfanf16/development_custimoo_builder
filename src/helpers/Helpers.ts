@@ -517,6 +517,18 @@ const activityStatus = {
   },
 }
 
+const getUploadedLogoObject = async (res:Record<any, any>) => {
+  return{
+    original_logo : res.logo_url,
+    transparent_logo : res.transparent_logo_url,
+    smart_transparent_logo : res.smart_transparent_logo_url,
+    is_smart_transparent : false,
+    is_transparent: false,
+    url : res.logo_url,
+    id : res.id
+  }
+}
+
 const getCompany = async () => {
   const res = await http.get('company').catch(error => {
     handleResponseException(error)
@@ -546,5 +558,6 @@ const getPermissions = async () => {
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions,
+  getUploadedLogoObject
 };

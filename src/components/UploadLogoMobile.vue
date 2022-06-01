@@ -108,7 +108,7 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
-import {getLogoObject, setLogoSettings} from "../helpers/Helpers"
+import { getLogoObject, getUploadedLogoObject, setLogoSettings } from '../helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import ModalAction from "@/mixins/ModalAction";
 
@@ -277,7 +277,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
         custom_logo.upload = true
-        let customObj = this.getUploadedLogoObject(resp.data.file)
+        let customObj = getUploadedLogoObject(resp.data.file)
         let getLogos = []
         if (this.customLogos.length > 1){
           getLogos = this.customLogos.slice(0, -1)
@@ -309,16 +309,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         this.showError(error);
       })
   }
-  public getUploadedLogoObject(res:Record<any, any>){
-    return{
-      logo_url : res.logo_url,
-      transparent_logo_url : res.transparent_logo_url,
-      smart_transparent_logo_url : res.smart_transparent_logo_url,
-      is_smart_transparent : false,
-      url : res.logo_url,
-      id : res.id
-    }
-  }
+
   public hasExtension(fileName : string, exts: any) : boolean {
 
     return (new RegExp('(' + exts.join('|').replace(/\./g, '\\.') + ')$')).test(fileName);
