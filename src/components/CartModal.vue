@@ -43,12 +43,9 @@
 
               </td>
               <td>
-                <template v-for="(roster_detail, index) in factory_product.roster_detail">
-                  <div :key="index" @click="editCartItem(factory_product, cart_item.id, false)"><a
-                      style="cursor:pointer;color:blue;text-decoration: underline">{{ roster_detail.size }} :
-                      {{ roster_detail.quantity }}</a></div>
-                </template>
-                <div>Total : {{ factory_product.roster_detail | itemQtyCount(factory_product.roster_detail) }}</div>
+                <a style="font-weight: bold; cursor:pointer; color:blue;text-decoration: underline" @click="editCartItem(factory_product, cart_item.id, false)">
+                  {{ factory_product.roster_detail | itemQtyCount(factory_product.roster_detail) }}
+                </a>
               </td>
               <!--          <td>{{factory_product.roster_detail | itemQtyCount(factory_product.roster_detail)}}</td>-->
               <!--            <td class="cursor-pointer">   <a data-title="Edit Product" @click="editCartItem(factory_product,cart_item.id)">-->
