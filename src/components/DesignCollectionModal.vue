@@ -241,7 +241,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   }
 
   public editCollectionModal() {
-    this.ref['collection-modal'].show();
+    this.showVModal('collection-modal')
     this.retrievCollectionItems();
   }
 
@@ -304,7 +304,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
       this.showToast(res.message, 'SUCCESS')
       const payload = {"attribute": "locker_products", "value": []};
       this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
-      this.ref['collection-modal'].hide();
+      this.hideVModal('collection-modal')
     } else {
       this.showErrorArr(res.message)
     }
@@ -352,7 +352,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
       const payload = {"attribute": "locker_products", "value": []};
       this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
       this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
-      this.ref['collection-modal'].hide();
+      this.hideVModal('collection-modal')
     } else {
       this.showErrorArr(res.message)
     }
