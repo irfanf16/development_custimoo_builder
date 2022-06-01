@@ -277,7 +277,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
         custom_logo.upload = true
-        let customObj = getUploadedLogoObject(resp.data.file)
+        let customObj = await getUploadedLogoObject(resp.data.file)
         this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
         custom_logo.adding_tab = false
