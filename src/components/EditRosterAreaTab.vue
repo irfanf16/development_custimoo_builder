@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex gap-2">
       <b-button class="d-none d-lg-block" @click="show">Edit Roster</b-button>
-      <button class="btn btn-secondary light" v-if="isCustomerAuthenticated" @click="shareRoster">Share roster url</button>
+      <button class="btn btn-secondary light" v-if="isCustomerAuthenticated && company.platform != 'cdnExceptLogin'" @click="shareRoster">Share roster url</button>
     </div>
 
     <modal id="modal-scrollable" :width="screenWidth"
@@ -101,6 +101,12 @@ export default class EditRosterAreaTab extends Vue {
   }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
+  }
+  get company(){
+    return this.$store.getters.getCompany
+  }
+  get allproducts(){
+    return this.$store.getters.getProducts
   }
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
