@@ -4560,7 +4560,8 @@ $fontSize: 0.5;
 }
 
 .vm--modal {
-    //overflow-y: auto;
+    margin-top: 80px;
+
     @media (max-width: 768px) {
         margin: 0 auto !important;
         left: 0 !important;
