@@ -335,8 +335,8 @@ export default class RosterDetails extends Vue {
   public updateRosterSize(selected_size_index: number, roster: Record<any, any>) {
     let selected_size = this.productSizes[selected_size_index];
     if(selected_size){
-      roster.size = selected_size.name
-      roster.code = selected_size.code
+      roster.size = selected_size.text
+      roster.code = selected_size.value
     }
   }
 
