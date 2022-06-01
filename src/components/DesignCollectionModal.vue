@@ -241,7 +241,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   }
 
   public editCollectionModal() {
-    this.ref['collection-modal'].show();
+    this.showVModal('collection-modal')
     this.retrievCollectionItems();
   }
 
