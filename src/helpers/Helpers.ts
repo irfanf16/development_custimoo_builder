@@ -467,15 +467,20 @@ const getActiveProductData = async () => {
 }
 
 const getRosterDetailDefaultObject = () => {
-  return {
-    text: '',
-    number: '',
-    size: '',
-    size_index: 0,
-    code: '',
-    quantity: 1,
-    information: ''
+  const selected_product = Store.getters.getSelectedProduct;
+  if (selected_product.sizes.length){
+    const productSizes = JSON.parse(selected_product.sizes[0].json_data)
+    return {
+      text: '',
+      number: '',
+      size_index: 0,
+      size: productSizes[0].name,
+      code: productSizes[0].name,
+      quantity: 1,
+      information: ''
+    }
   }
+  return {}
 }
 
 const activityStatus = {
