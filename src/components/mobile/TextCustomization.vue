@@ -277,7 +277,7 @@ export default class TextCustomization extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 2,
+      outLineWidth: 0,
       add_type: 'manual',
     }
     this.$store.dispatch('setCustomTexts', {follow:true, index: this.customTexts.length, text: text, prd_id:this.selectedProduct.id})

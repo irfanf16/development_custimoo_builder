@@ -286,6 +286,9 @@ export default class LogoEditorModal extends Mixins(ErrorMessages, ModalAction) 
 </script>
 
 <style lang="scss" scoped>
+.customization-tabs .logo-placement-tabs .logo-placement-holder .logo-holder .edit-logo-modal .loader img{
+  max-width: 110px;
+}
 .lockerroom-header {
   display: flex;
   flex-wrap: wrap;

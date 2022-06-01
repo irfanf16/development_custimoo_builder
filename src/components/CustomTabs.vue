@@ -61,7 +61,7 @@
         <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
       </div>
     </div>
-    <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2 && selectedProduct.allow_name_number">
+    <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2 && selectedProduct.allow_extra_text">
 <!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
       <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
@@ -90,7 +90,7 @@
         <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
             <template v-if="isCustomerAuthenticated">
               <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                <span v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                <span v-if="this.ref['edit-roster'] && !this.ref['edit-roster'].$refs['order-details'].isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
                   Add to cart
                 </span></span>
                 <span v-else class="addPlayer" style="background: #a9a9a9; color: #fff"><span class="fs-2 icon position-absolute"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
@@ -110,7 +110,7 @@
         </div>
       </div>
     </div>
-    <div class="open-logo-uploader customize_controls d-flex align-items-center gap-1" v-if="!maximized">
+    <div class="open-logo-uploader customize_controls d-flex align-items-center gap-1" v-if="!maximized" style="top: auto">
       <span v-html="tabIcons[sideTabIndex]" class="fs-4 d-inline-flex" style="line-height: normal; color: #219F84; padding-bottom: 2px;"></span>
       <span class="fs-3 font-weight-bold d-inline-flex pb-0">
         {{ tabTitles[sideTabIndex] }}
@@ -167,7 +167,9 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     this.fontsColorsManipulation()
     this.fontsList()
     this.customTextInit()
-    this.switchTabs(0)
+    let tabIndex = this.selectedProduct.is_logo_allowed ? 0 : 1
+    this.switchTabs(tabIndex)
+    console.log('this', this)
   }
 })
 
@@ -211,10 +213,14 @@ export default class CustomTabs extends Vue {
 
   private shareRoster() {
     if(this.isCustomerAuthenticated){
-      console.log(this.ref['edit-roster'].$refs['order-details'].getLockers())
+      this.ref['edit-roster'].$refs['order-details'].getLockers()
     }else{
       this.gotoLogin()
     }
+  }
+
+  private log(text:any){
+    console.log(text)
   }
 
   get company(): Record<any, any>{
@@ -723,7 +729,7 @@ export default class CustomTabs extends Vue {
           fillColorPantone: this.firstColor.name,
           outLineColor: this.secondColor.value,
           outLineColorPantone: this.secondColor.name,
-          outLineWidth: 2,
+          outLineWidth: 0,
           selectColor: false
         }
         this.$store.dispatch('setCustomTexts', {index: index, text: text})
@@ -795,7 +801,7 @@ export default class CustomTabs extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 2
+      outLineWidth: 0
     }
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
   }

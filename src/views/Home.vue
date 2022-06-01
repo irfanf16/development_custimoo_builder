@@ -115,13 +115,13 @@
                 </div>
 
                 <div class="mobile-nav">
-                  <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="switchTabs(activeTab-1, false)" v-if="activeTab > 0" style="line-height: normal">
+                  <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="navigateTabs('prev')" v-if="activeTab > 0" style="line-height: normal">
                     <b-icon-arrow-left-short />
                   </button>
                   <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="showDesign" v-else-if="selectedProduct && (!activeTab || activeTab<0)" style="line-height: normal">
                     <b-icon-arrow-left-short />
                   </button>
-                  <button class="btn text-white fs-4 border-0 mr-3 p-0 btn-secondary btn-sm" @click="switchTabs(activeTab+1, false)" v-if="activeTab < 4" style="line-height: normal">
+                  <button class="btn text-white fs-4 border-0 mr-3 p-0 btn-secondary btn-sm" @click="navigateTabs('next')" v-if="activeTab < 4" style="line-height: normal">
                     <b-icon-arrow-right-short />
                   </button>
                   <template v-else>
@@ -186,7 +186,7 @@
               </div>
               <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
                 <b-button v-if="tabIndex > 0" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= 2) || (!hideColorSection && tabIndex <= 3)">Next</b-button>
+                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= (totalTabs-1)) || (!hideColorSection && tabIndex <= totalTabs)">Next</b-button>
                 <template v-else>
                   <template v-if="isCustomerAuthenticated">
                     <template v-if="$store.getters.getUpdateOrderItemProducts == null">
@@ -213,7 +213,7 @@
           </div>
           <div class="sideNav" v-if="mobileScreen">
             <ul>
-              <li>
+              <li v-if="selectedProduct.is_logo_allowed">
                 <a @click="switchTabs(0, false)">
                   <span v-html="tabIcons[0]">
                   </span>
@@ -225,7 +225,7 @@
                   </span>
                 </a>
               </li>
-              <li>
+              <li v-if="selectedProduct.allow_name_number">
                 <a @click="switchTabs(2, false)">
                   <span v-html="tabIcons[2]">
                   </span>
@@ -251,7 +251,7 @@
           </div>
         <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
           <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll" :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products"/>
-          <div class="customize_controls" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
+          <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
             <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
             <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
@@ -338,6 +338,13 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
+    if(!this.selectedProduct.is_logo_allowed){
+      this.totalTabs = this.totalTabs - 1
+    }
+
+    if(!this.selectedProduct.allow_name_number){
+      this.totalTabs = this.totalTabs - 1
+    }
     //get recent logos
     this.setRecentLogos()
 
@@ -452,6 +459,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public updated_order_products: Record<any, any>[] = []
   public updateOrderItemProducts: Record<any, any> | null = null;
   private sideTabIndex = 0
+  private totalTabs = 4
   private maximized = true
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
@@ -496,6 +504,32 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private maximizeTab(ind:number, maximize:boolean){
     this.switchTabs(ind, false)
     this.maximized = maximize
+  }
+
+  private navigateTabs(side: string){
+    let index = 0;
+    if(side === 'prev'){
+      index = this.activeTab - 1
+      if(!this.selectedProduct.is_logo_allowed && index === 0){
+        index = -1
+        this.showDesign()
+      }
+      if(!this.selectedProduct.allow_name_number && index === 2) {
+        index = 1
+      }
+    }
+
+    if(side === 'next') {
+      index = this.activeTab + 1
+      if (!this.selectedProduct.is_logo_allowed && index === 0) {
+        index = 1
+      }
+      if (!this.selectedProduct.allow_name_number && index === 2) {
+        index = 3
+      }
+    }
+
+    this.switchTabs(index, false)
   }
 
   private switchTabs (ind:number, isHome:boolean){
@@ -1131,6 +1165,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if(this.mobileScreen){
       this.showDesign()
+      this.switchTabs(0, true)
     }
   }
 
