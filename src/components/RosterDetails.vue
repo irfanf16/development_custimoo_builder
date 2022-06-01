@@ -55,7 +55,7 @@
         <div class="roster-row mb-2"  :key="index">
           <div class="align-left">
             <div class="hide-show" >
-              <a >
+              <a @click="editRosterPlayer(index)">
                 <font-awesome-icon  :icon="['fas',  index === eyeIndex ? 'eye' : 'eye-slash']"/>
               </a>
             </div>
