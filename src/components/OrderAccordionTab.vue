@@ -66,7 +66,8 @@
                 <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front.file_url " alt="Collar"/>
               </div>
               <div class="collar-details">
-                <strong>{{ model.model_name }}</strong>
+<!--                <strong>{{ selectedProduct.productstyles[styleIndex].name }}</strong>-->
+                <strong>{{selectedProduct.productstyles[styleIndex].name }}</strong>
                 <div class="d-flex flex-wrap align-items-center" v-for="(item, i) in selectedProduct.addons" :key="i">
                   <div class="category mr-3">{{ item.addon.name }}</div>
                   <div class="price">+${{ item.addon.price }}</div>
