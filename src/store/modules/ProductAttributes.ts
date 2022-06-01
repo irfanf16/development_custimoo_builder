@@ -552,12 +552,6 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.rosterDetails[rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)
       } else {
         const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
-        const selected_product = state.products[state.selectedIndex];
-        const product_sizes = selected_product.sizes;
-        if(product_sizes.length > 0) {
-          roster_detail_default_obj.size = product_sizes[0].name;
-          roster_detail_default_obj.code = product_sizes[0].code;
-        }
         state.rosterDetails.push(roster_detail_default_obj)
       }
     },
@@ -751,12 +745,6 @@ const ProductAttributes:Module<any, any> = {
       state.rosterDetails = []
 
       const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
-      const selected_product = state.products[state.selectedIndex];
-      const product_sizes = selected_product.sizes;
-      if(product_sizes.length > 0) {
-        roster_detail_default_obj.size = product_sizes[0].name;
-        roster_detail_default_obj.code = product_sizes[0].code;
-      }
       state.rosterDetails.push(roster_detail_default_obj)
 
       const selectedProduct = state.products[state.selectedIndex];
@@ -779,6 +767,19 @@ const ProductAttributes:Module<any, any> = {
         state.customTextObjects = [];
         state.customLogoObjects = [];
       }
+
+      state.selectedIndex = 0;
+      state.styleIndex = 0 ;
+      const select_product = state.products[state.selectedIndex];
+
+      select_product.productstyles[state.styleIndex].productdesigns.forEach((item: Record<any, any>) => {
+        if (item.is_default) {
+          Vue.set(item, 'design_show', 1)
+          state.selectedDesignId = item.id
+        } else {
+          Vue.set(item, 'design_show', 0)
+        }
+      });
 
       //rest custom texts
       state.customTexts = {}

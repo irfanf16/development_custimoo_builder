@@ -93,11 +93,6 @@ export default class EditRosterArea extends Vue {
 
   public rosterDetailsInit() {
     let payload = getRosterDetailDefaultObject()
-    if(this.sizeOptions.length > 0) {
-      payload.size = this.sizeOptions[0].value;
-      payload.code = this.sizeOptions[0].code;
-    }
-
     this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
   }
 

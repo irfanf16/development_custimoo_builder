@@ -84,7 +84,7 @@
             ></b-form-input>
           </div>
           <div class="remove" v-if="rosterDetails.length > 1">
-            <a @click="removeIndex(index, roster.text, roster.number)">
+            <a @click="removeIndex(index)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
             </a>
           </div>
@@ -190,11 +190,8 @@ export default class RosterDetails extends Vue {
   public addPlayer(obj:Record<any, any>) {
     this.$emit('addPlayer');
   }
-  public isActive = false;
-  public myFilter() {
-    this.isActive = !this.isActive
-  }
-  public removeIndex(ind:number, text:string, num:number){
+
+  public removeIndex(ind:number){
     if (this.customText.length > 0){
       if (this.customText[0]){
         this.$store.dispatch('updateCustomTextAttribute', {index: 0, on_all: true, attribute: 'text', value: ''})
@@ -339,7 +336,7 @@ export default class RosterDetails extends Vue {
     let selected_size = this.productSizes[selected_size_index];
     if(selected_size){
       roster.size = selected_size.name
-      roster.code = selected_size.code
+      roster.code = selected_size.name
     }
   }
 

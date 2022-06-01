@@ -415,7 +415,7 @@ const getActiveProductData = async () => {
     scene_ref.frontCanvas.discardActiveObject().renderAll()
     scene_ref.backCanvas.discardActiveObject().renderAll()
     const post_data: Record<any, any> = {
-      back_image: getCanvasImage.scene.$refs.back.toDataURL("image/png"),
+      back_image: getCanvasImage.ref_back?.toDataURL("image/png"),
       custom_logos: Store.getters.getCustomLogos(),
       measurement_ratio: selected_design.measurement_ratio,
       custom_logo_svgs: [],
@@ -424,7 +424,7 @@ const getActiveProductData = async () => {
       colors: Store.getters.getLogosColors,
       design_id: selected_design.id,
       defaultcolors: Store.getters.getDefaultColors,
-      front_image: getCanvasImage.scene.$refs.front.toDataURL("image/png"),
+      front_image: getCanvasImage.ref_front.toDataURL("image/png"),
       groupcolors: Store.getters.getGroupColors,
       logo_colors: Store.getters.getLogosColors,
       model_id: product_models[selected_model_index].id,
@@ -467,15 +467,20 @@ const getActiveProductData = async () => {
 }
 
 const getRosterDetailDefaultObject = () => {
-  return {
-    text: '',
-    number: '',
-    size: '',
-    size_index: 0,
-    code: '',
-    quantity: 1,
-    information: ''
+  const selected_product = Store.getters.getSelectedProduct;
+  if (selected_product.sizes.length){
+    const productSizes = JSON.parse(selected_product.sizes[0].json_data)
+    return {
+      text: '',
+      number: '',
+      size_index: 0,
+      size: productSizes[0].name,
+      code: productSizes[0].name,
+      quantity: 1,
+      information: ''
+    }
   }
+  return {}
 }
 
 const activityStatus = {
