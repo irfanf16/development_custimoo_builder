@@ -146,7 +146,7 @@
                 <b-tab v-if="!getSelectionMode.readonly" title="Colors">
                   <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
                     <div class="pt-lg-2 folder-wrapper">
-                      <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
+                      <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold text-left">Select Folder</h3>
                       <div class="d-flex flex-wrap color-folder-holder">
                         <template v-for="(folder, inde) in room.folders">
                           <a href="#" class="text-center d-block" @click="fetchColors(inde, i)" :key="inde">
