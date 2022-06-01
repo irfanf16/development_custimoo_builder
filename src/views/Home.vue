@@ -1158,9 +1158,22 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public async resetStore(){
     const ok = await this.ref['reset-changes'].showConfirm()
     if (ok) {
-      this.$store.dispatch('resetStore')
-      this.$store.dispatch('SET_LOGO_COLORS', [])
-      this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+      if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
+        await this.retrieveProducts()
+        this.$store.dispatch('setTabMain',{value: 0})
+        this.$store.dispatch('SET_LOGO_COLORS', [])
+        this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+        this.$store.dispatch('resetStore')
+        await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
+        await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
+        this.$store.commit('CHANGE_EDIT_STATUS',{status:false})
+        this.updateOrderItemProducts = null;
+      } else{
+        this.$store.dispatch('resetStore')
+        this.$store.dispatch('setTabMain',{value: 0})
+        this.$store.dispatch('SET_LOGO_COLORS', [])
+        this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+      }
     }
 
     if(this.mobileScreen){

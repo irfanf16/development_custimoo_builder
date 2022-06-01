@@ -780,6 +780,19 @@ const ProductAttributes:Module<any, any> = {
         state.customLogoObjects = [];
       }
 
+      state.selectedIndex = 0;
+      state.styleIndex = 0 ;
+      const select_product = state.products[state.selectedIndex];
+
+      select_product.productstyles[state.styleIndex].productdesigns.forEach((item: Record<any, any>) => {
+        if (item.is_default) {
+          Vue.set(item, 'design_show', 1)
+          state.selectedDesignId = item.id
+        } else {
+          Vue.set(item, 'design_show', 0)
+        }
+      });
+
       //rest custom texts
       state.customTexts = {}
       state.products.forEach((product:any) => {
