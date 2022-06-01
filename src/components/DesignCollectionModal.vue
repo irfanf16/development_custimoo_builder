@@ -1,9 +1,14 @@
 <template>
 
   <span>
-  <b-modal ref="collection-modal" id="modal-center-collection" size="xl" modal-class="modal-fullscreen2" content-class="collection-modal">
-
-    <template #modal-title>
+  <modal :width="screenWidth"
+         :resizable="true"
+         :scrollable="true"
+         height="auto"
+         :reset="true"
+         :shiftY="0"
+         name="collection-modal" ref="collection-modal">
+    <div class="modal-header">
       <div class="d-flex justify-content-sm-between flex-wrap align-items-center justify-content-center gap-1 w-100">
         <div>
           <b-form-input @input="updateCollectionItemAttribute('name','',$event)" v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
@@ -15,9 +20,9 @@
         </div>
 
       </div>
-    </template>
+    </div>
 
-    <template>
+    <div class="modal-body">
       <div class="design-collection-form">
         <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
         <b-form inline>
@@ -76,18 +81,18 @@
           </b-container>
         </b-form>
       </div>
-    </template>
+    </div>
 
 
 
-   <template #modal-footer>
+   <div class="modal-footer">
       <div class="d-flex align-items-center justify-content-end w-100 gap-1">
         <b-button @click="hideCollectionModal" variant="secondary" class="light">Cancel</b-button>
         <b-button @click="openLockerModel">Add more</b-button>
         <b-button variant="secondary" @click="saveCollectionForm">Save</b-button>
       </div>
-    </template>
-  </b-modal>
+    </div>
+  </modal>
     <DesignCollectionPdfView :collectionData="collectionItemsPdf" :key="DesignCollectionPdfViewKey"/>
   </span>
 
@@ -103,6 +108,7 @@ import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
 import {getRandom} from "@/helpers/Helpers";
+import ModalAction from "@/mixins/ModalAction";
 
 @Component({
   components: {
@@ -112,13 +118,15 @@ import {getRandom} from "@/helpers/Helpers";
   }
 })
 
-export default class DesignCollectionModal extends Mixins(ErrorMessages) {
+export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAction) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public collectionData: any[] = []
   public ref = this.$refs as Record<any, any>
   public DesignCollectionPdfViewKey: number|string = 12345
   // public isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
+  private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  private screenWidth = this.mobileScreen ? window.screen.availWidth : (window.screen.availWidth - 100)
 
   public async retrievCollectionItems() {
     this.showLoader = true;
@@ -220,7 +228,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
   }
 
   public hideCollectionModal() {
-    this.ref['collection-modal'].hide()
+    this.hideVModal('collection-modal')
   }
 
   public showCollectionModal() {
@@ -228,7 +236,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages) {
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {"attribute": "collection_id", "value": 0})
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "deleted_products", "value": []})
     this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
-    this.ref['collection-modal'].show();
+    this.showVModal('collection-modal')
     this.retrievCollectionItems();
   }
 
