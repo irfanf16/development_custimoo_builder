@@ -25,6 +25,32 @@
                     <template v-if="isCustomerAuthenticated">
                       <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
                     </template>
+                    <template v-if="isCustomerAuthenticated">
+                      <b-button :key="'shareDesign'" variant="outline-secondary" :ref="'share'+lockerIndex+''+lockerProductIndex" :id="'share'+lockerIndex+''+lockerProductIndex" @click.stop="shareDesign">Share design</b-button>
+
+                      <Popper
+                        style="font-size: 12px;"
+                        v-if="product"
+                        :is-open="popperID == ('share'+lockerIndex+''+lockerProductIndex)"
+                        :anchor-el="$refs['share'+lockerIndex+''+lockerProductIndex]"
+                        :on-close="hidePopper"
+                      >
+                        <aside id="popper-content" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                          <div class="share-holder">
+                            <h3>Copy link and Share</h3>
+                            <div class="share-form">
+                              <b-form inline>
+                                <b-form-input :ref="'copylink_product_'+lockerProductIndex" id="copy-link"
+                                              :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+
+                                ></b-form-input>
+                                <button @click="copyLink(lockerProductIndex)" class="btn" type="button">Copy Link</button>
+                              </b-form>
+                            </div>
+                          </div>
+                        </aside>
+                      </Popper>
+                    </template>
                     <template v-else>
                       <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                     </template>
@@ -307,7 +333,8 @@ import CartModal from "@/components/CartModal.vue";
 import {logData, getActiveProductData, getPermissions} from "@/helpers/Helpers";
 import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
-
+import { Popper } from 'popper-vue'
+import 'popper-vue/dist/popper-vue.css'
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -318,6 +345,7 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
+    Popper,
     LogoUploader,
     CartModal,
     CustomTabs,
@@ -454,6 +482,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private sideTabIndex = 0
   private mainTotalTabs = 0
   private maximized = true
+  private product: Record<any, any> = {}
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
       <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
@@ -480,6 +509,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
     </svg>`,
   ]
+
+  private get lockerIndex (){
+    return this.$store.getters.getLockerTabsIndex
+  }
+  private get lockerProductIndex (){
+    return this.$store.getters.getActiveLockerProduct
+  }
 
   private updateOtherTab(value:boolean){
     this.showOtherTab = value
@@ -1335,6 +1371,62 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private setPlayersDataHeight = (idx: number) => {
     return (e:Record<any, any>) => {
       let element = document.querySelectorAll('.customize_controls') as Record<any, any>;
+    }
+  }
+
+  public get popperID() {
+    return this.$store.getters.getPopperID
+  }
+
+  public showPopper(id:string){
+    this.$store.commit('setPopper', id)
+  }
+
+  public hidePopper(){
+    this.$store.commit('setPopper', '')
+  }
+
+  get roomWithProducts():Record<any, any>{
+    const room = this.$store.getters.getLockerProducts
+    return room
+  }
+
+
+  public async shareProduct(product: Record<any, any>, ind: number, i: number) {
+    try {
+      if(product){
+        let payload = {
+          type: 'locker',
+          id: product.id,
+          customer_id: this.customer ? this.customer.id : '',
+          product_id: this.selectedProduct.product_id
+        }
+        let shared_url = "";
+        if (product.shared_url) {
+          shared_url += product.shared_url;
+        } else {
+          let res = await this.$store.dispatch('shareProduct', payload);
+          shared_url += res.data.url;
+          Vue.set(this.getLockerProducts[i].product[ind], 'shared_url', shared_url)
+        }
+
+        this.showPopper('share'+i+''+ind);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  private async shareDesign(){
+    if (this.editStatus || this.lockerIndex !== undefined){
+      this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
+      this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
+      this.hideVModal('locker-modal')
+      // (this.ref['lockerModal'].$refs['lockerRoom'] as Record<any, any>).shareProduct(product, this.lockerProductIndex, this.lockerIndex)
+
+    }else{
+      this.$store.commit('setIsShareDesign', true)
+      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     }
   }
 }

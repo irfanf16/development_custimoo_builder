@@ -21,7 +21,9 @@ const ProductAttributes:Module<any, any> = {
     stock_count:0,
     searchLoader: false,
     lockerActiveTabIndex:0,
-    lockerTabsIndex:0,
+    lockerTabsIndex:undefined,
+    isShareDesign : false,
+    activeLockerProduct:0,
     products:[],
     selectedIndex: 0,
     selectedPrdId:0,
@@ -111,6 +113,9 @@ const ProductAttributes:Module<any, any> = {
     SET_NOTIFICATIONS(state:Record<any, any>, payload) {
       state.notifications  = payload
     },
+    setIsShareDesign(state:Record<any, any>, payload) {
+      state.isShareDesign  = payload
+    },
     UPDATE_NOTIFICATIONS(state:Record<any, any>, payload){
       if (payload){
         state.notifications.unshift(payload)
@@ -119,6 +124,9 @@ const ProductAttributes:Module<any, any> = {
 
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
       state.lockerActiveTabIndex = payload
+    },
+    setActiveLockerProduct(state:Record<any, any>, payload) {
+      state.activeLockerProduct = payload
     },
     Change_Locker_Tabs_Index(state:Record<any, any>, payload) {
       state.lockerTabsIndex = payload
@@ -955,6 +963,12 @@ const ProductAttributes:Module<any, any> = {
   getters: {
     getSearchLoader: state => {
       return state.searchLoader
+    },
+    getIsShareDesign: state => {
+      return state.isShareDesign
+    },
+    getActiveLockerProduct: state => {
+      return state.activeLockerProduct
     },
     getEditLockerProduct: state => {
       return state.editLockerProduct
