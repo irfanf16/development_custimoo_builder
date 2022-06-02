@@ -981,6 +981,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
   public async getLockers(share_url = false){
+    this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
     if (!this.editStatus){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()

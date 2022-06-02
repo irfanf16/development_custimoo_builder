@@ -55,6 +55,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts) {
   }
 
   public async productDesigns(index: number) {
+    this.$store.commit('Change_Locker_Tabs_Index', undefined)
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
     this.$store.commit('CHANGE_STYLE_INDEX', 0);
     this.$store.dispatch("getModels", this.products[index].product_id);
