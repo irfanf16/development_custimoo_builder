@@ -37,7 +37,7 @@
 
                             <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <template v-if="room.active_tab">
-                              <img @dblclick="editProduct(room.id, product.id)" v-if="!getSelectionMode.eventProductMode"  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                              <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
                               <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url+'tesss' ? '' : 'placeholder'" alt="">
                             </template>
 
@@ -57,7 +57,7 @@
                         <li v-if="!getSelectionMode.readonly">
                           <a style="font-size: 12px;" v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product.id)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                           <a style="font-size: 12px;" v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product.id)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
-                          <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product.id)" @mouseleave="hideTooltip"
+                          <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product.id, ind)" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
@@ -349,8 +349,6 @@ import ModalAction from "@/mixins/ModalAction";
     if (this.lockers.length >0 ){
       this.copiedProductLockerId = this.lockers[0].id
     }
-
-    console.log('getCollections', this.getCollections)
   }
 })
 export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
@@ -624,7 +622,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {
       if(product){
-        console.log(this.popperID)
           let payload = {
             type: 'locker',
             id: product.id,
