@@ -1584,6 +1584,17 @@ button{
                 flex: 0 0 20%;
                 max-width: 20%;
             }
+
+            &.no-name-number{
+                flex: 0 0 calc(100% - 40px);
+                max-width: calc(100% - 40px);
+                margin-left: 20px;
+                @media only screen and (min-width: 992px){
+                    flex: 0 0 calc(100% - 40px);
+                    max-width: calc(100% - 40px);
+                    margin-left: 20px;
+                }
+            }
         }
         .qty{
             flex: 0 0 58%;

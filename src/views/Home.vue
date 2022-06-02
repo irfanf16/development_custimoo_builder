@@ -22,7 +22,7 @@
                     <template v-else>
                       <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                     </template>
-                    <template v-if="isCustomerAuthenticated">
+                    <template v-if="isCustomerAuthenticated && (undoItems.length > 0 || redoitems.length > 0 )">
                       <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
                     </template>
                     <template v-if="isCustomerAuthenticated">
@@ -52,7 +52,7 @@
                       </Popper>
                     </template>
                     <template v-else>
-                      <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                      <b-button v-if="undoItems.length > 0 || redoitems.length > 0" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                     </template>
                   </template>
                   <template v-if="updateOrderItemProducts">
@@ -102,11 +102,6 @@
                       <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                     </a>
                   </li>
-<!--                  <li v-if="isCustomerAuthenticated">-->
-<!--                    <a  class="icon mr-0" @click="openOrdersModal">-->
-<!--                      <font-awesome-icon :icon="['fas', 'cart-arrow-down']" />-->
-<!--                    </a>-->
-<!--                  </li>-->
                 </ul>
                 <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
                 </div>
@@ -228,12 +223,6 @@
                     <b-button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary" v-b-modal.modal-login>Add to Cart</b-button>
                   </template>
                 </template>
-                <!-- <template v-if="isCustomerAuthenticated">
-                  <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
-                </template>
-                <template v-else>
-                  <b-button @click="setActionBeforeLogin('summary')" v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
-                </template> -->
               </div>
             </div>
           </div>
@@ -593,16 +582,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       if($(".sideNav li a").length){
         customizer_tabs = $(".sideNav li a")
         customizer_tabs.removeClass('active')
-        // e.currentTarget.classList.add('active');
         if(ind >= 0){
           customizer_tabs.eq(ind).addClass('active')
         }
         self.$store.dispatch('setActiveTab', ind);
-        // $(".sideNav li a").each(function (index){
-        //   if($(this).hasClass('active')){
-        //     self.$store.dispatch('setActiveTab', index);
-        //   }
-        // })
       }else{
         let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
         customizer_tabs = shadow_dom.querySelectorAll('.sideNav li a')
@@ -617,13 +600,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         }
       }
       self.$store.dispatch('setActiveTab', ind);
-      // e.target.classes.push('active');
-      // e.currentTarget.classList.add('active');
-      // $(".sideNav li a").each(function (index){
-      //   if($(this).hasClass('active')){
-      //     self.$store.dispatch('setActiveTab', index);
-      //   }
-      // })
     }
   }
 
@@ -637,10 +613,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public setRecentLogos() {
     this.$store.commit('SET_RECENT_LOGOS')
   }
-
-  // get updateOrderItemProducts() {
-  //   return this.$store.getters.getUpdateOrderItemProducts
-  // }
 
   get notifications(){
     return this.$store.getters.getNotifications
@@ -666,7 +638,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   get notificationsCounter(){
-    // this.ref.lockerModal.$refs['lockerRoom'].editProduct()
     let unread_notification_counter = 0
     if (this.$store.getters.getNotifications.length){
       this.$store.getters.getNotifications.forEach((notification:Record<any, any>) => {
@@ -741,9 +712,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showVModal('cart-modal')
     }
   }
-  // public async openOrdersModal(){
-  //   this.ref['orderlisting'].showOdersPopup()
-  // }
+
   public getPath(){
     let url = ''
     url = this.$route.path
@@ -1200,9 +1169,22 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public async resetStore(){
     const ok = await this.ref['reset-changes'].showConfirm()
     if (ok) {
-      this.$store.dispatch('resetStore')
-      this.$store.dispatch('SET_LOGO_COLORS', [])
-      this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+      if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
+        await this.retrieveProducts()
+        this.$store.dispatch('setTabMain',{value: 0})
+        this.$store.dispatch('SET_LOGO_COLORS', [])
+        this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+        this.$store.dispatch('resetStore')
+        await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
+        await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
+        this.$store.commit('CHANGE_EDIT_STATUS',{status:false})
+        this.updateOrderItemProducts = null;
+      } else{
+        this.$store.dispatch('resetStore')
+        this.$store.dispatch('setTabMain',{value: 0})
+        this.$store.dispatch('SET_LOGO_COLORS', [])
+        this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+      }
     }
 
     if(this.mobileScreen){
@@ -1309,7 +1291,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     http.post(url, {factory_products: self.updateOrderItemProducts.factory_products}).then((res: any) => {
       if (res.data.success == true) {
         if(this.$root.$options.shadowRoot) {
-          window.location.href = `http://santa_order_detail.test/#/?order_id=${self.updateOrderItemProducts?.order_id}`;
+          window.location.href = `${this.company.company_domain}/my-account/orders`;
         } else {
           self.$router.push({name: "OrderDetail", params: { order_id: order_item_id }});
         }
@@ -1353,12 +1335,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         cursorPosition = window.screen.availHeight - 190
       }
       this.playersDataHeight = cursorPosition;
-      // if (cursorPosition < this.oldCursor) {
-      //   this.direction = "up"
-      // } else if (cursorPosition > this.oldCursor) {
-      //   this.direction = "down"
-      // }
-      // this.tabTop = cursorPosition;
       let element = document.querySelector('.customize_controls') as Record<any, any>;
       if(!element){
         let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;

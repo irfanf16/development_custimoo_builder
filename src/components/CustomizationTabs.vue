@@ -1,7 +1,7 @@
 <template>
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
-      <b-tabs v-model="tabIndex">
+      <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
         <!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
         <!--        <vue-scrollbar :speed="20" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">-->
         <div class="myscroll">
@@ -164,7 +164,6 @@ import {sortTextsArray} from "@/helpers/Helpers";
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
-    this.customTextInit()
   },
 })
 export default class CustomizationTabs extends Vue {
@@ -361,108 +360,6 @@ export default class CustomizationTabs extends Vue {
     this.$store.dispatch('setHideTab', {index: index, value: value})
   }
 
-  public customTextInit() {
-
-    this.products.forEach((product:any) => {
-      if(!this.customTexts[product.id]) {
-        //product.productnames =  sortTextsArray(product.productnames);
-        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-          if (this.customTexts[index] && !this.customTexts[index].action) {
-            //calculate colors pantone on init
-            let fill_color_pantone = this.firstColor.name;
-            let fill_hex_color = '';
-            if(this.customTexts[index].fillColor){
-              fill_hex_color = this.customTexts[index].fillColor;
-            }else if(this.firstColor.value){
-              fill_hex_color = this.firstColor.value;
-            }
-            if(fill_hex_color != ''){
-              let pantone = getClosestColor(fill_hex_color);
-              if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-                fill_color_pantone = pantone.pantone;
-              }
-            }
-
-            let outLine_color_pantone = this.secondColor.name;
-            let outLine_hex_color = '';
-            if(this.customTexts[index].outLineColor){
-              outLine_hex_color = this.customTexts[index].outLineColor;
-            }else if(this.secondColor.value){
-              outLine_hex_color = this.secondColor.value;
-            }
-            if(outLine_hex_color != ''){
-              let opantone = getClosestColor(outLine_hex_color);
-              if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-                outLine_color_pantone = opantone.pantone;
-              }
-            }
-            let text = {
-              text: this.customTexts[index].text,
-              type: productName.type,
-              width: productName.width,
-              height: productName.height,
-              x_axis: productName.x_axis,
-              y_axis: productName.y_axis,
-              rotation: productName.rotation,
-              haveControls: Boolean(!productName.is_locked),
-              outlineEnabled: Boolean(productName.outline_enabled),
-              side: productName.side,
-              fontFamily: this.customTexts[index].fontFamily ? this.customTexts[index].fontFamily : this.fontOptions[0].value,
-              fillColor: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.value,
-              fillColorPantone: fill_color_pantone,
-              outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.value,
-              //outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
-              outLineColorPantone: outLine_color_pantone,
-              outLineWidth: this.customTexts[index].outLineWidth ? this.customTexts[index].outLineWidth : 0,
-              selectColor: false
-            }
-            await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
-          }
-          else if (!this.customTexts[index]) {
-
-            //calculate colors pantone on init
-            let fill_color_pantone = this.firstColor.name;
-            let pantone = getClosestColor(this.firstColor.value);
-            if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-              fill_color_pantone = pantone.pantone;
-            }
-
-            let outLine_color_pantone = this.secondColor.name;
-            let opantone = getClosestColor(this.secondColor.value);
-            if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-              outLine_color_pantone = opantone.pantone;
-            }
-
-
-            let text = {
-              text: '',
-              type: productName.type,
-              width: productName.width,
-              height: productName.height,
-              x_axis: productName.x_axis,
-              y_axis: productName.y_axis,
-              rotation: productName.rotation,
-              haveControls: Boolean(!productName.is_locked),
-              outlineEnabled: Boolean(productName.outline_enabled),
-              side: productName.side,
-              fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-              fillColor: this.firstColor.value,
-              fillColorPantone: fill_color_pantone,
-              outLineColor: this.secondColor.value,
-              outLineColorPantone: outLine_color_pantone,
-              outLineWidth: 2,
-              selectColor: false
-            }
-            await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
-          }
-        })
-      }
-
-
-    });
-
-  }
-
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
     let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
@@ -527,7 +424,7 @@ export default class CustomizationTabs extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 2,
+      outLineWidth: 0,
       add_type: 'manual',
     }
     this.$store.dispatch('setCustomTexts', {follow:true, index: this.customTexts.length, text: text, prd_id:this.selectedProduct.id})

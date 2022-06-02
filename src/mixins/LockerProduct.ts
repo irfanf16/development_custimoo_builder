@@ -92,6 +92,8 @@ export class LockerProducts extends Vue {
         else {
           logo_colors = JSON.parse(element.colors)
         }
+        this.$store.commit('RESET_UNDO');
+        this.$store.commit('RESET_REDO');
         await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
         this.$emit('hideLockerRoomModal')
       }, (error:Record<any, any>) => {
@@ -187,6 +189,7 @@ export class handleMainProducts extends Vue {
     //set custom text objects for new products
     let customTextObjects = this.$store.getters.getCustomTextObject
     let custom_texts = await this.$store.getters.getCustomTexts();
+
     retrieved_products.forEach((product:any) => {
       if(!customTextObjects[product.id]) {
         product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
@@ -202,9 +205,9 @@ export class handleMainProducts extends Vue {
           if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
             outLine_color_pantone = opantone.pantone;
           }
-          const already_added_text_str = custom_texts[index] ? custom_texts[index]['text'] : ''
+
           const text = {
-            text: already_added_text_str,
+            text: '',
             type: productName.type,
             width: productName.width,
             height: productName.height,
@@ -219,7 +222,7 @@ export class handleMainProducts extends Vue {
             fillColorPantone: fill_color_pantone,
             outLineColor: obj.secondColor.value,
             outLineColorPantone: outLine_color_pantone,
-            outLineWidth: 2,
+            outLineWidth: 0,
             textIndex: index,
             selectColor: false
           }

@@ -111,6 +111,7 @@ import ColorTabs from "@/components/ColorTabs.vue";
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
+import { getUploadedLogoObject } from '@/helpers/Helpers'
 @Component<LogoEditorModal>({
   components: {
     ColorTabs,
@@ -170,7 +171,7 @@ export default class LogoEditorModal extends Mixins(ErrorMessages, ModalAction) 
     data.append("logo", this.$store.getters.getLogoEditor.image);
     data.append("product_id", this.$store.getters.getSelectedProduct.id);
     http.post('/customer/update/logo', data)
-      .then(resp => {
+      .then(async resp => {
         this.colors = resp.data.colors;
         custom_logo.original_logo = resp.data.file.logo_url;
         custom_logo.transparent_logo = resp.data.file.transparent_logo_url;
@@ -178,23 +179,22 @@ export default class LogoEditorModal extends Mixins(ErrorMessages, ModalAction) 
         custom_logo.is_smart_transparent = false;
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
-        let getLogos = []
-        if (this.customLogos.length > 1) {
-          getLogos = this.customLogos.slice(0, -1)
-        } else {
-          getLogos = this.customLogos
-        }
+        let customObj = await getUploadedLogoObject(resp.data.file)
         this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
         this.$store.commit('SET_COLORS_FROM_RECENT', false)
-        this.$store.commit('customLogos', custom_logo)
+        custom_logo.adding_tab = false
+        let payload = {
+          customObj : customObj,
+          custom_logo: custom_logo
+        }
+        this.$store.commit('customLogos', payload)
         this.$emit('updateLogoFromLogoEditor', this.colors)
-        //this.getLogoColors()
         this.$store.commit('SET_RECENT_LOGOS');
 
 
         if (this.customLogoIndex == 0) {
           //update team logo url in all product logos
-          this.$store.dispatch('setTeamLogoUrl', custom_logo)
+          this.$store.dispatch('setTeamLogoUrl', payload)
         }
         this.showToast('Logo Applied', 'SUCCESS')
         this.showLoader = false

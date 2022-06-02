@@ -302,7 +302,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
         logo: data,
         id:prd_id
       }
-      Store.commit('UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT', new_data)
+      await Store.commit('UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT', new_data)
     }else{
       await Store.dispatch('updateCustomLogoAttribute', data)
     }
@@ -389,7 +389,17 @@ const pathInfo = (file_path: string, ) => {
   };
 }
 
+const checkSceneMounted = async () => {
+  const scene_ref = Store.getters.getCanvasImage.scene
+  if(scene_ref.mounted) {
+    return true
+  } else {
+    setTimeout(checkSceneMounted, 500)
+  }
+}
+
 const getActiveProductData = async () => {
+  await checkSceneMounted()
   const scene_ref = Store.getters.getCanvasImage.scene
   const getCanvasImage = Store.getters.getCanvasImage
 
@@ -415,7 +425,7 @@ const getActiveProductData = async () => {
     scene_ref.frontCanvas.discardActiveObject().renderAll()
     scene_ref.backCanvas.discardActiveObject().renderAll()
     const post_data: Record<any, any> = {
-      back_image: getCanvasImage.scene.$refs.back.toDataURL("image/png"),
+      back_image: getCanvasImage.ref_back?.toDataURL("image/png"),
       custom_logos: Store.getters.getCustomLogos(),
       measurement_ratio: selected_design.measurement_ratio,
       custom_logo_svgs: [],
@@ -424,7 +434,7 @@ const getActiveProductData = async () => {
       colors: Store.getters.getLogosColors,
       design_id: selected_design.id,
       defaultcolors: Store.getters.getDefaultColors,
-      front_image: getCanvasImage.scene.$refs.front.toDataURL("image/png"),
+      front_image: getCanvasImage.ref_front.toDataURL("image/png"),
       groupcolors: Store.getters.getGroupColors,
       logo_colors: Store.getters.getLogosColors,
       model_id: product_models[selected_model_index].id,
@@ -467,15 +477,20 @@ const getActiveProductData = async () => {
 }
 
 const getRosterDetailDefaultObject = () => {
-  return {
-    text: '',
-    number: '',
-    size: '',
-    size_index: 0,
-    code: '',
-    quantity: 1,
-    information: ''
+  const selected_product = Store.getters.getSelectedProduct;
+  if (selected_product.sizes.length){
+    const productSizes = JSON.parse(selected_product.sizes[0].json_data)
+    return {
+      text: '',
+      number: '',
+      size_index: 0,
+      size: productSizes[0].name,
+      code: productSizes[0].name,
+      quantity: 1,
+      information: ''
+    }
   }
+  return {}
 }
 
 const activityStatus = {
@@ -517,6 +532,18 @@ const activityStatus = {
   },
 }
 
+const getUploadedLogoObject = async (res:Record<any, any>) => {
+  return{
+    original_logo : res.logo_url,
+    transparent_logo : res.transparent_logo_url,
+    smart_transparent_logo : res.smart_transparent_logo_url,
+    is_smart_transparent : false,
+    is_transparent: false,
+    url : res.logo_url,
+    id : res.id
+  }
+}
+
 const getCompany = async () => {
   const res = await http.get('company').catch(error => {
     handleResponseException(error)
@@ -546,5 +573,6 @@ const getPermissions = async () => {
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions,
+  getUploadedLogoObject
 };

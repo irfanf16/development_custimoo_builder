@@ -108,7 +108,7 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
-import {fileToBase64, getLogoObject, setCustomLogo, setLogoSettings} from "../helpers/Helpers"
+import { fileToBase64, getLogoObject, getUploadedLogoObject, setCustomLogo, setLogoSettings } from '../helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import ModalAction from "@/mixins/ModalAction";
 
@@ -277,13 +277,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
         custom_logo.upload = true
-        let customObj = await this.getUploadedLogoObject(resp.data.file)
-        let getLogos = []
-        if (this.customLogos.length > 1){
-          getLogos = this.customLogos.slice(0, -1)
-        }else{
-          getLogos = this.customLogos
-        }
+        let customObj = await getUploadedLogoObject(resp.data.file)
         this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
         custom_logo.adding_tab = false
@@ -311,20 +305,9 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   }
 
   public hasExtension(fileName : string, exts: any) : boolean {
-
     return (new RegExp('(' + exts.join('|').replace(/\./g, '\\.') + ')$')).test(fileName);
   }
- public getUploadedLogoObject(res:Record<any, any>){
-    return{
-      original_logo : res.logo_url,
-      transparent_logo : res.transparent_logo_url,
-      smart_transparent_logo : res.smart_transparent_logo_url,
-      is_smart_transparent : false,
-      is_transparent: false,
-      url : res.logo_url,
-      id : res.id
-    }
- }
+
   public getLogoColors() {
       if (this.customLogos.length) {
       if (this.customLogos[0] && this.customLogos[0].url) {

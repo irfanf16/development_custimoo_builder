@@ -2,14 +2,14 @@
   <div class="roster-section">
     <div class="d-flex align-items-center justify-content-between">
       <div class="d-none d-md-block roster-upload-area">
+        <template v-if="company.platform != 'cdnExceptLogin'">
         <h3>Import Roster from Excel sheets</h3>
-        <b-button  @click="$modal.show('rosterfilemodal')" class="btn btn-secondary fw-bold">Download/Upload Roster Template <a href="#" v-b-tooltip.hover
-                                                                                                                                title="Import roster details from excel sheet">
+        <b-button  @click="$modal.show('rosterfilemodal')" class="btn btn-secondary fw-bold">Download/Upload Roster Template <a href="#" v-b-tooltip.hover title="Import roster details from excel sheet">
           <font-awesome-icon :icon="['fas', 'info-circle']"/>
-        </a></b-button>
-
-
-        <p>Or insert details manually below</p>
+        </a>
+        </b-button>
+          <p>Or insert details manually below</p>
+        </template>
       </div>
       <div class="d-flex gap-1" v-if="rosterDetails.length > 0">
         <b-button @click="updateRosterPlayerNameFormat('capitalized')" class="btn btn-secondary fs-3 btn-sm" title="Capitalize">
@@ -40,10 +40,12 @@
 
     <div>
       <div class="roster-row mb-2">
-        <div class="align-left">
+        <div class="align-left" :class="{'justify-content-start pl-4': !selectedProduct.allow_name_number}">
           <div class="hide-show"></div>
-          <div class="roster-name">Name</div>
-          <div class="shirt-no">No</div>
+          <template v-if="selectedProduct.allow_name_number">
+            <div class="roster-name">Name</div>
+            <div class="shirt-no">No</div>
+          </template>
           <div class="shirt-size">Size</div>
         </div>
         <div class="align-right">
@@ -55,18 +57,19 @@
         <div class="roster-row mb-2"  :key="index">
           <div class="align-left">
             <div class="hide-show" >
-              <a >
+              <a @click="editRosterPlayer(index)">
                 <font-awesome-icon  :icon="['fas',  index === eyeIndex ? 'eye' : 'eye-slash']"/>
               </a>
             </div>
+           <template v-if="selectedProduct.allow_name_number">
             <div class="roster-name">
               <b-form-input ref="myInputs" v-model="roster.text" @focus="editRosterPlayer(index)"></b-form-input>
             </div>
-          <div class="shirt-no">
-            <b-form-input ref="myInputs" class="text-center" v-model="roster.number" @focus="editRosterPlayer(index)"
-            ></b-form-input>
-          </div>
-          <div class="shirt-size">
+             <div class="shirt-no">
+               <b-form-input ref="myInputs" class="text-center" v-model="roster.number" @focus="editRosterPlayer(index)"></b-form-input>
+             </div>
+           </template>
+          <div class="shirt-size" :class="{'no-name-number': !selectedProduct.allow_name_number}">
             <b-form-select ref="myInputs" @input="updateRosterSize($event, roster)" v-model="roster.size_index">
               <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx" >{{productSize.text}}</b-form-select-option>
             </b-form-select>
@@ -81,7 +84,7 @@
             ></b-form-input>
           </div>
           <div class="remove" v-if="rosterDetails.length > 1">
-            <a @click="removeIndex(index, roster.text, roster.number)">
+            <a @click="removeIndex(index)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
             </a>
           </div>
@@ -143,6 +146,9 @@ export default class RosterDetails extends Vue {
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails
   }
+  get company(){
+    return this.$store.getters.getCompany
+  }
   get rosterFirstNameAndNumber(): string|null {
     let editing_roster_player_index = this.editing_roster_player_index
     if(this.rosterDetails && this.rosterDetails.length > 0) {
@@ -184,11 +190,8 @@ export default class RosterDetails extends Vue {
   public addPlayer(obj:Record<any, any>) {
     this.$emit('addPlayer');
   }
-  public isActive = false;
-  public myFilter() {
-    this.isActive = !this.isActive
-  }
-  public removeIndex(ind:number, text:string, num:number){
+
+  public removeIndex(ind:number){
     if (this.customText.length > 0){
       if (this.customText[0]){
         this.$store.dispatch('updateCustomTextAttribute', {index: 0, on_all: true, attribute: 'text', value: ''})
@@ -333,7 +336,7 @@ export default class RosterDetails extends Vue {
     let selected_size = this.productSizes[selected_size_index];
     if(selected_size){
       roster.size = selected_size.name
-      roster.code = selected_size.code
+      roster.code = selected_size.name
     }
   }
 
