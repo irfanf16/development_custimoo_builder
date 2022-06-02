@@ -22,11 +22,11 @@
                     <template v-else>
                       <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                     </template>
-                    <template v-if="isCustomerAuthenticated">
+                    <template v-if="isCustomerAuthenticated && (undoItems.length > 0 || redoitems.length > 0 )">
                       <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
                     </template>
                     <template v-else>
-                      <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                      <b-button v-if="undoItems.length > 0 || redoitems.length > 0" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                     </template>
                   </template>
                   <template v-if="updateOrderItemProducts">
