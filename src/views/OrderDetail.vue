@@ -268,15 +268,18 @@ import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {findIndex, debounce, filter} from "lodash";
+import {getCompany} from "@/helpers/Helpers";
 
 
 @Component<OrderDetail>({
   async mounted() {
+    await getCompany();
 
     let self = this;
     let comment_id = null;
     this.isWebComponent = this.$root.$options.name == 'shadow-root'
-    if(this.company.platform == "wordpress") {
+
+     if(this.company.platform == "wordpress") {
       this.order_id = this.$route.query.order_id;
     } else {
       this.order_id = this.$route.params.order_id;
@@ -591,7 +594,13 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   updateOrderProducts(order_item_id: number, order_item_status_activity: number) {
     let self = this;
-    self.$router.push({path: "/", query: {update_order_product: true, order_item_id: order_item_id, activity_id: order_item_status_activity}});
+    console.log("dsfgddfadsfg", this.company)
+    if(this.company.platform == "wordpress") {
+      let query_string = `update_order_product=true&order_item_id=${order_item_id}&activity_id=${order_item_status_activity}`
+      window.location.href = `${this.company.company_domain}/custimoo-santa/#/?${query_string}`;
+    } else{
+      self.$router.push({path: "/", query: {update_order_product: true, order_item_id: order_item_id, activity_id: order_item_status_activity}});
+    }
   }
 
   canPerformCommentAction(comment_obj: Record<any, any>) {
