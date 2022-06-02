@@ -738,6 +738,7 @@ export default class Scene extends Vue {
   }
 
   public getSvgGroups(): void {
+    this.showLoader = true
     this.svgGroups = []
     this.initialSvgGroups = []
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
@@ -806,6 +807,7 @@ export default class Scene extends Vue {
         this.changeGroupColor(this.groupColors)
       }
     }
+    this.showLoader = false
   }
 
   public containsObject(obj: Record<any, any>): boolean {
@@ -919,7 +921,6 @@ export default class Scene extends Vue {
               this.$store.commit('SET_CANVAS_READY', true);
             }, 500)
           }
-          this.showLoader = false
           this.mounted = true
         }
         resolve('done')
@@ -1970,7 +1971,7 @@ export default class Scene extends Vue {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.99);
   z-index: 1030;
 
   img {
