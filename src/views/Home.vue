@@ -1160,7 +1160,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     http.post(url, {factory_products: self.updateOrderItemProducts.factory_products}).then((res: any) => {
       if (res.data.success == true) {
         if(this.$root.$options.shadowRoot) {
-          window.location.href = `http://santa_order_detail.test/#/?order_id=${self.updateOrderItemProducts?.order_id}`;
+          window.location.href = `${this.company.company_domain}/my-account/orders`;
         } else {
           self.$router.push({name: "OrderDetail", params: { order_id: order_item_id }});
         }

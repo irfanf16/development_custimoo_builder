@@ -596,7 +596,13 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   updateOrderProducts(order_item_id: number, order_item_status_activity: number) {
     let self = this;
-    self.$router.push({path: "/", query: {update_order_product: true, order_item_id: order_item_id, activity_id: order_item_status_activity}});
+    console.log("dsfgddfadsfg", this.company)
+    if(this.company.platform == "wordpress") {
+      let query_string = `update_order_product=true&order_item_id=${order_item_id}&activity_id=${order_item_status_activity}`
+      window.location.href = `${this.company.company_domain}/custimoo-santa/#/?${query_string}`;
+    } else{
+      self.$router.push({path: "/", query: {update_order_product: true, order_item_id: order_item_id, activity_id: order_item_status_activity}});
+    }
   }
 
   canPerformCommentAction(comment_obj: Record<any, any>) {
