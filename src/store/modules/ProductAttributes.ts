@@ -840,6 +840,8 @@ const ProductAttributes:Module<any, any> = {
       state.undoItems.push(payload)
     },
     UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
+    RESET_UNDO:(state) => state.undoItems = [],
+    RESET_REDO:(state) => state.redoItems = [],
     DO_UNDO(state: Record<any, any>) {
       if (state.undoItems.length) {
         const lastUndo = state.undoItems.pop()

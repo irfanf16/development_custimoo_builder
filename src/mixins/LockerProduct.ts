@@ -90,6 +90,8 @@ export class LockerProducts extends Vue {
         else {
           logo_colors = JSON.parse(element.colors)
         }
+        this.$store.commit('RESET_UNDO');
+        this.$store.commit('RESET_REDO');
         await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
         this.$emit('hideLockerRoomModal')
       }, (error:Record<any, any>) => {

@@ -96,9 +96,9 @@
         </div>
 
         <div class="align-self-start">
-          <div class="fs-2 font-weight-bold ">Reference No:</div>
+          <div class="fs-2 font-weight-bold ">Team Name / order reference</div>
           <div class="mt-1">
-            <b-form-input class="form-input" placeholder="Order reference" type="text" name="customer_reference_no"
+            <b-form-input class="form-input" placeholder="Team Name / order reference" type="text" name="customer_reference_no"
               v-model="customer_reference_no" />
           </div>
         </div>
