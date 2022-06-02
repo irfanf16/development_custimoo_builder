@@ -737,8 +737,7 @@ export default class Scene extends Vue {
     }
   }
 
-  public getSvgGroups(): void {
-    this.showLoader = true
+  public async getSvgGroups() {
     this.svgGroups = []
     this.initialSvgGroups = []
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
@@ -781,30 +780,30 @@ export default class Scene extends Vue {
     this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
 
     if (this.mainPreview) {
-      this.$store.dispatch('setSvgGroups', this.svgGroups)
+      await this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
     if (this.productType == 'customized' && this.lockerDefaultColors.length) {
       let lockerDefaultColors = this.lockerDefaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       if (lockerDefaultColors.length) {
-        this.changeDefaultColors(lockerDefaultColors)
+        await this.changeDefaultColors(lockerDefaultColors)
       }
     }
     else if (this.productType == 'customized' && this.defaultColors.length) {
       let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       if (defaultColors.length) {
-        this.changeDefaultColors(defaultColors)
+        await this.changeDefaultColors(defaultColors)
       }
     }
 
     if (Object.keys(this.lockerGroupColors).length) {
       if (this.productType == 'customized') {
-        this.changeGroupColor(this.lockerGroupColors)
+        await this.changeGroupColor(this.lockerGroupColors)
       }
     }
     else if (Object.keys(this.groupColors).length && !this.lockerDefaultColors.length) {
       if (this.productType == 'customized') {
-        this.changeGroupColor(this.groupColors)
+        await this.changeGroupColor(this.groupColors)
       }
     }
     this.showLoader = false
@@ -926,7 +925,7 @@ export default class Scene extends Vue {
         resolve('done')
       })
       canvas.on('object:modified', (e: Record<any, any>) => {
-        var objects = canvas.getObjects('line');
+        let objects = canvas.getObjects('line');
         for (let i in objects) {
           canvas.remove(objects[i]);
         }

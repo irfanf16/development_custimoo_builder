@@ -389,7 +389,17 @@ const pathInfo = (file_path: string, ) => {
   };
 }
 
+const checkSceneMounted = async () => {
+  const scene_ref = Store.getters.getCanvasImage.scene
+  if(scene_ref.mounted) {
+    return true
+  } else {
+    setTimeout(checkSceneMounted, 500)
+  }
+}
+
 const getActiveProductData = async () => {
+  await checkSceneMounted()
   const scene_ref = Store.getters.getCanvasImage.scene
   const getCanvasImage = Store.getters.getCanvasImage
 
