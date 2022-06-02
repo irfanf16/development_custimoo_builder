@@ -522,7 +522,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private adjustTotalTabs() {
-    console.log('called')
     this.mainTotalTabs = 3
 
     if(!this.selectedProduct.is_logo_allowed){
