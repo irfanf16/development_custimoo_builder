@@ -98,7 +98,6 @@ window.Echo = new Echo({
 });
 
 import { getCompany } from "@/helpers/Helpers"
-
 export default {
   store, router,
   name: "Customizer",
@@ -119,10 +118,6 @@ export default {
     }
   },
   mounted: async function() {
-    if(localStorage.getItem('login_code')) {
-      localStorage.clear()
-      location.reload()
-    }
     await getCompany();
     let elem = document.createElement('link');
     elem.rel = ' stylesheet'
@@ -148,18 +143,7 @@ export default {
       ubuntu_font.append = '@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap")'
       document.head.append(ubuntu_font)
     }
-
-    if (!this.$store.getters.getCustomer && localStorage.getItem('jwtToken')) {
-      let token = localStorage.getItem('jwtToken')
-      let response = await this.$store.dispatch('getCustomerFromToken', token)
-      if (response) {
-        let payload = {
-          access_token: token,
-          user: response
-        }
-        this.$store.commit('SET_CUSTOMER', payload)
-      }
-    }
+    await getCompany();
 
     // This will only work on your root Vue component since it's using $parent
     const { shadowRoot } = this.$parent.$options

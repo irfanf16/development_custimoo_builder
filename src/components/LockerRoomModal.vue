@@ -40,9 +40,6 @@ import ModalAction from '@/mixins/ModalAction'
   components: {
     LockerRoom,
     DesignCollection,
-  },
-  mounted() {
-    console.log(this.mobileScreen , this.screenWidth)
   }
 })
 export default class LockerRoomModal extends Mixins(ModalAction){
@@ -64,7 +61,7 @@ export default class LockerRoomModal extends Mixins(ModalAction){
 
   public addMoreCollectionModal = () => {
     this.$emit('editCollectionModal')
-    this.ref['locker-modal'].hide()
+    this.hideVModal('locker-modal')
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
       collectionAddmoreMode:false,

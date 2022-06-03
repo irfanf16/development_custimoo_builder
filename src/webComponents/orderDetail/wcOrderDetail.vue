@@ -15,7 +15,9 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 
 import router from './router'
+import {getCompany} from "@/helpers/Helpers";
 
+Vue.config.devtools = true
 export default {
   store, router,
   name: "WcOrderDetail",

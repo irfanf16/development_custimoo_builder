@@ -302,7 +302,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
         logo: data,
         id:prd_id
       }
-      Store.commit('UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT', new_data)
+      await Store.commit('UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT', new_data)
     }else{
       await Store.dispatch('updateCustomLogoAttribute', data)
     }
@@ -389,7 +389,17 @@ const pathInfo = (file_path: string, ) => {
   };
 }
 
+const checkSceneMounted = async () => {
+  const scene_ref = Store.getters.getCanvasImage.scene
+  if(scene_ref.mounted) {
+    return true
+  } else {
+    setTimeout(checkSceneMounted, 500)
+  }
+}
+
 const getActiveProductData = async () => {
+  await checkSceneMounted()
   const scene_ref = Store.getters.getCanvasImage.scene
   const getCanvasImage = Store.getters.getCanvasImage
 

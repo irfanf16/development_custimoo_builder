@@ -7,7 +7,8 @@ import {getClosestColor} from "@/pantoneColor";
 @Component
 export class LockerProducts extends Vue {
 
-  public async editProduct(room_id: number, room_product_id: number, share_url="") {
+  public async editProduct(room_id: number, room_product_id: number, ind: number, share_url="") {
+    this.$store.commit('setActiveLockerProduct', ind)
     let self = this;
     let is_customized = this.$store.getters.getCustomized
     let is_personalized = this.$store.getters.getPersonalized
@@ -90,6 +91,9 @@ export class LockerProducts extends Vue {
         else {
           logo_colors = JSON.parse(element.colors)
         }
+        this.$store.commit('RESET_UNDO');
+        this.$store.commit('RESET_REDO');
+        this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
         await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
         this.$emit('hideLockerRoomModal')
       }, (error:Record<any, any>) => {
@@ -185,6 +189,7 @@ export class handleMainProducts extends Vue {
     //set custom text objects for new products
     let customTextObjects = this.$store.getters.getCustomTextObject
     let custom_texts = await this.$store.getters.getCustomTexts();
+
     retrieved_products.forEach((product:any) => {
       if(!customTextObjects[product.id]) {
         product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
@@ -200,9 +205,9 @@ export class handleMainProducts extends Vue {
           if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
             outLine_color_pantone = opantone.pantone;
           }
-          const already_added_text_str = custom_texts[index] ? custom_texts[index]['text'] : ''
+
           const text = {
-            text: already_added_text_str,
+            text: '',
             type: productName.type,
             width: productName.width,
             height: productName.height,

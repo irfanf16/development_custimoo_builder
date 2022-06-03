@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;">
+  <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;" :data="undoRedoArrays">
     <meta name="viewport" content="width=device-width">
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
@@ -22,11 +22,45 @@
                     <template v-else>
                       <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                     </template>
-                    <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
+                    <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
+                      <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
+                        <template v-if="editProductStatus">Update to locker room</template>
+                        <template v-else>Save to locker room</template>
+                      </b-button>
                     </template>
                     <template v-else>
-                      <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                      <b-button v-if="undoItems.length > 0 || redoitems.length > 0" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                    </template>
+
+                    <template v-if="isCustomerAuthenticated">
+                      <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" id="shareDesign" @click.stop="shareDesign">Share design</b-button>
+
+                      <Popper
+                        style="font-size: 12px;"
+                        v-if="product"
+                        :is-open="popperID == 'shareDesign'"
+                        :anchor-el="$refs['shareDesign']"
+                        :on-close="hidePopper"
+                      >
+                        <aside id="popper-content" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                          <div class="share-holder">
+                            <h3>Copy link and Share</h3>
+                            <div class="share-form">
+                              <b-form inline>
+                                <b-form-input :ref="'copylink_product_'+lockerProductIndex" id="copy-link"
+                                              :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+
+                                ></b-form-input>
+                                <button @click="copyLink(lockerProductIndex)" class="btn" type="button">Copy Link</button>
+                              </b-form>
+                            </div>
+                          </div>
+                        </aside>
+                      </Popper>
+                    </template>
+                    <template v-else>
+                      <b-button  @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                      <b-button variant="outline-secondary" @click="setActionBeforeLogin('shareDesign')">Share design</b-button>
                     </template>
                   </template>
                   <template v-if="updateOrderItemProducts">
@@ -76,11 +110,6 @@
                       <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                     </a>
                   </li>
-<!--                  <li v-if="isCustomerAuthenticated">-->
-<!--                    <a  class="icon mr-0" @click="openOrdersModal">-->
-<!--                      <font-awesome-icon :icon="['fas', 'cart-arrow-down']" />-->
-<!--                    </a>-->
-<!--                  </li>-->
                 </ul>
                 <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
                 </div>
@@ -186,7 +215,7 @@
               </div>
               <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
                 <b-button v-if="tabIndex > 0" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= (totalTabs-1)) || (!hideColorSection && tabIndex <= totalTabs)">Next</b-button>
+                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= (mainTotalTabs-1)) || (!hideColorSection && tabIndex <= mainTotalTabs)">Next</b-button>
                 <template v-else>
                   <template v-if="isCustomerAuthenticated">
                     <template v-if="$store.getters.getUpdateOrderItemProducts == null">
@@ -202,12 +231,6 @@
                     <b-button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary" v-b-modal.modal-login>Add to Cart</b-button>
                   </template>
                 </template>
-                <!-- <template v-if="isCustomerAuthenticated">
-                  <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
-                </template>
-                <template v-else>
-                  <b-button @click="setActionBeforeLogin('summary')" v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
-                </template> -->
               </div>
             </div>
           </div>
@@ -307,7 +330,8 @@ import CartModal from "@/components/CartModal.vue";
 import {logData, getActiveProductData, getPermissions} from "@/helpers/Helpers";
 import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
-
+import { Popper } from 'popper-vue'
+import 'popper-vue/dist/popper-vue.css'
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -318,6 +342,7 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
+    Popper,
     LogoUploader,
     CartModal,
     CustomTabs,
@@ -338,13 +363,6 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    if(!this.selectedProduct.is_logo_allowed){
-      this.totalTabs = this.totalTabs - 1
-    }
-
-    if(!this.selectedProduct.allow_name_number){
-      this.totalTabs = this.totalTabs - 1
-    }
     //get recent logos
     this.setRecentLogos()
 
@@ -459,8 +477,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public updated_order_products: Record<any, any>[] = []
   public updateOrderItemProducts: Record<any, any> | null = null;
   private sideTabIndex = 0
-  private totalTabs = 4
+  private mainTotalTabs = 0
   private maximized = true
+  private product: Record<any, any> = {}
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
       <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
@@ -488,8 +507,27 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     </svg>`,
   ]
 
+  private get lockerIndex (){
+    return this.$store.getters.getLockerTabsIndex
+  }
+  private get lockerProductIndex (){
+    return this.$store.getters.getActiveLockerProduct
+  }
+
   private updateOtherTab(value:boolean){
     this.showOtherTab = value
+  }
+
+  private adjustTotalTabs() {
+    this.mainTotalTabs = 3
+
+    if(!this.selectedProduct.is_logo_allowed){
+      this.mainTotalTabs = (this.mainTotalTabs - 1)
+    }
+
+    if(!this.selectedProduct.allow_name_number){
+      this.mainTotalTabs = (this.mainTotalTabs - 1)
+    }
   }
 
   private swapSide(textIndex: number){
@@ -552,16 +590,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       if($(".sideNav li a").length){
         customizer_tabs = $(".sideNav li a")
         customizer_tabs.removeClass('active')
-        // e.currentTarget.classList.add('active');
         if(ind >= 0){
           customizer_tabs.eq(ind).addClass('active')
         }
         self.$store.dispatch('setActiveTab', ind);
-        // $(".sideNav li a").each(function (index){
-        //   if($(this).hasClass('active')){
-        //     self.$store.dispatch('setActiveTab', index);
-        //   }
-        // })
       }else{
         let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
         customizer_tabs = shadow_dom.querySelectorAll('.sideNav li a')
@@ -576,13 +608,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         }
       }
       self.$store.dispatch('setActiveTab', ind);
-      // e.target.classes.push('active');
-      // e.currentTarget.classList.add('active');
-      // $(".sideNav li a").each(function (index){
-      //   if($(this).hasClass('active')){
-      //     self.$store.dispatch('setActiveTab', index);
-      //   }
-      // })
     }
   }
 
@@ -596,10 +621,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public setRecentLogos() {
     this.$store.commit('SET_RECENT_LOGOS')
   }
-
-  // get updateOrderItemProducts() {
-  //   return this.$store.getters.getUpdateOrderItemProducts
-  // }
 
   get notifications(){
     return this.$store.getters.getNotifications
@@ -625,7 +646,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   get notificationsCounter(){
-    // this.ref.lockerModal.$refs['lockerRoom'].editProduct()
     let unread_notification_counter = 0
     if (this.$store.getters.getNotifications.length){
       this.$store.getters.getNotifications.forEach((notification:Record<any, any>) => {
@@ -700,9 +720,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showVModal('cart-modal')
     }
   }
-  // public async openOrdersModal(){
-  //   this.ref['orderlisting'].showOdersPopup()
-  // }
+
   public getPath(){
     let url = ''
     url = this.$route.path
@@ -741,6 +759,22 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
+  get hideSaveLockerButton():boolean{
+    return this.$store.getters.getHideSaveLockerButton;
+  }
+
+  get undoRedoArrays(): boolean {
+    let undo = this.$store.getters.getUndoItems;
+    let redo = this.$store.getters.getRedoItems;
+    let hidebtn = this.$store.getters.getHideSaveLockerButton;
+      if(hidebtn && this.editProductStatus){
+      if(undo.length > 0 || redo.length > 0){
+        this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false)
+      }
+    }
+    return hidebtn
+  }
+
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
   }
@@ -881,6 +915,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.buyNow()
     } else if(this.actionBeforeLogin == 'addToCart') {
       this.addToCart()
+    } else if(this.actionBeforeLogin == 'shareDesign') {
+      this.shareDesign()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
@@ -939,6 +975,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
   public async getLockers(share_url = false){
+    this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
     if (!this.editStatus){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
@@ -946,9 +983,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
-    if (this.$store.getters.getEditDesignId != currentDesign[0].id || this.$store.getters.getEditStyleId != this.selectedProduct.productstyles[this.styleIndex].id){
-      this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
-    }
+    // if (this.$store.getters.getEditDesignId != currentDesign[0].id || this.$store.getters.getEditStyleId != this.selectedProduct.productstyles[this.styleIndex].id){
+    //   this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+    // }
     let main_scene = this.ref.mainScene[0];
     main_scene.frontCanvas.discardActiveObject().renderAll();
     main_scene.backCanvas.discardActiveObject().renderAll();
@@ -978,6 +1015,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       if (res.status == 201){
         this.showLoader = false
         this.showToast(res.data.message, 'SUCCESS')
+        this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
       }else{
         this.showError(res)
         this.showLoader = false
@@ -1280,7 +1318,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     http.post(url, {factory_products: self.updateOrderItemProducts.factory_products}).then((res: any) => {
       if (res.data.success == true) {
         if(this.$root.$options.shadowRoot) {
-          window.location.href = `http://santa_order_detail.test/#/?order_id=${self.updateOrderItemProducts?.order_id}`;
+          window.location.href = `${this.company.company_domain}/my-account/orders`;
         } else {
           self.$router.push({name: "OrderDetail", params: { order_id: order_item_id }});
         }
@@ -1324,12 +1362,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         cursorPosition = window.screen.availHeight - 190
       }
       this.playersDataHeight = cursorPosition;
-      // if (cursorPosition < this.oldCursor) {
-      //   this.direction = "up"
-      // } else if (cursorPosition > this.oldCursor) {
-      //   this.direction = "down"
-      // }
-      // this.tabTop = cursorPosition;
       let element = document.querySelector('.customize_controls') as Record<any, any>;
       if(!element){
         let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
@@ -1342,6 +1374,63 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private setPlayersDataHeight = (idx: number) => {
     return (e:Record<any, any>) => {
       let element = document.querySelectorAll('.customize_controls') as Record<any, any>;
+    }
+  }
+
+  public get popperID() {
+    return this.$store.getters.getPopperID
+  }
+
+  public showPopper(id:string){
+    this.$store.commit('setPopper', id)
+  }
+
+  public hidePopper(){
+    this.$store.commit('setPopper', '')
+  }
+
+  get roomWithProducts():Record<any, any>{
+    const room = this.$store.getters.getLockerProducts
+    return room
+  }
+
+
+  public async shareProduct(product: Record<any, any>, ind: number, i: number) {
+    try {
+      if(product){
+        let payload = {
+          type: 'locker',
+          id: product.id,
+          customer_id: this.customer ? this.customer.id : '',
+          product_id: this.selectedProduct.product_id
+        }
+        let shared_url = "";
+        if (product.shared_url) {
+          shared_url += product.shared_url;
+        } else {
+          let res = await this.$store.dispatch('shareProduct', payload);
+          shared_url += res.data.url;
+          Vue.set(this.getLockerProducts[i].product[ind], 'shared_url', shared_url)
+          console.log(res)
+        }
+
+        this.showPopper('shareDesign');
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  private async shareDesign(){
+    if (this.editStatus || this.lockerIndex !== undefined || this.undoItems.length > 0 || this.redoitems.length > 0){
+      this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
+      this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
+      this.hideVModal('locker-modal')
+      // (this.ref['lockerModal'].$refs['lockerRoom'] as Record<any, any>).shareProduct(product, this.lockerProductIndex, this.lockerIndex)
+
+    }else{
+      this.$store.commit('setIsShareDesign', true)
+      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     }
   }
 }

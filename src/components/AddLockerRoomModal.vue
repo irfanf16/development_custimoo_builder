@@ -8,7 +8,7 @@
          :shiftY="0"
          id="modal-center-addlockerroom" hide-footer centered size="xl"  modal-class="add_locker" content-class="lockerroom-modal">
     <div class="modal-header d-flex justify-content-between">
-      <span class="fs-5 font-weight-bold">Save</span>
+      <span class="fs-5 font-weight-bold">Save your design <span v-if="$store.getters.getIsShareDesign">before sharing</span></span>
       <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('add-to-lockerroom')"><BIconX /></span>
     </div>
     <div class="p-4">
@@ -154,6 +154,7 @@ import ModalAction from "@/mixins/ModalAction";
       public showButton(id:number, index:number){
         this.room_id = id;
         this.tabIndex = index
+        this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
         this.productData = this.roomWithProducts[index].product
       }
       public lockerAdded(){
@@ -211,7 +212,11 @@ import ModalAction from "@/mixins/ModalAction";
               this.hideVModal('add-to-lockerroom');
               this.showLoader = false
             } else {
-              this.$emit('open-locker-room', this.tabIndex);
+              if(!this.$store.getters.getIsShareDesign){
+                this.$emit('open-locker-room', this.tabIndex);
+              }else{
+                this.hideVModal('add-to-lockerroom');
+              }
             }
 
           }else{
@@ -221,6 +226,12 @@ import ModalAction from "@/mixins/ModalAction";
         }else{
           this.showError("please login first");
         }
+
+        this.$store.commit('setActiveLockerProduct', (this.productData.length - 1));
+        if(this.$store.getters.getIsShareDesign){
+          (this.$parent as Record<any, any>).shareDesign();
+        }
+        this.$store.commit('setIsShareDesign', false);
       }
       public async deleteRoom(id:number, index:number){
         if (confirm('You are going to delete associated product')){
@@ -241,6 +252,10 @@ import ModalAction from "@/mixins/ModalAction";
         this.showVModal('add-to-lockerroom')
         this.recallProducts();
       }
+      // public saveBeforeShareDesign() {
+      //   this.showVModal('add-to-lockerroom');
+      //   this.recallProducts();
+      // }
       public async deleteProduct(ind:number, id:number){
         let room_index = this.roomWithProducts.findIndex((room:Record<any, any>) => room.id == this.room_id)
         const ok = await this.ref['reset-modal'].showConfirm()

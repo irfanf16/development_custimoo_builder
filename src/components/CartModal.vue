@@ -96,9 +96,9 @@
         </div>
 
         <div class="align-self-start">
-          <div class="fs-2 font-weight-bold ">Reference No:</div>
+          <div class="fs-2 font-weight-bold ">Team Name / order reference</div>
           <div class="mt-1">
-            <b-form-input class="form-input" placeholder="Order reference" type="text" name="customer_reference_no"
+            <b-form-input class="form-input" placeholder="Team Name / order reference" type="text" name="customer_reference_no"
               v-model="customer_reference_no" />
           </div>
         </div>
@@ -150,7 +150,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   private userData = this.$store.getters.getCustomer;
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public customer_reference_no = ""
-  public shipping_address: Record<any, any> = null
+  public shipping_address: Record<any, any> | null = null
 
   get cartItems() {
     return this.$store.getters.getCartItems
@@ -233,9 +233,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       locker_product = prod_res.data;
       this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item.roster_detail)));
       this.$root.$emit('rostershared', '')
-      const designId = cart_item.design_id
-      const styleId = cart_item.style_id
-      const product_id = cart_item.product_id
 
       // const element = prod_res.data;
       is_customized = locker_product_type == "customized" ? true : is_customized;

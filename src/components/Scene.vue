@@ -1,5 +1,6 @@
 <template>
   <div class="loading-holder">
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen }"
       style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{ 'show-small': showSmall.front }">
@@ -12,7 +13,6 @@
         <h2>Back</h2>
       </a>
     </div>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 </template>
 
@@ -21,7 +21,7 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getProductLogoSetting, setLogoSettings } from "@/helpers/Helpers";
+import { getProductLogoSetting } from "@/helpers/Helpers";
 
 @Component<Scene>({
   async mounted() {
@@ -114,9 +114,13 @@ import { getProductLogoSetting, setLogoSettings } from "@/helpers/Helpers";
       }
 
       function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
+
         let target = transform.target;
         let canvas = target.canvas;
         if ('textIndex' in target) {
+
+          let before_update = self.updateTextObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomTextObject)), { 'action': 'customTexts' })
+          self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
           self.$store.dispatch('updateCustomTextAttribute', { index: target.textIndex, on_all: true, attribute: 'text', value: '' })
         } else {
           let logo = getProductLogoSetting(self.selectedProductId, target.logoIndex);
@@ -124,6 +128,10 @@ import { getProductLogoSetting, setLogoSettings } from "@/helpers/Helpers";
           let payload = {
             custom_logo: logo
           }
+
+          let before_update = self.updateLogoObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomLogoObject)))
+          self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
+
           logo.logoIndex = target.logoIndex;
           self.$store.commit('customLogos', payload)
           self.$store.commit('SET_LOGO_COLORS', []);
@@ -737,7 +745,7 @@ export default class Scene extends Vue {
     }
   }
 
-  public getSvgGroups(): void {
+  public async getSvgGroups() {
     this.svgGroups = []
     this.initialSvgGroups = []
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
@@ -780,32 +788,33 @@ export default class Scene extends Vue {
     this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
 
     if (this.mainPreview) {
-      this.$store.dispatch('setSvgGroups', this.svgGroups)
+      await this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
     if (this.productType == 'customized' && this.lockerDefaultColors.length) {
       let lockerDefaultColors = this.lockerDefaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       if (lockerDefaultColors.length) {
-        this.changeDefaultColors(lockerDefaultColors)
+        await this.changeDefaultColors(lockerDefaultColors)
       }
     }
     else if (this.productType == 'customized' && this.defaultColors.length) {
       let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       if (defaultColors.length) {
-        this.changeDefaultColors(defaultColors)
+        await this.changeDefaultColors(defaultColors)
       }
     }
 
     if (Object.keys(this.lockerGroupColors).length) {
       if (this.productType == 'customized') {
-        this.changeGroupColor(this.lockerGroupColors)
+        await this.changeGroupColor(this.lockerGroupColors)
       }
     }
     else if (Object.keys(this.groupColors).length && !this.lockerDefaultColors.length) {
       if (this.productType == 'customized') {
-        this.changeGroupColor(this.groupColors)
+        await this.changeGroupColor(this.groupColors)
       }
     }
+    this.showLoader = false
   }
 
   public containsObject(obj: Record<any, any>): boolean {
@@ -919,13 +928,12 @@ export default class Scene extends Vue {
               this.$store.commit('SET_CANVAS_READY', true);
             }, 500)
           }
-          this.showLoader = false
           this.mounted = true
         }
         resolve('done')
       })
       canvas.on('object:modified', (e: Record<any, any>) => {
-        var objects = canvas.getObjects('line');
+        let objects = canvas.getObjects('line');
         for (let i in objects) {
           canvas.remove(objects[i]);
         }
@@ -1970,7 +1978,7 @@ export default class Scene extends Vue {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.99);
   z-index: 1030;
 
   img {

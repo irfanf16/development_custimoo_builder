@@ -37,7 +37,7 @@
 
                             <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <template v-if="room.active_tab">
-                              <img @dblclick="editProduct(room.id, product.id)" v-if="!getSelectionMode.eventProductMode"  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                              <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
                               <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url+'tesss' ? '' : 'placeholder'" alt="">
                             </template>
 
@@ -55,9 +55,9 @@
                             :icon="['fas', 'trash-alt']" /></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
-                          <a style="font-size: 12px;" v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product.id)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
-                          <a style="font-size: 12px;" v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product.id)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
-                          <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product.id)" @mouseleave="hideTooltip"
+                          <a style="font-size: 12px;" v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product.id, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
+                          <a style="font-size: 12px;" v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product.id, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
+                          <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product.id, ind)" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
@@ -146,7 +146,7 @@
                 <b-tab v-if="!getSelectionMode.readonly" title="Colors">
                   <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
                     <div class="pt-lg-2 folder-wrapper">
-                      <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
+                      <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold text-left">Select Folder</h3>
                       <div class="d-flex flex-wrap color-folder-holder">
                         <template v-for="(folder, inde) in room.folders">
                           <a href="#" class="text-center d-block" @click="fetchColors(inde, i)" :key="inde">
@@ -342,6 +342,8 @@ import ModalAction from "@/mixins/ModalAction";
     draggable
   },
   mounted() {
+    console.log(this.$store.getters.getLockerTabsIndex)
+    console.log(this.$store.getters.getActiveLockerProduct)
     let href: any = location.href;
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
@@ -357,7 +359,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
   public colors: [] = []
-  public tabIndex = this.$store.getters.getLockerTabsIndex;
   public viewLoader = false
   public copiedProductId = 0
   public copiedProductName = ''
@@ -396,6 +397,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
         // console.log('The ' + mutation.attributeName + ' attribute was modified.');
       }
     }
+  }
+
+  private get tabIndex() {
+    return this.$store.getters.getLockerTabsIndex
   }
 
   private observer:any = new MutationObserver(this.observerCallback);
@@ -622,7 +627,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {
       if(product){
-        console.log(this.popperID)
           let payload = {
             type: 'locker',
             id: product.id,
