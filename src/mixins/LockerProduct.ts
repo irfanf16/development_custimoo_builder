@@ -8,6 +8,7 @@ import {getClosestColor} from "@/pantoneColor";
 export class LockerProducts extends Vue {
 
   public async editProduct(room_id: number, room_product_id: number, ind: number, share_url="") {
+    this.$store.commit('setActiveLockerProduct', ind)
     let self = this;
     let is_customized = this.$store.getters.getCustomized
     let is_personalized = this.$store.getters.getPersonalized
@@ -28,8 +29,6 @@ export class LockerProducts extends Vue {
       data = {share_url: share_url}
       // url += `?share_url=${share_url}`;
     }
-
-    this.$store.commit('setActiveLockerProduct', ind)
 
     http.get(url, {params: data}).then(async (selected_product_detail) => {
       let prod_res = selected_product_detail;

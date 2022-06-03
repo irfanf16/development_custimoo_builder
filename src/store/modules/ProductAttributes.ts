@@ -23,7 +23,7 @@ const ProductAttributes:Module<any, any> = {
     lockerActiveTabIndex:0,
     lockerTabsIndex:undefined,
     isShareDesign : false,
-    activeLockerProduct:0,
+    activeLockerProduct:undefined,
     products:[],
     selectedIndex: 0,
     selectedPrdId:0,
