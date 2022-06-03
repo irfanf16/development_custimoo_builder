@@ -677,7 +677,7 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_ROSTER(state:Record<any, any>, payload:Record<any, any>){
       if (payload){
-        state.rosterDetails = payload;
+        state.rosterDetails[state.selectedPrdId] = payload;
       }
     },
     OVERRIDE_ROSTER(state:Record<any, any>){
