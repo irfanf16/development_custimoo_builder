@@ -110,7 +110,7 @@ router.beforeEach(async (to, from, next) => {
         access_token: jwtToken,
         user: customer
       }
-      store.commit('SET_CUSTOMER', payload)
+      await store.commit('SET_CUSTOMER', payload)
     }
   }
   next()

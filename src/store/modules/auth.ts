@@ -59,14 +59,14 @@ const Auth:Module<any, any> = {
       commit('SET_CUSTOMER_TOKEN')
     },
     async getCustomerFromToken({commit}, token:string){
-    let customer = null
-     customer = await http.get('customer/from/token', {params: {token:token}}).then((res) => {
+      let customer = null
+      customer = await http.get('customer/from/token', {params: {token:token}}).then((res) => {
         return res.data.customer
       }).catch(err =>{
         if (err.response.status == 404){
           return false
         }
-     })
+      })
       return customer
     },
     async companyAction({commit}, payload){
