@@ -101,7 +101,8 @@ const ProductAttributes:Module<any, any> = {
     editCart: {
       cartId: 0,
       cartItemId: ''
-    }
+    },
+    hideSaveLockerButton: false
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -952,6 +953,9 @@ const ProductAttributes:Module<any, any> = {
         state.customLogoObjects.push(payload.data)
       }
       state.canvasImage.scene = payload.scene
+    },
+    SET_HIDE_SAVE_LOCKER_BUTTON(state:Record<any, any>, payload){
+      state.hideSaveLockerButton = payload
     }
   },
   getters: {
@@ -1144,6 +1148,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getStockCount(state:Record<any,any>){
       return state.stock_count;
+    },
+    getHideSaveLockerButton(state:Record<any,any>){
+      return state.hideSaveLockerButton;
     }
   },
   actions: {

@@ -43,7 +43,6 @@ export default class DesignAvailable extends Vue {
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     this.$store.dispatch('setActiveTab', -1)
     this.$store.commit('SET_SUFFLE', false)
-    this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
     this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {
         Vue.set(design, 'design_show', 1)
@@ -52,6 +51,7 @@ export default class DesignAvailable extends Vue {
         Vue.set(design, 'design_show', 0)
       }
     })
+    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
   }
 
   public showPreview() {

@@ -93,6 +93,7 @@ export class LockerProducts extends Vue {
         }
         this.$store.commit('RESET_UNDO');
         this.$store.commit('RESET_REDO');
+        this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
         await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
         this.$emit('hideLockerRoomModal')
       }, (error:Record<any, any>) => {

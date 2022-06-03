@@ -78,6 +78,7 @@ import {http} from "@/httpCommon";
               Vue.set(item, 'design_show', 0)
             }
           })
+          this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
           if (!designFound){
             if(!this.selectedProduct.productstyles[i].productdesigns.filter((design: Record<any, any>) => design.design_show).length) {
               this.selectedProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{

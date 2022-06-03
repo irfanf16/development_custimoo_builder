@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;">
+  <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;" :data="undoRedoArrays">
     <meta name="viewport" content="width=device-width">
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
@@ -22,8 +22,11 @@
                     <template v-else>
                       <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                     </template>
-                    <template v-if="isCustomerAuthenticated && (undoItems.length > 0 || redoitems.length > 0 )">
-                      <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
+                    <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
+                      <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
+                        <template v-if="editProductStatus">Update to locker room</template>
+                        <template v-else>Save to locker room</template>
+                      </b-button>
                     </template>
                     <template v-else>
                       <b-button v-if="undoItems.length > 0 || redoitems.length > 0" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
@@ -56,6 +59,7 @@
                       </Popper>
                     </template>
                     <template v-else>
+                      <b-button  @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                       <b-button variant="outline-secondary" @click="setActionBeforeLogin('shareDesign')">Share design</b-button>
                     </template>
                   </template>
@@ -755,6 +759,22 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
+  get hideSaveLockerButton():boolean{
+    return this.$store.getters.getHideSaveLockerButton;
+  }
+
+  get undoRedoArrays(): boolean {
+    let undo = this.$store.getters.getUndoItems;
+    let redo = this.$store.getters.getRedoItems;
+    let hidebtn = this.$store.getters.getHideSaveLockerButton;
+      if(hidebtn && this.editProductStatus){
+      if(undo.length > 0 || redo.length > 0){
+        this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false)
+      }
+    }
+    return hidebtn
+  }
+
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
   }
@@ -963,9 +983,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
-    if (this.$store.getters.getEditDesignId != currentDesign[0].id || this.$store.getters.getEditStyleId != this.selectedProduct.productstyles[this.styleIndex].id){
-      this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
-    }
+    // if (this.$store.getters.getEditDesignId != currentDesign[0].id || this.$store.getters.getEditStyleId != this.selectedProduct.productstyles[this.styleIndex].id){
+    //   this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
+    // }
     let main_scene = this.ref.mainScene[0];
     main_scene.frontCanvas.discardActiveObject().renderAll();
     main_scene.backCanvas.discardActiveObject().renderAll();
@@ -995,6 +1015,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       if (res.status == 201){
         this.showLoader = false
         this.showToast(res.data.message, 'SUCCESS')
+        this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
       }else{
         this.showError(res)
         this.showLoader = false
