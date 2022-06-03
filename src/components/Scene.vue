@@ -21,7 +21,7 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getProductLogoSetting, setLogoSettings } from "@/helpers/Helpers";
+import { getProductLogoSetting } from "@/helpers/Helpers";
 
 @Component<Scene>({
   async mounted() {

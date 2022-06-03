@@ -479,19 +479,6 @@ const ProductAttributes:Module<any, any> = {
           })
         }
       }
-      // state.products.forEach((item:Record<any, any>) => {
-      //   if (item.id != state.selectedPrdId && item.text_follows_product) {
-      //     if (state.customTexts[item.id][customTextAttribute.index]) {
-      //       if ('add_type' in text_item){
-      //         const count = text_item.added_count
-      //         const index = state.customTexts[item.id].findIndex((text:Record<any, any>) => text.added_count == count)
-      //         Vue.set(state.customTexts[item.id][index], customTextAttribute.attribute, customTextAttribute.value)
-      //       }else{
-      //         Vue.set(state.customTexts[item.id][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
-      //       }
-      //     }
-      //   }
-      // })
     },
     CUSTOM_TEXT_WITHOUT_TRIGGER(state: Record<any, any>, customTextsAttribute: Record<any, any>) {
       if(customTextsAttribute){
@@ -598,7 +585,7 @@ const ProductAttributes:Module<any, any> = {
         }
       });
     },
-    OVERRIDE_TEXT(state:Record<any, any>, payload){
+    OVERRIDE_TEXT(state:Record<any, any>, payload) {
       state.customTexts = {};
       const locker_texts = JSON.parse(payload.text)
       state.products.forEach((product: Record<any, any>) => {
