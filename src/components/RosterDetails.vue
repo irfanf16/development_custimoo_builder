@@ -315,7 +315,11 @@ export default class RosterDetails extends Vue {
     }
   }
   public close(){
-    this.$modal.hide('rostermodal');
+    const self = this;
+    this.editRosterPlayer(0);
+    setTimeout(function(){
+      self.$modal.hide('rostermodal')
+    },500);
   }
 
   public fontsList(): void {

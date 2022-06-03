@@ -12,10 +12,12 @@
            :reset="true"
            :shiftY="0"
            name="rostermodal"  title="Roster" class="roster-modal" size="xl"
-             footer-class="hide-modal-footer d-none">
+             footer-class="hide-modal-footer d-none"
+          @closed="close"
+        >
       <div class="modal-header d-flex justify-content-between">
         <span class="fs-5 font-weight-bolder">Edit Roster</span>
-        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="close"><BIconX /></span>
       </div>
       <div class="modal-body">
         <div class="d-flex flex-wrap justify-content-between">
@@ -51,7 +53,7 @@
     </modal>
 
     <div class="d-lg-none">
-      <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>
+      <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
       <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details"/>
@@ -133,6 +135,20 @@ export default class EditRosterAreaTab extends Vue {
   }
   public hide(){
     this.$modal.hide('rostermodal')
+  }
+  public close(){
+    const self = this;
+    self.updateText();
+    setTimeout(function(){
+      self.$modal.hide('rostermodal')
+    },500);
+  }
+  public updateText(){
+    const self = this;
+    const roster_details = self.rosterDetails;
+    if(roster_details.length){
+      self.ref['roster-detail'].changeText(roster_details[0].text,roster_details[0].number,0)
+    }
   }
 
   public rosterDetailsInit() {
