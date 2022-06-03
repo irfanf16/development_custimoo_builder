@@ -37,10 +37,6 @@ window.Echo = new Echo({
     Navbar
   },
   async mounted() {
-    if(localStorage.getItem('login_code')) {
-      localStorage.clear()
-      location.reload()
-    }
     await getCompany();
     const token = this.$router.currentRoute.query.token
     if (token){

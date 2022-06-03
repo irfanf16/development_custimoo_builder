@@ -61,7 +61,7 @@
         <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
       </div>
     </div>
-    <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2 && selectedProduct.allow_extra_text">
+    <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2 && selectedProduct.allow_name_number">
 <!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
       <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>

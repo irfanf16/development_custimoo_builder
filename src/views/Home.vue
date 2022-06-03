@@ -28,14 +28,18 @@
                         <template v-else>Save to locker room</template>
                       </b-button>
                     </template>
+                    <template v-else>
+                      <b-button v-if="undoItems.length > 0 || redoitems.length > 0" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                    </template>
+
                     <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'shareDesign'" variant="outline-secondary" :ref="'share'+lockerIndex+''+lockerProductIndex" :id="'share'+lockerIndex+''+lockerProductIndex" @click.stop="shareDesign">Share design</b-button>
+                      <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" id="shareDesign" @click.stop="shareDesign">Share design</b-button>
 
                       <Popper
                         style="font-size: 12px;"
                         v-if="product"
-                        :is-open="popperID == ('share'+lockerIndex+''+lockerProductIndex)"
-                        :anchor-el="$refs['share'+lockerIndex+''+lockerProductIndex]"
+                        :is-open="popperID == 'shareDesign'"
+                        :anchor-el="$refs['shareDesign']"
                         :on-close="hidePopper"
                       >
                         <aside id="popper-content" class="tooltip b-tooltip bs-tooltip share-tooltip">
@@ -56,6 +60,7 @@
                     </template>
                     <template v-else>
                       <b-button  @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                      <b-button variant="outline-secondary" @click="setActionBeforeLogin('shareDesign')">Share design</b-button>
                     </template>
                   </template>
                   <template v-if="updateOrderItemProducts">
@@ -514,7 +519,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private adjustTotalTabs() {
-    console.log('called')
     this.mainTotalTabs = 3
 
     if(!this.selectedProduct.is_logo_allowed){
@@ -911,6 +915,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.buyNow()
     } else if(this.actionBeforeLogin == 'addToCart') {
       this.addToCart()
+    } else if(this.actionBeforeLogin == 'shareDesign') {
+      this.shareDesign()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
@@ -969,6 +975,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
   public async getLockers(share_url = false){
+    this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
     if (!this.editStatus){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
@@ -1404,9 +1411,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           let res = await this.$store.dispatch('shareProduct', payload);
           shared_url += res.data.url;
           Vue.set(this.getLockerProducts[i].product[ind], 'shared_url', shared_url)
+          console.log(res)
         }
 
-        this.showPopper('share'+i+''+ind);
+        this.showPopper('shareDesign');
       }
     } catch (error) {
       console.log(error)
@@ -1414,7 +1422,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async shareDesign(){
-    if (this.editStatus || this.lockerIndex !== undefined){
+    if (this.editStatus || this.lockerIndex !== undefined || this.undoItems.length > 0 || this.redoitems.length > 0){
       this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
       this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
       this.hideVModal('locker-modal')

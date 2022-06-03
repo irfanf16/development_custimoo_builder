@@ -40,6 +40,7 @@ export default class DesignAvailable extends Vue {
   }
 
   public changeDesign(index: number) {
+    this.$store.commit('Change_Locker_Tabs_Index', undefined)
     this.$store.dispatch('setActiveTab', -1)
     this.$store.commit('SET_SUFFLE', false)
     this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
