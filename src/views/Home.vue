@@ -25,6 +25,10 @@
                     <template v-if="isCustomerAuthenticated && (undoItems.length > 0 || redoitems.length > 0 )">
                       <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
                     </template>
+                    <template v-else>
+                      <b-button v-if="undoItems.length > 0 || redoitems.length > 0" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                    </template>
+
                     <template v-if="isCustomerAuthenticated">
                       <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" id="shareDesign" @click.stop="shareDesign">Share design</b-button>
 
@@ -52,7 +56,7 @@
                       </Popper>
                     </template>
                     <template v-else>
-                      <b-button v-if="undoItems.length > 0 || redoitems.length > 0" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                      <b-button variant="outline-secondary" @click="setActionBeforeLogin('shareDesign')">Share design</b-button>
                     </template>
                   </template>
                   <template v-if="updateOrderItemProducts">
@@ -891,6 +895,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.buyNow()
     } else if(this.actionBeforeLogin == 'addToCart') {
       this.addToCart()
+    } else if(this.actionBeforeLogin == 'shareDesign') {
+      this.shareDesign()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
@@ -1395,7 +1401,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async shareDesign(){
-    if (this.editStatus || this.lockerIndex !== undefined){
+    if (this.editStatus || this.lockerIndex !== undefined || this.undoItems.length > 0 || this.redoitems.length > 0){
       this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
       this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
       this.hideVModal('locker-modal')
