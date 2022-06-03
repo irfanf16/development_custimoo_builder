@@ -13,6 +13,7 @@ import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
 import OrderListing from "@/views/OrderListing.vue";
 import Dashboard from "@/views/Dashboard.vue";
 import Thankyou from "@/views/Thankyou.vue";
+import store from '@/store'
 
 
 
@@ -98,6 +99,21 @@ const routes: Array<RouteConfig> = [
 
 const router = new VueRouter({
   routes
+})
+
+router.beforeEach(async (to, from, next) => {
+  const jwtToken = localStorage.getItem('jwtToken')
+  if (!store.getters.getCustomer && jwtToken){
+    const customer = await store.dispatch('getCustomerFromToken', jwtToken)
+    if (customer){
+      const payload = {
+        access_token: jwtToken,
+        user: customer
+      }
+      store.commit('SET_CUSTOMER', payload)
+    }
+  }
+  next()
 })
 
 export default router

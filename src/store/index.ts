@@ -41,8 +41,6 @@ export default new Vuex.Store({
       'Auth.jwtToken',
       'Auth.platform',
      ]
-
-
     })]
 })
 
