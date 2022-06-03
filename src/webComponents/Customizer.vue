@@ -114,11 +114,7 @@ export default {
       }
     }
   },
-  mounted: async function() {
-    if(localStorage.getItem('login_code')) {
-      localStorage.clear()
-      location.reload()
-    }
+  mounted: async () => {
     await getCompany();
     let elem = document.createElement('link');
     elem.rel = ' stylesheet'

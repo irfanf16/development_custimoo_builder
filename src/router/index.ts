@@ -6,10 +6,8 @@ import Cart from '../views/Cart.vue'
 import Order from '../views/Order.vue'
 import OrderDetail from '../views/OrderDetail.vue'
 import Orders from '../views/Orders.vue'
-import ViewScene from '../views/ViewScene.vue'
 import ThreeD from '../views/ThreeD.vue'
 import ShareRoster from '../views/ShareRoster.vue'
-import CustomizationProcess from '../views/CustomizationProcess.vue'
 import ConfirmOrder from '../views/ConfirmOrder.vue'
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
 import OrderListing from "@/views/OrderListing.vue";

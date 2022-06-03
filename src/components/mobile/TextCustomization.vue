@@ -4,19 +4,15 @@
       <template v-for="(customText, tabIndex) in customTexts">
         <b-tab v-if="customText.hasOwnProperty('text')" :key="tabIndex" @click="setTextIndex(tabIndex)">
           <template #title>
-            <template v-if="tabIndex + 1  > selectedProduct.productnames.length">
-              <!--            <b-button class="add-logo-btn ml-1" @click="removeTab(tabIndex, selectedProduct.id)">-->
-              <!--              - -->
-              <!--            </b-button>-->
+            <template v-if="customTexts[customTextIndex].add_type && customTexts[customTextIndex].add_type == 'manual'">
               <b-button class="p-0 mr-1 light remove-text" size="sm" style="min-width: unset; line-height: normal" variant="dark" @click.stop="removeTab(tabIndex, selectedProduct.id)">
                 <b-icon-x />
               </b-button>
+              Additional Text # {{ customTexts[customTextIndex].added_count }}
             </template>
-
-            <span>
-            {{ /* customText.side ? customText.side : 'text' | capitalize */ }}
-            {{ customText.type | capitalize }}
-          </span>
+            <template v-else>
+              {{ selectedProduct.productnames[customTextIndex].name_of_placement }}
+            </template>
           </template>
 
           <div class="grid mobile-cols-2 gap-1">
@@ -114,17 +110,9 @@
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 import {getClosestColor} from "@/pantoneColor";
-import {lowerFirst} from "lodash";
 @Component<TextCustomization>({
   components: {
     colorPicker
-    // ColorAccordion,
-    // LogoPlacementTabs,
-    // CustomizationText,
-    // CollarStyle,
-    // EditRosterArea,
-    // ColorTabs,
-    // UploadLogo
   },
   mounted() {
     this.$nextTick(() => {
@@ -133,9 +121,8 @@ import {lowerFirst} from "lodash";
     this.getColors()
     // this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
-    console.log('customTexts' , this.customTexts)
-    var roster: any = JSON.parse(JSON.stringify(this.rosterText));
-    var newRoster:Record<any, any> = []
+    let roster: any = JSON.parse(JSON.stringify(this.rosterText));
+    let newRoster:Record<any, any> = []
     roster.forEach((item:Record<any, any>, index:number) => {
       if(item){
         newRoster.push(item)
