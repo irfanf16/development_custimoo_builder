@@ -476,6 +476,47 @@ const getActiveProductData = async () => {
   }
 }
 
+const initCustomTexts = (retrieved_products: Record<any, any>) => {
+  retrieved_products.forEach((product:any) => {
+      product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
+        const obj = fontsColorsManipulation(product)
+        //calculate colors pantone on init
+        let fill_color_pantone = obj.firstColor.name;
+        const pantone = getClosestColor(obj.firstColor.value);
+        if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+          fill_color_pantone = pantone.pantone;
+        }
+        let outLine_color_pantone = obj.secondColor.name;
+        const opantone = getClosestColor(obj.secondColor.value);
+        if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+          outLine_color_pantone = opantone.pantone;
+        }
+
+        const text = {
+          text: '',
+          type: productName.type,
+          width: productName.width,
+          height: productName.height,
+          x_axis: productName.x_axis,
+          y_axis: productName.y_axis,
+          rotation: productName.rotation,
+          haveControls: Boolean(!productName.is_locked),
+          outlineEnabled: Boolean(productName.outline_enabled),
+          side: productName.side,
+          fontFamily: fontsList(product)[0].value,
+          fillColor: obj.firstColor.value,
+          fillColorPantone: fill_color_pantone,
+          outLineColor: obj.secondColor.value,
+          outLineColorPantone: outLine_color_pantone,
+          outLineWidth: 0,
+          textIndex: index,
+          selectColor: false
+        }
+        await Store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
+      })
+  });
+}
+
 const getRosterDetailDefaultObject = () => {
   const selected_product = Store.getters.getSelectedProduct;
   if (selected_product.sizes.length){
@@ -574,5 +615,5 @@ export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject
+  getUploadedLogoObject, initCustomTexts
 };

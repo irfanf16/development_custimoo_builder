@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { Component, Vue } from 'vue-property-decorator'
 import {findIndex} from 'lodash';
-import {fontsColorsManipulation, fontsList, getRandom, processColorsCustom} from "@/helpers/Helpers";
+import { fontsColorsManipulation, fontsList, getRandom, initCustomTexts, processColorsCustom } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import {getClosestColor} from "@/pantoneColor";
 @Component
@@ -188,48 +188,8 @@ export class handleMainProducts extends Vue {
     }
     //set custom text objects for new products
     let customTextObjects = this.$store.getters.getCustomTextObject
-    let custom_texts = await this.$store.getters.getCustomTexts();
 
-    retrieved_products.forEach((product:any) => {
-      if(!customTextObjects[product.id]) {
-        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-          const obj = fontsColorsManipulation(product)
-          //calculate colors pantone on init
-          let fill_color_pantone = obj.firstColor.name;
-          const pantone = getClosestColor(obj.firstColor.value);
-          if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-            fill_color_pantone = pantone.pantone;
-          }
-          let outLine_color_pantone = obj.secondColor.name;
-          const opantone = getClosestColor(obj.secondColor.value);
-          if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-            outLine_color_pantone = opantone.pantone;
-          }
-
-          const text = {
-            text: '',
-            type: productName.type,
-            width: productName.width,
-            height: productName.height,
-            x_axis: productName.x_axis,
-            y_axis: productName.y_axis,
-            rotation: productName.rotation,
-            haveControls: Boolean(!productName.is_locked),
-            outlineEnabled: Boolean(productName.outline_enabled),
-            side: productName.side,
-            fontFamily: fontsList(product)[0].value,
-            fillColor: obj.firstColor.value,
-            fillColorPantone: fill_color_pantone,
-            outLineColor: obj.secondColor.value,
-            outLineColorPantone: outLine_color_pantone,
-            outLineWidth: 0,
-            textIndex: index,
-            selectColor: false
-          }
-          await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
-        })
-      }
-    });
+    initCustomTexts(retrieved_products)
     this.$store.dispatch('setColorSectionVisibility')
     this.$store.dispatch("getModels", selected_product.product_id);
 
