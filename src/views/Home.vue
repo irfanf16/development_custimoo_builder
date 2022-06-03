@@ -26,13 +26,13 @@
                       <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">Save to locker room</b-button>
                     </template>
                     <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'shareDesign'" variant="outline-secondary" :ref="'share'+lockerIndex+''+lockerProductIndex" :id="'share'+lockerIndex+''+lockerProductIndex" @click.stop="shareDesign">Share design</b-button>
+                      <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" id="shareDesign" @click.stop="shareDesign">Share design</b-button>
 
                       <Popper
                         style="font-size: 12px;"
                         v-if="product"
-                        :is-open="popperID == ('share'+lockerIndex+''+lockerProductIndex)"
-                        :anchor-el="$refs['share'+lockerIndex+''+lockerProductIndex]"
+                        :is-open="popperID == 'shareDesign'"
+                        :anchor-el="$refs['shareDesign']"
                         :on-close="hidePopper"
                       >
                         <aside id="popper-content" class="tooltip b-tooltip bs-tooltip share-tooltip">
@@ -1384,9 +1384,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           let res = await this.$store.dispatch('shareProduct', payload);
           shared_url += res.data.url;
           Vue.set(this.getLockerProducts[i].product[ind], 'shared_url', shared_url)
+          console.log(res)
         }
 
-        this.showPopper('share'+i+''+ind);
+        this.showPopper('shareDesign');
       }
     } catch (error) {
       console.log(error)
