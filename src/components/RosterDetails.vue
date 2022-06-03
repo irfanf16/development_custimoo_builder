@@ -95,7 +95,7 @@
     </div>
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
-      <button class="btn btn-secondary w-auto fw-bold" @click="addPlayer(roster)">Add Player</button>
+      <button class="btn btn-secondary w-auto fw-bold" @click="addPlayer">Add Player</button>
       <button class="btn btn-secondary w-auto fw-bold" @click="close">OK</button>
     </div>
   </div>
@@ -144,7 +144,7 @@ export default class RosterDetails extends Vue {
     return this.$store.getters.getSelectedProduct
   }
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
   get company(){
     return this.$store.getters.getCompany
@@ -187,8 +187,8 @@ export default class RosterDetails extends Vue {
     return this.$store.getters.getEyeIndex;
   }
 
-  public addPlayer(obj:Record<any, any>) {
-    this.$emit('addPlayer');
+  public addPlayer() {
+    this.$emit('addPlayer', this.rosterDetails.length);
   }
 
   public removeIndex(ind:number){

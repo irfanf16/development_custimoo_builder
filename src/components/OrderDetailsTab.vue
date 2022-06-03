@@ -123,7 +123,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
   }
 
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
 
   get logoColors(): [Record<any, any>] {

@@ -78,12 +78,14 @@ import { findIndex } from 'lodash'
     RosterDetails,
     Scene
   },
-  mounted() {
+    mounted() {
     this.setProductSizes()
     this.$nextTick(() => {
-      if (!this.rosterDetails.length) {
-        this.rosterDetailsInit()
-      }
+      this.allproducts.forEach(async(product:Record<any, any>)=>{
+        if(!this.rosterDetails[product.id]) {
+          await this.rosterDetailsInit(0, product.id)
+        }
+      })
     })
   }
 })
@@ -135,9 +137,17 @@ export default class EditRosterAreaTab extends Vue {
     this.$modal.hide('rostermodal')
   }
 
-  public rosterDetailsInit() {
+  public rosterDetailsInit(index = 0, p_id = 0) {
     let payload = getRosterDetailDefaultObject()
-    this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
+    if(this.sizeOptions.length > 0) {
+      payload.size = this.sizeOptions[0].text;
+      payload.code = this.sizeOptions[0].value;
+    }
+    let product_id = this.selectedProduct.id
+    if (p_id){
+      product_id = p_id
+    }
+    this.$store.dispatch('setRosterDetails', { pid : product_id, index: index, roster: payload })
   }
 
   public setProductSizes() {
@@ -230,7 +240,6 @@ export default class EditRosterAreaTab extends Vue {
           }
         }
         if (loopStatus == true){
-          console.log(loopStatus)
           this.$store.dispatch('updateRoster', this.fileData);
           this.$modal.hide('rosterfilemodal');
         }else{
