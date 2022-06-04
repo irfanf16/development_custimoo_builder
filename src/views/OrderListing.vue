@@ -54,7 +54,7 @@
               Order Reference
             </th>
             <th>
-              Order Reference No
+              Actions
             </th>
             <th>
               Actions
