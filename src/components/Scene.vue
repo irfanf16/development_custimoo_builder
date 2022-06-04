@@ -21,7 +21,7 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getProductLogoSetting, setLogoSettings } from "@/helpers/Helpers";
+import { getProductLogoSetting } from "@/helpers/Helpers";
 
 @Component<Scene>({
   async mounted() {
@@ -114,9 +114,13 @@ import { getProductLogoSetting, setLogoSettings } from "@/helpers/Helpers";
       }
 
       function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
+
         let target = transform.target;
         let canvas = target.canvas;
         if ('textIndex' in target) {
+
+          let before_update = self.updateTextObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomTextObject)), { 'action': 'customTexts' })
+          self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
           self.$store.dispatch('updateCustomTextAttribute', { index: target.textIndex, on_all: true, attribute: 'text', value: '' })
         } else {
           let logo = getProductLogoSetting(self.selectedProductId, target.logoIndex);
@@ -124,6 +128,10 @@ import { getProductLogoSetting, setLogoSettings } from "@/helpers/Helpers";
           let payload = {
             custom_logo: logo
           }
+
+          let before_update = self.updateLogoObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomLogoObject)))
+          self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
+
           logo.logoIndex = target.logoIndex;
           self.$store.commit('customLogos', payload)
           self.$store.commit('SET_LOGO_COLORS', []);

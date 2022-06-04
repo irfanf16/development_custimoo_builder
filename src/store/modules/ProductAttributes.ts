@@ -2,7 +2,7 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
-import {getRosterDetailDefaultObject, setCustomLogo} from "../../helpers/Helpers";
+import { getRosterDetailDefaultObject, initCustomTexts, setCustomLogo } from '../../helpers/Helpers'
 
 import {
   fontsColorsManipulation, fontsList,
@@ -101,7 +101,8 @@ const ProductAttributes:Module<any, any> = {
     editCart: {
       cartId: 0,
       cartItemId: ''
-    }
+    },
+    hideSaveLockerButton: false
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -465,8 +466,8 @@ const ProductAttributes:Module<any, any> = {
       if (text_item){
         Vue.set(text_item, customTextAttribute.attribute, customTextAttribute.value)
       }
-      const index = state.products.findIndex((item:Record<any, any>) => item.id === state.selectedPrdId)
-      const settings = state.products[index]['productnames'][customTextAttribute.index]
+      const selectedProduct = this.getters.getSelectedProduct;
+      const settings = selectedProduct['productnames'][customTextAttribute.index]
       if(settings && settings.text_follows_product){
         const ids = settings.following_product_ids
         if(ids.length){
@@ -479,26 +480,13 @@ const ProductAttributes:Module<any, any> = {
           })
         }
       }
-      // state.products.forEach((item:Record<any, any>) => {
-      //   if (item.id != state.selectedPrdId && item.text_follows_product) {
-      //     if (state.customTexts[item.id][customTextAttribute.index]) {
-      //       if ('add_type' in text_item){
-      //         const count = text_item.added_count
-      //         const index = state.customTexts[item.id].findIndex((text:Record<any, any>) => text.added_count == count)
-      //         Vue.set(state.customTexts[item.id][index], customTextAttribute.attribute, customTextAttribute.value)
-      //       }else{
-      //         Vue.set(state.customTexts[item.id][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
-      //       }
-      //     }
-      //   }
-      // })
     },
     CUSTOM_TEXT_WITHOUT_TRIGGER(state: Record<any, any>, customTextsAttribute: Record<any, any>) {
       if(customTextsAttribute){
         if(Object.keys(customTextsAttribute.data).length && state.customTexts[state.selectedPrdId] && state.customTexts[state.selectedPrdId][customTextsAttribute.index]) {
           const product_id = customTextsAttribute.product_id? customTextsAttribute.product_id : state.selectedPrdId
           Object.keys(customTextsAttribute.data).forEach((key: string) => {
-            state.customTexts[product_id][customTextsAttribute.index][key] = customTextsAttribute.data[key]
+            Object.assign(state.customTexts[product_id][customTextsAttribute.index], key, customTextsAttribute.data[key])
           })
         }
       }
@@ -598,83 +586,15 @@ const ProductAttributes:Module<any, any> = {
         }
       });
     },
-    OVERRIDE_TEXT(state:Record<any, any>, payload){
+    OVERRIDE_TEXT(state:Record<any, any>, payload) {
       state.customTexts = {};
+      initCustomTexts(this.getters.getProducts)
       const locker_texts = JSON.parse(payload.text)
-      state.products.forEach((product: Record<any, any>) => {
-        if(!state.customTexts[product.id]) {
-          Vue.set(state.customTexts, product.id, [])
-        }
-        const obj = fontsColorsManipulation(product)
-        //calculate colors pantone on init
-        let fill_color_pantone = obj.firstColor.name;
-        const pantone = getClosestColor(obj.firstColor.value);
-        if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-          fill_color_pantone = pantone.pantone;
-        }
-        let outLine_color_pantone = obj.secondColor.name;
-        const opantone = getClosestColor(obj.secondColor.value);
-        if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-          outLine_color_pantone = opantone.pantone;
-        }
-        if(parseInt(product.id) == parseInt(payload.product_id)) {
-          const productTextsArr = JSON.parse(JSON.stringify(product.productnames))
-          locker_texts.forEach( (lockerText: Record<any, any>, lockerTextIndex: number) => {
-            Vue.set(state.customTexts[product.id], lockerTextIndex, lockerText)
-            productTextsArr.shift()
-          })
-          if(productTextsArr.length > 0) {
-            let maxIndex = locker_texts.length - 1
-            productTextsArr.forEach(async (productText: Record<any, any>, productTextIndex: number) => {
-              maxIndex = maxIndex + 1
-              const text = {
-                text: '',
-                type: productText.type,
-                width: productText.width,
-                height: productText.height,
-                x_axis: productText.x_axis,
-                y_axis: productText.y_axis,
-                rotation: productText.rotation,
-                haveControls: Boolean(!productText.is_locked),
-                outlineEnabled: Boolean(productText.outline_enabled),
-                side: productText.side,
-                fontFamily: fontsList(product)[0].value,
-                fillColor: obj.firstColor.value,
-                fillColorPantone: fill_color_pantone,
-                outLineColor: obj.secondColor.value,
-                outLineColorPantone: outLine_color_pantone,
-                outLineWidth: 0,
-                selectColor: false
-              }
-              Vue.set(state.customTexts[product.id], maxIndex, text)
-            })
-          }
-        }
-        else {
-          product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-            const locker_text_str = locker_texts[index] ? locker_texts[index]['text'] : ''
-            const text = {
-              text: locker_text_str,
-              type: productName.type,
-              width: productName.width,
-              height: productName.height,
-              x_axis: productName.x_axis,
-              y_axis: productName.y_axis,
-              rotation: productName.rotation,
-              haveControls: Boolean(!productName.is_locked),
-              outlineEnabled: Boolean(productName.outline_enabled),
-              side: productName.side,
-              fontFamily: fontsList(product)[0].value,
-              fillColor: obj.firstColor.value,
-              fillColorPantone: fill_color_pantone,
-              outLineColor: obj.secondColor.value,
-              outLineColorPantone: outLine_color_pantone,
-              outLineWidth: 0,
-              selectColor: false
-            }
-            Vue.set(state.customTexts[product.id], index, text)
-          })
-        }
+
+      locker_texts.forEach((text: Record<any, any>, index: number) => {
+        const add_text = {text: text, index: index, prd_id : payload.product_id}
+        console.log(add_text)
+        this.dispatch('setCustomTexts', add_text)
       })
     },
     OVERRIDE_DEFAULT_COLOR(state:Record<any, any>, payload){
@@ -965,6 +885,9 @@ const ProductAttributes:Module<any, any> = {
         state.customLogoObjects.push(payload.data)
       }
       state.canvasImage.scene = payload.scene
+    },
+    SET_HIDE_SAVE_LOCKER_BUTTON(state:Record<any, any>, payload){
+      state.hideSaveLockerButton = payload
     }
   },
   getters: {
@@ -1157,6 +1080,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getStockCount(state:Record<any,any>){
       return state.stock_count;
+    },
+    getHideSaveLockerButton(state:Record<any,any>){
+      return state.hideSaveLockerButton;
     }
   },
   actions: {
