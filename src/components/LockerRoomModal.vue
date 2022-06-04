@@ -5,7 +5,7 @@
            height="auto"
            :reset="true"
            :shiftY="0"
-           name="locker-modal" ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0" title="Locker Room"
+           name="locker-modal" ref="locker-modal" id="modal-center-lockerroom" size="xl" :hide-footer="!selectedCollectionProducts.length>0"
            @close="$store.commit('Change_Locker_Active_Tab', 0)">
       <div class="modal-header d-flex justify-content-between">
         <span class="fs-5 font-weight-bold">Locker Room</span>
