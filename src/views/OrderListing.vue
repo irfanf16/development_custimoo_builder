@@ -56,9 +56,6 @@
             <th>
               Actions
             </th>
-            <th>
-              Actions
-            </th>
           </tr>
           <template v-if="orders.length !== 0">
             <template v-for="(order,index) in orders" >
