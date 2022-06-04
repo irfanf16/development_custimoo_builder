@@ -123,7 +123,7 @@
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-              <EditRosterAreaTab @open-add-to-locker="openAddToLocker" :productSizes="productSizes"/>
+              <EditRosterAreaTab @open-add-to-locker="openAddToLocker" :productSizes="productSizes" ref="edit-roster-area-tab"/>
             </div>
           </b-tab>
           <!--        </vuescroll>-->
@@ -171,6 +171,8 @@ export default class CustomizationTabs extends Vue {
   public showLoader = false
   public text_add_count = 0
   public set = false
+  public previous_tab='';
+  public ref = this.$refs as Record<any, any>
   private ops = {
     // vuescroll: {
     //   mode: 'native'
@@ -357,7 +359,12 @@ export default class CustomizationTabs extends Vue {
   }
 
   public setHideTab(index: string, value: boolean) {
+    if(this.previous_tab === 'teamHide'){
+      this.ref['edit-roster-area-tab'].updateText();
+    }
+
     this.$store.dispatch('setHideTab', {index: index, value: value})
+    this.previous_tab = index;
   }
 
   public fontsList(): void {

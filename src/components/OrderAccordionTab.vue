@@ -36,7 +36,7 @@
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in rosterDetails">
-              <div :key="key" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
+              <div :key="key" class="roster-row d-flex flex-wrap align-items-center justify-content-between" @click="updateText(key)">
                 <span class="name">{{ roster.text }}</span>
                 <span>{{ roster.number }}</span>
                 <span>{{ roster.size }}</span>
@@ -141,10 +141,11 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator'
+import {Component, Prop, Vue} from 'vue-property-decorator'
 
 @Component<OrderAccordion>({})
 export default class OrderAccordion extends Vue {
+  @Prop({required: true}) changeText: any
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   public customLogosExists = false;
@@ -179,6 +180,11 @@ export default class OrderAccordion extends Vue {
   get productModels(): Record<any, any> {
     return this.$store.getters.getProductModels
   }
+
+  public updateText (index:number) {
+      this.changeText(index);
+  }
+
 
 }
 </script>

@@ -12,7 +12,7 @@
     </div>
 
     <div>
-      <ConfirmOrderTab />
+      <ConfirmOrderTab :changeText="changeText" />
     </div>
     <div class="order-details-area">
       <div class="qty-area">
@@ -62,7 +62,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins} from 'vue-property-decorator'
+import {Component, Mixins, Prop} from 'vue-property-decorator'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
@@ -95,6 +95,7 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
 })
 
 export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction)  {
+  @Prop({required: true}) changeText: any
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>
