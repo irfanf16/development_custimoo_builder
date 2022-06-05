@@ -78,7 +78,6 @@
         <div class="align-right">
           <div class="qty">
             <b-form-input
-
               class="text-center" ref="myInputs"
               placeholder="0" v-model="roster.quantity"
             ></b-form-input>
@@ -102,11 +101,12 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
+import {Component, Prop, Vue, Watch, Mixins} from 'vue-property-decorator'
 import readXlsxFile from "read-excel-file";
 import {default as $} from "jquery";
 import {http} from "@/httpCommon";
 import {findIndex} from 'lodash';
+import ModalAction from "@/mixins/ModalAction";
 
 
 @Component<RosterDetails>({
@@ -117,7 +117,7 @@ import {findIndex} from 'lodash';
     this.fontsList()
   },
 })
-export default class RosterDetails extends Vue {
+export default class RosterDetails extends Mixins(ModalAction) {
   @Prop({required: true}) productSizes!: any
   private roster: any[] = []
   public fileData: Record<any, any>[] = []
@@ -148,6 +148,9 @@ export default class RosterDetails extends Vue {
   }
   get company(){
     return this.$store.getters.getCompany
+  }
+  get editCart(): Record<any, any> {
+    return this.$store.getters.getEditCart
   }
   get rosterFirstNameAndNumber(): string|null {
     let editing_roster_player_index = this.editing_roster_player_index
@@ -318,7 +321,13 @@ export default class RosterDetails extends Vue {
     const self = this;
     this.editRosterPlayer(0);
     setTimeout(function(){
-      self.$modal.hide('rostermodal')
+      if(self.editCart){
+        (self.$root.$refs as Record<any,any>).Order_Details.addToCart();
+        self.$modal.hide('rostermodal')
+        self.showVModal('cart-modal')
+      }else{
+        self.$modal.hide('rostermodal')
+      }
     },500);
   }
 

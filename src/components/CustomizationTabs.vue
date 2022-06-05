@@ -212,6 +212,9 @@ export default class CustomizationTabs extends Vue {
   @Prop({required: false, default:0}) tabIndexNew!: number
   public fontOptions: Record<any, any>[] = []
 
+  get maintabindex(){
+    return this.$store.getters.getMainTab
+  }
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
   }
