@@ -323,10 +323,10 @@ export default class RosterDetails extends Mixins(ModalAction) {
     setTimeout(function(){
       if(self.editCart){
         (self.$root.$refs as Record<any,any>).Order_Details.addToCart();
-        self.$modal.hide('rostermodal')
+        self.hideVModal('rostermodal')
         self.showVModal('cart-modal')
       }else{
-        self.$modal.hide('rostermodal')
+        self.hideVModal('rostermodal')
       }
     },500);
   }
