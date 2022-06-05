@@ -1,67 +1,71 @@
 <template>
   <div class="page-wrapper m-lg-4">
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif"/></div>
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <div v-else class="container-fluid bg-white">
       <div class="text-left">
         <h1 class="h3">Address Book</h1>
       </div>
-      <hr class="border border-secondary"/>
+      <hr class="border border-secondary" />
       <div class="container-fluid">
         <div class="row">
-          <div class="col-8">
-            <table v-if="!addresses">
+          <div class="col-12 col-md-4  col-lg-2  border-right">
+            <div class="col  my-4">
+              <router-link to="dashboard" class="btn btn-outline-secondary w-100">My Account</router-link>
+            </div>
+            <div class="col  my-4">
+              <button type="button" class="btn btn-outline-secondary w-100">My profile settings</button>
+            </div>
+            <div class="col  my-4">
+              <router-link to="address" class="btn btn-outline-secondary w-100">Address book</router-link>
+            </div>
+          </div>
+          <div class="col-12 col-md-8  col-lg-10">
+            <div class="d-flex justify-content-end my-2">
+              <router-link to="dashboard" class="btn btn-secondary light mx-2">Back</router-link>
+              <button class="btn btn-secondary text-nowrap mx-2" @click="addAddressModalShow">New Address</button>
+            </div>
+            <table class="mt-4" v-if="!addresses">
               <tr>
                 <td colspan="2">No addresses added yet</td>
               </tr>
             </table>
-            <table v-else>
-              <tr v-for="address in addresses" :key="address.id">
-                <td>
-                  <p>{{ address.first_name + ' ' + address.last_name}}</p>
-                  <p v-if="address.address1">{{ address.address1 }}</p>
-                  <p v-if="address.address2">{{ address.address2 }}</p>
-                  <p v-if="address.phone_number">{{ address.phone_number }}</p>
-                  <p>{{ address.city + ' ' + address.zip_code}}</p>
-                  <p>{{ address.country.name }}</p>
-                </td>
-                <td class="text-right">
-                  <button class="btn btn-success mx-2" @click="editAddressModalShow(address)">Edit</button>
-                  <button class="btn btn-success mx-2" @click="deleteAddress(address)" v-if="address.default != 1 || address.default != true">Delete</button>
-                  <button class="btn btn-secondary mx-2" v-else :disabled="true">Default</button>
-                </td>
-              </tr>
+            <table class="mt-4" v-else>
+              <thead class="bg-dark">
+                <tr>
+                  <td class="border-0 text-white font-weight-bold py-3">
+                    <p class="ml-2">Address</p>
+                  </td>
+                  <td class="border-0 text-white font-weight-bold py-3" style="width: 200px; max-width: 200px; word-wrap: break-word;">
+                    <p class="ml-2">Actions</p>
+                  </td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="address in addresses" :key="address.id">
+                  <td class="pl-2">
+                    <p class="h6">{{ address.first_name + ' ' + address.last_name }}</p>
+                    <p class="h6" v-if="address.address1">{{ address.address1 }}</p>
+                    <p class="h6" v-if="address.address2">{{ address.address2 }}</p>
+                    <p class="h6" v-if="address.phone_number">{{ address.phone_number }}</p>
+                    <p class="h6">{{ address.city + ' ' + address.zip_code }}</p>
+                    <p class="h6">{{ address.country.name }}</p>
+                  </td>
+                  <td class="text-center pl-2" style="width: 200px; max-width: 200px; word-wrap: break-word; vertical-align: middle;">
+                    <button class="btn btn-dark light mx-2" @click="editAddressModalShow(address)">Edit</button>
+                    <button class="btn btn-success mx-2" @click="deleteAddress(address)"
+                      v-if="address.default != 1 || address.default != true">Delete</button>
+                    <button class="btn btn-dark mx-2" v-else :disabled="true">Default</button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
-            <div class="row d-flex justify-content-between my-2">
-              <div class="col">
-                <router-link to="dashboard" class="btn btn-success w-50">Back</router-link>
-              </div>
-              <div class="col">
-                <button class="btn btn-success w-50 text-nowrap" @click="addAddressModalShow">New Address</button>
-              </div>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="row">
-              <div class="col my-2">
-                <router-link to="dashboard"  class="btn btn-outline-secondary w-50">My Account</router-link>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col my-2">
-                <button type="button" class="btn btn-outline-secondary w-50">My profile settings</button>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col my-2">
-                <router-link to="address" class="btn btn-outline-secondary w-50">Address book</router-link>
-              </div>
-            </div>
           </div>
         </div>
       </div>
-      <AddAddressModal ref="add-address-modal"  @actionAfterAddressSave="actionAfterAddressSave"  />
-      <EditAddressModal  ref="update-address-modal" @actionAfterAddressSave="actionAfterAddressSave"  />
-      <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes" name="delete-address" ref="delete-address"></confirm-modal>
+      <AddAddressModal ref="add-address-modal" @actionAfterAddressSave="actionAfterAddressSave" />
+      <EditAddressModal ref="update-address-modal" @actionAfterAddressSave="actionAfterAddressSave" />
+      <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes"
+        name="delete-address" ref="delete-address"></confirm-modal>
     </div>
 
   </div>
@@ -69,8 +73,8 @@
 
 <script lang="ts">
 
-import {Component, Mixins, Vue} from 'vue-property-decorator'
-import {http} from "@/httpCommon";
+import { Component, Mixins, Vue } from 'vue-property-decorator'
+import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import AddAddressModal from "@/components/AddAddressModal.vue";
@@ -109,11 +113,11 @@ export default class Addresses extends Mixins(ErrorMessages) {
       });
   }
 
-  addAddressModalShow():void{
+  addAddressModalShow(): void {
     this.ref['add-address-modal'].show()
   }
 
-  editAddressModalShow(address:Record<any,any>):void{
+  editAddressModalShow(address: Record<any, any>): void {
     this.ref['update-address-modal'].updateForm(address);
     this.ref['update-address-modal'].show()
   }
@@ -122,25 +126,25 @@ export default class Addresses extends Mixins(ErrorMessages) {
   //   this.ref['delete-address'].showConfirm()
   // }
 
-  async deleteAddress(address:Record<any,any>){
+  async deleteAddress(address: Record<any, any>) {
     const response = await this.ref['delete-address'].showConfirm();
     //console.log(address);
-    if(response){
+    if (response) {
       const url = `addresses/${address.id}`
-      http.delete(url).then(async (response:Record<any,any>) => {
+      http.delete(url).then(async (response: Record<any, any>) => {
         this.getAddressDetails();
         this.showToast(response.data.message, 'SUCCESS')
-      }).catch((e:any)=>{
+      }).catch((e: any) => {
         //console.log(e);
         this.showError(e);
         this.ref['cartModal'].hide();
       });
     }
   }
-  async actionAfterAddressSave(){
-    if(this.$route.query && this.$route.query.cart == 1){
-        this.$store.commit('SHOW_CART_MODAL',true);
-        this.$router.push({name:'Home'})
+  async actionAfterAddressSave() {
+    if (this.$route.query && this.$route.query.cart == 1) {
+      this.$store.commit('SHOW_CART_MODAL', true);
+      this.$router.push({ name: 'Home' })
     }
 
     await this.getAddressDetails();
@@ -156,10 +160,10 @@ table {
   width: 100%;
 }
 
-td, th {
+td,
+th {
   border: 1px solid #dddddd;
   text-align: left;
   padding: 8px;
 }
-
 </style>
