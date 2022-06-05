@@ -593,7 +593,6 @@ const ProductAttributes:Module<any, any> = {
 
       locker_texts.forEach((text: Record<any, any>, index: number) => {
         const add_text = {text: text, index: index, prd_id : payload.product_id}
-        console.log(add_text)
         this.dispatch('setCustomTexts', add_text)
       })
     },
