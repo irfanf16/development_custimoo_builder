@@ -55,7 +55,7 @@
     </table>
 
     <div class="roster-row mb-2 flex justify-content-end gap-1 button-holder p-0">
-      <button @click="addPlayer(roster)" class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
+      <button @click="addPlayer" class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
         <BIconPlus />
       </button>
 
@@ -127,7 +127,7 @@ export default class RosterTableMobile extends Vue {
     return this.$store.getters.getCompany
   }
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
   get customText():Record<any, any>[]{
     return this.$store.getters.getCustomTexts();
@@ -136,8 +136,8 @@ export default class RosterTableMobile extends Vue {
     return this.$store.getters.getEyeIndex;
   }
 
-  public addPlayer(obj:Record<any, any>) {
-    this.$emit('addPlayer');
+  public addPlayer() {
+    this.$emit('addPlayer', this.rosterDetails.length);
   }
   public saveRoster(id:number){
     http.post('update/roster', {id:id, roster: this.rosterDetails}).then((res) => {

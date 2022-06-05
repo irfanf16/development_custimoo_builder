@@ -44,7 +44,7 @@ const ProductAttributes:Module<any, any> = {
     groupColors: {},
     svgGroups: [],
     currentColorApplied: 'group',
-    rosterDetails: [],
+    rosterDetails: {},
     productionSVGs: {},
     lockerColors:[],
     logoTabIndex: 0,
@@ -540,9 +540,10 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     rosterDetails(state: Record<any, any>, rosterDetail: Record<any, any>) {
-      if(rosterDetail){
-        Vue.set(state.rosterDetails, rosterDetail.index, rosterDetail.roster)
+      if(!state.rosterDetails[rosterDetail.pid]){
+        Vue.set(state.rosterDetails, rosterDetail.pid, [])
       }
+      Vue.set(state.rosterDetails[rosterDetail.pid], rosterDetail.index , rosterDetail.roster)
     },
     updateAllRoster(state: Record<any, any>, rosterDetail: [Record<any, any>]){
       state.rosterDetails = rosterDetail
@@ -603,11 +604,11 @@ const ProductAttributes:Module<any, any> = {
       state.groupColors = payload;
     },
     REMOVE_ROSTER(state:Record<any, any>, payload:number){
-      state.rosterDetails.splice(payload, 1);
+      state.rosterDetails[state.selectedPrdId].splice(payload, 1);
     },
     UPDATE_ROSTER(state:Record<any, any>, payload:Record<any, any>){
       if (payload){
-        state.rosterDetails = payload;
+        state.rosterDetails[state.selectedPrdId] = payload;
       }
     },
     OVERRIDE_ROSTER(state:Record<any, any>){
@@ -673,10 +674,15 @@ const ProductAttributes:Module<any, any> = {
         cartItemId: ''
       }
 
-      state.rosterDetails = []
+      state.rosterDetails = {}
 
       const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
-      state.rosterDetails.push(roster_detail_default_obj)
+      state.products.forEach((product:any) => {
+        if(!state.rosterDetails[product.id]) {
+          Vue.set(state.rosterDetails, product.id, [])
+          Vue.set(state.rosterDetails[product.id], 0, roster_detail_default_obj)
+        }
+      })
 
       const selectedProduct = state.products[state.selectedIndex];
       if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
@@ -1026,8 +1032,11 @@ const ProductAttributes:Module<any, any> = {
     getSvgGroups: state => {
       return state.svgGroups
     },
-    getRosterDetails: state => {
-      return state.rosterDetails
+    getRosterDetails: state => (prd_id = state.selectedPrdId) => {
+      if(!state.rosterDetails[prd_id]) {
+        return []
+      }
+      return state.rosterDetails[prd_id]
     },
     getProductionSVGs: state => {
       return state.productionSVGs

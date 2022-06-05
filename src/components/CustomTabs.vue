@@ -146,6 +146,7 @@ import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
+import {getRosterDetailDefaultObject} from "@/helpers/Helpers";
 
 @Component<CustomTabs>({
   components: {
@@ -269,15 +270,17 @@ export default class CustomTabs extends Vue {
     }
   }
 
-  public rosterDetailsInit() {
-    let payload = {
-      text: '',
-      number: '',
-      size: this.sizeOptions[0] ? this.sizeOptions[0].value : '',
-      quantity: 1,
-      information: ''
+  public rosterDetailsInit(index = 0, p_id = 0) {
+    let payload = getRosterDetailDefaultObject()
+    if(this.sizeOptions.length > 0) {
+      payload.size = this.sizeOptions[0].text;
+      payload.code = this.sizeOptions[0].value;
     }
-    this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
+    let product_id = this.selectedProduct.id
+    if (p_id){
+      product_id = p_id
+    }
+    this.$store.dispatch('setRosterDetails', { pid : product_id, index: index, roster: payload })
   }
 
   get productSizes(){
