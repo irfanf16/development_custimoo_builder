@@ -23,6 +23,7 @@
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
                              :multiDrag="true"
+                             handle=".image-holder"
                              v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}"
                              @update="lockerProductsChanged($event)">
                     <template v-for="(product, ind) in room.product">
