@@ -56,7 +56,7 @@
       <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
-      <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details"/>
+      <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details" :changeText="changeText"/>
     </div>
   </div>
 </template>
@@ -148,6 +148,14 @@ export default class EditRosterAreaTab extends Vue {
     const roster_details = self.rosterDetails;
     if(roster_details.length){
       self.ref['roster-detail'].changeText(roster_details[0].text,roster_details[0].number,0)
+    }
+  }
+
+  public changeText(index:number){
+    const self = this;
+    const roster_details = self.rosterDetails;
+    if(roster_details.length){
+      self.ref['roster-detail'].changeText(roster_details[index].text,roster_details[index].number,index)
     }
   }
 

@@ -1,11 +1,11 @@
 <template>
     <div class="confirm-order-area">
-      <OrderAccordionTab />
+      <OrderAccordionTab :changeText="changeText"/>
     </div>
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from 'vue-property-decorator'
+import {Component, Prop, Vue} from 'vue-property-decorator'
     import OrderAccordionTab from '@/components/OrderAccordionTab.vue'
     import CustomizationPreview from '@/components/CustomizationPreview.vue'
     import OrderDetailsTab from '@/components/OrderDetailsTab.vue'
@@ -29,6 +29,7 @@
     })
 
     export default class ConfirmOrderTab extends Vue {
+      @Prop({required: true}) changeText: any
         public selected= null
       public ref = this.$refs as Record<any, any>
         public options= [

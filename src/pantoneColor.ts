@@ -16,16 +16,24 @@ const get_rgbObject = (hexColor: string) => {
   return rgbObject
 }
 
-const pantoneRGBList = pantones.map((color: Record<any, any>) => get_rgbObject(color.hex))
+let pantoneRGBList = pantones.map((color: Record<any, any>) => get_rgbObject(color.hex))
 
-const getClosestColor = (inputHex: string) => {
+const getClosestColor = (inputHex: string, pantonesArray= []) => {
+
+  let sample_pantones = pantones;
+  if(pantonesArray.length > 0){
+    sample_pantones = pantonesArray
+    pantoneRGBList = null
+    pantoneRGBList = pantonesArray.map((color: Record<any, any>) => get_rgbObject(color.hex))
+  }
+
   const inputRGB = get_rgbObject(inputHex)
   const nearestPantone = diff.closest(inputRGB,pantoneRGBList)
   const nearestPantoneHex = rgbHex(nearestPantone.R,nearestPantone.G,nearestPantone.B)
-  const indexInPantonesList = pantones.findIndex((x: Record<any, any>) => {
+  const indexInPantonesList = sample_pantones.findIndex((x: Record<any, any>) => {
     return x.hex.toLowerCase() == `#${nearestPantoneHex.toLowerCase()}`
   })
-  const nearestPantoneObject =  pantones[indexInPantonesList]
+  const nearestPantoneObject =  sample_pantones[indexInPantonesList]
   return nearestPantoneObject
 }
 
