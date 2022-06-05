@@ -116,7 +116,8 @@
               </header>
               <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
-                <b-button variant="outline-secondary" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
+                <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
+                <b-button variant="outline-secondary" v-if="usingColorLogos && imageColors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
               </div>
               <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem" v-if="customer"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
@@ -305,7 +306,7 @@
 
 <script lang="ts">
 
-import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
@@ -510,6 +511,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private get lockerIndex (){
     return this.$store.getters.getLockerTabsIndex
   }
+
+  get usingColorLogos() : [Record<any, any>] {
+    return this.$store.getters.getUsingColorLogos;
+  }
+
   private get lockerProductIndex (){
     return this.$store.getters.getActiveLockerProduct
   }
@@ -1422,7 +1428,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async shareDesign(){
-    if (this.editStatus || this.lockerIndex !== undefined || this.undoItems.length > 0 || this.redoitems.length > 0){
+    if (this.editStatus || this.lockerIndex !== undefined || this.lockerProductIndex !== undefined && (this.undoItems.length > 0 || this.redoitems.length > 0)){
       this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
       this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
       this.hideVModal('locker-modal')
