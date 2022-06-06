@@ -102,6 +102,7 @@ const ProductAttributes:Module<any, any> = {
       cartId: 0,
       cartItemId: ''
     },
+    revertRosterBool:false,
     hideSaveLockerButton: false
   },
   mutations: {
@@ -893,6 +894,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_HIDE_SAVE_LOCKER_BUTTON(state:Record<any, any>, payload){
       state.hideSaveLockerButton = payload
+    },
+    SET_REVERT_ROSTER_BOOL(state:Record<any, any>, payload){
+      state.revertRosterBool = payload;
     }
   },
   getters: {
@@ -1091,6 +1095,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getHideSaveLockerButton(state:Record<any,any>){
       return state.hideSaveLockerButton;
+    },
+    getRevertRosterBool(state:Record<any,any>){
+      return state.revertRosterBool;
     }
   },
   actions: {
@@ -1378,6 +1385,9 @@ const ProductAttributes:Module<any, any> = {
         return res
       })
     },
+    setRevertRosterBOOL({commit},payload){
+      commit('SET_REVERT_ROSTER_BOOL',payload);
+    }
   }
 }
 export default ProductAttributes;

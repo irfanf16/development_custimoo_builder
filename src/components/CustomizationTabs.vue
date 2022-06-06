@@ -363,11 +363,15 @@ export default class CustomizationTabs extends Vue {
 
   public setHideTab(index: string, value: boolean) {
     if(this.previous_tab === 'teamHide'){
-      this.ref['edit-roster-area-tab'].updateText();
+      this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
     }
 
     this.$store.dispatch('setHideTab', {index: index, value: value})
     this.previous_tab = index;
+  }
+
+  public renderText(){
+    this.ref['edit-roster-area-tab'].updateText();
   }
 
   public fontsList(): void {
