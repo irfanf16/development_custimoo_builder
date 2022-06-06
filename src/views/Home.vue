@@ -677,10 +677,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   @Watch('revertRosterBool')
   revertRosterBoolChanged(){
     const self = this;
-    console.log('checking')
     if(this.revertRosterBool){
-      console.log('value')
-      console.log(this.revertRosterBool)
       self.ref['customization-tab']?.renderText();
     }
     self.$store.commit('SET_REVERT_ROSTER_BOOL',false)
