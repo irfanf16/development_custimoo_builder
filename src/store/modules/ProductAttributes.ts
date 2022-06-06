@@ -549,16 +549,16 @@ const ProductAttributes:Module<any, any> = {
       state.rosterDetails = rosterDetail
     },
     rosterDetailAttribute(state: Record<any, any>, rosterDetailAttribute: Record<any, any>) {
-      if(state.rosterDetails.length > 0) {
-        Vue.set(state.rosterDetails[rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)
+      if(state.rosterDetails[state.selectedPrdId].length > 0) {
+        Vue.set(state.rosterDetails[state.selectedPrdId][rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)
       } else {
         const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
-        state.rosterDetails.push(roster_detail_default_obj)
+        state.rosterDetails[state.selectedPrdId].push(roster_detail_default_obj)
       }
     },
     rosterDetailAttributeWithoutTrigger(state: Record<any, any>, rosterDetailAttribute: Record<any, any>) {
-      if(state.rosterDetails.length > 0) {
-        state.rosterDetails[rosterDetailAttribute.index][rosterDetailAttribute.attribute] = rosterDetailAttribute.value
+      if(state.rosterDetails[state.selectedPrdId].length > 0) {
+        state.rosterDetails[state.selectedPrdId][rosterDetailAttribute.index][rosterDetailAttribute.attribute] = rosterDetailAttribute.value
       }
     },
     productionSVGs(state: Record<any, any>, productionSvg: Record<any, any>) {
