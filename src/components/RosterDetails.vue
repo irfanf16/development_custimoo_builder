@@ -221,7 +221,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       }, 1000) // closing modal after add to cart
     } // if quantity is not zero
     else {
-      this.showToast("Qunatity must be atleast 1", "error")
+      this.showToast("Quantity must be atleast 1", "error")
     } // toast message if quantity is zero
   }
 
