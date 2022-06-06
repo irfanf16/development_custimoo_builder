@@ -351,7 +351,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public close() {
     this.editRosterPlayer(0);
     setTimeout(() =>{
-      if(this.editCart){
+      if(this.editCart.cartId && this.editCart.cartItemId){
         (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
         this.hideVModal('rostermodal')
         this.showVModal('cart-modal')
