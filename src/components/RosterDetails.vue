@@ -119,11 +119,9 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import readXlsxFile from "read-excel-file";
-import { default as $ } from "jquery";
-import { http } from "@/httpCommon";
 import { findIndex } from 'lodash';
 import ErrorMessages from '@/mixins/ErrorMessages';
+import ModalAction from "@/mixins/ModalAction";
 
 
 @Component<RosterDetails>({
@@ -134,7 +132,7 @@ import ErrorMessages from '@/mixins/ErrorMessages';
     this.fontsList()
   },
 })
-export default class RosterDetails extends Mixins(ErrorMessages) {
+export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   @Prop({ required: true }) productSizes!: any
   private roster: any[] = []
   public fileData: Record<any, any>[] = []
@@ -165,6 +163,9 @@ export default class RosterDetails extends Mixins(ErrorMessages) {
   }
   get company() {
     return this.$store.getters.getCompany
+  }
+  get editCart(): Record<any, any> {
+    return this.$store.getters.getEditCart
   }
   get rosterFirstNameAndNumber(): string | null {
     let editing_roster_player_index = this.editing_roster_player_index
@@ -348,11 +349,16 @@ export default class RosterDetails extends Mixins(ErrorMessages) {
     }
   }
   public close() {
-    const self = this;
     this.editRosterPlayer(0);
-    setTimeout(function () {
-      self.$modal.hide('rostermodal')
-    }, 500);
+    setTimeout(() =>{
+      if(this.editCart){
+        (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
+        this.hideVModal('rostermodal')
+        this.showVModal('cart-modal')
+      }else{
+        this.hideVModal('rostermodal')
+      }
+    },500);
   }
 
   public fontsList(): void {

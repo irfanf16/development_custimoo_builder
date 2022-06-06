@@ -10,7 +10,7 @@
     </div>
 
     <div class="theme-scroll" style="height: calc(100% - 65px); overflow-y: auto; padding-bottom: 20px">
-      <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+      <div class="loader relative" v-if="viewLoader || $root.$refs.Order_Details.isLoading"><img src="../../src/assets/images/loading.gif" /></div>
       <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
         <thead class="bg-light">
           <tr>
@@ -36,11 +36,12 @@
                   @click="editCartItem(factory_product, cart_item.id, true)">{{ factory_product.product_name }}</a>
               </td>
               <td>
-                <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.front_image"
-                  alt="Front Design"></b-img>
-                <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.back_image"
-                  alt="Back Design"></b-img>
-
+                <div class="d-inline-flex gap-1">
+                  <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.front_image"
+                         alt="Front Design"></b-img>
+                  <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.back_image"
+                         alt="Back Design"></b-img>
+                </div>
               </td>
               <td>
                 <a style="font-weight: bold; cursor:pointer; color:blue;text-decoration: underline" @click="editCartItem(factory_product, cart_item.id, false)">
@@ -145,6 +146,7 @@ import ModalAction from "@/mixins/ModalAction";
   }
 })
 export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
+  @Prop({ default: 3, required: true }) mainTotalTabs!: number
 
   public viewLoader = false;
   private userData = this.$store.getters.getCustomer;
@@ -296,9 +298,10 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       await this.$store.dispatch('setProductType', { prd_type: locker_product_type, value: true });
       await this.$store.dispatch('setEditCart', { key: 'cartId', value: cart_id });
       await this.$store.dispatch('setEditCart', { key: 'cartItemId', value: cart_item.id });
-      this.$modal.hide('cart-modal');
+      this.hideVModal('cart-modal')
       if (!edit) {
-        this.$modal.show('rostermodal');
+        await this.$store.dispatch('setTabMain', {value: (this.mainTotalTabs + 1)})
+        this.showVModal('rostermodal');
       }
     }).catch(err => {
       console.error("Error while getting order detail", err)
