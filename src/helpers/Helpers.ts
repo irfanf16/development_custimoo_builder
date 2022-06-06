@@ -191,7 +191,8 @@ const getSelectedProductPantones = () => {
     if(key == 0){
       const colors = JSON.parse(product_colors.json_data)
       colors.forEach((color: any) => {
-        let pantone = color.name
+        //let pantone = color.name
+        let pantone = ''
         if(color.pantone){
           pantone = color.pantone
         }
