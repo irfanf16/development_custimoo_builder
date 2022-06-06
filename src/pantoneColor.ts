@@ -25,6 +25,8 @@ const getClosestColor = (inputHex: string, pantonesArray= []) => {
     sample_pantones = pantonesArray
     pantoneRGBList = null
     pantoneRGBList = pantonesArray.map((color: Record<any, any>) => get_rgbObject(color.hex))
+  }else{
+    pantoneRGBList = pantones.map((color: Record<any, any>) => get_rgbObject(color.hex))
   }
 
   const inputRGB = get_rgbObject(inputHex)

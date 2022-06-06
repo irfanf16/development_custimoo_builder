@@ -175,7 +175,6 @@ const processColorsCustom = (colors: []) => {
   const deletedCount = uniqueColors.length - 4
   uniqueColors.splice(4, deletedCount)
   const selectProductPantonesList = getSelectedProductPantones()
-  console.log('selectProductPantonesList',selectProductPantonesList)
   uniqueColors.forEach((color: string) => {
     const pantoneColor = getClosestColor(color, selectProductPantonesList);
     //const pantoneColor = getClosestColor(color);
