@@ -210,7 +210,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   }
 
   public addPlayer(obj: Record<any, any>) {
-    this.$emit('addPlayer');
+    this.$emit('addPlayer', this.rosterDetails.length);
   }
 
   private addToCart() {
