@@ -119,7 +119,7 @@
                 <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
                 <b-button variant="outline-secondary" v-if="usingColorLogos && imageColors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
               </div>
-              <CartModal ref="cartModal"  @deleteCartItem="deleteCartItem" v-if="customer"/>
+              <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
               <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url"/>
@@ -785,7 +785,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return  this.$store.getters.getCurrentStyleIndex;
   }
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors

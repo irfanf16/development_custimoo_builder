@@ -113,7 +113,7 @@ export default class OrderAccordion extends Vue {
   public customLogosExists = false;
 
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
 
   get selectedProduct(): Record<any, any> {

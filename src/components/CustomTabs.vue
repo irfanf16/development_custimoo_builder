@@ -244,7 +244,7 @@ export default class CustomTabs extends Vue {
   }
 
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
 
   public async setActionBeforeLogin(type: string) {
