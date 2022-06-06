@@ -489,7 +489,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return  this.$store.getters.getSelectedDesignId;
   }
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors

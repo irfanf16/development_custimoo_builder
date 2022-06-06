@@ -75,7 +75,7 @@ export default class EditRosterArea extends Vue {
 
 
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
