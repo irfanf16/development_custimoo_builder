@@ -174,13 +174,37 @@ const processColorsCustom = (colors: []) => {
   })
   const deletedCount = uniqueColors.length - 4
   uniqueColors.splice(4, deletedCount)
+  const selectProductPantonesList = getSelectedProductPantones()
+  console.log('selectProductPantonesList',selectProductPantonesList)
   uniqueColors.forEach((color: string) => {
-    const pantoneColor = getClosestColor(color)
+    const pantoneColor = getClosestColor(color, selectProductPantonesList);
+    //const pantoneColor = getClosestColor(color);
     imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
   })
   return imageColors;
 
 }
+
+const getSelectedProductPantones = () => {
+  const productPantones = []
+  const selectedProduct = Store.getters.getSelectedProduct;
+    selectedProduct.colors.forEach((product_colors: any, key: number) => {
+    if(key == 0){
+      const colors = JSON.parse(product_colors.json_data)
+      colors.forEach((color: any) => {
+        let pantone = color.name
+        if(color.pantone){
+          pantone = color.pantone
+        }
+        productPantones.push({pantone : pantone, name: color.name, hex: color.value});
+      })
+    }
+  })
+  return productPantones;
+}
+
+
+
 const sortTextsArray = (product_names: any) => {
   return product_names.sort((a:any,b:any)=> (a.type > b.type ? 1 : -1));
 
@@ -615,5 +639,5 @@ export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomTexts
+  getUploadedLogoObject, initCustomTexts, getSelectedProductPantones
 };

@@ -325,8 +325,7 @@ export default class LogoPlacementTabs extends Vue {
         this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
       }
     } else {
-      await this.getColors()
-      await this.getSelectedProductPantones();
+
 
       if (this.imageColors.length ==0 && this.initialExtractedColors.length){
         this.$store.commit('SET_LOGO_COLORS', this.initialExtractedColors)
@@ -335,14 +334,7 @@ export default class LogoPlacementTabs extends Vue {
       this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
       for (let i = 0; i < 4; i++) {
         if(this.imageColors[i]) {
-          if(this.imageColors[i].hex && this.productPantones.length > 0){
-            let pantoneColor = getClosestColor((this.imageColors[i].hex).substring(1), this.productPantones)
-            this.$store.dispatch('setDefaultColor', { index: i, color: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
-          }else{
-            this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone, name: this.imageColors[i].name})
-          }
-
-         // this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone, name: this.imageColors[i].name})
+          this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone, name: this.imageColors[i].name})
         } else {
           this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
         }
@@ -388,23 +380,12 @@ export default class LogoPlacementTabs extends Vue {
       this.$store.dispatch("SET_LOGO_COLORS", imageColors);
       this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
       imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-        if(imageColor.hex){
-          let pantoneColor = getClosestColor((imageColor.hex).substring(1), this.productPantones)
-          this.$store.dispatch('setDefaultColor', {
-            index: index,
-            color: pantoneColor.hex,
-            pantone: pantoneColor.pantone,
-            name: pantoneColor.name
-          })
-        }else{
-          this.$store.dispatch('setDefaultColor', {
-            index: index,
-            color: imageColor.hex,
-            pantone: imageColor.pantone,
-            name: imageColor.name
-          })
-        }
-
+        this.$store.dispatch('setDefaultColor', {
+          index: index,
+          color: imageColor.hex,
+          pantone: imageColor.pantone,
+          name: imageColor.name
+        })
       })
     }
   }
@@ -462,19 +443,7 @@ export default class LogoPlacementTabs extends Vue {
     this.productColors = this.productColors.concat(this.lockerColors)
   }
 
-  public getSelectedProductPantones() {
-    this.productPantones = []
-    this.selectedProduct.colors.forEach((product_colors: any, key: number) => {
-      let colors = JSON.parse(product_colors.json_data)
-      colors.forEach((color: any) => {
-        let pantone = color.name
-        if(color.pantone){
-          pantone = color.pantone
-        }
-        this.productPantones.push({pantone : pantone, name: color.name, hex: color.value});
-      })
-    })
-  }
+
 
   public selectLogoColor(index: number, imageColor: Record<any, any>){
     if(index==this.selectedSwatchIndex) {

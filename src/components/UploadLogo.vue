@@ -108,7 +108,14 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
-import { fileToBase64, getLogoObject, getUploadedLogoObject, setCustomLogo, setLogoSettings } from '../helpers/Helpers'
+import {
+  fileToBase64,
+  getLogoObject,
+  getSelectedProductPantones,
+  getUploadedLogoObject,
+  setCustomLogo,
+  setLogoSettings
+} from '../helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import ModalAction from "@/mixins/ModalAction";
 
@@ -330,10 +337,10 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     })
     let deletedCount = uniqueColors.length - 4
     uniqueColors.splice(4, deletedCount)
-
+    const selectProductPantonesList = getSelectedProductPantones()
     uniqueColors.forEach((color: string) => {
-     // console.log(color)
-      let pantoneColor = getClosestColor(color)
+    
+      let pantoneColor = getClosestColor(color, selectProductPantonesList)
       //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
