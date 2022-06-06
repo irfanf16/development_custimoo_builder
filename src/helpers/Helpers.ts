@@ -14,7 +14,7 @@ const getLogoSettingsObject = () => {
     product_style_id: null,
     rotation: 0,
     width: 100,
-    height: 0,
+    height: 100,
     name_of_placement: "chest",
     side: "front",
     x_axis: 300,
