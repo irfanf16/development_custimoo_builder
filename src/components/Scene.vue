@@ -1693,7 +1693,7 @@ export default class Scene extends Vue {
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
       fabric.Image.fromURL(logoUrl + '?nocache=' + Math.random().toString(36).slice(2, -1), async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
-        img.scaleToHeight(this.canvasWidth / this.mainCanvasWidth * logo.height as number)
+        img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
         img.set({
           left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
           top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
