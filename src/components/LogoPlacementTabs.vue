@@ -335,7 +335,7 @@ export default class LogoPlacementTabs extends Vue {
       this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
       for (let i = 0; i < 4; i++) {
         if(this.imageColors[i]) {
-          if(this.imageColors[i].hex){
+          if(this.imageColors[i].hex && this.productPantones.length > 0){
             let pantoneColor = getClosestColor((this.imageColors[i].hex).substring(1), this.productPantones)
             this.$store.dispatch('setDefaultColor', { index: i, color: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
           }else{
