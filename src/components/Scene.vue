@@ -487,8 +487,9 @@ export default class Scene extends Vue {
         left: this.canvasWidth / this.mainCanvasWidth * item.x_axis,
         top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
       })
-      object.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
-      object.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
+      let multiplyBy = object.text? 1 : this.canvasWidth / this.mainCanvasWidth
+      object.scaleX = item.scaleX * multiplyBy
+      object.scaleY = item.scaleY * multiplyBy
       if (otherSideObject) {
         const left = otherSideObject.left
         const top = otherSideObject.top
@@ -497,8 +498,8 @@ export default class Scene extends Vue {
           left: left,
           top: top
         })
-        otherSideObject.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
-        otherSideObject.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
+        otherSideObject.scaleX = item.scaleX * multiplyBy
+        otherSideObject.scaleY = item.scaleY * multiplyBy
       }
     } else if (item.action == 'rotate') {
       object.center()
@@ -1692,7 +1693,7 @@ export default class Scene extends Vue {
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
       fabric.Image.fromURL(logoUrl + '?nocache=' + Math.random().toString(36).slice(2, -1), async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
-        img.scaleToWidth(this.canvasWidth / this.mainCanvasWidth * logo.width as number)
+        img.scaleToHeight(this.canvasWidth / this.mainCanvasWidth * logo.height as number)
         img.set({
           left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
           top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
