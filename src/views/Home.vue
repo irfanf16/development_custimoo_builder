@@ -950,6 +950,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.showLoader = false
         this.showToast(res.data.message, 'SUCCESS')
         this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
+        this.retrieveProducts();
       }else{
         this.showError(res)
         this.showLoader = false
