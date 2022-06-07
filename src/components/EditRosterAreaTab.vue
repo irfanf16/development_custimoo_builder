@@ -11,6 +11,7 @@
            height="auto"
            :reset="true"
            :shiftY="0"
+           @opened="$emit('setRosterOpen', true)"
            name="rostermodal" class="roster-modal" size="xl"
              footer-class="hide-modal-footer d-none"
           @closed="close"
