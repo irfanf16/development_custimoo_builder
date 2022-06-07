@@ -105,7 +105,8 @@
     </div>
 
     <div class="d-flex justify-content-center mt-3">
-      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"
+<!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
+      <button v-if="!isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"
         :disabled="canvasImage.scene == null">
         Add to Cart
       </button>
@@ -154,6 +155,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public fontsColors: any[] = []
   public fontOptions: Record<any, any>[] = []
   public editing_roster_player_index = 0;
+  public isLoading = false;
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -214,13 +216,16 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   }
 
   private addToCart() {
+    this.isLoading = true;
     if (!this.rosterDetails.some(el => el.quantity == 0)) {
       (this.$root.$refs as Record<any, any>).Order_Details.addToCart();
       setTimeout(() => {
         this.close();
+        this.isLoading = false
       }, 1000) // closing modal after add to cart
     } // if quantity is not zero
     else {
+      this.isLoading = false
       this.showToast("Quantity must be atleast 1", "error")
     } // toast message if quantity is zero
   }

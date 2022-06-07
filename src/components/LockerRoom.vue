@@ -658,7 +658,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       document.execCommand('copy');
       this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
     } catch (err) {
-      alert('Oops, unable to copy');
+      this.showToast('Oops, unable to copy.', 'ERROR');
     }
   }
 
