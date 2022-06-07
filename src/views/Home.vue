@@ -214,7 +214,7 @@
                 </div>
               </div>
               <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
-                <b-button v-if="tabIndex > 0" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
+                <b-button :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                 <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= (mainTotalTabs-1)) || (!hideColorSection && tabIndex <= mainTotalTabs)">Next</b-button>
                 <template v-else>
                   <template v-if="isCustomerAuthenticated">
