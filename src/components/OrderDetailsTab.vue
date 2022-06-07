@@ -1,7 +1,8 @@
 <template>
   <div>
     <LoginForm ref="loginModal"   />
-    <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
+<!--    <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">-->
+    <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="false">
       <b-input-group class="w-100">
         <b-form-input ref="shared_url_link" class="w-100" v-model="shared_url" ></b-form-input>
       </b-input-group>
