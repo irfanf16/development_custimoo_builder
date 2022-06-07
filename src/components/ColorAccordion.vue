@@ -144,12 +144,12 @@ export default class ColorAccordion extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantoneColor = getClosestColor(color.hex)
+    let pantoneColor = getClosestColor(color.hex) // this is sub-menu other tab of color tab in menu
     this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
   }
 
   public changePantoneColor() {
-    let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
+   let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
       this.pantoneMessage = ''

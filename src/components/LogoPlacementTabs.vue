@@ -319,8 +319,7 @@ export default class LogoPlacementTabs extends Vue {
   async  useLogoColors() {
     this.logoColorUsed = true
     if(this.usingColorLogos) {
-      console.log('using')
-      /*this.$store.commit('SET_LOGO_COLORS', [])*/
+     /*this.$store.commit('SET_LOGO_COLORS', [])*/
       for (let i = 0; i < 4; i++) {
         this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
       }

@@ -21,7 +21,7 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getProductLogoSetting } from "@/helpers/Helpers";
+import {getProductLogoSetting, getSelectedProductPantones} from "@/helpers/Helpers";
 
 @Component<Scene>({
   async mounted() {
@@ -704,7 +704,12 @@ export default class Scene extends Vue {
               }
             }
             if (!Object.keys(changeColor).length) {
-              const closestColor = getClosestColor('#000000')
+              let pantone_product_id = null;
+              if(this.product_id){
+                pantone_product_id = this.product_id;
+              }
+              const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
+              const closestColor = getClosestColor('#000000', selectProductPantonesList)
               changeColor = { value: closestColor.hex, name: closestColor.name, pantone: closestColor.pantone }
             }
             this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
@@ -760,7 +765,12 @@ export default class Scene extends Vue {
           if (item.fill.includes('rgb')) {
             item.fill = rgbHex(item.fill)
           }
-          const pantoneColor = getClosestColor(item.fill)
+          let pantone_product_id = null;
+          if(this.product_id){
+            pantone_product_id = this.product_id;
+          }
+          const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
+          const pantoneColor = getClosestColor(item.fill, selectProductPantonesList)
           this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
         }
       }
@@ -778,7 +788,13 @@ export default class Scene extends Vue {
             if (item.fill.includes('rgb')) {
               item.fill = rgbHex(item.fill)
             }
-            const pantoneColor = getClosestColor(item.fill)
+
+            let pantone_product_id = null;
+            if(this.product_id){
+              pantone_product_id = this.product_id;
+            }
+            const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
+            const pantoneColor = getClosestColor(item.fill, selectProductPantonesList)
             this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
           }
         }
