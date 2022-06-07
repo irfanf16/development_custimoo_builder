@@ -470,7 +470,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public shared_link = ''
   public generate_share_url = false
   public extractedcolorclass = ""
-  public is_manula_reset = false
   private isFront = true;
   private showOtherTab = false
   public showOtherColors = false
@@ -950,8 +949,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       if (res.status == 201){
         this.showLoader = false
         this.showToast(res.data.message, 'SUCCESS')
-        this.is_manula_reset = true;
-        this.resetStore();
         this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
         this.retrieveProducts();
       }else{
@@ -1132,12 +1129,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public async resetStore(){
-    let ok = false;
-    if(this.is_manula_reset == false){
-       ok = await this.ref['reset-changes'].showConfirm()
-    }
 
-    if (ok || this.is_manula_reset) {
+       const ok = await this.ref['reset-changes'].showConfirm()
+
+    if (ok) {
       if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
         await this.retrieveProducts()
         this.$store.dispatch('setTabMain',{value: 0})
@@ -1154,7 +1149,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.$store.dispatch('SET_LOGO_COLORS', [])
         this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
       }
-      this.is_manula_reset = false
+
     }
 
     if(this.mobileScreen){
