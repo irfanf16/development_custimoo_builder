@@ -1855,7 +1855,7 @@ export default class Scene extends Vue {
         lockScalingFlip: true,
         padding: 15,
         cornerSize: 30,
-        fontSize: self.canvasHeight / self.mainCanvasHeight * text.width
+        fontSize: self.canvasHeight / self.mainCanvasHeight * text.height
       })
 
       if (text.scaleX && text.scaleY) {
