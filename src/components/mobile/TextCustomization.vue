@@ -11,7 +11,7 @@
               Additional Text # {{ customTexts[customTextIndex].added_count }}
             </template>
             <template v-else>
-              {{ selectedProduct.productnames[customTextIndex].name_of_placement }}
+              {{ selectedProduct.productnames[tabIndex].name_of_placement }}
             </template>
           </template>
 

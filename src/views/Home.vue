@@ -28,8 +28,8 @@
                         <template v-else>Save to locker room</template>
                       </b-button>
                     </template>
-                    <template v-else>
-                      <b-button v-if="undoItems.length > 0 || redoitems.length > 0" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                    <template v-else-if="undoItems.length > 0 || redoitems.length > 0">
+                      <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                     </template>
 
                     <template v-if="isCustomerAuthenticated">
@@ -47,7 +47,7 @@
                             <h3>Copy link and Share</h3>
                             <div class="share-form">
                               <b-form inline>
-                                <b-form-input :ref="'copylink_product_'+lockerProductIndex" id="copy-link"
+                                <b-form-input ref="share-design-link" id="share-design-link"
                                               :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
                                 ></b-form-input>
@@ -59,7 +59,6 @@
                       </Popper>
                     </template>
                     <template v-else>
-                      <b-button  @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                       <b-button variant="outline-secondary" @click="setActionBeforeLogin('shareDesign')">Share design</b-button>
                     </template>
                   </template>
@@ -384,7 +383,7 @@ Vue.filter('formatDate', function(value:string) {
     }
     if (this.$route.params.name) {
       this.showLoader = true
-      await this.editProduct(0, 0, this.getPath());
+      await this.editProduct(0, 0, this.lockerProductIndex, this.getPath());
       this.showLoader = false
     } else {
       await this.retrieveProducts()
@@ -1004,13 +1003,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public copyLink(){
-    let testingCodeToCopy = document.querySelector("#copy-link")  as Record<any, any>
+    let testingCodeToCopy = this.ref['share-design-link']  as Record<any, any>
     testingCodeToCopy.select()
     try {
       document.execCommand('copy');
-      alert('Product link was copied to clipboard');
+      this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
     } catch (err) {
-      alert('Oops, unable to copy');
+      this.showToast('Oops, unable to copy', 'ERROR');
     }
   }
 
