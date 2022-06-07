@@ -21,7 +21,7 @@ const ProductAttributes:Module<any, any> = {
     stock_count:0,
     searchLoader: false,
     lockerActiveTabIndex:0,
-    lockerTabsIndex:undefined,
+    lockerTabsIndex:0,
     isShareDesign : false,
     activeLockerProduct:undefined,
     products:[],

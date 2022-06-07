@@ -34,8 +34,6 @@ export default new Vuex.Store({
       'ProductAttributes.using_logo_colors',
       'Product.logoColors',
       'Product.initialExtractedColors',
-      'ProductAttributes.lockerTabsIndex',
-      'ProductAttributes.activeLockerProduct',
       'Main.tabIndexMain',
       'ProductAttributes.customTextObjects',
       'ProductAttributes.customLogoObjects',
