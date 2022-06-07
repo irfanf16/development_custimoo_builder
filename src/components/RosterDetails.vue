@@ -238,6 +238,17 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   }
   public changeText(text: string, num: number, index: number) {
     this.$store.commit('CHANGE_EYE_INDEX', index)
+    const custom_name_index = findIndex(this.customText, { type: 'name' });
+    const custom_number_index = findIndex(this.customText, { type: 'number' });
+    if(custom_name_index != -1) {
+      this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, on_all: true, attribute: 'text', value: text })
+    }
+    if(custom_number_index != -1) {
+      this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, on_all: true, attribute: 'text', value: text })
+    }
+  }
+  public changeText1(text: string, num: number, index: number) {
+    this.$store.commit('CHANGE_EYE_INDEX', index)
     let textAdd = false
     let numberAdd = false
 
