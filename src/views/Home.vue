@@ -214,7 +214,7 @@
                 </div>
               </div>
               <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
-                <b-button v-if="tabIndex > 0" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
+                <b-button :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                 <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= (mainTotalTabs-1)) || (!hideColorSection && tabIndex <= mainTotalTabs)">Next</b-button>
                 <template v-else>
                   <template v-if="isCustomerAuthenticated">
@@ -1357,8 +1357,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async shareDesign(){
-    if (this.editStatus || this.lockerIndex !== undefined || this.lockerProductIndex !== undefined && (this.undoItems.length > 0 || this.redoitems.length > 0)){
+    if (this.editStatus || (this.lockerIndex >= 0 && this.lockerProductIndex !== undefined) && (this.undoItems.length > 0 || this.redoitems.length > 0)){
       this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
+      console.log(this.product)
       this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
       this.hideVModal('locker-modal')
       // (this.ref['lockerModal'].$refs['lockerRoom'] as Record<any, any>).shareProduct(product, this.lockerProductIndex, this.lockerIndex)
