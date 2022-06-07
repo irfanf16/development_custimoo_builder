@@ -219,7 +219,10 @@
                 <template v-else>
                   <template v-if="isCustomerAuthenticated">
                     <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                      <b-button v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                      <b-button v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{isRosterOpened = true; showVModal('rostermodal')}">
+                        Edit Roster
+                      </b-button>
+                      <b-button v-else-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
                         {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
                       </b-button>
                       <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -479,6 +482,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private sideTabIndex = 0
   private mainTotalTabs = 0
   private maximized = true
+  private isRosterOpened = false
   private product: Record<any, any> = {}
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
