@@ -36,7 +36,7 @@
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in rosterDetails">
-              <div :key="key" class="roster-row d-flex flex-wrap align-items-center justify-content-between" @click="updateText(key)">
+              <div :key="key" class="roster-row cursor-pointer d-flex flex-wrap align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key)">
                 <span class="name">{{ roster.text }}</span>
                 <span>{{ roster.number }}</span>
                 <span>{{ roster.size }}</span>
@@ -146,6 +146,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 @Component<OrderAccordion>({})
 export default class OrderAccordion extends Vue {
   @Prop({required: true}) changeText: any
+  private activeRow = 0
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   public customLogosExists = false;
@@ -187,9 +188,8 @@ export default class OrderAccordion extends Vue {
 
   public updateText (index:number) {
       this.changeText(index);
+      this.activeRow = index
   }
-
-
 }
 </script>
 
@@ -325,6 +325,21 @@ export default class OrderAccordion extends Vue {
     flex: 0 0 48%;
     max-width: 48%;
     border-radius: 5px;
+  }
+}
+
+.roster-details-table .roster-row.activeRow{
+  background:  #E7F4F1;
+  color: #219F84;
+  animation: animRow 0.7s infinite alternate;
+  font-weight: bold;
+}
+@keyframes animRow {
+  from{
+    background:  #E7F4F1;
+  }
+  to{
+    background: #d0f5ea;
   }
 }
 </style>

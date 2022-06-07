@@ -26,7 +26,7 @@
 
 
     <div class="btn btn-secondary modal-handler" >
-      <div class="upload-box position-relative" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
+      <div class="upload-box position-relative" :class="{'pulse-animation': !(showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url)}" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
         <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <img :src="storageUrl+customLogos[customLogoIndex].url+'?nocache=1'" width="100%"/>
@@ -339,7 +339,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     uniqueColors.splice(4, deletedCount)
     const selectProductPantonesList = getSelectedProductPantones()
     uniqueColors.forEach((color: string) => {
-    
+
       let pantoneColor = getClosestColor(color, selectProductPantonesList)
       //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
