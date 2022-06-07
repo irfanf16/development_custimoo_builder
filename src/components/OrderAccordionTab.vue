@@ -119,7 +119,7 @@
       <b-collapse id="accordion-5" accordion="my-accordion" role="tabpanel">
         <b-card-body class="border-top">
           <div class="order-logo-holder">
-            <div v-if="customTexts" class="overflow-hidden roster-details-table">
+            <div v-if="customTexts && maintabindex > 2" class="overflow-hidden roster-details-table">
               <div class="roster-row head d-flex flex-wrap align-items-center justify-content-between">
                 <span class="name">Field</span>
                 <span>Height</span>
@@ -149,6 +149,10 @@ export default class OrderAccordion extends Vue {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   public customLogosExists = false;
+
+  get maintabindex(){
+    return this.$store.getters.getMainTab
+  }
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails()
