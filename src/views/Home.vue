@@ -1099,32 +1099,30 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
   private addToCart() {
+    (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
+    
     let whereToAppend = document.getElementsByClassName("preview-column")[0];
-    let oldCanvas1 = document.getElementById("scene-front");
-    let newCanvas1 = this.cloneCanvas(oldCanvas1)
-    let oldCanvas2 = document.getElementById("scene-back");
-    let newCanvas2 = this.cloneCanvas(oldCanvas2)
-    newCanvas1.style.width = "100%";
-    newCanvas1.style.height = "100%";
-    newCanvas2.style.width = "100%";
-    newCanvas2.style.height = "100%";
+
+    let canvasFront = this.cloneCanvas(document.getElementById("scene-front"))
+    let canvasBack = this.cloneCanvas(document.getElementById("scene-back"))
+    
+    // setting width & height of canvas
+    canvasFront.style.width = "100%";
+    canvasFront.style.height = "100%";
+    canvasBack.style.width = "100%";
+    canvasBack.style.height = "100%";
 
     let elementToAppend = document.createElement("div");
-    elementToAppend.appendChild(newCanvas1);
-    elementToAppend.appendChild(newCanvas2);
+    elementToAppend.appendChild(canvasFront);
+    elementToAppend.appendChild(canvasBack);
     elementToAppend.classList.add("cart-animation");
-    let endNode = this.ref["cart_icon"]
 
-    console.log(endNode.offsetTop)
     whereToAppend.append(elementToAppend)
 
     setTimeout(() => {
       elementToAppend?.parentElement?.removeChild(elementToAppend)
     } , 999)
-
-    // (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
   }
-
 
   public cloneCanvas(oldCanvas: any) {
     //create a new canvas
