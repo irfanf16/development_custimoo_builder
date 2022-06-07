@@ -11,7 +11,8 @@
            height="auto"
            :reset="true"
            :shiftY="0"
-           name="rostermodal"  title="Roster" class="roster-modal" size="xl"
+           @opened="$emit('setRosterOpen', true)"
+           name="rostermodal" class="roster-modal" size="xl"
              footer-class="hide-modal-footer d-none"
           @closed="close"
         >
@@ -34,7 +35,7 @@
            :scrollable="true"
            height="auto"
            :reset="true"
-           :shiftY="0" name="rosterfilemodal"  content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered  size="lg" title="Upload Team Roster">
+           :shiftY="0" name="rosterfilemodal"  content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered  size="lg">
       <div class="modal-body">
       <p class="mb-4">The Team Roster can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
       <div class="roster-template-area">
@@ -62,7 +63,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop} from 'vue-property-decorator'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import OrderDetailsTab from '@/components/OrderDetailsTab.vue'
 import RosterDetails from '@/components/RosterDetails.vue'
@@ -71,6 +72,7 @@ import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
 import { getRosterDetailDefaultObject } from '@/helpers/Helpers'
 import { findIndex } from 'lodash'
+import ModalAction from "@/mixins/ModalAction";
 
 
 @Component<EditRosterAreaTab>({
@@ -92,7 +94,7 @@ import { findIndex } from 'lodash'
   }
 })
 
-export default class EditRosterAreaTab extends Vue {
+export default class EditRosterAreaTab extends Mixins(ModalAction) {
   @Prop({required: true}) productSizes!: any
   private products: any[] = []
   public designsIndex = 0
@@ -133,10 +135,10 @@ export default class EditRosterAreaTab extends Vue {
     this.$emit('open-add-to-locker')
   }
   public show(){
-    this.$modal.show('rostermodal')
+    this.showVModal('rostermodal')
   }
   public hide(){
-    this.$modal.hide('rostermodal')
+    this.hideVModal('rostermodal')
   }
   public close(){
     const self = this;
@@ -263,10 +265,10 @@ export default class EditRosterAreaTab extends Vue {
         }
         if (loopStatus == true){
           this.$store.dispatch('updateRoster', this.fileData);
-          this.$modal.hide('rosterfilemodal');
+          this.hideVModal('rosterfilemodal');
         }else{
           alert('Size is missing');
-          this.$modal.hide('rosterfilemodal');
+          this.hideVModal('rosterfilemodal');
         }
       }else{
         alert("please upload a valid file");
