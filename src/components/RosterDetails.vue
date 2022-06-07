@@ -249,7 +249,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       let texts: Record<any, any>
       if (this.selectedProduct.productnames[0]) {
         texts = {
-          text: text.toString(),
+          text: text,
           type: this.selectedProduct.productnames[0].type,
           width: this.selectedProduct.productnames[0].width,
           height: this.selectedProduct.productnames[0].height,
@@ -268,7 +268,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
         }
       } else {
         texts = {
-          text: text.toString(),
+          text: text,
           type: 'name',
           width: 50,
           height: 50,
@@ -289,14 +289,14 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       }
     }
     if (this.customText[1]) {
-      this.$store.dispatch('updateCustomTextAttribute', { index: 1, on_all: true, attribute: 'text', value: num.toString() })
+      this.$store.dispatch('updateCustomTextAttribute', { index: 1, on_all: true, attribute: 'text', value: num })
       numberAdd = true
     }
     if (!numberAdd) {
       let texts: Record<any, any>
       if (this.selectedProduct.productnames[1]) {
         texts = {
-          text: num.toString(),
+          text: num,
           type: this.selectedProduct.productnames[1].type,
           width: this.selectedProduct.productnames[1].width,
           height: this.selectedProduct.productnames[1].height,
@@ -315,7 +315,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
         }
       } else {
         texts = {
-          text: num.toString(),
+          text: num,
           type: 'number',
           width: 50,
           height: 50,
