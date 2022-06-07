@@ -49,6 +49,10 @@
       <div class="roster-row mb-2">
         <div class="align-left" :class="{ 'justify-content-start pl-4': !selectedProduct.allow_name_number }">
           <div class="hide-show"></div>
+          <template v-if="lockerRosters && lockerRosters.length">
+            <label for="">select roster from product</label>
+            <b-form-select @change="changeRoster($event)"  :options="lockerRosters"></b-form-select>
+          </template>
           <template v-if="selectedProduct.allow_name_number">
             <div class="roster-name">Name</div>
             <div class="shirt-no">No</div>
@@ -134,6 +138,7 @@ import ModalAction from "@/mixins/ModalAction";
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   @Prop({ required: true }) productSizes!: any
+  @Prop({required: false}) lockerRosters: Record<any, any>[]
   private roster: any[] = []
   public fileData: Record<any, any>[] = []
   public selected = this.productSizes[0]
@@ -224,7 +229,9 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       this.showToast("Quantity must be atleast 1", "error")
     } // toast message if quantity is zero
   }
-
+ public changeRoster(res:any){
+    this.$store.commit('UPDATE_ROSTER', JSON.parse(res))
+ }
   public removeIndex(ind: number) {
     if (this.customText.length > 0) {
       if (this.customText[0]) {

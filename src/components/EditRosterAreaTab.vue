@@ -21,7 +21,7 @@
       </div>
       <div class="modal-body">
         <div class="d-flex flex-wrap justify-content-between">
-          <RosterDetails :productSizes="sizeOptions" ref="rostermodal" @addPlayer="rosterDetailsInit"/>
+          <RosterDetails :productSizes="sizeOptions" ref="rostermodal" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit"/>
           <div class="roster-preview-area">
             <CustomizationPreview :designs="products[designsIndex]"/>
   <!--          <OrderDetails/>-->
@@ -36,7 +36,7 @@
            :reset="true"
            :shiftY="0" name="rosterfilemodal"  content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered  size="lg" title="Upload Team Roster">
       <div class="modal-body">
-      <p class="mb-4">The Team Roster can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
+      <p class="mb-4">The Team Rosterfgsdfgsgfsdgds can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
       <div class="roster-template-area">
         <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download Roster Template <a  v-b-tooltip.hover
                                                                                                            title="Enter roster in excel file">
@@ -53,7 +53,7 @@
     </modal>
 
     <div class="d-lg-none">
-      <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
+      <RosterDetails @addPlayer="rosterDetailsInit" :lockerRosters="products_roster"  :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
       <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details" :changeText="changeText"/>
@@ -80,7 +80,7 @@ import { findIndex } from 'lodash'
     RosterDetails,
     Scene
   },
-    mounted() {
+    async mounted() {
     this.setProductSizes()
     this.$nextTick(() => {
       this.allproducts.forEach(async(product:Record<any, any>)=>{
@@ -89,6 +89,13 @@ import { findIndex } from 'lodash'
         }
       })
     })
+      if (this.isCustomerAuthenticated){
+        let res  = await http.get("products/roster")
+        if (res.status == 200){
+          this.products_roster = res.data
+          console.log("rosters", this.products_roster.length)
+        }
+      }
   }
 })
 
@@ -98,6 +105,7 @@ export default class EditRosterAreaTab extends Vue {
   public designsIndex = 0
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
+  public products_roster: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
   private screenWidth = (window.screen.availWidth - 100)
   public shareRoster(){
@@ -132,7 +140,7 @@ export default class EditRosterAreaTab extends Vue {
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
   }
-  public show(){
+  public async show(){
     this.$modal.show('rostermodal')
   }
   public hide(){
