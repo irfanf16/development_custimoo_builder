@@ -39,6 +39,7 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
 import {getClosestColor, getPantoneColor} from '@/pantoneColor'
+import {getSelectedProductPantones} from "@/helpers/Helpers";
 
 @Component<LogoColorTabs>({
   components: {
@@ -161,7 +162,7 @@ export default class LogoColorTabs extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantoneColor = getClosestColor(color.hex)
+    let pantoneColor = getClosestColor(color.hex) // this is other tab of logo tab
     this.setSwatchColor({hex: pantoneColor.hex.toUpperCase(), name: pantoneColor.name, pantone: pantoneColor.pantone})
     this.pantoneColorVal = pantoneColor.pantone
   }
@@ -179,7 +180,8 @@ export default class LogoColorTabs extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
-    let pantoneColor = getClosestColor(color.value)
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantoneColor = getClosestColor(color.value, selectProductPantonesList)
     this.$emit('update:defSwatchColor',  color.value)
     this.pantoneColorVal = pantoneColor.pantone
     this.setSwatchColor({hex: color.value, name: color.name, pantone: pantoneColor.pantone})

@@ -245,6 +245,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
     try {
       this.isLoading = true;
      let cart_product = await getActiveProductData();
+     this.$store.dispatch('setRevertRosterBOOL',true);
 
      if(cart_product == null) {
        return false;

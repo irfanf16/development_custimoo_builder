@@ -148,10 +148,8 @@ export default class EditRosterAreaTab extends Vue {
   }
   public close(){
     const self = this;
-    self.updateText();
-    setTimeout(function(){
-      self.$modal.hide('rostermodal')
-    },500);
+    this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
+    self.$modal.hide('rostermodal')
   }
   public updateText(){
     const self = this;

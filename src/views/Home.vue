@@ -1,16 +1,16 @@
 <template>
-  <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;" :data="undoRedoArrays">
+  <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;" :data="undoRedoArrays" >
     <meta name="viewport" content="width=device-width">
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs"/>
+            <CustomizationTabs v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" />
             <CustomTabs @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex" @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" v-else />
           </b-col>
 
-        <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column position-relative">
+        <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column position-relative" >
           <template>
             <div class="customization-preview-process w-100">
               <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
@@ -674,8 +674,22 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
+  @Watch('revertRosterBool')
+  revertRosterBoolChanged(){
+    const self = this;
+    if(this.revertRosterBool){
+      self.ref['customization-tab']?.renderText();
+    }
+    self.$store.commit('SET_REVERT_ROSTER_BOOL',false)
+  }
+
+
   get cartItemsCount(){
     return this.$store.getters.getCartItemsCount
+  }
+
+  get revertRosterBool(){
+    return this.$store.getters.getRevertRosterBool;
   }
 
   public showConfirm(){
@@ -799,91 +813,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   get cartItems() {
     return this.$store.getters.getCartItems
-  }
-  @Watch('customTexts', {
-    deep: true
-  })
-  async  customTextsChanged(newVal: [Record<any, any>]){
-    try{
-      if (this.getUrlParams()){
-        let query = this.getPath()
-        let param = {
-          case: 'customtext',
-          customtext: this.customTexts,
-          url: query
-        }
-        let res = await this.$store.dispatch('updateSharedProduct', param)
-      }
-    }catch (error){
-      console.log(error)
-    }
-  }
-  get logoColors(): [] {
-    return  this.$store.getters.getLogosColors;
-  }
-  @Watch('logoColors', {
-    deep: true
-  })
-  async logoColorsChanged(newVal: [Record<any, any>]) {
-    try{
-      if (this.getUrlParams()){
-        let query = this.getPath()
-        let param = {
-          case: 'logo_colors',
-          logo_colors: this.logoColors,
-          url: query
-        }
-        let res = await this.$store.dispatch('updateSharedProduct', param)
-        console.log(res)
-      }
-    }catch (error){
-      console.log(error)
-    }
-  }
-  get defaultColors(): [Record<any, any>] {
-    return this.$store.getters.getDefaultColors
-  }
-  @Watch('defaultColors', {
-    deep: true
-  })
-  async defaultColorsChanged(newVal: [Record<any, any>]) {
-    try{
-      if (this.getUrlParams()){
-        let query = this.getPath()
-        let param = {
-          case: 'defaultcolors',
-          defaultcolors: this.defaultColors,
-          url: query
-        }
-        let res = await this.$store.dispatch('updateSharedProduct', param)
-        console.log(res)
-      }
-    }catch (error){
-      console.log(error)
-    }
-  }
-  get groupColors(): [Record<any, any>] {
-    return this.$store.getters.getGroupColors
-  }
-
-  @Watch('groupColors', {
-    deep: true
-  })
-  async groupColorsChanged(newVal: [Record<any, any>]){
-    try{
-      if (this.getUrlParams()){
-        let query = this.getPath()
-        let param = {
-          case: 'groupcolors',
-          groupcolors: this.groupColors,
-          url: query
-        }
-        let res = await this.$store.dispatch('updateSharedProduct', param)
-        console.log(res)
-      }
-    }catch (error){
-      console.log(error)
-    }
   }
   get actionBeforeLogin(): string {
     return this.$store.getters.getActionBeforeLogin

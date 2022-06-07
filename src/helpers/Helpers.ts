@@ -14,7 +14,7 @@ const getLogoSettingsObject = () => {
     product_style_id: null,
     rotation: 0,
     width: 100,
-    height: 0,
+    height: 100,
     name_of_placement: "chest",
     side: "front",
     x_axis: 300,
@@ -174,13 +174,48 @@ const processColorsCustom = (colors: []) => {
   })
   const deletedCount = uniqueColors.length - 4
   uniqueColors.splice(4, deletedCount)
+  const selectProductPantonesList = getSelectedProductPantones()
   uniqueColors.forEach((color: string) => {
-    const pantoneColor = getClosestColor(color)
+    const pantoneColor = getClosestColor(color, selectProductPantonesList);
+    //const pantoneColor = getClosestColor(color);
     imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
   })
   return imageColors;
 
 }
+
+const getSelectedProductPantones = (product_id = null) => {
+  const productPantones = []
+  let selectedProduct = Store.getters.getSelectedProduct;
+  if(product_id){
+    const search_product = getProductById(product_id);
+    if(search_product)
+      selectedProduct = search_product;
+  }
+
+    selectedProduct.colors.forEach((product_colors: any, key: number) => {
+    if(key == 0){
+      const colors = JSON.parse(product_colors.json_data)
+      colors.forEach((color: any) => {
+        //let pantone = color.name
+        let pantone = ''
+        if(color.pantone){
+          pantone = color.pantone
+        }
+        productPantones.push({pantone : pantone, name: color.name, hex: color.value});
+      })
+    }
+  })
+  return productPantones;
+}
+
+const getProductById = (product_id) => {
+  const products = Store.getters.getProducts;
+  const selected_product = products.find((product) => product.id == product_id)
+   return selected_product
+}
+
+
 const sortTextsArray = (product_names: any) => {
   return product_names.sort((a:any,b:any)=> (a.type > b.type ? 1 : -1));
 
@@ -477,17 +512,21 @@ const getActiveProductData = async () => {
 }
 
 const initCustomTexts = (retrieved_products: Record<any, any>) => {
+
   retrieved_products.forEach((product:any) => {
       product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
         const obj = fontsColorsManipulation(product)
         //calculate colors pantone on init
         let fill_color_pantone = obj.firstColor.name;
-        const pantone = getClosestColor(obj.firstColor.value);
+
+        const selectProductPantonesList = getSelectedProductPantones(product.id)
+
+        const pantone = getClosestColor(obj.firstColor.value, selectProductPantonesList);
         if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
           fill_color_pantone = pantone.pantone;
         }
         let outLine_color_pantone = obj.secondColor.name;
-        const opantone = getClosestColor(obj.secondColor.value);
+        const opantone = getClosestColor(obj.secondColor.value, selectProductPantonesList);
         if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
           outLine_color_pantone = opantone.pantone;
         }
@@ -615,5 +654,5 @@ export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomTexts
+  getUploadedLogoObject, initCustomTexts, getSelectedProductPantones
 };

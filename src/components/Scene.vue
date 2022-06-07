@@ -21,7 +21,7 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getProductLogoSetting } from "@/helpers/Helpers";
+import {getProductLogoSetting, getSelectedProductPantones} from "@/helpers/Helpers";
 
 @Component<Scene>({
   async mounted() {
@@ -487,8 +487,9 @@ export default class Scene extends Vue {
         left: this.canvasWidth / this.mainCanvasWidth * item.x_axis,
         top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
       })
-      object.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
-      object.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
+      let multiplyBy = object.text? 1 : this.canvasWidth / this.mainCanvasWidth
+      object.scaleX = item.scaleX * multiplyBy
+      object.scaleY = item.scaleY * multiplyBy
       if (otherSideObject) {
         const left = otherSideObject.left
         const top = otherSideObject.top
@@ -497,8 +498,8 @@ export default class Scene extends Vue {
           left: left,
           top: top
         })
-        otherSideObject.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
-        otherSideObject.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
+        otherSideObject.scaleX = item.scaleX * multiplyBy
+        otherSideObject.scaleY = item.scaleY * multiplyBy
       }
     } else if (item.action == 'rotate') {
       object.center()
@@ -703,7 +704,12 @@ export default class Scene extends Vue {
               }
             }
             if (!Object.keys(changeColor).length) {
-              const closestColor = getClosestColor('#000000')
+              let pantone_product_id = null;
+              if(this.product_id){
+                pantone_product_id = this.product_id;
+              }
+              const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
+              const closestColor = getClosestColor('#000000', selectProductPantonesList)
               changeColor = { value: closestColor.hex, name: closestColor.name, pantone: closestColor.pantone }
             }
             this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
@@ -759,7 +765,12 @@ export default class Scene extends Vue {
           if (item.fill.includes('rgb')) {
             item.fill = rgbHex(item.fill)
           }
-          const pantoneColor = getClosestColor(item.fill)
+          let pantone_product_id = null;
+          if(this.product_id){
+            pantone_product_id = this.product_id;
+          }
+          const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
+          const pantoneColor = getClosestColor(item.fill, selectProductPantonesList)
           this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
         }
       }
@@ -777,7 +788,13 @@ export default class Scene extends Vue {
             if (item.fill.includes('rgb')) {
               item.fill = rgbHex(item.fill)
             }
-            const pantoneColor = getClosestColor(item.fill)
+
+            let pantone_product_id = null;
+            if(this.product_id){
+              pantone_product_id = this.product_id;
+            }
+            const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
+            const pantoneColor = getClosestColor(item.fill, selectProductPantonesList)
             this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
           }
         }
@@ -1692,7 +1709,7 @@ export default class Scene extends Vue {
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
       fabric.Image.fromURL(logoUrl + '?nocache=' + Math.random().toString(36).slice(2, -1), async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
-        img.scaleToWidth(this.canvasWidth / this.mainCanvasWidth * logo.width as number)
+        img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
         img.set({
           left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
           top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,

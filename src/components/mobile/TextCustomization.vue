@@ -110,6 +110,7 @@
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 import {getClosestColor} from "@/pantoneColor";
+import {getSelectedProductPantones} from "@/helpers/Helpers";
 @Component<TextCustomization>({
   components: {
     colorPicker
@@ -188,7 +189,7 @@ export default class TextCustomization extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantone = getClosestColor(color.hex);
+    let pantone = getClosestColor(color.hex); // for other color in
     if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
       this.pantoneColorVal = pantone.pantone;
     }
@@ -319,7 +320,8 @@ export default class TextCustomization extends Vue {
 
   public setColor(color: Record<any, any>) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
-    let pantone = getClosestColor(color.value);
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantone = getClosestColor(color.value, selectProductPantonesList);
     let color_pantone = color.name;
     // console.log(pantone.pantone);
     if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
