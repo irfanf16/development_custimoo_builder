@@ -50,8 +50,8 @@
         <div class="align-left" :class="{ 'justify-content-start pl-4': !selectedProduct.allow_name_number }">
           <div class="hide-show"></div>
           <template v-if="selectedProduct.allow_name_number">
-            <div class="roster-name">Name</div>
-            <div class="shirt-no">No</div>
+            <div v-if="custom_name_index != -1" class="roster-name">Name</div>
+            <div v-if="custom_number_index != -1" class="shirt-no">No</div>
           </template>
           <div class="shirt-size">Size</div>
         </div>
@@ -69,11 +69,11 @@
               </a>
             </div>
             <template v-if="selectedProduct.allow_name_number">
-              <div class="roster-name">
+              <div v-if="custom_name_index != -1" class="roster-name">
                 <b-form-input ref="myInputs" v-model="roster.text" @focus="editRosterPlayer(index)"></b-form-input>
               </div>
-              <div class="shirt-no">
-                <b-form-input ref="myInputs" class="text-center" v-model="roster.number"
+              <div v-if="custom_number_index != -1" class="shirt-no">
+                <b-form-input  ref="myInputs" class="text-center" v-model="roster.number"
                   @focus="editRosterPlayer(index)"></b-form-input>
               </div>
             </template>
@@ -185,18 +185,16 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     let number = "";
     if (newVal) {
       let name_and_number_array = newVal.split("|;|");
-      name = name_and_number_array[0]
-      number = name_and_number_array[1]
+      name = name_and_number_array[0]? name_and_number_array[0] : ""
+      number = name_and_number_array[1]? name_and_number_array[1] : ""
     }
     let custom_text = this.$store.getters.getCustomTexts()
     if (custom_text) {
-      let custom_name_index = findIndex(custom_text, { type: 'name' });
-      let custom_number_index = findIndex(custom_text, { type: 'number' });
-      if (custom_name_index != -1) {
-        this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, on_all: true, attribute: 'text', value: name })
+      if (this.custom_name_index != -1) {
+        this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_name_index, on_all: true, attribute: 'text', value: name })
       }
-      if (custom_number_index != -1) {
-        this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, on_all: true, attribute: 'text', value: number })
+      if (this.custom_number_index != -1) {
+        this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_number_index, on_all: true, attribute: 'text', value: number })
       }
     }
   }
@@ -214,6 +212,9 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public addPlayer(obj: Record<any, any>) {
     this.$emit('addPlayer', this.rosterDetails.length);
   }
+
+  public custom_name_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'name' });
+  public custom_number_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'number' });
 
   private addToCart() {
     this.isLoading = true;

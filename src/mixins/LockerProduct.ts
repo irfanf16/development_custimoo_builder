@@ -188,8 +188,6 @@ export class handleMainProducts extends Vue {
         await this.$store.dispatch('setCustomObj',product.id)
       }
     }
-    //set custom text objects for new products
-    let customTextObjects = this.$store.getters.getCustomTextObject
 
     initCustomTexts(retrieved_products)
     this.$store.dispatch('setColorSectionVisibility')
