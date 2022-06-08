@@ -215,15 +215,29 @@
               </div>
               <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
                 <b-button :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= (mainTotalTabs-1)) || (!hideColorSection && tabIndex <= mainTotalTabs)">Next</b-button>
+                <template v-if="editCart.cartId > 0">
+                  <template v-if="isCustomerAuthenticated">
+                    <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                      <b-button v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                        Update Item
+                      </b-button>
+                      <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
+                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                      </b-button>
+                    </template>
+                  </template>
+                </template>
+
+                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" aria-label="Next"  v-else-if="(hideColorSection && tabIndex <= (mainTotalTabs-1)) || (!hideColorSection && tabIndex <= mainTotalTabs)">Next</b-button>
+
                 <template v-else>
                   <template v-if="isCustomerAuthenticated">
                     <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                       <b-button v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
                         Edit Roster
                       </b-button>
-                      <b-button v-else-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
-                        {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
+                      <b-button aria-label="Add to Cart" v-else-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                        Add to Cart
                       </b-button>
                       <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
                         <img width="20" height="20" src="../../src/assets/images/loading.gif" />
@@ -231,7 +245,7 @@
                     </template>
                   </template>
                   <template v-else>
-                    <b-button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary" v-b-modal.modal-login>Add to Cart</b-button>
+                    <b-button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                   </template>
                 </template>
               </div>
@@ -862,9 +876,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
-  private addToCart() {
-    (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
+  private async addToCart() {
+    await (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
+    if(this.editCart.cartId > 0){
+      this.showVModal('cart-modal')
+    }
   }
+
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
