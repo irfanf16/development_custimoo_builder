@@ -101,10 +101,13 @@
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addPlayer">Add Player</button>
-      <button class="btn btn-secondary w-auto fw-bold" @click="close">OK</button>
+      <button class="btn btn-secondary w-auto fw-bold" @click="close">
+        <template v-if="editCart.cartId > 0">Update Item</template>
+        <template v-else>OK</template>
+      </button>
     </div>
 
-    <div class="d-flex justify-content-center mt-3">
+    <div class="d-flex justify-content-center mt-3" v-if="!editCart.cartId > 0">
 <!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
       <button v-if="!isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"
         :disabled="canvasImage.scene == null">
