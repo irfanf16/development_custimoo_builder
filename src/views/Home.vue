@@ -1045,7 +1045,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
           }
         }
-
+        console.log("modal opens from here")
         this.showVModal('locker-modal')
 
         if(this.ref.saveToLockerModal) {
@@ -1371,8 +1371,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   private async shareDesign(){
     if (this.editStatus || (this.lockerIndex >= 0 && this.lockerProductIndex !== undefined) && (this.undoItems.length > 0 || this.redoitems.length > 0)){
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
-      console.log(this.product)
       this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
       this.hideVModal('locker-modal')
       // (this.ref['lockerModal'].$refs['lockerRoom'] as Record<any, any>).shareProduct(product, this.lockerProductIndex, this.lockerIndex)
