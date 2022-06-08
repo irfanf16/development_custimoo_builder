@@ -488,7 +488,9 @@ const ProductAttributes:Module<any, any> = {
           const product_id = customTextsAttribute.product_id? customTextsAttribute.product_id : state.selectedPrdId
           Object.keys(customTextsAttribute.data).forEach((key: string) => {
             if(state.customTexts[product_id][customTextsAttribute.index]) {
-              Object.assign({}, state.customTexts[product_id][customTextsAttribute.index], {key: customTextsAttribute.data[key]})
+              const obj: Record<any, any> = {}
+              obj[key] = customTextsAttribute.data[key]
+              Object.assign(state.customTexts[product_id][customTextsAttribute.index], obj)
             }
           })
         }
