@@ -369,6 +369,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     }
   }
   public close() {
+    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
     setTimeout(() =>{
       if(this.editCart.cartId && this.editCart.cartItemId){
