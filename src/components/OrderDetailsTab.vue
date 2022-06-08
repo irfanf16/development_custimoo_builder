@@ -310,6 +310,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
         this.isLoading = true;
         http.post(url, post_data).then((res: any) => {
           if (res.data.success == true){
+            let edit_cart = this.$store.getters.getEditCart.cartId > 0;
             let api_res:Record<any, any> = res.data.result
             this.$store.dispatch('addToCart',api_res.items)
             this.$store.dispatch('setEditCart', {key:'cartId',value:0});
@@ -328,7 +329,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
               });
 
             } else {
-              this.retrieveProducts();
+              if(edit_cart) {
+                this.retrieveProducts();
+              }
             }
             this.isLoading = false;
           }else{
