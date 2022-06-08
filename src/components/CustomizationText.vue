@@ -12,7 +12,7 @@
         </template>
       </h2>
       <h2 class="fw-bold mb-2 fz-18 d-flex align-items-center justify-content-between" v-else>
-        <span>{{ selectedProduct.productnames[customTextIndex].name_of_placement }}</span>
+        <span>{{ selectedProduct.productnames[customTextIndex] ? selectedProduct.productnames[customTextIndex].name_of_placement: '' }}</span>
       </h2>
 
       <div class="d-flex">
