@@ -936,6 +936,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if(this.mainProductType == "front_back") {
       locker_back_png =  main_scene.backCanvas.toDataURL("image/png").split(',')[1];
     }
+
+
     let locker = {
 
       product_id: this.selectedProduct.product_id,
@@ -943,9 +945,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       design_id: currentDesign[0].id,
       custom_logos: this.customLogos,
       text: this.customTexts,
-      colors: this.logoColors,
-      defaultcolors: this.defaultColors,
-      groupcolors: this.groupColors,
+      colors: this.imageColors,
+      defaultcolors: this.$store.getters.getDefaultColors,
+      groupcolors: this.$store.getters.getGroupColors,
       id: this.$store.getters.getEditProductId,
       locker_front_png: locker_front_png,
       locker_back_png: locker_back_png,
