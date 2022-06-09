@@ -64,7 +64,7 @@
         <div class="roster-row mb-2" :key="index">
           <div class="align-left">
             <div class="hide-show">
-              <a @click="editRosterPlayer(index)">
+              <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="editRosterPlayer(index)">
                 <font-awesome-icon :icon="['fas', index === eyeIndex ? 'eye' : 'eye-slash']" />
               </a>
             </div>
