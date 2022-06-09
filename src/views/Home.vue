@@ -17,10 +17,10 @@
                 <div class="buttons-preview text-left">
                   <template v-if="editCart.cartId < 1 && updateOrderItemProducts == null">
                     <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                      <b-button :key="'lockerRoom'" v-if="roomWithProducts.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                     </template>
                     <template v-else>
-                      <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                      <b-button @click="setActionBeforeLogin('lockerRoom')" v-if="roomWithProducts.length" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
                     </template>
                     <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
                       <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
