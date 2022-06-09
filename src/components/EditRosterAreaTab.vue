@@ -86,7 +86,7 @@ import ModalAction from "@/mixins/ModalAction";
     this.setProductSizes()
     this.$nextTick(() => {
       this.allproducts.forEach(async(product:Record<any, any>)=>{
-        if(!this.rosterDetails[product.id]) {
+         if(!this.$store.getters.getAllRosterDetails[product.id]) {
           await this.rosterDetailsInit(0, product.id)
         }
       })

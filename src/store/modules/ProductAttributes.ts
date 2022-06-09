@@ -1046,6 +1046,9 @@ const ProductAttributes:Module<any, any> = {
       }
       return state.rosterDetails[prd_id]
     },
+    getAllRosterDetails: state  => {
+      return state.rosterDetails
+    },
     getProductionSVGs: state => {
       return state.productionSVGs
     },
