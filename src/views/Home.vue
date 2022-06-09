@@ -250,7 +250,7 @@
                   </template>
                 </template>
 
-                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
+                <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
               </div>
             </div>
           </div>
@@ -937,14 +937,19 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     }
   }
-  public async getLockers(share_url = false, isCancel = false){
-    if(!isCancel){
-      this.$store.commit('setIsShareDesign', false)
-      this.generate_share_url = share_url
-      if (!this.editStatus){
-        this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
-      }
+
+  private cancelEdit() {
+    this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
+    this.retrieveProducts();
+  }
+
+  public async getLockers(share_url = false){
+    this.$store.commit('setIsShareDesign', false)
+    this.generate_share_url = share_url
+    if (!this.editStatus){
+      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     }
+
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
