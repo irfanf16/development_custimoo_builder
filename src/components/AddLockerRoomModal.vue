@@ -13,51 +13,64 @@
     </div>
     <div class="p-4">
       <div class="lockerroom-header">
-              <div class="locker-opener w-100" style="max-width: 100%; overflow-x: auto">
-                <b-button style="white-space: nowrap" v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-                <span class="btn btn-secondary light add_new_locker_btn" @click="showVModal('create-modal')">Add <BIconPlus /></span>
-              </div>
-  <!--            <div class="add_new_locker">-->
-  <!--              -->
-  <!--            </div>-->
-  <!--                <b-button class="create-btn" variant="secondary" ><span>Create New </span>+</b-button>-->
-                  <CreateLockerRoomModal @lockerAdded="lockerAdded" />
-          </div>
-        <div class="pt-4 design-name-form" v-if="lockers.length > 0">
-              <b-form inline>
-                  <label for="inline-form-input-productname" class="w-100 d-block mb-2 text-left">Product Name</label>
-                  <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
-                      <b-input-group>
-                          <b-form-input id="inline-form-input-productname" v-model="product_name"  placeholder="Type Here"></b-form-input>
-                      </b-input-group>
-                    <b-button variant="primary" @click="saveToLocker()">Save Design</b-button>
-                  </div>
-              </b-form>
-          </div>
-        <div class="grid grid-6 gap-3 w-100 mt-4">
-          <div v-for="(product, ind) in productData" :key="ind" class="products-block">
-            <label :key="ind" class="w-100" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
-              <div class="image-holder position-relative">
-                <div>
-                  <div class="d-flex align-items-center justify-content-between position-absolute controls">
-                    <div>
-                      <a v-b-tooltip.hover title="Delete design" class="btn remove" @click="deleteProduct(ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
-                     </div>
-                    <div>
-                     <a v-if="product.design && product.design.back_design_count > 0" v-b-tooltip.hover :title="product.is_back_img ? 'Show front' : 'Show back' " class="btn btn-secondary light rounded-circle" @click="swapDesign(ind)" style="font-size: 1em">
-                       <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
-                     </a>
-                     </div>
-                  </div>
-                  <img class="w-100" :src="product.product_url" alt="">
-                 </div>
-              </div>
-              <div class="d-none d-lg-block product-description text-center">
-                <p>{{ product.product_name }}</p>
-              </div>
-            </label>
+        <div class="locker-opener w-100" style="max-width: 100%; overflow-x: auto">
+          <b-button style="white-space: nowrap" v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
+          <span class="btn btn-secondary light add_new_locker_btn" @click="showVModal('create-modal')">Add <BIconPlus /></span>
+        </div>
+<!--            <div class="add_new_locker">-->
+<!--              -->
+<!--            </div>-->
+<!--                <b-button class="create-btn" variant="secondary" ><span>Create New </span>+</b-button>-->
+            <CreateLockerRoomModal @lockerAdded="lockerAdded" />
+      </div>
+
+      <div class="d-flex gap-4 flex-wrap flex-row-reverse">
+        <div class="bg-light pt-4" style="flex-basis: calc(40% - 2rem)">
+          <div class="fs-3 font-weight-bold">Design Preview</div>
+
+          <div>
+            asdasd
           </div>
         </div>
+        <div style="flex-basis: 60%">
+          <div class="pt-4 design-name-form" v-if="lockers.length > 0">
+            <b-form inline>
+              <label for="inline-form-input-productname" class="w-100 d-block mb-2 text-left">Product Name</label>
+              <div class="w-100 d-flex flex-wrap justify-content-between align-items-center">
+                <b-input-group>
+                  <b-form-input id="inline-form-input-productname" v-model="product_name"  placeholder="Type Here"></b-form-input>
+                </b-input-group>
+                <b-button variant="primary" @click="saveToLocker()">Save Design</b-button>
+              </div>
+            </b-form>
+          </div>
+          <div class="grid grid-6 gap-3 w-100 mt-4">
+            <div v-for="(product, ind) in productData" :key="ind" class="products-block">
+              <label :key="ind" class="w-100" :class="product.class ? 'selected': ''" @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
+                <div class="image-holder position-relative">
+                  <div>
+                    <div class="d-flex align-items-center justify-content-between position-absolute controls">
+                      <div>
+                        <a v-b-tooltip.hover title="Delete design" class="btn remove" @click="deleteProduct(ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
+                      </div>
+                      <div>
+                        <a v-if="product.design && product.design.back_design_count > 0" v-b-tooltip.hover :title="product.is_back_img ? 'Show front' : 'Show back' " class="btn btn-secondary light rounded-circle" @click="swapDesign(ind)" style="font-size: 1em">
+                          <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
+                        </a>
+                      </div>
+                    </div>
+                    <img class="w-100" :src="product.product_url" alt="">
+                  </div>
+                </div>
+                <div class="d-none d-lg-block product-description text-center">
+                  <p>{{ product.product_name }}</p>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
         <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
       <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     </div>
