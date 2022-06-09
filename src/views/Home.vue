@@ -6,7 +6,7 @@
       <b-row>
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs @setRosterOpen="setRosterOpen" v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" />
+            <CustomizationTabs @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" />
             <CustomTabs @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex" @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" v-else />
           </b-col>
 
@@ -231,12 +231,13 @@
                 <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" aria-label="Next"  v-else-if="(hideColorSection && tabIndex <= (mainTotalTabs-1)) || (!hideColorSection && tabIndex <= mainTotalTabs)">Next</b-button>
 
                 <template v-else>
-                  <template v-if="isCustomerAuthenticated">
+                  <b-button v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
+                    Edit Roster
+                  </b-button>
+
+                  <template v-else-if="isCustomerAuthenticated">
                     <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                      <b-button v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
-                        Edit Roster
-                      </b-button>
-                      <b-button aria-label="Add to Cart" v-else-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                      <b-button aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
                         Add to Cart
                       </b-button>
                       <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >

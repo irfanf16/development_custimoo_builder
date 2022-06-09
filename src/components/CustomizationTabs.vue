@@ -123,7 +123,7 @@
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-              <EditRosterAreaTab @setRosterOpen="setRosterOpen" @open-add-to-locker="openAddToLocker" :productSizes="productSizes" ref="edit-roster-area-tab"/>
+              <EditRosterAreaTab @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="openAddToLocker" :productSizes="productSizes" ref="edit-roster-area-tab"/>
             </div>
           </b-tab>
           <!--        </vuescroll>-->
@@ -216,6 +216,10 @@ export default class CustomizationTabs extends Vue {
 
   private setRosterOpen(val:boolean){
     this.$emit('setRosterOpen', val)
+  }
+
+  private setActionBeforeLogin(type: string){
+    this.$emit('setActionBeforeLogin', type)
   }
 
   get maintabindex(){
