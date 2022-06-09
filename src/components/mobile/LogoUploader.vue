@@ -89,7 +89,7 @@
                   <template v-if="usingColorLogos"> Original Colors</template>
                   <template v-else> Logo Colors</template>
                 </b-button>
-                <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors($event)" :class="!(usingColorLogos && imageColors.length > 1) ? 'invisible': 'shuffle-mobile'"
+                <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors($event)" :class="!(usingColorLogos && imageColors.length > 1) ? 'invisible': 'pulse-animation'"
                           variant="secondary"><b-icon-shuffle />
                 </b-button>
                 <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
@@ -256,7 +256,7 @@ export default class LogoUploader extends Vue {
 
 
   shuffleLogoColors(e:Record<any, any>) {
-    e.currentTarget.classList.remove('shuffle-mobile')
+    e.currentTarget.classList.remove('pulse-animation')
     if(this.imageColors && this.imageColors.length > 1) {
       this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
       /*.filter((imageColor: Record<any, any>, icIdx) => {
@@ -425,45 +425,6 @@ export default class LogoUploader extends Vue {
 .logo-uploader-main{
   @media (max-width: 600px) {
     display: flex;
-  }
-}
-
-.shuffle-mobile{
-  position: relative;
-
-  &:after,&:before{
-    content: "";
-    display: block;
-    position: absolute;
-    //background: #fff;
-    background: lighten(#219F84, 40%);
-    height: 20px;
-    width: 20px;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    border-radius: 1000px;
-    opacity: 0;
-  }
-  &:after{
-    animation: pulse 1s ease-out infinite;
-  }
-  &:before{
-    animation: pulse 1s ease-out infinite;
-    animation-delay: 0.2s;
-  }
-}
-
-@keyframes pulse {
-  from{
-    transform: scale(0);
-    opacity: .5;
-  }
-  to{
-    transform: scale(5);
-    opacity: 0;
   }
 }
 </style>

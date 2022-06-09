@@ -61,11 +61,11 @@
                   <b-button @click="saveColor"  class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px">
                     Save color
                   </b-button>
-                  <b-button @click="useLogoColors()" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px" v-if="imageColors.length > 1">
+                  <b-button @click="useLogoColors()" class="use-btn flex-shrink-1" :class="{'pulse-animation': !usingColorLogos && !isClicked}" style="white-space: nowrap; max-width: 200px" v-if="imageColors.length > 1">
                     <template v-if="usingColorLogos"> Use Original Colors</template>
                     <template v-else> Use Logo Colors</template>
                   </b-button>
-                  <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" :class="{'invisible': !(imageColors.length > 1 && usingColorLogos)}"
+                  <b-button class="use-btn flex-shrink-1 pulse-animation" @click="shuffleLogoColors($event)" :class="{'invisible': !(imageColors.length > 1 && usingColorLogos)}"
                             variant="secondary">Shuffle
                   </b-button>
                   <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
@@ -125,6 +125,7 @@ import {getClosestColor} from "@/pantoneColor";
 })
 export default class LogoPlacementTabs extends Vue {
   @Prop({required: true}) numberOfLogosAllowed!: number
+  private isClicked = false
   @Prop({required: false, default: () => { return [{
       url: '',
       width: 200,
@@ -317,6 +318,7 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   async  useLogoColors() {
+    this.isClicked = true
     this.logoColorUsed = true
     if(this.usingColorLogos) {
      /*this.$store.commit('SET_LOGO_COLORS', [])*/
@@ -344,7 +346,8 @@ export default class LogoPlacementTabs extends Vue {
   }
 
 
-  shuffleLogoColors() {
+  shuffleLogoColors(e:Record<any, any>) {
+    e.currentTarget.classList.remove('pulse-animation')
     if(this.imageColors && this.imageColors.length > 1) {
       this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
         /*.filter((imageColor: Record<any, any>, icIdx) => {

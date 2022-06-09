@@ -54,8 +54,8 @@
             <b-form-select @change="changeRoster($event)"  :options="lockerRosters"></b-form-select>
           </template>
           <template v-if="selectedProduct.allow_name_number">
-            <div class="roster-name">Name</div>
-            <div class="shirt-no">No</div>
+            <div v-if="custom_name_index != -1" class="roster-name">Name</div>
+            <div v-if="custom_number_index != -1" class="shirt-no">No</div>
           </template>
           <div class="shirt-size">Size</div>
         </div>
@@ -68,16 +68,16 @@
         <div class="roster-row mb-2" :key="index">
           <div class="align-left">
             <div class="hide-show">
-              <a @click="editRosterPlayer(index)">
+              <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="editRosterPlayer(index)">
                 <font-awesome-icon :icon="['fas', index === eyeIndex ? 'eye' : 'eye-slash']" />
               </a>
             </div>
             <template v-if="selectedProduct.allow_name_number">
-              <div class="roster-name">
+              <div v-if="custom_name_index != -1" class="roster-name">
                 <b-form-input ref="myInputs" v-model="roster.text" @focus="editRosterPlayer(index)"></b-form-input>
               </div>
-              <div class="shirt-no">
-                <b-form-input ref="myInputs" class="text-center" v-model="roster.number"
+              <div v-if="custom_number_index != -1" class="shirt-no">
+                <b-form-input  ref="myInputs" class="text-center" v-model="roster.number"
                   @focus="editRosterPlayer(index)"></b-form-input>
               </div>
             </template>
@@ -105,14 +105,26 @@
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addPlayer">Add Player</button>
-      <button class="btn btn-secondary w-auto fw-bold" @click="close">OK</button>
+      <button class="btn btn-secondary w-auto fw-bold" @click="close">
+        <template v-if="editCart.cartId > 0">Update Item</template>
+        <template v-else>OK</template>
+      </button>
     </div>
 
-    <div class="d-flex justify-content-center mt-3">
-      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"
-        :disabled="canvasImage.scene == null">
-        Add to Cart
-      </button>
+    <div class="d-flex justify-content-center mt-3" v-if="!editCart.cartId > 0">
+<!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
+      <template v-if="!isCustomerAuthenticated" >
+        <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
+          :disabled="canvasImage.scene == null">
+          Add to Cart
+        </button>
+      </template>
+      <template v-else-if="!$root.$refs.Order_Details.isLoading">
+        <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
+          :disabled="canvasImage.scene == null">
+          Add to Cart
+        </button>
+      </template>
       <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
         <img width="20" height="20" src="../../src/assets/images/loading.gif" />
       </button>
@@ -134,6 +146,7 @@ import ModalAction from "@/mixins/ModalAction";
   mounted() {
     this.fontsColorsManipulation()
     this.fontsList()
+    console.log(this.$root.$children[0].$children[2])
   },
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
@@ -160,6 +173,19 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public fontOptions: Record<any, any>[] = []
   public editing_roster_player_index = 0;
 
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
+  private addToCart() {
+    if (!this.rosterDetails.some(el => el.quantity == 0)) {
+      (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
+      this.hideVModal('rostermodal')
+      this.showVModal('cart-modal')
+    } // if quantity is not zero
+    else {
+      this.showToast("Quantity must be atleast 1", "error")
+    } // toast message if quantity is zero
+  }
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
@@ -188,18 +214,16 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     let number = "";
     if (newVal) {
       let name_and_number_array = newVal.split("|;|");
-      name = name_and_number_array[0]
-      number = name_and_number_array[1]
+      name = name_and_number_array[0]? name_and_number_array[0] : ""
+      number = name_and_number_array[1]? name_and_number_array[1] : ""
     }
     let custom_text = this.$store.getters.getCustomTexts()
     if (custom_text) {
-      let custom_name_index = findIndex(custom_text, { type: 'name' });
-      let custom_number_index = findIndex(custom_text, { type: 'number' });
-      if (custom_name_index != -1) {
-        this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, on_all: true, attribute: 'text', value: name })
+      if (this.custom_name_index != -1) {
+        this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_name_index, on_all: true, attribute: 'text', value: name })
       }
-      if (custom_number_index != -1) {
-        this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, on_all: true, attribute: 'text', value: number })
+      if (this.custom_number_index != -1) {
+        this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_number_index, on_all: true, attribute: 'text', value: number })
       }
     }
   }
@@ -217,21 +241,11 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public addPlayer(obj: Record<any, any>) {
     this.$emit('addPlayer', this.rosterDetails.length);
   }
-
-  private addToCart() {
-    if (!this.rosterDetails.some(el => el.quantity == 0)) {
-      (this.$root.$refs as Record<any, any>).Order_Details.addToCart();
-      setTimeout(() => {
-        this.close();
-      }, 1000) // closing modal after add to cart
-    } // if quantity is not zero
-    else {
-      this.showToast("Quantity must be atleast 1", "error")
-    } // toast message if quantity is zero
-  }
- public changeRoster(res:any){
+  public custom_name_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'name' });
+  public custom_number_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'number' });
+  public changeRoster(res:any){
     this.$store.commit('UPDATE_ROSTER', JSON.parse(res))
- }
+  }
   public removeIndex(ind: number) {
     if (this.customText.length > 0) {
       if (this.customText[0]) {
@@ -245,6 +259,21 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   }
   public changeText(text: string, num: number, index: number) {
     this.$store.commit('CHANGE_EYE_INDEX', index)
+    const custom_name_index = findIndex(this.customText, { type: 'name' });
+    const custom_number_index = findIndex(this.customText, { type: 'number' });
+    if(custom_name_index != -1 && custom_number_index != -1) {
+      this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, on_all: true, attribute: 'text', value: text })
+      this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, on_all: true, attribute: 'text', value: num })
+    }
+    if(custom_name_index != -1) {
+      this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, on_all: true, attribute: 'text', value: text })
+    }
+    if(custom_number_index != -1) {
+      this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, on_all: true, attribute: 'text', value: num })
+    }
+  }
+  public changeText1(text: string, num: number, index: number) {
+    this.$store.commit('CHANGE_EYE_INDEX', index)
     let textAdd = false
     let numberAdd = false
 
@@ -256,7 +285,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       let texts: Record<any, any>
       if (this.selectedProduct.productnames[0]) {
         texts = {
-          text: text.toString(),
+          text: text,
           type: this.selectedProduct.productnames[0].type,
           width: this.selectedProduct.productnames[0].width,
           height: this.selectedProduct.productnames[0].height,
@@ -275,7 +304,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
         }
       } else {
         texts = {
-          text: text.toString(),
+          text: text,
           type: 'name',
           width: 50,
           height: 50,
@@ -296,14 +325,14 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       }
     }
     if (this.customText[1]) {
-      this.$store.dispatch('updateCustomTextAttribute', { index: 1, on_all: true, attribute: 'text', value: num.toString() })
+      this.$store.dispatch('updateCustomTextAttribute', { index: 1, on_all: true, attribute: 'text', value: num })
       numberAdd = true
     }
     if (!numberAdd) {
       let texts: Record<any, any>
       if (this.selectedProduct.productnames[1]) {
         texts = {
-          text: num.toString(),
+          text: num,
           type: this.selectedProduct.productnames[1].type,
           width: this.selectedProduct.productnames[1].width,
           height: this.selectedProduct.productnames[1].height,
@@ -322,7 +351,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
         }
       } else {
         texts = {
-          text: num.toString(),
+          text: num,
           type: 'number',
           width: 50,
           height: 50,
@@ -356,6 +385,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     }
   }
   public close() {
+    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
     setTimeout(() =>{
       if(this.editCart.cartId && this.editCart.cartItemId){

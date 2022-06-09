@@ -21,7 +21,7 @@ const ProductAttributes:Module<any, any> = {
     stock_count:0,
     searchLoader: false,
     lockerActiveTabIndex:0,
-    lockerTabsIndex:undefined,
+    lockerTabsIndex:0,
     isShareDesign : false,
     activeLockerProduct:undefined,
     products:[],
@@ -487,7 +487,11 @@ const ProductAttributes:Module<any, any> = {
         if(Object.keys(customTextsAttribute.data).length && state.customTexts[state.selectedPrdId] && state.customTexts[state.selectedPrdId][customTextsAttribute.index]) {
           const product_id = customTextsAttribute.product_id? customTextsAttribute.product_id : state.selectedPrdId
           Object.keys(customTextsAttribute.data).forEach((key: string) => {
-            state.customTexts[product_id][customTextsAttribute.index][key] = customTextsAttribute.data[key]
+            if(state.customTexts[product_id][customTextsAttribute.index]) {
+              const obj: Record<any, any> = {}
+              obj[key] = customTextsAttribute.data[key]
+              Object.assign(state.customTexts[product_id][customTextsAttribute.index], obj)
+            }
           })
         }
       }
@@ -1041,6 +1045,9 @@ const ProductAttributes:Module<any, any> = {
         return []
       }
       return state.rosterDetails[prd_id]
+    },
+    getAllRosterDetails: state  => {
+      return state.rosterDetails
     },
     getProductionSVGs: state => {
       return state.productionSVGs

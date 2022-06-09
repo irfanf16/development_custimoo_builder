@@ -30,15 +30,16 @@
         <b-card-body>
           <div class="overflow-hidden roster-details-table">
             <div class="roster-row head d-flex flex-wrap align-items-center justify-content-between">
-              <span class="name">Name</span>
-              <span>No</span>
+              <span v-if="checkIndex('name') != -1" class="name">Name</span>
+              <span v-if="checkIndex('number') != -1">No</span>
               <span>Size</span>
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in rosterDetails">
-              <div :key="key" class="roster-row d-flex flex-wrap align-items-center justify-content-between" @click="updateText(key)">
-                <span class="name">{{ roster.text }}</span>
-                <span>{{ roster.number }}</span>
+              <div :key="key" class="roster-row cursor-pointer d-flex flex-wrap align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key)">
+                <span v-if="checkIndex('name') != -1" class="name">{{ roster.text }}</span>
+                <span v-if="checkIndex('number') != -1">{{ roster.number }}</span>
+
                 <span>{{ roster.size }}</span>
                 <span>{{ roster.quantity }}</span>
 <!--                <span>-->
@@ -119,7 +120,7 @@
       <b-collapse id="accordion-5" accordion="my-accordion" role="tabpanel">
         <b-card-body class="border-top">
           <div class="order-logo-holder">
-            <div v-if="customTexts" class="overflow-hidden roster-details-table">
+            <div v-if="customTexts && maintabindex > 2" class="overflow-hidden roster-details-table">
               <div class="roster-row head d-flex flex-wrap align-items-center justify-content-between">
                 <span class="name">Field</span>
                 <span>Height</span>
@@ -142,13 +143,19 @@
 
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
+import { findIndex } from 'lodash'
 
 @Component<OrderAccordion>({})
 export default class OrderAccordion extends Vue {
   @Prop({required: true}) changeText: any
+  private activeRow = 0
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   public customLogosExists = false;
+
+  get maintabindex(){
+    return this.$store.getters.getMainTab
+  }
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails()
@@ -183,9 +190,12 @@ export default class OrderAccordion extends Vue {
 
   public updateText (index:number) {
       this.changeText(index);
+      this.activeRow = index
   }
 
-
+  public checkIndex(text_type: string) {
+    return findIndex(this.customTexts, { type: text_type })
+  }
 }
 </script>
 
@@ -321,6 +331,21 @@ export default class OrderAccordion extends Vue {
     flex: 0 0 48%;
     max-width: 48%;
     border-radius: 5px;
+  }
+}
+
+.roster-details-table .roster-row.activeRow{
+  background:  #E7F4F1;
+  color: #219F84;
+  animation: animRow 0.7s infinite alternate;
+  font-weight: bold;
+}
+@keyframes animRow {
+  from{
+    background:  #E7F4F1;
+  }
+  to{
+    background: #d0f5ea;
   }
 }
 </style>
