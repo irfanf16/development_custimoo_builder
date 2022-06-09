@@ -142,7 +142,6 @@ import ModalAction from "@/mixins/ModalAction";
   mounted() {
     this.fontsColorsManipulation()
     this.fontsList()
-    console.log(this.$root.$children[0].$children[2])
   },
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {

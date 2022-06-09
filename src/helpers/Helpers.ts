@@ -512,50 +512,49 @@ const getActiveProductData = async () => {
 }
 
 const initCustomTexts = (retrieved_products: Record<any, any>) => {
-
   retrieved_products.forEach((product:any) => {
-      product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-        const custom_texts_objects = Store.getters.customTextObjects
-        if(!custom_texts_objects[index]) {
-          const obj = fontsColorsManipulation(product)
-          //calculate colors pantone on init
-          let fill_color_pantone = obj.firstColor.name;
+    product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
+      const custom_texts = Store.getters.getCustomTexts(product.id)
+      if(!custom_texts || !(custom_texts && custom_texts.length)) {
+        const obj = fontsColorsManipulation(product)
+        //calculate colors pantone on init
+        let fill_color_pantone = obj.firstColor.name;
 
-          const selectProductPantonesList = getSelectedProductPantones(product.id)
+        const selectProductPantonesList = getSelectedProductPantones(product.id)
 
-          const pantone = getClosestColor(obj.firstColor.value, selectProductPantonesList);
-          if (pantone && pantone.pantone && pantone.pantone != 'undefined') {
-            fill_color_pantone = pantone.pantone;
-          }
-          let outLine_color_pantone = obj.secondColor.name;
-          const opantone = getClosestColor(obj.secondColor.value, selectProductPantonesList);
-          if (opantone && opantone.pantone && opantone.pantone != 'undefined') {
-            outLine_color_pantone = opantone.pantone;
-          }
-
-          const text = {
-            text: '',
-            type: productName.type,
-            width: productName.width,
-            height: productName.height,
-            x_axis: productName.x_axis,
-            y_axis: productName.y_axis,
-            rotation: productName.rotation,
-            haveControls: Boolean(!productName.is_locked),
-            outlineEnabled: Boolean(productName.outline_enabled),
-            side: productName.side,
-            fontFamily: fontsList(product)[0].value,
-            fillColor: obj.firstColor.value,
-            fillColorPantone: fill_color_pantone,
-            outLineColor: obj.secondColor.value,
-            outLineColorPantone: outLine_color_pantone,
-            outLineWidth: 0,
-            textIndex: index,
-            selectColor: false
-          }
-          await Store.dispatch('setCustomTexts', {index: index, text: text, prd_id: product.id})
+        const pantone = getClosestColor(obj.firstColor.value, selectProductPantonesList);
+        if (pantone && pantone.pantone && pantone.pantone != 'undefined') {
+          fill_color_pantone = pantone.pantone;
         }
-      })
+        let outLine_color_pantone = obj.secondColor.name;
+        const opantone = getClosestColor(obj.secondColor.value, selectProductPantonesList);
+        if (opantone && opantone.pantone && opantone.pantone != 'undefined') {
+          outLine_color_pantone = opantone.pantone;
+        }
+
+        const text = {
+          text: '',
+          type: productName.type,
+          width: productName.width,
+          height: productName.height,
+          x_axis: productName.x_axis,
+          y_axis: productName.y_axis,
+          rotation: productName.rotation,
+          haveControls: Boolean(!productName.is_locked),
+          outlineEnabled: Boolean(productName.outline_enabled),
+          side: productName.side,
+          fontFamily: fontsList(product)[0].value,
+          fillColor: obj.firstColor.value,
+          fillColorPantone: fill_color_pantone,
+          outLineColor: obj.secondColor.value,
+          outLineColorPantone: outLine_color_pantone,
+          outLineWidth: 0,
+          textIndex: index,
+          selectColor: false
+        }
+        await Store.dispatch('setCustomTexts', {index: index, text: text, prd_id: product.id})
+      }
+    })
   });
 }
 
