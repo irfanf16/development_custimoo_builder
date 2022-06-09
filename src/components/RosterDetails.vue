@@ -109,10 +109,18 @@
 
     <div class="d-flex justify-content-center mt-3" v-if="!editCart.cartId > 0">
 <!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
-      <button v-if="!isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"
-        :disabled="canvasImage.scene == null">
-        Add to Cart
-      </button>
+      <template v-if="!isCustomerAuthenticated" >
+        <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
+          :disabled="canvasImage.scene == null">
+          Add to Cart
+        </button>
+      </template>
+      <template v-else-if="!$root.$refs.Order_Details.isLoading">
+        <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
+          :disabled="canvasImage.scene == null">
+          Add to Cart
+        </button>
+      </template>
       <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
         <img width="20" height="20" src="../../src/assets/images/loading.gif" />
       </button>
@@ -134,6 +142,7 @@ import ModalAction from "@/mixins/ModalAction";
   mounted() {
     this.fontsColorsManipulation()
     this.fontsList()
+    console.log(this.$root.$children[0].$children[2])
   },
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
@@ -158,8 +167,20 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public fontsColors: any[] = []
   public fontOptions: Record<any, any>[] = []
   public editing_roster_player_index = 0;
-  public isLoading = false;
 
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
+  private addToCart() {
+    if (!this.rosterDetails.some(el => el.quantity == 0)) {
+      (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
+      this.hideVModal('rostermodal')
+      this.showVModal('cart-modal')
+    } // if quantity is not zero
+    else {
+      this.showToast("Quantity must be atleast 1", "error")
+    } // toast message if quantity is zero
+  }
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
@@ -219,20 +240,20 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public custom_name_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'name' });
   public custom_number_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'number' });
 
-  private addToCart() {
-    this.isLoading = true;
-    if (!this.rosterDetails.some(el => el.quantity == 0)) {
-      (this.$root.$refs as Record<any, any>).Order_Details.addToCart();
-      setTimeout(() => {
-        this.close();
-        this.isLoading = false
-      }, 1000) // closing modal after add to cart
-    } // if quantity is not zero
-    else {
-      this.isLoading = false
-      this.showToast("Quantity must be atleast 1", "error")
-    } // toast message if quantity is zero
-  }
+  // private addToCart() {
+  //   this.isLoading = true;
+  //   if (!this.rosterDetails.some(el => el.quantity == 0)) {
+  //     (this.$root.$refs as Record<any, any>).Order_Details.addToCart();
+  //    setTimeout(() => {
+  //       this.close();
+  //       this.isLoading = false
+  //     }, 1000) // closing modal after add to cart
+  //   } // if quantity is not zero
+  //   else {
+  //     this.isLoading = false
+  //     this.showToast("Quantity must be atleast 1", "error")
+  //   } // toast message if quantity is zero
+  // }
 
   public removeIndex(ind: number) {
     if (this.customText.length > 0) {

@@ -54,7 +54,7 @@
     </modal>
 
     <div class="d-lg-none">
-      <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
+      <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
       <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details" :changeText="changeText"/>
@@ -104,6 +104,9 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   private screenWidth = (window.screen.availWidth - 100)
   public shareRoster(){
     this.ref['order-details'].getLockers();
+  }
+  private setActionBeforeLogin(val:string){
+    this.$emit('setActionBeforeLogin', val)
   }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
