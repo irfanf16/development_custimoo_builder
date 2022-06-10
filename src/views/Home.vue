@@ -6,7 +6,7 @@
       <b-row>
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" />
+            <CustomizationTabs :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val" @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" />
             <CustomTabs @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex" @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" v-else />
           </b-col>
 
@@ -17,10 +17,10 @@
                 <div class="buttons-preview text-left">
                   <template v-if="editCart.cartId < 1 && updateOrderItemProducts == null">
                     <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                      <b-button :key="'lockerRoom'" v-if="roomWithProducts.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                     </template>
                     <template v-else>
-                      <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                      <b-button @click="setActionBeforeLogin('lockerRoom')" v-if="roomWithProducts.length" :key="'loginmodal'" variant="outline-secondary">Locker room</b-button>
                     </template>
                     <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
                       <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
@@ -116,7 +116,7 @@
               <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                 <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
-                <b-button variant="outline-secondary" v-if="usingColorLogos && imageColors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
+                <b-button variant="outline-secondary" :class="{'pulse-animation': isColorShuffled}" v-if="usingColorLogos && imageColors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
               </div>
               <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
@@ -249,6 +249,8 @@
                     <b-button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                   </template>
                 </template>
+
+                <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
               </div>
             </div>
           </div>
@@ -381,7 +383,8 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    //get recent logos
+    await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+
     this.setRecentLogos()
 
     if (this.hideColorSection){
@@ -457,7 +460,6 @@ Vue.filter('formatDate', function(value:string) {
     if(this.$route.query.tabIdx){
       this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
     }
-
   }
   //  destroyed() {
   //   this.$store.dispatch("updateOrderItemProducts", null);
@@ -498,6 +500,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private mainTotalTabs = 0
   private maximized = true
   private isRosterOpened = false
+  private isColorShuffled = true
   private product: Record<any, any> = {}
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
@@ -935,12 +938,19 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     }
   }
+
+  private cancelEdit() {
+    this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
+    this.retrieveProducts();
+  }
+
   public async getLockers(share_url = false){
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
     if (!this.editStatus){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     }
+
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
@@ -1102,6 +1112,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   shuffleLogoColors() {
+    this.isColorShuffled = false
     if(this.imageColors.length > 1) {
       this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
       let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
@@ -1185,6 +1196,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showDesign()
       this.switchTabs(0, true)
     }
+
+    this.isRosterOpened = false
   }
 
   get hideColorSection() {

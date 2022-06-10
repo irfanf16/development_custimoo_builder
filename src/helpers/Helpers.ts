@@ -13,8 +13,8 @@ const getLogoSettingsObject = () => {
     product_id: null,
     product_style_id: null,
     rotation: 0,
-    width: 100,
-    height: 100,
+    width: 57,
+    height: 57,
     name_of_placement: "chest",
     side: "front",
     x_axis: 300,
@@ -512,8 +512,9 @@ const getActiveProductData = async () => {
 }
 
 const initCustomTexts = (retrieved_products: Record<any, any>) => {
-
   retrieved_products.forEach((product:any) => {
+    const custom_texts = Store.getters.getCustomTexts(product.id)
+    if(!custom_texts || !(custom_texts && custom_texts.length)) {
       product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
         const obj = fontsColorsManipulation(product)
         //calculate colors pantone on init
@@ -522,12 +523,12 @@ const initCustomTexts = (retrieved_products: Record<any, any>) => {
         const selectProductPantonesList = getSelectedProductPantones(product.id)
 
         const pantone = getClosestColor(obj.firstColor.value, selectProductPantonesList);
-        if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
+        if (pantone && pantone.pantone && pantone.pantone != 'undefined') {
           fill_color_pantone = pantone.pantone;
         }
         let outLine_color_pantone = obj.secondColor.name;
         const opantone = getClosestColor(obj.secondColor.value, selectProductPantonesList);
-        if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
+        if (opantone && opantone.pantone && opantone.pantone != 'undefined') {
           outLine_color_pantone = opantone.pantone;
         }
 
@@ -539,6 +540,7 @@ const initCustomTexts = (retrieved_products: Record<any, any>) => {
           x_axis: productName.x_axis,
           y_axis: productName.y_axis,
           rotation: productName.rotation,
+          name_of_placement: productName.name_of_placement,
           haveControls: Boolean(!productName.is_locked),
           outlineEnabled: Boolean(productName.outline_enabled),
           side: productName.side,
@@ -551,8 +553,9 @@ const initCustomTexts = (retrieved_products: Record<any, any>) => {
           textIndex: index,
           selectColor: false
         }
-        await Store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
+        await Store.dispatch('setCustomTexts', {index: index, text: text, prd_id: product.id})
       })
+    }
   });
 }
 

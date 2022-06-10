@@ -50,8 +50,8 @@
         <div class="align-left" :class="{ 'justify-content-start pl-4': !selectedProduct.allow_name_number }">
           <div class="hide-show"></div>
           <template v-if="selectedProduct.allow_name_number">
-            <div class="roster-name">Name</div>
-            <div class="shirt-no">No</div>
+            <div v-if="custom_name_index != -1" class="roster-name">Name</div>
+            <div v-if="custom_number_index != -1" class="shirt-no">No</div>
           </template>
           <div class="shirt-size">Size</div>
         </div>
@@ -64,16 +64,16 @@
         <div class="roster-row mb-2" :key="index">
           <div class="align-left">
             <div class="hide-show">
-              <a @click="editRosterPlayer(index)">
+              <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="editRosterPlayer(index)">
                 <font-awesome-icon :icon="['fas', index === eyeIndex ? 'eye' : 'eye-slash']" />
               </a>
             </div>
             <template v-if="selectedProduct.allow_name_number">
-              <div class="roster-name">
+              <div v-if="custom_name_index != -1" class="roster-name">
                 <b-form-input ref="myInputs" v-model="roster.text" @focus="editRosterPlayer(index)"></b-form-input>
               </div>
-              <div class="shirt-no">
-                <b-form-input ref="myInputs" class="text-center" v-model="roster.number"
+              <div v-if="custom_number_index != -1" class="shirt-no">
+                <b-form-input  ref="myInputs" class="text-center" v-model="roster.number"
                   @focus="editRosterPlayer(index)"></b-form-input>
               </div>
             </template>
@@ -142,7 +142,6 @@ import ModalAction from "@/mixins/ModalAction";
   mounted() {
     this.fontsColorsManipulation()
     this.fontsList()
-    console.log(this.$root.$children[0].$children[2])
   },
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
@@ -172,10 +171,14 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     return this.$store.getters.isCustomerAuthenticated
   }
   private addToCart() {
-    (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
-
-    this.hideVModal('rostermodal')
-    this.showVModal('cart-modal')
+    if (!this.rosterDetails.some(el => el.quantity == 0)) {
+      (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
+      this.hideVModal('rostermodal')
+      this.showVModal('cart-modal')
+    } // if quantity is not zero
+    else {
+      this.showToast("Quantity must be atleast 1", "error")
+    } // toast message if quantity is zero
   }
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -205,18 +208,16 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     let number = "";
     if (newVal) {
       let name_and_number_array = newVal.split("|;|");
-      name = name_and_number_array[0]
-      number = name_and_number_array[1]
+      name = name_and_number_array[0]? name_and_number_array[0] : ""
+      number = name_and_number_array[1]? name_and_number_array[1] : ""
     }
     let custom_text = this.$store.getters.getCustomTexts()
     if (custom_text) {
-      let custom_name_index = findIndex(custom_text, { type: 'name' });
-      let custom_number_index = findIndex(custom_text, { type: 'number' });
-      if (custom_name_index != -1) {
-        this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, on_all: true, attribute: 'text', value: name })
+      if (this.custom_name_index != -1) {
+        this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_name_index, on_all: true, attribute: 'text', value: name })
       }
-      if (custom_number_index != -1) {
-        this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, on_all: true, attribute: 'text', value: number })
+      if (this.custom_number_index != -1) {
+        this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_number_index, on_all: true, attribute: 'text', value: number })
       }
     }
   }
@@ -235,11 +236,14 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     this.$emit('addPlayer', this.rosterDetails.length);
   }
 
+  public custom_name_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'name' });
+  public custom_number_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'number' });
+
   // private addToCart() {
   //   this.isLoading = true;
   //   if (!this.rosterDetails.some(el => el.quantity == 0)) {
   //     (this.$root.$refs as Record<any, any>).Order_Details.addToCart();
-  //     setTimeout(() => {
+  //    setTimeout(() => {
   //       this.close();
   //       this.isLoading = false
   //     }, 1000) // closing modal after add to cart
@@ -296,6 +300,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
           x_axis: this.selectedProduct.productnames[0].x_axis,
           y_axis: this.selectedProduct.productnames[0].y_axis,
           rotation: this.selectedProduct.productnames[0].rotation,
+          name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
           haveControls: Boolean(!this.selectedProduct.productnames[0].is_locked),
           outlineEnabled: Boolean(this.selectedProduct.productnames[0].outline_enabled),
           side: this.selectedProduct.productnames[0].side,
@@ -315,6 +320,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
           x_axis: 300,
           y_axis: 180,
           rotation: 0,
+          name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
           haveControls: true,
           outlineEnabled: true,
           side: 'back',
@@ -343,6 +349,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
           x_axis: this.selectedProduct.productnames[1].x_axis,
           y_axis: this.selectedProduct.productnames[1].y_axis,
           rotation: this.selectedProduct.productnames[1].rotation,
+          name_of_placement: this.selectedProduct.productnames[1].name_of_placement,
           haveControls: Boolean(!this.selectedProduct.productnames[1].is_locked),
           outlineEnabled: Boolean(this.selectedProduct.productnames[1].outline_enabled),
           side: this.selectedProduct.productnames[1].side,
@@ -362,6 +369,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
           x_axis: 300,
           y_axis: 180,
           rotation: 0,
+          name_of_placement: this.selectedProduct.productnames[1].name_of_placement,
           haveControls: true,
           outlineEnabled: true,
           side: 'back',

@@ -1856,6 +1856,7 @@ export default class Scene extends Vue {
         padding: 15,
         cornerSize: 30,
         fontSize: self.canvasHeight / self.mainCanvasHeight * text.height,
+        _fontSizeMult: .835,
       })
 
       if (text.scaleX && text.scaleY) {
