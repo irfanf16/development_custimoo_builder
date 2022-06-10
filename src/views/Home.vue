@@ -17,10 +17,10 @@
                 <div class="buttons-preview text-left">
                   <template v-if="editCart.cartId < 1 && updateOrderItemProducts == null">
                     <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                      <b-button :key="'lockerRoom'" v-if="roomWithProducts.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                     </template>
                     <template v-else>
-                      <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                      <b-button @click="setActionBeforeLogin('lockerRoom')" v-if="roomWithProducts.length" :key="'loginmodal'" variant="outline-secondary">Locker room</b-button>
                     </template>
                     <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
                       <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
@@ -249,6 +249,8 @@
                     <b-button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                   </template>
                 </template>
+
+                <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
               </div>
             </div>
           </div>
@@ -381,7 +383,8 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    //get recent logos
+    await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+
     this.setRecentLogos()
 
     if (this.hideColorSection){
@@ -457,7 +460,6 @@ Vue.filter('formatDate', function(value:string) {
     if(this.$route.query.tabIdx){
       this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
     }
-
   }
   //  destroyed() {
   //   this.$store.dispatch("updateOrderItemProducts", null);
@@ -935,12 +937,19 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     }
   }
+
+  private cancelEdit() {
+    this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
+    this.retrieveProducts();
+  }
+
   public async getLockers(share_url = false){
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
     if (!this.editStatus){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     }
+
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
@@ -1185,6 +1194,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showDesign()
       this.switchTabs(0, true)
     }
+
+    this.isRosterOpened = false
   }
 
   get hideColorSection() {
