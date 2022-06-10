@@ -732,6 +732,11 @@ const ProductAttributes:Module<any, any> = {
       state.customLogos = {};
       initCustomLogos(state.products)
     },
+    RESET_ALL_COLORS: (state: Record<any, any>) => {
+      state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]
+     // state.groupColors = {}
+      //state.svgGroups = []
+    },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       state.undoItems.push(payload)
     },

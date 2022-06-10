@@ -240,6 +240,12 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${locker_product?.id}`;
       await self.$store.dispatch("updateMainProductsInfo", { has_more_products: false, next_page: null, active_product_id: locker_product?.id });
       await http.get(url).then(async (response: Record<any, any>) => {
+
+        await this.$store.commit('RESET_CUSTOM_TEXTS')
+        await this.$store.commit('RESET_CUSTOM_LOGOS')
+        await this.$store.commit('RESET_ALL_COLORS')
+
+
         await (this as Record<any, any>).handleMainProducts(response);
 
         let selected_product = this.$store.getters.getSelectedProduct;
