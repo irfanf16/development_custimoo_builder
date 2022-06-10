@@ -6,7 +6,7 @@
       <b-row>
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" />
+            <CustomizationTabs @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" />
             <CustomTabs @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex" @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" v-else />
           </b-col>
 
@@ -17,10 +17,10 @@
                 <div class="buttons-preview text-left">
                   <template v-if="editCart.cartId < 1 && updateOrderItemProducts == null">
                     <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'lockerRoom'" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                      <b-button :key="'lockerRoom'" v-if="roomWithProducts.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                     </template>
                     <template v-else>
-                      <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary" v-b-modal.modal-login>Locker room</b-button>
+                      <b-button @click="setActionBeforeLogin('lockerRoom')" v-if="roomWithProducts.length" :key="'loginmodal'" variant="outline-secondary">Locker room</b-button>
                     </template>
                     <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
                       <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
@@ -215,12 +215,30 @@
               </div>
               <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
                 <b-button :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= (mainTotalTabs-1)) || (!hideColorSection && tabIndex <= mainTotalTabs)">Next</b-button>
-                <template v-else>
+                <template v-if="editCart.cartId > 0">
                   <template v-if="isCustomerAuthenticated">
                     <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                       <b-button v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
-                        {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
+                        Update Item
+                      </b-button>
+                      <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
+                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                      </b-button>
+                    </template>
+                  </template>
+                </template>
+
+                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" aria-label="Next"  v-else-if="(hideColorSection && tabIndex <= (mainTotalTabs-1)) || (!hideColorSection && tabIndex <= mainTotalTabs)">Next</b-button>
+
+                <template v-else>
+                  <b-button v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
+                    Edit Roster
+                  </b-button>
+
+                  <template v-else-if="isCustomerAuthenticated">
+                    <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                      <b-button aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                        Add to Cart
                       </b-button>
                       <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
                         <img width="20" height="20" src="../../src/assets/images/loading.gif" />
@@ -228,9 +246,11 @@
                     </template>
                   </template>
                   <template v-else>
-                    <b-button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary" v-b-modal.modal-login>Add to Cart</b-button>
+                    <b-button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                   </template>
                 </template>
+
+                <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
               </div>
             </div>
           </div>
@@ -363,7 +383,8 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    //get recent logos
+    await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+
     this.setRecentLogos()
 
     if (this.hideColorSection){
@@ -439,7 +460,6 @@ Vue.filter('formatDate', function(value:string) {
     if(this.$route.query.tabIdx){
       this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
     }
-
   }
   //  destroyed() {
   //   this.$store.dispatch("updateOrderItemProducts", null);
@@ -479,6 +499,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private sideTabIndex = 0
   private mainTotalTabs = 0
   private maximized = true
+  private isRosterOpened = false
   private product: Record<any, any> = {}
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
@@ -506,6 +527,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
     </svg>`,
   ]
+
+  private setRosterOpen(val:boolean) {
+    this.isRosterOpened = val
+  }
 
   private get lockerIndex (){
     return this.$store.getters.getLockerTabsIndex
@@ -854,9 +879,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
-  private addToCart() {
-    (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
+  private async addToCart() {
+    await (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
+    if(this.editCart.cartId > 0){
+      this.showVModal('cart-modal')
+    }
   }
+
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
@@ -908,12 +937,19 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     }
   }
+
+  private cancelEdit() {
+    this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
+    this.retrieveProducts();
+  }
+
   public async getLockers(share_url = false){
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
     if (!this.editStatus){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     }
+
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
@@ -928,6 +964,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if(this.mainProductType == "front_back") {
       locker_back_png =  main_scene.backCanvas.toDataURL("image/png").split(',')[1];
     }
+
+
     let locker = {
 
       product_id: this.selectedProduct.product_id,
@@ -935,9 +973,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       design_id: currentDesign[0].id,
       custom_logos: this.customLogos,
       text: this.customTexts,
-      colors: this.logoColors,
-      defaultcolors: this.defaultColors,
-      groupcolors: this.groupColors,
+      colors: this.imageColors,
+      defaultcolors: this.$store.getters.getDefaultColors,
+      groupcolors: this.$store.getters.getGroupColors,
       id: this.$store.getters.getEditProductId,
       locker_front_png: locker_front_png,
       locker_back_png: locker_back_png,
@@ -1035,7 +1073,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
           }
         }
-
+        console.log("modal opens from here")
         this.showVModal('locker-modal')
 
         if(this.ref.saveToLockerModal) {
@@ -1129,7 +1167,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public async resetStore(){
-    const ok = await this.ref['reset-changes'].showConfirm()
+
+       const ok = await this.ref['reset-changes'].showConfirm()
+
     if (ok) {
       if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
         await this.retrieveProducts()
@@ -1147,12 +1187,15 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.$store.dispatch('SET_LOGO_COLORS', [])
         this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
       }
+
     }
 
     if(this.mobileScreen){
       this.showDesign()
       this.switchTabs(0, true)
     }
+
+    this.isRosterOpened = false
   }
 
   get hideColorSection() {
@@ -1358,8 +1401,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   private async shareDesign(){
     if (this.editStatus || (this.lockerIndex >= 0 && this.lockerProductIndex !== undefined) && (this.undoItems.length > 0 || this.redoitems.length > 0)){
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
-      console.log(this.product)
       this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
       this.hideVModal('locker-modal')
       // (this.ref['lockerModal'].$refs['lockerRoom'] as Record<any, any>).shareProduct(product, this.lockerProductIndex, this.lockerIndex)

@@ -38,7 +38,9 @@ export class LockerProducts extends Vue {
         // @ts-ignore
         Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
       }
-      this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
+     if(prod_res.data.roster_detail) {
+       this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
+     }
       this.$root.$emit('rostershared', '')
       const designId = locker_product?.design_id
       const styleId = locker_product?.style_id
@@ -186,8 +188,6 @@ export class handleMainProducts extends Vue {
         await this.$store.dispatch('setCustomObj',product.id)
       }
     }
-    //set custom text objects for new products
-    let customTextObjects = this.$store.getters.getCustomTextObject
 
     initCustomTexts(retrieved_products)
     this.$store.dispatch('setColorSectionVisibility')

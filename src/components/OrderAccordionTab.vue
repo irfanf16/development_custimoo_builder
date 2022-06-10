@@ -30,15 +30,16 @@
         <b-card-body>
           <div class="overflow-hidden roster-details-table">
             <div class="roster-row head d-flex flex-wrap align-items-center justify-content-between">
-              <span class="name">Name</span>
-              <span>No</span>
+              <span v-if="checkIndex('name') != -1" class="name">Name</span>
+              <span v-if="checkIndex('number') != -1">No</span>
               <span>Size</span>
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in rosterDetails">
               <div :key="key" class="roster-row cursor-pointer d-flex flex-wrap align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key)">
-                <span class="name">{{ roster.text }}</span>
-                <span>{{ roster.number }}</span>
+                <span v-if="checkIndex('name') != -1" class="name">{{ roster.text }}</span>
+                <span v-if="checkIndex('number') != -1">{{ roster.number }}</span>
+
                 <span>{{ roster.size }}</span>
                 <span>{{ roster.quantity }}</span>
 <!--                <span>-->
@@ -142,6 +143,7 @@
 
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
+import { findIndex } from 'lodash'
 
 @Component<OrderAccordion>({})
 export default class OrderAccordion extends Vue {
@@ -189,6 +191,10 @@ export default class OrderAccordion extends Vue {
   public updateText (index:number) {
       this.changeText(index);
       this.activeRow = index
+  }
+
+  public checkIndex(text_type: string) {
+    return findIndex(this.customTexts, { type: text_type })
   }
 }
 </script>

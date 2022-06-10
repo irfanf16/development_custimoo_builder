@@ -225,8 +225,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let self = this;
     let is_customized = this.$store.getters.getCustomized
     let is_personalized = this.$store.getters.getPersonalized
-    let lockerIndex: null | number = null;
-    let productIndex: null | number = null;
     let locker_product: null | Record<any, any> = null;
     let url = "product_detail";
     http.get(url, { params: { id: cart_item.product_id } }).then(async (selected_product_detail) => {
