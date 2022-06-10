@@ -15,7 +15,7 @@ import {
 import {log} from "fabric/fabric-impl";
 import {getClosestColor} from "@/pantoneColor";
 import product from "@/store/modules/product";
-import {findIndex} from "lodash";
+import {findIndex, isEmpty} from "lodash";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
@@ -532,7 +532,12 @@ const ProductAttributes:Module<any, any> = {
 
     SET_GROUP_COLORS (state: Record<any, any>, groupColors: Record<any, any>) {
       if(groupColors) {
-        state.groupColors = groupColors
+       if(isEmpty(groupColors)){
+          state.groupColors = {}
+        }else{
+          state.groupColors = groupColors
+        }
+
       }
     },
     UPDATE_GROUP_COLORS (state: Record<any, any>, color: Record<any, any>) {
@@ -615,7 +620,12 @@ const ProductAttributes:Module<any, any> = {
       state.defaultColors = payload;
     },
     OVERRIDE_GROUP_COLORS(state:Record<any, any>, payload){
-      state.groupColors = payload;
+      if(isEmpty(payload)){
+        state.groupColors = {};
+      }else{
+        state.groupColors = payload;
+      }
+
     },
     REMOVE_ROSTER(state:Record<any, any>, payload:number){
       state.rosterDetails[state.selectedPrdId].splice(payload, 1);
@@ -739,7 +749,12 @@ const ProductAttributes:Module<any, any> = {
           state.defaultColors = lastUndo.data
         } else if (lastUndo.action == 'groupColor') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
-          state.groupColors = lastUndo.data
+          if(isEmpty(lastUndo.data)){
+            state.groupColors = {};
+          }else{
+            state.groupColors = lastUndo.data
+          }
+
         } else if (lastUndo.action == 'customTexts') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
@@ -759,7 +774,12 @@ const ProductAttributes:Module<any, any> = {
         }
         else if (lastUndo.action == 'groupColor'){
           state.undoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
-          state.groupColors = lastUndo.data
+          if(isEmpty(lastUndo.data)){
+            state.groupColors = {};
+          }else{
+            state.groupColors = lastUndo.data
+          }
+
         }
         else if (lastUndo.action == 'customTexts'){
           state.undoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})

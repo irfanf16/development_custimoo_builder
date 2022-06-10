@@ -679,6 +679,7 @@ export default class CustomTabs extends Vue {
       x_axis: 300,
       y_axis: 180,
       rotation: 0,
+      name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
       haveControls: true,
       outlineEnabled: true,
       side: 'back',

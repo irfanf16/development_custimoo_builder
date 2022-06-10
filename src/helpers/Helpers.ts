@@ -540,6 +540,7 @@ const initCustomTexts = (retrieved_products: Record<any, any>) => {
           x_axis: productName.x_axis,
           y_axis: productName.y_axis,
           rotation: productName.rotation,
+          name_of_placement: productName.name_of_placement,
           haveControls: Boolean(!productName.is_locked),
           outlineEnabled: Boolean(productName.outline_enabled),
           side: productName.side,

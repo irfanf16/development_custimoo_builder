@@ -128,7 +128,7 @@
               </div>
               <template v-for="(text, index) in customTexts">
                 <div :key="index" v-if="text.text" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
-                  <span class="name">{{ text.text }}</span>
+                  <span class="name">{{ text.name_of_placement }}</span>
                   <span>{{ text.originalHeight }}cm</span>
 <!--                  <span>{{ text.originalWidth }}cm</span>-->
                 </div>
@@ -283,12 +283,12 @@ export default class OrderAccordion extends Vue {
     }
 
     span.name {
-      width: 40%;
+      width: 60%;
       text-align: left;
     }
 
     span {
-      width: 20%;
+      width: 40%;
       text-align: left;
       text-align: center;
     }
