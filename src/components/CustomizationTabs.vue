@@ -17,7 +17,7 @@
               </a>
             </template>
             <div class="logo-placement-tabs" v-if="hideTab.logoHide">
-              <LogoPlacementTabs v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
+              <LogoPlacementTabs @setColorShuffled="(val) => $emit('setColorShuffled', val)" :isColorShuffled="isColorShuffled" v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
                                  :logosSetting="selectedProduct.logos_setting"/>
             </div>
           </b-tab>
@@ -167,6 +167,7 @@ import {sortTextsArray} from "@/helpers/Helpers";
   },
 })
 export default class CustomizationTabs extends Vue {
+  @Prop({required: true}) isColorShuffled!: boolean
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
   public text_add_count = 0

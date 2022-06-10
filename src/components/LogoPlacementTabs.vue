@@ -65,7 +65,7 @@
                     <template v-if="usingColorLogos"> Use Original Colors</template>
                     <template v-else> Use Logo Colors</template>
                   </b-button>
-                  <b-button class="use-btn flex-shrink-1 pulse-animation" @click="shuffleLogoColors($event)" :class="{'invisible': !(imageColors.length > 1 && usingColorLogos)}"
+                  <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors($event)" :class="{'invisible': !(imageColors.length > 1 && usingColorLogos), 'pulse-animation': isColorShuffled}"
                             variant="secondary">Shuffle
                   </b-button>
                   <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
@@ -125,6 +125,7 @@ import {getClosestColor} from "@/pantoneColor";
 })
 export default class LogoPlacementTabs extends Vue {
   @Prop({required: true}) numberOfLogosAllowed!: number
+  @Prop({required: true}) isColorShuffled!: boolean
   private isClicked = false
   @Prop({required: false, default: () => { return [{
       url: '',
@@ -347,7 +348,7 @@ export default class LogoPlacementTabs extends Vue {
 
 
   shuffleLogoColors(e:Record<any, any>) {
-    e.currentTarget.classList.remove('pulse-animation')
+    this.$emit('setColorShuffled', false)
     if(this.imageColors && this.imageColors.length > 1) {
       this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
         /*.filter((imageColor: Record<any, any>, icIdx) => {
