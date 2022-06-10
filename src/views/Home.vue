@@ -1194,6 +1194,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showDesign()
       this.switchTabs(0, true)
     }
+
+    this.isRosterOpened = false
   }
 
   get hideColorSection() {

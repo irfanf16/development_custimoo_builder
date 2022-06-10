@@ -173,7 +173,7 @@
                 </b-tab>
                 <b-tab v-if="(!getSelectionMode.readonly && getCollections.length > 0) || (getSelectionMode.readonly && getSelectionMode.eventCollectionMode)" title="Collections"
                        class="designCollections">
-                  <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
+                  <div class="products-holder collection grid gap-5 mobile-cols-2 grid-6">
                     <template v-for="(collection, index) in getCollections">
                       <div :key="index" @click="getSelectionMode.eventCollectionMode ? setEventCollection(index) : null" class="products-block" :style="getSelectionMode.eventCollectionMode ? 'cursor:pointer' : 'cursor:move' ">
                         <div class="image-holder">
@@ -195,25 +195,31 @@
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
                                class="btn light btn-secondary rounded-circle"><font-awesome-icon
                               :icon="['fas', 'edit']"/></a>
-                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`collection_${i+''+index}`"
-                                      :target="`collection_${index}`" class="light rounded-circle"
+                            <b-button title="Share collection" :id="'share-collection'+index" @click="showPopper('share-collection'+index)"
+                                      :ref="'share-collection'+index" class="light rounded-circle"
                                       custom-class="share-tooltip"><font-awesome-icon
                               :icon="['fas', 'share-alt']"/></b-button>
-                            <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
-                            <b-tooltip :target="`collection_${i+''+index}`" custom-class="share-tooltip"
-                                       placement="bottom" triggers="focus">
-                              <div class="share-holder">
-                                <h3>Copy link and Share</h3>
-                                <div class="share-form">
-                                  <b-form inline>
-                                    <b-form-input :ref="'copylink_'+index"
-                                                  :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}/view`  : ''"
-                                    ></b-form-input>
-                                    <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
-                                  </b-form>
+                            <Popper
+                              style="font-size: 12px;"
+                              v-if="$refs['share-collection'+index]"
+                              :is-open="popperID == ('share-collection'+index)"
+                              :anchor-el="$refs['share-collection'+index][0]"
+                              :on-close="hidePopper"
+                              class="share-tooltip">
+                              <aside :id="'popper-content'+index" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                                <div class="share-holder">
+                                  <h3>Copy link and Share</h3>
+                                  <div class="share-form">
+                                    <b-form inline>
+                                      <b-form-input :ref="'copylink_'+index"
+                                                    :value="collection.file_name ?  `#/collection/${collection.file_name}/view`  : ''"
+                                      ></b-form-input>
+                                      <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
+                                    </b-form>
+                                  </div>
                                 </div>
-                              </div>
-                            </b-tooltip>
+                              </aside>
+                            </Popper>
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">

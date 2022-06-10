@@ -2838,6 +2838,22 @@ $fontSize: 0.5;
                 }
             }
         }
+
+        &.collection{
+            .products-block {
+                .image-holder {
+                    overflow: visible;
+
+                    .controls {
+                        .share-form{
+                            .btn{
+                                width: auto !important;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 .draggable{
