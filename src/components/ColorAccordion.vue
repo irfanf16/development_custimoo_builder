@@ -11,7 +11,7 @@
           <span class="accordion-icon"></span>
         </b-button>
       </b-card-header>
-      <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
+      <b-collapse :id="'accordion-'+(index+1)" accordion="my-accordion" role="tabpanel">
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center" style="display: none">
             <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
