@@ -51,7 +51,7 @@ window.Echo = new Echo({
           await this.$store.dispatch('setBrowserToken')
         }
         this.$router.push({name: 'Home'})
-        this.$store.commit('RESET_STORE')
+        this.$store.dispatch('resetStore')
       }else{
         alert('no customer')
       }

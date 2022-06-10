@@ -2,7 +2,7 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
-import { getRosterDetailDefaultObject, initCustomTexts, setCustomLogo } from '../../helpers/Helpers'
+import { getRosterDetailDefaultObject, initCustomLogos, initCustomTexts, setCustomLogo } from '../../helpers/Helpers'
 
 import {
   fontsColorsManipulation, fontsList,
@@ -416,10 +416,10 @@ const ProductAttributes:Module<any, any> = {
     SET_CUSTOM_OBJ(state:  Record<any, any>,prd_id:number){
       const arr = []
       const default_setting = setLogoSettings(0)
-      const prod_logo_setting = getLogoSettings(0,false,prd_id)
+      const prod_logo_setting = getLogoSettings(0,false, prd_id)
       const logo_setting = {...default_setting,...prod_logo_setting}
       arr.push(logo_setting)
-      Vue.set(state.customLogos,prd_id,arr)
+      Vue.set(state.customLogos, prd_id, arr)
 
       //set team logo url of new product
       const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
@@ -460,6 +460,14 @@ const ProductAttributes:Module<any, any> = {
             Vue.set(state.customTexts[customText.prd_id][index],'added_count', text_count)
           }
         })
+      }
+    },
+    customLogo(state: Record<any, any>, customlogo: Record<any, any>) {
+      if(customlogo){
+        if(!state.customLogos[customlogo.prd_id]) {
+          Vue.set(state.customLogos, customlogo.prd_id, [])
+        }
+        Vue.set(state.customLogos[customlogo.prd_id], customlogo.index, customlogo.logo)
       }
     },
     customTextAttribute(state: Record<any, any>, customTextAttribute: Record<any, any>) {
@@ -579,22 +587,23 @@ const ProductAttributes:Module<any, any> = {
     ADD_TO_PRODUCTS(state:Record<any, any>, payload){
       state.products.push(payload);
     },
-    OVERRIDE_LOGOS(state:Record<any, any>, payload){
+    OVERRIDE_LOGOS(state: Record<any, any>, payload) {
       const locker_logos = JSON.parse(payload.custom_logos)
-      Object.keys(state.customLogos).map(function(key:any, index:any) {
-        if(key == payload.product_id) {
-          Vue.set(state.customLogos,key,locker_logos)
+      const products = state.products
+      products.forEach((product: Record<any, any>) => {
+        if(product.id == payload.product_id) {
+          Vue.set(state.customLogos, product.id, locker_logos)
         }
         else {
-          const logo_setting = getLogoSettings(0,false,key)
-          const final_logo = {...locker_logos[0],...logo_setting}
-          Vue.set(state.customLogos,key,[final_logo])
+          const logo_setting = getLogoSettings(0,false, product.id)
+          const final_logo = {...locker_logos[0], ...logo_setting}
+          Vue.set(state.customLogos, product.id,[final_logo])
         }
-      });
+      })
     },
     OVERRIDE_TEXT(state:Record<any, any>, payload) {
       state.customTexts = {};
-      initCustomTexts(this.getters.getProducts)
+      initCustomTexts(this.getters.getProducts) // getters works fine
       const locker_texts = JSON.parse(payload.text)
 
       locker_texts.forEach((text: Record<any, any>, index: number) => {
@@ -652,7 +661,6 @@ const ProductAttributes:Module<any, any> = {
       state.undoItems = []
       state.redoItems = []
       state.edit_locker_product = []
-      state.customLogos = {};
       //state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
@@ -689,27 +697,6 @@ const ProductAttributes:Module<any, any> = {
         }
       })
 
-      const selectedProduct = state.products[state.selectedIndex];
-      if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
-        let arr:any = []
-        state.products.forEach(async (product:any) => {
-          const default_setting = setLogoSettings(0)
-          const prod_logo_setting = getLogoSettings(0,false,product.id)
-          const logo_setting = {...default_setting,...prod_logo_setting}
-           arr.push(logo_setting)
-          //arr.push(getLogoSettings(0,false,product.id))
-          Vue.set(state.customLogos,product.id,arr)
-          // Object.assign(state.customLogos,product.id)
-          // state.customLogos[product.id] = arr
-          arr = []
-        })
-
-        //state.customLogos.push(setLogoSettings(0));
-        state.logoTabIndex = 0;
-        state.customTextObjects = [];
-        state.customLogoObjects = [];
-      }
-
       state.selectedIndex = 0;
       state.styleIndex = 0 ;
       const select_product = state.products[state.selectedIndex];
@@ -723,10 +710,17 @@ const ProductAttributes:Module<any, any> = {
           Vue.set(item, 'design_show', 0)
         }
       });
-
-      //rest custom texts
+    },
+    RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
+      state.customTextObjects = [];
       state.customTexts = {}
-      await initCustomTexts(state.products)
+      initCustomTexts(state.products)
+    },
+    RESET_CUSTOM_LOGOS: (state: Record<any, any>) => {
+      state.logoTabIndex = 0;
+      state.customLogoObjects = [];
+      state.customLogos = {};
+      initCustomLogos(state.products)
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       state.undoItems.push(payload)
@@ -1218,6 +1212,8 @@ const ProductAttributes:Module<any, any> = {
     },
     resetStore({commit}){
       commit('RESET_STORE')
+      commit('RESET_CUSTOM_TEXTS')
+      commit('RESET_CUSTOM_LOGOS')
     },
     undoAction({commit}){
       commit('DO_UNDO');
