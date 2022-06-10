@@ -13,8 +13,8 @@ const getLogoSettingsObject = () => {
     product_id: null,
     product_style_id: null,
     rotation: 0,
-    width: 100,
-    height: 100,
+    width: 57,
+    height: 57,
     name_of_placement: "chest",
     side: "front",
     x_axis: 300,
@@ -513,9 +513,9 @@ const getActiveProductData = async () => {
 
 const initCustomTexts = (retrieved_products: Record<any, any>) => {
   retrieved_products.forEach((product:any) => {
-    product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-      const custom_texts = Store.getters.getCustomTexts(product.id)
-      if(!custom_texts || !(custom_texts && custom_texts.length)) {
+    const custom_texts = Store.getters.getCustomTexts(product.id)
+    if(!custom_texts || !(custom_texts && custom_texts.length)) {
+      product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
         const obj = fontsColorsManipulation(product)
         //calculate colors pantone on init
         let fill_color_pantone = obj.firstColor.name;
@@ -553,8 +553,8 @@ const initCustomTexts = (retrieved_products: Record<any, any>) => {
           selectColor: false
         }
         await Store.dispatch('setCustomTexts', {index: index, text: text, prd_id: product.id})
-      }
-    })
+      })
+    }
   });
 }
 

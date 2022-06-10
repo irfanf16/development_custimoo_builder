@@ -648,7 +648,7 @@ const ProductAttributes:Module<any, any> = {
         state.collections = collections
 
     },
-    RESET_STORE(state: Record<any, any>){
+    async RESET_STORE(state: Record<any, any>){
       state.undoItems = []
       state.redoItems = []
       state.edit_locker_product = []
@@ -713,6 +713,7 @@ const ProductAttributes:Module<any, any> = {
       state.selectedIndex = 0;
       state.styleIndex = 0 ;
       const select_product = state.products[state.selectedIndex];
+      state.selectedPrdId = select_product.id
 
       select_product.productstyles[state.styleIndex].productdesigns.forEach((item: Record<any, any>) => {
         if (item.is_default) {
@@ -725,54 +726,7 @@ const ProductAttributes:Module<any, any> = {
 
       //rest custom texts
       state.customTexts = {}
-      state.products.forEach((product:any) => {
-        if(!state.customTexts[product.id]) {
-          Vue.set(state.customTexts, product.id, [])
-        }
-        product.productnames =  sortTextsArray(product.productnames);
-
-        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-          const obj = fontsColorsManipulation(product)
-
-          //calculate colors pantone on init
-          let fill_color_pantone = obj.firstColor.name;
-          const pantone = getClosestColor(obj.firstColor.value);
-          if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-            fill_color_pantone = pantone.pantone;
-          }
-
-          let outLine_color_pantone = obj.secondColor.name;
-          const opantone = getClosestColor(obj.secondColor.value);
-          if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-            outLine_color_pantone = opantone.pantone;
-          }
-          let textIndex = index
-          if(state.customTexts[product.id] && state.customTexts[product.id][index]) {
-            textIndex = state.customTexts[product.id][index].textIndex
-          }
-          const text = {
-            text: '',
-            type: productName.type,
-            width: productName.width,
-            height: productName.height,
-            x_axis: productName.x_axis,
-            y_axis: productName.y_axis,
-            rotation: productName.rotation,
-            haveControls: Boolean(!productName.is_locked),
-            outlineEnabled: Boolean(productName.outline_enabled),
-            side: productName.side,
-            fontFamily: fontsList(product)[0].value,
-            fillColor: obj.firstColor.value,
-            fillColorPantone: fill_color_pantone,
-            outLineColor: obj.secondColor.value,
-            outLineColorPantone: outLine_color_pantone,
-            outLineWidth: 0,
-            textIndex: textIndex,
-            selectColor: false
-            }
-          Vue.set(state.customTexts[product.id], index, text)
-        })
-      })
+      await initCustomTexts(state.products)
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       state.undoItems.push(payload)
