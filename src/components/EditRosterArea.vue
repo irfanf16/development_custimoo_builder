@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-button class="d-none d-lg-block" v-b-modal.modal-scrollable>Edit Roster</b-button>
+    <b-button class="d-none d-lg-block" v-b-modal.modal-scrollable>Edit {{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</b-button>
 
     <b-modal id="modal-scrollable" scrollable title="Roster" content-class="roster-modal" size="xl"
              footer-class="hide-modal-footer d-none">
@@ -20,7 +20,7 @@
           <font-awesome-icon :icon="['fas', 'info-circle']"/>
         </a></b-button>
 
-        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template
+        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload {{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template
           <b-form-file  class="mb-2"></b-form-file>
           <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
             <font-awesome-icon :icon="['fas', 'info-circle']"/>
@@ -89,6 +89,9 @@ export default class EditRosterArea extends Vue {
   }
   get notifications(){
     return this.$store.getters.getNotifications
+  }
+  get company(){
+    return this.$store.getters.getCompany
   }
 
   public rosterDetailsInit() {
