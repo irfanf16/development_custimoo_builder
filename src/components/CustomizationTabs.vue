@@ -122,7 +122,7 @@
               </a>
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
-              <h2 class="fw-bold mb-2 fz-18">{{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</h2>
+              <h2 class="fw-bold mb-2 fz-18">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</h2>
               <EditRosterAreaTab @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="openAddToLocker" :productSizes="productSizes" ref="edit-roster-area-tab"/>
             </div>
           </b-tab>

@@ -23,7 +23,7 @@
 
     <b-card no-body v-if="rosterDetails.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-2 class="p-3 d-flex align-items-center justify-content-between"><span class="text">{{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span> <span
+        <b-button block v-b-toggle.accordion-2 class="p-3 d-flex align-items-center justify-content-between"><span class="text">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span> <span
           class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-2" accordion="my-accordion" role="tabpanel">

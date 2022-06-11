@@ -3,7 +3,7 @@
     <div class="d-none d-md-block roster-upload-area">
       <template v-if="company.platform != 'cdnExceptLogin'">
       <h3>Import Roster from Excel sheet</h3>
-      <b-button  v-b-modal.modal-center-uploadroster class="btn btn-secondary fw-bold">Download/Upload {{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template <a href="#" v-b-tooltip.hover
+      <b-button  v-b-modal.modal-center-uploadroster class="btn btn-secondary fw-bold">Download/Upload {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template <a href="#" v-b-tooltip.hover
                                                                                   title="Import roster details from excel sheet">
               <font-awesome-icon :icon="['fas', 'info-circle']"/>
             </a></b-button>
@@ -69,14 +69,14 @@
     </div>
 
     <b-modal ref="myModal" content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered scrollable size="lg" title="Upload Team Roster">
-      <p class="mb-4">The {{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Team Roster' | TitleCase}} can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
+      <p class="mb-4">The {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Team Roster' | TitleCase}} can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
       <div class="roster-template-area">
-        <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download {{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template <a  v-b-tooltip.hover
+        <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template <a  v-b-tooltip.hover
                                                                                                            title="Enter roster in excel file">
           <font-awesome-icon :icon="['fas', 'info-circle']"/>
         </a></b-button>
 
-        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload {{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template
+        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template
           <b-form-file  class="mb-2"></b-form-file>
           <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
             <font-awesome-icon :icon="['fas', 'info-circle']"/>
