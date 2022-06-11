@@ -141,6 +141,7 @@
                         </span>
                         <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
                       </div>
+                      <a :key="`delete_logo${inda}`" @click="deleteLogo(i, logo.id, inda, room.id)"><font-awesome-icon :icon="['fas', 'trash-alt']"/></a>
                     </template>
                   </div>
                 </b-tab>
@@ -195,7 +196,7 @@
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
                                class="btn light btn-secondary rounded-circle"><font-awesome-icon
                               :icon="['fas', 'edit']"/></a>
-                            <b-button title="Share collection" :id="'share-collection'+index" @click="showPopper('share-collection'+index)"
+                            <b-button title="Share collection" :id="'share-collection'+index" @click.stop="shareCollectionLink(collection, index)"
                                       :ref="'share-collection'+index" class="light rounded-circle"
                                       custom-class="share-tooltip"><font-awesome-icon
                               :icon="['fas', 'share-alt']"/></b-button>
@@ -212,7 +213,7 @@
                                   <div class="share-form">
                                     <b-form inline>
                                       <b-form-input :ref="'copylink_'+index"
-                                                    :value="collection.file_name ?  `#/collection/${collection.file_name}/view`  : ''"
+                                                    :value="collection.shared_url !== 'undefined'   || collection.shared_url != null ?  collection.shared_url : ''"
                                       ></b-form-input>
                                       <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
                                     </b-form>
@@ -655,6 +656,29 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       console.log(error)
     }
   }
+  async shareCollectionLink(collection:Record<any, any>, index:number){
+    try {
+      if(collection){
+        let collections = {
+          id: collection.id,
+          file_name: collection.file_name
+        }
+        let shared_url = "";
+        if (collection.shared_url) {
+          shared_url += collection.shared_url;
+        }
+        else {
+          let res = await http.post('collection/link', collections)
+          shared_url += res.data.url;
+          Vue.set(this.getCollections[index], 'shared_url', shared_url)
+          console.log("url", this.getCollections[index].shared_url)
+        }
+        this.showPopper('share-collection'+index)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   public copyCollectionLink(ind: number) {
     let toCopy = this.$refs['copylink_' + ind] as Record<any, any>
@@ -739,6 +763,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit('SET_COLORS_FROM_RECENT',false)
     await setCustomLogo(logo,index)
     this.$emit('hideLockerRoomModal')
+  }
+
+  public async deleteLogo(room_index:number, logo_id:number, logo_index: number, room_id:number){
+   let res  = await http.post('delete/logo', {id: logo_id, room_id: room_id})
+    if(res.status == 204){
+      this.getLockerProducts[room_index]['logos'].splice(logo_index, 1)
+    }
   }
 
   public get selectedCollectionProducts() {

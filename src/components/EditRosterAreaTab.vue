@@ -22,7 +22,7 @@
       </div>
       <div class="modal-body">
         <div class="d-flex flex-wrap justify-content-between">
-          <RosterDetails :productSizes="sizeOptions" ref="rostermodal" @addPlayer="rosterDetailsInit"/>
+          <RosterDetails :productSizes="sizeOptions" ref="rostermodal" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit"/>
           <div class="roster-preview-area">
             <CustomizationPreview :designs="products[designsIndex]"/>
   <!--          <OrderDetails/>-->
@@ -54,7 +54,7 @@
     </modal>
 
     <div class="d-lg-none">
-      <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
+      <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
       <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details" :changeText="changeText"/>
@@ -82,7 +82,7 @@ import ModalAction from "@/mixins/ModalAction";
     RosterDetails,
     Scene
   },
-    mounted() {
+    async mounted() {
     this.setProductSizes()
     this.$nextTick(() => {
       this.allproducts.forEach(async(product:Record<any, any>)=>{
@@ -91,6 +91,13 @@ import ModalAction from "@/mixins/ModalAction";
         }
       })
     })
+      if (this.isCustomerAuthenticated){
+        let res  = await http.get("products/roster")
+        if (res.status == 200){
+          this.products_roster = res.data
+          console.log("rosters", this.products_roster.length)
+        }
+      }
   }
 })
 
@@ -100,6 +107,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   public designsIndex = 0
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
+  public products_roster: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
   private screenWidth = (window.screen.availWidth - 100)
   public shareRoster(){
@@ -137,7 +145,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
   }
-  public show(){
+  public async show(){
     this.showVModal('rostermodal')
   }
   public hide(){

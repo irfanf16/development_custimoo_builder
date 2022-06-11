@@ -6,7 +6,7 @@
       <b-row>
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" />
+            <CustomizationTabs :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val" @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" />
             <CustomTabs @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex" @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" v-else />
           </b-col>
 
@@ -116,7 +116,7 @@
               <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
                 <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                 <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
-                <b-button variant="outline-secondary" v-if="usingColorLogos && imageColors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
+                <b-button variant="outline-secondary" :class="{'pulse-animation': isColorShuffled}" v-if="usingColorLogos && imageColors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
               </div>
               <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
@@ -500,6 +500,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private mainTotalTabs = 0
   private maximized = true
   private isRosterOpened = false
+  private isColorShuffled = true
   private product: Record<any, any> = {}
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
@@ -964,10 +965,16 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if(this.mainProductType == "front_back") {
       locker_back_png =  main_scene.backCanvas.toDataURL("image/png").split(',')[1];
     }
-
-
+    let distinct:Record<any, any> = []
+    let svgGroups = this.$store.getters.getSvgGroups
+    let unique:any = [];
+    for( let i = 0; i < svgGroups.length; i++ ){
+      if( !unique[svgGroups[i].color]){
+        distinct.push({value: svgGroups[i].color, name: svgGroups[i].name});
+        unique[svgGroups[i].color] = 1;
+      }
+    }
     let locker = {
-
       product_id: this.selectedProduct.product_id,
       style_id: this.selectedProduct.productstyles[this.styleIndex].id,
       design_id: currentDesign[0].id,
@@ -979,7 +986,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       id: this.$store.getters.getEditProductId,
       locker_front_png: locker_front_png,
       locker_back_png: locker_back_png,
-      roster: this.rosterDetails
+      roster: this.rosterDetails,
+      svgcolors: distinct
     }
     if (this.editStatus){
       this.showLoader = true
@@ -1111,6 +1119,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   shuffleLogoColors() {
+    this.isColorShuffled = false
     if(this.imageColors.length > 1) {
       this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
       let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
