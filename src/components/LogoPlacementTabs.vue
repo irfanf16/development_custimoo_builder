@@ -58,9 +58,6 @@
                   </div>
                 </div>
                 <div class="d-flex align-items-center justify-content-center gap-1">
-                  <b-button @click="saveColor"  class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px">
-                    Save color
-                  </b-button>
                   <b-button @click="useLogoColors()" class="use-btn flex-shrink-1" :class="{'pulse-animation': !usingColorLogos && !isClicked}" style="white-space: nowrap; max-width: 200px" v-if="imageColors.length > 1">
                     <template v-if="usingColorLogos"> Use Original Colors</template>
                     <template v-else> Use Logo Colors</template>
@@ -76,7 +73,6 @@
             </div>
         </div>
         <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
-        <SaveColorModal ref="save-color" />
       </b-tab>
       <template #tabs-end>
         <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
@@ -165,9 +161,6 @@ export default class LogoPlacementTabs extends Vue {
 
 
 
-  public saveColor() {
-    this.ref['save-color'][0].showColorModal()
-  }
 
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
