@@ -68,6 +68,10 @@ export class LockerProducts extends Vue {
         if(!customLogos[element.product_id]) {
           await this.$store.dispatch('setCustomObj', element.product_id)
         }
+        await this.$store.commit('RESET_CUSTOM_TEXTS')
+        await this.$store.commit('RESET_CUSTOM_LOGOS')
+        await this.$store.commit('RESET_ALL_COLORS')
+        
         await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
         await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
         await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
