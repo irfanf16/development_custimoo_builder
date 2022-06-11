@@ -121,6 +121,12 @@ export default class ItemToCustomize extends Vue {
       this.$emit('switchTabs')
     }
   }
+
+
+  public setSliderIndex() {
+    (this.$refs['itemsCarousel'] as Record<any,any>).setSliderIndex()
+  }
+
   private toggleDesigns () {
     this.showDesigns = !this.showDesigns
   }
