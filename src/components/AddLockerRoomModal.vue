@@ -5,6 +5,8 @@
          :scrollable="true"
          height="auto"
          :reset="true"
+         @opened="$emit('genImages')"
+         @closed="$emit('genImages', true)"
          :shiftY="0"
          id="modal-center-addlockerroom" hide-footer centered size="xl"  modal-class="add_locker" content-class="lockerroom-modal">
     <div class="modal-header d-flex justify-content-between">
@@ -25,11 +27,16 @@
       </div>
 
       <div class="d-flex gap-4 flex-wrap flex-row-reverse">
-        <div class="bg-light pt-4" style="flex-basis: calc(40% - 2rem)">
+        <div class="bg-light rounded pt-3" style="flex-basis: calc(40% - 2rem)">
           <div class="fs-3 font-weight-bold">Design Preview</div>
 
-          <div>
-            asdasd
+          <div v-if="frontPreview !== '' || backPreview !== ''" class="d-flex py-4 gap-1 flex-grow-0">
+            <div>
+              <img style="max-width: 100%" :src="frontPreview">
+            </div>
+            <div>
+              <img style="max-width: 100%" :src="backPreview">
+            </div>
           </div>
         </div>
         <div style="flex-basis: 60%">
@@ -94,6 +101,8 @@ import ModalAction from "@/mixins/ModalAction";
     export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalAction) {
       @Prop({required: false, default: true}) readonly close_on_add !: boolean
       @Prop({required: false, default: false})  rosterUrl !: boolean
+      @Prop({required: true})  frontPreview !: string
+      @Prop({required: true})  backPreview !: string
       async recallProducts(){
         this.showLoader = true;
         await this.$store.dispatch('GET_LOCKER_PRODUCTS')
