@@ -109,6 +109,9 @@
         <template v-if="editCart.cartId > 0">Update Item</template>
         <template v-else>OK</template>
       </button>
+      <button v-if="editCart.cartId > 0" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $root.$children[0].$children[2].cancelCart()">
+        Cancel
+      </button>
     </div>
 
     <div class="d-flex justify-content-center mt-3" v-if="!editCart.cartId > 0">

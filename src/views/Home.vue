@@ -121,7 +121,7 @@
               <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
-              <AddLockerRoomModal @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url"/>
+              <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url"/>
               <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
 
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
@@ -226,6 +226,7 @@
                       </b-button>
                     </template>
                   </template>
+                <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel">Cancel</b-button>
                 </template>
 
                 <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" aria-label="Next"  v-else-if="(hideColorSection && tabIndex <= (mainTotalTabs-1)) || (!hideColorSection && tabIndex <= mainTotalTabs)">Next</b-button>
@@ -502,6 +503,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private isRosterOpened = false
   private isColorShuffled = true
   private product: Record<any, any> = {}
+  private frontPreview = ''
+  private backPreview = ''
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
       <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
@@ -531,6 +534,20 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   private setRosterOpen(val:boolean) {
     this.isRosterOpened = val
+  }
+
+  private genImages(isClose = false) {
+    const canvasFront = this.ref['mainScene'][0].$refs['front']
+    const canvasBack = this.ref['mainScene'][0].$refs['back']
+    const imgFront    = canvasFront.toDataURL('image/png')
+    const imgBack    = canvasBack.toDataURL('image/png')
+    if(isClose){
+      this.frontPreview = ''
+      this.backPreview = ''
+    }else{
+      this.frontPreview = imgFront
+      this.backPreview = imgBack
+    }
   }
 
   private get lockerIndex (){
@@ -1219,6 +1236,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   get searchLoader() {
     return this.$store.getters.getSearchLoader
+  }
+
+  private async cancelCart() {
+    await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
+    await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
+    await this.retrieveProducts();
+    await this.showVModal('cart-modal')
   }
 
   public async retrieveProducts(url:string|null=null) {
