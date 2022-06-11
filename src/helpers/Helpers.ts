@@ -559,6 +559,38 @@ const initCustomTexts = (retrieved_products: Record<any, any>) => {
   });
 }
 
+const initCustomLogos = (retrieved_products: Record<any, any>) => {
+  retrieved_products.forEach((product: Record<any, any>) => {
+    if(product.is_logo_allowed) {
+      const custom_logos = Store.getters.getCustomLogos(product.id)
+      if (!custom_logos || !(custom_logos && custom_logos.length)) {
+        if(product.logos_setting.length) {
+          const logoSetting = product.logos_setting[0]
+          const logo = {
+            id: null,
+            product_id: null,
+            product_style_id: null,
+            url: '',
+            width: logoSetting.width,
+            height: logoSetting.height,
+            x_axis: logoSetting.x_axis,
+            y_axis: logoSetting.y_axis,
+            rotation: logoSetting.rotation as number,
+            haveControls: Boolean(!logoSetting.is_locked),
+            side: logoSetting.side,
+            customLogo: true,
+            is_locked: logoSetting.is_locker,
+          }
+          Store.commit('customLogo', {index: 0, logo: logo, prd_id: product.id})
+        } else { // if logo is allowed but there is no setting for logo in product the add default logo object to show team logo
+          const logo = getLogoSettingsObject()
+          Store.commit('customLogo', {index: 0, logo: logo, prd_id: product.id})
+        }
+      }
+    }
+  })
+}
+
 const getRosterDetailDefaultObject = () => {
   const selected_product = Store.getters.getSelectedProduct;
   if (selected_product.sizes.length){
@@ -657,5 +689,5 @@ export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomTexts, getSelectedProductPantones
+  getUploadedLogoObject, initCustomLogos, initCustomTexts, getSelectedProductPantones
 };

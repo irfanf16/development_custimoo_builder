@@ -141,6 +141,7 @@
                         </span>
                         <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
                       </div>
+                      <a :key="`delete_logo${inda}`" @click="deleteLogo(i, logo.id, inda, room.id)"><font-awesome-icon :icon="['fas', 'trash-alt']"/></a>
                     </template>
                   </div>
                 </b-tab>
@@ -762,6 +763,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit('SET_COLORS_FROM_RECENT',false)
     await setCustomLogo(logo,index)
     this.$emit('hideLockerRoomModal')
+  }
+
+  public async deleteLogo(room_index:number, logo_id:number, logo_index: number, room_id:number){
+   let res  = await http.post('delete/logo', {id: logo_id, room_id: room_id})
+    if(res.status == 204){
+      this.getLockerProducts[room_index]['logos'].splice(logo_index, 1)
+    }
   }
 
   public get selectedCollectionProducts() {

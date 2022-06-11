@@ -183,6 +183,15 @@ import ModalAction from "@/mixins/ModalAction";
           this.canvasImage.back = this.canvasImage.ref_back.toDataURL("image/png").split(',')[1]
           let locker_front_png = this.canvasImage.front
           let locker_back_png = this.canvasImage.back
+          let distinct:Record<any, any> = []
+          let svgGroups = this.$store.getters.getSvgGroups
+          let unique:any = [];
+          for( let i = 0; i < svgGroups.length; i++ ){
+            if( !unique[svgGroups[i].color]){
+              distinct.push({value: svgGroups[i].color, name: svgGroups[i].name});
+              unique[svgGroups[i].color] = 1;
+            }
+          }
           let locker = {
             roster_url: this.rosterUrl,
             room_id: this.room_id,
@@ -198,7 +207,8 @@ import ModalAction from "@/mixins/ModalAction";
             groupcolors: this.groupColors,
             locker_front_png: locker_front_png,
             locker_back_png: locker_back_png,
-            roster_details: this.rosterDetails
+            roster_details: this.rosterDetails,
+            svgcolors: distinct
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res.status == 201){

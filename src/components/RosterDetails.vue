@@ -49,6 +49,10 @@
       <div class="roster-row mb-2">
         <div class="align-left" :class="{ 'justify-content-start pl-4': !selectedProduct.allow_name_number }">
           <div class="hide-show"></div>
+          <template v-if="lockerRosters && lockerRosters.length">
+            <label for="">select roster from product</label>
+            <b-form-select @change="changeRoster($event)"  :options="lockerRosters"></b-form-select>
+          </template>
           <template v-if="selectedProduct.allow_name_number">
             <div v-if="custom_name_index != -1" class="roster-name">Name</div>
             <div v-if="custom_number_index != -1" class="shirt-no">No</div>
@@ -146,6 +150,7 @@ import ModalAction from "@/mixins/ModalAction";
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   @Prop({ required: true }) productSizes!: any
+  @Prop({required: false}) lockerRosters: Record<any, any>[]
   private roster: any[] = []
   public fileData: Record<any, any>[] = []
   public selected = this.productSizes[0]
@@ -235,25 +240,11 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public addPlayer(obj: Record<any, any>) {
     this.$emit('addPlayer', this.rosterDetails.length);
   }
-
   public custom_name_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'name' });
   public custom_number_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'number' });
-
-  // private addToCart() {
-  //   this.isLoading = true;
-  //   if (!this.rosterDetails.some(el => el.quantity == 0)) {
-  //     (this.$root.$refs as Record<any, any>).Order_Details.addToCart();
-  //    setTimeout(() => {
-  //       this.close();
-  //       this.isLoading = false
-  //     }, 1000) // closing modal after add to cart
-  //   } // if quantity is not zero
-  //   else {
-  //     this.isLoading = false
-  //     this.showToast("Quantity must be atleast 1", "error")
-  //   } // toast message if quantity is zero
-  // }
-
+  public changeRoster(res:any){
+    this.$store.commit('UPDATE_ROSTER', JSON.parse(res))
+  }
   public removeIndex(ind: number) {
     if (this.customText.length > 0) {
       if (this.customText[0]) {
