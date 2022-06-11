@@ -232,7 +232,7 @@
 
                 <template v-else>
                   <b-button v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
-                    Edit Roster
+                    Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
                   </b-button>
 
                   <template v-else-if="isCustomerAuthenticated">

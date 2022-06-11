@@ -23,20 +23,20 @@
 
     <b-card no-body v-if="rosterDetails.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-2 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Roster</span> <span
+        <b-button block v-b-toggle.accordion-2 class="p-3 d-flex align-items-center justify-content-between"><span class="text">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span> <span
           class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-2" accordion="my-accordion" role="tabpanel">
         <b-card-body>
           <div class="overflow-hidden roster-details-table">
-            <div class="roster-row head d-flex flex-wrap align-items-center justify-content-between">
+            <div class="roster-row head d-flex align-items-center justify-content-between">
               <span v-if="checkIndex('name') != -1" class="name">Name</span>
               <span v-if="checkIndex('number') != -1">No</span>
               <span>Size</span>
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in rosterDetails">
-              <div :key="key" class="roster-row cursor-pointer d-flex flex-wrap align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key)">
+              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key)">
                 <span v-if="checkIndex('name') != -1" class="name">{{ roster.text }}</span>
                 <span v-if="checkIndex('number') != -1">{{ roster.number }}</span>
 
@@ -155,6 +155,9 @@ export default class OrderAccordion extends Vue {
 
   get maintabindex(){
     return this.$store.getters.getMainTab
+  }
+  get company(): Record<any, any>{
+    return this.$store.getters.getCompany
   }
 
   get rosterDetails(): [Record<any, any>] {
