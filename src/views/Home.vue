@@ -226,6 +226,7 @@
                       </b-button>
                     </template>
                   </template>
+                <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel">Cancel</b-button>
                 </template>
 
                 <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" aria-label="Next"  v-else-if="(hideColorSection && tabIndex <= (mainTotalTabs-1)) || (!hideColorSection && tabIndex <= mainTotalTabs)">Next</b-button>
@@ -1211,6 +1212,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   get searchLoader() {
     return this.$store.getters.getSearchLoader
+  }
+
+  private async cancelCart() {
+    await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
+    await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
+    await this.retrieveProducts();
+    await this.showVModal('cart-modal')
   }
 
   public async retrieveProducts(url:string|null=null) {
