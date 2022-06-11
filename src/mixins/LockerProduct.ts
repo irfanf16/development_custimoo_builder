@@ -1,7 +1,14 @@
 /* eslint-disable */
 import { Component, Vue } from 'vue-property-decorator'
 import {findIndex} from 'lodash';
-import { fontsColorsManipulation, fontsList, getRandom, initCustomTexts, processColorsCustom } from '@/helpers/Helpers'
+import {
+  fontsColorsManipulation,
+  fontsList,
+  getRandom,
+  initCustomLogos,
+  initCustomTexts,
+  processColorsCustom
+} from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import {getClosestColor} from "@/pantoneColor";
 @Component
@@ -182,14 +189,16 @@ export class handleMainProducts extends Vue {
     await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
     await this.$store.dispatch('setStockCount',stock_count);
     let selected_product = this.$store.getters.getSelectedProduct;
+
+    initCustomTexts(retrieved_products)
+    initCustomLogos(retrieved_products)
+
     let customLogos = this.$store.getters.getCustomLogoObject
     for (const product of retrieved_products) {
       if(!customLogos[product.id]) {
-        await this.$store.dispatch('setCustomObj',product.id)
+        await this.$store.dispatch('setCustomObj', product.id)
       }
     }
-
-    initCustomTexts(retrieved_products)
     this.$store.dispatch('setColorSectionVisibility')
     this.$store.dispatch("getModels", selected_product.product_id);
 

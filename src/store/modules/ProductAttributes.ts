@@ -413,7 +413,7 @@ const ProductAttributes:Module<any, any> = {
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
     },
-    SET_CUSTOM_OBJ(state:  Record<any, any>,prd_id:number){
+    SET_CUSTOM_OBJ(state:  Record<any, any>, prd_id:number){
       const arr = []
       const default_setting = setLogoSettings(0)
       const prod_logo_setting = getLogoSettings(0,false, prd_id)
@@ -422,33 +422,35 @@ const ProductAttributes:Module<any, any> = {
       Vue.set(state.customLogos, prd_id, arr)
 
       //set team logo url of new product
-      const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
-
-
-      for (const prop in custom_obj) {
-        const any_logo = custom_obj[prop][0];
-        if(any_logo && any_logo.url) {
-          logo_setting.original_logo = any_logo.original_logo
-          logo_setting.transparent_logo = any_logo.transparent_logo
-          logo_setting.smart_transparent_logo = any_logo.smart_transparent_logo
-          logo_setting.is_smart_transparent = false
-          logo_setting.is_transparent = false
-          logo_setting.url = any_logo.url
-          Vue.set(state.customLogos[prop],0, logo_setting)
-          break;
+      const team_logo_product_id = Object.keys(state.customLogos).find((product_id: string) => {
+        if(state.customLogos[product_id] && state.customLogos[product_id][0] && state.customLogos[product_id][0].url) {
+          return true
         }
+      })
+      if(team_logo_product_id) {
+        const logo = state.customLogos[team_logo_product_id][0];
+        state.products.forEach((product: Record<any, any>) => {
+          if(state.customLogos[product.id] && state.customLogos[product.id][0] && !state.customLogos[product.id][0].url) {
+            state.customLogos[product.id][0].original_logo = logo.original_logo
+            state.customLogos[product.id][0].transparent_logo = logo.transparent_logo
+            state.customLogos[product.id][0].smart_transparent_logo = logo.smart_transparent_logo
+            state.customLogos[product.id][0].is_smart_transparent = false
+            state.customLogos[product.id][0].is_transparent = false
+            Vue.set(state.customLogos[product.id][0], 'url', logo.url)
+          }
+        })
       }
     },
     SET_TEAM_LOGO_URL(state:  Record<any, any>,logo:any){
       const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
-      Object.keys(custom_obj).map(function(key, index) {
-        let logo_ = custom_obj[key][0];
+      Object.keys(custom_obj).map(function(product_id: string) {
+        let logo_ = custom_obj[product_id][0];
         logo_ = {...logo_, ...logo.customObj}
-        Vue.set(state.customLogos[key],0, logo_)
+        Vue.set(state.customLogos[product_id],0, logo_)
       });
     },
     async customTexts(state: Record<any, any>, customText: Record<any, any>) {
-      if(customText){
+     if(customText){
         if(!state.customTexts[customText.prd_id]) {
           Vue.set(state.customTexts, customText.prd_id, [])
         }
