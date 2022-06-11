@@ -177,7 +177,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     return this.$store.getters.isCustomerAuthenticated
   }
   private addToCart() {
-   
+
     if (!this.rosterDetails.some(el => el.quantity == 0)) {
       this.isLoading = true;
       (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
@@ -205,7 +205,9 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     let editing_roster_player_index = this.editing_roster_player_index
     if (this.rosterDetails && this.rosterDetails.length > 0) {
       // |;| is just name and number separator
-      return `${this.rosterDetails[editing_roster_player_index].text}|;|${this.rosterDetails[editing_roster_player_index].number}`;
+      let roster_text = this.rosterDetails[editing_roster_player_index].text ? this.rosterDetails[editing_roster_player_index].text : ''
+      let roster_num = this.rosterDetails[editing_roster_player_index].number ? this.rosterDetails[editing_roster_player_index].number : ''
+      return `${roster_text}|;|${roster_num}`;
     } else {
       return null;
     }
