@@ -119,7 +119,7 @@
           Add to Cart
         </button>
       </template>
-      <template v-else-if="!$root.$refs.Order_Details.isLoading">
+      <template v-else-if="!isLoading">
         <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
           :disabled="canvasImage.scene == null">
           Add to Cart
@@ -171,14 +171,18 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public fontsColors: any[] = []
   public fontOptions: Record<any, any>[] = []
   public editing_roster_player_index = 0;
+  public isLoading = false;
 
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
   private addToCart() {
+   
     if (!this.rosterDetails.some(el => el.quantity == 0)) {
+      this.isLoading = true;
       (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
       this.hideVModal('rostermodal')
+      this.isLoading = false;
       this.showVModal('cart-modal')
     } // if quantity is not zero
     else {
