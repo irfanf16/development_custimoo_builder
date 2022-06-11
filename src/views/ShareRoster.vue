@@ -44,8 +44,8 @@
       </div>
 
       <div class="mt-3 text-left">
-        <div class="fs-3 font-weight-bold">Import Roster from Excel sheet</div>
-        <span class="btn btn-secondary light position-relative mt-2" v-b-modal.modal-center-uploadroster style="padding-left: 30px"><span style="left: 10px" class="fs-3 icon position-absolute"><BIconFileEarmarkExcelFill /></span> <span class="d-inline-block ml-1">Upload / Download Roster Template</span></span>
+        <div class="fs-3 font-weight-bold">Import {{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} from Excel sheet</div>
+        <span class="btn btn-secondary light position-relative mt-2" v-b-modal.modal-center-uploadroster style="padding-left: 30px"><span style="left: 10px" class="fs-3 icon position-absolute"><BIconFileEarmarkExcelFill /></span> <span class="d-inline-block ml-1">Upload / Download {{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template</span></span>
       </div>
     </div>
     <div class="players-data pt-4">
@@ -65,7 +65,7 @@
           <font-awesome-icon :icon="['fas', 'info-circle']"/>
         </a></b-button>
 
-        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template
+        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload {{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template
           <b-form-file  class="mb-2"></b-form-file>
           <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
             <font-awesome-icon :icon="['fas', 'info-circle']"/>
@@ -150,6 +150,9 @@ export default class ShareRoster extends Mixins(ErrorMessages) {
       information: ''
     }
     this.custom_arr.push(payload)
+  }
+  get company(){
+    return this.$store.getters.getCompany
   }
 
   public setProductSizes() {

@@ -28,7 +28,7 @@
               <b-button class="btn btn-secondary fw-bold w-100 mb-2" v-b-modal.modal-login>Summary</b-button>
             </template>
             <template>
-              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share roster url</b-button>
+              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share {{company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'roster' }} url</b-button>
               <AddLockerRoomModal :rosterUrl="true"  ref="share" />
             </template>
             <template v-if="shared_url">
@@ -145,6 +145,9 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
 
   get editStatus():boolean{
     return  this.$store.getters.getEditStatus
+  }
+  get company(): Record<any, any>{
+    return this.$store.getters.getCompany
   }
 
 
