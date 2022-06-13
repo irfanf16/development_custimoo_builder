@@ -1243,7 +1243,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       position: absolute;
       right: -5px;
       top: -5px;
-      z-index: 1;
+      z-index: 2;
       height: 100%;
       font-size: 16px;
       display: flex;
