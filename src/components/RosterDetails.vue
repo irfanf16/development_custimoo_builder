@@ -227,11 +227,13 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     }
     let custom_text = this.$store.getters.getCustomTexts()
     if (custom_text) {
+      this.custom_name_index = findIndex(this.customText, { type: 'name' })
+      this.custom_number_index = findIndex(this.customText, { type: 'number' })
       if (this.custom_name_index != -1) {
-        this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_name_index, on_all: true, attribute: 'text', value: name })
+        await this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_name_index, on_all: true, attribute: 'text', value: name })
       }
       if (this.custom_number_index != -1) {
-        this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_number_index, on_all: true, attribute: 'text', value: number })
+        await this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_number_index, on_all: true, attribute: 'text', value: number })
       }
     }
   }
@@ -249,8 +251,8 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public addPlayer(obj: Record<any, any>) {
     this.$emit('addPlayer', this.rosterDetails.length);
   }
-  public custom_name_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'name' });
-  public custom_number_index = findIndex(this.$store.getters.getCustomTexts(), { type: 'number' });
+  public custom_name_index = findIndex(this.customText, { type: 'name' });
+  public custom_number_index = findIndex(this.customText, { type: 'number' });
   public changeRoster(res:any){
     this.$store.commit('UPDATE_ROSTER', JSON.parse(res))
   }
@@ -267,17 +269,13 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   }
   public changeText(text: string, num: number, index: number) {
     this.$store.commit('CHANGE_EYE_INDEX', index)
-    const custom_name_index = findIndex(this.customText, { type: 'name' });
-    const custom_number_index = findIndex(this.customText, { type: 'number' });
-    if(custom_name_index != -1 && custom_number_index != -1) {
-      this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, on_all: true, attribute: 'text', value: text })
-      this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, on_all: true, attribute: 'text', value: num })
+    this.custom_name_index = findIndex(this.customText, { type: 'name' })
+    this.custom_number_index = findIndex(this.customText, { type: 'number' })
+    if(this.custom_name_index != -1) {
+      this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_name_index, on_all: true, attribute: 'text', value: text })
     }
-    if(custom_name_index != -1) {
-      this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, on_all: true, attribute: 'text', value: text })
-    }
-    if(custom_number_index != -1) {
-      this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, on_all: true, attribute: 'text', value: num })
+    if(this.custom_number_index != -1) {
+      this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_number_index, on_all: true, attribute: 'text', value: num })
     }
   }
   public changeText1(text: string, num: number, index: number) {
