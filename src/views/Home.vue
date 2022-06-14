@@ -1335,7 +1335,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let url = `order_item/${order_item_id}/update/products`;
     http.post(url, {factory_products: self.updateOrderItemProducts.factory_products}).then((res: any) => {
       if (res.data.success == true) {
-        if(this.$root.$options.shadowRoot) {
+        if(this.company.platform == 'wordpress') {
           window.location.href = `${this.company.company_domain}/my-account/orders`;
         } else {
           self.$router.push({name: "OrderDetail", params: { order_id: order_item_id }});
