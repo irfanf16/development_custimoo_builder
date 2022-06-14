@@ -33,8 +33,10 @@
                     </template>
 
                     <template v-if="isCustomerAuthenticated">
-                      <b-button v-if="!shareDesignLoader" :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" style="min-width: 100px" @click.stop="shareDesign">Share design</b-button>
-                      <b-button v-else :key="'shareDesign1'" variant="outline-secondary" style="min-width: 100px" :disabled="true"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
+                      <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" :disabled="shareDesignLoader" style="min-width: 100px" @click.stop="shareDesign">
+                        <template v-if="!shareDesignLoader">Share design</template>
+                        <img v-else width="20" height="20" src="../../src/assets/images/loading.gif" />
+                      </b-button>
                       <Popper
                         style="font-size: 12px;"
                         v-if="product"
