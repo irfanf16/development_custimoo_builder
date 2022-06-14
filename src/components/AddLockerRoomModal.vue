@@ -27,7 +27,7 @@
       </div>
 
       <div class="d-flex gap-4 flex-wrap flex-row-reverse">
-        <div class="bg-light rounded pt-3" style="flex-basis: calc(40% - 2rem)">
+        <div class="bg-light rounded pt-3 text-center" style="flex-basis: calc(40% - 2rem)">
           <div class="fs-3 font-weight-bold">Design Preview</div>
 
           <div v-if="frontPreview !== '' || backPreview !== ''" class="d-flex py-4 gap-1 flex-grow-0">

@@ -1,15 +1,19 @@
 <template>
   <div class="roster-section">
-    <div class="d-flex align-items-center justify-content-between">
-      <div class="d-none d-md-block roster-upload-area">
-        <template v-if="company.platform != 'cdnExceptLogin'">
-          <h3>Import {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} from Excel sheets</h3>
-          <b-button @click="$modal.show('rosterfilemodal')" class="btn btn-secondary fw-bold">Download/Upload {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
-            Template <a href="#" v-b-tooltip.hover title="Import roster details from excel sheet">
-              <font-awesome-icon :icon="['fas', 'info-circle']" />
-            </a>
-          </b-button>
-          <p>Or insert details manually below</p>
+    <div class="d-flex align-items-center justify-content-between bg-light p-2">
+      <div class="d-none d-md-block roster-upload-area" v-if="company.platform != 'cdnExceptLogin'">
+        <h3>Import {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} from Excel sheets</h3>
+        <b-button @click="$modal.show('rosterfilemodal')" class="btn btn-secondary fw-bold">Download/Upload {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
+          Template <a href="#" v-b-tooltip.hover title="Import roster details from excel sheet">
+            <font-awesome-icon :icon="['fas', 'info-circle']" />
+          </a>
+        </b-button>
+        <p>Or insert details manually below</p>
+      </div>
+      <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '19px 0 0 0' : '0 0 0 37px'}">
+        <template v-if="lockerRosters && lockerRosters.length">
+          <label for="">Select roster from product</label>
+          <b-form-select @change="changeRoster($event)"  :options="lockerRosters"></b-form-select>
         </template>
       </div>
       <div class="d-flex gap-1" v-if="rosterDetails.length > 0">
@@ -45,14 +49,10 @@
       </div>
     </div>
 
-    <div>
+    <div class="mt-3">
       <div class="roster-row mb-2">
         <div class="align-left" :class="{ 'justify-content-start pl-4': !selectedProduct.allow_name_number }">
           <div class="hide-show"></div>
-          <template v-if="lockerRosters && lockerRosters.length">
-            <label for="">select roster from product</label>
-            <b-form-select @change="changeRoster($event)"  :options="lockerRosters"></b-form-select>
-          </template>
           <template v-if="selectedProduct.allow_name_number">
             <div v-if="custom_name_index != -1" class="roster-name">Name</div>
             <div v-if="custom_number_index != -1" class="shirt-no">No</div>
