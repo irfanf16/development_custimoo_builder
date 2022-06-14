@@ -33,8 +33,8 @@
                     </template>
 
                     <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" id="shareDesign" @click.stop="shareDesign">Share design</b-button>
-
+                      <b-button v-if="!shareDesignLoader" :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" style="min-width: 100px" @click.stop="shareDesign">Share design</b-button>
+                      <b-button v-else :key="'shareDesign1'" variant="outline-secondary" style="min-width: 100px" :disabled="true"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
                       <Popper
                         style="font-size: 12px;"
                         v-if="product"
@@ -506,6 +506,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private maximized = true
   private isRosterOpened = false
   private isColorShuffled = true
+  public shareDesignLoader = false
   private product: Record<any, any> = {}
   private frontPreview = ''
   private backPreview = ''
@@ -1416,6 +1417,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async shareProduct(product: Record<any, any>, ind: number, i: number,without_locker=true) {
     try {
+        this.shareDesignLoader = true;
         if(without_locker){
           await (this.$refs['saveToLockerModal'] as Record<any, any>).saveToLocker(true);
         }
@@ -1443,6 +1445,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             }
 
             this.showPopper('shareDesign');
+            this.shareDesignLoader = false;
           }
     } catch (error) {
       console.log(error)
