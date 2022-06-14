@@ -216,11 +216,7 @@
                 </div>
               </div>
               <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
-                <template v-if="customer.first_name == 'yasir'">
-                  <div>editCart.cartId > 0 | {{ editCart.cartId > 0 }}</div>
-                  <div>$store.getters.getUpdateOrderItemProducts == null | {{ $store.getters.getUpdateOrderItemProducts == null }}</div>
-                </template>
-                <b-button :key="'Back'" :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
+                <b-button :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                 <template v-if="editCart.cartId > 0">
                   <template v-if="isCustomerAuthenticated">
                     <template v-if="$store.getters.getUpdateOrderItemProducts == null">
