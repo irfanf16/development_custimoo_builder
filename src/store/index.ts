@@ -22,7 +22,6 @@ export default new Vuex.Store({
   plugins: [createPersistedState({
     key: 'custimo',
     paths: [
-      'ProductAttributes.styleIndex',
       'ProductAttributes.selectedIndex',
       'ProductAttributes.selectedPrdId',
       'ProductAttributes.customLogos',

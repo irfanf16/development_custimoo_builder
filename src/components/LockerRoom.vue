@@ -78,11 +78,11 @@
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
                                   <b-form inline>
-                                    <b-form-input :ref="'copylink_product_'+ind"
+                                    <b-form-input :ref="'copylink_product_'+i +''+ind"
                                                   :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
                                     ></b-form-input>
-                                    <button @click="copyLink(ind)" class="btn" type="button">Copy Link</button>
+                                    <button @click="copyLink(i, ind)" class="btn" type="button">Copy Link</button>
                                   </b-form>
                                 </div>
                               </div>
@@ -692,8 +692,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public copyLink(ind: number) {
-    let toCopy = this.$refs['copylink_product_' + ind] as Record<any, any>
+  public copyLink(room_index: number, ind: number) {
+    let toCopy = this.$refs['copylink_product_' + room_index + '' + ind] as Record<any, any>
     toCopy = toCopy[0].$el as Record<any, any>
     toCopy.select()
     try {
@@ -1243,7 +1243,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       position: absolute;
       right: -5px;
       top: -5px;
-      z-index: 1;
+      z-index: 2;
       height: 100%;
       font-size: 16px;
       display: flex;
