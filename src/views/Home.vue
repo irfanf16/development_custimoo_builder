@@ -218,7 +218,7 @@
                   <div>editCart.cartId > 0 | {{ editCart.cartId > 0 }}</div>
                   <div>$store.getters.getUpdateOrderItemProducts == null | {{ $store.getters.getUpdateOrderItemProducts == null }}</div>
                 </template>
-                <b-button :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
+                <b-button :key="'Back'" :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                 <template v-if="editCart.cartId > 0">
                   <template v-if="isCustomerAuthenticated">
                     <template v-if="$store.getters.getUpdateOrderItemProducts == null">
@@ -233,16 +233,16 @@
                 <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel">Cancel</b-button>
                 </template>
 
-                <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" aria-label="Next"  v-else-if="(hideColorSection && (tabIndex <= (mainTotalTabs-1))) || (!hideColorSection && (tabIndex <= mainTotalTabs))">Next</b-button>
+                <b-button :key="'Next'" @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-else-if="(hideColorSection && (tabIndex <= (mainTotalTabs-1))) || (!hideColorSection && (tabIndex <= mainTotalTabs))">Next</b-button>
 
                 <template v-else>
-                  <b-button v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
+                  <b-button :key="'editRoster'" v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
                     Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
                   </b-button>
 
                   <template v-else-if="isCustomerAuthenticated">
                     <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                      <b-button aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                      <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
                         Add to Cart
                       </b-button>
                       <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -251,7 +251,7 @@
                     </template>
                   </template>
                   <template v-else>
-                    <b-button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                    <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                   </template>
                 </template>
 
