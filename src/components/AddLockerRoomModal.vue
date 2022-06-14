@@ -188,17 +188,20 @@ import ModalAction from "@/mixins/ModalAction";
         }
       }
 
-      public async saveToLocker(){
+      public async saveToLocker(without_locker=false){
         this.showLoader = true
         const modelIndex = this.$store.getters.getSelectedModelIndex
         if (this.isCustomerAuthenticated) {
           const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
             return item.design_show
           })
-          if (this.product_name == ''){
+          if (this.product_name == '' && !without_locker){
             this.showError('product name is required')
             this.showLoader = false
             return false
+          }
+          if(without_locker){
+            this.product_name = this.selectedProduct.product_name;
           }
 
           this.canvasImage.front = this.canvasImage.ref_front.toDataURL("image/png").split(',')[1]
@@ -216,7 +219,7 @@ import ModalAction from "@/mixins/ModalAction";
           }
           let locker = {
             roster_url: this.rosterUrl,
-            room_id: this.room_id,
+            room_id: without_locker? null:this.room_id,
             product_id: this.selectedProduct.product_id,
             model_id: this.productModels[modelIndex].id,
             product_name: this.product_name,
@@ -232,25 +235,27 @@ import ModalAction from "@/mixins/ModalAction";
             roster_details: this.rosterDetails,
             svgcolors: distinct
           }
-         let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
+         let res = await this.$store.dispatch("SAVE_TO_LOCKER", {locker:locker,without_locker:without_locker});
+          console.log(res);
           if (res.status == 201){
             if (this.rosterUrl){
               this.$root.$emit('rostershared', res.data.data.roster_shared_url)
             }
-            this.showToast('Design saved successfully', 'SUCCESS')
-            this.product_name = ''
-            this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
-            if(this.close_on_add) {
-              this.hideVModal('add-to-lockerroom');
-              this.showLoader = false
-            } else {
-              if(!this.$store.getters.getIsShareDesign){
-                this.$emit('open-locker-room', this.tabIndex);
-              }else{
+            if(!without_locker){
+              this.showToast('Design saved successfully', 'SUCCESS')
+              this.product_name = ''
+              this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
+              if(this.close_on_add) {
                 this.hideVModal('add-to-lockerroom');
+                this.showLoader = false
+              } else {
+                if(!this.$store.getters.getIsShareDesign){
+                  this.$emit('open-locker-room', this.tabIndex);
+                }else{
+                  this.hideVModal('add-to-lockerroom');
+                }
               }
             }
-
           }else{
             this.showLoader = false
             this.showError(res);
@@ -258,10 +263,11 @@ import ModalAction from "@/mixins/ModalAction";
         }else{
           this.showError("please login first");
         }
-
-        this.$store.commit('setActiveLockerProduct', (this.productData.length - 1));
-        if(this.$store.getters.getIsShareDesign){
-          (this.$parent as Record<any, any>).shareDesign();
+        if(!without_locker){
+          this.$store.commit('setActiveLockerProduct', (this.productData.length - 1));
+          if(this.$store.getters.getIsShareDesign){
+            (this.$parent as Record<any, any>).shareDesign();
+          }
         }
         this.$store.commit('setIsShareDesign', false);
       }

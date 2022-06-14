@@ -561,6 +561,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get usingColorLogos() : [Record<any, any>] {
     return this.$store.getters.getUsingColorLogos;
   }
+  get productLockerId():number{
+    return this.$store.getters.getProductLockerId;
+  }
 
   private get lockerProductIndex (){
     return this.$store.getters.getActiveLockerProduct
@@ -1411,27 +1414,36 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
 
-  public async shareProduct(product: Record<any, any>, ind: number, i: number) {
+  public async shareProduct(product: Record<any, any>, ind: number, i: number,without_locker=true) {
     try {
-      if(product){
-        let payload = {
-          type: 'locker',
-          id: product.id,
-          customer_id: this.customer ? this.customer.id : '',
-          product_id: this.selectedProduct.product_id
+        if(without_locker){
+          await (this.$refs['saveToLockerModal'] as Record<any, any>).saveToLocker(true);
         }
-        let shared_url = "";
-        if (product.shared_url) {
-          shared_url += product.shared_url;
-        } else {
-          let res = await this.$store.dispatch('shareProduct', payload);
-          shared_url += res.data.url;
-          Vue.set(this.getLockerProducts[i].product[ind], 'shared_url', shared_url)
-          console.log(res)
-        }
+          if(product){
+            let payload = {
+              type: 'locker',
+              id: without_locker?this.productLockerId:product.id,
+              customer_id: this.customer ? this.customer.id : '',
+              product_id: this.selectedProduct.product_id
+            }
+            let shared_url = "";
+            if (product.shared_url) {
+              shared_url += product.shared_url;
+            } else {
+              let res = await this.$store.dispatch('shareProduct', payload);
+              shared_url += res.data.url;
+              if(without_locker){
+                Vue.set(product, 'shared_url', shared_url)
+                console.log(res)
+              }
+              else{
+                Vue.set(this.getLockerProducts[i].product[ind], 'shared_url', shared_url)
+                console.log(res)
+              }
+            }
 
-        this.showPopper('shareDesign');
-      }
+            this.showPopper('shareDesign');
+          }
     } catch (error) {
       console.log(error)
     }
@@ -1446,8 +1458,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       // (this.ref['lockerModal'].$refs['lockerRoom'] as Record<any, any>).shareProduct(product, this.lockerProductIndex, this.lockerIndex)
 
     }else{
-      this.$store.commit('setIsShareDesign', true)
-      this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+      // this.$store.commit('setIsShareDesign', true)
+      this.shareProduct(this.product,0,0,true);
+      // this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     }
   }
 }

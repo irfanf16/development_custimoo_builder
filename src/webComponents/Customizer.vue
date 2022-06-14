@@ -14,6 +14,9 @@ import Gleap from 'gleap';
 Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
+Vue.filter("TitleCase", (value) => {
+  return value.toLowerCase().replace(/(?:^|\s|-)\S/g, (x) => x.toUpperCase());
+});
 import { config, dom, library } from '@fortawesome/fontawesome-svg-core'
 // Make sure you tell Font Awesome to skip auto-inserting CSS into the <head>
 config.autoAddCss = false
