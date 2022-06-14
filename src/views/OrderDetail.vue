@@ -218,7 +218,7 @@
 
           <div v-for="(actFile, fileInd) in activity_items.activity_item_data[activity_navigation_index].files" :key="`actfile-${fileInd}`">
             <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`" :key="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
-            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`"  :src="`${actFile.file}`+'?nocache=1'" alt="" class="w-100" style="max-height: 500px">
+            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`" :src="`${actFile.file}?nocache=`+Math.floor(Math.random() * 100)" alt="" class="w-100" style="max-height: 500px">
           </div>
 
 
