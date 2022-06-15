@@ -32,7 +32,7 @@
                       <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                     </template>
 
-                    <template v-if="isCustomerAuthenticated">
+                    <template>
                       <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" :disabled="shareDesignLoader" style="min-width: 100px" @click.stop="shareDesign">
                         <template v-if="!shareDesignLoader">Share design</template>
                         <img v-else width="20" height="20" src="../../src/assets/images/loading.gif" />
@@ -59,9 +59,6 @@
                           </div>
                         </aside>
                       </Popper>
-                    </template>
-                    <template v-else>
-                      <b-button variant="outline-secondary" @click="setActionBeforeLogin('shareDesign')">Share design</b-button>
                     </template>
                   </template>
                   <template v-if="updateOrderItemProducts">
@@ -123,7 +120,7 @@
               <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
               <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
               <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
-              <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url"/>
+              <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
               <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
 
               <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
@@ -1413,17 +1410,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
 
-  public async shareProduct(product: Record<any, any>, ind: number, i: number,without_locker=true) {
+  public async shareProduct(product: Record<any, any>, ind: number, i: number) {
     try {
-        this.shareDesignLoader = true;
-        if(without_locker){
-          await (this.$refs['saveToLockerModal'] as Record<any, any>).saveToLocker(true);
-        }
           if(product){
             let payload = {
               type: 'locker',
-              id: without_locker?this.productLockerId:product.id,
-              customer_id: this.customer ? this.customer.id : '',
+              id: product.id,
+              customer_id: this.customer.id ,
               product_id: this.selectedProduct.product_id
             }
             let shared_url = "";
@@ -1432,18 +1425,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             } else {
               let res = await this.$store.dispatch('shareProduct', payload);
               shared_url += res.data.url;
-              if(without_locker){
-                Vue.set(product, 'shared_url', shared_url)
-                console.log(res)
-              }
-              else{
                 Vue.set(this.getLockerProducts[i].product[ind], 'shared_url', shared_url)
                 console.log(res)
-              }
             }
 
             this.showPopper('shareDesign');
-            this.shareDesignLoader = false;
           }
     } catch (error) {
       console.log(error)
@@ -1459,9 +1445,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       // (this.ref['lockerModal'].$refs['lockerRoom'] as Record<any, any>).shareProduct(product, this.lockerProductIndex, this.lockerIndex)
 
     }else{
-      // this.$store.commit('setIsShareDesign', true)
-      this.shareProduct(this.product,0,0,true);
-      // this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+      this.shareDesignLoader = true;
+      await (this.$refs['saveToLockerModal'] as Record<any, any>).shareDesignUrl(this.product);
+      this.shareDesignLoader = false;
+
     }
   }
 }
