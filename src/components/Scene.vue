@@ -900,6 +900,8 @@ export default class Scene extends Vue {
         if (!this.back || (this.back && side == 'back')) {
           if (ImageData.file_extension == 'svg' && this.productType == 'customized') {
             this.getSvgGroups()
+          } else {
+            this.showLoader = false
           }
 
           if (this.logos.length) {
