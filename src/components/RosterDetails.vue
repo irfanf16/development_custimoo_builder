@@ -13,7 +13,7 @@
       <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '19px 0 0 0' : '0 0 0 37px'}">
         <template v-if="lockerRosters && lockerRosters.length">
           <label for="">Select roster from product</label>
-          <b-form-select @change="changeRoster($event)"  :options="lockerRosters"></b-form-select>
+          <b-form-select class="mt-1" @change="changeRoster($event)"  :options="lockerRosters"></b-form-select>
         </template>
       </div>
       <div class="d-flex gap-1" v-if="rosterDetails.length > 0">
@@ -55,9 +55,9 @@
           <div class="hide-show"></div>
           <template v-if="selectedProduct.allow_name_number">
             <div v-if="custom_name_index != -1" class="roster-name">Name</div>
-            <div v-if="custom_number_index != -1" class="shirt-no">No</div>
+            <div v-if="custom_number_index != -1" :style="{maxWidth: custom_name_index == -1 && '70%', flexBasis: custom_name_index == -1 && '70%'}" class="shirt-no">No</div>
           </template>
-          <div class="shirt-size">Size</div>
+          <div class="shirt-size" :class="{ 'no-name-number': !(custom_name_index != -1 || custom_number_index != -1) }">Size</div>
         </div>
         <div class="align-right">
           <div class="qty">Qty</div>
@@ -76,12 +76,12 @@
               <div v-if="custom_name_index != -1" class="roster-name">
                 <b-form-input ref="myInputs" v-model="roster.text" @focus="editRosterPlayer(index)"></b-form-input>
               </div>
-              <div v-if="custom_number_index != -1" class="shirt-no">
+              <div v-if="custom_number_index != -1" :style="{maxWidth: custom_name_index == -1 && '70%', flexBasis: custom_name_index == -1 && '70%'}" class="shirt-no">
                 <b-form-input  ref="myInputs" class="text-center" v-model="roster.number"
                   @focus="editRosterPlayer(index)"></b-form-input>
               </div>
             </template>
-            <div class="shirt-size" :class="{ 'no-name-number': !selectedProduct.allow_name_number }">
+            <div class="shirt-size" :class="{ 'no-name-number': !(custom_name_index != -1 || custom_number_index != -1)}">
               <b-form-select ref="myInputs" @input="updateRosterSize($event, roster)" v-model="roster.size_index">
                 <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
                   {{ productSize.text }}</b-form-select-option>
