@@ -137,17 +137,29 @@ const Product:Module<any, any> = {
     async SAVE_TO_LOCKER({commit}, payload){
       let err = '';
       return new Promise(function(resolve, reject) {
-        http.post("save/product/locker", {...payload.locker,without_locker:payload.without_locker}).then((res) => {
-          if (res.status == 201 && !payload.without_locker){
-            commit('ADD_PRODUCT_TO_LOCKER', {room_id : payload.locker.room_id, data: res.data.data})
-            resolve(res);
-          }
-          if(res.status == 201 && payload.without_locker){
-            commit("SET_PRODUCT_LOCKER_ID",res.data.data.product_locker_id);
+        http.post("save/product/locker", payload).then((res) => {
+          if (res.status == 201){
+            commit('ADD_PRODUCT_TO_LOCKER', {room_id : payload.room_id, data: res.data.data})
             resolve(res);
           }
         }).catch((errors)=>{
           console.log(errors);
+          if (errors.response.status == 422){
+            err =  errors.response.data.errors.name[0];
+            reject(err);
+          }
+          reject(err);
+        });
+      });
+    },
+    async SHARE_DESIGN_URL({commit},payload){
+      let err = '';
+      return new Promise(function(resolve, reject) {
+        http.post("share-design-url", payload).then((res) => {
+          if (res.status == 201){
+            resolve(res);
+          }
+        }).catch((errors)=>{
           if (errors.response.status == 422){
             err =  errors.response.data.errors.name[0];
             reject(err);

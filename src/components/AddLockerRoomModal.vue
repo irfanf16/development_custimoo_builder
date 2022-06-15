@@ -188,22 +188,18 @@ import ModalAction from "@/mixins/ModalAction";
         }
       }
 
-      public async saveToLocker(without_locker=false){
+      public async saveToLocker(){
         this.showLoader = true
         const modelIndex = this.$store.getters.getSelectedModelIndex
         if (this.isCustomerAuthenticated) {
           const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
             return item.design_show
           })
-          if (this.product_name == '' && !without_locker){
+          if (this.product_name == ''){
             this.showError('product name is required')
             this.showLoader = false
             return false
           }
-          if(without_locker){
-            this.product_name = this.selectedProduct.product_name;
-          }
-
           this.canvasImage.front = this.canvasImage.ref_front.toDataURL("image/png").split(',')[1]
           this.canvasImage.back = this.canvasImage.ref_back.toDataURL("image/png").split(',')[1]
           let locker_front_png = this.canvasImage.front
@@ -219,7 +215,7 @@ import ModalAction from "@/mixins/ModalAction";
           }
           let locker = {
             roster_url: this.rosterUrl,
-            room_id: without_locker? null:this.room_id,
+            room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
             model_id: this.productModels[modelIndex].id,
             product_name: this.product_name,
@@ -235,13 +231,11 @@ import ModalAction from "@/mixins/ModalAction";
             roster_details: this.rosterDetails,
             svgcolors: distinct
           }
-         let res = await this.$store.dispatch("SAVE_TO_LOCKER", {locker:locker,without_locker:without_locker});
-          console.log(res);
+         let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res.status == 201){
             if (this.rosterUrl){
               this.$root.$emit('rostershared', res.data.data.roster_shared_url)
             }
-            if(!without_locker){
               this.showToast('Design saved successfully', 'SUCCESS')
               this.product_name = ''
               this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
@@ -255,7 +249,6 @@ import ModalAction from "@/mixins/ModalAction";
                   this.hideVModal('add-to-lockerroom');
                 }
               }
-            }
           }else{
             this.showLoader = false
             this.showError(res);
@@ -263,13 +256,59 @@ import ModalAction from "@/mixins/ModalAction";
         }else{
           this.showError("please login first");
         }
-        if(!without_locker){
           this.$store.commit('setActiveLockerProduct', (this.productData.length - 1));
           if(this.$store.getters.getIsShareDesign){
             (this.$parent as Record<any, any>).shareDesign();
           }
-        }
         this.$store.commit('setIsShareDesign', false);
+      }
+      public async shareDesignUrl(product:Record<any,any>){
+        const modelIndex = this.$store.getters.getSelectedModelIndex
+        const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+            return item.design_show
+        })
+        this.product_name = this.selectedProduct.product_name;
+        this.canvasImage.front = this.canvasImage.ref_front.toDataURL("image/png").split(',')[1]
+        this.canvasImage.back = this.canvasImage.ref_back.toDataURL("image/png").split(',')[1]
+        let locker_front_png = this.canvasImage.front
+        let locker_back_png = this.canvasImage.back
+        let distinct:Record<any, any> = []
+        let svgGroups = this.$store.getters.getSvgGroups
+        let unique:any = [];
+        for( let i = 0; i < svgGroups.length; i++ ){
+            if( !unique[svgGroups[i].color]){
+              distinct.push({value: svgGroups[i].color, name: svgGroups[i].name});
+              unique[svgGroups[i].color] = 1;
+            }
+        }
+        let locker = {
+            roster_url: this.rosterUrl,
+            room_id: null,
+            product_id: this.selectedProduct.product_id,
+            model_id: this.productModels[modelIndex].id,
+            product_name: this.product_name,
+            style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+            design_id: currentDesign[0].id,
+            custom_logos: this.customLogos,
+            text: this.customTexts,
+            colors: this.logoColors,
+            defaultcolors: this.defaultColors,
+            groupcolors: this.groupColors,
+            locker_front_png: locker_front_png,
+            locker_back_png: locker_back_png,
+            roster_details: this.rosterDetails,
+            svgcolors: distinct
+          }
+        let res = await this.$store.dispatch("SHARE_DESIGN_URL", locker);
+
+          console.log(res);
+          if (res.status == 201){
+            Vue.set(product, 'shared_url', res.data.url);
+            this.$emit('showPopper','shareDesign');
+          }else{
+            this.showLoader = false
+            this.showError(res);
+          }
       }
       public async deleteRoom(id:number, index:number){
         if (confirm('You are going to delete associated product')){
