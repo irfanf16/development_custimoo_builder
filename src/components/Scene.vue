@@ -21,7 +21,7 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import {getProductLogoSetting, getSelectedProductPantones} from "@/helpers/Helpers";
+import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
 
 @Component<Scene>({
   async mounted() {
@@ -118,12 +118,12 @@ import {getProductLogoSetting, getSelectedProductPantones} from "@/helpers/Helpe
         let target = transform.target;
         let canvas = target.canvas;
         if ('textIndex' in target) {
-
           let before_update = self.updateTextObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomTextObject)), { 'action': 'customTexts' })
           self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
           self.$store.dispatch('updateCustomTextAttribute', { index: target.textIndex, on_all: true, attribute: 'text', value: '' })
         } else {
-          let logo = getProductLogoSetting(self.selectedProductId, target.logoIndex);
+          let logo = setLogoSettings(target.logoIndex);
+          logo.logoIndex = target.logoIndex;
           logo.removeLogo = true
           let payload = {
             custom_logo: logo
@@ -132,7 +132,6 @@ import {getProductLogoSetting, getSelectedProductPantones} from "@/helpers/Helpe
           let before_update = self.updateLogoObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomLogoObject)))
           self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
 
-          logo.logoIndex = target.logoIndex;
           self.$store.commit('customLogos', payload)
           self.$store.commit('SET_LOGO_COLORS', []);
           self.$store.commit('SET_INITIAL_LOGO_COLORS', []);
