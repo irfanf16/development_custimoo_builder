@@ -196,15 +196,14 @@
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
                                class="btn light btn-secondary rounded-circle"><font-awesome-icon
                               :icon="['fas', 'edit']"/></a>
-                            <b-button title="Share collection" :id="'share-collection'+index" @click.stop="shareCollectionLink(collection, index)"
-                                      :ref="'share-collection'+index" class="light rounded-circle"
-                                      custom-class="share-tooltip"><font-awesome-icon
+                            <b-button title="Share collection" @click.stop="shareCollectionLink(collection, index, i)"
+                                      :ref="'share-collection'+index+''+i" class="light rounded-circle" custom-class="share-tooltip"><font-awesome-icon
                               :icon="['fas', 'share-alt']"/></b-button>
                             <Popper
                               style="font-size: 12px;"
-                              v-if="$refs['share-collection'+index]"
-                              :is-open="popperID == ('share-collection'+index)"
-                              :anchor-el="$refs['share-collection'+index][0]"
+                              v-if="$refs['share-collection'+index+''+i]"
+                              :is-open="popperID == ('share-collection'+index+''+i)"
+                              :anchor-el="$refs['share-collection'+index+''+i][0]"
                               :on-close="hidePopper"
                               class="share-tooltip">
                               <aside :id="'popper-content'+index" class="tooltip b-tooltip bs-tooltip share-tooltip">
@@ -656,7 +655,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       console.log(error)
     }
   }
-  async shareCollectionLink(collection:Record<any, any>, index:number){
+  async shareCollectionLink(collection:Record<any, any>, index: number, lockerIndex: number){
     try {
       if(collection){
         let collections = {
@@ -673,7 +672,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
           Vue.set(this.getCollections[index], 'shared_url', shared_url)
           console.log("url", this.getCollections[index].shared_url)
         }
-        this.showPopper('share-collection'+index)
+        this.showPopper('share-collection'+index+''+lockerIndex)
       }
     } catch (error) {
       console.log(error)
