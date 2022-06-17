@@ -778,7 +778,7 @@ export default class Scene extends Vue {
     if (this.backTexture) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
-        if (!this.containsObject({ id: item.id })) {
+        if (!item.id.includes('noncustomizable') && !this.containsObject({ id: item.id })) {
           let count = 1
           if (item.id == 'base') {
             count = 100000 // to make base always at first color position
@@ -860,7 +860,7 @@ export default class Scene extends Vue {
       let model: any
       let promises = []
       if (this.productType == 'customized') {
-        promises.push(this.addModel(ImageData.modelUrl, side, canvas.getHeight()))
+        promises.push(this.addModel(ImageData.modelUrl, side))
       }
 
       promises.push(this.addTexture(ImageData.textureUrl, side, ImageData.file_extension))
@@ -1619,10 +1619,15 @@ export default class Scene extends Vue {
     }
   }
 
-  public async addModel(modelUrl: string, side: string, canvas_height: number) {
+  public async addModel(modelUrl: string, side: string) {
     return new Promise((resolve, reject) => {
       fabric.Image.fromURL(modelUrl + '?nocache=1', async (img: any) => {
-        img.scaleToHeight(canvas_height - 10).set({
+        if(img.width > img.height) {
+          img.scaleToWidth(this.canvasWidth - 10)
+        } else {
+          img.scaleToHeight(this.canvasHeight - 10)
+        }
+        img.set({
           hasControls: false,
           selectable: false,
           evented: false,
@@ -1647,7 +1652,13 @@ export default class Scene extends Vue {
         fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
           options.crossOrigin = 'Anonymous'
           const img = fabric.util.groupSVGElements(objects) as fabric.Group
-          img.scaleToHeight(this.frontCanvas.getHeight() - 10).set({
+          if(img.width > img.height) {
+            img.scaleToWidth(this.canvasWidth - 10)
+          } else {
+            img.scaleToHeight(this.canvasHeight - 10)
+          }
+
+          img.set({
             hasControls: false,
             selectable: false,
             evented: false,
