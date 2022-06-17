@@ -54,7 +54,30 @@
 <!--        <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
 <!--        <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
       </div>
-          <SelectItemCarousel ref="itemsCarousel"/>
+
+      <div class="d-flex align-items-center">
+<!--        <div class="pr-2 font-weight-bold">-->
+<!--          Brands:-->
+<!--        </div>-->
+        <div class="fade-right w-100 py-2">
+          <div class="overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList ">
+            <div v-dragscroll="true" v-for="(item, i) in 10" :key="i" style="white-space: nowrap" :style="{color: selectedBrand == i ? '#000 !important': '#999 !important'}"
+                 :class="{ 'pr-3': i + 1 == 10, 'activeBrand': selectedBrand == i}" role="button" @click="()=>selectedBrand=i">
+              <img src="img/Bauer_Logo.png" height="30" v-if="i==0">
+              <img src="img/Hummel_Logo.png" height="30" v-if="i==1">
+              <img src="img/NinjaApparel_Logo.png" height="30" v-if="i==2">
+              <img src="img/Bauer_Logo.png" height="30" v-if="i==3">
+              <img src="img/Hummel_Logo.png" height="30" v-if="i==4">
+              <img src="img/NinjaApparel_Logo.png" height="30" v-if="i==5">
+              <img src="img/Bauer_Logo.png" height="30" v-if="i==6">
+              <img src="img/Hummel_Logo.png" height="30" v-if="i==7">
+              <img src="img/NinjaApparel_Logo.png" height="30" v-if="i==8">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <SelectItemCarousel ref="itemsCarousel"/>
 
     </template>
 
@@ -77,6 +100,7 @@
   import SelectItemCarousel from '../components/SelectItemCarousel.vue'
   import DesignAvailable from '../components/DesignAvailable.vue'
   import ItemsGrid from "@/components/ItemsGrid.vue";
+  import { dragscroll } from 'vue-dragscroll'
   import _ from 'lodash'
   import {http} from "@/httpCommon";
 
@@ -87,6 +111,9 @@
     // ItemsCarousel,
     SelectItemCarousel,
     DesignAvailable
+  },
+  directives: {
+    dragscroll
   },
   mounted() {
     if(this.mobileScreen){
@@ -111,6 +138,7 @@ export default class ItemToCustomize extends Vue {
   public showLoader = false;
   public searchLoader = false;
   public timeout = 0;
+  public selectedBrand = 0;
 
 
   private toggleItems () {
@@ -253,6 +281,54 @@ export default class ItemToCustomize extends Vue {
     @media (max-width: 1680px) {
       //flex-direction: column;
       flex-wrap: wrap;
+    }
+  }
+
+  .brandsList{
+    img {
+      filter: grayscale(100%);
+      opacity: 0.8;
+      transform: scale(0.85);
+      transition: 0.2s all ease-in-out;
+    }
+
+    &>div{
+      position: relative;
+      padding-bottom: 5px;
+      &:after{
+        transition: 0.2s all ease-in-out;
+        content: "";
+        display: block;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 0;
+        height: 2px;
+        margin: 0 auto;
+        background: #2c3e50;
+      }
+    }
+
+    .activeBrand{
+      &:after{
+        content: "";
+        display: block;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 2px;
+        background: #2c3e50;
+        margin: 0 auto;
+      }
+
+      img{
+        opacity: 1;
+        filter: none;
+        transform: scale(1);
+      }
     }
   }
 </style>

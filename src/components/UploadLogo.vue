@@ -455,6 +455,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     flex-direction: column;
     //overflow: hidden;
     position: relative;
+    background: rgb(205, 205, 205);
     @media only screen and (min-width: 992px) {
       width: 64px;
       height: 64px;
@@ -482,6 +483,10 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     .uploaded-logo-holder{
       height: 100%;
       max-width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
       img{
         display: block;
         height: auto;

@@ -1,6 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
 
 $theme-color: #219F84;
+.theme-color{
+    color: $theme-color !important;
+}
+.theme-bg{
+    background-color: $theme-color !important;
+}
 
 html,
 body,
@@ -1196,16 +1202,10 @@ button {
                 font-weight: 700;
                 padding: 10px;
                 display: flex;
-                flex-wrap: wrap;
                 align-items: center;
                 justify-content: center;
                 color: #000;
                 margin-bottom: 10px;
-
-                @media only screen and (min-width: 992px) {
-                    width: 75px;
-                    height: 70px;
-                }
 
                 &:hover {
                     background: none;
