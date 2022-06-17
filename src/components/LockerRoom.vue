@@ -1,8 +1,8 @@
 <template>
   <span class="asdasd">
-  <b-tabs content-class="mt-3"   @changed="lockerChanged">
+  <b-tabs lazy content-class="mt-3"   @changed="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
-      <b-tab :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
+      <b-tab lazy :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
         <template #title>
           <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
                       @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
@@ -18,8 +18,8 @@
           <div>
             <b-card no-body>
               <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
-              <b-tabs card v-model="lockerActiveTabIndex" @changed="checkINdex" :no-fade="true">
-                <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" >
+              <b-tabs v-else lazy card v-model="lockerActiveTabIndex" @changed="checkINdex" :no-fade="true">
+                <b-tab lazy v-if="!getSelectionMode.eventCollectionMode"  title="Products" >
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
                              :multiDrag="true"
@@ -132,7 +132,7 @@
                   </draggable>
 
                 </b-tab>
-                <b-tab v-if="!getSelectionMode.readonly" title="Assets" class="assets-file">
+                <b-tab lazy v-if="!getSelectionMode.readonly" title="Assets" class="assets-file">
                   <div class="grid grid-mobile-3 gap-1">
                     <template v-for="(logo, inda) in room.logos">
                       <div :key="inda" class="assets-logo-block">
@@ -145,7 +145,7 @@
                     </template>
                   </div>
                 </b-tab>
-                <b-tab v-if="!getSelectionMode.readonly" title="Colors">
+                <b-tab lazy v-if="!getSelectionMode.readonly" title="Colors">
                   <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
                     <div class="pt-lg-2 folder-wrapper">
                       <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold text-left">Select Folder</h3>
@@ -172,10 +172,11 @@
                     </div>
                   </div>
                 </b-tab>
-                <b-tab v-if="(!getSelectionMode.readonly && getCollections.length > 0) || (getSelectionMode.readonly && getSelectionMode.eventCollectionMode)" title="Collections"
+                <b-tab @click="getCollectionData" lazy v-if="(!getSelectionMode.readonly) || (getSelectionMode.readonly && getSelectionMode.eventCollectionMode)" title="Collections"
                        class="designCollections">
                   <div class="products-holder collection grid gap-5 mobile-cols-2 grid-6">
-                    <template v-for="(collection, index) in getCollections">
+                    <template v-if="getCollections.length > 0">
+                      <template v-for="(collection, index) in getCollections">
                       <div :key="index" @click="getSelectionMode.eventCollectionMode ? setEventCollection(index) : null" class="products-block" :style="getSelectionMode.eventCollectionMode ? 'cursor:pointer' : 'cursor:move' ">
                         <div class="image-holder">
                           <div class="convas_container" :key="collection_product_index"
@@ -196,14 +197,15 @@
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
                                class="btn light btn-secondary rounded-circle"><font-awesome-icon
                               :icon="['fas', 'edit']"/></a>
-                            <b-button title="Share collection" @click.stop="shareCollectionLink(collection, index, i)"
-                                      :ref="'share-collection'+index+''+i" class="light rounded-circle" custom-class="share-tooltip"><font-awesome-icon
+                            <b-button title="Share collection" :id="'share-collection'+index" @click.stop="shareCollectionLink(collection, index)"
+                                      :ref="'share-collection'+index" class="light rounded-circle"
+                                      custom-class="share-tooltip"><font-awesome-icon
                               :icon="['fas', 'share-alt']"/></b-button>
                             <Popper
                               style="font-size: 12px;"
-                              v-if="$refs['share-collection'+index+''+i]"
-                              :is-open="popperID == ('share-collection'+index+''+i)"
-                              :anchor-el="$refs['share-collection'+index+''+i][0]"
+                              v-if="$refs['share-collection'+index]"
+                              :is-open="popperID == ('share-collection'+index)"
+                              :anchor-el="$refs['share-collection'+index][0]"
                               :on-close="hidePopper"
                               class="share-tooltip">
                               <aside :id="'popper-content'+index" class="tooltip b-tooltip bs-tooltip share-tooltip">
@@ -227,9 +229,11 @@
                         </div>
                       </div>
                     </template>
+                    </template>
+                    <template v-else><p>No Collection Exists</p></template>
                   </div>
                  </b-tab>
-                <b-tab  :ref="`yearlyTab${room.id}`" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly && customerPermissions.includes('Yearly-Planner')"  title="Yearly Planner" class="designCollections">
+                <b-tab lazy :ref="`yearlyTab${room.id}`" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly && customerPermissions.includes('Yearly-Planner')"  title="Yearly Planner" class="designCollections">
                   <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
                     <template>
                       <div v-if="!room.have_yearly_planner">
@@ -354,7 +358,6 @@ import ModalAction from "@/mixins/ModalAction";
     let href: any = location.href;
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
-    this.setCollections()
     if (this.lockers.length >0 ){
       this.copiedProductLockerId = this.lockers[0].id
     }
@@ -409,6 +412,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   private get tabIndex() {
     return this.$store.getters.getLockerTabsIndex
   }
+  private set tabIndex(value){
+    this.$store.commit('Change_Locker_Tabs_Index',value);
+  }
 
   private observer:any = new MutationObserver(this.observerCallback);
 
@@ -428,6 +434,15 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
   private setSelected(e: Record<any, any>) {
     console.log('ev', e.target)
+  }
+  public getCollectionData() {
+
+    if(this.getCollections.length === 0){
+        this.viewLoader = true
+        this.setCollections();
+        this.viewLoader = false
+    }
+
   }
 
   private showTooltip(e: Record<any, any>) {
@@ -655,7 +670,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       console.log(error)
     }
   }
-  async shareCollectionLink(collection:Record<any, any>, index: number, lockerIndex: number){
+  async shareCollectionLink(collection:Record<any, any>, index:number){
     try {
       if(collection){
         let collections = {
@@ -672,7 +687,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
           Vue.set(this.getCollections[index], 'shared_url', shared_url)
           console.log("url", this.getCollections[index].shared_url)
         }
-        this.showPopper('share-collection'+index+''+lockerIndex)
+        this.showPopper('share-collection'+index)
       }
     } catch (error) {
       console.log(error)
@@ -851,11 +866,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     })
   }
   public changeTabIndex(i:number){
+    this.viewLoader = true;
     this.tabIndex = i
     let payload = {index: i, attribute: 'active_tab', value:true}
     this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
     this.$store.commit('Change_Locker_Tabs_Index', i)
     this.lockerActiveTabIndex = 0
+    this.viewLoader = false;
   }
   public checkINdex(){
     this.lockerActiveTabIndex = 0
