@@ -189,6 +189,7 @@ export default {
 @import '~bootstrap/dist/css/bootstrap.css';
 @import '~bootstrap-vue/dist/bootstrap-vue.css';
 @import '~pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';
+@import '~@fortawesome/fontawesome-svg-core/styles.css';
 @import '~vue-js-modal/dist/styles.css';
 @import '../assets/css/custom.css';
 
