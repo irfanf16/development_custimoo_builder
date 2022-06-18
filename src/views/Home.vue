@@ -902,7 +902,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   private async addToCart() {
     await (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
-    if(this.editCart.cartId > 0){
+    if(this.editCart.cartId > 0 && this.company.platform != 'wordpress'){
       this.showVModal('cart-modal')
     }
   }
