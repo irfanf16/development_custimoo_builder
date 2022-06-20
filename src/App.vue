@@ -31,6 +31,12 @@ window.Echo = new Echo({
   },
 });
 
+//todo remove this code after a while as this is used to remove pwa cache
+navigator.serviceWorker.getRegistrations().then(function(registrations) {
+  for(let registration of registrations) {
+    registration.unregister()
+} })
+
 @Component<App>({
   components: {
     Header,
