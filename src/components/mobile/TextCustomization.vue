@@ -111,6 +111,7 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 import {getClosestColor} from "@/pantoneColor";
 import {getSelectedProductPantones} from "@/helpers/Helpers";
+import { findIndex } from 'lodash'
 @Component<TextCustomization>({
   components: {
     colorPicker
@@ -122,21 +123,6 @@ import {getSelectedProductPantones} from "@/helpers/Helpers";
     this.getColors()
     // this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
-    let roster: any = JSON.parse(JSON.stringify(this.rosterText));
-    let newRoster:Record<any, any> = []
-    roster.forEach((item:Record<any, any>, index:number) => {
-      if(item){
-        newRoster.push(item)
-      }
-    })
-    if(newRoster){
-      [newRoster[0], newRoster[this.eyeIndex]] = [newRoster[this.eyeIndex], newRoster[0]]
-      this.$store.commit('updateAllRoster', newRoster)
-
-      this.roster = newRoster[0]
-
-      this.$store.commit('CHANGE_EYE_INDEX', 0)
-    }
   },
   filters: {
     capitalize: (value: string) => {
@@ -350,47 +336,21 @@ export default class TextCustomization extends Vue {
     return this.$store.getters.getEyeIndex;
   }
 
-  private roster: any = {}
-
   updateTextField(index: number, value: string) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' });
-    this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'text', value: value});
-    (this.$parent.$parent as Record<any, any>).swapSide(this.customTextIndex)
-
-    //
-    // (this.$parent.$refs['mobile-roster'] as Record<any, any>).roster.text = roster.text;
-    // (this.$parent.$refs['mobile-roster'] as Record<any, any>).roster.number = roster.number;
-    // (this.$parent.$refs['mobile-roster'] as Record<any, any>).changeText((index == 0 ? value : ''), (index == 1 ? value : ''), this.eyeIndex)
-
-    if(index == 0) {
-      this.roster.text = value
-    }
-    if(index == 1){
-      this.roster.number = value
-    }
-
-    this.$store.dispatch('setRosterDetails', {index:this.eyeIndex, roster: this.roster})
-
-    // if(this.eyeIndex){
-    //   console.log('this.rosterText', this.rosterText[this.eyeIndex])
-    //   let roster = {...this.rosterText[this.eyeIndex]}
-    //   console.log(this.customTexts)
-    //     roster.text = this.customTexts[0].text
-    //     roster.number = this.customTexts[1].text
-    //
-    //
-    //   // if(this.customTexts[0].type === 'name'){
-    //   // }
-    //   // if(this.customTexts[1].type === 'number'){
-    //   // }
-    //   console.log(roster, this.rosterText)
-    //   this.$store.dispatch('setRosterDetails', {index:this.eyeIndex, roster: roster})
-    // }
+    this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'text', value: value});
+    this.initRosterFromTexts()
   }
 
-
-  private get rosterText() {
-    return this.$store.getters.getRosterDetails
+  public initRosterFromTexts() {
+    const custom_name_index = findIndex(this.customTexts, { type: 'name' });
+    const custom_number_index = findIndex(this.customTexts, { type: 'number' });
+    if (custom_name_index != -1) {
+      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'text', value: this.customTexts[custom_name_index].text })
+    }
+    if (custom_number_index != -1) {
+      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'number', value: this.customTexts[custom_number_index].text })
+    }
   }
 
   private setTextIndex(index:number){

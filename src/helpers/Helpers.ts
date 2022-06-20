@@ -591,10 +591,9 @@ const initCustomLogos = (retrieved_products: Record<any, any>) => {
   })
 }
 
-const getRosterDetailDefaultObject = () => {
-  const selected_product = Store.getters.getSelectedProduct;
-  if (selected_product.sizes.length){
-    const productSizes = JSON.parse(selected_product.sizes[0].json_data)
+const getRosterDetailDefaultObject = (product = Store.getters.getSelectedProduct) => {
+  if (product.sizes.length){
+    const productSizes = JSON.parse(product.sizes[0].json_data)
     return {
       text: '',
       number: '',

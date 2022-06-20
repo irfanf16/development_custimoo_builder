@@ -57,7 +57,7 @@
       <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
-      <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details" :changeText="changeText"/>
+      <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details" />
     </div>
   </div>
 </template>
@@ -155,21 +155,6 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     const self = this;
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
     self.$modal.hide('rostermodal')
-  }
-  public updateText(){
-    const self = this;
-    const roster_details = self.rosterDetails;
-    if(roster_details.length){
-      self.ref['roster-detail'].changeText(roster_details[0].text,roster_details[0].number,0)
-    }
-  }
-
-  public changeText(index:number){
-    const self = this;
-    const roster_details = self.rosterDetails;
-    if(roster_details.length){
-      self.ref['roster-detail'].changeText(roster_details[index].text,roster_details[index].number,index)
-    }
   }
 
   public rosterDetailsInit(index = 0, p_id = 0) {

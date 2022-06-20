@@ -177,9 +177,6 @@ export default class CustomizationText extends Vue {
   get lockerColors() {
     return this.$store.getters.getLockerColors
   }
-  get customText(): Record<any, any>[] {
-    return this.$store.getters.getCustomTexts();
-  }
 
   public getColors() {
     this.productColors = []
@@ -271,19 +268,19 @@ export default class CustomizationText extends Vue {
     if(action == "focus"){
       this.$refs[`accordion-${index+1}`].show = true
     }
-    else if(action == "blur" && this.customText[index].text.length < 1){
+    else if(action == "blur" && this.customTexts[index].text.length < 1){
       this.$refs[`accordion-${index+1}`].show = false
     }
   }
 
   public initRosterFromTexts() {
-    const custom_name_index = findIndex(this.customText, { type: 'name' });
-    const custom_number_index = findIndex(this.customText, { type: 'number' });
+    const custom_name_index = findIndex(this.customTexts, { type: 'name' });
+    const custom_number_index = findIndex(this.customTexts, { type: 'number' });
     if (custom_name_index != -1) {
-      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'text', value: this.customText[custom_name_index].text })
+      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'text', value: this.customTexts[custom_name_index].text })
     }
     if (custom_number_index != -1) {
-      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'number', value: this.customText[custom_number_index].text })
+      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'number', value: this.customTexts[custom_number_index].text })
     }
   }
 }

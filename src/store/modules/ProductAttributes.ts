@@ -103,7 +103,8 @@ const ProductAttributes:Module<any, any> = {
       cartItemId: ''
     },
     revertRosterBool:false,
-    hideSaveLockerButton: false
+    hideSaveLockerButton: false,
+    editing_roster_player_index: 0
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -701,8 +702,8 @@ const ProductAttributes:Module<any, any> = {
 
       state.rosterDetails = {}
 
-      const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
       state.products.forEach((product:any) => {
+        const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject(product);
         if(!state.rosterDetails[product.id]) {
           Vue.set(state.rosterDetails, product.id, [])
           Vue.set(state.rosterDetails[product.id], 0, roster_detail_default_obj)
@@ -876,6 +877,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_REVERT_ROSTER_BOOL(state:Record<any, any>, payload){
       state.revertRosterBool = payload;
+    },
+    SET_EDITING_ROSTER_PLAYER_INDEX(state:Record<any, any>, payload){
+      state.editing_roster_player_index = payload;
     }
   },
   getters: {
@@ -1080,6 +1084,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getRevertRosterBool(state:Record<any,any>){
       return state.revertRosterBool;
+    },
+    getEditingRosterPlayerIndex(state:Record<any,any>){
+      return state.editing_roster_player_index;
     }
   },
   actions: {

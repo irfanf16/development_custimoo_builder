@@ -352,6 +352,7 @@ import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
+import { findIndex } from 'lodash'
 
 
 Vue.filter('formatDate', function(value:string) {
@@ -721,11 +722,46 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   @Watch('revertRosterBool')
   revertRosterBoolChanged(){
-    const self = this;
-    if(this.revertRosterBool){
-      self.ref['customization-tab']?.renderText();
+    this.$store.commit('SET_REVERT_ROSTER_BOOL',false)
+    this.$store.commit('CHANGE_EYE_INDEX', 0)
+    this.$store.commit('SET_EDITING_ROSTER_PLAYER_INDEX', 0)
+  }
+
+  get editing_roster_player_index(): number {
+    return this.$store.getters.getEditingRosterPlayerIndex
+  }
+
+  get rosterFirstNameAndNumber(): string | null {
+    if (this.rosterDetails && this.rosterDetails.length > 0) {
+      // |;| is just name and number separator
+      let roster_text = this.rosterDetails[this.editing_roster_player_index].text ? this.rosterDetails[this.editing_roster_player_index].text : ''
+      let roster_num = this.rosterDetails[this.editing_roster_player_index].number ? this.rosterDetails[this.editing_roster_player_index].number : ''
+      return `${roster_text}|;|${roster_num}`;
+    } else {
+      return null;
     }
-    self.$store.commit('SET_REVERT_ROSTER_BOOL',false)
+  }
+
+  @Watch('rosterFirstNameAndNumber', { deep: true })
+  async onRosterFirstNameAndNumberChanged(newVal: string) {
+    let name = "";
+    let number = "";
+    if (newVal) {
+      let name_and_number_array = newVal.split("|;|");
+      name = name_and_number_array[0]? name_and_number_array[0] : ""
+      number = name_and_number_array[1]? name_and_number_array[1] : ""
+    }
+    let custom_text = this.$store.getters.getCustomTexts()
+    if (custom_text) {
+      const custom_name_index = findIndex(this.customTexts, { type: 'name' })
+      const custom_number_index = findIndex(this.customTexts, { type: 'number' })
+      if (custom_name_index != -1) {
+        await this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, attribute: 'text', value: name })
+      }
+      if (custom_number_index != -1) {
+        await this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, attribute: 'text', value: number })
+      }
+    }
   }
 
 

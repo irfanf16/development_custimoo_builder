@@ -13,9 +13,11 @@
     <table class="table table-bordered table-striped roster-data" style="table-layout: fixed">
       <thead>
         <tr>
-          <th style="width: 9%;"></th>
-          <th style="width: 40%">Name</th>
-          <th style="width: 14%;">No</th>
+          <template  v-if="selectedProduct.allow_name_number">
+            <th v-if="custom_name_index != -1 || custom_number_index != -1" style="width: 9%;"></th>
+            <th v-if="custom_name_index != -1" style="width: 40%">Name</th>
+            <th v-if="custom_number_index != -1" style="width: 14%;">No</th>
+          </template>
           <th style="width: 18%;">Size</th>
           <th style="width: 10%;">Qty</th>
           <th style="width: 9%;"></th>
@@ -24,19 +26,19 @@
       <tbody>
       <template v-for="(roster, index) in rosterDetails" >
         <tr :key="index">
-          <td style="width: 10%; text-align: center" :class="{'activeEye': eyeIndex == index}" @click="changeText(roster.text, roster.number, index)"><BIconEye /></td>
-          <td style="width: 50%">
-            <b-form-input
-              class="text-center" ref="myInputs"
-              @input="changeText(roster.text, roster.number, index)"
-              v-model="roster.text" />
-          </td>
-          <td style="width: 10%; text-align: center">
-            <b-form-input
-              class="text-center" ref="myInputs" type="number"
-              @input="changeText(roster.text, roster.number, index)"
-              v-model="roster.number" />
-          </td>
+          <template v-if="selectedProduct.allow_name_number">
+            <td @click="editRosterPlayer(index)" v-if="custom_name_index != -1 || custom_number_index != -1" style="width: 10%; text-align: center" :class="{'activeEye': eyeIndex == index}"><BIconEye /></td>
+            <td v-if="custom_name_index != -1" style="width: 50%">
+              <b-form-input @focus="editRosterPlayer(index)"
+                class="text-center" ref="myInputs"
+                v-model="roster.text" />
+            </td>
+            <td v-if="custom_number_index != -1" style="width: 10%; text-align: center">
+              <b-form-input @focus="editRosterPlayer(index)"
+                class="text-center" ref="myInputs" type="number"
+                v-model="roster.number" />
+            </td>
+          </template>
           <td style="width: 10%; text-align: center">
             <b-form-select ref="myInputs" @input="updateRosterSize($event, roster)" v-model="roster.size_index">
               <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx" >{{productSize.name}}</b-form-select-option>
@@ -92,6 +94,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import readXlsxFile from "read-excel-file";
 import {default as $} from "jquery";
 import {http} from "@/httpCommon";
+import { findIndex } from 'lodash'
 
 @Component<RosterTableMobile>({
   mounted() {
@@ -120,6 +123,14 @@ export default class RosterTableMobile extends Vue {
   public fontsColors: any[] = []
   public fontOptions: Record<any, any>[] = []
 
+  get custom_name_index() : number {
+    return findIndex(this.customText, { type: 'name' })
+  }
+
+  get custom_number_index() : number {
+    return findIndex(this.customText, { type: 'number' })
+  }
+
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
@@ -134,6 +145,11 @@ export default class RosterTableMobile extends Vue {
   }
   get eyeIndex():number{
     return this.$store.getters.getEyeIndex;
+  }
+
+  public editRosterPlayer(index: number) {
+    this.$store.commit('CHANGE_EYE_INDEX', index)
+    this.$store.commit('SET_EDITING_ROSTER_PLAYER_INDEX', index)
   }
 
   public addPlayer() {
@@ -273,110 +289,6 @@ export default class RosterTableMobile extends Vue {
       link.download = 'roster_template.xlsx';
       link.click();
     })
-  }
-  public changeText(text:string, num:number, index:number) {
-    this.$store.commit('CHANGE_EYE_INDEX', index)
-    let textAdd = false
-    let numberAdd = false
-
-      if (this.customText[0]) {
-        this.$store.dispatch('updateCustomTextAttribute', {index: 0, on_all: true, attribute: 'text', value: text})
-        textAdd = true
-      }
-      if (!textAdd) {
-        let texts: Record<any, any>
-        if(this.selectedProduct.productnames[0]) {
-          texts = {
-            text: text.toString(),
-            type: this.selectedProduct.productnames[0].type,
-            width: this.selectedProduct.productnames[0].width,
-            height: this.selectedProduct.productnames[0].height,
-            x_axis: this.selectedProduct.productnames[0].x_axis,
-            y_axis: this.selectedProduct.productnames[0].y_axis,
-            rotation: this.selectedProduct.productnames[0].rotation,
-            name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
-            haveControls: Boolean(!this.selectedProduct.productnames[0].is_locked),
-            outlineEnabled: Boolean(this.selectedProduct.productnames[0].outline_enabled),
-            side: this.selectedProduct.productnames[0].side,
-            fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-            fillColor: this.firstColor.value,
-            fillColorPantone: this.firstColor.name,
-            outLineColor: this.secondColor.value,
-            outLineColorPantone: this.secondColor.name,
-            selectColor: false
-          }
-        } else {
-          texts = {
-            text: text.toString(),
-            type: 'name',
-            width: 50,
-            height: 50,
-            x_axis: 300,
-            y_axis: 180,
-            rotation: 0,
-            name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
-            haveControls: true,
-            outlineEnabled: true,
-            side: 'back',
-            fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-            fillColor: this.firstColor.value,
-            fillColorPantone: this.firstColor.name,
-            outLineColor: this.secondColor.value,
-            outLineColorPantone: this.secondColor.name,
-            selectColor: false
-          }
-          this.$store.dispatch('setCustomTexts', {index: 0, text: texts})
-        }
-      }
-    if (this.customText[1]) {
-      this.$store.dispatch('updateCustomTextAttribute', {index: 1, on_all: true, attribute: 'text', value: num.toString()})
-      numberAdd = true
-    }
-    if(!numberAdd) {
-      let texts: Record<any, any>
-      if(this.selectedProduct.productnames[1]) {
-        texts = {
-          text: num.toString(),
-          type: this.selectedProduct.productnames[1].type,
-          width: this.selectedProduct.productnames[1].width,
-          height: this.selectedProduct.productnames[1].height,
-          x_axis: this.selectedProduct.productnames[1].x_axis,
-          y_axis: this.selectedProduct.productnames[1].y_axis,
-          rotation: this.selectedProduct.productnames[1].rotation,
-          name_of_placement: this.selectedProduct.productnames[1].name_of_placement,
-          haveControls: Boolean(!this.selectedProduct.productnames[1].is_locked),
-          outlineEnabled: Boolean(this.selectedProduct.productnames[1].outline_enabled),
-          side: this.selectedProduct.productnames[1].side,
-          fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-          fillColor: this.firstColor.value,
-          fillColorPantone: this.firstColor.name,
-          outLineColor: this.secondColor.value,
-          outLineColorPantone: this.secondColor.name,
-          selectColor: false
-        }
-      } else {
-        texts = {
-          text: num.toString(),
-          type: 'number',
-          width: 50,
-          height: 50,
-          x_axis: 300,
-          y_axis: 180,
-          rotation: 0,
-          name_of_placement: this.selectedProduct.productnames[1].name_of_placement,
-          haveControls: true,
-          outlineEnabled: true,
-          side: 'back',
-          fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-          fillColor: this.firstColor.value,
-          fillColorPantone: this.firstColor.name,
-          outLineColor: this.secondColor.value,
-          outLineColorPantone: this.secondColor.name,
-          selectColor: false
-        }
-        this.$store.dispatch('setCustomTexts', {index: 1, text: texts})
-      }
-    }
   }
 
   public fontsColorsManipulation() {

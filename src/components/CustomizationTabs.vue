@@ -383,10 +383,6 @@ export default class CustomizationTabs extends Vue {
     this.previous_tab = index;
   }
 
-  public renderText(){
-    this.ref['edit-roster-area-tab'].updateText();
-  }
-
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
     let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;

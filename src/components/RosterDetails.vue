@@ -52,8 +52,8 @@
     <div class="mt-3">
       <div class="roster-row mb-2">
         <div class="align-left" :class="{ 'justify-content-start pl-4': !selectedProduct.allow_name_number }">
-          <div class="hide-show"></div>
           <template v-if="selectedProduct.allow_name_number">
+            <div class="hide-show"></div>
             <div v-if="custom_name_index != -1" class="roster-name">Name</div>
             <div v-if="custom_number_index != -1" :style="{maxWidth: custom_name_index == -1 && '70%', flexBasis: custom_name_index == -1 && '70%'}" class="shirt-no">No</div>
           </template>
@@ -67,12 +67,12 @@
       <template v-for="(roster, index) in rosterDetails">
         <div class="roster-row mb-2" :key="index">
           <div class="align-left">
-            <div class="hide-show">
-              <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="editRosterPlayer(index)">
-                <font-awesome-icon :icon="['fas', index === eyeIndex ? 'eye' : 'eye-slash']" />
-              </a>
-            </div>
             <template v-if="selectedProduct.allow_name_number">
+              <div class="hide-show">
+                <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="editRosterPlayer(index)">
+                  <font-awesome-icon :icon="['fas', index === eyeIndex ? 'eye' : 'eye-slash']" />
+                </a>
+              </div>
               <div v-if="custom_name_index != -1" class="roster-name">
                 <b-form-input ref="myInputs" v-model="roster.text" @focus="editRosterPlayer(index)"></b-form-input>
               </div>
@@ -173,14 +173,13 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public rosters: any[] = []
   public fontsColors: any[] = []
   public fontOptions: Record<any, any>[] = []
-  public editing_roster_player_index = 0;
   public isLoading = false;
 
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
-  private addToCart() {
 
+  private addToCart() {
     if (!this.rosterDetails.some(el => el.quantity == 0)) {
       this.isLoading = true;
       (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
@@ -204,39 +203,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   get editCart(): Record<any, any> {
     return this.$store.getters.getEditCart
   }
-  get rosterFirstNameAndNumber(): string | null {
-    let editing_roster_player_index = this.editing_roster_player_index
-    if (this.rosterDetails && this.rosterDetails.length > 0) {
-      // |;| is just name and number separator
-      let roster_text = this.rosterDetails[editing_roster_player_index].text ? this.rosterDetails[editing_roster_player_index].text : ''
-      let roster_num = this.rosterDetails[editing_roster_player_index].number ? this.rosterDetails[editing_roster_player_index].number : ''
-      return `${roster_text}|;|${roster_num}`;
-    } else {
-      return null;
-    }
-  }
 
-  @Watch('rosterFirstNameAndNumber', { deep: true })
-  async onRosterFirstNameAndNumberChanged(newVal: string) {
-    let name = "";
-    let number = "";
-    if (newVal) {
-      let name_and_number_array = newVal.split("|;|");
-      name = name_and_number_array[0]? name_and_number_array[0] : ""
-      number = name_and_number_array[1]? name_and_number_array[1] : ""
-    }
-    let custom_text = this.$store.getters.getCustomTexts()
-    if (custom_text) {
-      this.custom_name_index = findIndex(this.customText, { type: 'name' })
-      this.custom_number_index = findIndex(this.customText, { type: 'number' })
-      if (this.custom_name_index != -1) {
-        await this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_name_index, on_all: true, attribute: 'text', value: name })
-      }
-      if (this.custom_number_index != -1) {
-        await this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_number_index, on_all: true, attribute: 'text', value: number })
-      }
-    }
-  }
   get customText(): Record<any, any>[] {
     return this.$store.getters.getCustomTexts();
   }
@@ -251,8 +218,15 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public addPlayer(obj: Record<any, any>) {
     this.$emit('addPlayer', this.rosterDetails.length);
   }
-  public custom_name_index = findIndex(this.customText, { type: 'name' });
-  public custom_number_index = findIndex(this.customText, { type: 'number' });
+
+  get custom_name_index() : number {
+    return findIndex(this.customText, { type: 'name' })
+  }
+
+  get custom_number_index() : number {
+    return findIndex(this.customText, { type: 'number' })
+  }
+
   public changeRoster(res:any){
     this.$store.commit('UPDATE_ROSTER', JSON.parse(res))
   }
@@ -266,121 +240,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       }
     }
     this.$store.dispatch('removeRoster', ind);
-  }
-  public changeText(text: string, num: number, index: number) {
-    this.$store.commit('CHANGE_EYE_INDEX', index)
-    this.custom_name_index = findIndex(this.customText, { type: 'name' })
-    this.custom_number_index = findIndex(this.customText, { type: 'number' })
-    if(this.custom_name_index != -1) {
-      this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_name_index, on_all: true, attribute: 'text', value: text })
-    }
-    if(this.custom_number_index != -1) {
-      this.$store.dispatch('updateCustomTextAttribute', { index: this.custom_number_index, on_all: true, attribute: 'text', value: num })
-    }
-  }
-  public changeText1(text: string, num: number, index: number) {
-    this.$store.commit('CHANGE_EYE_INDEX', index)
-    let textAdd = false
-    let numberAdd = false
-
-    if (this.customText[0]) {
-      this.$store.dispatch('updateCustomTextAttribute', { index: 0, on_all: true, attribute: 'text', value: text })
-      textAdd = true
-    }
-    if (!textAdd) {
-      let texts: Record<any, any>
-      if (this.selectedProduct.productnames[0]) {
-        texts = {
-          text: text,
-          type: this.selectedProduct.productnames[0].type,
-          width: this.selectedProduct.productnames[0].width,
-          height: this.selectedProduct.productnames[0].height,
-          x_axis: this.selectedProduct.productnames[0].x_axis,
-          y_axis: this.selectedProduct.productnames[0].y_axis,
-          rotation: this.selectedProduct.productnames[0].rotation,
-          name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
-          haveControls: Boolean(!this.selectedProduct.productnames[0].is_locked),
-          outlineEnabled: Boolean(this.selectedProduct.productnames[0].outline_enabled),
-          side: this.selectedProduct.productnames[0].side,
-          fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-          fillColor: this.firstColor.value,
-          fillColorPantone: this.firstColor.name,
-          outLineColor: this.secondColor.value,
-          outLineColorPantone: this.secondColor.name,
-          selectColor: false
-        }
-      } else {
-        texts = {
-          text: text,
-          type: 'name',
-          width: 50,
-          height: 50,
-          x_axis: 300,
-          y_axis: 180,
-          rotation: 0,
-          name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
-          haveControls: true,
-          outlineEnabled: true,
-          side: 'back',
-          fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-          fillColor: this.firstColor.value,
-          fillColorPantone: this.firstColor.name,
-          outLineColor: this.secondColor.value,
-          outLineColorPantone: this.secondColor.name,
-          selectColor: false
-        }
-        this.$store.dispatch('setCustomTexts', { index: 0, text: texts })
-      }
-    }
-    if (this.customText[1]) {
-      this.$store.dispatch('updateCustomTextAttribute', { index: 1, on_all: true, attribute: 'text', value: num })
-      numberAdd = true
-    }
-    if (!numberAdd) {
-      let texts: Record<any, any>
-      if (this.selectedProduct.productnames[1]) {
-        texts = {
-          text: num,
-          type: this.selectedProduct.productnames[1].type,
-          width: this.selectedProduct.productnames[1].width,
-          height: this.selectedProduct.productnames[1].height,
-          x_axis: this.selectedProduct.productnames[1].x_axis,
-          y_axis: this.selectedProduct.productnames[1].y_axis,
-          rotation: this.selectedProduct.productnames[1].rotation,
-          name_of_placement: this.selectedProduct.productnames[1].name_of_placement,
-          haveControls: Boolean(!this.selectedProduct.productnames[1].is_locked),
-          outlineEnabled: Boolean(this.selectedProduct.productnames[1].outline_enabled),
-          side: this.selectedProduct.productnames[1].side,
-          fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-          fillColor: this.firstColor.value,
-          fillColorPantone: this.firstColor.name,
-          outLineColor: this.secondColor.value,
-          outLineColorPantone: this.secondColor.name,
-          selectColor: false
-        }
-      } else {
-        texts = {
-          text: num,
-          type: 'number',
-          width: 50,
-          height: 50,
-          x_axis: 300,
-          y_axis: 180,
-          rotation: 0,
-          name_of_placement: this.selectedProduct.productnames[1].name_of_placement,
-          haveControls: true,
-          outlineEnabled: true,
-          side: 'back',
-          fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-          fillColor: this.firstColor.value,
-          fillColorPantone: this.firstColor.name,
-          outLineColor: this.secondColor.value,
-          outLineColorPantone: this.secondColor.name,
-          selectColor: false
-        }
-        this.$store.dispatch('setCustomTexts', { index: 1, text: texts })
-      }
-    }
   }
 
   public fontsColorsManipulation() {
@@ -431,8 +290,8 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   }
 
   public editRosterPlayer(index: number) {
-    this.editing_roster_player_index = index;
     this.$store.commit('CHANGE_EYE_INDEX', index)
+    this.$store.commit('SET_EDITING_ROSTER_PLAYER_INDEX', index)
   }
 
   public updateRosterPlayerNameFormat(selected_format: string) {

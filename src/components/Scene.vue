@@ -406,20 +406,21 @@ export default class Scene extends Vue {
             textObject.set('strokeWidth', parseInt(text.outLineWidth))
             canvas.renderAll()
 
-            const width = (textObject.width as number * textObject.scaleX * this.measurementRatio).toFixed(1)
-            const height = (textObject.height as number * textObject.scaleY * this.measurementRatio).toFixed(1)
-            const outLineWidth = (textObject.strokeWidth as number * this.measurementRatio).toFixed(1)
-            self.$store.dispatch('updateCustomTextWithoutTrigger', {
-              index: index,
-              data: {
-                actualWidth: textObject.width,
-                actualHeight: textObject.height,
-                originalWidth: width,
-                originalHeight: height,
-                originalOutLineWidth: outLineWidth,
-              }
-            })
-
+            if(this.mainPreview) {
+              const width = (textObject.width as number * textObject.scaleX * this.measurementRatio).toFixed(1)
+              const height = (textObject.height as number * textObject.scaleY * this.measurementRatio).toFixed(1)
+              const outLineWidth = (textObject.strokeWidth as number * this.measurementRatio).toFixed(1)
+              self.$store.dispatch('updateCustomTextWithoutTrigger', {
+                index: index,
+                data: {
+                  actualWidth: textObject.width,
+                  actualHeight: textObject.height,
+                  originalWidth: width,
+                  originalHeight: height,
+                  originalOutLineWidth: outLineWidth,
+                }
+              })
+            }
             this.eventAction(text, textObject, otherSideObject)
             addText = false
           }

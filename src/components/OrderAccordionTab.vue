@@ -147,7 +147,6 @@ import { findIndex } from 'lodash'
 
 @Component<OrderAccordion>({})
 export default class OrderAccordion extends Vue {
-  @Prop({required: true}) changeText: any
   private activeRow = 0
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
@@ -192,7 +191,6 @@ export default class OrderAccordion extends Vue {
   }
 
   public updateText (index:number) {
-      this.changeText(index);
       this.activeRow = index
   }
 

@@ -13,7 +13,7 @@
     </div>
 
     <div>
-      <ConfirmOrderTab :changeText="changeText" />
+      <ConfirmOrderTab />
     </div>
     <div class="order-details-area">
       <div class="qty-area">
@@ -97,7 +97,6 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
 })
 
 export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts)  {
-  @Prop({required: true}) changeText: any
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>
