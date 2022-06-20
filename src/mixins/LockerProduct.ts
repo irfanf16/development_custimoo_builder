@@ -7,7 +7,7 @@ import {
   getRandom,
   initCustomLogos,
   initCustomTexts,
-  processColorsCustom
+  processColorsCustom, rosterDetailsInit
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import {getClosestColor} from "@/pantoneColor";
@@ -196,6 +196,7 @@ export class handleMainProducts extends Vue {
 
     initCustomTexts(retrieved_products)
     initCustomLogos(retrieved_products)
+    rosterDetailsInit(retrieved_products)
 
     let customLogos = this.$store.getters.getCustomLogoObject
     for (const product of retrieved_products) {

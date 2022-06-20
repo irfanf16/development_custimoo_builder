@@ -2,7 +2,13 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
-import { getRosterDetailDefaultObject, initCustomLogos, initCustomTexts, setCustomLogo } from '../../helpers/Helpers'
+import {
+  getRosterDetailDefaultObject,
+  initCustomLogos,
+  initCustomTexts,
+  rosterDetailsInit,
+  setCustomLogo
+} from '../../helpers/Helpers'
 
 import {
   fontsColorsManipulation, fontsList,
@@ -701,14 +707,7 @@ const ProductAttributes:Module<any, any> = {
       }
 
       state.rosterDetails = {}
-
-      state.products.forEach((product:any) => {
-        const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject(product);
-        if(!state.rosterDetails[product.id]) {
-          Vue.set(state.rosterDetails, product.id, [])
-          Vue.set(state.rosterDetails[product.id], 0, roster_detail_default_obj)
-        }
-      })
+      rosterDetailsInit(state.products)
 
       state.selectedIndex = 0;
       state.styleIndex = 0 ;

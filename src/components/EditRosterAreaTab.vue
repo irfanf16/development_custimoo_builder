@@ -84,20 +84,13 @@ import ModalAction from "@/mixins/ModalAction";
   },
     async mounted() {
     this.setProductSizes()
-    this.$nextTick(() => {
-      this.allproducts.forEach(async(product:Record<any, any>)=>{
-         if(!this.$store.getters.getAllRosterDetails[product.id]) {
-          await this.rosterDetailsInit(0, product.id)
-        }
-      })
-    })
-      if (this.isCustomerAuthenticated){
-        let res  = await http.get("products/roster")
-        if (res.status == 200){
-          this.products_roster = res.data
-          console.log("rosters", this.products_roster.length)
-        }
+    if (this.isCustomerAuthenticated){
+      let res  = await http.get("products/roster")
+      if (res.status == 200){
+        this.products_roster = res.data
+        console.log("rosters", this.products_roster.length)
       }
+    }
   }
 })
 
@@ -157,17 +150,13 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     self.$modal.hide('rostermodal')
   }
 
-  public rosterDetailsInit(index = 0, p_id = 0) {
-    let payload = getRosterDetailDefaultObject()
+  public rosterDetailsInit(index = 0, product = this.selectedProduct) {
+    let payload = getRosterDetailDefaultObject(product)
     if(this.sizeOptions.length > 0) {
       payload.size = this.sizeOptions[0].text;
       payload.code = this.sizeOptions[0].value;
     }
-    let product_id = this.selectedProduct.id
-    if (p_id){
-      product_id = p_id
-    }
-    this.$store.dispatch('setRosterDetails', { pid : product_id, index: index, roster: payload })
+    this.$store.dispatch('setRosterDetails', { pid : product.id, index: index, roster: payload })
   }
 
   public setProductSizes() {

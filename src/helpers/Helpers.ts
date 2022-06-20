@@ -591,6 +591,16 @@ const initCustomLogos = (retrieved_products: Record<any, any>) => {
   })
 }
 
+const rosterDetailsInit = (retrieved_products: Record<any, any>) => {
+  retrieved_products.forEach((product: Record<any, any>) => {
+    if(!Store.getters.getAllRosterDetails[product.id]) {
+      const payload = getRosterDetailDefaultObject(product)
+      console.log('first time roster init')
+      Store.dispatch('setRosterDetails', { pid : product.id, index: 0, roster: payload })
+    }
+  })
+}
+
 const getRosterDetailDefaultObject = (product = Store.getters.getSelectedProduct) => {
   if (product.sizes.length){
     const productSizes = JSON.parse(product.sizes[0].json_data)
@@ -688,5 +698,5 @@ export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomLogos, initCustomTexts, getSelectedProductPantones
+  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones
 };
