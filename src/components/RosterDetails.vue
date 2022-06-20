@@ -1,15 +1,6 @@
 <template>
   <div class="roster-section">
     <div class="d-flex align-items-center justify-content-between bg-light p-2">
-      <div class="d-none d-md-block roster-upload-area" v-if="company.platform != 'cdnExceptLogin'">
-        <h3>Import {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} from Excel sheets</h3>
-        <b-button @click="$modal.show('rosterfilemodal')" class="btn btn-secondary fw-bold">Download/Upload {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
-          Template <a href="#" v-b-tooltip.hover title="Import roster details from excel sheet">
-            <font-awesome-icon :icon="['fas', 'info-circle']" />
-          </a>
-        </b-button>
-        <p>Or insert details manually below</p>
-      </div>
       <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '19px 0 0 0' : '0 0 0 37px'}">
         <template v-if="lockerRosters && lockerRosters.length">
           <label for="">Select roster from product</label>
