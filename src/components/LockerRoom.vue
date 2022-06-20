@@ -838,12 +838,12 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     // }
   }
 
-  public async clickYearlyTab(evt:any,room_id:number) {
+  public clickYearlyTab(evt:any,room_id:number) {
     // console.log('evt',evt.target.className)
     // console.table('evt active',evt.target.classList)
     // console.table('evt asdasdasd',evt.target.classList)
 
-    await this.getLockerEvents(room_id)
+    this.getLockerEvents(room_id)
   }
 
   public lockerProductsChanged(payload: any, index = null) {
@@ -1042,9 +1042,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
         this.showError(e)
     }
   }
-   public async getLockerEvents(room_id:number) {
+   public getLockerEvents(room_id:number) {
      this.viewLoader = true
-    let res = await this.$store.dispatch('getLockerEvents',room_id)
+     this.$store.dispatch('getLockerEvents',room_id)
      this.viewLoader = false
   }
   public openEventModal(status:boolean){

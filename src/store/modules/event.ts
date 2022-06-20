@@ -91,10 +91,9 @@ const Event:Module<any, any> = {
       return await http.post("events/delete", {id:paylod})
     },
     async getLockerEvents({commit,state},room_id:number){
-      return  await http.get(`events/locker?year=${state.selected_year}&room_id=${room_id}`).then(async (res) => {
+      await http.get(`events/locker?year=${state.selected_year}&room_id=${room_id}`).then(async (res) => {
         if (res.status == 200){
           await commit('SET_LOCKER_EVENTS', res.data)
-          return res.data
         }
       })
     },
