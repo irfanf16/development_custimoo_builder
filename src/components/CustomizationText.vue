@@ -12,7 +12,7 @@
         </template>
       </h2>
       <h2 class="fw-bold mb-2 fz-18 d-flex align-items-center justify-content-between" v-else>
-        <span>{{ selectedProduct.productnames[customTextIndex]? selectedProduct.productnames[customTextIndex].name_of_placement: '' }}</span>
+        <span :key="selectedProduct.id+''+customTextIndex">{{ productNames[customTextIndex]? productNames[customTextIndex].name_of_placement: '' }}</span>
       </h2>
 
       <div class="d-flex">
@@ -37,7 +37,7 @@
               <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontSize: '20px', fontFamily: item.value, color: customTexts[customTextIndex].fontFamily == item.value ? '#000000' : '#808895'}"
                 @click="fontOptionChanged(customTextIndex, item.value)" style="white-space: nowrap"
                 :class="{ 'pr-3': i + 1 == fontOptions.length }" role="button">
-                <span v-b-tooltip.right="customTexts[customTextIndex].text ? item.value : ''">
+                <span :key="'font'+selectedProduct.id+''+customTextIndex" v-b-tooltip.right="customTexts[customTextIndex].text ? item.value : ''">
                   {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : item.value }}
                 </span>
               </div>
