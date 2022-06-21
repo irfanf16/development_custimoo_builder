@@ -59,20 +59,12 @@
 <!--        <div class="pr-2 font-weight-bold">-->
 <!--          Brands:-->
 <!--        </div>-->
-        <div class="fade-right w-100 py-2">
+        <div class="fade-right w-100 py-2" >
           <div class="overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList ">
-            <div v-dragscroll="true" v-for="(item, i) in 10" :key="i" style="white-space: nowrap" :style="{color: selectedBrand == i ? '#000 !important': '#999 !important'}"
-                 :class="{ 'pr-3': i + 1 == 10, 'activeBrand': selectedBrand == i}" role="button" @click="()=>selectedBrand=i">
-              <img src="img/Bauer_Logo.png" height="30" v-if="i==0">
-              <img src="img/Hummel_Logo.png" height="30" v-if="i==1">
-              <img src="img/NinjaApparel_Logo.png" height="30" v-if="i==2">
-              <img src="img/Bauer_Logo.png" height="30" v-if="i==3">
-              <img src="img/Hummel_Logo.png" height="30" v-if="i==4">
-              <img src="img/NinjaApparel_Logo.png" height="30" v-if="i==5">
-              <img src="img/Bauer_Logo.png" height="30" v-if="i==6">
-              <img src="img/Hummel_Logo.png" height="30" v-if="i==7">
-              <img src="img/NinjaApparel_Logo.png" height="30" v-if="i==8">
-            </div>
+            <div  v-for="(category, i) in categories" :key="i" style="white-space: nowrap" :style="{color: isSelectedBrand(category.id) ? '#000 !important': '#999 !important'}"
+                 :class="{ 'pr-3': i + 1 == categories.length, 'activeBrand': isSelectedBrand(category.id) }" role="button" @click="setBrands(category.id)">
+              <img :src="`${storage_url}${category.image_url}`"  height="30">
+             </div>
           </div>
         </div>
       </div>
@@ -127,7 +119,7 @@ export default class ItemToCustomize extends Vue {
   @Prop({required: true}) categories!: any;
   @Prop({required: true}) uploaderOpened!: any;
 
-
+  public storage_url = process.env.VUE_APP_STORAGE_URL
   private showItems = false;
   private showDesigns = true;
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
@@ -138,7 +130,7 @@ export default class ItemToCustomize extends Vue {
   public showLoader = false;
   public searchLoader = false;
   public timeout = 0;
-  public selectedBrand = 0;
+  public selectedBrands = this.$store.getters.getSelectedCategories
 
 
   private toggleItems () {
@@ -210,6 +202,19 @@ export default class ItemToCustomize extends Vue {
     }
   }
 
+  public async  setBrands(category_id){
+    await this.$store.commit('SET_SELECTED_CATEGORIES', category_id)
+    this.$emit('retrieveProducts','/list/products' )
+  }
+  public isSelectedBrand(category_id){
+
+    if(this.selectedBrands.includes(category_id)){
+      return true
+    }else{
+      return false
+    }
+  }
+
   get getPersonalized(): boolean {
     return this.$store.getters.getPersonalized
   }
@@ -219,6 +224,7 @@ export default class ItemToCustomize extends Vue {
   get StockCount():number{
     return this.$store.getters.getStockCount
   }
+
 }
 </script>
 

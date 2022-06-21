@@ -122,7 +122,6 @@
                 <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
                 <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
                 <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
-
                 <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                   <div>
                     <b-button variant="outline-secondary mr-2" :disabled="undoItems.length < 1" @click="undoAction"><span class="d-sm-block d-none">Undo</span><span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span></b-button>
@@ -1327,6 +1326,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public async retrieveProducts(url:string|null=null) {
+
     let self = this;
     let sync_id = this.$route.query.sync_id;
     if(url == null) {
@@ -1348,6 +1348,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       url_obj.searchParams.append('activity_id', this.$route.query.activity_id);
       //this.$router.replace('/')
     }
+
+    const categories = this.$store.getters.getSelectedCategories;
+    if(categories.length > 0){
+      url_obj.searchParams.append('categories', categories.toString())
+    }
+
     url = url_obj.pathname + url_obj.search;
     if(sync_id) {
       if(url.indexOf("?") > 0) {

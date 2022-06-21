@@ -110,7 +110,8 @@ const ProductAttributes:Module<any, any> = {
     },
     revertRosterBool:false,
     hideSaveLockerButton: false,
-    editing_roster_player_index: 0
+    editing_roster_player_index: 0,
+    selectedCategories:[]
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -218,6 +219,17 @@ const ProductAttributes:Module<any, any> = {
         state.categories = categories
       }
 
+    },
+    SET_SELECTED_CATEGORIES(state: Record<any, any>, category_id: number){
+
+      if(state.selectedCategories.includes(category_id)){
+        const index = state.selectedCategories.indexOf(category_id);
+        if (index > -1) {
+          state.selectedCategories.splice(index, 1);
+        }
+      }else{
+        state.selectedCategories.push(category_id);
+      }
     },
      customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
        if(customLogo && customLogo.custom_logo){
@@ -975,6 +987,9 @@ const ProductAttributes:Module<any, any> = {
     getSelectedProductId: (state: any) => state.selectedPrdId,
     getCategories: state => {
       return state.categories
+    },
+    getSelectedCategories: state => {
+      return state.selectedCategories
     },
 
     getCustomLogos: state => (prd_id = state.selectedPrdId) => {
