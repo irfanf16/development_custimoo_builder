@@ -11,6 +11,11 @@
           </b-col>
 
           <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" ref="preview-column" class="preview-column position-relative" >
+            <div v-if="frontPreview !== '' || backPreview !== ''" ref="cartAnim" class="cartAnim">
+              <img :src="frontPreview" ref="frontImg" height="100" alt="">
+              <img :src="backPreview" ref="backImg" height="100" alt="">
+            </div>
+
             <template>
               <div class="customization-preview-process w-100">
                 <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
@@ -103,7 +108,7 @@
                         </template>
                       </div>
                     </li>
-                    <li v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')">
+                    <li class="position-relative" v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')">
                       <a  class="icon mr-0" @click="openCartModal">
                         <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                       </a>
@@ -193,7 +198,7 @@
                 <div class="twoD-view">
                   <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
                     <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
-                      <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
+                      <div v-if="design.design_show == 1" class="image-holder" ref="scene-holder" :key="'front'+design.id">
                         <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
                                :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                                :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
@@ -937,52 +942,36 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
   private async addToCart() {
-    await (this.$root.$refs as Record<any,any>).Order_Details.addToCart()
+    await logData((this.$root.$refs as Record<any,any>).Order_Details.addToCart());
     if(this.editCart.cartId > 0 && this.company.platform != 'wordpress'){
       this.showVModal('cart-modal')
     }
 
-    let whereToAppend = this.ref["preview-column"];
-
-    let canvasFront = this.cloneCanvas(this.ref["mainScene"][0])
-    let canvasBack = this.cloneCanvas(this.ref["mainScene"][1])
-
-    console.log('whereToAppend', whereToAppend)
-    console.log('canvasFront', canvasFront)
-    console.log('canvasBack', canvasBack)
-
-    // setting width & height of canvas
-    canvasFront.style.width = "100%";
-    canvasFront.style.height = "100%";
-    canvasBack.style.width = "100%";
-    canvasBack.style.height = "100%";
-
-    let elementToAppend = document.createElement("div");
-    elementToAppend.appendChild(canvasFront);
-    elementToAppend.appendChild(canvasBack);
-    elementToAppend.classList.add("cart-animation");
-
-    whereToAppend.append(elementToAppend)
+    this.genImages()
+    const canvasFront = this.ref['mainScene'][0].$refs['front']
+    const canvasBack = this.ref['mainScene'][0].$refs['back']
 
     setTimeout(() => {
-      elementToAppend?.parentElement?.removeChild(elementToAppend)
-    } , 999)
+      this.ref['frontImg'].height = canvasFront.clientHeight
+      this.ref['frontImg'].width = canvasFront.clientWidth
+      this.ref['backImg'].height = canvasBack.clientHeight
+      this.ref['backImg'].width = canvasBack.clientWidth
+    }, 100)
+
   }
 
-  public cloneCanvas(oldCanvas: any) {
-    //create a new canvas
-    const newCanvas = document.createElement('canvas');
-    const context = newCanvas.getContext('2d');
+  get addedToCart() {
+    return this.$store.getters.getAddedToCart
+  }
 
-    //set dimensions
-    newCanvas.width = oldCanvas.width;
-    newCanvas.height = oldCanvas.height;
+  @Watch('addedToCart')
+  addedToCartChanged(newVal:boolean) {
+    this.ref['cartAnim'].classList.add('cart-animation')
 
-    //apply the old canvas to the new one
-    context?.drawImage(oldCanvas, 0, 0);
-
-    //return the new canvas
-    return newCanvas;
+    setTimeout(()=>{
+      this.ref['cartAnim'].classList.remove('cart-animation')
+      this.$store.dispatch('addedToCart', false)
+    }, 300)
   }
 
   getFillColors() {

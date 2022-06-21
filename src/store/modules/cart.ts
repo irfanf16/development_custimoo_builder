@@ -7,7 +7,8 @@ const Cart:Module<any, any> = {
   state: {
     cart_items: [],
     shipping_address: null,
-    show_cart_modal:false
+    show_cart_modal:false,
+    added_to_cart: false
   },
   getters: {
     getCartItemsCount(state:Record<any, any>){
@@ -26,10 +27,16 @@ const Cart:Module<any, any> = {
     getShowCart(state:Record<any, any>){
       return state.show_cart_modal;
     },
+    getAddedToCart(state:Record<any, any>){
+      return state.added_to_cart;
+    },
   },
   mutations: {
     ADD_TO_CART(state: Record<any, any>, payload: boolean){
       state.cart_items = payload
+    },
+    ADDED_TO_CART(state: Record<any, any>, payload: boolean){
+      state.added_to_cart = payload
     },
     ADD_SHIPPING_ADDRESS(state: Record<any, any>, payload: Record<any, any>){
       state.shipping_address = payload
@@ -41,6 +48,9 @@ const Cart:Module<any, any> = {
   actions: {
     addToCart({commit},payload){
       commit('ADD_TO_CART', payload);
+    },
+    addedToCart({commit},payload){
+      commit('ADDED_TO_CART', payload);
     },
     async getCartServer({commit,state},room_id:number){
       const url = '/carts/cart-items'

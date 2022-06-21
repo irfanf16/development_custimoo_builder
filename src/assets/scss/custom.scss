@@ -5734,27 +5734,30 @@ $fontSize: 0.5;
     display: none !important;
 }
 
-.cart-animation {
+.cartAnim{
     position: absolute;
-    opacity: 0.5;
-    width: 200px;
-    display: flex;
-    gap: 20px;
-    height: 200px;
-    z-index: 1;
-    animation-name: cartAnimation;
-    animation-duration: 1s;
-    transition: all 1s ease-out;
-    top: 50%;
-    right: 50%;
+    opacity: 0;
+    display: none;
+    z-index: 111;
+    top: 410px;
+    right: 30px;
     transform: translateX(0%) translateY(-50%) scale(1);
+
+    &.cart-animation {
+        opacity: 1;
+        display: flex;
+        animation-name: cartAnimation;
+        animation-duration: 0.7s;
+        transition: all 0.7s ease-out;
+    }
 }
+
 
 @keyframes cartAnimation {
     to {
         opacity: 0;
         top: 0;
         right: 0;
-        transform: translateX(45%) translateY(-20%) scale(0);
+        transform: translateX(48%) translateY(-38%) scale(0);
     }
 }
