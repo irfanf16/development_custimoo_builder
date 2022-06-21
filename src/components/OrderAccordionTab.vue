@@ -23,22 +23,23 @@
 
     <b-card no-body v-if="rosterDetails.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-2 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Roster</span> <span
+        <b-button block v-b-toggle.accordion-2 class="p-3 d-flex align-items-center justify-content-between"><span class="text">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span> <span
           class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-2" accordion="my-accordion" role="tabpanel">
         <b-card-body>
           <div class="overflow-hidden roster-details-table">
-            <div class="roster-row head d-flex flex-wrap align-items-center justify-content-between">
-              <span class="name">Name</span>
-              <span>No</span>
+            <div class="roster-row head d-flex align-items-center justify-content-between">
+              <span v-if="checkIndex('name') != -1" class="name">Name</span>
+              <span v-if="checkIndex('number') != -1">No</span>
               <span>Size</span>
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in rosterDetails">
-              <div :key="key" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
-                <span class="name">{{ roster.text }}</span>
-                <span>{{ roster.number }}</span>
+              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key)">
+                <span v-if="checkIndex('name') != -1" class="name">{{ roster.text }}</span>
+                <span v-if="checkIndex('number') != -1">{{ roster.number }}</span>
+
                 <span>{{ roster.size }}</span>
                 <span>{{ roster.quantity }}</span>
 <!--                <span>-->
@@ -66,7 +67,8 @@
                 <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front.file_url " alt="Collar"/>
               </div>
               <div class="collar-details">
-                <strong>{{ model.model_name }}</strong>
+<!--                <strong>{{ selectedProduct.productstyles[styleIndex].name }}</strong>-->
+                <strong>{{selectedProduct.productstyles[styleIndex].name }}</strong>
                 <div class="d-flex flex-wrap align-items-center" v-for="(item, i) in selectedProduct.addons" :key="i">
                   <div class="category mr-3">{{ item.addon.name }}</div>
                   <div class="price">+${{ item.addon.price }}</div>
@@ -118,7 +120,7 @@
       <b-collapse id="accordion-5" accordion="my-accordion" role="tabpanel">
         <b-card-body class="border-top">
           <div class="order-logo-holder">
-            <div v-if="customTexts" class="overflow-hidden roster-details-table">
+            <div v-if="customTexts && maintabindex > 2" class="overflow-hidden roster-details-table">
               <div class="roster-row head d-flex flex-wrap align-items-center justify-content-between">
                 <span class="name">Field</span>
                 <span>Height</span>
@@ -126,7 +128,7 @@
               </div>
               <template v-for="(text, index) in customTexts">
                 <div :key="index" v-if="text.text" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
-                  <span class="name">{{ text.text }}</span>
+                  <span class="name">{{ text.name_of_placement }}</span>
                   <span>{{ text.originalHeight }}cm</span>
 <!--                  <span>{{ text.originalWidth }}cm</span>-->
                 </div>
@@ -140,16 +142,25 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator'
+import {Component, Prop, Vue} from 'vue-property-decorator'
+import { findIndex } from 'lodash'
 
 @Component<OrderAccordion>({})
 export default class OrderAccordion extends Vue {
+  private activeRow = 0
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   public customLogosExists = false;
 
+  get maintabindex(){
+    return this.$store.getters.getMainTab
+  }
+  get company(): Record<any, any>{
+    return this.$store.getters.getCompany
+  }
+
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
   get getCustomTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts(this.selectedProduct)
@@ -179,6 +190,13 @@ export default class OrderAccordion extends Vue {
     return this.$store.getters.getProductModels
   }
 
+  public updateText (index:number) {
+      this.activeRow = index
+  }
+
+  public checkIndex(text_type: string) {
+    return findIndex(this.customTexts, { type: text_type })
+  }
 }
 </script>
 
@@ -266,12 +284,12 @@ export default class OrderAccordion extends Vue {
     }
 
     span.name {
-      width: 40%;
+      width: 60%;
       text-align: left;
     }
 
     span {
-      width: 20%;
+      width: 40%;
       text-align: left;
       text-align: center;
     }
@@ -314,6 +332,21 @@ export default class OrderAccordion extends Vue {
     flex: 0 0 48%;
     max-width: 48%;
     border-radius: 5px;
+  }
+}
+
+.roster-details-table .roster-row.activeRow{
+  background:  #E7F4F1;
+  color: #219F84;
+  animation: animRow 0.7s infinite alternate;
+  font-weight: bold;
+}
+@keyframes animRow {
+  from{
+    background:  #E7F4F1;
+  }
+  to{
+    background: #d0f5ea;
   }
 }
 </style>

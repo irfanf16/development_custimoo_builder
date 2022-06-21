@@ -6,7 +6,7 @@
         <span v-if="mobileScreen" class="mt-1 toggleArrow" :class="showItems ? 'opened' : ''"><BIconChevronDown /></span>
       </h2>
 
-      <div class="select-items" :class="showItems ? 'opened' : ''">
+      <div class="select-items" :class="[showItems ? 'opened' : '']">
 <!--        <div class="collection-btn mt-1 px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0">-->
         <div class="collection-btn mt-1 px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0">
 <!--          <b-form-checkbox :checked="customized" @change="changeProductType('customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
@@ -60,14 +60,13 @@
 
     <h2 v-if="mobileScreen" class="fw-bold px-3 py-1 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
       <span style="font-size: 16px">Designs Available</span>
-      <span class="mt-1 toggleArrow" :class="showDesigns ? 'opened' : ''"><BIconChevronDown /></span>
+      <span class="mt-1 toggleArrow" :class="[showDesigns ? 'opened' : '']"><BIconChevronDown /></span>
     </h2>
     <h2 v-else class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between">
       <span style="font-size: 16px">Designs Available</span>
     </h2>
-    <div class="select-designs" :class="showDesigns ? 'opened' : ''">
+    <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
       <DesignAvailable />
-
     </div>
   </div>
 </template>
@@ -99,6 +98,7 @@
 
 export default class ItemToCustomize extends Vue {
   @Prop({required: true}) categories!: any;
+  @Prop({required: true}) uploaderOpened!: any;
 
 
   private showItems = false;
@@ -115,7 +115,18 @@ export default class ItemToCustomize extends Vue {
 
   private toggleItems () {
     this.showItems = !this.showItems
+    if(this.showItems){
+      this.$emit('hideAll')
+    }else{
+      this.$emit('switchTabs')
+    }
   }
+
+
+  public setSliderIndex() {
+    (this.$refs['itemsCarousel'] as Record<any,any>).setSliderIndex()
+  }
+
   private toggleDesigns () {
     this.showDesigns = !this.showDesigns
   }
@@ -202,7 +213,15 @@ export default class ItemToCustomize extends Vue {
     overflow-y: auto;
 
     &.opened{
-      max-height: calc(85vh - 120px);
+      max-height: calc(100vh - 285px);
+
+      &.uploaderOpened{
+        max-height: calc(100vh - 455px);
+
+        &>.available-designs-section{
+          padding-bottom: 0;
+        }
+      }
     }
   }
 

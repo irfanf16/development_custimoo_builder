@@ -1,29 +1,31 @@
 <template>
   <div class="loading-holder">
-    <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen}" style="display: flex; justify-content: space-between;">
-      <a @click="setShowSmall('back')" :class="{'show-small' : showSmall.front}">
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen }"
+      style="display: flex; justify-content: space-between;">
+      <a @click="setShowSmall('back')" :class="{ 'show-small': showSmall.front }">
         <canvas ref="front" id="scene-front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         <h2>Front</h2>
       </a>
-      <a @click="setShowSmall('front')" :class="{'show-small' : showSmall.back}" v-if="back">
-        <canvas v-if="back" ref="back" id="scene-back" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+      <a @click="setShowSmall('front')" :class="{ 'show-small': showSmall.back }" v-if="back">
+        <canvas v-if="back" ref="back" id="scene-back" class="canvas" :width="canvasWidth"
+          :height="canvasHeight"></canvas>
         <h2>Back</h2>
       </a>
     </div>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
-import {fabric} from 'fabric'
-import {getClosestColor} from '@/pantoneColor'
+import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
+import { fabric } from 'fabric'
+import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import {getProductLogoSetting, setLogoSettings} from "@/helpers/Helpers";
+import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
 
 @Component<Scene>({
   async mounted() {
-    if(this.back) {
+    if (this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
         backgroundColor: '#fff',
@@ -37,7 +39,7 @@ import {getProductLogoSetting, setLogoSettings} from "@/helpers/Helpers";
       })
     }
     const self = this
-    let frontPromise =  this.loadScene(this.front, 'front')
+    let frontPromise = this.loadScene(this.front, 'front')
     frontPromise.then(() => {
       if (this.back) {
         this.loadScene(this.back, 'back')
@@ -112,17 +114,24 @@ import {getProductLogoSetting, setLogoSettings} from "@/helpers/Helpers";
       }
 
       function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
+
         let target = transform.target;
         let canvas = target.canvas;
-        if('textIndex' in target) {
-          self.$store.dispatch('updateCustomTextAttribute', {index: target.textIndex, on_all: true, attribute: 'text', value: ''})
-        }else {
-          let logo = getProductLogoSetting(self.selectedProductId, target.logoIndex);
+        if ('textIndex' in target) {
+          let before_update = self.updateTextObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomTextObject)), { 'action': 'customTexts' })
+          self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
+          self.$store.dispatch('updateCustomTextAttribute', { index: target.textIndex, on_all: true, attribute: 'text', value: '' })
+        } else {
+          let logo = setLogoSettings(target.logoIndex);
+          logo.logoIndex = target.logoIndex;
           logo.removeLogo = true
           let payload = {
-            custom_logo : logo
+            custom_logo: logo
           }
-          logo.logoIndex = target.logoIndex;
+
+          let before_update = self.updateLogoObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomLogoObject)))
+          self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
+
           self.$store.commit('customLogos', payload)
           self.$store.commit('SET_LOGO_COLORS', []);
           self.$store.commit('SET_INITIAL_LOGO_COLORS', []);
@@ -135,31 +144,31 @@ import {getProductLogoSetting, setLogoSettings} from "@/helpers/Helpers";
 })
 
 export default class Scene extends Vue {
-  @Prop({required: true}) readonly front!: Record<string, unknown>;
-  @Prop({required: false}) readonly back!: Record<string, unknown>;
-  @Prop({required: false}) readonly backTextureUrl!: string;
-  @Prop({required: false}) readonly backTextrueExtension !: string;
-  @Prop({required: false}) readonly logos !: [Record<string, any>];
-  @Prop({required: false, default: () => { return [] }}) readonly texts !: [Record<string, any>];
-  @Prop({required: false, default: () => { return [] }}) readonly lockerDefaultColors !: [Record<string, any>];
-  @Prop({required: false, default:  () => { return {} }}) readonly lockerGroupColors !: Record<string, any>;
-  @Prop({required: false}) readonly product_id !: number
-  @Prop({required: false}) readonly carousel !: string
-  @Prop({required: false, default: () => { return [] }}) readonly productNamesSetting !: [Record<any, any>]
-  @Prop({required: false, default: false}) readonly logoAllowed !: boolean
-  @Prop({required: false, default: false}) readonly preSetData !: boolean
-  @Prop({required: false, default: true}) readonly multipleLogo !: boolean
-  @Prop({required: false}) readonly logosLimit !: number
-  @Prop({required: false}) readonly productColors !: [Record<string, any>];
-  @Prop({required: true, default: 10}) readonly measurementRatio!: number;
-  @Prop({required: false, default: 600}) readonly mainCanvasWidth!: number;
-  @Prop({required: false, default: 600}) readonly mainCanvasHeight!: number;
-  @Prop({required: false, default: 600}) readonly canvasWidth!: number;
-  @Prop({required: false, default: 600}) readonly canvasHeight!: number;
-  @Prop({required: false, default: false}) readonly mainPreview!: boolean;
-  @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
-  @Prop({required: false, default: 'customized'}) readonly productType!: string;
-  @Prop({required: false}) readonly colorGrouping!: Record<any, any>;
+  @Prop({ required: true }) readonly front!: Record<string, unknown>;
+  @Prop({ required: false }) readonly back!: Record<string, unknown>;
+  @Prop({ required: false }) readonly backTextureUrl!: string;
+  @Prop({ required: false }) readonly backTextrueExtension !: string;
+  @Prop({ required: false }) readonly logos !: [Record<string, any>];
+  @Prop({ required: false, default: () => { return [] } }) readonly texts !: [Record<string, any>];
+  @Prop({ required: false, default: () => { return [] } }) readonly lockerDefaultColors !: [Record<string, any>];
+  @Prop({ required: false, default: () => { return {} } }) readonly lockerGroupColors !: Record<string, any>;
+  @Prop({ required: false }) readonly product_id !: number
+  @Prop({ required: false }) readonly carousel !: string
+  @Prop({ required: false, default: () => { return [] } }) readonly productNamesSetting !: [Record<any, any>]
+  @Prop({ required: false, default: false }) readonly logoAllowed !: boolean
+  @Prop({ required: false, default: false }) readonly preSetData !: boolean
+  @Prop({ required: false, default: true }) readonly multipleLogo !: boolean
+  @Prop({ required: false }) readonly logosLimit !: number
+  @Prop({ required: false }) readonly productColors !: [Record<string, any>];
+  @Prop({ required: true, default: 10 }) readonly measurementRatio!: number;
+  @Prop({ required: false, default: 600 }) readonly mainCanvasWidth!: number;
+  @Prop({ required: false, default: 600 }) readonly mainCanvasHeight!: number;
+  @Prop({ required: false, default: 600 }) readonly canvasWidth!: number;
+  @Prop({ required: false, default: 600 }) readonly canvasHeight!: number;
+  @Prop({ required: false, default: false }) readonly mainPreview!: boolean;
+  @Prop({ required: false, default: true }) readonly canvasSelection!: boolean;
+  @Prop({ required: false, default: 'customized' }) readonly productType!: string;
+  @Prop({ required: false }) readonly colorGrouping!: Record<any, any>;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -191,14 +200,14 @@ export default class Scene extends Vue {
   public otherSideTexts: any[] = []
   public logoIndex = 0
   public textIndex = 0
-  public ctx:any = {}
-  public verticalLines:Record<any, any>[] = []
-  public horizontalLines:Record<any, any>[] = []
+  public ctx: any = {}
+  public verticalLines: Record<any, any>[] = []
+  public horizontalLines: Record<any, any>[] = []
   public aligningLineOffset = 5
   public aligningLineMargin = 4
   public aligningLineWidth = 3
   public aligningLineColor = 'rgb(110, 243, 204)'
-  public viewportTransform:any
+  public viewportTransform: any
   public drawLines = false
 
   get fillColors(): [Record<any, any>] {
@@ -206,12 +215,12 @@ export default class Scene extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    let product_id = this.product_id? this.product_id : this.selectedProductId
+    let product_id = this.product_id ? this.product_id : this.selectedProductId
     return this.$store.getters.getCustomLogos(product_id)
   }
 
   get customTexts(): [Record<any, any>] {
-    let product_id = this.product_id? this.product_id : this.selectedProductId
+    let product_id = this.product_id ? this.product_id : this.selectedProductId
     return this.$store.getters.getCustomTexts(product_id)
   }
 
@@ -223,7 +232,7 @@ export default class Scene extends Vue {
     return this.$store.getters.getDefaultColors.filter((defaultColor: Record<any, any>) => { return defaultColor.color })
   }
 
-  get groupColors() : [Record<any, any>] {
+  get groupColors(): [Record<any, any>] {
     return this.$store.getters.getGroupColors
   }
 
@@ -239,17 +248,17 @@ export default class Scene extends Vue {
     deep: true
   })
   customLogosChanged(newVal: [Record<any, any>]) {
-    if(this.mounted && this.logoAllowed) {
+    if (this.mounted && this.logoAllowed) {
       const self = this
-      if(this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
+      if (this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
         this.customLogoObjects.forEach((item: Record<any, any>, index: number) => {
-          if(item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '' || this.customLogos[item.logoIndex].url == null)) {
+          if (item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '' || this.customLogos[item.logoIndex].url == null)) {
             this.frontCanvas.remove(this.customLogoObjects[item.logoIndex])
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
             }
             this.customLogoObjects[item.logoIndex] = null
-            if(this.otherSideLogos[item.logoIndex]) {
+            if (this.otherSideLogos[item.logoIndex]) {
               this.frontCanvas.remove(this.otherSideLogos[item.logoIndex])
               if (this.backCanvas) {
                 this.backCanvas.remove(this.otherSideLogos[item.logoIndex])
@@ -260,17 +269,17 @@ export default class Scene extends Vue {
         })
       }
       newVal.forEach((logo: Record<any, any>, index: number) => {
-        let logoUrl = logo? encodeURI((this.storageUrl + logo.url).trim()) : ''
-        if(logo && ((this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && this.customLogoObjects[logo.logoIndex]._element.src.split("?")[0] != logoUrl))){
+        let logoUrl = logo ? encodeURI((this.storageUrl + logo.url).trim()) : ''
+        if (logo && ((this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && this.customLogoObjects[logo.logoIndex]._element.src.split("?")[0] != logoUrl))) {
           self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
           if (self.backCanvas) {
             self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
           }
           this.customLogoObjects[logo.logoIndex] = null
-          if(this.mainPreview) {
-            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: logo.logoIndex, data: null, scene: this});
+          if (this.mainPreview) {
+            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", { index: logo.logoIndex, data: null, scene: this });
           }
-          if(this.otherSideLogos[index]) {
+          if (this.otherSideLogos[index]) {
             this.frontCanvas.remove(this.otherSideLogos[index])
             if (this.backCanvas) {
               this.backCanvas.remove(this.otherSideLogos[index])
@@ -278,16 +287,16 @@ export default class Scene extends Vue {
             this.otherSideLogos[index] = null
           }
         } else {
-          if(!logo && this.customLogoObjects[index]) {
+          if (!logo && this.customLogoObjects[index]) {
             this.frontCanvas.remove(this.customLogoObjects[index])
             if (this.backCanvas) {
               this.backCanvas.remove(this.customLogoObjects[index])
             }
             this.customLogoObjects[index] = null
-            if(this.mainPreview) {
-              this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {index: index, data: null, scene: this});
+            if (this.mainPreview) {
+              this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", { index: index, data: null, scene: this });
             }
-            if(this.otherSideLogos[index]) {
+            if (this.otherSideLogos[index]) {
               this.frontCanvas.remove(this.otherSideLogos[index])
               if (this.backCanvas) {
                 this.backCanvas.remove(this.otherSideLogos[index])
@@ -299,14 +308,14 @@ export default class Scene extends Vue {
       })
 
       newVal.forEach((logo: Record<any, any>, index: number) => {
-        if(logo) {
+        if (logo) {
           if ((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
             let addLogo = true
             if (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element) {
               const logoObject = this.customLogoObjects[logo.logoIndex]
               const otherSideObject = this.otherSideLogos[logo.logoIndex]
 
-              if(logo.haveControls) {
+              if (logo.haveControls) {
                 this.eventAction(logo, logoObject, otherSideObject)
               }
               addLogo = false
@@ -331,7 +340,7 @@ export default class Scene extends Vue {
       })
       if (this.mainPreview) {
         //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
-        this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
+        this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
       }
     }
   }
@@ -342,15 +351,15 @@ export default class Scene extends Vue {
   customTextsChanged(newVal: [Record<any, any>]) {
     if (this.mounted) {
       const self = this
-      if(this.customTextObjects.length != this.customTexts.filter((text: Record<any, any>) => text && text.text).length) {
+      if (this.customTextObjects.length != this.customTexts.filter((text: Record<any, any>) => text && text.text).length) {
         this.customTextObjects.forEach((item: Record<any, any>, index: number) => {
-          if(item && (!Object.keys(this.customTexts[item.textIndex]).length || this.customTexts[item.textIndex].text == '' || !this.customTexts[item.textIndex].text)) {
+          if (item && (!Object.keys(this.customTexts[item.textIndex]).length || this.customTexts[item.textIndex].text == '' || !this.customTexts[item.textIndex].text)) {
             this.frontCanvas.remove(this.customTextObjects[item.textIndex])
             if (this.backCanvas) {
               this.backCanvas.remove(this.customTextObjects[item.textIndex])
             }
             this.customTextObjects[item.textIndex] = null
-            if(this.otherSideTexts[item.textIndex]) {
+            if (this.otherSideTexts[item.textIndex]) {
               this.frontCanvas.remove(this.otherSideTexts[item.textIndex])
               if (this.backCanvas) {
                 this.backCanvas.remove(this.otherSideTexts[item.textIndex])
@@ -361,16 +370,16 @@ export default class Scene extends Vue {
         })
       }
       newVal.forEach((text: Record<any, any>) => {
-        if((this.customTextObjects[text.textIndex] && text.side != this.customTextObjects[text.textIndex].side) || (this.customTextObjects[text.textIndex] && !text.text)){
+        if ((this.customTextObjects[text.textIndex] && text.side != this.customTextObjects[text.textIndex].side) || (this.customTextObjects[text.textIndex] && !text.text)) {
           self.frontCanvas.remove(this.customTextObjects[text.textIndex])
           if (self.backCanvas) {
             self.backCanvas.remove(this.customTextObjects[text.textIndex])
           }
           this.customTextObjects[text.textIndex] = null
-          if(this.mainPreview) {
-            this.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", {index: text.textIndex, data: null})
+          if (this.mainPreview) {
+            this.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", { index: text.textIndex, data: null })
           }
-          if(this.otherSideTexts[text.textIndex]) {
+          if (this.otherSideTexts[text.textIndex]) {
             self.frontCanvas.remove(this.otherSideTexts[text.textIndex])
             if (self.backCanvas) {
               self.backCanvas.remove(this.otherSideTexts[text.textIndex])
@@ -397,20 +406,21 @@ export default class Scene extends Vue {
             textObject.set('strokeWidth', parseInt(text.outLineWidth))
             canvas.renderAll()
 
-            const width = (textObject.width as number * textObject.scaleX * this.measurementRatio).toFixed(1)
-            const height = (textObject.height as number * textObject.scaleY * this.measurementRatio).toFixed(1)
-            const outLineWidth = (textObject.strokeWidth as number * this.measurementRatio).toFixed(1)
-            self.$store.dispatch('updateCustomTextWithoutTrigger', {
-              index: index,
-              data: {
-                actualWidth: textObject.width,
-                actualHeight: textObject.height,
-                originalWidth: width,
-                originalHeight: height,
-                originalOutLineWidth: outLineWidth,
-              }
-            })
-
+            if(this.mainPreview) {
+              const width = (textObject.width as number * textObject.scaleX * this.measurementRatio).toFixed(1)
+              const height = (textObject.height as number * textObject.scaleY * this.measurementRatio).toFixed(1)
+              const outLineWidth = (textObject.strokeWidth as number * this.measurementRatio).toFixed(1)
+              self.$store.dispatch('updateCustomTextWithoutTrigger', {
+                index: index,
+                data: {
+                  actualWidth: textObject.width,
+                  actualHeight: textObject.height,
+                  originalWidth: width,
+                  originalHeight: height,
+                  originalOutLineWidth: outLineWidth,
+                }
+              })
+            }
             this.eventAction(text, textObject, otherSideObject)
             addText = false
           }
@@ -431,7 +441,7 @@ export default class Scene extends Vue {
 
       if (this.mainPreview) {
         //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
-        this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
+        this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
       }
     }
   }
@@ -440,17 +450,17 @@ export default class Scene extends Vue {
     deep: true
   })
   defaultColorsChanged(newVal: [Record<any, any>]) {
-    if(this.productType == 'customized' && this.mounted) {
-      let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
-      if(defaultColors.length) {
+    if (this.productType == 'customized' && this.mounted) {
+      let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+      if (defaultColors.length) {
         this.changeDefaultColors(defaultColors)
-      }else{
+      } else {
         this.setInitialColors();
       }
 
       if (this.mainPreview) {
         //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
-        this.$store.commit('STORE_CANVAS_IMAGE', {front: this.$refs.front, back: this.$refs.back, scene: this})
+        this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
       }
     }
   }
@@ -459,7 +469,7 @@ export default class Scene extends Vue {
     deep: true, immediate: false
   })
   groupColorsChanged(newVal: Record<any, any>) {
-    if(this.productType == 'customized' && this.mounted) {
+    if (this.productType == 'customized' && this.mounted) {
       this.changeGroupColor(newVal)
     }
   }
@@ -477,9 +487,10 @@ export default class Scene extends Vue {
         left: this.canvasWidth / this.mainCanvasWidth * item.x_axis,
         top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
       })
-      object.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
-      object.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
-      if(otherSideObject) {
+      let multiplyBy = object.text? 1 : this.canvasWidth / this.mainCanvasWidth
+      object.scaleX = item.scaleX * multiplyBy
+      object.scaleY = item.scaleY * multiplyBy
+      if (otherSideObject) {
         const left = otherSideObject.left
         const top = otherSideObject.top
         otherSideObject.center()
@@ -487,8 +498,8 @@ export default class Scene extends Vue {
           left: left,
           top: top
         })
-        otherSideObject.scaleX = this.canvasWidth / this.mainCanvasWidth * item.scaleX
-        otherSideObject.scaleY = this.canvasHeight / this.mainCanvasHeight * item.scaleY
+        otherSideObject.scaleX = item.scaleX * multiplyBy
+        otherSideObject.scaleY = item.scaleY * multiplyBy
       }
     } else if (item.action == 'rotate') {
       object.center()
@@ -497,7 +508,7 @@ export default class Scene extends Vue {
         top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
       })
       object.rotate(item.rotation as number)
-      if(otherSideObject) {
+      if (otherSideObject) {
         const left = otherSideObject.left
         const top = otherSideObject.top
         otherSideObject.center()
@@ -511,8 +522,8 @@ export default class Scene extends Vue {
     object.setCoords()
   }
 
-  public changeGroupColor (groupColors: Record<any, any>): void {
-    let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
+  public changeGroupColor(groupColors: Record<any, any>): void {
+    let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
       if (groupColors[item.id]) {
@@ -533,16 +544,16 @@ export default class Scene extends Vue {
             name: groupColors[item.id].name
           })
         }
-      }else if (!defaultColors.length) {
+      } else if (!defaultColors.length) {
         let svgIndex = 0
         this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
           if (svgGroup.id == item.id) {
             svgIndex = index
           }
         })
-        if(this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
+        if (this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
           item.set('fill', this.initialSvgGroups[svgIndex].color)
-          if(!this.back) {
+          if (!this.back) {
             Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
           }
         }
@@ -568,14 +579,14 @@ export default class Scene extends Vue {
               name: groupColors[item.id].name
             })
           }
-        }else if (!defaultColors.length) {
+        } else if (!defaultColors.length) {
           let svgIndex = 0
           this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
             if (svgGroup.id == item.id) {
               svgIndex = index
             }
           })
-          if(this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
+          if (this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
             item.set('fill', this.initialSvgGroups[svgIndex].color)
             Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
           }
@@ -586,7 +597,7 @@ export default class Scene extends Vue {
     this.unHideColorGrouping()
   }
 
-  public changeDefaultColors (defaultColors: [Record<any, any>]): void {
+  public changeDefaultColors(defaultColors: [Record<any, any>]): void {
     let appliedDefaultColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
@@ -605,7 +616,7 @@ export default class Scene extends Vue {
       svgGroup.name = defaultColors[useColorIndex].name
 
       useColorIndex++
-      if(useColorIndex >= defaultColors.length) {
+      if (useColorIndex >= defaultColors.length) {
         useColorIndex = 0
       }
     })
@@ -618,7 +629,7 @@ export default class Scene extends Vue {
     })
     this.frontCanvas.renderAll()
 
-    if(this.back) {
+    if (this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
         if (appliedDefaultColors[item.id]) {
@@ -630,10 +641,10 @@ export default class Scene extends Vue {
     this.unHideColorGrouping()
   }
 
-  public setInitialColors (): void {
+  public setInitialColors(): void {
     let defaultSvgGroups: Record<any, any> = {}
     this.initialSvgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-        defaultSvgGroups[svgGroup.id] = svgGroup
+      defaultSvgGroups[svgGroup.id] = svgGroup
     })
 
     let appliedDefaultColors: string[] = []
@@ -661,7 +672,7 @@ export default class Scene extends Vue {
     })
     this.frontCanvas.renderAll()
 
-    if(this.back) {
+    if (this.back) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
         if (appliedDefaultColors[item.id]) {
@@ -673,28 +684,33 @@ export default class Scene extends Vue {
   }
 
   public unHideColorGrouping() {
-    if(this.colorGrouping) {
-      for(let key in this.colorGrouping) {
+    if (this.colorGrouping) {
+      for (let key in this.colorGrouping) {
         const distinguishPart = this.svgGroups.filter((svgGroup: Record<any, any>) => { return svgGroup.id == key.toLowerCase() })
         this.colorGrouping[key].forEach((comparePartId: string) => {
           const comparePart = this.svgGroups.filter((svgGroup: Record<any, any>) => { return svgGroup.id == comparePartId.toLowerCase() })
-          if(distinguishPart.length && comparePart.length && distinguishPart[0].color == comparePart[0].color) {
+          if (distinguishPart.length && comparePart.length && distinguishPart[0].color == comparePart[0].color) {
             let changeColor: Record<any, any> = {}
-            for(let index in this.productColors) {
+            for (let index in this.productColors) {
               let colors = JSON.parse(this.productColors[index].json_data)
               for (let i in colors) {
-                if(colors[i].value != comparePart[0].color) {
+                if (colors[i].value != comparePart[0].color) {
                   changeColor = colors[i]
                   break
                 }
               }
-              if(Object.keys(changeColor).length) {
+              if (Object.keys(changeColor).length) {
                 break
               }
             }
-            if(!Object.keys(changeColor).length) {
-              const closestColor = getClosestColor('#000000')
-              changeColor = {value: closestColor.hex, name: closestColor.name, pantone: closestColor.pantone}
+            if (!Object.keys(changeColor).length) {
+              let pantone_product_id = null;
+              if(this.product_id){
+                pantone_product_id = this.product_id;
+              }
+              const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
+              const closestColor = getClosestColor('#000000', selectProductPantonesList)
+              changeColor = { value: closestColor.hex, name: closestColor.name, pantone: closestColor.pantone }
             }
             this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
               item.id = item.id.toLowerCase()
@@ -703,7 +719,7 @@ export default class Scene extends Vue {
               }
             })
             this.frontCanvas.renderAll()
-            if(this.back) {
+            if (this.back) {
               this.backTexture.getObjects().forEach((item: Record<any, any>) => {
                 item.id = item.id.toLowerCase()
                 if (key.toLowerCase() == item.id) {
@@ -735,39 +751,50 @@ export default class Scene extends Vue {
     }
   }
 
-  public getSvgGroups(): void {
+  public async getSvgGroups() {
     this.svgGroups = []
     this.initialSvgGroups = []
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if(!item.id.includes('noncustomizable') && !this.containsObject({ id: item.id })) {
+      if (!item.id.includes('noncustomizable') && !this.containsObject({ id: item.id })) {
         let count = 1
-        if(item.id == 'base') {
+        if (item.id == 'base') {
           count = 100000 // to make base always at first color position
         }
-        if(!item.id.includes('inside')) {
-          if(item.fill.includes('rgb')) {
+        if (!item.id.includes('inside')) {
+          if (item.fill.includes('rgb')) {
             item.fill = rgbHex(item.fill)
           }
-          const pantoneColor = getClosestColor(item.fill)
+          let pantone_product_id = null;
+          if(this.product_id){
+            pantone_product_id = this.product_id;
+          }
+          const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
+          const pantoneColor = getClosestColor(item.fill, selectProductPantonesList)
           this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
         }
       }
     })
 
-    if(this.backTexture) {
+    if (this.backTexture) {
       this.backTexture.getObjects().forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
-        if(!this.containsObject({ id: item.id })) {
+        if (!item.id.includes('noncustomizable') && !this.containsObject({ id: item.id })) {
           let count = 1
-          if(item.id == 'base') {
+          if (item.id == 'base') {
             count = 100000 // to make base always at first color position
           }
-          if(!item.id.includes('inside')) {
-            if(item.fill.includes('rgb')) {
+          if (!item.id.includes('inside')) {
+            if (item.fill.includes('rgb')) {
               item.fill = rgbHex(item.fill)
             }
-            const pantoneColor = getClosestColor(item.fill)
+
+            let pantone_product_id = null;
+            if(this.product_id){
+              pantone_product_id = this.product_id;
+            }
+            const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
+            const pantoneColor = getClosestColor(item.fill, selectProductPantonesList)
             this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
           }
         }
@@ -778,37 +805,38 @@ export default class Scene extends Vue {
     this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
 
     if (this.mainPreview) {
-      this.$store.dispatch('setSvgGroups', this.svgGroups)
+      await this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
-    if(this.productType == 'customized' && this.lockerDefaultColors.length) {
-      let lockerDefaultColors = this.lockerDefaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
-      if(lockerDefaultColors.length) {
-        this.changeDefaultColors(lockerDefaultColors)
+    if (this.productType == 'customized' && this.lockerDefaultColors.length) {
+      let lockerDefaultColors = this.lockerDefaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+      if (lockerDefaultColors.length) {
+        await this.changeDefaultColors(lockerDefaultColors)
       }
     }
-    else if(this.productType == 'customized' && this.defaultColors.length) {
-      let defaultColors = this.defaultColors.filter((color:Record<any, any>) => color.color) as [Record<any, any>]
-      if(defaultColors.length) {
-        this.changeDefaultColors(defaultColors)
+    else if (this.productType == 'customized' && this.defaultColors.length) {
+      let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+      if (defaultColors.length) {
+        await this.changeDefaultColors(defaultColors)
       }
     }
 
-    if(Object.keys(this.lockerGroupColors).length) {
-      if(this.productType == 'customized') {
-        this.changeGroupColor(this.lockerGroupColors)
+    if (Object.keys(this.lockerGroupColors).length) {
+      if (this.productType == 'customized') {
+        await this.changeGroupColor(this.lockerGroupColors)
       }
     }
-    else if(Object.keys(this.groupColors).length && !this.lockerDefaultColors.length) {
-      if(this.productType == 'customized') {
-        this.changeGroupColor(this.groupColors)
+    else if (Object.keys(this.groupColors).length && !this.lockerDefaultColors.length) {
+      if (this.productType == 'customized') {
+        await this.changeGroupColor(this.groupColors)
       }
     }
+    this.showLoader = false
   }
 
   public containsObject(obj: Record<any, any>): boolean {
     for (let i = 0; i < this.svgGroups.length; i++) {
-      if( this.svgGroups[i].id == obj.id) {
+      if (this.svgGroups[i].id == obj.id) {
         return true
       }
     }
@@ -833,7 +861,7 @@ export default class Scene extends Vue {
       let model: any
       let promises = []
       if (this.productType == 'customized') {
-        promises.push(this.addModel(ImageData.modelUrl, side, canvas.getHeight()))
+        promises.push(this.addModel(ImageData.modelUrl, side))
       }
 
       promises.push(this.addTexture(ImageData.textureUrl, side, ImageData.file_extension))
@@ -845,7 +873,7 @@ export default class Scene extends Vue {
       const self = this
 
       Promise.all(promises).then((values) => {
-        if(this.mainPreview) {
+        if (this.mainPreview) {
           console.log('promises reslove call done')
         }
         let texture = this.frontTexture
@@ -872,6 +900,8 @@ export default class Scene extends Vue {
         if (!this.back || (this.back && side == 'back')) {
           if (ImageData.file_extension == 'svg' && this.productType == 'customized') {
             this.getSvgGroups()
+          } else {
+            this.showLoader = false
           }
 
           if (this.logos.length) {
@@ -917,13 +947,12 @@ export default class Scene extends Vue {
               this.$store.commit('SET_CANVAS_READY', true);
             }, 500)
           }
-          this.showLoader = false
           this.mounted = true
         }
         resolve('done')
       })
       canvas.on('object:modified', (e: Record<any, any>) => {
-        var objects = canvas.getObjects('line');
+        let objects = canvas.getObjects('line');
         for (let i in objects) {
           canvas.remove(objects[i]);
         }
@@ -990,22 +1019,22 @@ export default class Scene extends Vue {
     })
   }
 
-  public getCustomObjectsLength(canvas:Record<any, any>) {
+  public getCustomObjectsLength(canvas: Record<any, any>) {
     let logoLength = 0
     let textLength = 0
-    canvas.getObjects().forEach((obj:Record<any, any>) => {
-      if('logoIndex' in obj) {
+    canvas.getObjects().forEach((obj: Record<any, any>) => {
+      if ('logoIndex' in obj) {
         logoLength++
       }
-      if('textIndex' in obj) {
+      if ('textIndex' in obj) {
         textLength++
       }
     })
-    return {logoLength,textLength}
+    return { logoLength, textLength }
   }
-  public addGuideLine(e: Record<any, any>, canvas: Record<any, any>,vertical_line:Record<any, any>,horizontal_line:Record<any, any>,relativeCanvasWidth:number,relativeCanvasHeight:number) {
+  public addGuideLine(e: Record<any, any>, canvas: Record<any, any>, vertical_line: Record<any, any>, horizontal_line: Record<any, any>, relativeCanvasWidth: number, relativeCanvasHeight: number) {
 
-    if(!this.drawLines) {
+    if (!this.drawLines) {
       canvas.add(vertical_line);
       canvas.add(horizontal_line);
       this.drawLines = true
@@ -1018,15 +1047,15 @@ export default class Scene extends Vue {
     let top = coords.tl.y;
 
 
-    let  height = e.target.height * e.target.scaleY
+    let height = e.target.height * e.target.scaleY
     let width = e.target.width * e.target.scaleX
-    width = Math.trunc(width/2)
-    height = Math.trunc(height/2)
+    width = Math.trunc(width / 2)
+    height = Math.trunc(height / 2)
 
-    if(parseInt(left) >= relativeCanvasWidth-width && parseInt(left) <= (relativeCanvasWidth-width)+5) {
+    if (parseInt(left) >= relativeCanvasWidth - width && parseInt(left) <= (relativeCanvasWidth - width) + 5) {
       vertical_line.set({
         stroke: '#6EF3CC',
-        strokeWidth:4,
+        strokeWidth: 4,
         strokeDashArray: []
       })
       canvas.renderAll()
@@ -1034,16 +1063,16 @@ export default class Scene extends Vue {
     else {
       vertical_line.set({
         stroke: '#6EF3CC',
-        strokeWidth:4,
-        strokeDashArray: [5,5]
+        strokeWidth: 4,
+        strokeDashArray: [5, 5]
       })
       canvas.renderAll()
     }
 
-    if(parseInt(top) >= relativeCanvasHeight-height && parseInt(top) <= (relativeCanvasHeight-height)+5 ) {
+    if (parseInt(top) >= relativeCanvasHeight - height && parseInt(top) <= (relativeCanvasHeight - height) + 5) {
       horizontal_line.set({
         stroke: '#6EF3CC',
-        strokeWidth:4,
+        strokeWidth: 4,
         strokeDashArray: [],
       })
       canvas.renderAll();
@@ -1051,14 +1080,14 @@ export default class Scene extends Vue {
     else {
       horizontal_line.set({
         stroke: '#6EF3CC',
-        strokeWidth:4,
-        strokeDashArray: [5,5],
+        strokeWidth: 4,
+        strokeDashArray: [5, 5],
       })
       canvas.renderAll();
     }
   }
 
-  public addGuideForMultipleObjects(canvas:Record<any, any>,selectedObject:Record<any, any>) {
+  public addGuideForMultipleObjects(canvas: Record<any, any>, selectedObject: Record<any, any>) {
     var activeObject = selectedObject,
       canvasObjects = canvas.getObjects(),
       activeObjectCenter = activeObject.getCenterPoint(),
@@ -1076,10 +1105,10 @@ export default class Scene extends Vue {
     // It should be trivial to DRY this up by encapsulating (repeating) creation of x1, x2, y1, and y2 into functions,
     // but we're not doing it here for perf. reasons -- as this a function that's invoked on every mouse move
 
-    for (var i = canvasObjects.length; i--; ) {
+    for (var i = canvasObjects.length; i--;) {
       if (canvasObjects[i] === activeObject) continue;
 
-      if('logoIndex' in canvasObjects[i] || 'textIndex' in canvasObjects[i]) {
+      if ('logoIndex' in canvasObjects[i] || 'textIndex' in canvasObjects[i]) {
 
         var objectCenter = canvasObjects[i].getCenterPoint(),
           objectLeft = objectCenter.x,
@@ -1107,7 +1136,7 @@ export default class Scene extends Vue {
         if (this.isInRange(objectLeft - objectWidth / 2, activeObjectLeft - activeObjectWidth / 2)) {
           verticalInTheRange = true;
           this.verticalLines.push({
-            x: objectLeft - objectWidth / 2 +10,
+            x: objectLeft - objectWidth / 2 + 10,
             y1: (objectTop < activeObjectTop)
               ? (objectTop - objectHeight / 2 - this.aligningLineOffset)
               : (objectTop + objectHeight / 2 + this.aligningLineOffset),
@@ -1188,7 +1217,7 @@ export default class Scene extends Vue {
     }
   }
 
-  public drawVerticalLine(coords:any,ctx:CanvasRenderingContext2D) {
+  public drawVerticalLine(coords: any, ctx: CanvasRenderingContext2D) {
     this.drawLine(
       coords.x + 0.5,
       coords.y1 > coords.y2 ? coords.y2 : coords.y1,
@@ -1196,28 +1225,28 @@ export default class Scene extends Vue {
       coords.y2 > coords.y1 ? coords.y2 : coords.y1, ctx);
   }
 
-  public drawHorizontalLine(coords:any,ctx:any) {
+  public drawHorizontalLine(coords: any, ctx: any) {
     this.drawLine(
       coords.x1 > coords.x2 ? coords.x2 : coords.x1,
       coords.y + 0.5,
       coords.x2 > coords.x1 ? coords.x2 : coords.x1,
-      coords.y + 0.5,ctx);
+      coords.y + 0.5, ctx);
   }
 
-  public drawLine(x1:number, y1:number, x2:number, y2:number,ctx:CanvasRenderingContext2D) {
+  public drawLine(x1: number, y1: number, x2: number, y2: number, ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.lineWidth = this.aligningLineWidth;
     ctx.strokeStyle = this.aligningLineColor;
     ctx.setLineDash([5, 5]);
 
     ctx.beginPath();
-    ctx.moveTo(((x1+this.viewportTransform[4])), ((y1+this.viewportTransform[5])));
-    ctx.lineTo(((x2+this.viewportTransform[4])), ((y2+this.viewportTransform[5])));
+    ctx.moveTo(((x1 + this.viewportTransform[4])), ((y1 + this.viewportTransform[5])));
+    ctx.lineTo(((x2 + this.viewportTransform[4])), ((y2 + this.viewportTransform[5])));
     ctx.stroke();
     ctx.restore();
   }
 
-  public isInRange(value1:number, value2:number) {
+  public isInRange(value1: number, value2: number) {
     value1 = Math.round(value1);
     value2 = Math.round(value2);
     for (var i = value1 - this.aligningLineMargin, len = value1 + this.aligningLineMargin; i <= len; i++) {
@@ -1232,7 +1261,7 @@ export default class Scene extends Vue {
   public objectScaling(e: Record<any, any>, side: string) {
     let texture = this.frontTexture
     let canvas = this.frontCanvas
-    if(side == 'back') {
+    if (side == 'back') {
       texture = this.backTexture
       canvas = this.backCanvas
     }
@@ -1245,21 +1274,21 @@ export default class Scene extends Vue {
       bottom: modelBoundingRect.top + modelBoundingRect.height,
     }
 
-    if(e.target.left > boundingRect.right - (e.target.width / 4)) {
-      e.target.left = boundingRect.right - (e.target.width / 4)
+    if(e.target.left > boundingRect.right + (e.target.width * e.target.scaleX / 4)) { // object goes right
+      e.target.left = boundingRect.right + (e.target.width * e.target.scaleX / 4)
     }
-    else if(e.target.left < boundingRect.left + (e.target.width / 4)) {
-      e.target.left = boundingRect.left + (e.target.width / 4)
+    else if(e.target.left < boundingRect.left - (e.target.width * e.target.scaleX / 4)) { // object goes left
+      e.target.left = boundingRect.left - (e.target.width * e.target.scaleX / 4)
     }
-    if(e.target.top > boundingRect.bottom - (e.target.height / 6)){
-      e.target.top = boundingRect.bottom - (e.target.height / 6)
+    if(e.target.top < boundingRect.top + (e.target.height * e.target.scaleY / 3)) { // object goes top
+      e.target.top = boundingRect.top + (e.target.height * e.target.scaleY / 3)
     }
-    else if(e.target.top < boundingRect.top + (e.target.height / 6)) {
-      e.target.top = boundingRect.top + (e.target.height / 6)
+    else if(e.target.top > boundingRect.bottom - (e.target.height * e.target.scaleY / 3)){ // object goes bottom
+      e.target.top = boundingRect.bottom  - (e.target.height * e.target.scaleY / 3)
     }
 
     let centerPoint = e.target.getCenterPoint()
-    if(canvas.isTargetTransparent(texture, centerPoint.x, centerPoint.y)) {
+    if (canvas.isTargetTransparent(texture, centerPoint.x, centerPoint.y)) {
       const boundingDistance = {
         left: Math.abs(boundingRect.left - centerPoint.x),
         right: Math.abs(boundingRect.right - centerPoint.x)
@@ -1267,40 +1296,61 @@ export default class Scene extends Vue {
 
       let moveTo = 'left'
       Object.keys(boundingDistance).forEach((key: string) => {
-        if(boundingDistance[key] > boundingDistance[moveTo]) {
+        if (boundingDistance[key] > boundingDistance[moveTo]) {
           moveTo = key
         }
       })
+      let pointXCompare = e.target.left + (e.target.width * e.target.scaleX / 4)
+      if(moveTo == 'left') {
+        pointXCompare = e.target.left - (e.target.width * e.target.scaleX / 4)
+      }
 
-      let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, moveTo)
+      let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo)
 
       e.target.left = direction.left
     }
 
     let dimText = this.dimTextFront
-    if(e.target.side == 'back') {
+    if (e.target.side == 'back') {
       dimText = this.dimTextBack
     }
     this.showDimensions(e, dimText)
   }
 
+  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string): Record<any, any> {
+    let pointXCompare = pointX + (width * scaleX / 4)
+    if(moveTo == 'left') {
+      pointXCompare = pointX - (width * scaleX / 4)
+    }
+    if(canvas.isTargetTransparent(model, pointXCompare, pointY)) {
+      if(moveTo == 'left') {
+        pointX = pointX - 1
+      } else {
+        pointX = pointX + 1
+      }
+      return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo)
+    } else {
+      return {left: pointX, top: pointY}
+    }
+  }
+
   public addToOtherSide(target: any, side: string) {
     if(side == 'back' || (this.back && side == 'front')) {
-      let model = this.frontTexture
+      let texture = this.frontTexture
       let canvas = this.frontCanvas
       if (side == 'back' && this.back) {
-        model = this.backTexture
+        texture = this.backTexture
         canvas = this.backCanvas
       }
 
-      let addIndex = 0
+      let addIndex
       if (target.text) {
         addIndex = target.textIndex
       } else {
         addIndex = target.logoIndex
       }
 
-      const modelBoundingRect = model.getBoundingRect()
+      const modelBoundingRect = texture.getBoundingRect()
       let boundingRect = {
         left: modelBoundingRect.left,
         right: modelBoundingRect.left + modelBoundingRect.width,
@@ -1323,32 +1373,31 @@ export default class Scene extends Vue {
         }
       })
 
-      const width = target.width * target.scaleX;
-      let checkPointX = target.left + width / 2
+      let checkPointX = target.left + (target.width * target.scaleX / 2)
       if (nearTo == 'left') {
-        checkPointX = target.left - width / 2
+        checkPointX = target.left - (target.width * target.scaleX / 2)
       }
 
       let otherSideObjects = this.otherSideLogos
-      if(target.text) {
+      if (target.text) {
         otherSideObjects = this.otherSideTexts
       }
-      if (canvas.isTargetTransparent(model, checkPointX, centerPoint.y)) {
-        let addLeft = 0
-        let addTop = 0
-        const model_start = (model.left - ((model.width * model.scaleX) / 2)) - 1
-        const model_end = (model.left + ((model.width * model.scaleX) / 2)) + 1
+      if (canvas.isTargetTransparent(texture, checkPointX, centerPoint.y)) {
+        let addLeft
+        let addTop
+        const model_start = (texture.left - ((texture.width * texture.scaleX) / 2)) - 1
+        const model_end = (texture.left + ((texture.width * texture.scaleX) / 2)) + 1
         const width = target.width * target.scaleX;
         if (nearTo == 'left') {
-          const direction = this.targetNonTransparent(canvas, model, checkPointX, centerPoint.y, 'right')
-          const directionFromRight = this.targetNonTransparent(canvas, model, model_end, centerPoint.y, 'left')
+          const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')
+          const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, centerPoint.y, 0, 1, 'left')
           const outside = direction.left - checkPointX
           const modelSpaceLeft = directionFromRight.left + (width / 2) + 10
           addLeft = modelSpaceLeft - outside
           addTop = target.top
         } else {
-          const direction = this.targetNonTransparent(canvas, model, target.left + width, target.top, 'left')
-          const directionFromRight = this.targetNonTransparent(canvas, model, model_start, centerPoint.y, 'right')
+          const direction = this.targetNonTransparent(canvas, texture, target.left+ width, target.top, 0, 1, 'left')
+          const directionFromRight = this.targetNonTransparent(canvas, texture, model_start, centerPoint.y, 0, 1, 'right')
           const outside = checkPointX - direction.left
           const modelSpaceRight = directionFromRight.left - (width / 2) - 10
           addLeft = modelSpaceRight + outside
@@ -1361,7 +1410,7 @@ export default class Scene extends Vue {
           if (side == 'back') {
             this.frontCanvas.renderAll()
           } else {
-            if(this.back) {
+            if (this.back) {
               this.backCanvas.renderAll()
             }
           }
@@ -1375,13 +1424,13 @@ export default class Scene extends Vue {
           otherSideObjects[addIndex] = objectAdd
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)
-            if(this.productType == 'customized') {
+            if (this.productType == 'customized') {
               this.frontModel.bringToFront()
             }
           } else {
-            if(this.back) {
+            if (this.back) {
               this.backCanvas.add(objectAdd)
-              if(this.productType == 'customized') {
+              if (this.productType == 'customized') {
                 this.backModel.bringToFront()
               }
             }
@@ -1392,7 +1441,7 @@ export default class Scene extends Vue {
           if (side == 'back') {
             this.frontCanvas.remove(otherSideObjects[addIndex])
           } else {
-            if(this.back) {
+            if (this.back) {
               this.backCanvas.remove(otherSideObjects[addIndex])
             }
           }
@@ -1402,49 +1451,23 @@ export default class Scene extends Vue {
     }
   }
 
-  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
-    if(canvas.isTargetTransparent(model, pointX, pointY)) {
-      if(moveTo == 'left') {
-        pointX = pointX - 1
-      } else {
-        pointX = pointX + 1
-      }
-      return this.targetNonTransparent(canvas, model, pointX, pointY, moveTo)
-    } else {
-      return {left: pointX, top: pointY}
-    }
-  }
+  public updateLogoObject(obj: Record<any, any>, update_obj: Record<any, any>) {
 
-  public targetTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, moveTo: string): Record<any, any> {
-    if(canvas.isTargetTransparent(model, pointX, pointY)) {
-      if(moveTo == 'left') {
-        pointX = pointX - 1
-      } else {
-        pointX = pointX + 1
-      }
-      return this.targetTransparent(canvas, model, pointX, pointY, moveTo)
-    } else {
-      return {left: pointX, top: pointY}
-    }
-  }
-
-  public updateLogoObject(obj:Record<any, any>,update_obj:Record<any, any>) {
-
-    Object.keys(obj).map(function(key, index) {
-      obj[key].forEach((logo:Record<any, any>,logo_index:number) => {
+    Object.keys(obj).map(function (key, index) {
+      obj[key].forEach((logo: Record<any, any>, logo_index: number) => {
         let logo_obj = obj[key][logo_index]
-        obj[key][logo_index] = {...logo_obj, ...update_obj}
+        obj[key][logo_index] = { ...logo_obj, ...update_obj }
       })
     });
     return obj;
   }
 
-  public updateTextObject(obj:Record<any, any>,update_obj:Record<any, any>) {
+  public updateTextObject(obj: Record<any, any>, update_obj: Record<any, any>) {
 
-    Object.keys(obj).map(function(key, index) {
-      obj[key].forEach((logo:Record<any, any>,logo_index:number) => {
+    Object.keys(obj).map(function (key, index) {
+      obj[key].forEach((logo: Record<any, any>, logo_index: number) => {
         let logo_obj = obj[key][logo_index]
-        obj[key][logo_index] = {...logo_obj, ...update_obj}
+        obj[key][logo_index] = { ...logo_obj, ...update_obj }
       })
     });
     return obj;
@@ -1452,11 +1475,11 @@ export default class Scene extends Vue {
 
   public objectMove(e: any, side: string) {
     const self = this;
-    if(e.target.text) {
+    if (e.target.text) {
       this.customTexts.forEach((text, index) => {
-        if(e.target.textIndex == index) {
+        if (e.target.textIndex == index) {
           if (e.action == 'drag') {
-            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)),{'action':e.action})
+            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), { 'action': e.action })
             this.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
@@ -1471,7 +1494,7 @@ export default class Scene extends Vue {
               value: e.target.top
             })
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)),{'action':e.action})
+            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), { 'action': e.action })
             self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
             const width = e.target.width * e.target.scaleX;
             const height = e.target.height * e.target.scaleY;
@@ -1507,7 +1530,7 @@ export default class Scene extends Vue {
               value: (outLineWidth * this.measurementRatio).toFixed(1)
             })
           } else if (e.action == 'rotate') {
-            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)),{'action':e.action})
+            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), { 'action': e.action })
             this.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
             self.$store.dispatch('updateCustomTextAttribute', {
               index: index,
@@ -1523,7 +1546,7 @@ export default class Scene extends Vue {
             value: e.action
           })
           let dimText = this.dimTextFront
-          if(e.target.side == 'back') {
+          if (e.target.side == 'back') {
             dimText = this.dimTextBack
           }
           this.showDimensions(e, dimText)
@@ -1531,11 +1554,11 @@ export default class Scene extends Vue {
       })
     } else {
       this.customLogos.forEach((logo, index) => {
-        if(logo) {
+        if (logo) {
           let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
           if (logoUrl == e.target._element.src.split("?")[0] && logo.logoIndex == e.target.logoIndex) {
             if (e.action == 'drag') {
-              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)),{'action':e.action})
+              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
               self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
                 index: index,
@@ -1548,7 +1571,7 @@ export default class Scene extends Vue {
                 value: e.target.top
               })
             } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)),{'action':e.action})
+              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
               self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
               const width = e.target.width * e.target.scaleX;
               const height = e.target.height * e.target.scaleY;
@@ -1573,7 +1596,7 @@ export default class Scene extends Vue {
                 value: Math.floor(height * this.measurementRatio)
               })
             } else if (e.action == 'rotate') {
-              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)),{'action':e.action})
+              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
               self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
               self.$store.dispatch('updateCustomLogoAttribute', {
                 index: index,
@@ -1597,10 +1620,15 @@ export default class Scene extends Vue {
     }
   }
 
-  public async addModel(modelUrl: string, side: string, canvas_height: number) {
+  public async addModel(modelUrl: string, side: string) {
     return new Promise((resolve, reject) => {
       fabric.Image.fromURL(modelUrl + '?nocache=1', async (img: any) => {
-        img.scaleToHeight(canvas_height - 10).set({
+        if(img.width > img.height) {
+          img.scaleToWidth(this.canvasWidth - 10)
+        } else {
+          img.scaleToHeight(this.canvasHeight - 10)
+        }
+        img.set({
           hasControls: false,
           selectable: false,
           evented: false,
@@ -1619,13 +1647,19 @@ export default class Scene extends Vue {
     })
   }
 
-  public addTexture (textureUrl: string, side: string, file_ext: string) {
+  public addTexture(textureUrl: string, side: string, file_ext: string) {
     return new Promise((resolve, reject) => {
       if (file_ext == 'svg') {
         fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
           options.crossOrigin = 'Anonymous'
           const img = fabric.util.groupSVGElements(objects) as fabric.Group
-          img.scaleToHeight(this.frontCanvas.getHeight() - 10).set({
+          if(img.width > img.height) {
+            img.scaleToWidth(this.canvasWidth - 10)
+          } else {
+            img.scaleToHeight(this.canvasHeight - 10)
+          }
+
+          img.set({
             hasControls: false,
             selectable: false,
             evented: false,
@@ -1669,7 +1703,7 @@ export default class Scene extends Vue {
     })
   }
 
-  public addLogos(logo: Record<any, any>, logoIndex: null|number = null) {
+  public addLogos(logo: Record<any, any>, logoIndex: null | number = null) {
     if ('logoIndex' in logo) {
       logoIndex = logo.logoIndex
     } else {
@@ -1688,7 +1722,7 @@ export default class Scene extends Vue {
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
       fabric.Image.fromURL(logoUrl + '?nocache=' + Math.random().toString(36).slice(2, -1), async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
-        img.scaleToWidth(this.canvasWidth / this.mainCanvasWidth * logo.width as number)
+        img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
         img.set({
           left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
           top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
@@ -1789,11 +1823,11 @@ export default class Scene extends Vue {
     const width = (object.width as number * object.scaleX * this.measurementRatio)
     const height = (object.height as number * object.scaleY * this.measurementRatio)
 
-    if(width != 0 || height != 0){
+    if (width != 0 || height != 0) {
       dimText.set({
         left: object.left,
         top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-        text: 'Size '+ width.toFixed(1) + 'cm x ' + height.toFixed(1) + 'cm',
+        text: 'Size ' + width.toFixed(1) + 'cm x ' + height.toFixed(1) + 'cm',
         visible: true
       }).bringToFront()
     }
@@ -1803,10 +1837,10 @@ export default class Scene extends Vue {
 
   public addTexts(text: Record<any, any>, textIndex: null | number = null) {
     const self = this
-    if('textIndex' in text) {
+    if ('textIndex' in text) {
       textIndex = text.textIndex
     } else {
-      let product_id = this.product_id? this.product_id : this.selectedProductId
+      let product_id = this.product_id ? this.product_id : this.selectedProductId
       this.$store.dispatch('updateCustomTextWithoutTrigger', {
         index: textIndex,
         product_id: product_id,
@@ -1815,7 +1849,7 @@ export default class Scene extends Vue {
         }
       })
     }
-    if(text.text && text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back)) && !this.customTextObjects[textIndex as number]) {
+    if (text.text && text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back)) && !this.customTextObjects[textIndex as number]) {
       let textBox = new fabric.Text(text.text, {
         left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
         top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
@@ -1834,10 +1868,11 @@ export default class Scene extends Vue {
         lockScalingFlip: true,
         padding: 15,
         cornerSize: 30,
-        fontSize: self.canvasHeight / self.mainCanvasHeight * text.width
+        fontSize: self.canvasHeight / self.mainCanvasHeight * text.height,
+        _fontSizeMult: .835,
       })
 
-      if(text.scaleX && text.scaleY) {
+      if (text.scaleX && text.scaleY) {
         textBox.scaleX = text.scaleX
         textBox.scaleY = text.scaleY
       }
@@ -1868,15 +1903,15 @@ export default class Scene extends Vue {
       })
       self.customTextObjects[textIndex as number] = textBox
       canvas.add(textBox)
-      if(this.productType == 'customized') {
+      if (this.productType == 'customized') {
         model.bringToFront()
       }
       canvas.renderAll()
 
       this.addToOtherSide(textBox, text.side)
 
-      if(this.mainPreview) {
-        self.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", {index: textIndex, data: textBox});
+      if (this.mainPreview) {
+        self.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", { index: textIndex, data: textBox });
         const scaleX = textBox.scaleX as number
         const scaleY = textBox.scaleY as number
         const width = (textBox.width as number * scaleX * this.measurementRatio).toFixed(1)
@@ -1908,8 +1943,8 @@ export default class Scene extends Vue {
   }
 
   public setShowSmall(side: string): void {
-    if(this.manageComponents.mobileScreen && this.backCanvas) {
-      if(side == 'back') {
+    if (this.manageComponents.mobileScreen && this.backCanvas) {
+      if (side == 'back') {
         Vue.set(this.showSmall, 'back', true)
         Vue.set(this.showSmall, 'front', false)
       } else {
@@ -1931,24 +1966,38 @@ export default class Scene extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.available-designs-section{
+.available-designs-section {
+
   .canvas-area-holder,
   .fix-space {
-    a{
+    a {
       flex: 0 0 100%;
       max-width: 100%;
       //&:last-child{display: none;}
     }
   }
 }
-.canvas-area-holder{
-  a{
-    h2{
+
+.canvas-area-holder {
+  a {
+    h2 {
       display: none;
     }
   }
 }
-.loader{
+
+.customization-area {
+  .canvas-area-holder {
+    a {
+      h2 {
+        display: block;
+        text-align: center;
+      }
+    }
+  }
+}
+
+.loader {
   position: absolute;
   left: 0;
   right: 0;
@@ -1960,9 +2009,10 @@ export default class Scene extends Vue {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.99);
   z-index: 1030;
-  img{
+
+  img {
     max-width: 15%;
     display: block;
     margin: 0 auto;

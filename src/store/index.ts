@@ -22,7 +22,6 @@ export default new Vuex.Store({
   plugins: [createPersistedState({
     key: 'custimo',
     paths: [
-      'ProductAttributes.styleIndex',
       'ProductAttributes.selectedIndex',
       'ProductAttributes.selectedPrdId',
       'ProductAttributes.customLogos',
@@ -34,15 +33,12 @@ export default new Vuex.Store({
       'ProductAttributes.using_logo_colors',
       'Product.logoColors',
       'Product.initialExtractedColors',
-      'Main.windowView',
       'Main.tabIndexMain',
       'ProductAttributes.customTextObjects',
       'ProductAttributes.customLogoObjects',
       'Auth.jwtToken',
       'Auth.platform',
      ]
-
-
     })]
 })
 

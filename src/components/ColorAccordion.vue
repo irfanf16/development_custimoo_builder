@@ -11,7 +11,7 @@
           <span class="accordion-icon"></span>
         </b-button>
       </b-card-header>
-      <b-collapse :id="'accordion-'+(index+1)" visible accordion="my-accordion" role="tabpanel">
+      <b-collapse :id="'accordion-'+(index+1)" accordion="my-accordion" role="tabpanel">
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center" style="display: none">
             <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
@@ -144,12 +144,12 @@ export default class ColorAccordion extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantoneColor = getClosestColor(color.hex)
+    let pantoneColor = getClosestColor(color.hex) // this is sub-menu other tab of color tab in menu
     this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
   }
 
   public changePantoneColor() {
-    let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
+   let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
       this.pantoneMessage = ''

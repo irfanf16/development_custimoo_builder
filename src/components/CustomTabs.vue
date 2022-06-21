@@ -1,7 +1,8 @@
 <template>
   <div>
-    <div class="customize_controls" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 0" >
-      <span class="close" @click="this.hideAll"><BIconX /></span>
+    <div class="customize_controls" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && selectedProduct.is_logo_allowed">
+<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
+      <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div>
@@ -9,7 +10,8 @@
       </div>
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 1" >
-      <span class="close" @click="this.hideAll"><BIconX /></span>
+<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
+      <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div class="grid gap-1 text-left">
@@ -59,32 +61,36 @@
         <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
       </div>
     </div>
-    <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2" >
-      <span class="close" @click="this.hideAll"><BIconX /></span>
+    <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2 && selectedProduct.allow_name_number">
+<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
+      <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
       <div class="mt-2"></div>
       <TextCustomization
         @showOther="updateOtherTab"
+        ref="custom-text-mobile"
         :productFonts="selectedProduct.namefonts" :selectedProductID="selectedProduct.id"
         :fontsColors="fontsColors" :firstColor="firstColor" :secondColor="secondColor" :fontOptions="fontOptions" />
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 3" >
-      <span class="close" @click="this.hideAll"><BIconX /></span>
+<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
+      <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(2)" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
       <div class="mt-2"></div>
 
       <Collars :productModels="productModels"/>
     </div>
-    <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-if="this.$store.getters.getActiveTab === 4">
-      <span class="close" @click="this.hideAll"><BIconX /></span>
+    <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-show="this.$store.getters.getActiveTab === 4">
+<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
+      <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(3)" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
       <div class="d-flex mt-2 flex-column h-100">
         <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
             <template v-if="isCustomerAuthenticated">
               <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                <span v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                <span v-if="this.ref['edit-roster'] && !this.ref['edit-roster'].$refs['order-details'].isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
                   Add to cart
                 </span></span>
                 <span v-else class="addPlayer" style="background: #a9a9a9; color: #fff"><span class="fs-2 icon position-absolute"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
@@ -97,14 +103,27 @@
                 Add to cart
               </span></span>
             </template>
-          <span class="addPlayer"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share Roster Link</span></span>
+          <span class="addPlayer" @click="shareRoster"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Link</span></span>
         </div>
         <div class="players-table mt-2 hide-scroll h-100">
-          <RosterTableMobile :productSizes="sizeOptions" @addPlayer="rosterDetailsInit" />
+          <RosterTableMobile :productSizes="productSizes" ref="mobile-roster" @addPlayer="rosterDetailsInit" />
         </div>
       </div>
     </div>
-    <EditRosterAreaTab v-show="false" @open-add-to-locker="openAddToLocker" :productSizes="productSizes"/>
+    <div class="open-logo-uploader customize_controls d-flex align-items-center gap-1" v-if="!maximized" style="top: auto">
+      <span v-html="tabIcons[sideTabIndex]" class="fs-4 d-inline-flex" style="line-height: normal; color: #219F84; padding-bottom: 2px;"></span>
+      <span class="fs-3 font-weight-bold d-inline-flex pb-0">
+        {{ tabTitles[sideTabIndex] }}
+      </span>
+      <span @click="maximizeTab(sideTabIndex)" class="maximizer close">
+        <svg height="1em" width="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+             viewBox="0 0 16 16">
+          <polygon points="0,11.8 0,0 11.8,0 "/>
+          <polygon points="16,4.3 16,16 4.3,16 "/>
+        </svg>
+      </span>
+    </div>
+    <EditRosterAreaTab v-show="false" @open-add-to-locker="openAddToLocker" ref="edit-roster" :productSizes="productSizes"/>
   </div>
 </template>
 
@@ -127,6 +146,7 @@ import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
+import {getRosterDetailDefaultObject} from "@/helpers/Helpers";
 
 @Component<CustomTabs>({
   components: {
@@ -147,16 +167,17 @@ import ErrorMessages from "@/mixins/ErrorMessages";
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
-    this.customTextInit()
-    this.switchTabs(0)
-
-    this.productSizes = this.selectedProduct.sizes
-    this.setProductSizes()
-  },
+    let tabIndex = this.selectedProduct.is_logo_allowed ? 0 : 1
+    this.switchTabs(tabIndex)
+    console.log('this', this)
+  }
 })
 
 export default class CustomTabs extends Vue {
   @Prop() activeTab!: number
+  @Prop() sideTabIndex!: number
+  @Prop() maximized!: boolean
+  @Prop() tabIcons!: Record<any, any>
   private showOtherTab = false
   private activePart = 0;
   private activeCollection = 0;
@@ -174,7 +195,6 @@ export default class CustomTabs extends Vue {
   // privat tabTop = window.screen.availHeight - 190;
   public id = 0
   public custom_arr: Record<any, any>[] = [];
-  public productSizes : any[] = []
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
@@ -183,6 +203,25 @@ export default class CustomTabs extends Vue {
   public productName = ''
   public showLoader = false
   public designsIndex = 0;
+  private tabTitles = [
+    'Logo Uploader',
+    'Change Colors',
+    'Add Text',
+    'Variants',
+    'Roster Details',
+  ]
+
+  private shareRoster() {
+    if(this.isCustomerAuthenticated){
+      this.ref['edit-roster'].$refs['order-details'].getLockers()
+    }else{
+      this.gotoLogin()
+    }
+  }
+
+  private log(text:any){
+    console.log(text)
+  }
 
   get company(): Record<any, any>{
     return this.$store.getters.getCompany
@@ -205,7 +244,7 @@ export default class CustomTabs extends Vue {
   }
 
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
 
   public async setActionBeforeLogin(type: string) {
@@ -231,22 +270,37 @@ export default class CustomTabs extends Vue {
     }
   }
 
-  public rosterDetailsInit() {
-    let payload = {
-      text: '',
-      number: '',
-      size: this.sizeOptions[0] ? this.sizeOptions[0].value : '',
-      quantity: 1,
-      information: ''
+  public rosterDetailsInit(index = 0, p_id = 0) {
+    let payload = getRosterDetailDefaultObject()
+    if(this.sizeOptions.length > 0) {
+      payload.size = this.sizeOptions[0].text;
+      payload.code = this.sizeOptions[0].value;
     }
-    this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
+    let product_id = this.selectedProduct.id
+    if (p_id){
+      product_id = p_id
+    }
+    this.$store.dispatch('setRosterDetails', { pid : product_id, index: index, roster: payload })
   }
 
-  public setProductSizes() {
-    this.productSizes.forEach((size: any, key: number) => {
-      let sizes = {value: size.name, text: size.name}
-      this.sizeOptions = this.sizeOptions.concat([sizes])
+  get productSizes(){
+    let cumulative_size:Record<any,any> = [];
+    Object.values(this.selectedProduct.sizes).forEach((value: any)=>{
+      if(Object.prototype.hasOwnProperty.call(value as Record<any,any>,'json_data')){
+        cumulative_size.push(JSON.parse(value.json_data));
+      }
     })
+    let sizes = [] as Record<any,any>;
+    if(cumulative_size.length > 0){
+      cumulative_size.forEach((size_array:Record<any,any>) => {
+        if(size_array.length > 0){
+          size_array.forEach((size:Record<any,any>) => {
+            sizes.push(size);
+          })
+        }
+      })
+    }
+    return sizes;
   }
 
   public changeProduct(designsIndex: number) {
@@ -449,7 +503,14 @@ export default class CustomTabs extends Vue {
   ]
 
   private hideAll(){
-    this.$emit('switchTabs', -1, false)
+    if(this.sideTabIndex === 4){
+      this.ref['edit-roster'].updateText();
+    }
+    this.$emit('maximizeTab', -1, false)
+  }
+
+  private maximizeTab(){
+    this.$emit('maximizeTab', this.sideTabIndex, true)
   }
 
   private switchTabs(ind:number){
@@ -561,125 +622,6 @@ export default class CustomTabs extends Vue {
   get lockerColors(){
     return this.$store.getters.getLockerColors
   }
-  //
-  // @Watch('tabIndexNew', {
-  //   immediate: true, deep: true
-  // })
-  //
-  // tabIndexNewChanged() {
-  //   this.tabIndex = this.tabIndexNew
-  // }
-  //
-  // @Watch('tabIndex', {
-  //   immediate: true, deep: true
-  // })
-  //
-  // tabIndexChanged() {
-  //   this.$emit('tabIndexChange', this.tabIndex)
-  // }
-  //
-  // @Watch('selectedProduct', {
-  //   deep: false
-  // })
-  //
-  // selectedProductChanged() {
-  //   this.productColorsManipulation()
-  // }
-  //
-  // @Watch('lockerColors', {
-  //   deep: false
-  // })
-  //
-  // lockerColorsChanged() {
-  //   this.productColorsManipulation()
-  // }
-  //
-  // public productColorsManipulation() {
-  //   this.productColors = []
-  //   this.selectedProduct.colors.forEach((colors: any, key: number) => {
-  //     let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
-  //     finalColor.color_text = JSON.parse(colors.color_text)
-  //     this.productColors = this.productColors.concat(finalColor)
-  //   })
-  //   this.productColors = this.productColors.concat(this.lockerColors)
-  //
-  //   if(this.logoColors.length){
-  //     let logoColorsNew: any[] = []
-  //     this.logoColors.forEach((color: any, index: number) => {
-  //       logoColorsNew = logoColorsNew.concat([{name: color.pantone, value: color.hex, position: index+1}])
-  //     })
-  //     let teamLogoColors = [{name: 'Team Logo Colors', color_text: logoColorsNew, selectedColor: ''}]
-  //     this.productColors = this.productColors.concat(teamLogoColors)
-  //   }
-  // }
-  //
-  // public fontsColorsManipulation() {
-  //   this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
-  //     let finalColor = {color_text: []}
-  //     finalColor.color_text = JSON.parse(colors.color_text)
-  //     this.fontsColors = this.fontsColors.concat(finalColor)
-  //   })
-  //   if (this.fontsColors.length) {
-  //     this.firstColor = this.fontsColors[0].color_text[0]
-  //     this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1] : this.fontsColors[0].color_text[0]
-  //   }
-  // }
-  //
-  // public async getModels() {
-  //   await this.$store.dispatch("getModels", this.selectedProduct.product_id);
-  // }
-  //
-  // public setHideTab(index: string, value: boolean) {
-  //   this.$store.dispatch('setHideTab', {index: index, value: value})
-  // }
-  //
-  public customTextInit() {
-    this.productNames.forEach((productName: Record<any, any>, index: number) => {
-      if (this.customTexts[index] && !this.customTexts[index].action) {
-        let text = {
-          text: this.customTexts[index].text,
-          type: productName.type,
-          width: productName.width,
-          height: productName.height,
-          x_axis: productName.x_axis,
-          y_axis: productName.y_axis,
-          rotation: productName.rotation,
-          haveControls: Boolean(!productName.is_locked),
-          outlineEnabled: Boolean(productName.outline_enabled),
-          side: productName.side,
-          fontFamily: this.customTexts[index].fontFamily ? this.customTexts[index].fontFamily : this.fontOptions[0].value,
-          fillColor: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.value,
-          fillColorPantone: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.name,
-          outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.value,
-          outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
-          outLineWidth: this.customTexts[index].outLineWidth ? this.customTexts[index].outLineWidth : 0,
-          selectColor: false
-        }
-        this.$store.dispatch('setCustomTexts', {index: index, text: text})
-      } else if (!this.customTexts[index]) {
-        let text = {
-          text: '',
-          type: productName.type,
-          width: productName.width,
-          height: productName.height,
-          x_axis: productName.x_axis,
-          y_axis: productName.y_axis,
-          rotation: productName.rotation,
-          haveControls: Boolean(!productName.is_locked),
-          outlineEnabled: Boolean(productName.outline_enabled),
-          side: productName.side,
-          fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-          fillColor: this.firstColor.value,
-          fillColorPantone: this.firstColor.name,
-          outLineColor: this.secondColor.value,
-          outLineColorPantone: this.secondColor.name,
-          outLineWidth: 2,
-          selectColor: false
-        }
-        this.$store.dispatch('setCustomTexts', {index: index, text: text})
-      }
-    })
-  }
 
   public fontsList(): void {
     let productFonts = this.selectedProduct.namefonts
@@ -737,6 +679,7 @@ export default class CustomTabs extends Vue {
       x_axis: 300,
       y_axis: 180,
       rotation: 0,
+      name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
       haveControls: true,
       outlineEnabled: true,
       side: 'back',
@@ -745,7 +688,7 @@ export default class CustomTabs extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 2
+      outLineWidth: 0
     }
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
   }

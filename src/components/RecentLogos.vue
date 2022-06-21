@@ -11,7 +11,7 @@
       </div>
 
     </div>
-    <confirm-modal popup_icon="info" message="This logo cannot be deleted as it is using in one of your locker product" cancel_text="" confirm_text="" ref="delete-logo-ref"></confirm-modal>
+    <confirm-modal popup_icon="info" message="This logo cannot be deleted as it is using in one of your locker product" cancel_text="" confirm_text="" name="delete-logo-ref" ref="delete-logo-ref"></confirm-modal>
     <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
   </div>
 
@@ -63,7 +63,9 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos()
   }
-
+  get products(): [Record<any, any>] {
+    return this.$store.getters.getProducts
+  }
 
   get getRecentLogos() {
     return this.$store.getters.getRecentLogos
@@ -119,15 +121,20 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
       if(!logo.logo_colors) {
         logo.logo_colors = await this.fetchLogoColors(logo.id)
       }
-      let custom_logos = this.$store.getters.getCustomLogos()
-      //check if logo is removed but the tab is still active
-      // if(!custom_logos[index]) {
-      //   //add logo object in custom logos array
-      //   console.log("adding new custom object")
-      //   await this.addLogoObject(this.customLogoIndex)
-      // }
+
       this.$store.commit('SET_COLORS_FROM_RECENT',true)
-      await setCustomLogo(logo,this.customLogoIndex, this.selectedProduct.id)
+      const settings = this.selectedProduct['logos_setting'][this.customLogoIndex]
+      await setCustomLogo(logo, this.customLogoIndex, this.selectedProduct.id)
+      if(settings && settings.logos_follows_product){
+        const ids = settings.following_product_ids
+        if(ids.length){
+          ids.forEach(async (new_item:number)=>{
+            if (new_item != this.selectedProduct.id){
+              await setCustomLogo(logo, this.customLogoIndex, new_item)
+            }
+          })
+        }
+      }
     }
     catch (err) {
       console.log(err)

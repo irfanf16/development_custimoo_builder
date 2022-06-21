@@ -218,11 +218,10 @@
 
           <div v-for="(actFile, fileInd) in activity_items.activity_item_data[activity_navigation_index].files" :key="`actfile-${fileInd}`">
             <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`" :key="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
-            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`"  :src="`${actFile.file}`+'?nocache=1'" alt="" class="w-100" style="max-height: 500px">
+            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`" :src="`${actFile.file}?nocache=`+Math.floor(Math.random() * 100)" alt="" class="w-100" style="max-height: 500px">
           </div>
 
 
-<!--          <div class="fs-5" v-if="(activity_items.activity_item_data.length - 1) != activity_navigation_index">-->
           <div class="fs-5">
             <BIconChevronRight @click="navigateActivitySlider('next')" />
           </div>
@@ -269,18 +268,21 @@ import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {findIndex, debounce, filter} from "lodash";
+import {getCompany} from "@/helpers/Helpers";
 
 
 @Component<OrderDetail>({
   async mounted() {
+    await getCompany();
 
     let self = this;
     let comment_id = null;
     this.isWebComponent = this.$root.$options.name == 'shadow-root'
-    if(this.company.platform == "self") {
-      this.order_id = this.$route.params.order_id;
-    } else {
+
+     if(this.company.platform == "wordpress") {
       this.order_id = this.$route.query.order_id;
+    } else {
+      this.order_id = this.$route.params.order_id;
     }
     comment_id = this.$route.query.comment_id;
     await self.getOrderDetail();
@@ -385,7 +387,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
 
   async getOrderDetail() {
-    console.log("i9nside")
     let self = this;
     let url = `order/${self.order_id}`
     http.get(url)
@@ -593,7 +594,13 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   updateOrderProducts(order_item_id: number, order_item_status_activity: number) {
     let self = this;
-    self.$router.push({path: "/", query: {update_order_product: true, order_item_id: order_item_id, activity_id: order_item_status_activity}});
+    console.log("dsfgddfadsfg", this.company)
+    if(this.company.platform == "wordpress") {
+      let query_string = `update_order_product=true&order_item_id=${order_item_id}&activity_id=${order_item_status_activity}`
+      window.location.href = `${this.company.company_domain}/custimoo-santa/#/?${query_string}`;
+    } else{
+      self.$router.push({path: "/", query: {update_order_product: true, order_item_id: order_item_id, activity_id: order_item_status_activity}});
+    }
   }
 
   canPerformCommentAction(comment_obj: Record<any, any>) {

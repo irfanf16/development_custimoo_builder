@@ -1,8 +1,8 @@
 <template>
   <span class="asdasd">
-  <b-tabs content-class="mt-3"   @changed="lockerChanged">
+  <b-tabs lazy content-class="mt-3"   @changed="lockerChanged">
     <template v-for="(room, i) in getLockerProducts">
-      <b-tab :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
+      <b-tab lazy :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
         <template #title>
           <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
                       @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
@@ -18,11 +18,12 @@
           <div>
             <b-card no-body>
               <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
-              <b-tabs card v-model="lockerActiveTabIndex" @changed="checkINdex" :no-fade="true">
-                <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" >
+              <b-tabs v-else lazy card v-model="lockerActiveTabIndex" @changed="checkINdex" :no-fade="true">
+                <b-tab lazy v-if="!getSelectionMode.eventCollectionMode"  title="Products" >
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
                              :multiDrag="true"
+                             handle=".image-holder"
                              v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}"
                              @update="lockerProductsChanged($event)">
                     <template v-for="(product, ind) in room.product">
@@ -37,7 +38,7 @@
 
                             <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <template v-if="room.active_tab">
-                              <img @dblclick="editProduct(room.id, product.id)" v-if="!getSelectionMode.eventProductMode"  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                              <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
                               <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url+'tesss' ? '' : 'placeholder'" alt="">
                             </template>
 
@@ -55,9 +56,9 @@
                             :icon="['fas', 'trash-alt']" /></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
-                          <a style="font-size: 12px;" v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product.id)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
-                          <a style="font-size: 12px;" v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product.id)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
-                          <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product.id)" @mouseleave="hideTooltip"
+                          <a style="font-size: 12px;" v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product.id, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
+                          <a style="font-size: 12px;" v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product.id, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
+                          <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product.id, ind)" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
@@ -77,11 +78,11 @@
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
                                   <b-form inline>
-                                    <b-form-input :ref="'copylink_product_'+ind"
+                                    <b-form-input :ref="'copylink_product_'+i +''+ind"
                                                   :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
                                     ></b-form-input>
-                                    <button @click="copyLink(ind)" class="btn" type="button">Copy Link</button>
+                                    <button @click="copyLink(i, ind)" class="btn" type="button">Copy Link</button>
                                   </b-form>
                                 </div>
                               </div>
@@ -131,7 +132,7 @@
                   </draggable>
 
                 </b-tab>
-                <b-tab v-if="!getSelectionMode.readonly" title="Assets" class="assets-file">
+                <b-tab lazy v-if="!getSelectionMode.readonly" title="Assets" class="assets-file">
                   <div class="grid grid-mobile-3 gap-1">
                     <template v-for="(logo, inda) in room.logos">
                       <div :key="inda" class="assets-logo-block">
@@ -140,13 +141,14 @@
                         </span>
                         <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
                       </div>
+                      <a :key="`delete_logo${inda}`" @click="deleteLogo(i, logo.id, inda, room.id)"><font-awesome-icon :icon="['fas', 'trash-alt']"/></a>
                     </template>
                   </div>
                 </b-tab>
-                <b-tab v-if="!getSelectionMode.readonly" title="Colors">
+                <b-tab lazy v-if="!getSelectionMode.readonly" title="Colors">
                   <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
                     <div class="pt-lg-2 folder-wrapper">
-                      <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold">Select Folder</h3>
+                      <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold text-left">Select Folder</h3>
                       <div class="d-flex flex-wrap color-folder-holder">
                         <template v-for="(folder, inde) in room.folders">
                           <a href="#" class="text-center d-block" @click="fetchColors(inde, i)" :key="inde">
@@ -170,10 +172,11 @@
                     </div>
                   </div>
                 </b-tab>
-                <b-tab v-if="(!getSelectionMode.readonly && getCollections.length > 0) || (getSelectionMode.readonly && getSelectionMode.eventCollectionMode)" title="Collections"
+                <b-tab @click="getCollectionData" lazy v-if="(!getSelectionMode.readonly) || (getSelectionMode.readonly && getSelectionMode.eventCollectionMode)" title="Collections"
                        class="designCollections">
-                  <div class="products-holder grid gap-5 mobile-cols-2 grid-6">
-                    <template v-for="(collection, index) in getCollections">
+                  <div class="products-holder collection grid gap-5 mobile-cols-2 grid-6">
+                    <template v-if="getCollections.length > 0">
+                      <template v-for="(collection, index) in getCollections">
                       <div :key="index" @click="getSelectionMode.eventCollectionMode ? setEventCollection(index) : null" class="products-block" :style="getSelectionMode.eventCollectionMode ? 'cursor:pointer' : 'cursor:move' ">
                         <div class="image-holder">
                           <div class="convas_container" :key="collection_product_index"
@@ -194,25 +197,31 @@
                             <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
                                class="btn light btn-secondary rounded-circle"><font-awesome-icon
                               :icon="['fas', 'edit']"/></a>
-                            <b-button v-b-tooltip.hover.right title="Share collection" :id="`collection_${i+''+index}`"
-                                      :target="`collection_${index}`" class="light rounded-circle"
+                            <b-button title="Share collection" :id="'share-collection'+index" @click.stop="shareCollectionLink(collection, index)"
+                                      :ref="'share-collection'+index" class="light rounded-circle"
                                       custom-class="share-tooltip"><font-awesome-icon
                               :icon="['fas', 'share-alt']"/></b-button>
-                            <!--                            <a  :target="`collection_${index}`" class="btn light btn-secondary rounded-circle"><font-awesome-icon :icon="['fas', 'share-alt']" /></a>-->
-                            <b-tooltip :target="`collection_${i+''+index}`" custom-class="share-tooltip"
-                                       placement="bottom" triggers="focus">
-                              <div class="share-holder">
-                                <h3>Copy link and Share</h3>
-                                <div class="share-form">
-                                  <b-form inline>
-                                    <b-form-input :ref="'copylink_'+index"
-                                                  :value="collection.file_name ?  `${collection_base_url}#/collection/${collection.file_name}/view`  : ''"
-                                    ></b-form-input>
-                                    <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
-                                  </b-form>
+                            <Popper
+                              style="font-size: 12px;"
+                              v-if="$refs['share-collection'+index]"
+                              :is-open="popperID == ('share-collection'+index)"
+                              :anchor-el="$refs['share-collection'+index][0]"
+                              :on-close="hidePopper"
+                              class="share-tooltip">
+                              <aside :id="'popper-content'+index" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                                <div class="share-holder">
+                                  <h3>Copy link and Share</h3>
+                                  <div class="share-form">
+                                    <b-form inline>
+                                      <b-form-input :ref="'copylink_'+index"
+                                                    :value="collection.shared_url !== 'undefined'   || collection.shared_url != null ?  collection.shared_url : ''"
+                                      ></b-form-input>
+                                      <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
+                                    </b-form>
+                                  </div>
                                 </div>
-                              </div>
-                            </b-tooltip>
+                              </aside>
+                            </Popper>
                           </div>
                         </div>
                         <div class="d-none d-lg-block product-description text-center">
@@ -220,9 +229,11 @@
                         </div>
                       </div>
                     </template>
+                    </template>
+                    <template v-else><p>No Collection Exists</p></template>
                   </div>
                  </b-tab>
-                <b-tab  :ref="`yearlyTab${room.id}`" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly && customerPermissions.includes('Yearly-Planner')"  title="Yearly Planner" class="designCollections">
+                <b-tab lazy :ref="`yearlyTab${room.id}`" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly && customerPermissions.includes('Yearly-Planner')"  title="Yearly Planner" class="designCollections">
                   <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
                     <template>
                       <div v-if="!room.have_yearly_planner">
@@ -342,10 +353,11 @@ import ModalAction from "@/mixins/ModalAction";
     draggable
   },
   mounted() {
+    console.log(this.$store.getters.getLockerTabsIndex)
+    console.log(this.$store.getters.getActiveLockerProduct)
     let href: any = location.href;
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
-    this.setCollections()
     if (this.lockers.length >0 ){
       this.copiedProductLockerId = this.lockers[0].id
     }
@@ -357,7 +369,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
   public colors: [] = []
-  public tabIndex = this.$store.getters.getLockerTabsIndex;
   public viewLoader = false
   public copiedProductId = 0
   public copiedProductName = ''
@@ -398,6 +409,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
+  private get tabIndex() {
+    return this.$store.getters.getLockerTabsIndex
+  }
+  private set tabIndex(value){
+    this.$store.commit('Change_Locker_Tabs_Index',value);
+  }
+
   private observer:any = new MutationObserver(this.observerCallback);
 
   private setObserver = (targetNode:Record<any, any>) => {
@@ -416,6 +434,15 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
   private setSelected(e: Record<any, any>) {
     console.log('ev', e.target)
+  }
+  public getCollectionData() {
+
+    if(this.getCollections.length === 0){
+        this.viewLoader = true
+        this.setCollections();
+        this.viewLoader = false
+    }
+
   }
 
   private showTooltip(e: Record<any, any>) {
@@ -622,7 +649,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {
       if(product){
-        console.log(this.popperID)
           let payload = {
             type: 'locker',
             id: product.id,
@@ -644,6 +670,29 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       console.log(error)
     }
   }
+  async shareCollectionLink(collection:Record<any, any>, index:number){
+    try {
+      if(collection){
+        let collections = {
+          id: collection.id,
+          file_name: collection.file_name
+        }
+        let shared_url = "";
+        if (collection.shared_url) {
+          shared_url += collection.shared_url;
+        }
+        else {
+          let res = await http.post('collection/link', collections)
+          shared_url += res.data.url;
+          Vue.set(this.getCollections[index], 'shared_url', shared_url)
+          console.log("url", this.getCollections[index].shared_url)
+        }
+        this.showPopper('share-collection'+index)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   public copyCollectionLink(ind: number) {
     let toCopy = this.$refs['copylink_' + ind] as Record<any, any>
@@ -653,12 +702,12 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       document.execCommand('copy');
       this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
     } catch (err) {
-      alert('Oops, unable to copy');
+      this.showToast('Oops, unable to copy.', 'ERROR');
     }
   }
 
-  public copyLink(ind: number) {
-    let toCopy = this.$refs['copylink_product_' + ind] as Record<any, any>
+  public copyLink(room_index: number, ind: number) {
+    let toCopy = this.$refs['copylink_product_' + room_index + '' + ind] as Record<any, any>
     toCopy = toCopy[0].$el as Record<any, any>
     toCopy.select()
     try {
@@ -728,6 +777,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit('SET_COLORS_FROM_RECENT',false)
     await setCustomLogo(logo,index)
     this.$emit('hideLockerRoomModal')
+  }
+
+  public async deleteLogo(room_index:number, logo_id:number, logo_index: number, room_id:number){
+   let res  = await http.post('delete/logo', {id: logo_id, room_id: room_id})
+    if(res.status == 204){
+      this.getLockerProducts[room_index]['logos'].splice(logo_index, 1)
+    }
   }
 
   public get selectedCollectionProducts() {
@@ -810,11 +866,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     })
   }
   public changeTabIndex(i:number){
+    this.viewLoader = true;
     this.tabIndex = i
     let payload = {index: i, attribute: 'active_tab', value:true}
     this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
     this.$store.commit('Change_Locker_Tabs_Index', i)
     this.lockerActiveTabIndex = 0
+    this.viewLoader = false;
   }
   public checkINdex(){
     this.lockerActiveTabIndex = 0
@@ -1201,7 +1259,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       position: absolute;
       right: -5px;
       top: -5px;
-      z-index: 1;
+      z-index: 2;
       height: 100%;
       font-size: 16px;
       display: flex;

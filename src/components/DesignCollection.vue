@@ -209,7 +209,7 @@ export default class DesignCollection extends Mixins(ErrorMessages) {
                     position: absolute;
                     right: -5px;
                     top: -5px;
-                    z-index: 1;
+                    z-index: 2;
                     @media only screen and (min-width: 992px){
                         right: 5px;
                         top: 5px;

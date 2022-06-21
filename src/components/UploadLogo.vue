@@ -26,7 +26,7 @@
 
 
     <div class="btn btn-secondary modal-handler" >
-      <div class="upload-box position-relative" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
+      <div class="upload-box position-relative" :class="{'pulse-animation': !(showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url)}" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
         <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <img :src="storageUrl+customLogos[customLogoIndex].url+'?nocache=1'" width="100%"/>
@@ -90,7 +90,7 @@
             Don't show again.
           </b-form-checkbox>
         </div>
-        <div class="upload-logo-buttons d-flex gap-1">
+        <div class="upload-logo-buttons justify-content-center d-flex gap-1">
           <button class="btn btn-secondary light text-center justify-content-center p-2" @click="hideModal">Cancel</button>
           <button v-if="this.uploadType=='click'" class="btn btn-secondary text-center justify-content-center p-2" style="background: #219F84; color: #fff" @click="uploadLogoBtn">Confirm and Upload</button>
           <button v-if="this.uploadType=='drag'" class="btn btn-secondary text-center justify-content-center p-2" style="background: #219F84; color: #fff" @click="uploadLogoDraged">Confirm and Upload</button>
@@ -108,7 +108,14 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
-import {fileToBase64, getLogoObject, setCustomLogo, setLogoSettings} from "../helpers/Helpers"
+import {
+  fileToBase64,
+  getLogoObject,
+  getSelectedProductPantones,
+  getUploadedLogoObject,
+  setCustomLogo,
+  setLogoSettings
+} from '../helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import ModalAction from "@/mixins/ModalAction";
 
@@ -277,13 +284,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
         custom_logo.upload = true
-        let customObj = this.getUploadedLogoObject(resp.data.file)
-        let getLogos = []
-        if (this.customLogos.length > 1){
-          getLogos = this.customLogos.slice(0, -1)
-        }else{
-          getLogos = this.customLogos
-        }
+        let customObj = await getUploadedLogoObject(resp.data.file)
         this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
         custom_logo.adding_tab = false
@@ -294,13 +295,13 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         this.$store.commit('customLogos', payload)
         // await setCustomLogo(customObj, this.customLogoIndex)
         this.hideModal()
-        this.getLogoColors()
+        await this.getLogoColors()
         this.$store.commit('SET_RECENT_LOGOS');
         this.showLoader = false;
 
         if(this.customLogoIndex == 0) {
           //update team logo url in all product logos
-          this.$store.dispatch('setTeamLogoUrl', custom_logo)
+          this.$store.dispatch('setTeamLogoUrl', payload)
         }
       })
       .catch((error: any) => {
@@ -311,19 +312,9 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   }
 
   public hasExtension(fileName : string, exts: any) : boolean {
-
     return (new RegExp('(' + exts.join('|').replace(/\./g, '\\.') + ')$')).test(fileName);
   }
- public getUploadedLogoObject(res:Record<any, any>){
-    return{
-      logo_url : res.logo_url,
-      transparent_logo_url : res.transparent_logo_url,
-      smart_transparent_logo_url : res.smart_transparent_logo_url,
-      is_smart_transparent : false,
-      url : res.logo_url,
-      id : res.id
-    }
- }
+
   public getLogoColors() {
       if (this.customLogos.length) {
       if (this.customLogos[0] && this.customLogos[0].url) {
@@ -346,10 +337,10 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     })
     let deletedCount = uniqueColors.length - 4
     uniqueColors.splice(4, deletedCount)
-
+    const selectProductPantonesList = getSelectedProductPantones()
     uniqueColors.forEach((color: string) => {
-     // console.log(color)
-      let pantoneColor = getClosestColor(color)
+
+      let pantoneColor = getClosestColor(color, selectProductPantonesList)
       //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })

@@ -85,6 +85,10 @@ Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false
 
+Vue.filter("TitleCase", (value:Record<any,any>) => {
+  return value.toLowerCase().replace(/(?:^|\s|-)\S/g, (x:Record<any,any>) => x.toUpperCase());
+});
+
 new Vue({
   router,
   store,

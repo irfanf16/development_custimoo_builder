@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="d-flex gap-2">
-      <b-button class="d-none d-lg-block" @click="show">Edit Roster</b-button>
-      <button class="btn btn-secondary light" v-if="isCustomerAuthenticated" @click="shareRoster">Share roster url</button>
+      <b-button class="d-none d-lg-block" @click="show">Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</b-button>
+      <button class="btn btn-secondary light" v-if="isCustomerAuthenticated && company.platform != 'cdnExceptLogin'" @click="shareRoster">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'roster' }} url</button>
     </div>
 
     <modal id="modal-scrollable" :width="screenWidth"
@@ -11,15 +11,18 @@
            height="auto"
            :reset="true"
            :shiftY="0"
-           name="rostermodal"  title="Roster" class="roster-modal" size="xl"
-             footer-class="hide-modal-footer d-none">
+           @opened="$emit('setRosterOpen', true)"
+           name="rostermodal" class="roster-modal" size="xl"
+             footer-class="hide-modal-footer d-none"
+          @closed="close"
+        >
       <div class="modal-header d-flex justify-content-between">
-        <span class="fs-5 font-weight-bolder">Edit Roster</span>
-        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
+        <span class="fs-5 font-weight-bolder">Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="close"><BIconX /></span>
       </div>
       <div class="modal-body">
         <div class="d-flex flex-wrap justify-content-between">
-          <RosterDetails :productSizes="sizeOptions" ref="rostermodal" @addPlayer="rosterDetailsInit"/>
+          <RosterDetails :productSizes="sizeOptions" ref="rostermodal" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit"/>
           <div class="roster-preview-area">
             <CustomizationPreview :designs="products[designsIndex]"/>
   <!--          <OrderDetails/>-->
@@ -32,16 +35,16 @@
            :scrollable="true"
            height="auto"
            :reset="true"
-           :shiftY="0" name="rosterfilemodal"  content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered  size="lg" title="Upload Team Roster">
+           :shiftY="0" name="rosterfilemodal"  content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered  size="lg">
       <div class="modal-body">
-      <p class="mb-4">The Team Roster can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
+      <p class="mb-4">The {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Team Roster' | TitleCase}} can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
       <div class="roster-template-area">
-        <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download Roster Template <a  v-b-tooltip.hover
+        <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template <a  v-b-tooltip.hover
                                                                                                            title="Enter roster in excel file">
           <font-awesome-icon :icon="['fas', 'info-circle']"/>
         </a></b-button>
 
-        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload Roster Template
+        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template
           <b-form-file  class="mb-2"></b-form-file>
           <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
             <font-awesome-icon :icon="['fas', 'info-circle']"/>
@@ -51,16 +54,16 @@
     </modal>
 
     <div class="d-lg-none">
-      <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>
+      <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
-      <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details"/>
+      <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop} from 'vue-property-decorator'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import OrderDetailsTab from '@/components/OrderDetailsTab.vue'
 import RosterDetails from '@/components/RosterDetails.vue'
@@ -69,6 +72,7 @@ import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
 import { getRosterDetailDefaultObject } from '@/helpers/Helpers'
 import { findIndex } from 'lodash'
+import ModalAction from "@/mixins/ModalAction";
 
 
 @Component<EditRosterAreaTab>({
@@ -78,32 +82,44 @@ import { findIndex } from 'lodash'
     RosterDetails,
     Scene
   },
-  mounted() {
+    async mounted() {
     this.setProductSizes()
-    this.$nextTick(() => {
-      if (!this.rosterDetails.length) {
-        this.rosterDetailsInit()
+    if (this.isCustomerAuthenticated){
+      let res  = await http.get("products/roster")
+      if (res.status == 200){
+        this.products_roster = res.data
+        console.log("rosters", this.products_roster.length)
       }
-    })
+    }
   }
 })
 
-export default class EditRosterAreaTab extends Vue {
+export default class EditRosterAreaTab extends Mixins(ModalAction) {
   @Prop({required: true}) productSizes!: any
   private products: any[] = []
   public designsIndex = 0
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
+  public products_roster: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
   private screenWidth = (window.screen.availWidth - 100)
   public shareRoster(){
     this.ref['order-details'].getLockers();
   }
+  private setActionBeforeLogin(val:string){
+    this.$emit('setActionBeforeLogin', val)
+  }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
+  get company(){
+    return this.$store.getters.getCompany
+  }
+  get allproducts(){
+    return this.$store.getters.getProducts
+  }
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
@@ -122,20 +138,25 @@ export default class EditRosterAreaTab extends Vue {
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
   }
-  public show(){
-    this.$modal.show('rostermodal')
+  public async show(){
+    this.showVModal('rostermodal')
   }
   public hide(){
-    this.$modal.hide('rostermodal')
+    this.hideVModal('rostermodal')
+  }
+  public close(){
+    const self = this;
+    this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
+    self.$modal.hide('rostermodal')
   }
 
-  public rosterDetailsInit() {
-    let payload = getRosterDetailDefaultObject()
+  public rosterDetailsInit(index = 0, product = this.selectedProduct) {
+    let payload = getRosterDetailDefaultObject(product)
     if(this.sizeOptions.length > 0) {
-      payload.size = this.sizeOptions[0].value;
-      payload.code = this.sizeOptions[0].code;
+      payload.size = this.sizeOptions[0].text;
+      payload.code = this.sizeOptions[0].value;
     }
-    this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
+    this.$store.dispatch('setRosterDetails', { pid : product.id, index: index, roster: payload })
   }
 
   public setProductSizes() {
@@ -228,12 +249,11 @@ export default class EditRosterAreaTab extends Vue {
           }
         }
         if (loopStatus == true){
-          console.log(loopStatus)
           this.$store.dispatch('updateRoster', this.fileData);
-          this.$modal.hide('rosterfilemodal');
+          this.hideVModal('rosterfilemodal');
         }else{
           alert('Size is missing');
-          this.$modal.hide('rosterfilemodal');
+          this.hideVModal('rosterfilemodal');
         }
       }else{
         alert("please upload a valid file");

@@ -1,7 +1,8 @@
 <template>
   <div>
     <LoginForm ref="loginModal"   />
-    <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">
+<!--    <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">-->
+    <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="false">
       <b-input-group class="w-100">
         <b-form-input ref="shared_url_link" class="w-100" v-model="shared_url" ></b-form-input>
       </b-input-group>
@@ -62,7 +63,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins} from 'vue-property-decorator'
+import {Component, Mixins, Prop} from 'vue-property-decorator'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
@@ -73,6 +74,7 @@ import ModalAction from "@/mixins/ModalAction";
 import ProductionScene from '@/components/ProductionScene.vue'
 import { getActiveProductData,urlToBase64,getFileExtensionType,fontsList } from "@/helpers/Helpers";
 import LoginForm from '@/components/LoginForm.vue'
+import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
 
 import {compact} from 'lodash';
 
@@ -94,7 +96,7 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
   }
 })
 
-export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction)  {
+export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts)  {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>
@@ -137,7 +139,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
   }
 
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails
+    return this.$store.getters.getRosterDetails()
   }
 
   get logoColors(): [Record<any, any>] {
@@ -261,6 +263,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
      let content:string = await this.fetchUrlContent(cart_product?.production_url);
 
       let production_content = await this.parseSvgString(content,cart_product as Record<any,any>);
+     this.$store.dispatch('setRevertRosterBOOL',true);
 
      if(cart_product == null) {
        return false;
@@ -324,6 +327,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
         this.isLoading = true;
         http.post(url, post_data).then((res: any) => {
           if (res.data.success == true){
+            let edit_cart = this.$store.getters.getEditCart.cartId > 0;
             let api_res:Record<any, any> = res.data.result
             this.$store.dispatch('addToCart',api_res.items)
             this.$store.dispatch('setEditCart', {key:'cartId',value:0});
@@ -341,6 +345,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
                 this.showErrorArr(err.response.data.errors)
               });
 
+            } else {
+              if(edit_cart) {
+                this.retrieveProducts();
+              }
             }
             this.isLoading = false;
           }else{
@@ -365,6 +373,59 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction) 
       this.isLoading = false
     }
   }
+
+  public async retrieveProducts(url:string|null=null) {
+    let self = this;
+    let sync_id = this.$route.query.sync_id;
+    if(url == null) {
+      url = `/list/products`;
+    }
+    let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
+    if(!url_obj.searchParams.has("customized")) {
+      url_obj.searchParams.append('customized', this.$store.getters.getCustomized)
+    }
+    if(!url_obj.searchParams.has("personalized")) {
+      url_obj.searchParams.append('personalized', this.$store.getters.getPersonalized)
+    }
+    if(self.search_products && !url_obj.searchParams.has("title")) {
+      url_obj.searchParams.append('title', self.search_products)
+    }
+    if(this.$route.query.update_order_product) {
+      url_obj.searchParams.append('update_order_product', this.$route.query.update_order_product);
+      url_obj.searchParams.append('order_item_id', this.$route.query.order_item_id);
+      url_obj.searchParams.append('activity_id', this.$route.query.activity_id);
+      //this.$router.replace('/')
+    }
+    url = url_obj.pathname + url_obj.search;
+    if(sync_id) {
+      if(url.indexOf("?") > 0) {
+        url += `&sync_id=${sync_id}`;
+      } else {
+        url = `?sync_id=${sync_id}`;
+      }
+    }
+    http.get(url).then(async (response: Record<any, any>) => {
+      if(response.data.products.data.length > 0 ){
+        await self.handleMainProducts(response);
+        if(self.updateOrderItemProducts) {
+          await self.updateFactoryProduct(self.updateOrderItemProducts.factory_products[self.updateOrderItemProducts.active_index]);
+        }
+
+        if(self["showLoader"] || self["searchLoader"]) {
+          self.showLoader = false;
+          await self.$store.dispatch('setSearchLoader', false)
+        }
+      }else{
+        this.showError("No Product Found")
+        self.showLoader = false
+        await self.$store.dispatch('setSearchLoader', false)
+      }
+    }, (error) => {
+      console.error("Error while getting order detail", error?.response?.data?.message)
+    })
+  }
+
+
    public async  generateProductionPdf() {
     let self = this;
     self.showLoader = true;

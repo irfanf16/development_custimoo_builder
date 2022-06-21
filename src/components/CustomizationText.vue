@@ -12,18 +12,12 @@
         </template>
       </h2>
       <h2 class="fw-bold mb-2 fz-18 d-flex align-items-center justify-content-between" v-else>
-        <span>Player {{ customTexts[customTextIndex].type | capitalize }} {{ customTexts[customTextIndex].side }}</span>
-        <template v-if="customTextIndex + 1 > selectedProduct.productnames.length">
-          <b-button class="ml-1 light" style="min-width: unset; line-height: normal" variant="dark"
-            @click="$emit('removeTab')">
-            <b-icon-x />
-          </b-button>
-        </template>
+        <span :key="selectedProduct.id+''+customTextIndex">{{ productNames[customTextIndex]? productNames[customTextIndex].name_of_placement: '' }}</span>
       </h2>
 
       <div class="d-flex">
         <b-form-input @click="isHidden = !isHidden" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here"
-          :value="customTexts[customTextIndex].text" @input="updateTextField(customTextIndex, $event)" ></b-form-input>
+          :value="customTexts[customTextIndex].text" @blur="toggleAccordian(customTextIndex, $event , 'blur')" @focus="toggleAccordian(customTextIndex, $event , 'focus')" @input="updateTextField(customTextIndex, $event)" ></b-form-input>
         <button v-b-toggle="'accordion-' + (customTextIndex + 1)"
           class="d-flex align-items-center btn btn-secondary light">
           <span class="minus d-flex align-items-center">
@@ -43,7 +37,7 @@
               <div v-for="(item, i) in fontOptions" :key="i" :style="{ fontSize: '20px', fontFamily: item.value, color: customTexts[customTextIndex].fontFamily == item.value ? '#000000' : '#808895'}"
                 @click="fontOptionChanged(customTextIndex, item.value)" style="white-space: nowrap"
                 :class="{ 'pr-3': i + 1 == fontOptions.length }" role="button">
-                <span v-b-tooltip.right="customTexts[customTextIndex].text ? item.value : ''">
+                <span :key="'font'+selectedProduct.id+''+customTextIndex" v-b-tooltip.right="customTexts[customTextIndex].text ? item.value : ''">
                   {{ customTexts[customTextIndex].text ? customTexts[customTextIndex].text : item.value }}
                 </span>
               </div>
@@ -64,7 +58,7 @@
             </div>
           </a>
           <a @click="showColor('outline', customTextIndex)"
-            v-if="customTexts[customTextIndex].outlineEnabled && customTexts[customTextIndex].outLineWidth > 0"
+            v-if="customTexts[customTextIndex].outlineEnabled && customTexts[customTextIndex].outLineWidth >= 0"
             :style="[{ borderColor: textColorType === 'outline' ? customTexts[customTextIndex].outLineColor : null }]">
             <div class="text-color-box">
               <div class="color-circle"
@@ -118,6 +112,7 @@ import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
 import { getClosestColor } from '@/pantoneColor'
 import { findIndex, values } from 'lodash'
+import {getSelectedProductPantones} from "@/helpers/Helpers";
 
 
 @Component<CustomizationText>({
@@ -182,9 +177,6 @@ export default class CustomizationText extends Vue {
   get lockerColors() {
     return this.$store.getters.getLockerColors
   }
-  get customText(): Record<any, any>[] {
-    return this.$store.getters.getCustomTexts();
-  }
 
   public getColors() {
     this.productColors = []
@@ -239,7 +231,8 @@ export default class CustomizationText extends Vue {
 
   public setColor(color: Record<any, any>) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
-    let pantone = getClosestColor(color.value);
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantone = getClosestColor(color.value, selectProductPantonesList);
     let color_pantone = color.name;
     if (pantone && pantone.pantone && pantone.pantone != 'undefined') {
       color_pantone = pantone.pantone;
@@ -269,22 +262,25 @@ export default class CustomizationText extends Vue {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     this.$store.dispatch('updateCustomTextAttribute', { index: index, on_all: true, attribute: 'text', value: value })
     this.initRosterFromTexts()
-    
-    if(value){
+  }
+
+  toggleAccordian(index:number , value: string , action: string) {
+    if(action == "focus"){
       this.$refs[`accordion-${index+1}`].show = true
-    }else{
+    }
+    else if(action == "blur" && this.customTexts[index].text.length < 1){
       this.$refs[`accordion-${index+1}`].show = false
     }
   }
 
   public initRosterFromTexts() {
-    const custom_name_index = findIndex(this.customText, { type: 'name' });
-    const custom_number_index = findIndex(this.customText, { type: 'number' });
+    const custom_name_index = findIndex(this.customTexts, { type: 'name' });
+    const custom_number_index = findIndex(this.customTexts, { type: 'number' });
     if (custom_name_index != -1) {
-      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'text', value: this.customText[custom_name_index].text })
+      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'text', value: this.customTexts[custom_name_index].text })
     }
     if (custom_number_index != -1) {
-      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'number', value: this.customText[custom_number_index].text })
+      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'number', value: this.customTexts[custom_number_index].text })
     }
   }
 }

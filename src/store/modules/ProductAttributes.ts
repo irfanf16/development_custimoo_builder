@@ -2,7 +2,13 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
-import {getRosterDetailDefaultObject, setCustomLogo} from "../../helpers/Helpers";
+import {
+  getRosterDetailDefaultObject,
+  initCustomLogos,
+  initCustomTexts,
+  rosterDetailsInit,
+  setCustomLogo
+} from '../../helpers/Helpers'
 
 import {
   fontsColorsManipulation, fontsList,
@@ -15,13 +21,15 @@ import {
 import {log} from "fabric/fabric-impl";
 import {getClosestColor} from "@/pantoneColor";
 import product from "@/store/modules/product";
-import {findIndex} from "lodash";
+import {findIndex, isEmpty} from "lodash";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
     searchLoader: false,
     lockerActiveTabIndex:0,
     lockerTabsIndex:0,
+    isShareDesign : false,
+    activeLockerProduct:undefined,
     products:[],
     selectedIndex: 0,
     selectedPrdId:0,
@@ -42,7 +50,7 @@ const ProductAttributes:Module<any, any> = {
     groupColors: {},
     svgGroups: [],
     currentColorApplied: 'group',
-    rosterDetails: [],
+    rosterDetails: {},
     productionSVGs: {},
     lockerColors:[],
     logoTabIndex: 0,
@@ -99,7 +107,10 @@ const ProductAttributes:Module<any, any> = {
     editCart: {
       cartId: 0,
       cartItemId: ''
-    }
+    },
+    revertRosterBool:false,
+    hideSaveLockerButton: false,
+    editing_roster_player_index: 0
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -111,6 +122,9 @@ const ProductAttributes:Module<any, any> = {
     SET_NOTIFICATIONS(state:Record<any, any>, payload) {
       state.notifications  = payload
     },
+    setIsShareDesign(state:Record<any, any>, payload) {
+      state.isShareDesign  = payload
+    },
     UPDATE_NOTIFICATIONS(state:Record<any, any>, payload){
       if (payload){
         state.notifications.unshift(payload)
@@ -119,6 +133,9 @@ const ProductAttributes:Module<any, any> = {
 
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
       state.lockerActiveTabIndex = payload
+    },
+    setActiveLockerProduct(state:Record<any, any>, payload) {
+      state.activeLockerProduct = payload
     },
     Change_Locker_Tabs_Index(state:Record<any, any>, payload) {
       state.lockerTabsIndex = payload
@@ -203,37 +220,43 @@ const ProductAttributes:Module<any, any> = {
 
     },
      customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
-      if(customLogo && customLogo.custom_logo){
-        const newCustomLogo = customLogo.custom_logo
-        if('logoIndex' in newCustomLogo && newCustomLogo.logoIndex != null) {
-          Vue.set(state.customLogos[state.selectedPrdId], newCustomLogo.logoIndex, {...newCustomLogo})
-          state.products.forEach(async (item:Record<any, any>) => {
-            let removeLogo = false
-            if('removeLogo' in newCustomLogo){
-              removeLogo = true
-            }
-            if ('adding_tab' in newCustomLogo && newCustomLogo.adding_tab || removeLogo){
-              if (item.logos_follows_product && item.id != state.selectedPrdId){
-                if (state.customLogos[item.id][newCustomLogo.logoIndex] && !removeLogo){
-                  newCustomLogo.adding_tab = true
-                  newCustomLogo.logoIndex = state.customLogos[item.id].length
-                }
-                const logo_settings = getProductLogoSetting(item.id, newCustomLogo.logoIndex)
-                if (logo_settings) {
-                  Vue.set(state.customLogos[item.id], newCustomLogo.logoIndex, {...logo_settings})
-                }
-              }
-            }
-            else{
-              if (item.logos_follows_product && item.id != state.selectedPrdId){
-                await setCustomLogo(customLogo.customObj, newCustomLogo.logoIndex, item.id)
-              }
-            }
-          })
-        } else {
-          Vue.set(state.customLogos[state.selectedPrdId], state.customLogos[state.selectedPrdId].length, customLogo.custom_logo)
-        }
-      }
+       if(customLogo && customLogo.custom_logo){
+         const newCustomLogo = customLogo.custom_logo
+         if('logoIndex' in newCustomLogo && newCustomLogo.logoIndex != null) {
+           Vue.set(state.customLogos[state.selectedPrdId], newCustomLogo.logoIndex, {...newCustomLogo})
+           const index = state.products.findIndex((item:Record<any, any>) => item.id === state.selectedPrdId)
+           const settings = state.products[index]['logos_setting'][newCustomLogo.logoIndex]
+             if(settings && settings.logos_follows_product){
+             const ids = settings.following_product_ids
+             if(ids.length){
+               console.log("in ids")
+               ids.forEach(async (new_item:number)=>{
+                 if (state.selectedPrdId != new_item) {
+                   let removeLogo = false
+                   if ('removeLogo' in newCustomLogo) {
+                     removeLogo = true
+                   }
+                   if ('adding_tab' in newCustomLogo  && newCustomLogo.adding_tab || removeLogo) {
+                     if (state.customLogos[new_item] && state.customLogos[new_item][newCustomLogo.logoIndex] && !removeLogo) {
+                       newCustomLogo.adding_tab = true
+                       newCustomLogo.logoIndex = state.customLogos[new_item].length
+                     }
+                     const logo_settings = getProductLogoSetting(new_item, newCustomLogo.logoIndex)
+                     if (logo_settings && state.customLogos[new_item]) {
+                       Vue.set(state.customLogos[new_item], newCustomLogo.logoIndex, {...logo_settings})
+                     }
+                   } else {
+                     console.log("uploading")
+                     await setCustomLogo(customLogo.customObj, newCustomLogo.logoIndex, new_item)
+                   }
+                 }
+               })
+             }
+           }
+         } else {
+           Vue.set(state.customLogos[state.selectedPrdId], state.customLogos[state.selectedPrdId].length, customLogo.custom_logo)
+         }
+       }
     },
     SET_RECENT_LOGOS(state: Record<any, any>,payload = []) {
       if(payload.length > 0) {
@@ -253,26 +276,26 @@ const ProductAttributes:Module<any, any> = {
     customLogoAttribute(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
       if(customLogoAttribute){
         Vue.set(state.customLogos[state.selectedPrdId][customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
-        // if (for_all_products){
-          state.products.forEach((item:Record<any, any>) => {
-            if (item.logos_follows_product && item.id != state.selectedPrdId){
-              state.customLogos[item.id][customLogoAttribute.index][customLogoAttribute.attribute] = customLogoAttribute.value
-            }
-          })
-        // }
+        const index = state.products.findIndex((item:Record<any, any>) => item.id === state.selectedPrdId)
+        const settings = state.products[index]['logos_setting'][customLogoAttribute.index]
+        if(settings && settings.logos_follows_product){
+          const ids = settings.following_product_ids
+          if(ids.length){
+            ids.forEach(async (new_item:number)=>{
+              if (new_item != state.selectedPrdId && state.customLogos[new_item]){
+                state.customLogos[new_item][customLogoAttribute.index][customLogoAttribute.attribute] = customLogoAttribute.value
+              }
+            })
+          }
+        }
       }
     },
     UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT(state:Record<any, any>, payload:Record<any, any>){
       if (payload.logo){
         const customLogoAttribute = payload.logo
-        if (state.customLogos[payload.id][customLogoAttribute.index]){
+        if (state.customLogos[payload.id] && state.customLogos[payload.id][customLogoAttribute.index]){
           Vue.set(state.customLogos[payload.id][customLogoAttribute.index], customLogoAttribute.attribute, customLogoAttribute.value)
         }
-        state.products.forEach((item:Record<any, any>) => {
-          if (item.logos_follows_product && item.id != state.selectedPrdId){
-            state.customLogos[item.id][customLogoAttribute.index][customLogoAttribute.attribute] = customLogoAttribute.value
-          }
-        })
       }
     },
     CUSTOM_LOGO_WITHOUT_TRIGGER(state: Record<any, any>, customLogoAttribute: Record<any, any>) {
@@ -299,14 +322,21 @@ const ProductAttributes:Module<any, any> = {
       if(delCustomTabLogo){
         // state.customLogos.splice(delCustomLogo.index, 1)
         Vue.delete(state.customLogos[state.selectedPrdId], delCustomTabLogo.index)
-        state.products.forEach((item:Record<any, any>) => {
-          if (item.logos_follows_product && item.id != state.selectedPrdId) {
-            Vue.delete(state.customLogos[item.id], delCustomTabLogo.index)
-          }
-          state.customLogos[item.id].forEach((logo:Record<any, any>, ind:number)=>{
-              Vue.set(state.customLogos[item.id][ind], 'logoIndex', ind)
+        const index = state.products.findIndex((item:Record<any, any>) => item.id === state.selectedPrdId)
+        const settings = state.products[index]['logos_setting'][delCustomTabLogo.index]
+        if(settings && settings.logos_follows_product){
+          const ids = settings.following_product_ids
+          if(ids.length){
+            ids.forEach(async (new_item:number)=>{
+              if (new_item != state.selectedPrdId){
+                Vue.delete(state.customLogos[new_item], delCustomTabLogo.index)
+              }
+              state.customLogos[new_item].forEach((logo:Record<any, any>, ind:number)=>{
+                Vue.set(state.customLogos[new_item][ind], 'logoIndex', ind)
+              })
             })
-        })
+          }
+        }
       }
     },
     setLogoTabMutation(state: Record<any, any>, logoIndex:number) {
@@ -390,64 +420,63 @@ const ProductAttributes:Module<any, any> = {
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
     },
-    SET_CUSTOM_OBJ(state:  Record<any, any>,prd_id:number){
+    SET_CUSTOM_OBJ(state:  Record<any, any>, prd_id:number){
       const arr = []
       const default_setting = setLogoSettings(0)
-      const prod_logo_setting = getLogoSettings(0,false,prd_id)
+      const prod_logo_setting = getLogoSettings(0,false, prd_id)
       const logo_setting = {...default_setting,...prod_logo_setting}
       arr.push(logo_setting)
-      Vue.set(state.customLogos,prd_id,arr)
+      Vue.set(state.customLogos, prd_id, arr)
 
       //set team logo url of new product
-      const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
-
-
-      for (const prop in custom_obj) {
-        const any_logo = custom_obj[prop][0];
-        if(any_logo && any_logo.url) {
-          logo_setting.original_logo = any_logo.original_logo
-          logo_setting.transparent_logo = any_logo.transparent_logo
-          logo_setting.smart_transparent_logo = any_logo.smart_transparent_logo
-          logo_setting.is_smart_transparent = false
-          logo_setting.is_transparent = false
-          logo_setting.url = any_logo.url
-          Vue.set(state.customLogos[prop],0, logo_setting)
-          break;
+      const team_logo_product_id = Object.keys(state.customLogos).find((product_id: string) => {
+        if(state.customLogos[product_id] && state.customLogos[product_id][0] && state.customLogos[product_id][0].url) {
+          return true
         }
+      })
+      if(team_logo_product_id) {
+        const logo = state.customLogos[team_logo_product_id][0];
+        state.products.forEach((product: Record<any, any>) => {
+          if(state.customLogos[product.id] && state.customLogos[product.id][0] && !state.customLogos[product.id][0].url) {
+            state.customLogos[product.id][0].original_logo = logo.original_logo
+            state.customLogos[product.id][0].transparent_logo = logo.transparent_logo
+            state.customLogos[product.id][0].smart_transparent_logo = logo.smart_transparent_logo
+            state.customLogos[product.id][0].is_smart_transparent = false
+            state.customLogos[product.id][0].is_transparent = false
+            Vue.set(state.customLogos[product.id][0], 'url', logo.url)
+          }
+        })
       }
     },
     SET_TEAM_LOGO_URL(state:  Record<any, any>,logo:any){
       const custom_obj = JSON.parse(JSON.stringify(state.customLogos))
-      Object.keys(custom_obj).map(function(key, index) {
-        if(state.selectedPrdId != key) {
-          let logo_ = custom_obj[key][0];
-          logo_ = {...logo_, ...logo}
-          Vue.set(state.customLogos[key],0, logo_)
-        }
+      Object.keys(custom_obj).map(function(product_id: string) {
+        let logo_ = custom_obj[product_id][0];
+        logo_ = {...logo_, ...logo.customObj}
+        Vue.set(state.customLogos[product_id],0, logo_)
       });
     },
     async customTexts(state: Record<any, any>, customText: Record<any, any>) {
-      if ('follow' in customText){
-        if(customText){
-          Vue.set(state.customTexts[customText.prd_id], customText.index, {...customText.text})
-          state.products.forEach((item:Record<any, any>, prd_index:number) => {
-            if (item.text_follows_product && item.id != customText.prd_id){
-              Vue.set(state.customTexts[item.id], state.customTexts[item.id].length, {...customText.text})
-            }
-            var text_count = 0
-           state.customTexts[item.id].forEach((text:Record<any, any>, index:number) =>{
-              if ('add_type' in state.customTexts[item.id][index]){
-                text_count++
-                Vue.set(state.customTexts[item.id][index],'added_count', text_count)
-              }
-            })
-          })
-        }
-      }else{
+     if(customText){
         if(!state.customTexts[customText.prd_id]) {
           Vue.set(state.customTexts, customText.prd_id, [])
         }
         Vue.set(state.customTexts[customText.prd_id], customText.index, customText.text)
+        let text_count = 0
+        state.customTexts[customText.prd_id].forEach((text:Record<any, any>, index:number) =>{
+          if ('add_type' in state.customTexts[customText.prd_id][index]){
+            text_count++
+            Vue.set(state.customTexts[customText.prd_id][index],'added_count', text_count)
+          }
+        })
+      }
+    },
+    customLogo(state: Record<any, any>, customlogo: Record<any, any>) {
+      if(customlogo){
+        if(!state.customLogos[customlogo.prd_id]) {
+          Vue.set(state.customLogos, customlogo.prd_id, [])
+        }
+        Vue.set(state.customLogos[customlogo.prd_id], customlogo.index, customlogo.logo)
       }
     },
     customTextAttribute(state: Record<any, any>, customTextAttribute: Record<any, any>) {
@@ -455,54 +484,45 @@ const ProductAttributes:Module<any, any> = {
       if (text_item){
         Vue.set(text_item, customTextAttribute.attribute, customTextAttribute.value)
       }
-      state.products.forEach((item:Record<any, any>) => {
-        if (item.id != state.selectedPrdId && item.text_follows_product) {
-          if (state.customTexts[item.id][customTextAttribute.index]) {
-            if ('add_type' in text_item){
-              const count = text_item.added_count
-              const index = state.customTexts[item.id].findIndex((text:Record<any, any>) => text.added_count == count)
-              Vue.set(state.customTexts[item.id][index], customTextAttribute.attribute, customTextAttribute.value)
-            }else{
-              Vue.set(state.customTexts[item.id][customTextAttribute.index], customTextAttribute.attribute, customTextAttribute.value)
+      const selectedProduct = this.getters.getSelectedProduct;
+      const settings = selectedProduct['productnames'][customTextAttribute.index]
+      if(settings && settings.text_follows_product){
+        const ids = settings.following_product_ids
+        if(ids.length){
+          ids.forEach((new_item:number)=>{
+            if (state.customTexts[new_item]) {
+              const item = state.customTexts[new_item][customTextAttribute.index]
+              if (item)
+                Vue.set(item, customTextAttribute.attribute, customTextAttribute.value)
             }
-          }
+          })
         }
-      })
+      }
     },
     CUSTOM_TEXT_WITHOUT_TRIGGER(state: Record<any, any>, customTextsAttribute: Record<any, any>) {
       if(customTextsAttribute){
         if(Object.keys(customTextsAttribute.data).length && state.customTexts[state.selectedPrdId] && state.customTexts[state.selectedPrdId][customTextsAttribute.index]) {
           const product_id = customTextsAttribute.product_id? customTextsAttribute.product_id : state.selectedPrdId
           Object.keys(customTextsAttribute.data).forEach((key: string) => {
-            state.customTexts[product_id][customTextsAttribute.index][key] = customTextsAttribute.data[key]
+            if(state.customTexts[product_id][customTextsAttribute.index]) {
+              const obj: Record<any, any> = {}
+              obj[key] = customTextsAttribute.data[key]
+              Object.assign(state.customTexts[product_id][customTextsAttribute.index], obj)
+            }
           })
         }
       }
     },
     REMOVE_CUSTOMIZATION_TEXT_ELEMENT(state:Record<any, any>, payload:Record<any, any>){
       if (payload.product_id){
-        const text_item = state.customTexts[payload.product_id][payload.index]
         Vue.set(state.customTexts[payload.product_id], payload.index, {})
-        // Vue.delete(state.customTexts[payload.product_id], payload.index)
-        state.products.forEach((item:Record<any, any>) => {
-          if (item.text_follows_product && item.id != state.selectedPrdId) {
-            if ('add_type' in text_item){
-              const count = text_item.added_count
-              const index = state.customTexts[item.id].findIndex((text:Record<any, any>) => text.added_count == count)
-              // Vue.delete(state.customTexts[item.id], index)
-              Vue.set(state.customTexts[item.id], index, {})
-            }else{
-              Vue.set(state.customTexts[item.id], index, {})
-            }
-          }
           let count = 0
-          state.customTexts[item.id].forEach((logo:Record<any, any>, ind:number)=>{
-            if ('add_type' in logo){
+          state.customTexts[payload.product_id].forEach((text:Record<any, any>, ind:number)=>{
+            if ('add_type' in text){
               count++
-              Vue.set(state.customTexts[item.id][ind], 'added_count', count)
+              Vue.set(state.customTexts[payload.product_id][ind], 'added_count', count)
             }
           })
-        })
       }
     },
     defaultColor (state: Record<any, any>, color: Record<any, any>) {
@@ -521,7 +541,12 @@ const ProductAttributes:Module<any, any> = {
 
     SET_GROUP_COLORS (state: Record<any, any>, groupColors: Record<any, any>) {
       if(groupColors) {
-        state.groupColors = groupColors
+       if(isEmpty(groupColors)){
+          state.groupColors = {}
+        }else{
+          state.groupColors = groupColors
+        }
+
       }
     },
     UPDATE_GROUP_COLORS (state: Record<any, any>, color: Record<any, any>) {
@@ -542,27 +567,25 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     rosterDetails(state: Record<any, any>, rosterDetail: Record<any, any>) {
-      if(rosterDetail){
-        Vue.set(state.rosterDetails, rosterDetail.index, rosterDetail.roster)
+      if(!state.rosterDetails[rosterDetail.pid]){
+        Vue.set(state.rosterDetails, rosterDetail.pid, [])
       }
+      Vue.set(state.rosterDetails[rosterDetail.pid], rosterDetail.index , rosterDetail.roster)
+    },
+    updateAllRoster(state: Record<any, any>, rosterDetail: [Record<any, any>]){
+      state.rosterDetails = rosterDetail
     },
     rosterDetailAttribute(state: Record<any, any>, rosterDetailAttribute: Record<any, any>) {
-      if(state.rosterDetails.length > 0) {
-        Vue.set(state.rosterDetails[rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)
+      if(state.rosterDetails[state.selectedPrdId].length > 0) {
+        Vue.set(state.rosterDetails[state.selectedPrdId][rosterDetailAttribute.index], rosterDetailAttribute.attribute, rosterDetailAttribute.value)
       } else {
         const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
-        const selected_product = state.products[state.selectedIndex];
-        const product_sizes = selected_product.sizes;
-        if(product_sizes.length > 0) {
-          roster_detail_default_obj.size = product_sizes[0].name;
-          roster_detail_default_obj.code = product_sizes[0].code;
-        }
-        state.rosterDetails.push(roster_detail_default_obj)
+        state.rosterDetails[state.selectedPrdId].push(roster_detail_default_obj)
       }
     },
     rosterDetailAttributeWithoutTrigger(state: Record<any, any>, rosterDetailAttribute: Record<any, any>) {
-      if(state.rosterDetails.length > 0) {
-        state.rosterDetails[rosterDetailAttribute.index][rosterDetailAttribute.attribute] = rosterDetailAttribute.value
+      if(state.rosterDetails[state.selectedPrdId].length > 0) {
+        state.rosterDetails[state.selectedPrdId][rosterDetailAttribute.index][rosterDetailAttribute.attribute] = rosterDetailAttribute.value
       }
     },
     productionSVGs(state: Record<any, any>, productionSvg: Record<any, any>) {
@@ -578,110 +601,47 @@ const ProductAttributes:Module<any, any> = {
     ADD_TO_PRODUCTS(state:Record<any, any>, payload){
       state.products.push(payload);
     },
-    OVERRIDE_LOGOS(state:Record<any, any>, payload){
+    OVERRIDE_LOGOS(state: Record<any, any>, payload) {
       const locker_logos = JSON.parse(payload.custom_logos)
-      Object.keys(state.customLogos).map(function(key:any, index:any) {
-        if(key == payload.product_id) {
-          Vue.set(state.customLogos,key,locker_logos)
+      const products = state.products
+      products.forEach((product: Record<any, any>) => {
+        if(product.id == payload.product_id) {
+          Vue.set(state.customLogos, product.id, locker_logos)
         }
         else {
-          const logo_setting = getLogoSettings(0,false,key)
-          const final_logo = {...locker_logos[0],...logo_setting}
-          Vue.set(state.customLogos,key,[final_logo])
+          const logo_setting = getLogoSettings(0,false, product.id)
+          const final_logo = {...locker_logos[0], ...logo_setting}
+          Vue.set(state.customLogos, product.id,[final_logo])
         }
-      });
+      })
     },
-    OVERRIDE_TEXT(state:Record<any, any>, payload){
+    OVERRIDE_TEXT(state:Record<any, any>, payload) {
       state.customTexts = {};
+      initCustomTexts(this.getters.getProducts) // getters works fine
       const locker_texts = JSON.parse(payload.text)
-      state.products.forEach((product: Record<any, any>) => {
-        if(!state.customTexts[product.id]) {
-          Vue.set(state.customTexts, product.id, [])
-        }
-        const obj = fontsColorsManipulation(product)
-        //calculate colors pantone on init
-        let fill_color_pantone = obj.firstColor.name;
-        const pantone = getClosestColor(obj.firstColor.value);
-        if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-          fill_color_pantone = pantone.pantone;
-        }
-        let outLine_color_pantone = obj.secondColor.name;
-        const opantone = getClosestColor(obj.secondColor.value);
-        if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-          outLine_color_pantone = opantone.pantone;
-        }
-        if(parseInt(product.id) == parseInt(payload.product_id)) {
-          const productTextsArr = JSON.parse(JSON.stringify(product.productnames))
-          locker_texts.forEach( (lockerText: Record<any, any>, lockerTextIndex: number) => {
-            Vue.set(state.customTexts[product.id], lockerTextIndex, lockerText)
-            productTextsArr.shift()
-          })
-          if(productTextsArr.length > 0) {
-            let maxIndex = locker_texts.length - 1
-            productTextsArr.forEach(async (productText: Record<any, any>, productTextIndex: number) => {
-              maxIndex = maxIndex + 1
-              const text = {
-                text: '',
-                type: productText.type,
-                width: productText.width,
-                height: productText.height,
-                x_axis: productText.x_axis,
-                y_axis: productText.y_axis,
-                rotation: productText.rotation,
-                haveControls: Boolean(!productText.is_locked),
-                outlineEnabled: Boolean(productText.outline_enabled),
-                side: productText.side,
-                fontFamily: fontsList(product)[0].value,
-                fillColor: obj.firstColor.value,
-                fillColorPantone: fill_color_pantone,
-                outLineColor: obj.secondColor.value,
-                outLineColorPantone: outLine_color_pantone,
-                outLineWidth: 2,
-                selectColor: false
-              }
-              Vue.set(state.customTexts[product.id], maxIndex, text)
-            })
-          }
-        }
-        else {
-          product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-            const locker_text_str = locker_texts[index] ? locker_texts[index]['text'] : ''
-            const text = {
-              text: locker_text_str,
-              type: productName.type,
-              width: productName.width,
-              height: productName.height,
-              x_axis: productName.x_axis,
-              y_axis: productName.y_axis,
-              rotation: productName.rotation,
-              haveControls: Boolean(!productName.is_locked),
-              outlineEnabled: Boolean(productName.outline_enabled),
-              side: productName.side,
-              fontFamily: fontsList(product)[0].value,
-              fillColor: obj.firstColor.value,
-              fillColorPantone: fill_color_pantone,
-              outLineColor: obj.secondColor.value,
-              outLineColorPantone: outLine_color_pantone,
-              outLineWidth: 2,
-              selectColor: false
-            }
-            Vue.set(state.customTexts[product.id], index, text)
-          })
-        }
+
+      locker_texts.forEach((text: Record<any, any>, index: number) => {
+        const add_text = {text: text, index: index, prd_id : payload.product_id}
+        this.dispatch('setCustomTexts', add_text)
       })
     },
     OVERRIDE_DEFAULT_COLOR(state:Record<any, any>, payload){
       state.defaultColors = payload;
     },
     OVERRIDE_GROUP_COLORS(state:Record<any, any>, payload){
-      state.groupColors = payload;
+      if(isEmpty(payload)){
+        state.groupColors = {};
+      }else{
+        state.groupColors = payload;
+      }
+
     },
     REMOVE_ROSTER(state:Record<any, any>, payload:number){
-      state.rosterDetails.splice(payload, 1);
+      state.rosterDetails[state.selectedPrdId].splice(payload, 1);
     },
     UPDATE_ROSTER(state:Record<any, any>, payload:Record<any, any>){
       if (payload){
-        state.rosterDetails = payload;
+        state.rosterDetails[state.selectedPrdId] = payload;
       }
     },
     OVERRIDE_ROSTER(state:Record<any, any>){
@@ -716,11 +676,10 @@ const ProductAttributes:Module<any, any> = {
         state.collections = collections
 
     },
-    RESET_STORE(state: Record<any, any>){
+    async RESET_STORE(state: Record<any, any>){
       state.undoItems = []
       state.redoItems = []
       state.edit_locker_product = []
-      state.customLogos = {};
       //state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
       state.groupColors = {};
@@ -747,93 +706,45 @@ const ProductAttributes:Module<any, any> = {
         cartItemId: ''
       }
 
-      state.rosterDetails = []
+      state.rosterDetails = {}
+      rosterDetailsInit(state.products)
 
-      const roster_detail_default_obj: Record<any, any> = getRosterDetailDefaultObject();
-      const selected_product = state.products[state.selectedIndex];
-      const product_sizes = selected_product.sizes;
-      if(product_sizes.length > 0) {
-        roster_detail_default_obj.size = product_sizes[0].name;
-        roster_detail_default_obj.code = product_sizes[0].code;
-      }
-      state.rosterDetails.push(roster_detail_default_obj)
+      state.selectedIndex = 0;
+      state.styleIndex = 0 ;
+      const select_product = state.products[state.selectedIndex];
+      state.selectedPrdId = select_product.id
 
-      const selectedProduct = state.products[state.selectedIndex];
-      if (selectedProduct && selectedProduct.is_logo_allowed == 1) {
-        let arr:any = []
-        state.products.forEach(async (product:any) => {
-          const default_setting = setLogoSettings(0)
-          const prod_logo_setting = getLogoSettings(0,false,product.id)
-          const logo_setting = {...default_setting,...prod_logo_setting}
-           arr.push(logo_setting)
-          //arr.push(getLogoSettings(0,false,product.id))
-          Vue.set(state.customLogos,product.id,arr)
-          // Object.assign(state.customLogos,product.id)
-          // state.customLogos[product.id] = arr
-          arr = []
-        })
-
-        //state.customLogos.push(setLogoSettings(0));
-        state.logoTabIndex = 0;
-        state.customTextObjects = [];
-        state.customLogoObjects = [];
-      }
-
-      //rest custom texts
-      state.customTexts = {}
-      state.products.forEach((product:any) => {
-        if(!state.customTexts[product.id]) {
-          Vue.set(state.customTexts, product.id, [])
+      select_product.productstyles[state.styleIndex].productdesigns.forEach((item: Record<any, any>) => {
+        if (item.is_default) {
+          Vue.set(item, 'design_show', 1)
+          state.selectedDesignId = item.id
+        } else {
+          Vue.set(item, 'design_show', 0)
         }
-        product.productnames =  sortTextsArray(product.productnames);
-
-        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-          const obj = fontsColorsManipulation(product)
-
-          //calculate colors pantone on init
-          let fill_color_pantone = obj.firstColor.name;
-          const pantone = getClosestColor(obj.firstColor.value);
-          if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-            fill_color_pantone = pantone.pantone;
-          }
-
-          let outLine_color_pantone = obj.secondColor.name;
-          const opantone = getClosestColor(obj.secondColor.value);
-          if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-            outLine_color_pantone = opantone.pantone;
-          }
-          let textIndex = index
-          if(state.customTexts[product.id] && state.customTexts[product.id][index]) {
-            textIndex = state.customTexts[product.id][index].textIndex
-          }
-          const text = {
-            text: '',
-            type: productName.type,
-            width: productName.width,
-            height: productName.height,
-            x_axis: productName.x_axis,
-            y_axis: productName.y_axis,
-            rotation: productName.rotation,
-            haveControls: Boolean(!productName.is_locked),
-            outlineEnabled: Boolean(productName.outline_enabled),
-            side: productName.side,
-            fontFamily: fontsList(product)[0].value,
-            fillColor: obj.firstColor.value,
-            fillColorPantone: fill_color_pantone,
-            outLineColor: obj.secondColor.value,
-            outLineColorPantone: outLine_color_pantone,
-            outLineWidth: 2,
-            textIndex: textIndex,
-            selectColor: false
-            }
-          Vue.set(state.customTexts[product.id], index, text)
-        })
-      })
+      });
+    },
+    RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
+      state.customTextObjects = [];
+      state.customTexts = {}
+      initCustomTexts(state.products)
+    },
+    RESET_CUSTOM_LOGOS: (state: Record<any, any>) => {
+      state.logoTabIndex = 0;
+      state.customLogoObjects = [];
+      state.customLogos = {};
+      initCustomLogos(state.products)
+    },
+    RESET_ALL_COLORS: (state: Record<any, any>) => {
+      state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]
+     // state.groupColors = {}
+      //state.svgGroups = []
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       state.undoItems.push(payload)
     },
     UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
+    RESET_UNDO:(state) => state.undoItems = [],
+    RESET_REDO:(state) => state.redoItems = [],
     DO_UNDO(state: Record<any, any>) {
       if (state.undoItems.length) {
         const lastUndo = state.undoItems.pop()
@@ -845,7 +756,12 @@ const ProductAttributes:Module<any, any> = {
           state.defaultColors = lastUndo.data
         } else if (lastUndo.action == 'groupColor') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
-          state.groupColors = lastUndo.data
+          if(isEmpty(lastUndo.data)){
+            state.groupColors = {};
+          }else{
+            state.groupColors = lastUndo.data
+          }
+
         } else if (lastUndo.action == 'customTexts') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
@@ -865,7 +781,12 @@ const ProductAttributes:Module<any, any> = {
         }
         else if (lastUndo.action == 'groupColor'){
           state.undoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
-          state.groupColors = lastUndo.data
+          if(isEmpty(lastUndo.data)){
+            state.groupColors = {};
+          }else{
+            state.groupColors = lastUndo.data
+          }
+
         }
         else if (lastUndo.action == 'customTexts'){
           state.undoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
@@ -949,11 +870,26 @@ const ProductAttributes:Module<any, any> = {
         state.customLogoObjects.push(payload.data)
       }
       state.canvasImage.scene = payload.scene
+    },
+    SET_HIDE_SAVE_LOCKER_BUTTON(state:Record<any, any>, payload){
+      state.hideSaveLockerButton = payload
+    },
+    SET_REVERT_ROSTER_BOOL(state:Record<any, any>, payload){
+      state.revertRosterBool = payload;
+    },
+    SET_EDITING_ROSTER_PLAYER_INDEX(state:Record<any, any>, payload){
+      state.editing_roster_player_index = payload;
     }
   },
   getters: {
     getSearchLoader: state => {
       return state.searchLoader
+    },
+    getIsShareDesign: state => {
+      return state.isShareDesign
+    },
+    getActiveLockerProduct: state => {
+      return state.activeLockerProduct
     },
     getEditLockerProduct: state => {
       return state.editLockerProduct
@@ -1082,7 +1018,13 @@ const ProductAttributes:Module<any, any> = {
     getSvgGroups: state => {
       return state.svgGroups
     },
-    getRosterDetails: state => {
+    getRosterDetails: state => (prd_id = state.selectedPrdId) => {
+      if(!state.rosterDetails[prd_id]) {
+        return []
+      }
+      return state.rosterDetails[prd_id]
+    },
+    getAllRosterDetails: state  => {
       return state.rosterDetails
     },
     getProductionSVGs: state => {
@@ -1135,6 +1077,15 @@ const ProductAttributes:Module<any, any> = {
     },
     getStockCount(state:Record<any,any>){
       return state.stock_count;
+    },
+    getHideSaveLockerButton(state:Record<any,any>){
+      return state.hideSaveLockerButton;
+    },
+    getRevertRosterBool(state:Record<any,any>){
+      return state.revertRosterBool;
+    },
+    getEditingRosterPlayerIndex(state:Record<any,any>){
+      return state.editing_roster_player_index;
     }
   },
   actions: {
@@ -1294,6 +1245,8 @@ const ProductAttributes:Module<any, any> = {
     },
     resetStore({commit}){
       commit('RESET_STORE')
+      commit('RESET_CUSTOM_TEXTS')
+      commit('RESET_CUSTOM_LOGOS')
     },
     undoAction({commit}){
       commit('DO_UNDO');
@@ -1422,6 +1375,9 @@ const ProductAttributes:Module<any, any> = {
         return res
       })
     },
+    setRevertRosterBOOL({commit},payload){
+      commit('SET_REVERT_ROSTER_BOOL',payload);
+    }
   }
 }
 export default ProductAttributes;

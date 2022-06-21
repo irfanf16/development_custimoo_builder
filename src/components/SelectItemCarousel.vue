@@ -32,6 +32,9 @@ Vue.use(SlitherSlider)
 @Component<SelectItemCarousel>({
   components: {
     Scene
+  },
+  mounted() {
+    (this.$parent.$parent as Record<any, any>).adjustTotalTabs()
   }
 })
 
@@ -52,11 +55,14 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts) {
   }
 
   public async productDesigns(index: number) {
+    this.$store.commit('Change_Locker_Tabs_Index', undefined)
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
     this.$store.commit('CHANGE_STYLE_INDEX', 0);
     this.$store.dispatch("getModels", this.products[index].product_id);
     this.$store.dispatch('setColorSectionVisibility')
-    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0,})
+    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false)
+    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0,});
+    (this.$parent.$parent as Record<any, any>).adjustTotalTabs()
   }
 
   public setSliderIndex() {

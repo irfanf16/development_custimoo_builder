@@ -31,16 +31,18 @@ window.Echo = new Echo({
   },
 });
 
+//todo remove this code after a while as this is used to remove pwa cache
+navigator.serviceWorker.getRegistrations().then(function(registrations) {
+  for(let registration of registrations) {
+    registration.unregister()
+} })
+
 @Component<App>({
   components: {
     Header,
     Navbar
   },
   async mounted() {
-    if(localStorage.getItem('login_code')) {
-      localStorage.clear()
-      location.reload()
-    }
     await getCompany();
     const token = this.$router.currentRoute.query.token
     if (token){
@@ -55,7 +57,7 @@ window.Echo = new Echo({
           await this.$store.dispatch('setBrowserToken')
         }
         this.$router.push({name: 'Home'})
-        this.$store.commit('RESET_STORE')
+        this.$store.dispatch('resetStore')
       }else{
         alert('no customer')
       }

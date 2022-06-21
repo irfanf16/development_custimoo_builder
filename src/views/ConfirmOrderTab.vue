@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from 'vue-property-decorator'
+import {Component, Prop, Vue} from 'vue-property-decorator'
     import OrderAccordionTab from '@/components/OrderAccordionTab.vue'
     import CustomizationPreview from '@/components/CustomizationPreview.vue'
     import OrderDetailsTab from '@/components/OrderDetailsTab.vue'
@@ -29,7 +29,7 @@
     })
 
     export default class ConfirmOrderTab extends Vue {
-        public selected= null
+      public selected= null
       public ref = this.$refs as Record<any, any>
         public options= [
           { value: 'a', text: 'SM' },

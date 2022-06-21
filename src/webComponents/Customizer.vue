@@ -14,6 +14,9 @@ import Gleap from 'gleap';
 Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
+Vue.filter("TitleCase", (value) => {
+  return value.toLowerCase().replace(/(?:^|\s|-)\S/g, (x) => x.toUpperCase());
+});
 import { config, dom, library } from '@fortawesome/fontawesome-svg-core'
 // Make sure you tell Font Awesome to skip auto-inserting CSS into the <head>
 config.autoAddCss = false
@@ -114,11 +117,7 @@ export default {
       }
     }
   },
-  mounted: async function() {
-    if(localStorage.getItem('login_code')) {
-      localStorage.clear()
-      location.reload()
-    }
+  mounted: async () => {
     await getCompany();
     let elem = document.createElement('link');
     elem.rel = ' stylesheet'
@@ -145,18 +144,6 @@ export default {
       document.head.append(ubuntu_font)
     }
 
-    if (!this.$store.getters.getCustomer && localStorage.getItem('jwtToken')) {
-      let token = localStorage.getItem('jwtToken')
-      let response = await this.$store.dispatch('getCustomerFromToken', token)
-      if (response) {
-        let payload = {
-          access_token: token,
-          user: response
-        }
-        this.$store.commit('SET_CUSTOMER', payload)
-      }
-    }
-
     // This will only work on your root Vue component since it's using $parent
     const { shadowRoot } = this.$parent.$options
     const id = 'fa-styles'
@@ -180,7 +167,7 @@ export default {
           await this.$store.dispatch('setBrowserToken')
         }
         this.$router.push({name: 'Home'})
-        this.$store.commit('RESET_STORE')
+        this.$store.dispatch('resetStore')
       }else{
         alert('no customer')
       }
@@ -202,6 +189,7 @@ export default {
 @import '~bootstrap/dist/css/bootstrap.css';
 @import '~bootstrap-vue/dist/bootstrap-vue.css';
 @import '~pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';
+@import '~@fortawesome/fontawesome-svg-core/styles.css';
 @import '~vue-js-modal/dist/styles.css';
 @import '../assets/css/custom.css';
 

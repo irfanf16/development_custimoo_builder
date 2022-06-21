@@ -1,7 +1,7 @@
 <template>
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
-      <b-tabs v-model="tabIndex">
+      <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
         <!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
         <!--        <vue-scrollbar :speed="20" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">-->
         <div class="myscroll">
@@ -17,7 +17,7 @@
               </a>
             </template>
             <div class="logo-placement-tabs" v-if="hideTab.logoHide">
-              <LogoPlacementTabs v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
+              <LogoPlacementTabs @setColorShuffled="(val) => $emit('setColorShuffled', val)" :isColorShuffled="isColorShuffled" v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
                                  :logosSetting="selectedProduct.logos_setting"/>
             </div>
           </b-tab>
@@ -42,7 +42,7 @@
               </div>
             </div>
           </b-tab>
-          <b-tab>
+          <b-tab v-if="selectedProduct.allow_name_number">
             <button @click="setHideTab('textHide', !hideTab.textHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('textHide', true)" >
@@ -122,8 +122,8 @@
               </a>
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
-              <h2 class="fw-bold mb-2 fz-18">Roster</h2>
-              <EditRosterAreaTab @open-add-to-locker="openAddToLocker" :productSizes="productSizes"/>
+              <h2 class="fw-bold mb-2 fz-18">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</h2>
+              <EditRosterAreaTab @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="openAddToLocker" :productSizes="productSizes" ref="edit-roster-area-tab"/>
             </div>
           </b-tab>
           <!--        </vuescroll>-->
@@ -164,14 +164,16 @@ import {sortTextsArray} from "@/helpers/Helpers";
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
-    this.customTextInit()
   },
 })
 export default class CustomizationTabs extends Vue {
+  @Prop({required: true}) isColorShuffled!: boolean
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
   public text_add_count = 0
   public set = false
+  public previous_tab='';
+  public ref = this.$refs as Record<any, any>
   private ops = {
     // vuescroll: {
     //   mode: 'native'
@@ -213,6 +215,19 @@ export default class CustomizationTabs extends Vue {
   @Prop({required: false, default:0}) tabIndexNew!: number
   public fontOptions: Record<any, any>[] = []
 
+  private setRosterOpen(val:boolean){
+    this.$emit('setRosterOpen', val)
+  }
+  get company(): Record<any, any>{
+    return this.$store.getters.getCompany
+  }
+  private setActionBeforeLogin(type: string){
+    this.$emit('setActionBeforeLogin', type)
+  }
+
+  get maintabindex(){
+    return this.$store.getters.getMainTab
+  }
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
   }
@@ -358,109 +373,14 @@ export default class CustomizationTabs extends Vue {
   }
 
   public setHideTab(index: string, value: boolean) {
+    this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
+    // if(this.previous_tab === 'teamHide'){
+    //   this.renderText();
+    //   // this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
+    // }
+
     this.$store.dispatch('setHideTab', {index: index, value: value})
-  }
-
-  public customTextInit() {
-
-    this.products.forEach((product:any) => {
-      if(!this.customTexts[product.id]) {
-        //product.productnames =  sortTextsArray(product.productnames);
-        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-          if (this.customTexts[index] && !this.customTexts[index].action) {
-            //calculate colors pantone on init
-            let fill_color_pantone = this.firstColor.name;
-            let fill_hex_color = '';
-            if(this.customTexts[index].fillColor){
-              fill_hex_color = this.customTexts[index].fillColor;
-            }else if(this.firstColor.value){
-              fill_hex_color = this.firstColor.value;
-            }
-            if(fill_hex_color != ''){
-              let pantone = getClosestColor(fill_hex_color);
-              if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-                fill_color_pantone = pantone.pantone;
-              }
-            }
-
-            let outLine_color_pantone = this.secondColor.name;
-            let outLine_hex_color = '';
-            if(this.customTexts[index].outLineColor){
-              outLine_hex_color = this.customTexts[index].outLineColor;
-            }else if(this.secondColor.value){
-              outLine_hex_color = this.secondColor.value;
-            }
-            if(outLine_hex_color != ''){
-              let opantone = getClosestColor(outLine_hex_color);
-              if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-                outLine_color_pantone = opantone.pantone;
-              }
-            }
-            let text = {
-              text: this.customTexts[index].text,
-              type: productName.type,
-              width: productName.width,
-              height: productName.height,
-              x_axis: productName.x_axis,
-              y_axis: productName.y_axis,
-              rotation: productName.rotation,
-              haveControls: Boolean(!productName.is_locked),
-              outlineEnabled: Boolean(productName.outline_enabled),
-              side: productName.side,
-              fontFamily: this.customTexts[index].fontFamily ? this.customTexts[index].fontFamily : this.fontOptions[0].value,
-              fillColor: this.customTexts[index].fillColor ? this.customTexts[index].fillColor : this.firstColor.value,
-              fillColorPantone: fill_color_pantone,
-              outLineColor: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.value,
-              //outLineColorPantone: this.customTexts[index].outLineColor ? this.customTexts[index].outLineColor : this.secondColor.name,
-              outLineColorPantone: outLine_color_pantone,
-              outLineWidth: this.customTexts[index].outLineWidth ? this.customTexts[index].outLineWidth : 0,
-              selectColor: false
-            }
-            await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
-          }
-          else if (!this.customTexts[index]) {
-
-            //calculate colors pantone on init
-            let fill_color_pantone = this.firstColor.name;
-            let pantone = getClosestColor(this.firstColor.value);
-            if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-              fill_color_pantone = pantone.pantone;
-            }
-
-            let outLine_color_pantone = this.secondColor.name;
-            let opantone = getClosestColor(this.secondColor.value);
-            if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-              outLine_color_pantone = opantone.pantone;
-            }
-
-
-            let text = {
-              text: '',
-              type: productName.type,
-              width: productName.width,
-              height: productName.height,
-              x_axis: productName.x_axis,
-              y_axis: productName.y_axis,
-              rotation: productName.rotation,
-              haveControls: Boolean(!productName.is_locked),
-              outlineEnabled: Boolean(productName.outline_enabled),
-              side: productName.side,
-              fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-              fillColor: this.firstColor.value,
-              fillColorPantone: fill_color_pantone,
-              outLineColor: this.secondColor.value,
-              outLineColorPantone: outLine_color_pantone,
-              outLineWidth: 2,
-              selectColor: false
-            }
-            await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
-          }
-        })
-      }
-
-
-    });
-
+    this.previous_tab = index;
   }
 
   public fontsList(): void {
@@ -519,6 +439,7 @@ export default class CustomizationTabs extends Vue {
       x_axis: 300,
       y_axis: 180,
       rotation: 0,
+      name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
       haveControls: true,
       outlineEnabled: true,
       side: 'front',
@@ -527,7 +448,7 @@ export default class CustomizationTabs extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 2,
+      outLineWidth: 0,
       add_type: 'manual',
     }
     this.$store.dispatch('setCustomTexts', {follow:true, index: this.customTexts.length, text: text, prd_id:this.selectedProduct.id})

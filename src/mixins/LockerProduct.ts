@@ -1,13 +1,21 @@
 /* eslint-disable */
 import { Component, Vue } from 'vue-property-decorator'
 import {findIndex} from 'lodash';
-import {fontsColorsManipulation, fontsList, getRandom, processColorsCustom} from "@/helpers/Helpers";
+import {
+  fontsColorsManipulation,
+  fontsList,
+  getRandom,
+  initCustomLogos,
+  initCustomTexts,
+  processColorsCustom, rosterDetailsInit
+} from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import {getClosestColor} from "@/pantoneColor";
 @Component
 export class LockerProducts extends Vue {
 
-  public async editProduct(room_id: number, room_product_id: number, share_url="") {
+  public async editProduct(room_id: number, room_product_id: number, ind: number, share_url="") {
+    this.$store.commit('setActiveLockerProduct', ind)
     let self = this;
     let is_customized = this.$store.getters.getCustomized
     let is_personalized = this.$store.getters.getPersonalized
@@ -37,7 +45,9 @@ export class LockerProducts extends Vue {
         // @ts-ignore
         Vue.set(this.getLockerProducts[lockerIndex].product, productIndex,  prod_res.data)
       }
-      this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
+     if(prod_res.data.roster_detail) {
+       this.$store.commit('UPDATE_ROSTER', JSON.parse(prod_res.data.roster_detail))
+     }
       this.$root.$emit('rostershared', '')
       const designId = locker_product?.design_id
       const styleId = locker_product?.style_id
@@ -58,6 +68,10 @@ export class LockerProducts extends Vue {
         if(!customLogos[element.product_id]) {
           await this.$store.dispatch('setCustomObj', element.product_id)
         }
+        await this.$store.commit('RESET_CUSTOM_TEXTS')
+        await this.$store.commit('RESET_CUSTOM_LOGOS')
+        await this.$store.commit('RESET_ALL_COLORS')
+
         await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', element);
         await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', element);
         await this.$store.dispatch('overRideDefaultColors', JSON.parse(element.defaultcolors));
@@ -90,6 +104,9 @@ export class LockerProducts extends Vue {
         else {
           logo_colors = JSON.parse(element.colors)
         }
+        this.$store.commit('RESET_UNDO');
+        this.$store.commit('RESET_REDO');
+        this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
         await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
         this.$emit('hideLockerRoomModal')
       }, (error:Record<any, any>) => {
@@ -176,55 +193,17 @@ export class handleMainProducts extends Vue {
     await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
     await this.$store.dispatch('setStockCount',stock_count);
     let selected_product = this.$store.getters.getSelectedProduct;
+
+    initCustomTexts(retrieved_products)
+    initCustomLogos(retrieved_products)
+    rosterDetailsInit(retrieved_products)
+
     let customLogos = this.$store.getters.getCustomLogoObject
     for (const product of retrieved_products) {
       if(!customLogos[product.id]) {
-        await this.$store.dispatch('setCustomObj',product.id)
+        await this.$store.dispatch('setCustomObj', product.id)
       }
     }
-    //set custom text objects for new products
-    let customTextObjects = this.$store.getters.getCustomTextObject
-    let custom_texts = await this.$store.getters.getCustomTexts();
-    retrieved_products.forEach((product:any) => {
-      if(!customTextObjects[product.id]) {
-        product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-          const obj = fontsColorsManipulation(product)
-          //calculate colors pantone on init
-          let fill_color_pantone = obj.firstColor.name;
-          const pantone = getClosestColor(obj.firstColor.value);
-          if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
-            fill_color_pantone = pantone.pantone;
-          }
-          let outLine_color_pantone = obj.secondColor.name;
-          const opantone = getClosestColor(obj.secondColor.value);
-          if(opantone && opantone.pantone && opantone.pantone != 'undefined'){
-            outLine_color_pantone = opantone.pantone;
-          }
-          const already_added_text_str = custom_texts[index] ? custom_texts[index]['text'] : ''
-          const text = {
-            text: already_added_text_str,
-            type: productName.type,
-            width: productName.width,
-            height: productName.height,
-            x_axis: productName.x_axis,
-            y_axis: productName.y_axis,
-            rotation: productName.rotation,
-            haveControls: Boolean(!productName.is_locked),
-            outlineEnabled: Boolean(productName.outline_enabled),
-            side: productName.side,
-            fontFamily: fontsList(product)[0].value,
-            fillColor: obj.firstColor.value,
-            fillColorPantone: fill_color_pantone,
-            outLineColor: obj.secondColor.value,
-            outLineColorPantone: outLine_color_pantone,
-            outLineWidth: 2,
-            textIndex: index,
-            selectColor: false
-          }
-          await this.$store.dispatch('setCustomTexts', {index: index, text: text,prd_id:product.id})
-        })
-      }
-    });
     this.$store.dispatch('setColorSectionVisibility')
     this.$store.dispatch("getModels", selected_product.product_id);
 
@@ -234,7 +213,12 @@ export class handleMainProducts extends Vue {
   public async updateFactoryProduct(factory_product: Record<any, any>) {
     let selected_product = this.$store.getters.getSelectedProduct;
     let selected_product_style_index = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === factory_product.style_id);
-    await this.$store.commit('CHANGE_STYLE_INDEX', selected_product_style_index);
+    await this.$store.commit('CHANGE_STYLE_INDEX', selected_product_style_index)
+
+    await this.$store.commit('RESET_CUSTOM_TEXTS')
+    await this.$store.commit('RESET_CUSTOM_LOGOS')
+    await this.$store.commit('RESET_ALL_COLORS')
+
     let customLogos = this.$store.getters.getCustomLogoObject
     if(!customLogos[factory_product.product_id]) {
       await this.$store.dispatch('setCustomObj', factory_product.product_id)

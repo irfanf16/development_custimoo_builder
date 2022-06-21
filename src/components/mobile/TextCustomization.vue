@@ -4,18 +4,15 @@
       <template v-for="(customText, tabIndex) in customTexts">
         <b-tab v-if="customText.hasOwnProperty('text')" :key="tabIndex" @click="setTextIndex(tabIndex)">
           <template #title>
-            <template v-if="tabIndex + 1  > selectedProduct.productnames.length">
-              <!--            <b-button class="add-logo-btn ml-1" @click="removeTab(tabIndex, selectedProduct.id)">-->
-              <!--              - -->
-              <!--            </b-button>-->
+            <template v-if="customTexts[customTextIndex].add_type && customTexts[customTextIndex].add_type == 'manual'">
               <b-button class="p-0 mr-1 light remove-text" size="sm" style="min-width: unset; line-height: normal" variant="dark" @click.stop="removeTab(tabIndex, selectedProduct.id)">
                 <b-icon-x />
               </b-button>
+              Additional Text # {{ customTexts[customTextIndex].added_count }}
             </template>
-
-            <span>
-            {{ customText.side ? customText.side : 'text' | capitalize}} {{ customText.type | capitalize }}
-          </span>
+            <template v-else>
+              {{ selectedProduct.productnames[tabIndex].name_of_placement }}
+            </template>
           </template>
 
           <div class="grid mobile-cols-2 gap-1">
@@ -113,16 +110,11 @@
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 import {getClosestColor} from "@/pantoneColor";
+import {getSelectedProductPantones} from "@/helpers/Helpers";
+import { findIndex } from 'lodash'
 @Component<TextCustomization>({
   components: {
     colorPicker
-    // ColorAccordion,
-    // LogoPlacementTabs,
-    // CustomizationText,
-    // CollarStyle,
-    // EditRosterArea,
-    // ColorTabs,
-    // UploadLogo
   },
   mounted() {
     this.$nextTick(() => {
@@ -131,10 +123,6 @@ import {getClosestColor} from "@/pantoneColor";
     this.getColors()
     // this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
-    // this.fontsColorsManipulation()
-    // this.fontsList()
-    // this.customTextInit()
-    console.log('customTexts', this.customTexts)
   },
   filters: {
     capitalize: (value: string) => {
@@ -159,7 +147,7 @@ export default class TextCustomization extends Vue {
   // @Prop({required: true}) customTextIndex!: any
   @Prop({required: true}) fontOptions!: any
   @Prop({required: true}) selectedProductID!: any
-  private customTextIndex: any = 0
+  public customTextIndex: any = 0
   public selectedFont = null
   public colorImage = '/img/images/color-placeholder.png'
   public fontColorType = 'fill'
@@ -187,7 +175,7 @@ export default class TextCustomization extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantone = getClosestColor(color.hex);
+    let pantone = getClosestColor(color.hex); // for other color in
     if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
       this.pantoneColorVal = pantone.pantone;
     }
@@ -255,6 +243,7 @@ export default class TextCustomization extends Vue {
       x_axis: 300,
       y_axis: 180,
       rotation: 0,
+      name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
       haveControls: true,
       outlineEnabled: true,
       side: 'back',
@@ -263,7 +252,7 @@ export default class TextCustomization extends Vue {
       fillColorPantone: this.firstColor.name,
       outLineColor: this.secondColor.value,
       outLineColorPantone: this.secondColor.name,
-      outLineWidth: 2,
+      outLineWidth: 0,
       add_type: 'manual',
     }
     this.$store.dispatch('setCustomTexts', {follow:true, index: this.customTexts.length, text: text, prd_id:this.selectedProduct.id})
@@ -318,7 +307,8 @@ export default class TextCustomization extends Vue {
 
   public setColor(color: Record<any, any>) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
-    let pantone = getClosestColor(color.value);
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantone = getClosestColor(color.value, selectProductPantonesList);
     let color_pantone = color.name;
     // console.log(pantone.pantone);
     if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
@@ -342,9 +332,25 @@ export default class TextCustomization extends Vue {
     this.$store.dispatch('updateCustomTextAttribute', {index: this.customTextIndex, on_all: true, attribute: 'outLineWidth', value: event})
   }
 
+  get eyeIndex():number{
+    return this.$store.getters.getEyeIndex;
+  }
+
   updateTextField(index: number, value: string) {
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
-    this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: true, attribute: 'text', value: value})
+    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' });
+    this.$store.dispatch('updateCustomTextAttribute', {index: index, attribute: 'text', value: value});
+    this.initRosterFromTexts()
+  }
+
+  public initRosterFromTexts() {
+    const custom_name_index = findIndex(this.customTexts, { type: 'name' });
+    const custom_number_index = findIndex(this.customTexts, { type: 'number' });
+    if (custom_name_index != -1) {
+      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'text', value: this.customTexts[custom_name_index].text })
+    }
+    if (custom_number_index != -1) {
+      this.$store.commit('rosterDetailAttributeWithoutTrigger', { index: 0, attribute: 'number', value: this.customTexts[custom_number_index].text })
+    }
   }
 
   private setTextIndex(index:number){

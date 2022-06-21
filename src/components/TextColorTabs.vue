@@ -123,7 +123,7 @@ export default class TextColorTabs extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantone = getClosestColor(color.hex);
+   let pantone = getClosestColor(color.hex); // this is sub-menu other tab of text tab in menu
     if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
       this.pantoneColorVal = pantone.pantone;
     }
@@ -133,7 +133,7 @@ export default class TextColorTabs extends Vue {
   }
 
   public changePantoneColor() {
-    let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
+   let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
       this.pantoneMessage = ''

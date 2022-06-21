@@ -17,7 +17,8 @@ const Product:Module<any, any> = {
       next_page: null,
       active_product_id: null
     },
-    update_order_item_products: null
+    update_order_item_products: null,
+    product_locker_id:0,
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -52,6 +53,9 @@ const Product:Module<any, any> = {
     },
     getUpdateOrderItemProducts(state:Record<any, any>){
       return state.update_order_item_products
+    },
+    getProductLockerId(state:Record<any,any>){
+      return state.product_locker_id;
     }
   },
   mutations:{
@@ -120,6 +124,9 @@ const Product:Module<any, any> = {
     UPDATE_MAIN_PRODUCTS_INFO(state:Record<any, any>, payload){
       state.main_products_info = payload
     },
+    SET_PRODUCT_LOCKER_ID(state:Record<any,any>,id){
+      state.product_locker_id = id;
+    }
   },
   actions: {
     async getModels({commit}, paylod:number){
@@ -127,20 +134,39 @@ const Product:Module<any, any> = {
         commit('SET_MODELS', res.data);
       });
     },
-    SAVE_TO_LOCKER({commit}, payload){
+    async SAVE_TO_LOCKER({commit}, payload){
       let err = '';
-      const res = http.post("save/product/locker", payload).then((res) => {
-        if (res.status == 201){
-          commit('ADD_PRODUCT_TO_LOCKER', {room_id : payload.room_id, data: res.data.data})
-          return res;
-        }
-      }).catch((errors)=>{
-        if (errors.response.status == 422){
-          err =  errors.response.data.errors.name[0];
-        }
-        return err;
+      return new Promise(function(resolve, reject) {
+        http.post("save/product/locker", payload).then((res) => {
+          if (res.status == 201){
+            commit('ADD_PRODUCT_TO_LOCKER', {room_id : payload.room_id, data: res.data.data})
+            resolve(res);
+          }
+        }).catch((errors)=>{
+          console.log(errors);
+          if (errors.response.status == 422){
+            err =  errors.response.data.errors.name[0];
+            reject(err);
+          }
+          reject(err);
+        });
       });
-      return res;
+    },
+    async SHARE_DESIGN_URL({commit},payload){
+      let err = '';
+      return new Promise(function(resolve, reject) {
+        http.post("share-design-url", payload).then((res) => {
+          if (res.status == 201){
+            resolve(res);
+          }
+        }).catch((errors)=>{
+          if (errors.response.status == 422){
+            err =  errors.response.data.errors.name[0];
+            reject(err);
+          }
+          reject(err);
+        });
+      });
     },
     async GET_LOCKER_PRODUCTS({commit}){
       return  await http.get("locker/products").then(async (res) => {

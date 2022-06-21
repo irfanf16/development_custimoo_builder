@@ -1584,6 +1584,17 @@ button{
                 flex: 0 0 20%;
                 max-width: 20%;
             }
+
+            &.no-name-number{
+                flex: 0 0 calc(100% - 40px);
+                max-width: calc(100% - 40px);
+                margin-left: 20px;
+                @media only screen and (min-width: 992px){
+                    flex: 0 0 calc(100% - 40px);
+                    max-width: calc(100% - 40px);
+                    margin-left: 20px;
+                }
+            }
         }
         .qty{
             flex: 0 0 58%;
@@ -2827,6 +2838,22 @@ $fontSize: 0.5;
                 }
             }
         }
+
+        &.collection{
+            .products-block {
+                .image-holder {
+                    overflow: visible;
+
+                    .controls {
+                        .share-form{
+                            .btn{
+                                width: auto !important;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 .draggable{
@@ -3292,19 +3319,42 @@ $fontSize: 0.5;
         right: 3px;
         height: 20px;
         width: 20px;
-        background-color: #e10000;
-        color: white;
+        background-color: rgb(232,110,91);
+        color: rgb(145,38,18);
         top: -10px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 999px;
         font-size: 1.5em;
+        opacity: 1;
+        text-shadow: none;
 
         &.maximizer{
-            background: #F1C242;
+            background: rgb(99,196,74);
+            color: rgb(42,98,14);
             font-size: 0.7em;
             opacity: 1;
+        }
+        &.minimizer{
+            background: rgb(240,195,67);
+            color: rgb(167,119,32);
+            opacity: 1;
+            font-size: 3em;
+            overflow: hidden;
+
+            &:after{
+                content: "";
+                display: block;
+                position: absolute;
+                top: 4px;
+                bottom: 4px;
+                left: 4px;
+                right: 4px;
+                border-radius: 1000px;
+                background: transparent;
+                box-shadow: 0 0 0 5px rgb(240,195,67);
+            }
         }
     }
 }
@@ -4526,7 +4576,14 @@ $fontSize: 0.5;
 }
 
 .vm--modal {
-    //overflow-y: auto;
+    margin-top: 80px;
+
+    @media (max-width: 768px) {
+        margin: 0 auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 95% !important;
+    }
 
     .modal-close {
         opacity: 0.5;
@@ -4830,4 +4887,47 @@ $fontSize: 0.5;
     .nav-item{
         position: relative;
     }
+}
+
+.pulse-animation{
+    position: relative;
+
+    &:after,&:before{
+        content: "";
+        display: block;
+        position: absolute;
+        //background: #fff;
+        background: lighten(#219F84, 40%);
+        height: 20px;
+        width: 20px;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        border-radius: 1000px;
+        opacity: 0;
+    }
+    &:after{
+        animation: pulse 1s ease-out infinite;
+    }
+    &:before{
+        animation: pulse 1s ease-out infinite;
+        animation-delay: 0.2s;
+    }
+}
+
+@keyframes pulse {
+    from{
+        transform: scale(0);
+        opacity: .5;
+    }
+    to{
+        transform: scale(5);
+        opacity: 0;
+    }
+}
+
+[title='Powered by marker.js']{
+    display: none !important;
 }

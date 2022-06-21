@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <div class="font-weight-bold fs-2">Choose Product</div>
-    <div class="fade-right">
+  <div :class="{'single-model-mobile': productModels.length === 1}">
+    <div class="font-weight-bold fs-2 title">Choose Product</div>
+    <div class="fade-right products">
       <div class="d-flex align-items-center gap-1 pt-1 pb-2 hide-scroll" v-if="productModels" style="overflow-x: auto;">
         <label class="button_radio" v-for="(item, index) in productModels" :key="index" :class="{'mr-4': index == (productModels.length)-1}">
           <input checked type="radio" name="style" />
@@ -16,7 +16,7 @@
     <div>
       <template>
         <div>
-          <div><span class="font-weight-bold fs-2">Product Info</span> <span class="read_more" @click="toggle_read(currentStyle)" :data-index="currentStyle"><BIconChevronDown /></span></div>
+          <div><span class="font-weight-bold fs-2">{{ productModels[currentStyle].model_name }}</span> <span class="read_more" @click="toggle_read(currentStyle)" :data-index="currentStyle"><BIconChevronDown /></span></div>
           <div style="display: none" v-html="productModels[currentStyle].product_model_description">
           </div>
         </div>
@@ -24,14 +24,19 @@
     </div>
 
     <div class="choose-collar mb-3">
-      <div class="collar-designs">
-        <template v-for="(style, i) in productModels[currentStyle].productstyles">
-          <template v-if="productModels[currentStyle].productstyles > 1">
-            <b-button :key="i"  v-if="model.model_styles.includes(style.id)" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
-              <img :src="storageUrl+style.front.file_url " />
-            </b-button>
+      <div class="font-weight-bold fs-2 title">Choose Option</div>
+
+      <div v-if="selectedProduct.productstyles.length > 1" class="choose-collar mb-3">
+        <h2 class="fw-bold mb-2 fz-18">Choose option</h2>
+        <div class="collar-designs">
+          <template v-for="(style, i) in selectedProduct.productstyles">
+            <template v-if="selectedProduct.productstyles.length > 1">
+              <b-button :key="i"  v-if="productModels[currentStyle].model_styles.includes(style.id)" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
+                <img :src="storageUrl+style.front.file_url " height="100" />
+              </b-button>
+            </template>
           </template>
-        </template>
+        </div>
       </div>
     </div>
 
@@ -96,6 +101,8 @@ export default class Collars extends Vue {
     }
   }
   public changeStyleIndex(i: number) {
+    (this.$parent.$parent as Record<any, any>).isFront = true
+
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
@@ -147,5 +154,34 @@ export default class Collars extends Vue {
   background: transparent;
   display: inline-block;
   box-shadow: 0px 1px 5px rgba(0,0,0,0.4);
+}
+
+.single-model-mobile{
+  .title,.products{
+    display: none;
+  }
+}
+
+.collar-designs{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  .btn{
+    border-color: #ececec;
+
+    &.active{
+      animation: border-blink 2s infinite ease-in-out alternate;
+    }
+  }
+}
+
+@keyframes border-blink {
+  from{
+    border-color: rgba(33, 159, 132, 0.85);
+  }
+  to{
+    border-color: #cbf4eb;
+  }
 }
 </style>
