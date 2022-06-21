@@ -61,6 +61,7 @@
     "vue-bootstrap-datetimepicker": "^5.0.1",
     "vue-class-component": "^7.2.3",
     "vue-color": "^2.8.1",
+    "vue-dragscroll": "^3.0.1",
     "vue-echo-laravel": "^0.1.0",
     "vue-js-modal": "^2.0.1",
     "vue-popperjs": "^2.3.0",

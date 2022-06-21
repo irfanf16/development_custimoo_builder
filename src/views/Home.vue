@@ -10,309 +10,309 @@
             <CustomTabs @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex" @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" v-else />
           </b-col>
 
-        <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" class="preview-column position-relative" >
-          <template>
-            <div class="customization-preview-process w-100">
-              <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
-                <div class="buttons-preview text-left">
-                  <template v-if="editCart.cartId < 1 && updateOrderItemProducts == null">
-                    <template v-if="isCustomerAuthenticated">
-                      <b-button :key="'lockerRoom'" v-if="roomWithProducts.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
-                    </template>
-                    <template v-else>
-                      <b-button @click="setActionBeforeLogin('lockerRoom')" v-if="roomWithProducts.length" :key="'loginmodal'" variant="outline-secondary">Locker room</b-button>
-                    </template>
-                    <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
-                      <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
-                        <template v-if="editProductStatus">Update to locker room</template>
-                        <template v-else>Save to locker room</template>
-                      </b-button>
-                    </template>
-                    <template v-else-if="undoItems.length > 0 || redoitems.length > 0">
-                      <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
-                    </template>
+          <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" ref="preview-column" class="preview-column position-relative" >
+            <template>
+              <div class="customization-preview-process w-100">
+                <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
+                  <div class="buttons-preview text-left">
+                    <template v-if="editCart.cartId < 1 && updateOrderItemProducts == null">
+                      <template v-if="isCustomerAuthenticated">
+                        <b-button :key="'lockerRoom'" v-if="roomWithProducts.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                      </template>
+                      <template v-else>
+                        <b-button @click="setActionBeforeLogin('lockerRoom')" v-if="roomWithProducts.length" :key="'loginmodal'" variant="outline-secondary">Locker room</b-button>
+                      </template>
+                      <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
+                        <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
+                          <template v-if="editProductStatus">Update to locker room</template>
+                          <template v-else>Save to locker room</template>
+                        </b-button>
+                      </template>
+                      <template v-else-if="undoItems.length > 0 || redoitems.length > 0">
+                        <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                      </template>
 
-                    <template>
-                      <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" :disabled="shareDesignLoader" style="min-width: 100px" @click.stop="shareDesign">
-                        <template v-if="!shareDesignLoader">Share design</template>
-                        <img v-else width="20" height="20" src="../../src/assets/images/loading.gif" />
-                      </b-button>
-                      <Popper
-                        style="font-size: 12px;"
-                        v-if="product"
-                        :is-open="popperID == 'shareDesign'"
-                        :anchor-el="$refs['shareDesign']"
-                        :on-close="hidePopper"
-                      >
-                        <aside id="popper-content" class="tooltip b-tooltip bs-tooltip share-tooltip">
-                          <div class="share-holder">
-                            <h3>Copy link and Share</h3>
-                            <div class="share-form">
-                              <b-form inline>
-                                <b-form-input ref="share-design-link" id="share-design-link"
-                                              :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+                      <template>
+                        <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" :disabled="shareDesignLoader" style="min-width: 100px" @click.stop="shareDesign">
+                          <template v-if="!shareDesignLoader">Share design</template>
+                          <img v-else width="20" height="20" src="../../src/assets/images/loading.gif" />
+                        </b-button>
+                        <Popper
+                          style="font-size: 12px;"
+                          v-if="product"
+                          :is-open="popperID == 'shareDesign'"
+                          :anchor-el="$refs['shareDesign']"
+                          :on-close="hidePopper"
+                        >
+                          <aside id="popper-content" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                            <div class="share-holder">
+                              <h3>Copy link and Share</h3>
+                              <div class="share-form">
+                                <b-form inline>
+                                  <b-form-input ref="share-design-link" id="share-design-link"
+                                                :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
-                                ></b-form-input>
-                                <button @click="copyLink(lockerProductIndex)" class="btn" type="button">Copy Link</button>
-                              </b-form>
+                                  ></b-form-input>
+                                  <button @click="copyLink(lockerProductIndex)" class="btn" type="button">Copy Link</button>
+                                </b-form>
+                              </div>
                             </div>
-                          </div>
-                        </aside>
-                      </Popper>
+                          </aside>
+                        </Popper>
+                      </template>
                     </template>
-                  </template>
-                  <template v-if="updateOrderItemProducts">
-                    <b-button @click="loadOrderItemProduct('previous')" variant="outline-secondary"
-                            v-if="updateOrderItemProducts.active_index != 0">Previous</b-button>
-                    <b-button  @click="loadOrderItemProduct('next')"  variant="outline-secondary"
-                            v-if="updateOrderItemProducts.active_index != (updateOrderItemProducts.factory_products.length - 1)">Next</b-button>
-                    <b-button  @click="UpdateOrderProducts" variant="outline-secondary"
-                            v-if="updateOrderItemProducts.active_index == (updateOrderItemProducts.factory_products.length - 1)">Update Products</b-button>
-                    <b-button  variant="outline-info" @click="$modal.show('product-rejection-info-modal')">Show Reason</b-button>
-                    <modal name="product-rejection-info-modal">
+                    <template v-if="updateOrderItemProducts">
+                      <b-button @click="loadOrderItemProduct('previous')" variant="outline-secondary"
+                                v-if="updateOrderItemProducts.active_index != 0">Previous</b-button>
+                      <b-button  @click="loadOrderItemProduct('next')"  variant="outline-secondary"
+                                 v-if="updateOrderItemProducts.active_index != (updateOrderItemProducts.factory_products.length - 1)">Next</b-button>
+                      <b-button  @click="UpdateOrderProducts" variant="outline-secondary"
+                                 v-if="updateOrderItemProducts.active_index == (updateOrderItemProducts.factory_products.length - 1)">Update Products</b-button>
+                      <b-button  variant="outline-info" @click="$modal.show('product-rejection-info-modal')">Show Reason</b-button>
+                      <modal name="product-rejection-info-modal">
                         <h1>{{updateOrderItemProducts.activity_items[updateOrderItemProducts.active_index].message}}</h1>
-                      <template v-for="(activity_file, activity_file_index) in updateOrderItemProducts.activity_items[updateOrderItemProducts.active_index].activity_files">
-                        <img width="250" :src="`${storageUrl}${activity_file.url}`" alt="" :key="`activity-file-${activity_file_index}`">
-                      </template>
-                    </modal>
-                  </template>
-                </div>
+                        <template v-for="(activity_file, activity_file_index) in updateOrderItemProducts.activity_items[updateOrderItemProducts.active_index].activity_files">
+                          <img width="250" :src="`${storageUrl}${activity_file.url}`" alt="" :key="`activity-file-${activity_file_index}`">
+                        </template>
+                      </modal>
+                    </template>
+                  </div>
 
-                <ul class="preview-header-icons">
-                  <li class="d-flex flex-wrap align-items-center">
-                    <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
-                    <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                    <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
-                  </li>
-                  <li><a>
-                    <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
-                  </a></li>
-                  <li v-if="isCustomerAuthenticated">
-                    <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
-                    <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
-                      <template v-for="(notification, ind) in notifications" >
-                        <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]">
-                          <div @click="readNotification(notification)" class="text d-flex align-items-start justify-content-between">
-                            <p v-if="notification.type == 'roster_updated'" @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
-                            <p v-if="notification.type == 'order_activity'"><router-link  :to="{ name: 'OrderDetail', params: { order_id: notification.order_id }}">{{notification.description}}</router-link>
-                            <div class="date">
-                              <div class="day" >{{ notification.created_at | formatDate }}</div>
+                  <ul class="preview-header-icons">
+                    <li class="d-flex flex-wrap align-items-center">
+                      <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
+                      <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
+                      <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
+                    </li>
+                    <li><a>
+                      <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
+                    </a></li>
+                    <li v-if="isCustomerAuthenticated">
+                      <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
+                      <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
+                        <template v-for="(notification, ind) in notifications" >
+                          <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]">
+                            <div @click="readNotification(notification)" class="text d-flex align-items-start justify-content-between">
+                              <p v-if="notification.type == 'roster_updated'" @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
+                              <p v-if="notification.type == 'order_activity'"><router-link  :to="{ name: 'OrderDetail', params: { order_id: notification.order_id }}">{{notification.description}}</router-link>
+                              <div class="date">
+                                <div class="day" >{{ notification.created_at | formatDate }}</div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </template>
-                    </div>
-                  </li>
-                  <li v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')">
-                    <a  class="icon mr-0" @click="openCartModal">
-                      <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
-                    </a>
-                  </li>
-                </ul>
-                <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
+                        </template>
+                      </div>
+                    </li>
+                    <li v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')">
+                      <a  class="icon mr-0" @click="openCartModal">
+                        <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
+                      </a>
+                    </li>
+                  </ul>
+                  <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
+                  </div>
+                </header>
+                <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
+                  <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
+                  <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
+                  <b-button variant="outline-secondary" :class="{'pulse-animation': isColorShuffled}" v-if="usingColorLogos && imageColors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
                 </div>
-              </header>
-              <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
-                <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
-                <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
-                <b-button variant="outline-secondary" :class="{'pulse-animation': isColorShuffled}" v-if="usingColorLogos && imageColors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
-              </div>
-              <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
-              <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
-              <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
-              <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
-              <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
+                <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
+                <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
+                <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
+                <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
+                <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
 
-              <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
-                <div>
-                  <b-button variant="outline-secondary mr-2" :disabled="undoItems.length < 1" @click="undoAction"><span class="d-sm-block d-none">Undo</span><span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span></b-button>
-                  <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1"><span class="d-sm-block d-none">Redo</span><span class="d-sm-none d-block"><BIconReplyFill /></span></b-button>
+                <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
+                  <div>
+                    <b-button variant="outline-secondary mr-2" :disabled="undoItems.length < 1" @click="undoAction"><span class="d-sm-block d-none">Undo</span><span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span></b-button>
+                    <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1"><span class="d-sm-block d-none">Redo</span><span class="d-sm-none d-block"><BIconReplyFill /></span></b-button>
 
-                  <template v-if="isCustomerAuthenticated">
-                    <button class="btn btn-secondary light" :key="'savetolocker'" @click="getLockers">
-                      <span class="d-sm-block d-none">Save</span>
-                      <span class="d-sm-none d-block"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></span>
-                    </button>
-                  </template>
-                  <template v-else>
-                    <button class="btn btn-secondary light" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" v-b-modal.modal-login>
-                      <span class="d-sm-block d-none">Save</span>
-                      <span class="d-sm-none d-block"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></span>
-                    </button>
-                  </template>
-                </div>
-
-                <div class="mobile-nav">
-                  <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="navigateTabs('prev')" v-if="activeTab > 0" style="line-height: normal">
-                    <b-icon-arrow-left-short />
-                  </button>
-                  <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="showDesign" v-else-if="selectedProduct && (!activeTab || activeTab<0)" style="line-height: normal">
-                    <b-icon-arrow-left-short />
-                  </button>
-                  <button class="btn text-white fs-4 border-0 mr-3 p-0 btn-secondary btn-sm" @click="navigateTabs('next')" v-if="activeTab < 4" style="line-height: normal">
-                    <b-icon-arrow-right-short />
-                  </button>
-                  <template v-else>
                     <template v-if="isCustomerAuthenticated">
-                      <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                        <button v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
-                          <b-icon-cart />
-                        </button>
-                        <button v-else :disabled="true" class="btn text-white fs-3 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4px 5px">
-                          <i class="fa fa-spinner fa-spin"></i>
-                        </button>
-                      </template>
-                    </template>
-                    <template v-else>
-                      <button v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
-                        <b-icon-cart />
+                      <button class="btn btn-secondary light" :key="'savetolocker'" @click="getLockers">
+                        <span class="d-sm-block d-none">Save</span>
+                        <span class="d-sm-none d-block"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></span>
                       </button>
                     </template>
-                  </template>
+                    <template v-else>
+                      <button class="btn btn-secondary light" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" v-b-modal.modal-login>
+                        <span class="d-sm-block d-none">Save</span>
+                        <span class="d-sm-none d-block"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></span>
+                      </button>
+                    </template>
+                  </div>
 
-                  <strong class="user-name mr-1">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
+                  <div class="mobile-nav">
+                    <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="navigateTabs('prev')" v-if="activeTab > 0" style="line-height: normal">
+                      <b-icon-arrow-left-short />
+                    </button>
+                    <button class="btn text-white mr-1 border-0 fs-4 p-0 btn-secondary btn-sm" @click="showDesign" v-else-if="selectedProduct && (!activeTab || activeTab<0)" style="line-height: normal">
+                      <b-icon-arrow-left-short />
+                    </button>
+                    <button class="btn text-white fs-4 border-0 mr-3 p-0 btn-secondary btn-sm" @click="navigateTabs('next')" v-if="activeTab < 4" style="line-height: normal">
+                      <b-icon-arrow-right-short />
+                    </button>
+                    <template v-else>
+                      <template v-if="isCustomerAuthenticated">
+                        <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                          <button v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
+                            <b-icon-cart />
+                          </button>
+                          <button v-else :disabled="true" class="btn text-white fs-3 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4px 5px">
+                            <i class="fa fa-spinner fa-spin"></i>
+                          </button>
+                        </template>
+                      </template>
+                      <template v-else>
+                        <button v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
+                          <b-icon-cart />
+                        </button>
+                      </template>
+                    </template>
 
-                  <button @click="toggleDD" class="custom-link reset-btn" ref="toggler"><BIconThreeDotsVertical /></button>
-                  <b-dropdown ref="dd-menu" :right="true" :offset="30" :boundary="ref['toggler']" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
-                    <b-dropdown-item><button @click="showDesign">Change Design / Item</button></b-dropdown-item>
-                    <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'lockerRoom'" @click="getLockerRoomProducts(null)">Open locker room</button></b-dropdown-item>
-                    <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'">Open locker room</button></b-dropdown-item>
-                    <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'summarybutton'" @click="buyNow">Summary</button></b-dropdown-item>
-                    <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
-                    <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
-                    <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
-                    <b-dropdown-item v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
-                  </b-dropdown>
+                    <strong class="user-name mr-1">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
+
+                    <button @click="toggleDD" class="custom-link reset-btn" ref="toggler"><BIconThreeDotsVertical /></button>
+                    <b-dropdown ref="dd-menu" :right="true" :offset="30" :boundary="ref['toggler']" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
+                      <b-dropdown-item><button @click="showDesign">Change Design / Item</button></b-dropdown-item>
+                      <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'lockerRoom'" @click="getLockerRoomProducts(null)">Open locker room</button></b-dropdown-item>
+                      <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'">Open locker room</button></b-dropdown-item>
+                      <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'summarybutton'" @click="buyNow">Summary</button></b-dropdown-item>
+                      <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
+                      <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
+                      <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
+                      <b-dropdown-item v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
+                    </b-dropdown>
+                  </div>
                 </div>
               </div>
-            </div>
-          </template>
+            </template>
 
-          <div class="customization-area" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
-            <div v-bind:class="{active: isActive}">
-              <div class="twoD-view">
-                <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
+            <div class="customization-area" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
+              <div v-bind:class="{active: isActive}">
+                <div class="twoD-view">
+                  <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
                     <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
-                    <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
-                      <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
-                             :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                             :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
-                             :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                             :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                             :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
+                      <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
+                        <Scene v-if="design.back_design" :measurement-ratio="design.measurement_ratio" ref="mainScene"
+                               :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
+                               :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
+                               :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                               :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
+                               :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
 
-                      <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio" ref="mainScene"
-                             :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                             :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                             :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                             :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
-                    </div>
+                        <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio" ref="mainScene"
+                               :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
+                               :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                               :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
+                               :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
+                      </div>
+                    </template>
+
+                    <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
+                  </div>
+                </div>
+                <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
+                  <b-button :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
+                  <template v-if="editCart.cartId > 0">
+                    <template v-if="isCustomerAuthenticated">
+                      <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                        <b-button v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                          Update Item
+                        </b-button>
+                        <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
+                          <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                        </b-button>
+                      </template>
+                    </template>
+                    <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel">Cancel</b-button>
                   </template>
 
-                  <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
+                  <b-button :key="'Next'" @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-else-if="(hideColorSection && (tabIndex <= (mainTotalTabs-1))) || (!hideColorSection && (tabIndex <= mainTotalTabs))">Next</b-button>
+
+                  <template v-else>
+                    <b-button :key="'editRoster'" v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
+                      Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
+                    </b-button>
+
+                    <template v-else-if="isCustomerAuthenticated">
+                      <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                        <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                          Add to Cart
+                        </b-button>
+                        <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
+                          <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                        </b-button>
+                      </template>
+                    </template>
+                    <template v-else>
+                      <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                    </template>
+                  </template>
+
+                  <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
                 </div>
               </div>
-              <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
-                <b-button :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
-                <template v-if="editCart.cartId > 0">
-                  <template v-if="isCustomerAuthenticated">
-                    <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                      <b-button v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
-                        Update Item
-                      </b-button>
-                      <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-                      </b-button>
-                    </template>
-                  </template>
-                <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel">Cancel</b-button>
-                </template>
-
-                <b-button :key="'Next'" @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-else-if="(hideColorSection && (tabIndex <= (mainTotalTabs-1))) || (!hideColorSection && (tabIndex <= mainTotalTabs))">Next</b-button>
-
-                <template v-else>
-                  <b-button :key="'editRoster'" v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
-                    Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
-                  </b-button>
-
-                  <template v-else-if="isCustomerAuthenticated">
-                    <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                      <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
-                        Add to Cart
-                      </b-button>
-                      <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-                      </b-button>
-                    </template>
-                  </template>
-                  <template v-else>
-                    <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
-                  </template>
-                </template>
-
-                <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
-              </div>
             </div>
-          </div>
-          <div class="sideNav" v-if="mobileScreen">
-            <ul>
-              <li v-if="selectedProduct.is_logo_allowed">
-                <a @click="switchTabs(0, false)">
+            <div class="sideNav" v-if="mobileScreen">
+              <ul>
+                <li v-if="selectedProduct.is_logo_allowed">
+                  <a @click="switchTabs(0, false)">
                   <span v-html="tabIcons[0]">
                   </span>
-                </a>
-              </li>
-              <li>
-                <a @click="switchTabs(1, false)">
+                  </a>
+                </li>
+                <li>
+                  <a @click="switchTabs(1, false)">
                   <span v-html="tabIcons[1]">
                   </span>
-                </a>
-              </li>
-              <li v-if="selectedProduct.allow_name_number">
-                <a @click="switchTabs(2, false)">
+                  </a>
+                </li>
+                <li v-if="selectedProduct.allow_name_number">
+                  <a @click="switchTabs(2, false)">
                   <span v-html="tabIcons[2]">
                   </span>
-                </a>
-              </li>
-              <li>
-                <a @click="switchTabs(3, false)">
+                  </a>
+                </li>
+                <li>
+                  <a @click="switchTabs(3, false)">
                   <span v-html="tabIcons[3]">
                   </span>
-                </a>
-              </li>
-              <li>
-                <a @click="switchTabs(4, false)">
+                  </a>
+                </li>
+                <li>
+                  <a @click="switchTabs(4, false)">
                   <span v-html="tabIcons[4]">
                   </span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </b-col>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </b-col>
           <div class="mobile-reset" v-if="mobileScreen && customLogos[0].url">
             <b-button @click="resetStore" variant="secondary" class="p-1"><b-icon-arrow-clockwise /></b-button>
           </div>
-        <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-          <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll" :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize"/>
-          <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
-            <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
-            <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
+          <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
+            <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll" :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize"/>
+            <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
+              <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
+              <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
-            <div>
-              <LogoUploader @switchTabs="switchTabs" @ @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
+              <div>
+                <LogoUploader @switchTabs="switchTabs" @ @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
+              </div>
             </div>
-          </div>
-          <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">
-            <span class="fs-3 font-weight-bold d-inline-flex pb-1">Logo Uploader</span>
-            <span @click="switchTabs(0, true)" class="maximizer close">
+            <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">
+              <span class="fs-3 font-weight-bold d-inline-flex pb-1">Logo Uploader</span>
+              <span @click="switchTabs(0, true)" class="maximizer close">
               <svg height="1em" width="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
                    viewBox="0 0 16 16">
                 <polygon points="0,11.8 0,0 11.8,0 "/>
                 <polygon points="16,4.3 16,16 4.3,16 "/>
               </svg>
             </span>
-          </div>
-        </b-col>
+            </div>
+          </b-col>
         </template>
       </b-row>
     </b-container>
@@ -426,36 +426,36 @@ Vue.filter('formatDate', function(value:string) {
         this.showVModal('cart-modal');
       }
 
-        let ecommerce_update_id = this.$route.query.update_item;
-        let santa_cart_id = this.$route.query.update_cart;
+      let ecommerce_update_id = this.$route.query.update_item;
+      let santa_cart_id = this.$route.query.update_cart;
 
-        if(ecommerce_update_id){
-         let cart_items = await this.$store.getters.getCartItems;
+      if(ecommerce_update_id){
+        let cart_items = await this.$store.getters.getCartItems;
 
 
-         let filter_items = cart_items.filter((item) => {
-           return item.id == parseInt(santa_cart_id)
-         });
+        let filter_items = cart_items.filter((item) => {
+          return item.id == parseInt(santa_cart_id)
+        });
 
-          if(filter_items && filter_items.length > 0){
+        if(filter_items && filter_items.length > 0){
 
-            let factory_items = filter_items[0].factory_products.filter((factory_item)=>{
-               return factory_item.ecommerce_cart_id == ecommerce_update_id
-            } );
+          let factory_items = filter_items[0].factory_products.filter((factory_item)=>{
+            return factory_item.ecommerce_cart_id == ecommerce_update_id
+          } );
 
-            if(factory_items && factory_items.length > 0){
-              let update_cart_item = factory_items[0]
-              if(this.$route.query.roster){
-                this.ref.cartModal.editCartItem(update_cart_item, santa_cart_id, false);
-              }else{
-                this.ref.cartModal.editCartItem(update_cart_item, santa_cart_id, true);
-              }
-
+          if(factory_items && factory_items.length > 0){
+            let update_cart_item = factory_items[0]
+            if(this.$route.query.roster){
+              this.ref.cartModal.editCartItem(update_cart_item, santa_cart_id, false);
+            }else{
+              this.ref.cartModal.editCartItem(update_cart_item, santa_cart_id, true);
             }
 
           }
 
         }
+
+      }
 
     }
     if(this.$route.query.tabIdx){
@@ -805,10 +805,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return  this.$store.getters.getEditStatus
   }
 
- get mainProductType():string{
+  get mainProductType():string{
     let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
     return selected_product.back_design ?  "front_back" : "front";
- }
+  }
 
   public showCollectionModal = () =>{
     this.ref['collectionModal'].showCollectionModal()
@@ -848,12 +848,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       console.log(error)
     }
   }
- get undoItems():Record<any, any>{
+  get undoItems():Record<any, any>{
     return this.$store.getters.getUndoItems
- }
- get redoitems():Record<any, any>{
+  }
+  get redoitems():Record<any, any>{
     return this.$store.getters.getRedoItems
- }
+  }
   get products():[Record<any, any>]{
     return this.$store.getters.getProducts
   }
@@ -868,7 +868,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let undo = this.$store.getters.getUndoItems;
     let redo = this.$store.getters.getRedoItems;
     let hidebtn = this.$store.getters.getHideSaveLockerButton;
-      if(hidebtn && this.editProductStatus){
+    if(hidebtn && this.editProductStatus){
       if(undo.length > 0 || redo.length > 0){
         this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false)
       }
@@ -913,11 +913,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public notificationsDropDown(){
     if(this.down){
       this.dropdownStyle = {'height': '0px', 'opacity': '0'}
-        this.down = false;
-      }else{
+      this.down = false;
+    }else{
       this.dropdownStyle = {'height' : 'auto', 'opacity': '1'}
       this.down = true;
-      }
+    }
   }
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
@@ -941,6 +941,48 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if(this.editCart.cartId > 0 && this.company.platform != 'wordpress'){
       this.showVModal('cart-modal')
     }
+
+    let whereToAppend = this.ref["preview-column"];
+
+    let canvasFront = this.cloneCanvas(this.ref["mainScene"][0])
+    let canvasBack = this.cloneCanvas(this.ref["mainScene"][1])
+
+    console.log('whereToAppend', whereToAppend)
+    console.log('canvasFront', canvasFront)
+    console.log('canvasBack', canvasBack)
+
+    // setting width & height of canvas
+    canvasFront.style.width = "100%";
+    canvasFront.style.height = "100%";
+    canvasBack.style.width = "100%";
+    canvasBack.style.height = "100%";
+
+    let elementToAppend = document.createElement("div");
+    elementToAppend.appendChild(canvasFront);
+    elementToAppend.appendChild(canvasBack);
+    elementToAppend.classList.add("cart-animation");
+
+    whereToAppend.append(elementToAppend)
+
+    setTimeout(() => {
+      elementToAppend?.parentElement?.removeChild(elementToAppend)
+    } , 999)
+  }
+
+  public cloneCanvas(oldCanvas: any) {
+    //create a new canvas
+    const newCanvas = document.createElement('canvas');
+    const context = newCanvas.getContext('2d');
+
+    //set dimensions
+    newCanvas.width = oldCanvas.width;
+    newCanvas.height = oldCanvas.height;
+
+    //apply the old canvas to the new one
+    context?.drawImage(oldCanvas, 0, 0);
+
+    //return the new canvas
+    return newCanvas;
   }
 
   getFillColors() {
@@ -1233,7 +1275,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async resetStore(){
 
-       const ok = await this.ref['reset-changes'].showConfirm()
+    const ok = await this.ref['reset-changes'].showConfirm()
 
     if (ok) {
       if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
@@ -1269,7 +1311,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   public async readNotification(notification:Record<any, any>){
     if (notification.read_at === null || notification.read_at === ''){
-       await this.$store.dispatch('readNotification', notification.id)
+      await this.$store.dispatch('readNotification', notification.id)
     }
   }
 
@@ -1304,7 +1346,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       url_obj.searchParams.append('update_order_product', this.$route.query.update_order_product);
       url_obj.searchParams.append('order_item_id', this.$route.query.order_item_id);
       url_obj.searchParams.append('activity_id', this.$route.query.activity_id);
-       //this.$router.replace('/')
+      //this.$router.replace('/')
     }
     url = url_obj.pathname + url_obj.search;
     if(sync_id) {
@@ -1448,25 +1490,25 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async shareProduct(product: Record<any, any>, ind: number, i: number) {
     try {
-          if(product){
-            let payload = {
-              type: 'locker',
-              id: product.id,
-              customer_id: this.customer.id ,
-              product_id: this.selectedProduct.product_id
-            }
-            let shared_url = "";
-            if (product.shared_url) {
-              shared_url += product.shared_url;
-            } else {
-              let res = await this.$store.dispatch('shareProduct', payload);
-              shared_url += res.data.url;
-                Vue.set(this.getLockerProducts[i].product[ind], 'shared_url', shared_url)
-                console.log(res)
-            }
+      if(product){
+        let payload = {
+          type: 'locker',
+          id: product.id,
+          customer_id: this.customer.id ,
+          product_id: this.selectedProduct.product_id
+        }
+        let shared_url = "";
+        if (product.shared_url) {
+          shared_url += product.shared_url;
+        } else {
+          let res = await this.$store.dispatch('shareProduct', payload);
+          shared_url += res.data.url;
+          Vue.set(this.getLockerProducts[i].product[ind], 'shared_url', shared_url)
+          console.log(res)
+        }
 
-            this.showPopper('shareDesign');
-          }
+        this.showPopper('shareDesign');
+      }
     } catch (error) {
       console.log(error)
     }

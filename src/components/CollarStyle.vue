@@ -1,14 +1,26 @@
 <template>
-    <b-tabs :class="{'single-model': productModels.length === 1}">
+    <b-tabs :class="{'have-scroll': productModels.length > 5}">
         <b-tab v-for="(model, index)  in productModels" :key="index" @click="selectModelStyle(index)">
             <template #title>
-              {{ model.model_name }}
+              <span v-html="model.model_name.replaceAll(' ', '<br>')"></span>
+              <BIconCheckCircleFill />
             </template>
             <div class="collar-area">
                 <div class="collar-description">
                     <h3>{{ model.model_name }}</h3>
                     <div v-html="model.product_model_description"></div>
                 </div>
+              <div v-if="selectedProduct.productstyles.length > 1" class="choose-collar mb-3">
+                <h2 class="fw-bold mb-2 fz-18 d-flex justify-content-between">
+                  <span>Price from 350DK</span>
+                  <span class="cursor-pointer theme-color text-underline" @click="()=>viewPrices = true" v-if="!viewPrices"><span class="fs-2">View all prices</span></span>
+                  <span class="cursor-pointer theme-color text-underline" @click="()=>viewPrices = false" v-else><span class="fs-2">Hide all prices</span></span>
+                </h2>
+                <div class="price-table" v-if="viewPrices">
+                  <b-table :items="items" striped small sticky-header head-variant="dark" />
+                </div>
+              </div>
+              <div><hr /></div>
                 <div v-if="selectedProduct.productstyles.length > 1" class="choose-collar mb-3">
                   <h2 class="fw-bold mb-2 fz-18">Choose option</h2>
                     <div class="collar-designs">
@@ -36,13 +48,20 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
-
+import moment from "moment";
     @Component<CollarStyle>({
 
     })
 
     export default class CollarStyle extends Vue {
       private storageUrl = process.env.VUE_APP_STORAGE_URL
+      private viewPrices = false
+      private items = [
+        { quantity: '1 - 3', price_per_item: '433DK' },
+        { quantity: '4 - 7', price_per_item: '400DK' },
+        { quantity: '8 - 12', price_per_item: '390DK' },
+        { quantity: '13 - 17', price_per_item: '350DK' }
+      ]
       @Prop({required: true}) productModels!: any
 
       get selectedProduct(): Record<any, any>{
@@ -103,4 +122,127 @@ import {http} from "@/httpCommon";
       display: none;
    }
 }
+
+.collar-section{
+  .tabs{
+    &>div:first-child{
+      margin-bottom: 15px;
+      padding-top: 10px;
+
+      &::-webkit-scrollbar {
+        height: 3px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #219F84;
+      }
+
+      scrollbar-color: #219F84 #f1f1f1;
+      scrollbar-width: thin;
+
+      &>ul{
+        display: flex;
+        justify-content: start;
+        gap: 10px;
+        margin-bottom: 0;
+
+        li {
+          a {
+            //white-space: nowrap;
+            position: relative;
+            color: #333 !important;
+
+            svg{
+              position: absolute;
+              top: -5px;
+              right: -7px;
+              fill: #189076;
+              opacity: 0;
+              transition: 0.2s all ease;
+              background: #fff;
+              transition: 0.2s ease-in-out opacity;
+              flex-shrink: 0 !important;
+            }
+
+            &.active{
+              border-color: #189076 !important;
+              color: #189076 !important;
+
+              svg{
+                opacity: 1;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .have-scroll{
+    &.tabs{
+      &>div:first-child{
+        overflow-y: auto;
+        margin-bottom: 15px;
+        padding-top: 10px;
+
+        &::-webkit-scrollbar {
+          height: 3px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: #f1f1f1;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: #219F84;
+        }
+
+        scrollbar-color: #219F84 #f1f1f1;
+        scrollbar-width: thin;
+
+        &>ul{
+          display: flex;
+          justify-content: start;
+          gap: 10px;
+          flex-wrap: nowrap;
+          margin-bottom: 0;
+
+          li {
+            a {
+              white-space: nowrap;
+              position: relative;
+              color: #333 !important;
+
+              svg{
+                position: absolute;
+                top: -5px;
+                right: -7px;
+                fill: #189076;
+                opacity: 0;
+                transition: 0.2s all ease;
+                background: #fff;
+                transition: 0.2s ease-in-out opacity;
+                flex-shrink: 0 !important;
+              }
+
+              &.active{
+                border-color: #189076 !important;
+                color: #189076 !important;
+
+                svg{
+                  opacity: 1;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 </style>
