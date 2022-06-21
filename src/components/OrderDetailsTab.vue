@@ -246,7 +246,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     try {
       this.isLoading = true;
      let cart_product = await getActiveProductData();
-     this.$store.dispatch('setRevertRosterBOOL',true);
+     await this.$store.dispatch('setRevertRosterBOOL',true);
 
      if(cart_product == null) {
        return false;
@@ -315,6 +315,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             this.$store.dispatch('setEditCart', {key:'cartId',value:0});
             this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
             this.showToast(res.data.message, 'SUCCESS');
+            this.$store.dispatch('addedToCart', true)
             if(platform === 'wordpress'){
               let update_cart_id_data = new FormData();
               update_cart_id_data.append('santa_cart_id', api_res.new_created_id);
