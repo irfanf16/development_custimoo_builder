@@ -1,7 +1,7 @@
 <template>
-  <div style="position:relative;">
-    <h4 v-if="getRecentLogos.length > 0" class="mb-3 mb-lg-4" style="font-weight: 700">Recent Logos</h4>
-    <div  class="grid grid-5 gap-2 py-2 px-3 rounded" style="background: rgb(205, 205, 205)">
+  <div v-if="getRecentLogos.length > 0"  style="position:relative;">
+    <h4 class="mb-3 mb-lg-4" style="font-weight: 700">Recent Logos</h4>
+    <div class="grid grid-5 gap-2 py-2 px-3 rounded" style="background: rgb(205, 205, 205)">
       <div style="position:relative;"  class="d-flex align-items-center justify-content-center" v-for="(logo, index) in getRecentLogos" :key="index">
         <a class="btn remove position-absolute" style="padding:0; height: 18px;width:18px;top: 0;right: 0; font-size: 1rem" v-if="addDeleteIconOnLogo(logo)" @click="deleteRecentLogo(logo)">
 <!--          <font-awesome-icon :icon="['fas', 'trash-alt']"/>-->
