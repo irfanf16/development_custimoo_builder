@@ -223,11 +223,9 @@ const ProductAttributes:Module<any, any> = {
     SET_SELECTED_CATEGORIES(state: Record<any, any>, category_id: number){
 
       if(state.selectedCategories.includes(category_id)){
-        const index = state.selectedCategories.indexOf(category_id);
-        if (index > -1) {
-          state.selectedCategories.splice(index, 1);
-        }
+        state.selectedCategories = [];
       }else{
+        state.selectedCategories = [];
         state.selectedCategories.push(category_id);
       }
     },

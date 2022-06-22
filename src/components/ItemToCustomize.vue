@@ -61,10 +61,10 @@
 <!--        </div>-->
         <div class="fade-right w-100 py-2" >
           <div class="overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList ">
-            <div  v-for="(category, i) in categories" :key="i" style="white-space: nowrap" :style="{color: isSelectedBrand(category.id) ? '#000 !important': '#999 !important'}"
-                 :class="{ 'pr-3': i + 1 == categories.length, 'activeBrand': isSelectedBrand(category.id) }" role="button" @click="setBrands(category.id)">
+            <div  v-for="(category, i) in categories" :key="i" style="white-space: nowrap" :style="{color: (selectedBrand == category.id) ? '#000 !important': '#999 !important'}"
+                 :class="{ 'pr-3': i + 1 == categories.length, 'activeBrand': (selectedBrand == category.id) }" role="button" @click="setBrands(category.id)">
               <img :src="`${storage_url}${category.image_url}`"  height="30">
-             </div>
+              </div>
           </div>
         </div>
       </div>
@@ -130,7 +130,7 @@ export default class ItemToCustomize extends Vue {
   public showLoader = false;
   public searchLoader = false;
   public timeout = 0;
-  public selectedBrands = this.$store.getters.getSelectedCategories
+
 
 
   private toggleItems () {
@@ -206,14 +206,6 @@ export default class ItemToCustomize extends Vue {
     await this.$store.commit('SET_SELECTED_CATEGORIES', category_id)
     this.$emit('retrieveProducts','/list/products' )
   }
-  public isSelectedBrand(category_id){
-
-    if(this.selectedBrands.includes(category_id)){
-      return true
-    }else{
-      return false
-    }
-  }
 
   get getPersonalized(): boolean {
     return this.$store.getters.getPersonalized
@@ -224,6 +216,14 @@ export default class ItemToCustomize extends Vue {
   get StockCount():number{
     return this.$store.getters.getStockCount
   }
+  get selectedBrand():number{
+    const selectedBrand =  this.$store.getters.getSelectedCategories
+    if(selectedBrand.length > 0)
+      return selectedBrand[0]
+    else
+      return 0
+  }
+
 
 }
 </script>
