@@ -207,11 +207,11 @@ import SelectYear from "@/components/SelectYear.vue";
   },
   async mounted() {
      //  let res =  this.$store.dispatch('getLockerEvents')
-     // console.log('res',res)
   }
 })
 
-export default class YearlyPlanner extends Mixins(ErrorMessages) {
+export default class
+YearlyPlanner extends Mixins(ErrorMessages) {
   @Prop({required: true}) readonly room_id !: number
   @Prop({required: true}) readonly room_index !: number
   public ref = this.$refs as Record<any, any>
