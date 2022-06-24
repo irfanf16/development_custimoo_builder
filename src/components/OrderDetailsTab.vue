@@ -909,7 +909,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       return production_content;
     }
     else{
-      return 'No SVG Exists'
+      return null;
     }
 
     // self.$emit("update:production_file_obj", self.production_file_obj)
