@@ -10,7 +10,7 @@
                     <h3>{{ model.model_name }}</h3>
                     <div v-html="model.product_model_description"></div>
                 </div>
-              <div v-if="selectedProduct.productstyles.length > 1" class="choose-collar mb-3">
+              <div v-if="selectedProduct.productstyles.length > 1 && company.platform == 'wordpress'" class="choose-collar mb-3">
                 <h2 class="fw-bold mb-2 fz-18 d-flex justify-content-between">
                   <span>Price from 350DK</span>
                   <span class="cursor-pointer theme-color text-underline" @click="()=>viewPrices = true" v-if="!viewPrices"><span class="fs-2">View all prices</span></span>
@@ -70,6 +70,11 @@ import moment from "moment";
       get styleIndex():number{
         return  this.$store.getters.getCurrentStyleIndex;
       }
+
+      get company(){
+        return this.$store.getters.getCompany
+      }
+
       public selectModelStyle(modelIndex: number) {
         this.$store.commit('SET_SELECTED_MODEL_INDEX', modelIndex)
         for (let styleIndex = 0; styleIndex < this.selectedProduct.productstyles.length; styleIndex++) {
