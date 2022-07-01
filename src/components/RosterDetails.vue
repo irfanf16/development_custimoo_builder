@@ -2,12 +2,12 @@
   <div class="roster-section">
     <div class="d-flex align-items-center justify-content-between bg-light p-2">
       <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '19px 0 0 0' : '0 0 0 37px'}">
-        <template v-if="lockerRosters && lockerRosters.length">
+        <template v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && lockerRosters && lockerRosters.length">
           <label for="">Select roster from product</label>
           <b-form-select class="mt-1" @change="changeRoster($event)"  :options="lockerRosters"></b-form-select>
         </template>
       </div>
-      <div class="d-flex gap-1" v-if="rosterDetails.length > 0">
+      <div class="d-flex gap-1" v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails.length > 0">
         <b-button @click="updateRosterPlayerNameFormat('capitalized')" class="btn btn-secondary fs-3 btn-sm"
           title="Capitalize">
           <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
