@@ -473,7 +473,6 @@ Vue.filter('formatDate', function(value:string) {
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
   public logData = logData;
-  public getActiveProductData = getActiveProductData;
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
