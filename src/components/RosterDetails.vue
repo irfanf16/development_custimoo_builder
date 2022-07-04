@@ -176,7 +176,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
       this.hideVModal('rostermodal')
       this.isLoading = false;
-      this.showVModal('cart-modal')
+      if(this.company.platform != 'wordpress'){
+        this.showVModal('cart-modal')
+      }
+
     } // if quantity is not zero
     else {
       this.showToast("Quantity must be atleast 1", "error")
