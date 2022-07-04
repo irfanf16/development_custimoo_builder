@@ -933,6 +933,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
     } else if(this.actionBeforeLogin == 'addToCart') {
+      this.isRosterOpened = true;
       this.addToCart()
     } else if(this.actionBeforeLogin == 'shareDesign') {
       this.shareDesign()
