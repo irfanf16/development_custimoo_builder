@@ -111,6 +111,8 @@
     if(this.mobileScreen){
       this.$emit('switchTabs')
     }
+
+    this.setBrands(this.categories[0].id)
   }
 })
 
@@ -202,9 +204,11 @@ export default class ItemToCustomize extends Vue {
     }
   }
 
-  public async  setBrands(category_id){
-    await this.$store.commit('SET_SELECTED_CATEGORIES', category_id)
-    this.$emit('retrieveProducts','/list/products' )
+  public async  setBrands(category_id:number){
+    if(this.selectedBrand !== category_id){
+      await this.$store.commit('SET_SELECTED_CATEGORIES', category_id)
+      this.$emit('retrieveProducts','/list/products' )
+    }
   }
 
   get getPersonalized(): boolean {
