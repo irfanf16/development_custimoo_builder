@@ -684,6 +684,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get canvasReady() {
     return this.$store.getters.getCanvasReady
   }
+  get customTextObjects(){
+    return this.$store.getters.customTextObjects;
+  }
 
   @Watch('canvasReady')
   canvasReadyChanged(newValL: [Record<any, any>]){
@@ -724,14 +727,67 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       number = name_and_number_array[1]? name_and_number_array[1] : ""
     }
     let custom_text = this.$store.getters.getCustomTexts()
+
     if (custom_text) {
       const custom_name_index = findIndex(this.customTexts, { type: 'name' })
       const custom_number_index = findIndex(this.customTexts, { type: 'number' })
+      let roster_details = this.rosterDetails;
+      let svg_object:Record<any,any> = {}
       if (custom_name_index != -1) {
         await this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, attribute: 'text', value: name })
+        if(name){
+          svg_object['name'] = {
+            svg : this.customTextObjects[custom_name_index].toSVG(),
+            placement : this.customTextObjects[custom_name_index].side,
+            width : this.customTextObjects[custom_name_index].width,
+            height : this.customTextObjects[custom_name_index].height,
+            scaleX : this.customTextObjects[custom_name_index].scaleX,
+            scaleY : this.customTextObjects[custom_name_index].scaleY,
+            rotation: this.customTexts[custom_name_index].rotation,
+            original_height: this.customTexts[custom_name_index].originalHeight,
+          }
+          roster_details[this.editing_roster_player_index].svgs = svg_object;
+        }else{
+          svg_object['name'] = {
+            svg : null,
+            placement : null,
+            width : null,
+            height : null,
+            scaleX : null,
+            scaleY : null,
+            original_height: null
+          };
+          roster_details[this.editing_roster_player_index].svgs = svg_object
+        }
+        this.$store.commit('UPDATE_ROSTER',roster_details);
       }
       if (custom_number_index != -1) {
         await this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, attribute: 'text', value: number })
+        if(number){
+          svg_object['number'] = {
+            svg : this.customTextObjects[custom_number_index].toSVG(),
+            placement : this.customTextObjects[custom_number_index].side,
+            width : this.customTextObjects[custom_number_index].width,
+            height : this.customTextObjects[custom_number_index].height,
+            scaleX : this.customTextObjects[custom_number_index].scaleX,
+            scaleY : this.customTextObjects[custom_number_index].scaleY,
+            rotation: this.customTexts[custom_number_index].rotation,
+            original_height: this.customTexts[custom_name_index].originalHeight,
+          };
+          roster_details[this.editing_roster_player_index].svgs = svg_object;
+        }else{
+          svg_object['number'] = {
+            svg : null,
+            placement : null,
+            width : null,
+            height : null,
+            scaleX : null,
+            scaleY : null,
+            original_height: null
+          };
+          roster_details[this.editing_roster_player_index].svgs =  svg_object;
+        }
+        this.$store.commit('UPDATE_ROSTER',roster_details);
       }
     }
   }
