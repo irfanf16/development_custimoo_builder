@@ -293,7 +293,7 @@
               </ul>
             </div>
           </b-col>
-          <div class="mobile-reset" v-if="mobileScreen && customLogos[0].url">
+          <div class="mobile-reset" v-if="mobileScreen && (undoItems.length > 0 || redoitems.length > 0)">
             <b-button @click="resetStore" variant="secondary" class="p-1"><b-icon-arrow-clockwise /></b-button>
           </div>
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">

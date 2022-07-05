@@ -503,9 +503,6 @@ export default class CustomTabs extends Vue {
   ]
 
   private hideAll(){
-    if(this.sideTabIndex === 4){
-      this.ref['edit-roster'].updateText();
-    }
     this.$emit('maximizeTab', -1, false)
   }
 
