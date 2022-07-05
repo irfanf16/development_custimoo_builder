@@ -1688,7 +1688,7 @@ export default class Scene extends Vue {
           } else {
             img.scaleToHeight(this.canvasHeight - 10)
           }
-          img.scaleToHeight(this.frontCanvas.getHeight() - 10).set({
+          img.set({
             hasControls: false,
             selectable: false,
             evented: false,
