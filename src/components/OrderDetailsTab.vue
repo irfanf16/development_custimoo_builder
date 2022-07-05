@@ -259,16 +259,18 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   public async addToCart() {
     try {
       this.isLoading = true;
-     let cart_product = await getActiveProductData();
-     let content:string = await this.fetchUrlContent(cart_product?.production_url);
-
-      let production_content = await this.parseSvgString(content,cart_product as Record<any,any>);
+     let cart_product:Record<any,any> = await getActiveProductData();
+     if(cart_product){
+       if(Object.prototype.hasOwnProperty.call(cart_product,'production_url') && cart_product.production_url){
+         let content:string = await this.fetchUrlContent(cart_product?.production_url);
+         let production_content = await this.parseSvgString(content,cart_product as Record<any,any>);
+         cart_product.svg_content = production_content;
+       }
+     }else{
+        return false;
+     }
      this.$store.dispatch('setRevertRosterBOOL',true);
 
-     if(cart_product == null) {
-       return false;
-     }
-      cart_product.svg_content = production_content;
       let post_data = {
         factory_product: cart_product
       };
