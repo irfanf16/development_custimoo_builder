@@ -644,208 +644,59 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     if(svg_string.substring(0, svg_string.lastIndexOf("</g>")) !== '') {
       let self = this;
       let production_content = "";
-      this.roster_detail = [];
 
-      //Applying Text and Logo on SVG
-      let custom_logos_texts_string = "";
-      let companies_name = [];
+      svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
+      let empty_text = await this.getDocFromString(`<g style="transform: rotate(0deg)"></g>`);
 
-      // let elements = await self.getDocFromString(self.factory_product.custom_text_svgs);
-
-      let custom_texts = factory_product.custom_texts;
-
-      let custom_name_index = custom_texts.findIndex((custom:Record<any,any>) => {
-        let is_roster_name = factory_product.roster_detail.findIndex((roaster:Record<any,any>) => {
-          return roaster.text == custom.text
-        });
-        return custom.type === 'name' && custom.text  && is_roster_name != -1;
-      })
-
-      let custom_number_index = custom_texts.findIndex((custom:Record<any,any>) => {
-        if(Object.prototype.hasOwnProperty.call(custom, 'text')){
-          let is_roster_number = factory_product.roster_detail.findIndex((roaster:Record<any,any>) => {
-            return roaster.number == custom.text
-          });
-          return custom.type === 'number' && custom.text && is_roster_number != -1;
+      factory_product.roster_detail.map(async (detail:Record<any, any>) => {
+        if(Object.prototype.hasOwnProperty.call(detail,'svgs')){
+          if(Object.prototype.hasOwnProperty.call(detail.svgs,'name') && detail.svgs.name.svg){
+            let group_name_svg = await this.getDocFromString(detail.svgs.name.svg);
+            let svg_name_text = group_name_svg.querySelector('text');
+            if(svg_name_text){
+              svg_name_text?.setAttribute('font-size',`${detail.svgs.name.original_height}cm`);
+            }
+            let tspan_name = svg_name_text?svg_name_text.querySelector('tspan'):null;
+            if(tspan_name){
+              tspan_name.setAttribute('x','0');
+              tspan_name.setAttribute('y','0');
+            }
+            detail.svgs.name.text_svg = svg_name_text?new XMLSerializer().serializeToString(svg_name_text): new XMLSerializer().serializeToString(empty_text);
+          }
+          else{
+            detail.svgs.name.text_svg = new XMLSerializer().serializeToString(empty_text);
+          }
+          if(Object.prototype.hasOwnProperty.call(detail.svgs,'number') && detail.svgs.number.svg){
+            let group_number_svg = await this.getDocFromString(detail.svgs.number.svg);
+            let svg_number_text = group_number_svg.querySelector('text');
+            if(svg_number_text){
+              svg_number_text?.setAttribute('font-size',`${detail.svgs.number.original_height}cm`);
+            }
+            let tspan_number = svg_number_text?svg_number_text?.querySelector('tspan'):null;
+            if(tspan_number){
+              tspan_number?.setAttribute('x','0');
+              tspan_number?.setAttribute('y','0');
+            }
+            detail.svgs.number.text_svg = svg_number_text?new XMLSerializer().serializeToString(svg_number_text): new XMLSerializer().serializeToString(empty_text);
+          }
+          else{
+            detail.svgs.number.text_svg = new XMLSerializer().serializeToString(empty_text);
+          }
+          return detail;
         }
-      })
-
-      let custom_text_svgs = factory_product.custom_text_svgs;
-
-      let sorted_custom_text_svgs = [];
-      if(custom_name_index > -1) {
-        if(factory_product.roster_detail.findIndex((roaster:Record<any,any>) => roaster.text == custom_texts[custom_name_index].text) > -1) {
-          sorted_custom_text_svgs.push({
-            svg: custom_text_svgs[custom_name_index],
-            type: 'name',
-            scaleX:custom_texts[custom_name_index].scaleX,
-            scaleY:custom_texts[custom_name_index].scaleY,
-            rotation:custom_texts[custom_name_index].rotation,
-          });
-        }
-      }
-
-      if(custom_number_index > -1) {
-        if(factory_product.roster_detail.findIndex((roaster:Record<any,any>) => roaster.number == custom_texts[custom_number_index].text) > -1) {
-          sorted_custom_text_svgs.push({
-            svg: custom_text_svgs[custom_number_index],
-            type: 'number',
-            scaleX:custom_texts[custom_number_index].scaleX,
-            scaleY:custom_texts[custom_number_index].scaleY,
-            rotation:custom_texts[custom_number_index].rotation,
-          });
-        }
-      }
-
-      let rest_of_text_svg : Record<any,any> = [];
-      custom_text_svgs.forEach((custom_text_svg:string,index:number) => {
-        if(index !== custom_name_index && index !== custom_number_index){
-          return rest_of_text_svg.push({
-            svg:custom_text_svg,
-            type:'common',
-            scaleX:custom_texts[index].scaleX,
-            scaleY:custom_texts[index].scaleY,
-            rotation:custom_texts[index].rotation,
-          });
+        else {
+          return detail;
         }
       });
+        svg_string += `${this.getSVGPattern(factory_product.roster_detail,factory_product.measurement_ratio)}\n`
 
-
-      rest_of_text_svg.forEach((text_svg:string)=>{
-        sorted_custom_text_svgs.push(text_svg);
-      });
-
-      for(let [indexrstr,roster_detail] of factory_product.roster_detail.entries()) {
-        let text = {};
-        let number = {};
-        let name_height = "";
-        let number_height = "";
-        companies_name = [];
-        for (let [index,custom_text_svg] of sorted_custom_text_svgs.entries()) {
-          let element = await self.getDocFromString(custom_text_svg.svg);
-          let el = element?.querySelector('g');
-          if(custom_text_svg.type === 'name' && el){
-            let tspan = el.querySelector('tspan');
-            if(tspan){
-              tspan.innerHTML = roster_detail.text
-              tspan.setAttribute('x','0');
-              tspan.setAttribute('y','0');
-              let el_text = el?.querySelector('text')
-              if(el_text){
-                text = {
-                  name :  new XMLSerializer().serializeToString(el_text),
-                  scaleX: custom_text_svg.scaleX,
-                  scaleY: custom_text_svg.scaleY,
-                  rotation: custom_text_svg.rotation,
-                };
-                name_height = factory_product.custom_texts[custom_name_index].originalHeight;
-              }
-            }
-
-          }
-          else if (custom_text_svg.type === 'number' && el){
-            let tspan = el.querySelector('tspan');
-            if(tspan){
-              tspan.innerHTML = roster_detail.number
-              tspan.setAttribute('x','0');
-              tspan.setAttribute('y','0');
-              let el_number = el?.querySelector('text')
-              if(el_number){
-                number = {
-                  name : new XMLSerializer().serializeToString(el_number),
-                  scaleX: custom_text_svg.scaleX,
-                  scaleY: custom_text_svg.scaleY,
-                  rotation: custom_text_svg.rotation,
-                }
-                number_height = factory_product.custom_texts[custom_number_index].originalHeight;
-              }
-
-            }
-
-
-          }
-          else {
-            if(el){
-              let tspan = el.querySelector('tspan');
-              if(tspan){
-                tspan.setAttribute('x','0');
-                tspan.setAttribute('y','0');
-                let el_common = el?.querySelector('text');
-                if(el_common){
-                  companies_name.push({
-                    name: {
-                      name: new XMLSerializer().serializeToString(el_common),
-                      scaleX: custom_text_svg.scaleX,
-                      scaleY: custom_text_svg.scaleY,
-                      rotation: custom_text_svg.rotation,
-                    },
-                    size: 'For ALL'
-                  })
-                }
-              }
-              let custom_logos_texts_string_mod = new XMLSerializer().serializeToString(el);
-              custom_logos_texts_string += custom_logos_texts_string_mod;
-            }
-
-          }
-
-
-        }
-
-        this.roster_detail.push(
-          {
-            text: text,
-            number: number,
-            size: roster_detail.size,
-            name_height: name_height,
-            number_height: number_height,
-          }
-        );
-      }
-      companies_name.forEach((company) => {
-        this.roster_detail.push(
-          {
-            text: company.name,
-            number:null,
-            size:company.size,
-            name_height: null,
-            number_height:null
-          }
-        )
-      })
-      let font_file = fontsList(this.selectedProduct)
-
-
-
-
-
-
-
-
-
-      for(let custom_logo_svg of factory_product.custom_logo_svgs) {
-        let logo_url = $(custom_logo_svg).find("img:eq(0)").attr("xlink:href")
-        if( logo_url) {
-          try {
-
-            let base64_logo = await urlToBase64(logo_url);
-            custom_logo_svg = custom_logo_svg.replace(logo_url, base64_logo)
-          } catch (errorResponse) {
-            console.log(errorResponse)
-          }
-        }
-        custom_logos_texts_string += custom_logo_svg;
-      }
-      if(custom_logos_texts_string) {
-        svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
-        // svg_string += `${custom_logos_texts_string}\n`
-        // svg_string += `${this.getSVGTable('Roaster Detail',['Name','Number','Size','Dimension'],this.roster_detail)}\n</g>\n</svg>`
-        svg_string += `${this.getSVGPattern(this.roster_detail,factory_product.measurement_ratio)}\n`
-        if(!(factory_product.custom_logos.length == 1 && factory_product.custom_logos[0].url === null)){
-          svg_string += `${await this.getLogoPattern(factory_product.custom_logos,factory_product.measurement_ratio)}`
+        if((factory_product.custom_logos.length >= 1)){
+          let custom_logos = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
+            return ((custom_logo.url != null || custom_logo.url != ""))
+          })
+          svg_string += `${await this.getLogoPattern(custom_logos,factory_product.measurement_ratio)}`
         }
         svg_string += `\n</g>\n</svg>`;
-      }
       let svg_doc = await this.getDocFromString(svg_string);
       this.production_file_info = {
         width: $(svg_doc).find("svg").eq(0).attr("width"),
@@ -857,55 +708,32 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       };
 
 
-      //Applying Color on SVG
-      factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
-        $(svg_doc).find(`[id][fill]`).each(function(doc_item) {
-          let doc_elem_id = $(this).attr("id");
-          if(doc_elem_id) {
-            doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
-            if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
-              $(this).attr("fill", svg_group_item.color);
-            }
-          }
-        })
-      })
+      //Applying Color on SVG Start
+      this.applyColorToSVG(factory_product,svg_doc);
+      //Applying Color on SVG End
 
       //Add Fonts to SVgs Start
-      let font_style = document.createElementNS("http://www.w3.org/2000/svg","style");
-      for(let font of font_file){
-        font_style.innerHTML += ` @font-face{ font-family: ${font.text}; src: url('${font.url}');  }`;
+      let font_file = fontsList(this.selectedProduct);
+      if(font_file.length > 0){
+        let font_style = this.generateFontFile(font_file);
+        $(svg_doc).find("svg").eq(0).prepend(font_style)
       }
-      $(svg_doc).find("svg").eq(0).prepend(font_style)
       //Add Fonts to SVgs End
 
-      //Add Front and Back Images Side wise to svg
-      let group_back_image_tag = document.createElementNS("http://www.w3.org/2000/svg","g");
-      group_back_image_tag.setAttribute('transform',`matrix(1 0 0 1 ${parseFloat(self.production_file_info.width)} 0)`);
-      let back_image = document.createElementNS("http://www.w3.org/2000/svg","image");
-      back_image.setAttribute('xlink:href',`${factory_product.back_image}`);
-      back_image.setAttribute('height',`${(parseFloat(self.production_file_info.height)/2)}px`);
-      back_image.setAttribute('width',`${(parseFloat(self.production_file_info.height)/2)}px`);
-      group_back_image_tag.appendChild(back_image);
+      //Add Front and Back Images Shown on SVG Start
+      //Back Image
+      let group_back_image_tag = this.getGroupImageTag(factory_product,self.production_file_info,'back_image');
       $(svg_doc).find("g").eq(0).prepend(group_back_image_tag)
-
-
-      let group_front_image_tag = document.createElementNS("http://www.w3.org/2000/svg","g");
-      group_front_image_tag.setAttribute('transform',`matrix(1 0 0 1 ${parseFloat(self.production_file_info.width)} ${(parseFloat(self.production_file_info.width)/2) + 500})`);
-      let front_image = document.createElementNS("http://www.w3.org/2000/svg","image")
-      front_image.setAttribute('xlink:href',`${factory_product.front_image}`);
-      front_image.setAttribute('height',`${(parseFloat(self.production_file_info.height)/2)}px`);
-      front_image.setAttribute('width',`${(parseFloat(self.production_file_info.height)/2)}px`);
-      group_front_image_tag.appendChild(front_image);
+      //Front Image
+      let group_front_image_tag = this.getGroupImageTag(factory_product,self.production_file_info,'front_image');
       $(svg_doc).find("g").eq(0).prepend(group_front_image_tag)
-
-      //Add Front and Back Images Side wise to svg
+      //Add Front and Back Images Side wise to svg End
 
       $(svg_doc).find("svg").eq(0).attr({"width": (scaled_file_info.width * 2) + 'px', height: scaled_file_info.height + 'px'});
       let view_box = svg_doc?.querySelector('svg')?.getAttribute('viewBox');
       let view_box_dimensions = view_box?.split(" ");
       svg_doc?.querySelector('svg')?.setAttribute('viewBox',`${view_box_dimensions[0]} ${view_box_dimensions[1]} ${parseFloat(self.production_file_info.width) * 2} ${this.logo_pattern_last_value_y?this.logo_pattern_last_value_y:this.svg_pattern_last_value_y}`);
       production_content = new XMLSerializer().serializeToString(svg_doc);
-
       return production_content;
     }
     else{
@@ -913,6 +741,36 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     }
 
     // self.$emit("update:production_file_obj", self.production_file_obj)
+  }
+  public applyColorToSVG(factory_product:Record<any,any>, svg_doc:Record<any,any>){
+    factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
+      $(svg_doc).find(`[id][fill]`).each(function(doc_item) {
+        let doc_elem_id = $(this).attr("id");
+        if(doc_elem_id) {
+          doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
+          if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
+            $(this).attr("fill", svg_group_item.color);
+          }
+        }
+      })
+    })
+  }
+  public generateFontFile(font_file:Record<any,any>[]){
+    let font_style = document.createElementNS("http://www.w3.org/2000/svg","style");
+    for(let font of font_file){
+      font_style.innerHTML += ` @font-face{ font-family: ${font.text}; src: url('${font.url}');  }`;
+    }
+    return font_style;
+  }
+  public getGroupImageTag(factory_product:Record<any,any>,production_file_info:Record<any,any>,image_side:string){
+    let group_image_tag = document.createElementNS("http://www.w3.org/2000/svg","g");
+    group_image_tag.setAttribute('transform',`matrix(1 0 0 1 ${parseFloat(production_file_info.width)} ${(image_side === 'front_image')? ((parseFloat(production_file_info.width)/2) + 500) : 0 })`);
+    let back_image = document.createElementNS("http://www.w3.org/2000/svg","image");
+    back_image.setAttribute('xlink:href',`${factory_product[image_side]}`);
+    back_image.setAttribute('height',`${(parseFloat(production_file_info.height)/2)}px`);
+    back_image.setAttribute('width',`${(parseFloat(production_file_info.height)/2)}px`);
+    group_image_tag.appendChild(back_image);
+    return group_image_tag;
   }
   public getSVGPattern(values:Record<any,any>,measurement_ratio:number){
     return `
@@ -936,27 +794,57 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
         ${values.map((value:Record<any,any>,index:number) => {
       return `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${5000})">
-                <g transform="matrix(${value.text.scaleX/measurement_ratio} 0 0 ${value.text.scaleY/measurement_ratio} 0 ${500 + index * 1000})">
-                      <g style="transform: rotate(${value.text?value.text.rotation : '0'}deg)">${value.text.name?value.text.name : ''}</g>
-                </g>
-                <g transform="matrix(${(value.number?value.number.scaleX:1)/measurement_ratio} 0 0 ${(value.number?value.number.scaleY:1)/measurement_ratio} 1000 ${500 + index * 1000})" >
-                      <g style="transform: rotate(${value.number?value.number.rotation : '0'}deg)">${value.number? value.number.name : ''}</g>
-                </g>
-                <g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
+                ${Object.prototype.hasOwnProperty.call(value,'svgs')?
+                  `<g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
+                      <g style="transform: rotate(${value.svgs.name.rotation?value.svgs.name.rotation : '0'}deg)">${value.svgs.name.text_svg}</g>
+                   </g>`
+                :
+                  `<g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
+                      <g style="transform: rotate(0deg)"></g>
+                   </g>`
+                }
+                ${Object.prototype.hasOwnProperty.call(value, 'svgs') ?
+                  `<g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})" >
+                        <g style="transform: rotate(${value.svgs.number.rotation ? value.svgs.number.rotation : '0'}deg)">${value.svgs.number.text_svg}</g>
+                    </g>`
+                  :
+                  `<g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
+                      <g style="transform: rotate(0deg)"></g>
+                   </g>`
+                  }
+                ${Object.prototype.hasOwnProperty.call(value, 'size') ?
+                `<g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.size? value.size : ''} </tspan>
+                        <tspan x="0" y="0">${value.size ? value.size : ''} </tspan>
                     </text>
-                </g>
-                <g transform="matrix(1 0 0 1 3000 ${500 + index * 1000})">
+                </g>`
+                :
+                `<g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
+                        <g style="transform: rotate(0deg)"></g>
+                 </g>`
+               }
+                ${Object.prototype.hasOwnProperty.call(value, 'svgs') ?
+                `<g transform="matrix(1 0 0 1 3000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.name_height? value.name_height + 'cm /' + parseFloat(value.name_height/this.INCH_TO_CENTIMETER).toFixed(2) + 'in'  : ''} </tspan>
+                        <tspan x="0" y="0">${value.svgs.name.original_height ? value.svgs.name.original_height + 'cm /' + parseFloat(value.svgs.name.original_height / this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
                     </text>
-                </g>
-                <g transform="matrix(1 0 0 1 4000 ${500 + index * 1000})">
+                </g>`
+                :
+                `<g transform="matrix(1 0 0 1 3000 ${500 + index * 1000})">
+                        <g style="transform: rotate(0deg)"></g>
+                 </g>`
+                }
+                ${Object.prototype.hasOwnProperty.call(value, 'svgs') ?
+                  `<g transform="matrix(1 0 0 1 4000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.number_height? value.number_height + 'cm /' + parseFloat(value.number_height/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
+                        <tspan x="0" y="0">${value.svgs.number.original_height? value.svgs.number.original_height + 'cm /' + parseFloat(value.svgs.number.original_height/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
                     </text>
-                </g>
+                </g>`
+                  :
+                  `<g transform="matrix(1 0 0 1 4000 ${500 + index * 1000})">
+                        <g style="transform: rotate(0deg)"></g>
+                    </g>`
+                }
                 ${this.svg_pattern_last_value_y = ((500 + index * 1000) + 5000)}
                 </g>`
 
@@ -981,14 +869,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     let index = 0;
     for(let index in values) {
       let value = values[index];
-      let original_url = Object.prototype.hasOwnProperty.call(value,'original_logo_url');
+      let original_url = Object.prototype.hasOwnProperty.call(value,'original_logo_url') && value.original_logo_url;
       let updated_url = original_url?value.original_logo_url:value.url;
       if(getFileExtensionType('raster', updated_url) ){
         await urlToBase64(`${this.storage_url}${updated_url}`).then(async (base64) => {
           svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
                 <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
-                    ${updated_url?`<image xlink:href="${base64}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/>`:''}
+                    ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${base64}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/></g>`:''}
                 </g>
                 <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
@@ -1007,7 +895,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
         svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
                 <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
-                    ${updated_url?`<image xlink:href="${this.storage_url}${updated_url}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/>`:''}
+                    ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${this.storage_url}${updated_url}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/></g>`:''}
                 </g>
                 <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">

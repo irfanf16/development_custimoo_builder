@@ -430,37 +430,6 @@ Vue.filter('formatDate', function(value:string) {
         this.showVModal('cart-modal');
       }
 
-      let ecommerce_update_id = this.$route.query.update_item;
-      let santa_cart_id = this.$route.query.update_cart;
-
-      if(ecommerce_update_id){
-        let cart_items = await this.$store.getters.getCartItems;
-
-
-        let filter_items = cart_items.filter((item) => {
-          return item.id == parseInt(santa_cart_id)
-        });
-
-        if(filter_items && filter_items.length > 0){
-
-          let factory_items = filter_items[0].factory_products.filter((factory_item)=>{
-            return factory_item.ecommerce_cart_id == ecommerce_update_id
-          } );
-
-          if(factory_items && factory_items.length > 0){
-            let update_cart_item = factory_items[0]
-            if(this.$route.query.roster){
-              this.ref.cartModal.editCartItem(update_cart_item, santa_cart_id, false);
-            }else{
-              this.ref.cartModal.editCartItem(update_cart_item, santa_cart_id, true);
-            }
-
-          }
-
-        }
-
-      }
-
     }
     if(this.$route.query.tabIdx){
       this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
@@ -473,7 +442,6 @@ Vue.filter('formatDate', function(value:string) {
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
   public logData = logData;
-  public getActiveProductData = getActiveProductData;
   public tabIndex = 0
   // private products: any[] = []
   private nextPageUrl !: string
@@ -716,6 +684,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get canvasReady() {
     return this.$store.getters.getCanvasReady
   }
+  get customTextObjects(){
+    return this.$store.getters.customTextObjects;
+  }
 
   @Watch('canvasReady')
   canvasReadyChanged(newValL: [Record<any, any>]){
@@ -756,14 +727,67 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       number = name_and_number_array[1]? name_and_number_array[1] : ""
     }
     let custom_text = this.$store.getters.getCustomTexts()
+
     if (custom_text) {
       const custom_name_index = findIndex(this.customTexts, { type: 'name' })
       const custom_number_index = findIndex(this.customTexts, { type: 'number' })
+      let roster_details = this.rosterDetails;
+      let svg_object:Record<any,any> = {}
       if (custom_name_index != -1) {
         await this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, attribute: 'text', value: name })
+        if(name){
+          svg_object['name'] = {
+            svg : this.customTextObjects[custom_name_index].toSVG(),
+            placement : this.customTextObjects[custom_name_index].side,
+            width : this.customTextObjects[custom_name_index].width,
+            height : this.customTextObjects[custom_name_index].height,
+            scaleX : this.customTextObjects[custom_name_index].scaleX,
+            scaleY : this.customTextObjects[custom_name_index].scaleY,
+            rotation: this.customTexts[custom_name_index].rotation,
+            original_height: this.customTexts[custom_name_index].originalHeight,
+          }
+          roster_details[this.editing_roster_player_index].svgs = svg_object;
+        }else{
+          svg_object['name'] = {
+            svg : null,
+            placement : null,
+            width : null,
+            height : null,
+            scaleX : null,
+            scaleY : null,
+            original_height: null
+          };
+          roster_details[this.editing_roster_player_index].svgs = svg_object
+        }
+        this.$store.commit('UPDATE_ROSTER',roster_details);
       }
       if (custom_number_index != -1) {
         await this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, attribute: 'text', value: number })
+        if(number){
+          svg_object['number'] = {
+            svg : this.customTextObjects[custom_number_index].toSVG(),
+            placement : this.customTextObjects[custom_number_index].side,
+            width : this.customTextObjects[custom_number_index].width,
+            height : this.customTextObjects[custom_number_index].height,
+            scaleX : this.customTextObjects[custom_number_index].scaleX,
+            scaleY : this.customTextObjects[custom_number_index].scaleY,
+            rotation: this.customTexts[custom_number_index].rotation,
+            original_height: this.customTexts[custom_name_index].originalHeight,
+          };
+          roster_details[this.editing_roster_player_index].svgs = svg_object;
+        }else{
+          svg_object['number'] = {
+            svg : null,
+            placement : null,
+            width : null,
+            height : null,
+            scaleX : null,
+            scaleY : null,
+            original_height: null
+          };
+          roster_details[this.editing_roster_player_index].svgs =  svg_object;
+        }
+        this.$store.commit('UPDATE_ROSTER',roster_details);
       }
     }
   }
@@ -934,6 +958,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     } else if(this.actionBeforeLogin == 'summary') {
       this.buyNow()
     } else if(this.actionBeforeLogin == 'addToCart') {
+      this.isRosterOpened = true;
       this.addToCart()
     } else if(this.actionBeforeLogin == 'shareDesign') {
       this.shareDesign()

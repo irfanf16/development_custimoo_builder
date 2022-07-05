@@ -141,8 +141,41 @@ import ModalAction from "@/mixins/ModalAction";
       return 0
     }
   },
-  mounted() {
+  async mounted() {
     // this.getColors()
+    if (this.isCustomerAuthenticated){
+      let ecommerce_update_id = this.$route.query.update_item;
+      let santa_cart_id = this.$route.query.update_cart;
+
+      if(ecommerce_update_id){
+        let cart_items = await this.$store.getters.getCartItems;
+
+
+        let filter_items = cart_items.filter((item) => {
+          return item.id == parseInt(santa_cart_id)
+        });
+
+        if(filter_items && filter_items.length > 0){
+
+          let factory_items = filter_items[0].factory_products.filter((factory_item)=>{
+            return factory_item.ecommerce_cart_id == ecommerce_update_id
+          } );
+
+          if(factory_items && factory_items.length > 0){
+            let update_cart_item = factory_items[0]
+            if(this.$route.query.roster){
+              this.editCartItem(update_cart_item, santa_cart_id, false);
+            }else{
+              this.editCartItem(update_cart_item, santa_cart_id, true);
+            }
+
+          }
+
+        }
+
+      }
+    }
+
   }
 })
 export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
@@ -156,6 +189,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
   get cartItems() {
     return this.$store.getters.getCartItems
+  }
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
   }
   public createOrder() {
     let payload = {}

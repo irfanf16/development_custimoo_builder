@@ -112,6 +112,8 @@
       this.$emit('switchTabs')
     }
 
+    let ecommerce_update_id = this.$route.query.update_item;
+    if(!ecommerce_update_id)
     this.setBrands(this.categories[0].id)
   }
 })

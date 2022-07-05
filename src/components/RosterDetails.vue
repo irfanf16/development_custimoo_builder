@@ -2,12 +2,12 @@
   <div class="roster-section">
     <div class="d-flex align-items-center justify-content-between bg-light p-2">
       <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '19px 0 0 0' : '0 0 0 37px'}">
-        <template v-if="lockerRosters && lockerRosters.length">
+        <template v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && lockerRosters && lockerRosters.length">
           <label for="">Select roster from product</label>
           <b-form-select class="mt-1" @change="changeRoster($event)"  :options="lockerRosters"></b-form-select>
         </template>
       </div>
-      <div class="d-flex gap-1" v-if="rosterDetails.length > 0">
+      <div class="d-flex gap-1" v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails.length > 0">
         <b-button @click="updateRosterPlayerNameFormat('capitalized')" class="btn btn-secondary fs-3 btn-sm"
           title="Capitalize">
           <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
@@ -96,9 +96,12 @@
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addPlayer">Add Player</button>
-      <button class="btn btn-secondary w-auto fw-bold" @click="close">
+      <button v-if="!isLoading" class="btn btn-secondary w-auto fw-bold" @click="close">
         <template v-if="editCart.cartId > 0">Update Item</template>
         <template v-else>OK</template>
+      </button>
+      <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
+        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
       </button>
       <button v-if="editCart.cartId > 0" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $root.$children[0].$children[2].cancelCart()">
         Cancel
@@ -176,7 +179,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
       this.hideVModal('rostermodal')
       this.isLoading = false;
-      this.showVModal('cart-modal')
+      if(this.company.platform != 'wordpress'){
+        this.showVModal('cart-modal')
+      }
+
     } // if quantity is not zero
     else {
       this.showToast("Quantity must be atleast 1", "error")
@@ -247,11 +253,20 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public close() {
     this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
+    let self = this;
+
     setTimeout(() =>{
+
       if(this.editCart.cartId && this.editCart.cartItemId){
+        self.isLoading = true;
         (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
-        this.hideVModal('rostermodal')
-        this.showVModal('cart-modal')
+
+        if(this.company.platform != 'wordpress'){
+          this.hideVModal('rostermodal')
+          this.showVModal('cart-modal')
+        }
+        self.isLoading = false;
+
       }else{
         this.hideVModal('rostermodal')
       }

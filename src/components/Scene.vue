@@ -1683,7 +1683,12 @@ export default class Scene extends Vue {
         })
       } else {
         fabric.Image.fromURL(textureUrl + '?nocache=1', async (img: any) => {
-          img.scaleToHeight(this.frontCanvas.getHeight() - 10).set({
+          if(img.width > img.height) {
+            img.scaleToWidth(this.canvasWidth - 10)
+          } else {
+            img.scaleToHeight(this.canvasHeight - 10)
+          }
+          img.set({
             hasControls: false,
             selectable: false,
             evented: false,
