@@ -96,9 +96,12 @@
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addPlayer">Add Player</button>
-      <button class="btn btn-secondary w-auto fw-bold" @click="close">
+      <button v-if="!isLoading" class="btn btn-secondary w-auto fw-bold" @click="close">
         <template v-if="editCart.cartId > 0">Update Item</template>
         <template v-else>OK</template>
+      </button>
+      <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
+        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
       </button>
       <button v-if="editCart.cartId > 0" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $root.$children[0].$children[2].cancelCart()">
         Cancel
@@ -250,13 +253,19 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public close() {
     this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
+    let self = this;
+
     setTimeout(() =>{
+
       if(this.editCart.cartId && this.editCart.cartItemId){
+        self.isLoading = true;
         (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
-        this.hideVModal('rostermodal')
+
         if(this.company.platform != 'wordpress'){
+          this.hideVModal('rostermodal')
           this.showVModal('cart-modal')
         }
+        self.isLoading = false;
 
       }else{
         this.hideVModal('rostermodal')
