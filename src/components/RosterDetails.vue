@@ -260,9 +260,8 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       if(this.editCart.cartId && this.editCart.cartItemId){
         self.isLoading = true;
         (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
-
+        this.hideVModal('rostermodal')
         if(this.company.platform != 'wordpress'){
-          this.hideVModal('rostermodal')
           this.showVModal('cart-modal')
         }
         self.isLoading = false;
