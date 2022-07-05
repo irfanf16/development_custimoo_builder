@@ -656,15 +656,15 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             if(svg_name_text){
               svg_name_text?.setAttribute('font-size',`${detail.svgs.name.original_height}cm`);
             }
-            let tspan_name = svg_name_text?svg_name_text.querySelector('tspan'):null;
+            let tspan_name = svg_name_text? svg_name_text.querySelector('tspan') : null;
             if(tspan_name){
               tspan_name.setAttribute('x','0');
               tspan_name.setAttribute('y','0');
             }
-            detail.svgs.name.text_svg = svg_name_text?new XMLSerializer().serializeToString(svg_name_text): new XMLSerializer().serializeToString(empty_text);
+            detail.svgs.name.text_svg = svg_name_text? await this.serializer(svg_name_text) : await this.serializer(empty_text);
           }
           else{
-            detail.svgs.name.text_svg = new XMLSerializer().serializeToString(empty_text);
+            detail.svgs.name.text_svg = await this.serializer(empty_text);
           }
           if(Object.prototype.hasOwnProperty.call(detail.svgs,'number') && detail.svgs.number.svg){
             let group_number_svg = await this.getDocFromString(detail.svgs.number.svg);
@@ -672,15 +672,15 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             if(svg_number_text){
               svg_number_text?.setAttribute('font-size',`${detail.svgs.number.original_height}cm`);
             }
-            let tspan_number = svg_number_text?svg_number_text?.querySelector('tspan'):null;
+            let tspan_number = svg_number_text?svg_number_text?.querySelector('tspan') : null;
             if(tspan_number){
               tspan_number?.setAttribute('x','0');
               tspan_number?.setAttribute('y','0');
             }
-            detail.svgs.number.text_svg = svg_number_text?new XMLSerializer().serializeToString(svg_number_text): new XMLSerializer().serializeToString(empty_text);
+            detail.svgs.number.text_svg = svg_number_text? await this.serializer(svg_number_text) : await this.serializer(empty_text);
           }
           else{
-            detail.svgs.number.text_svg = new XMLSerializer().serializeToString(empty_text);
+            detail.svgs.number.text_svg = await this.serializer(empty_text);
           }
           return detail;
         }
@@ -688,15 +688,15 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
           return detail;
         }
       });
-        svg_string += `${this.getSVGPattern(factory_product.roster_detail,factory_product.measurement_ratio)}\n`
+      svg_string += `${this.getSVGPattern(factory_product.roster_detail,factory_product.measurement_ratio)}\n`
 
-        if((factory_product.custom_logos.length >= 1)){
-          let custom_logos = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
-            return ((custom_logo.url != null || custom_logo.url != ""))
-          })
-          svg_string += `${await this.getLogoPattern(custom_logos,factory_product.measurement_ratio)}`
-        }
-        svg_string += `\n</g>\n</svg>`;
+      if((factory_product.custom_logos.length >= 1)){
+        let custom_logos = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
+          return ((custom_logo.url != null || custom_logo.url != ""))
+        })
+        svg_string += `${await this.getLogoPattern(custom_logos,factory_product.measurement_ratio)}`
+      }
+      svg_string += `\n</g>\n</svg>`;
       let svg_doc = await this.getDocFromString(svg_string);
       this.production_file_info = {
         width: $(svg_doc).find("svg").eq(0).attr("width"),
@@ -733,7 +733,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       let view_box = svg_doc?.querySelector('svg')?.getAttribute('viewBox');
       let view_box_dimensions = view_box?.split(" ");
       svg_doc?.querySelector('svg')?.setAttribute('viewBox',`${view_box_dimensions[0]} ${view_box_dimensions[1]} ${parseFloat(self.production_file_info.width) * 2} ${this.logo_pattern_last_value_y?this.logo_pattern_last_value_y:this.svg_pattern_last_value_y}`);
-      production_content = new XMLSerializer().serializeToString(svg_doc);
+      production_content = await this.serializer(svg_doc);
       return production_content;
     }
     else{
@@ -742,6 +742,15 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
     // self.$emit("update:production_file_obj", self.production_file_obj)
   }
+
+  public serializer(svg_doc: SVGTextElement | Document) {
+    return new Promise((resolve) => {
+      const xml = new XMLSerializer()
+      const xml_string = xml.serializeToString(svg_doc)
+      resolve(xml_string)
+    })
+  }
+
   public applyColorToSVG(factory_product:Record<any,any>, svg_doc:Record<any,any>){
     factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
       $(svg_doc).find(`[id][fill]`).each(function(doc_item) {
