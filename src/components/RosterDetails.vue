@@ -254,7 +254,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       if(this.editCart.cartId && this.editCart.cartItemId){
         (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
         this.hideVModal('rostermodal')
-        this.showVModal('cart-modal')
+        if(this.company.platform != 'wordpress'){
+          this.showVModal('cart-modal')
+        }
+
       }else{
         this.hideVModal('rostermodal')
       }
