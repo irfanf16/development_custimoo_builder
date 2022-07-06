@@ -721,9 +721,37 @@ const getPermissions = async () => {
   }
 }
 
+const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
+  if(for_all_edit_modes) {
+    return { editing: false, type: null,
+      filters: { customized: true, personalized: false, search_products: '' },
+      locker_product_info: { product_id: null, locker_product_id: null, style_id: null, design_id: null },
+      cart_product_info: { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null },
+      order_product_info: { order_item_id:  null, activity_id: null, order_products: null}
+    }
+  }
+  let response_obj = null;
+  switch (type) {
+    case "filters":
+      response_obj = { customized: true, personalized: false, search_products: '' }
+      break;
+    case "locker_product":
+      response_obj = { product_id: null, locker_product_id: null, style_id: null, design_id: null }
+      break;
+    case "cart_product":
+      response_obj = { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null }
+      break;
+    case "order_product":
+      response_obj = { order_item_id:  null, activity_id: null, order_products: null}
+    break;
+    default:
+      console.error(`Error while getting edit mode default object. Expecting value (filters, locker_product, cart_product, order_product) while (${type}) is given `)
+  }
+  return response_obj;
+}
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones
+  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getEditModeDefaultObjFor
 };

@@ -1,7 +1,7 @@
 <template>
   <div class="position-relative">
     <div class="loader" v-if="searchLoader"><img src="../../src/assets/images/loading.gif" /></div>
-    <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: 4, adaptiveHeight: false, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
+    <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: number_of_slides, adaptiveHeight: false, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
       <template v-for="(product, index) in products">
         <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
           <template v-for="design in product.productstyles[0].productdesigns">
@@ -25,7 +25,7 @@ import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
 import SlitherSlider from 'slither-slider';
 import Scene from '@/components/Scene.vue'
 import {http} from "@/httpCommon";
-import {handleMainProducts} from "@/mixins/LockerProduct";
+import {handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
 
 Vue.use(SlitherSlider)
 
@@ -33,51 +33,85 @@ Vue.use(SlitherSlider)
   components: {
     Scene
   },
-  mounted() {
+  created() {
     (this.$parent.$parent as Record<any, any>).adjustTotalTabs()
+   this.listenSliderEvent()
   }
 })
 
 
-export default class SelectItemCarousel extends Mixins(handleMainProducts) {
+export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode) {
 
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
   public renderComponent =  true;
   public multipleLogo = false;
   public has_more_products = false;
   public showLoader = false;
+  public number_of_slides = 4;
 
   get searchLoader() {
     return this.$store.getters.getSearchLoader
   }
+
   get products() {
     return this.$store.getters.getProducts
   }
 
+  get selectedProduct() {
+    return this.$store.getters.getSelectedProduct;
+  }
+
+  get getProductEditInfoObject() {
+    return this.$store.getters.getProductEditInfoObject;
+  }
+
   public async productDesigns(index: number) {
+    let self: Record<any, any> = this;
+    let style_index = 0;
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
-    this.$store.commit('CHANGE_STYLE_INDEX', 0);
+    this.$store.commit('CHANGE_STYLE_INDEX', style_index);
     this.$store.dispatch("getModels", this.products[index].product_id);
     this.$store.dispatch('setColorSectionVisibility')
     this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false)
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0,});
     (this.$parent.$parent as Record<any, any>).adjustTotalTabs()
-  }
-
-  public setSliderIndex() {
-    if(this.$refs && this.$refs.slider)
-      (this.$refs as Record<any,any>).slider.goToIndex(0);
-  }
-
-  public async loadMoreProduct() {
-    let self = this;
-    let main_products_info = await self.$store.getters.getMainProductsInfo;
-    if(main_products_info.has_more_products) {
-      let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&page=${main_products_info.next_page}`;
-      if(main_products_info.active_product_id) {
-        url += `&active_product_id=${main_products_info.active_product_id}`
+    let design_index = null;
+    let selected_product_design = this.selectedProduct.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>, product_design_index: number) => {
+      if(product_design.design_show === 1) {
+        design_index = product_design_index;
       }
+      return product_design.design_show === 1
+    })[0];
+    if(selected_product_design) {
+      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+        design_index: design_index, design_id: selected_product_design.id, product_index: index, product_id: this.selectedProduct.id, style_index: style_index,
+        style_id:  this.selectedProduct.productstyles[style_index].id
+      });
+    }
+    if(self.getProductEditInfoObject.type == "locker_product" && self.getProductEditInfoObject.locker_product_info.product_id != this.selectedProduct.id) {
+      await this.exitFromEditMode()
+    }
+  }
+
+  public setSliderIndex(slide_no = 0) {
+    if(this.$refs && this.$refs.slider)
+      (this.$refs as Record<any,any>).slider.goToIndex(slide_no);
+  }
+
+  public async loadMoreProduct(slide_index: number) {
+    let self = this;
+    console.log("slide index", slide_index)
+    // let main_products_info = await self.$store.getters.getMainProductsInfo;
+    let next_page_no = self.$store.getters.getProductsNextPageNo;
+    if(next_page_no) {
+      let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&page=${next_page_no}`;
+      if(self.getProductEditInfoObject.editing && ["locker_product", 'share_product'].includes(self.getProductEditInfoObject.type)) {
+        url += `&active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}&offset=${self.$store.getters.getProducts.length}&active_product_type=locker_product`
+      }
+      // if(main_products_info.active_product_id) {
+      //   url += `&active_product_id=${main_products_info.active_product_id}`
+      // }
       http.get(url).then(async (response: Record<any, any>) => {
         await self.handleMainProducts(response);
         if((self as Record<any,any>)["showLoader"]) {
@@ -87,6 +121,26 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts) {
         console.error("Error while getting order detail", error.response.data.message)
       })
     }
+  }
+
+  public listenSliderEvent() {
+    let self = this;
+    this.$root.$on('sliderEvent', (product_index: number) => { // here you need to use the arrow function
+      self.goToActiveProductSlide(product_index);
+    })
+  }
+
+  public goToActiveProductSlide(product_index: number) {
+    let last_active_product_data = this.$store.getters.getLastActiveProductData;
+    let product_no = product_index + 1
+    let product_slide_no = 0;
+    if(product_no > 1) {
+      product_slide_no = product_index / this.number_of_slides;
+      if(!Number.isInteger(product_slide_no)) {
+        product_slide_no = Math.floor(product_slide_no);
+      }
+    }
+    this.setSliderIndex(product_slide_no)
   }
 
 }

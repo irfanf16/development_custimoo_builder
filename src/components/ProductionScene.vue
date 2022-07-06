@@ -59,9 +59,12 @@ export default class ProductionScene extends Vue {
   public async setProductionSvgUrl(selected_product: Record<any, any>) {
     let self = this;
     let product_style = selected_product.productstyles[self.productStyleIndex];
-    let product_style_active_design = product_style.productdesigns.filter((product_design:Record<any, any>) => {
-      return product_design.design_show;
-    });
+    let product_style_active_design = [];
+    if(product_style) {
+      product_style_active_design = product_style.productdesigns.filter((product_design:Record<any, any>) => {
+        return product_design.design_show;
+      });
+    }
     if(product_style_active_design.length > 0) {
       product_style_active_design = product_style_active_design[0]
     } else {
