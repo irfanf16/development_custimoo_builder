@@ -882,9 +882,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       let value = values[index];
       let original_url = Object.prototype.hasOwnProperty.call(value,'original_logo_url') && value.original_logo_url;
       let updated_url = original_url?value.original_logo_url:value.url;
-      if(getFileExtensionType('raster', updated_url) ){
-        await urlToBase64(`${this.storage_url}${updated_url}`).then(async (base64) => {
-          svg_group_el += `
+      if(updated_url !== null && updated_url !== "" && updated_url !== undefined){
+        if(getFileExtensionType('raster', updated_url) ){
+          await urlToBase64(`${this.storage_url}${updated_url}`).then(async (base64) => {
+            svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
                 <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
                     ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${base64}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/></g>`:''}
@@ -901,9 +902,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
                 </g>
                 ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/measurement_ratio))}
                 </g>`
-        })
-      } else {
-        svg_group_el += `
+          })
+        } else {
+          svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
                 <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
                     ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${this.storage_url}${updated_url}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/></g>`:''}
@@ -920,8 +921,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
                 </g>
                 ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/measurement_ratio))}
                 </g>`
+        }
+        ++index;
       }
-      ++index;
     }
     return svg_group_el;
   }
