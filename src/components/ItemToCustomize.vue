@@ -78,20 +78,6 @@
         </div>
       </div>
 
-      <div class="d-flex align-items-center">
-<!--        <div class="pr-2 font-weight-bold">-->
-<!--          Brands:-->
-<!--        </div>-->
-        <div class="fade-right w-100 py-2" >
-          <div class="overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList ">
-            <div  v-for="(category, i) in categories" :key="i" style="white-space: nowrap" :style="{color: (selectedBrand == category.id) ? '#000 !important': '#999 !important'}"
-                 :class="{ 'pr-3': i + 1 == categories.length, 'activeBrand': (selectedBrand == category.id) }" role="button" @click="setBrands(category.id)">
-              <img :src="`${storage_url}${category.image_url}`"  height="30">
-              </div>
-          </div>
-        </div>
-      </div>
-
       <SelectItemCarousel ref="itemsCarousel"/>
 
     </template>
