@@ -139,29 +139,23 @@ import ModalAction from "@/mixins/ModalAction";
       if(ecommerce_update_id){
         let cart_items = await this.$store.getters.getCartItems;
 
-
-        let filter_items = cart_items.filter((item) => {
+        let cart_item_index = cart_items.findIndex((item) => {
           return item.id == parseInt(santa_cart_id)
         });
 
-        if(filter_items && filter_items.length > 0){
-
-          let factory_items = filter_items[0].factory_products.filter((factory_item)=>{
+        if(cart_items[cart_item_index]){
+          let factory_item_index = cart_items[cart_item_index].factory_products.findIndex((factory_item)=>{
             return factory_item.ecommerce_cart_id == ecommerce_update_id
           } );
 
-          if(factory_items && factory_items.length > 0){
-            let update_cart_item = factory_items[0]
+          if(cart_items[cart_item_index].factory_products[factory_item_index]){
             if(this.$route.query.roster){
-              this.editCartItem(update_cart_item, santa_cart_id, false);
+              this.editCartItem(cart_item_index, factory_item_index, false);
             }else{
-              this.editCartItem(update_cart_item, santa_cart_id, true);
+              this.editCartItem(cart_item_index, factory_item_index, true);
             }
-
           }
-
         }
-
       }
     }
 
