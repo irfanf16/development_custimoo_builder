@@ -642,54 +642,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     return url_content;
   }
 
-  public async parseSvgString(svg_string:string, factory_product: Record<any,any>) {
+  public async parseSvgString(svg_string:string, factory_product_content: Record<any,any>) {
     if(svg_string.substring(0, svg_string.lastIndexOf("</g>")) !== '') {
       let self = this;
       let production_content = "";
 
       svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
-      let empty_text = await this.getDocFromString(`<g style="transform: rotate(0deg)"></g>`);
 
-      factory_product.roster_detail.map(async (detail:Record<any, any>) => {
-        if(Object.prototype.hasOwnProperty.call(detail,'svgs')){
-          if(Object.prototype.hasOwnProperty.call(detail.svgs,'name') && detail.svgs.name.svg){
-            let group_name_svg = await this.getDocFromString(detail.svgs.name.svg);
-            let svg_name_text = group_name_svg.querySelector('text');
-            if(svg_name_text){
-              svg_name_text?.setAttribute('font-size',`${detail.svgs.name.original_height}cm`);
-            }
-            let tspan_name = svg_name_text? svg_name_text.querySelector('tspan') : null;
-            if(tspan_name){
-              tspan_name.setAttribute('x','0');
-              tspan_name.setAttribute('y','0');
-            }
-            detail.svgs.name.text_svg = svg_name_text? await this.serializer(svg_name_text) : await this.serializer(empty_text);
-          }
-          else{
-            detail.svgs.name.text_svg = await this.serializer(empty_text);
-          }
-          if(Object.prototype.hasOwnProperty.call(detail.svgs,'number') && detail.svgs.number.svg){
-            let group_number_svg = await this.getDocFromString(detail.svgs.number.svg);
-            let svg_number_text = group_number_svg.querySelector('text');
-            if(svg_number_text){
-              svg_number_text?.setAttribute('font-size',`${detail.svgs.number.original_height}cm`);
-            }
-            let tspan_number = svg_number_text?svg_number_text?.querySelector('tspan') : null;
-            if(tspan_number){
-              tspan_number?.setAttribute('x','0');
-              tspan_number?.setAttribute('y','0');
-            }
-            detail.svgs.number.text_svg = svg_number_text? await this.serializer(svg_number_text) : await this.serializer(empty_text);
-          }
-          else{
-            detail.svgs.number.text_svg = await this.serializer(empty_text);
-          }
-          return detail;
-        }
-        else {
-          return detail;
-        }
-      });
+      let factory_product:Record<any,any> = await this.parseFactoryProduct(factory_product_content);
       svg_string += `${this.getSVGPattern(factory_product.roster_detail,factory_product.measurement_ratio)}\n`
 
       if((factory_product.custom_logos.length >= 1)){
@@ -745,6 +705,88 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     // self.$emit("update:production_file_obj", self.production_file_obj)
   }
 
+  public async parseFactoryProduct(factory_product : Record<any, any>){
+    let default_svg_object = {
+      svg : null,
+      placement : null,
+      width : null,
+      height : null,
+      scaleX : null,
+      scaleY : null,
+      rotation:null,
+      original_height: null,
+    };
+    let empty_text = this.getDocFromString(`<g style="transform: rotate(0deg)"></g>`);
+
+    for (let index = 0; index < factory_product.roster_detail.length; index++) {
+      let detail = factory_product.roster_detail[index]
+      if(detail) {
+        if(Object.prototype.hasOwnProperty.call(detail,'svgs')){
+          if(Object.prototype.hasOwnProperty.call(detail.svgs,'name') && detail.svgs.name.svg){
+            let group_name_svg = await this.getDocFromString(detail.svgs.name.svg);
+            let svg_name_text = group_name_svg.querySelector('text');
+            if(svg_name_text){
+              svg_name_text?.setAttribute('font-size',`${detail.svgs.name.original_height}cm`);
+            }
+            let tspan_name = svg_name_text? svg_name_text.querySelector('tspan') : null;
+            if(tspan_name){
+              tspan_name.setAttribute('x','0');
+              tspan_name.setAttribute('y','0');
+            }
+            detail.svgs.name.text_svg = svg_name_text? await this.serializer(svg_name_text) : await this.serializer(empty_text);
+          }
+          else{
+            let svg_object : Record<any,any> = {};
+            svg_object['name'] = default_svg_object;
+            if(Object.prototype.hasOwnProperty.call(detail.svgs,'number')){
+              svg_object['number'] = detail.svgs.number;
+            }
+            else{
+              svg_object['number'] = default_svg_object;
+            }
+            detail.svgs = svg_object;
+            detail.svgs.name.text_svg = await this.serializer(empty_text);
+          }
+          if(Object.prototype.hasOwnProperty.call(detail.svgs,'number') && detail.svgs.number.svg){
+            let group_number_svg = await this.getDocFromString(detail.svgs.number.svg);
+            let svg_number_text = group_number_svg.querySelector('text');
+            if(svg_number_text){
+              svg_number_text?.setAttribute('font-size',`${detail.svgs.number.original_height}cm`);
+            }
+            let tspan_number = svg_number_text?svg_number_text?.querySelector('tspan') : null;
+            if(tspan_number){
+              tspan_number?.setAttribute('x','0');
+              tspan_number?.setAttribute('y','0');
+            }
+            detail.svgs.number.text_svg = svg_number_text? await this.serializer(svg_number_text) : await this.serializer(empty_text);
+          }
+          else{
+            let svg_object : Record<any,any> = {};
+            svg_object['number'] = default_svg_object;
+            if(Object.prototype.hasOwnProperty.call(detail.svgs,'name')){
+              svg_object['name'] = detail.svgs.name;
+            }
+            else{
+              svg_object['name'] = default_svg_object;
+            }
+            svg_object['name'] = detail.svgs.name;
+            detail.svgs = svg_object;
+            detail.svgs.number.text_svg = await this.serializer(empty_text);
+          }
+          Object.assign(factory_product.roster_detail[index], detail)
+        }
+        else {
+          let svg_object: Record<any, any> = {};
+          svg_object['name'] = default_svg_object;
+          svg_object['number'] = default_svg_object;
+          detail.svgs = svg_object;
+          Object.assign(factory_product.roster_detail[index], detail)
+        }
+      }
+    }
+    return factory_product;
+  }
+
   public serializer(svg_doc: SVGTextElement | Document) {
     return new Promise((resolve) => {
       const xml = new XMLSerializer()
@@ -755,7 +797,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
   public applyColorToSVG(factory_product:Record<any,any>, svg_doc:Record<any,any>){
     factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
-      $(svg_doc).find(`[id][fill]`).each(function(doc_item) {
+      $(svg_doc).find(`[id][fill]`).each  (function(doc_item) {
         let doc_elem_id = $(this).attr("id");
         if(doc_elem_id) {
           doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
