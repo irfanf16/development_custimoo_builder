@@ -38,6 +38,8 @@ export default new Vuex.Store({
       'ProductAttributes.customLogoObjects',
       'Auth.jwtToken',
       'Auth.platform',
+      'ProductAttributes.product_edit_info_object',
+      'ProductAttributes.last_active_product_data',
      ]
     })]
 })

@@ -56,9 +56,9 @@
                             :icon="['fas', 'trash-alt']" /></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
-                          <a style="font-size: 12px;" v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product.id, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
-                          <a style="font-size: 12px;" v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product.id, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
-                          <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product.id, ind)" @mouseleave="hideTooltip"
+                          <a style="font-size: 12px;" v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
+                          <a style="font-size: 12px;" v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
+                          <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product, ind)" @mouseleave="hideTooltip"
                              @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                         </li>
                         <li v-if="!getSelectionMode.readonly">
@@ -333,8 +333,8 @@ import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {getRandom, setCustomLogo} from "@/helpers/Helpers";
-import {differenceBy, intersectionBy, union, includes} from 'lodash';
-import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
+import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
+import {LockerProducts, handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
@@ -363,7 +363,7 @@ import ModalAction from "@/mixins/ModalAction";
     }
   }
 })
-export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
+export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   private baseUrl = location.host + "/#/"
@@ -637,6 +637,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public get popperID() {
     return this.$store.getters.getPopperID
+  }
+
+  public get getProductEditInfoObject() {
+    return this.$store.getters.getProductEditInfoObject;
   }
 
   public showPopper(id:string){

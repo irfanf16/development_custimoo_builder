@@ -40,7 +40,17 @@
           <template v-if="isCustomerAuthenticated">
             <template v-if="$store.getters.getUpdateOrderItemProducts == null">
               <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
-                {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
+                <template v-if="getProductEditInfoObject.editing">
+                  <template v-if="getProductEditInfoObject.type == 'cart_product'">
+                    Update Cart
+                  </template>
+                  <template v-else>
+                    Update Item
+                  </template>
+                </template>
+                <template v-else>
+                  Add to Cart
+                </template>
               </button>
               <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
                 <img width="20" height="20" src="../../src/assets/images/loading.gif" />
@@ -72,9 +82,15 @@ import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
 import ProductionScene from '@/components/ProductionScene.vue'
-import { getActiveProductData,urlToBase64,getFileExtensionType,fontsList } from "@/helpers/Helpers";
+import {
+  getActiveProductData,
+  urlToBase64,
+  getFileExtensionType,
+  fontsList,
+  handleResponseException
+} from "@/helpers/Helpers";
 import LoginForm from '@/components/LoginForm.vue'
-import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
 
 import {compact} from 'lodash';
 
@@ -96,7 +112,7 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
   }
 })
 
-export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts)  {
+export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts, ProductsQueryParamsMixin, exitEditMode)  {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>
@@ -109,6 +125,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   }
   public isLoading = false;
 
+  get getProductEditInfoObject() {
+    return this.$store.getters.getProductEditInfoObject
+  }
   public roster_detail: Record<any,any> = [];
 
   public production_file_info: Record<any,any> = {};
@@ -134,9 +153,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-  get editCart(): Record<any, any> {
-    return this.$store.getters.getEditCart
-  }
+  // get editCart(): Record<any, any> {
+  //   return this.$store.getters.getEditCart
+  // }
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails()
@@ -144,6 +163,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
   get logoColors(): [Record<any, any>] {
     return this.$store.getters.getLogosColors
+  }
+
+  get getLastActiveProductData() {
+    return this.$store.getters.getLastActiveProductData
   }
 
   get total(): number {
@@ -257,6 +280,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   }
 
   public async addToCart() {
+    let self: Record<any, any> = this;
     try {
       this.isLoading = true;
      let cart_product:Record<any,any> = await getActiveProductData();
@@ -275,11 +299,12 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
         factory_product: cart_product
       };
       let url = "carts"
-      if(this.$store.getters.getEditCart.cartId > 0) {
-        post_data.factory_product.id = this.$store.getters.getEditCart.cartItemId
-        url = `carts/cart-items/${this.$store.getters.getEditCart.cartId}/update`
+      let cart_edit_mode = false;
+      if(this.getProductEditInfoObject.editing && this.getProductEditInfoObject.type == "cart_product") {
+        cart_edit_mode = true
+        post_data.factory_product.id = this.getProductEditInfoObject.cart_product_info.cart_item_product.id
+        url = `carts/cart-items/${this.getProductEditInfoObject.cart_product_info.cart_item_id}/update`
       }
-
 
       let santacart = true;
       let company_domain = this.company.company_domain;
@@ -327,85 +352,79 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
       if(santacart){
         this.isLoading = true;
-        http.post(url, post_data).then((res: any) => {
+        http.post(url, post_data).then(async (res: any) => {
+          console.log("response", res.data.success)
           if (res.data.success == true){
-            let edit_cart = this.$store.getters.getEditCart.cartId > 0;
+            console.log("response if", res.data.success, cart_edit_mode)
+            let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
             let api_res:Record<any, any> = res.data.result
-            this.$store.dispatch('addToCart',api_res.items)
-            this.$store.dispatch('setEditCart', {key:'cartId',value:0});
-            this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
-            this.showToast(res.data.message, 'SUCCESS');
-            this.$store.dispatch('addedToCart', true)
+            self.$store.dispatch('addToCart',api_res.items)
+            // self.$store.dispatch('setEditCart', {key:'cartId',value:0});
+            // self.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
+            await self.exitFromEditMode()
+            self.showToast(res.data.message, 'SUCCESS');
+            self.$store.dispatch('addedToCart', true)
             if(platform === 'wordpress'){
               let update_cart_id_data = new FormData();
               update_cart_id_data.append('santa_cart_id', api_res.new_created_id);
               update_cart_id_data.append('woocom_cart_id', ecommerce_cart_id);
               update_cart_id_data.append('action', 'add_custimoo_cart_id');
-
+              if(cart_edit_mode) {
+                await self.exitFromEditMode()
+              }
                http.post(ecom_url, update_cart_id_data).then((res: any) => {
                  window.location.href = company_domain + '/cart'
               }).catch(err => {
-                this.showErrorArr(err.response.data.errors)
+                self.showErrorArr(err.response.data.errors)
               });
 
-            } else {
-              if(edit_cart) {
-                this.retrieveProducts();
+            }
+            else {
+              if(cart_edit_mode) {
+                await self.exitFromEditMode()
+                let query_params = await self.setQueryParams
+                self.retrieveProducts(query_params);
               }
             }
-            this.isLoading = false;
-          }else{
+            self.isLoading = false;
+          }
+          else {
             if(res.data.status_code === 422){
-              this.showErrorValidation(res.data.errors);
-              this.isLoading = false
+              self.showErrorValidation(res.data.errors);
             }
-            else{
-              this.showError(res)
-              this.isLoading = false
+            if(cart_edit_mode) {
+              await self.exitFromEditMode()
+              let query_params = await self.setQueryParams
+              self.retrieveProducts(query_params);
             }
           }
-        }).catch(err => {
-          this.isLoading = false
-          this.showErrorArr(err.response.data.errors)
+          self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
+          self.isLoading = false
+
+        }).catch(async errorResponse => {
+          self.isLoading = false
+          handleResponseException(errorResponse)
+          if(cart_edit_mode) {
+            await self.exitFromEditMode()
+            let query_params = await self.setQueryParams
+            self.retrieveProducts(query_params);
+          }
         })
       }
 
     }
     catch (e) {
       console.error('error in add to cart',e)
-      this.isLoading = false
+      self.isLoading = false
     }
   }
 
-  public async retrieveProducts(url:string|null=null) {
+  public async retrieveProducts() {
     let self = this;
-    let sync_id = this.$route.query.sync_id;
-    if(url == null) {
-      url = `/list/products`;
-    }
-    let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
-    if(!url_obj.searchParams.has("customized")) {
-      url_obj.searchParams.append('customized', this.$store.getters.getCustomized)
-    }
-    if(!url_obj.searchParams.has("personalized")) {
-      url_obj.searchParams.append('personalized', this.$store.getters.getPersonalized)
-    }
-    if(self.search_products && !url_obj.searchParams.has("title")) {
-      url_obj.searchParams.append('title', self.search_products)
-    }
-    if(this.$route.query.update_order_product) {
-      url_obj.searchParams.append('update_order_product', this.$route.query.update_order_product);
-      url_obj.searchParams.append('order_item_id', this.$route.query.order_item_id);
-      url_obj.searchParams.append('activity_id', this.$route.query.activity_id);
-      //this.$router.replace('/')
-    }
-    url = url_obj.pathname + url_obj.search;
-    if(sync_id) {
-      if(url.indexOf("?") > 0) {
-        url += `&sync_id=${sync_id}`;
-      } else {
-        url = `?sync_id=${sync_id}`;
-      }
+
+    let url = `/list/products?customized=${this.getLastActiveProductData.customized}&personalized=${this.getLastActiveProductData.personalized}`;
+    if(this.getLastActiveProductData.search_products) {
+      url +=` &title=${this.getLastActiveProductData.search_products}`
     }
     http.get(url).then(async (response: Record<any, any>) => {
       if(response.data.products.data.length > 0 ){
@@ -637,9 +656,13 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   }
 
   public async fetchUrlContent(url:string) {
-    let fetch_content = await fetch(url);
-    let url_content   = await fetch_content.text();
-    return url_content;
+    if(url) {
+      let fetch_content = await fetch(url);
+      let url_content   = await fetch_content.text();
+      return url_content;
+    } else {
+      return "";
+    }
   }
 
   public async parseSvgString(svg_string:string, factory_product_content: Record<any,any>) {

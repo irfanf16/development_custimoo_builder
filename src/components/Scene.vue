@@ -236,6 +236,11 @@ export default class Scene extends Vue {
     return this.$store.getters.getGroupColors
   }
 
+
+  get productEditInfoObject(): Record<any, any> {
+    return this.$store.getters.getProductEditInfoObject
+  }
+
   get mainSvgGroups(): [Record<any, any>] {
     return this.$store.getters.getSvgGroups
   }
@@ -342,6 +347,7 @@ export default class Scene extends Vue {
         //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
         this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
       }
+      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "custom_logos": this.customLogos})
     }
   }
 
@@ -443,6 +449,7 @@ export default class Scene extends Vue {
         //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
         this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
       }
+      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "custom_texts": this.customTexts})
     }
   }
 
@@ -462,6 +469,7 @@ export default class Scene extends Vue {
         //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
         this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
       }
+      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "default_colors": this.defaultColors})
     }
   }
 
@@ -471,6 +479,9 @@ export default class Scene extends Vue {
   groupColorsChanged(newVal: Record<any, any>) {
     if (this.productType == 'customized' && this.mounted) {
       this.changeGroupColor(newVal)
+      if(this.productEditInfoObject && this.productEditInfoObject.editing == false) {
+        this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "group_colors": this.groupColors})
+      }
     }
   }
 
@@ -948,6 +959,7 @@ export default class Scene extends Vue {
             }, 500)
           }
           this.mounted = true
+         this.showLoader = false
         }
         resolve('done')
       })

@@ -1,7 +1,7 @@
 <template>
   <div class="roster-section">
     <div class="d-none d-md-block roster-upload-area">
-      <template v-if="company.platform != 'cdnExceptLogin'">
+      <template v-if="company.platform != 'cdnExceptLogin' && company.platform != 'wordpress'">
       <h3>Import Roster from Excel sheet</h3>
       <b-button  v-b-modal.modal-center-uploadroster class="btn btn-secondary fw-bold">Download/Upload {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template <a href="#" v-b-tooltip.hover
                                                                                   title="Import roster details from excel sheet">

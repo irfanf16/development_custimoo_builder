@@ -1,17 +1,19 @@
 <template>
   <div class="available-designs-section px-3 px-lg-0" v-if="selectedProduct">
-    <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id">
-      <a @click="changeDesign(index); showPreview()">
-        <Scene canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
-           :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_thumbnail_url : ''}"
-           :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
-           :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
-           :logos="selectedProduct.productstyles[styleIndex].logo"
-           :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
-           :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"/>
-      </a>
-      <h3>{{ design.design_name }}</h3>
-    </div>
+    <template v-if="selectedProduct.productstyles[selected_style_index]">
+      <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[selected_style_index].productdesigns" :key="design.id">
+        <a @click="changeDesign(index); showPreview()">
+          <Scene canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
+                 :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[selected_style_index].front? storageUrl+selectedProduct.productstyles[selected_style_index].front.file_thumbnail_url : ''}"
+                 :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
+                 :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
+                 :logos="selectedProduct.productstyles[selected_style_index].logo"
+                 :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
+                 :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"/>
+        </a>
+        <h3>{{ design.design_name }} {{design.id}}</h3>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -22,12 +24,18 @@ import Scene from '@/components/Scene.vue'
 @Component<DesignAvailable>({
   components: {
     Scene
+  },
+  mounted() {
+    if(this.selectedProduct.productstyles[this.getLastActiveProductData.style_index]) {
+      this.selected_style_index = this.getLastActiveProductData.style_index
+    }
   }
 })
 
 export default class DesignAvailable extends Vue {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   @Prop() activeTab!: number;
+  public selected_style_index = 0
 
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
@@ -39,11 +47,19 @@ export default class DesignAvailable extends Vue {
     return  this.$store.getters.getCurrentStyleIndex;
   }
 
+  get getLastActiveProductData(): Record<any, any> {
+    return this.$store.getters.getLastActiveProductData
+  }
+
   public changeDesign(index: number) {
+    let self: Record<any, any> = this;
+    this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {
+      design_index: index, design_id: this.selectedProduct.productstyles[self.selected_style_index].productdesigns[index].id
+    })
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     this.$store.dispatch('setActiveTab', -1)
     this.$store.commit('SET_SUFFLE', false)
-    this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
+    this.selectedProduct.productstyles[self.selected_style_index].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {
         Vue.set(design, 'design_show', 1)
         this.$store.dispatch('setSelectedProductDesignID',design.id);

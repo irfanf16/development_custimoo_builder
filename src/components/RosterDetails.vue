@@ -97,18 +97,15 @@
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addPlayer">Add Player</button>
       <button v-if="!isLoading" class="btn btn-secondary w-auto fw-bold" @click="close">
-        <template v-if="editCart.cartId > 0">Update Item</template>
+        <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'">Update Item</template>
         <template v-else>OK</template>
       </button>
-      <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
-        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-      </button>
-      <button v-if="editCart.cartId > 0" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $root.$children[0].$children[2].cancelCart()">
+      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $root.$children[0].$children[2].cancelCart()">
         Cancel
       </button>
     </div>
 
-    <div class="d-flex justify-content-center mt-3" v-if="!editCart.cartId > 0">
+    <div class="d-flex justify-content-center mt-3" v-if="getProductEditInfoObject.editing == false">
 <!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
       <template v-if="!isCustomerAuthenticated" >
         <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
@@ -173,6 +170,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     return this.$store.getters.isCustomerAuthenticated
   }
 
+  get getProductEditInfoObject() {
+    return this.$store.getters.getProductEditInfoObject;
+  }
+
   private addToCart() {
     if (!this.rosterDetails.some(el => el.quantity == 0)) {
       this.isLoading = true;
@@ -182,7 +183,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       if(this.company.platform != 'wordpress'){
         this.showVModal('cart-modal')
       }
-
     } // if quantity is not zero
     else {
       this.showToast("Quantity must be atleast 1", "error")
@@ -197,8 +197,20 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   get company() {
     return this.$store.getters.getCompany
   }
-  get editCart(): Record<any, any> {
-    return this.$store.getters.getEditCart
+
+  // get editCart(): Record<any, any> {
+  //   return this.$store.getters.getEditCart
+  // }
+  get rosterFirstNameAndNumber(): string | null {
+    let editing_roster_player_index = this.editing_roster_player_index
+    if (this.rosterDetails && this.rosterDetails.length > 0) {
+      // |;| is just name and number separator
+      let roster_text = this.rosterDetails[editing_roster_player_index].text ? this.rosterDetails[editing_roster_player_index].text : ''
+      let roster_num = this.rosterDetails[editing_roster_player_index].number ? this.rosterDetails[editing_roster_player_index].number : ''
+      return `${roster_text}|;|${roster_num}`;
+    } else {
+      return null;
+    }
   }
 
   get customText(): Record<any, any>[] {
@@ -256,8 +268,8 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     let self = this;
 
     setTimeout(() =>{
-
-      if(this.editCart.cartId && this.editCart.cartItemId){
+      if(self.getProductEditInfoObject.editing && self.getProductEditInfoObject.type == 'cart_product'){
+     // if(this.editCart.cartId && this.editCart.cartItemId){
         self.isLoading = true;
         (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
         this.hideVModal('rostermodal')

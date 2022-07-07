@@ -11,7 +11,7 @@
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
                 <span class="icon-holder">
-                  <font-awesome-icon size="1em" :icon="['fas', 'image']"/>
+                  <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
                 </span>
                 Logo
               </a>

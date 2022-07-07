@@ -111,7 +111,18 @@ const ProductAttributes:Module<any, any> = {
     revertRosterBool:false,
     hideSaveLockerButton: false,
     editing_roster_player_index: 0,
-    selectedCategories:[]
+    selectedCategories:[],
+
+    //could be locker_product, cart_product, order_product
+    product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null },
+    last_active_product_data: {
+      design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
+      page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
+      roster_detail: [],
+    },
+    editing_roster_player_index: 0,
+    selectedCategories:[],
+    products_next_page_no: null //null value mean has no more pages
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -203,9 +214,9 @@ const ProductAttributes:Module<any, any> = {
       else
         Vue.set(state, 'customized', payload.value)*/
     },
-    SET_EDIT_CART(state: Record<any, any>, payload: Record<any, any>){
-      Vue.set(state.editCart,payload.key,payload.value)
-    },
+    // SET_EDIT_CART(state: Record<any, any>, payload: Record<any, any>){
+    //   Vue.set(state.editCart,payload.key,payload.value)
+    // },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
     },
@@ -221,7 +232,7 @@ const ProductAttributes:Module<any, any> = {
 
     },
     SET_SELECTED_CATEGORIES(state: Record<any, any>, category_id: number){
-      if(state.selectedCategories[0] !== category_id){
+      if(state.selectedCategories.includes(category_id)){
         state.selectedCategories = [];
         state.selectedCategories.push(category_id);
       }
@@ -264,6 +275,13 @@ const ProductAttributes:Module<any, any> = {
            Vue.set(state.customLogos[state.selectedPrdId], state.customLogos[state.selectedPrdId].length, customLogo.custom_logo)
          }
        }
+    },
+    SET_CUSTOM_LOGOS(state: Record<any, any>,payload = []) {
+      if('product_id' in payload) {
+        Vue.set(state.customLogos, payload.product_id, payload.custom_logos)
+      } else {
+        Vue.set(state.customLogos, state.selectedPrdId, payload)
+      }
     },
     SET_RECENT_LOGOS(state: Record<any, any>,payload = []) {
       if(payload.length > 0) {
@@ -884,8 +902,36 @@ const ProductAttributes:Module<any, any> = {
     SET_REVERT_ROSTER_BOOL(state:Record<any, any>, payload){
       state.revertRosterBool = payload;
     },
+    SET_PRODUCT_EDIT_INFO_OBJECT(state:Record<any, any>, payload) {
+      // const updated_product_info_obj: Record<any, any> = {}
+      // for(const [edit_info_obj_key, edit_info_obj_value] of Object.entries(state.product_edit_info_object)) {
+      //   if(payload[edit_info_obj_key]) {
+      //     updated_product_info_obj[edit_info_obj_key] =  edit_info_obj_value
+      //   } else {
+      //     updated_product_info_obj[edit_info_obj_key] =  null
+      //   }
+      // }
+
+      // const updated_payload: Record<any, any> = {};
+      // for(const [payload_key, payload_value] of Object.entries(payload)) {
+      //   updated_payload[payload_key] = payload_value
+      // }
+      // state.product_edit_info_object = Object.assign({}, state.product_edit_info_object, updated_payload);
+      state.product_edit_info_object = payload;
+    },
+    SET_LAST_ACTIVE_PRODUCT_DATA(state:Record<any, any>, payload)
+    {
+      const updated_payload: Record<any, any> = {};
+      for (const [payload_key, payload_value] of Object.entries(payload)) {
+        updated_payload[payload_key] = payload_value
+      }
+      state.last_active_product_data = Object.assign({}, state.last_active_product_data, updated_payload);
+    },
     SET_EDITING_ROSTER_PLAYER_INDEX(state:Record<any, any>, payload){
       state.editing_roster_player_index = payload;
+    },
+    SET_PRODUCTS_NEXT_PAGE_NO(state:Record<any, any>, payload){
+      state.products_next_page_no = payload;
     }
   },
   getters: {
@@ -901,9 +947,9 @@ const ProductAttributes:Module<any, any> = {
     getEditLockerProduct: state => {
       return state.editLockerProduct
     },
-    getEditCart: state => {
-      return state.editCart
-    },
+    // getEditCart: state => {
+    //   return state.editCart
+    // },
     getNotifications: state => {
       return state.notifications
     },
@@ -1094,8 +1140,17 @@ const ProductAttributes:Module<any, any> = {
     getRevertRosterBool(state:Record<any,any>){
       return state.revertRosterBool;
     },
+    getProductEditInfoObject(state:Record<any,any>){
+      return state.product_edit_info_object;
+    },
+    getLastActiveProductData(state:Record<any,any>){
+      return state.last_active_product_data;
+    },
     getEditingRosterPlayerIndex(state:Record<any,any>){
       return state.editing_roster_player_index;
+    },
+    getProductsNextPageNo(state:Record<any,any>) {
+      return state.products_next_page_no;
     }
   },
   actions: {
@@ -1123,9 +1178,9 @@ const ProductAttributes:Module<any, any> = {
     setProductType({commit}, payload) {
       commit('SET_PRODUCT_TYPE', payload)
     },
-    setEditCart({commit}, payload) {
-      commit('SET_EDIT_CART', payload)
-    },
+    // setEditCart({commit}, payload) {
+    //   commit('SET_EDIT_CART', payload)
+    // },
     setCategories({commit}){
       const url = '/product/categories'
       http.get(url).then((response: any) => {
@@ -1387,6 +1442,10 @@ const ProductAttributes:Module<any, any> = {
     },
     setRevertRosterBOOL({commit},payload){
       commit('SET_REVERT_ROSTER_BOOL',payload);
+    },
+    setLastActiveProductData({commit}, payload) {
+      commit('SET_LAST_ACTIVE_PRODUCT_DATA', payload)
+
     }
   }
 }

@@ -88,7 +88,6 @@ import ModalAction from "@/mixins/ModalAction";
       let res  = await http.get("products/roster")
       if (res.status == 200){
         this.products_roster = res.data
-        console.log("rosters", this.products_roster.length)
       }
     }
   }
