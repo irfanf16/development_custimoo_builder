@@ -26,7 +26,7 @@
                         <b-button :key="'lockerRoom'" v-if="roomWithProducts.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                       </template>
                       <template v-else>
-                        <b-button @click="setActionBeforeLogin('lockerRoom')" v-if="roomWithProducts.length" :key="'loginmodal'" variant="outline-secondary">Locker room</b-button>
+                        <b-button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'" variant="outline-secondary">Locker room</b-button>
                       </template>
                       <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
                         <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">

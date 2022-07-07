@@ -231,7 +231,6 @@ export class handleMainProducts extends Vue {
     this.$store.dispatch('setColorSectionVisibility')
     this.$store.dispatch("getModels", selected_product.product_id);
     selected_product.productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
-      console.log("matching", style_index, design_id, item.id)
       if (item.id == design_id) {
         Vue.set(item, 'design_show', 1)
         this.$store.dispatch('setSelectedProductDesignID', item.id)
