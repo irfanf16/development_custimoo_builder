@@ -20,7 +20,7 @@
               <div class="customization-preview-process w-100">
                 <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                   <div class="buttons-preview text-left">
-                    <template v-if="(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && updateOrderItemProducts == null">
+                    <template v-if="getProductEditInfoObject.editing == false || getProductEditInfoObject.type == 'locker_product'">
 <!--                    <template>-->
                       <template v-if="isCustomerAuthenticated">
                         <b-button :key="'lockerRoom'" v-if="roomWithProducts.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
@@ -1405,10 +1405,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
 
-    // const categories = this.$store.getters.getSelectedCategories;
-    // if(categories.length > 0){
-    //   url_obj.searchParams.append('categories', categories.toString())
-    // }
+    const categories = this.$store.getters.getSelectedCategories;
+    if(categories.length > 0){
+      url_obj.searchParams.append('categories', categories.toString())
+    }
     query_params.forEach((query_param: string) => {
       let query_param_array = query_param.split("=");
       if(url_obj.searchParams.has(query_param_array[0])) {
@@ -1420,9 +1420,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     url = url_obj.pathname + url_obj.search;
     if(sync_id) {
       if(url.indexOf("?") > 0) {
-        url += `&active_product_id=${sync_id}`;
+        url += `&sync_id=${sync_id}`;
       } else {
-        url = `?active_product_id=${sync_id}`;
+        url = `?sync_id=${sync_id}`;
       }
     }
     http.get(url).then(async (response: Record<any, any>) => {

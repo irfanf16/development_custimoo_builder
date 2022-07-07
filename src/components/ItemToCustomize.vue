@@ -138,7 +138,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 
     let ecommerce_update_id = this.$route.query.update_item;
     if(!ecommerce_update_id) {
-      this.setBrands(this.categories[0].id)
+      this.$store.commit('SET_SELECTED_CATEGORIES', this.categories[0].id) // as this is on mounted so don't need to send get product call again
     }
     this.search = this.search_products
   }
@@ -260,10 +260,10 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     }
   }
 
-  public async  setBrands(category_id:number){
+  public async setBrands(category_id:number){
     if(this.selectedBrand !== category_id){
       await this.$store.commit('SET_SELECTED_CATEGORIES', category_id)
-      this.$emit('retrieveProducts','/list/products' )
+      this.$emit('retrieveProducts')
     }
   }
 
