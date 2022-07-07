@@ -438,31 +438,6 @@ Vue.filter('formatDate', function(value:string) {
         this.showVModal('cart-modal');
       }
 
-      let ecommerce_update_id = this.$route.query.update_item;
-      let santa_cart_id = this.$route.query.update_cart;
-
-      if(ecommerce_update_id){
-        let cart_items = await this.$store.getters.getCartItems;
-
-        let filter_items = cart_items.filter((item) => {
-          return item.id == parseInt(santa_cart_id)
-        });
-
-        if(filter_items && filter_items.length > 0){
-          let factory_items = filter_items[0].factory_products.filter((factory_item)=>{
-            return factory_item.ecommerce_cart_id == ecommerce_update_id
-          });
-
-          if(factory_items && factory_items.length > 0){
-            let update_cart_item = factory_items[0]
-            if(this.$route.query.roster){
-              this.ref.cartModal.editCartItem(update_cart_item, santa_cart_id, false);
-            }else{
-              this.ref.cartModal.editCartItem(update_cart_item, santa_cart_id, true);
-            }
-          }
-        }
-      }
     }
     if(this.$route.query.tabIdx){
       this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
