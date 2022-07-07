@@ -396,7 +396,6 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    await this.$store.dispatch('GET_LOCKER_PRODUCTS')
     this.is_shared_product = this.$route.params.name ?  true : false
 
     this.setRecentLogos()
@@ -417,7 +416,6 @@ Vue.filter('formatDate', function(value:string) {
       await this.$store.dispatch('getCartServer', {})
     }
     let query_params = await this.setQueryParams()
-    console.log("query_params", query_params)
     await this.retrieveProducts(query_params)
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
     this.jwtToken = localStorage.getItem('jwtToken') as string

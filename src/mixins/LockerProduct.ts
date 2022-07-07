@@ -165,7 +165,6 @@ export class handleMainProducts extends Vue {
             })
             design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
           }
-          console.log("shahzaib", design_id, style_index)
           this.$store.commit('SET_CUSTOM_LOGOS', {product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos})
           this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
         } else {
@@ -186,7 +185,6 @@ export class handleMainProducts extends Vue {
           console.log("else search123", self.search_products)
         }
       }
-      console.log("not in editing mode")
       // await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: append_products});
     }
     await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
@@ -324,7 +322,6 @@ export class handleMainProducts extends Vue {
     return {
       validated: validated, message: message
     }
-
   }
 
   public async handleEditMode(retrieved_products: Record<any, any>[]) {
