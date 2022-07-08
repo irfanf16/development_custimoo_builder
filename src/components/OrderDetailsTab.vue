@@ -679,8 +679,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
         let custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
           return ((custom_logo.url != null || custom_logo.url != ""))
         })
-        let custom_logos = await this.$store.dispatch('converturlToBase64',{custom_logos:custom_logos_without_base64});
-        svg_string += `${await this.getLogoPattern(custom_logos.data.custom_logos,factory_product.measurement_ratio)}`
+        if(custom_logos_without_base64.length > 0){
+          let custom_logos = await this.$store.dispatch('converturlToBase64',{custom_logos:custom_logos_without_base64});
+          svg_string += `${await this.getLogoPattern(custom_logos.data.custom_logos,factory_product.measurement_ratio)}`
+        }
       }
       svg_string += `\n</g>\n</svg>`;
       let svg_doc = await this.getDocFromString(svg_string);
