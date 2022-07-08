@@ -750,17 +750,21 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       if (custom_name_index != -1) {
         await this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, attribute: 'text', value: name })
         if(name){
-          svg_object['name'] = {
-            svg : this.customTextObjects[custom_name_index].toSVG(),
-            placement : this.customTextObjects[custom_name_index].side,
-            width : this.customTextObjects[custom_name_index].width,
-            height : this.customTextObjects[custom_name_index].height,
-            scaleX : this.customTextObjects[custom_name_index].scaleX,
-            scaleY : this.customTextObjects[custom_name_index].scaleY,
-            rotation: this.customTexts[custom_name_index].rotation,
-            original_height: this.customTexts[custom_name_index].originalHeight,
-          }
-          roster_details[this.editing_roster_player_index].svgs = svg_object;
+          const interval = setInterval(() => {
+            if(this.customTextObjects[custom_name_index] && name == this.customTextObjects[custom_name_index].text)
+            svg_object['name'] = {
+              svg : this.customTextObjects[custom_name_index].toSVG(),
+              placement : this.customTextObjects[custom_name_index].side,
+              width : this.customTextObjects[custom_name_index].width,
+              height : this.customTextObjects[custom_name_index].height,
+              scaleX : this.customTextObjects[custom_name_index].scaleX,
+              scaleY : this.customTextObjects[custom_name_index].scaleY,
+              rotation: this.customTexts[custom_name_index].rotation,
+              original_height: this.customTexts[custom_name_index].originalHeight,
+            }
+            roster_details[this.editing_roster_player_index].svgs = svg_object;
+            clearInterval(interval)
+          }, 500)
         }else{
           svg_object['name'] = {
             svg : null,
@@ -778,17 +782,22 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       if (custom_number_index != -1) {
         await this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, attribute: 'text', value: number })
         if(number){
-          svg_object['number'] = {
-            svg : this.customTextObjects[custom_number_index].toSVG(),
-            placement : this.customTextObjects[custom_number_index].side,
-            width : this.customTextObjects[custom_number_index].width,
-            height : this.customTextObjects[custom_number_index].height,
-            scaleX : this.customTextObjects[custom_number_index].scaleX,
-            scaleY : this.customTextObjects[custom_number_index].scaleY,
-            rotation: this.customTexts[custom_number_index].rotation,
-            original_height: this.customTexts[custom_name_index].originalHeight,
-          };
-          roster_details[this.editing_roster_player_index].svgs = svg_object;
+          const interval = setInterval(() => {
+            if (this.customTextObjects[custom_number_index] && number == this.customTextObjects[custom_number_index].text) {
+              svg_object['number'] = {
+                svg: this.customTextObjects[custom_number_index].toSVG(),
+                placement: this.customTextObjects[custom_number_index].side,
+                width: this.customTextObjects[custom_number_index].width,
+                height: this.customTextObjects[custom_number_index].height,
+                scaleX: this.customTextObjects[custom_number_index].scaleX,
+                scaleY: this.customTextObjects[custom_number_index].scaleY,
+                rotation: this.customTexts[custom_number_index].rotation,
+                original_height: this.customTexts[custom_name_index].originalHeight,
+              };
+              roster_details[this.editing_roster_player_index].svgs = svg_object;
+              clearInterval(interval)
+            }
+          }, 500)
         }else{
           svg_object['number'] = {
             svg : null,
