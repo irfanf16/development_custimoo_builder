@@ -676,10 +676,11 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       svg_string += `${this.getSVGPattern(factory_product.roster_detail,factory_product.measurement_ratio)}\n`
 
       if((factory_product.custom_logos.length >= 1)){
-        let custom_logos = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
+        let custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
           return ((custom_logo.url != null || custom_logo.url != ""))
         })
-        svg_string += `${await this.getLogoPattern(custom_logos,factory_product.measurement_ratio)}`
+        let custom_logos = await this.$store.dispatch('converturlToBase64',{custom_logos:custom_logos_without_base64});
+        svg_string += `${await this.getLogoPattern(custom_logos.data.custom_logos,factory_product.measurement_ratio)}`
       }
       svg_string += `\n</g>\n</svg>`;
       let svg_doc = await this.getDocFromString(svg_string);
@@ -947,13 +948,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       let value = values[index];
       let original_url = Object.prototype.hasOwnProperty.call(value,'original_logo_url') && value.original_logo_url;
       let updated_url = original_url?value.original_logo_url:value.url;
+      let has_base64 = Object.prototype.hasOwnProperty.call(value,'base_64')?true:false;
       if(updated_url !== null && updated_url !== "" && updated_url !== undefined){
         if(getFileExtensionType('raster', updated_url) ){
-          await urlToBase64(`${this.storage_url}${updated_url}`).then(async (base64) => {
+          if(has_base64){
             svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
                 <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
-                    ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${base64}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/></g>`:''}
+                    ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${value.base_64}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/></g>`:''}
                 </g>
                 <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
@@ -967,7 +969,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
                 </g>
                 ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/measurement_ratio))}
                 </g>`
-          })
+          }
         } else {
           svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
