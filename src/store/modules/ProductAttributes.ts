@@ -232,11 +232,9 @@ const ProductAttributes:Module<any, any> = {
 
     },
     SET_SELECTED_CATEGORIES(state: Record<any, any>, category_id: number){
-      if(state.selectedCategories.includes(category_id)){
         state.selectedCategories = [];
         state.selectedCategories.push(category_id);
-      }
-    },
+     },
      customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
        if(customLogo && customLogo.custom_logo){
          const newCustomLogo = customLogo.custom_logo
