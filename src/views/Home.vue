@@ -398,6 +398,7 @@ Vue.filter('formatDate', function(value:string) {
   async mounted() {
     this.is_shared_product = this.$route.params.name ?  true : false
 
+
     this.setRecentLogos()
 
     if (this.hideColorSection){
@@ -773,6 +774,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             height : null,
             scaleX : null,
             scaleY : null,
+            rotation:null,
             original_height: null
           };
           roster_details[this.editing_roster_player_index].svgs = svg_object
@@ -806,6 +808,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             height : null,
             scaleX : null,
             scaleY : null,
+            rotation:null,
             original_height: null
           };
           roster_details[this.editing_roster_player_index].svgs =  svg_object;

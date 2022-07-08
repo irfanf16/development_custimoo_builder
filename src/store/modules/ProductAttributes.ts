@@ -232,11 +232,9 @@ const ProductAttributes:Module<any, any> = {
 
     },
     SET_SELECTED_CATEGORIES(state: Record<any, any>, category_id: number){
-      if(state.selectedCategories.includes(category_id)){
         state.selectedCategories = [];
         state.selectedCategories.push(category_id);
-      }
-    },
+     },
      customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
        if(customLogo && customLogo.custom_logo){
          const newCustomLogo = customLogo.custom_logo
@@ -1442,6 +1440,20 @@ const ProductAttributes:Module<any, any> = {
     },
     setRevertRosterBOOL({commit},payload){
       commit('SET_REVERT_ROSTER_BOOL',payload);
+    },
+    converturlToBase64({commit},payload){
+      return new Promise(function(resolve, reject) {
+        http.post("convert-url-to-base64", payload).then((res) => {
+          if (res.status == 200){
+            resolve(res);
+          }
+          else{
+            reject(res);
+          }
+        }).catch((errors)=>{
+          reject(errors);
+        });
+      });
     },
     setLastActiveProductData({commit}, payload) {
       commit('SET_LAST_ACTIVE_PRODUCT_DATA', payload)
