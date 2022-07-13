@@ -21,6 +21,7 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
+// import opentype from 'opentype.js'
 import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
 import {Object as FabricObject} from "fabric/fabric-impl";
 import { SetSelectedProductCustomTexts } from "@/mixins/SelectedProductMixin";
@@ -431,6 +432,32 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                 }
               })
             }
+            
+            // if(this.mainPreview) {
+            //   opentype.load('https://custimoo.s3.us-east-1.amazonaws.com/files/3/product/font/DKsportswear_fonts/BebasNeue-Regular.woff', (err: Record<any, any>, font: Record<any, any>) => {
+            //     if (err) {
+            //       alert('Font could not be loaded: ' + err);
+            //     } else {
+            //       // Now let's display it on a canvas with id "canvas"
+            //       // const ctx = document.getElementById('canvas').getContext('2d');
+            //
+            //       // Construct a Path object containing the letter shapes of the given text.
+            //       // The other parameters are x, y and fontSize.
+            //       // Note that y is the position of the baseline.
+            //       console.log(text.height)
+            //       const path = font.getPath(text.text, 0, 150 , text.height);
+            //
+            //       const svg = path.toSVG()
+            //       console.log(svg)
+            //       console.log(path.getBoundingBox())
+            //       console.log(font.getAdvanceWidth(text.text))
+            //
+            //       // If you just want to draw the text you can also use font.draw(ctx, text, x, y, fontSize).
+            //       // path.draw(ctx);
+            //     }
+            //   });
+            // }
+
             this.eventAction(text, textObject, otherSideObject)
             addText = false
           }
