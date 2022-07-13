@@ -76,7 +76,7 @@
                                 <div class="color-container">
                                   <div class="color-box" v-for="(color, colorIndex) in product_color.colors" :style="{background: color.value}"
                                        :key="`product_color_${productColorIndex}_${product_color.type}_type_color_${colorIndex}`" :title="color.name"
-                                        @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color)"></div>
+                                        @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)"></div>
                                 </div>
                               </div>
                             </b-tab>
@@ -84,6 +84,30 @@
                         </div>
                       </b-tab>
                     </b-tabs>
+                  </div>
+
+                  <div class="outline-slider-area d-flex justify-content-between pt-4">
+                    <template v-if="product_custom_text_item.outline_enabled">
+                      <div class="mr-sm-2 mb-sm-0">
+                        <label :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`">
+                          Outline Width
+                        </label>
+                        <b-form-input class="mt-2" id="range-2" type="range" min="0" max="10" step="1"
+                                      :value="product_custom_text_item.outline_width"
+                                      :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
+                                      :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
+                                      @change="handleCustomTextOutlineUpdate($event, customTextIndex, productCustomTextItemIndex)"></b-form-input>
+                        <div class="mt-2">Outline Size: {{ product_custom_text_item.outline_width }}px</div>
+                      </div>
+                    </template>
+                    <div>
+                      <label :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`">Placement</label>
+                      <b-form-select :style="{ fontSize: '18px', height: '44px' }" :value="product_custom_text_item.placement"
+                                     :options="['front', 'back']" :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
+                                     :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
+                                     @change="handleCustomTextPlacementUpdate($event, customTextIndex, productCustomTextItemIndex)"
+                      ></b-form-select>
+                    </div>
                   </div>
 
 
@@ -151,22 +175,42 @@ export default class NewCustomizationText extends Mixins(ProductColors, ProductF
     let self:Record<any, any> = this;
     self.product_custom_texts[custom_text_index].value = updatedVal;
     self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextUpdated", {index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
+    self.$eventBus.$emit("customTextUpdated", { custom_text_index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
   }
 
   handleCustomTextCheckboxChange(updatedVal: string, custom_text_index: number) {
     let self:Record<any, any> = this;
     console.log("custom_text_index", custom_text_index)
     self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextUpdated", {index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
+    self.$eventBus.$emit("customTextUpdated", { custom_text_index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
   }
 
-  customTextColorUpdated( custom_text_index: number, custom_text_item_index: number, color: Record<any, any>,) {
+  customTextColorUpdated( custom_text_index: number, custom_text_item_index: number, color: Record<any, any>, type: string) {
     let self:Record<any, any> = this;
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].color = color.value;
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].color_pantone = color.name;
+    if(type == "Fill Color") {
+      self.product_custom_texts[custom_text_index].items[custom_text_item_index].color = color.value;
+      self.product_custom_texts[custom_text_index].items[custom_text_item_index].color_pantone = color.name;
+    }
+    else if(type == "Outline Color") {
+      self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_color = color.value;
+      self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_color_pantone = color.name;
+    }
     self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextUpdated", {index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
+    self.$eventBus.$emit("customTextUpdated", {custom_text_index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
+  }
+
+  handleCustomTextOutlineUpdate( outline_value: number, custom_text_index: number, custom_text_item_index: number) {
+    let self:Record<any, any> = this;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_width = outline_value;
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$eventBus.$emit("customTextUpdated", { custom_text_index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
+  }
+
+  handleCustomTextPlacementUpdate( placement: number, custom_text_index: number, custom_text_item_index: number) {
+    let self:Record<any, any> = this;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].placement = placement;
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$eventBus.$emit("customTextUpdated", { custom_text_index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
   }
 }
 </script>

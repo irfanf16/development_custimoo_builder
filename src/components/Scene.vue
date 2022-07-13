@@ -218,7 +218,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
   public viewportTransform: any
   public drawLines = false
   public product_custom_texts: Record<any, any>[] = []
-  public product_custom_objects: Record<any, any>[] = []
+  public product_custom_text_objects: Record<any, any>[] = []
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -1957,14 +1957,27 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     if(self.product_custom_texts.length  == 0) {
       await self.setSelectedProductCustomTexts()
     }
-    const custom_text_index = custom_text_info.index;
+    const custom_text_index = custom_text_info.custom_text_index;
     const custom_text_value = custom_text_info.value;
     self.product_custom_texts[custom_text_index] = custom_text_value;
-    let custom_text = self.product_custom_texts[custom_text_info.index];
+    let custom_text = self.product_custom_texts[custom_text_index];
     let render_front_canvas = false;
     let render_back_canvas = false;
-    custom_text.items.forEach((custom_text_item:Record<any, any>, custom_text_item_index: number) => {
-      // let custom_text_value = custom_text.selected ? custom_text.value : '';
+    /*
+    * delete existing texts first and re render them
+    * */
+    if(self.product_custom_text_objects[custom_text_index]) {
+      self.product_custom_text_objects[custom_text_index].forEach((product_custom_text_object: any) => {
+        const placement = product_custom_text_object.get("placement");
+        if(placement == "front") {
+          self.frontCanvas.remove(product_custom_text_object)
+        }
+        else if(placement == "back" && self.backCanvas) {
+          self.backCanvas.remove(product_custom_text_object)
+        }
+      })
+    }
+    custom_text.items.forEach((custom_text_item:Record<any, any>, customTextItemIndex: number) => {
       let fabric_text = new fabric.Text(custom_text.value, {
         left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
         top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
@@ -1977,7 +1990,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
         globalCompositeOperation: 'source-atop',
         fontFamily: custom_text_item.font_family,
         fill: custom_text_item.color,
-        stroke: custom_text.outLineColor,
+        stroke: custom_text_item.outline_color,
         strokeWidth: parseInt(custom_text_item.outline_width),
         paintFirst: 'stroke',
         lockScalingFlip: true,
@@ -1987,7 +2000,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
         _fontSizeMult: .835,
         placement: custom_text_item.placement,
         visible: custom_text_item.selected,
-        custom_text_index: custom_text_item_index
+        custom_text_index: customTextItemIndex
       })
       fabric_text.setControlsVisibility({
         tl: false,
@@ -2000,20 +2013,12 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
         mt: false,
         mtr: false
       })
-      if(!self.product_custom_objects[custom_text_index]) {
-        self.product_custom_objects[custom_text_index] = [];
-        self.product_custom_objects[custom_text_index][custom_text_item_index] = null;
+      if(!self.product_custom_text_objects[custom_text_index]) {
+        self.product_custom_text_objects[custom_text_index] = [];
+        self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
       }
 
-      if(self.product_custom_objects[custom_text_index] && self.product_custom_objects[custom_text_index][custom_text_item_index]) {
-        if(custom_text_item.placement == "front") {
-          self.frontCanvas.remove(self.product_custom_objects[custom_text_index][custom_text_item_index])
-        } else if(custom_text_item.placement == 'back' && self.backCanvas) {
-          self.backCanvas.remove(self.product_custom_objects[custom_text_index][custom_text_item_index])
-        }
-      }
-
-      self.product_custom_objects[custom_text_index][custom_text_item_index] = fabric_text
+      self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
 
       if(custom_text_item.placement == 'front') {
         self.frontCanvas.add(fabric_text)
