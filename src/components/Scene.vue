@@ -17,14 +17,18 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
+import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
+import {Object as FabricObject} from "fabric/fabric-impl";
+import { SetSelectedProductCustomTexts } from "@/mixins/SelectedProductMixin";
 
 @Component<Scene>({
   async mounted() {
+    let self: Record<any, any> = this;
+    self.$eventBus.$on("customTextUpdated", self.addTextsNew)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -38,7 +42,6 @@ import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
         fontFamily: 'Ubuntu'
       })
     }
-    const self = this
     let frontPromise = this.loadScene(this.front, 'front')
     frontPromise.then(() => {
       if (this.back) {
@@ -118,9 +121,14 @@ import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
         let target = transform.target;
         let canvas = target.canvas;
         if ('textIndex' in target) {
-          let before_update = self.updateTextObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomTextObject)), { 'action': 'customTexts' })
-          self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
-          self.$store.dispatch('updateCustomTextAttribute', { index: target.textIndex, on_all: true, attribute: 'text', value: '' })
+          let before_update = self.updateTextObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomTextObject)), {'action': 'customTexts'})
+          self.$store.commit('UPDATE_UNDO', {data: before_update, action: 'customTexts'})
+          self.$store.dispatch('updateCustomTextAttribute', {
+            index: target.textIndex,
+            on_all: true,
+            attribute: 'text',
+            value: ''
+          })
         } else {
           let logo = setLogoSettings(target.logoIndex);
           logo.logoIndex = target.logoIndex;
@@ -130,7 +138,7 @@ import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
           }
 
           let before_update = self.updateLogoObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomLogoObject)))
-          self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
+          self.$store.commit('UPDATE_UNDO', {data: before_update, action: 'customLogos'})
 
           self.$store.commit('customLogos', payload)
           self.$store.commit('SET_LOGO_COLORS', []);
@@ -143,7 +151,7 @@ import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
   }
 })
 
-export default class Scene extends Vue {
+export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
   @Prop({ required: true }) readonly front!: Record<string, unknown>;
   @Prop({ required: false }) readonly back!: Record<string, unknown>;
   @Prop({ required: false }) readonly backTextureUrl!: string;
@@ -209,6 +217,8 @@ export default class Scene extends Vue {
   public aligningLineColor = 'rgb(110, 243, 204)'
   public viewportTransform: any
   public drawLines = false
+  public product_custom_texts: Record<any, any>[] = []
+  public product_custom_objects: Record<any, any>[] = []
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -870,7 +880,7 @@ export default class Scene extends Vue {
         promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension))
       }
 
-      const self = this
+      const self: Record<any, any> = this
 
       Promise.all(promises).then((values) => {
         if (this.mainPreview) {
@@ -1939,6 +1949,85 @@ export default class Scene extends Vue {
           visible: false
         })
       })
+    }
+  }
+
+  public async addTextsNew(custom_text_info: Record<any, any>) {
+    const self = this
+    if(self.product_custom_texts.length  == 0) {
+      await self.setSelectedProductCustomTexts()
+    }
+    const custom_text_index = custom_text_info.index;
+    const custom_text_value = custom_text_info.value;
+    self.product_custom_texts[custom_text_index] = custom_text_value;
+    let custom_text = self.product_custom_texts[custom_text_info.index];
+    let render_front_canvas = false;
+    let render_back_canvas = false;
+    custom_text.items.forEach((custom_text_item:Record<any, any>, custom_text_item_index: number) => {
+      // let custom_text_value = custom_text.selected ? custom_text.value : '';
+      let fabric_text = new fabric.Text(custom_text.value, {
+        left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
+        top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
+        angle: custom_text_item.rotation as number,
+        centeredScaling: true,
+        selectable: this.canvasSelection,
+        hasControls: true,
+        hasBorders: false,
+        evented: true,
+        globalCompositeOperation: 'source-atop',
+        fontFamily: custom_text_item.font_family,
+        fill: custom_text_item.color,
+        stroke: custom_text.outLineColor,
+        strokeWidth: parseInt(custom_text_item.outline_width),
+        paintFirst: 'stroke',
+        lockScalingFlip: true,
+        padding: 15,
+        cornerSize: 30,
+        fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
+        _fontSizeMult: .835,
+        placement: custom_text_item.placement,
+        visible: custom_text_item.selected,
+        custom_text_index: custom_text_item_index
+      })
+      fabric_text.setControlsVisibility({
+        tl: false,
+        bl: false,
+        tr: true,
+        br: true,
+        ml: false,
+        mb: false,
+        mr: false,
+        mt: false,
+        mtr: false
+      })
+      if(!self.product_custom_objects[custom_text_index]) {
+        self.product_custom_objects[custom_text_index] = [];
+        self.product_custom_objects[custom_text_index][custom_text_item_index] = null;
+      }
+
+      if(self.product_custom_objects[custom_text_index] && self.product_custom_objects[custom_text_index][custom_text_item_index]) {
+        if(custom_text_item.placement == "front") {
+          self.frontCanvas.remove(self.product_custom_objects[custom_text_index][custom_text_item_index])
+        } else if(custom_text_item.placement == 'back' && self.backCanvas) {
+          self.backCanvas.remove(self.product_custom_objects[custom_text_index][custom_text_item_index])
+        }
+      }
+
+      self.product_custom_objects[custom_text_index][custom_text_item_index] = fabric_text
+
+      if(custom_text_item.placement == 'front') {
+        self.frontCanvas.add(fabric_text)
+        render_front_canvas = true
+      } else if(custom_text_item.placement == 'back' && self.backCanvas) {
+        self.backCanvas.add(fabric_text)
+        render_back_canvas = true
+      }
+    })
+    if(render_front_canvas) {
+      self.frontCanvas.renderAll()
+    }
+    if(render_back_canvas) {
+      self.backCanvas.renderAll()
     }
   }
 

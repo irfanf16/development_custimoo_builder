@@ -111,7 +111,8 @@ const ProductAttributes:Module<any, any> = {
     revertRosterBool:false,
     hideSaveLockerButton: false,
     editing_roster_player_index: 0,
-    selectedCategories:[]
+    selectedCategories:[],
+    new_custom_texts: {}
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -889,9 +890,44 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_EDITING_ROSTER_PLAYER_INDEX(state:Record<any, any>, payload){
       state.editing_roster_player_index = payload;
+    },
+    SET_NEW_CUSTOM_TEXTS(state:Record<any, any>, payload) {
+      if("index" in payload) {
+        /*
+        * the index type should be one of "product", "product_text". if index_type = "product" then it means we want to update all custom texts of specific product.
+        * if index_type = "product_text" then it means we want to update product specific custom_text of product
+        * */
+        const index_type: string = payload.index_type ? payload.index_type : 'product_text';
+        /*
+        * By default we consider active product id to change custom text. If we want to update custom text if user wants
+        * to update custom text other than selected product then we get that product id
+        * */
+        const product_id: number = payload.product_id ? payload.product_id : state.selectedPrdId;
+        //if index_type = "product" then we will update all custom texts of product
+        if(index_type == "product") {
+          Vue.set(state.new_custom_texts, product_id, payload.value)
+        }
+        else {
+          Vue.set(state.new_custom_texts[product_id], payload.index, payload.value)
+        }
+      } else {
+        state.new_custom_texts = payload;
+      }
     }
   },
   getters: {
+    getSelectedProductCustomTexts: state =>  {
+      return state.new_custom_texts
+    },
+    //this is parameterized getter that's why in vue devtool it will always return function. Also it will not be cached instead it will always executed when we use getter
+     getNewCustomTexts: state => (product_id = "all") =>  {
+       console.log("inside vuuex", product_id)
+      if(product_id == "all") {
+        return state.new_custom_texts;
+      } else {
+        return state.new_custom_texts[product_id];
+      }
+    },
     getSearchLoader: state => {
       return state.searchLoader
     },

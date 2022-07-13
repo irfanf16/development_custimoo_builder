@@ -730,9 +730,60 @@ const getPermissions = async () => {
   }
 }
 
+const getNewCustomTexts = async (product_ids_string: string, custom_text_types_string: string, count= 1) => {
+  const custom_texts: Record<any, any> = {};
+  const product_ids: string[] = product_ids_string.split(",");
+  product_ids.forEach((product_id: string) => {
+    custom_texts[product_id] = []
+    let x_axis = 200
+    let y_axis = 100
+    const custom_text_types = custom_text_types_string.split(",")
+    for(let i=0; i<count; i++) {
+      const custom_text_type_count: string[] = custom_text_types[i].split(":");
+      const custom_text_type = custom_text_type_count[0]
+      const custom_text_type_child_count = custom_text_type_count.length == 2 ? custom_text_type_count[1] : 1;
+      const custom_text_obj: Record<any, any> = {
+        product_id: product_id,
+        type: custom_text_type,   //name, number, team_name
+        label: `${custom_text_type}_${product_id}`,
+        value: "",
+        following_products: false,
+        following_product_ids: [],
+        active_item_index: 0,
+        items: []
+      }
+      for(let i=0; i < custom_text_type_child_count; i++) {
+        custom_text_obj.items.push({
+          label: `item_${i}`,
+          placement:[0,1].includes(i) ? 'back' : 'front',
+          width: 50,
+          height: 50,
+          x_axis: x_axis,
+          y_axis: y_axis,
+          rotation: 0,
+          outline_enabled: true,
+          font_family: "FaktSlabPro-Bold",
+          color: "#F4F5F0",
+          color_pantone: "WHITE",
+          outline_color:"#292A2D",
+          outline_color_pantone: "BLACK",
+          outline_width: 0,
+          arc_text_allowed: false,
+          is_locked: false,
+          selected: true
+        })
+        x_axis += 60;
+        y_axis += 60
+      }
+      custom_texts[product_id].push(custom_text_obj)
+    }
+  })
+  return custom_texts;
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones
+  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getNewCustomTexts
 };

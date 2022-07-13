@@ -3,7 +3,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import {findIndex} from 'lodash';
 import {
   fontsColorsManipulation,
-  fontsList,
+  fontsList, getNewCustomTexts,
   getRandom,
   initCustomLogos,
   initCustomTexts,
@@ -191,6 +191,7 @@ export class handleMainProducts extends Vue {
     }
     await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: append_products});
     await this.$store.dispatch('setSelectedIndex', {selectedIndex:0});
+    self.setCustomTexts();
     await this.$store.dispatch('setStockCount',stock_count);
     let selected_product = this.$store.getters.getSelectedProduct;
 
@@ -264,5 +265,15 @@ export class handleMainProducts extends Vue {
     }
     await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
     await this.$store.dispatch('setProductType', {prd_type: factory_product.product_type, value: true});
+  }
+
+  public async setCustomTexts() {
+    console.log("setCustomTexts from locker prosucts")
+    let self: Record<any, any> = this;
+    let custom_texts = await getNewCustomTexts(`${self.$store.getters.getSelectedProductId},17,18`, "name:3,number:2", 2)
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", JSON.parse(JSON.stringify(custom_texts)))
+    console.log("emitting event")
+    self.$eventBus.$emit("setSelectedProductCustomTexts");
+
   }
 }

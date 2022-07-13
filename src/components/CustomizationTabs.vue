@@ -126,6 +126,19 @@
               <EditRosterAreaTab @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="openAddToLocker" :productSizes="productSizes" ref="edit-roster-area-tab"/>
             </div>
           </b-tab>
+          <b-tab>
+            <template #title>
+              <a>
+              <span class="icon-holder">
+                <BIconFileTextFill />
+              </span>
+                Test
+              </a>
+            </template>
+            <div class="team-roaster-area p-4">
+              <NewCustomizationText />
+            </div>
+          </b-tab>
           <!--        </vuescroll>-->
         </div>
       </b-tabs>
@@ -139,6 +152,7 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
 import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
+import NewCustomizationText from '@/components/NewCustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
@@ -154,6 +168,7 @@ import {sortTextsArray} from "@/helpers/Helpers";
     ColorAccordion,
     LogoPlacementTabs,
     CustomizationText,
+    NewCustomizationText,
     CollarStyle,
     EditRosterAreaTab,
     ColorTabs,

@@ -71,7 +71,7 @@
             <b-card-body style="padding: 0 !important;">
               <b-nav class="d-flex flex-wrap align-items-center">
                 <b-nav-item class="mr-2" v-for="(colorType, index) in fontsColors" :key="index"
-                  @click="selectType(index)">{{ colorType.file_type }}</b-nav-item>
+                  @click="selectType(index)">{{ colorType.file_type }}hey</b-nav-item>
               </b-nav>
               <!--            <div class="color-holder">-->
               <!--              <div class="">-->
