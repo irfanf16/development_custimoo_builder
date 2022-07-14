@@ -222,6 +222,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
   public product_custom_texts: Record<any, any>[] = []
   public product_custom_objects: Record<any, any>[] = []
   public product_fonts: Record<any, any>[] = []
+  public product_custom_text_objects: Record<any, any>[] = []
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -883,6 +884,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
   }
 
   public loadScene(ImageData: Record<any, any>, side: string) {
+    let self: Record<any , any> = this;
     return new Promise((resolve) => {
       this.mounted = false
       let element = this.$refs.front as HTMLCanvasElement
@@ -987,10 +989,15 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
             }, 500)
           }
           this.mounted = true
+          self.setSelectedProductCustomTexts()
         }
         resolve('done')
       })
       canvas.on('object:modified', (e: Record<any, any>) => {
+        const fabric_object = e.target;
+        if(fabric_object.get("type") == "text") {
+          self.handleCustomTextModifiedEvent(e.target)
+        }
         let objects = canvas.getObjects('line');
         for (let i in objects) {
           canvas.remove(objects[i]);
@@ -2088,6 +2095,17 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
     if(render_back_canvas) {
       self.backCanvas.renderAll()
     }
+  }
+
+  public handleCustomTextModifiedEvent(fabric_object: Record<any, any>) {
+    let self: Record<any, any> = this;
+    const custom_text_index =  fabric_object.get("custom_text_index");
+    const custom_text_item_index =  fabric_object.get("custom_text_item_index");
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = fabric_object.get("left");
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].y_axis = fabric_object.get("top");
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].angle = fabric_object.get("angle");
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$eventBus.$emit("customTextStoreUpdated");
   }
 
   public setShowSmall(side: string): void {

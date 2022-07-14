@@ -268,12 +268,9 @@ export class handleMainProducts extends Vue {
   }
 
   public async setCustomTexts() {
-    console.log("setCustomTexts from locker prosucts")
     let self: Record<any, any> = this;
     let custom_texts = await getNewCustomTexts(`${self.$store.getters.getSelectedProductId},17,18`, "name:3,number:2", 2)
     self.$store.commit("SET_NEW_CUSTOM_TEXTS", JSON.parse(JSON.stringify(custom_texts)))
-    console.log("emitting event")
     self.$eventBus.$emit("setSelectedProductCustomTexts");
-
   }
 }

@@ -72,10 +72,10 @@ export class SetSelectedProductCustomTexts extends Vue {
       if(selected_product_custom_texts) {
         self.product_custom_texts = JSON.parse(JSON.stringify(selected_product_custom_texts));
       } else {
-        console.log("id not found 123")
+        console.error(`product (${selected_product.id}) not found while setting selected product custom texts`)
       }
     } else {
-      console.log("id not found")
+      console.error(`selected product not found while setting selected product custom texts`)
     }
   }
 }

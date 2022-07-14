@@ -762,12 +762,12 @@ const getNewCustomTexts = async (product_ids_string: string, custom_text_types_s
           y_axis: y_axis,
           rotation: 0,
           outline_enabled: true,
+          outline_width: 2,
           font_family: "FaktSlabPro-Bold",
           color: "#F4F5F0",
           color_pantone: "WHITE",
           outline_color:"#292A2D",
           outline_color_pantone: "BLACK",
-          outline_width: 0,
           arc_text_allowed: false,
           is_locked: false,
           selected: true
