@@ -48,13 +48,14 @@ export class ProductColors extends Vue {
 export class ProductFonts extends Vue {
   public async productFonts() {
     const self: Record<any, any> = this;
-    const product_name_fonts = self.getSelectedProduct.namefonts
+    const product_name_fonts = self.$store.getters.getSelectedProduct.namefonts
     product_name_fonts.forEach((product_name_font: Record<any, any>) => {
       const name_font_data = JSON.parse(product_name_font.json_data)
       name_font_data.forEach((name_font_datum: Record<any, any>) => {
         self.product_fonts.push({
           label: name_font_datum.name.replace('-', ' ').toUpperCase(),
-          value: name_font_datum.name
+          value: name_font_datum.name,
+          url: process.env.VUE_APP_STORAGE_URL + name_font_datum.path
         })
       })
     })

@@ -21,10 +21,10 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-// import opentype from 'opentype.js'
+import opentype from 'opentype.js'
 import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
 import {Object as FabricObject} from "fabric/fabric-impl";
-import { SetSelectedProductCustomTexts } from "@/mixins/SelectedProductMixin";
+import { ProductFonts, SetSelectedProductCustomTexts } from '@/mixins/SelectedProductMixin'
 
 @Component<Scene>({
   async mounted() {
@@ -43,6 +43,7 @@ import { SetSelectedProductCustomTexts } from "@/mixins/SelectedProductMixin";
         fontFamily: 'Ubuntu'
       })
     }
+    await self.productFonts()
     let frontPromise = this.loadScene(this.front, 'front')
     frontPromise.then(() => {
       if (this.back) {
@@ -152,7 +153,7 @@ import { SetSelectedProductCustomTexts } from "@/mixins/SelectedProductMixin";
   }
 })
 
-export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
+export default class Scene extends Mixins(SetSelectedProductCustomTexts, ProductFonts) {
   @Prop({ required: true }) readonly front!: Record<string, unknown>;
   @Prop({ required: false }) readonly back!: Record<string, unknown>;
   @Prop({ required: false }) readonly backTextureUrl!: string;
@@ -220,6 +221,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
   public drawLines = false
   public product_custom_texts: Record<any, any>[] = []
   public product_custom_objects: Record<any, any>[] = []
+  public product_fonts: Record<any, any>[] = []
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -432,7 +434,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                 }
               })
             }
-            
+
             // if(this.mainPreview) {
             //   opentype.load('https://custimoo.s3.us-east-1.amazonaws.com/files/3/product/font/DKsportswear_fonts/BebasNeue-Regular.woff', (err: Record<any, any>, font: Record<any, any>) => {
             //     if (err) {
@@ -1990,65 +1992,95 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     let custom_text = self.product_custom_texts[custom_text_info.index];
     let render_front_canvas = false;
     let render_back_canvas = false;
+    // let fontOptions = custom_text_item.font_family
     custom_text.items.forEach((custom_text_item:Record<any, any>, custom_text_item_index: number) => {
-      // let custom_text_value = custom_text.selected ? custom_text.value : '';
-      let fabric_text = new fabric.Text(custom_text.value, {
-        left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
-        top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
-        angle: custom_text_item.rotation as number,
-        centeredScaling: true,
-        selectable: this.canvasSelection,
-        hasControls: true,
-        hasBorders: false,
-        evented: true,
-        globalCompositeOperation: 'source-atop',
-        fontFamily: custom_text_item.font_family,
-        fill: custom_text_item.color,
-        stroke: custom_text.outLineColor,
-        strokeWidth: parseInt(custom_text_item.outline_width),
-        paintFirst: 'stroke',
-        lockScalingFlip: true,
-        padding: 15,
-        cornerSize: 30,
-        fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
-        _fontSizeMult: .835,
-        placement: custom_text_item.placement,
-        visible: custom_text_item.selected,
-        custom_text_index: custom_text_item_index
-      })
-      fabric_text.setControlsVisibility({
-        tl: false,
-        bl: false,
-        tr: true,
-        br: true,
-        ml: false,
-        mb: false,
-        mr: false,
-        mt: false,
-        mtr: false
-      })
-      if(!self.product_custom_objects[custom_text_index]) {
-        self.product_custom_objects[custom_text_index] = [];
-        self.product_custom_objects[custom_text_index][custom_text_item_index] = null;
+      let font = this.product_fonts.filter((font: Record<any, any>) => { return font.value == custom_text_item.font_family }) as Record<any, any>
+      if(font.length == 0) {
+        font = this.product_fonts[0] as Record<any, any>
       }
 
-      if(self.product_custom_objects[custom_text_index] && self.product_custom_objects[custom_text_index][custom_text_item_index]) {
-        if(custom_text_item.placement == "front") {
-          self.frontCanvas.remove(self.product_custom_objects[custom_text_index][custom_text_item_index])
-        } else if(custom_text_item.placement == 'back' && self.backCanvas) {
-          self.backCanvas.remove(self.product_custom_objects[custom_text_index][custom_text_item_index])
+      opentype.load(font.url, (err: Record<any, any>, font: Record<any, any>) => {
+        if (err) {
+          console.log('Font could not be loaded: ' + err);
+        } else {
+          // Now let's display it on a canvas with id "canvas"
+          // const ctx = document.getElementById('canvas').getContext('2d');
+
+          // Construct a Path object containing the letter shapes of the given text.
+          // The other parameters are x, y and fontSize.
+          // Note that y is the position of the baseline.
+
+          const path = font.getPath(custom_text.value);
+
+          let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'
+          textSvg += path.toSVG()
+          textSvg += '\n</svg>'
+
+          fabric.loadSVGFromString(textSvg, (objects: any) => {
+            const fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group
+            fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
+            fabric_text.set({
+              left: this.canvasWidth / this.mainCanvasWidth * custom_text_item.x_axis,
+              top: this.canvasHeight / this.mainCanvasHeight * custom_text_item.y_axis,
+              height: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
+              angle: custom_text_item.rotation as number,
+              fill: custom_text_item.color,
+              stroke: 'red', //custom_text.outLineColor,
+              strokeWidth: 2, //parseInt(custom_text_item.outline_width)
+              centeredScaling: true,
+              selectable: this.canvasSelection,
+              hasControls: true, //custom_text_item.haveControls,
+              hasBorders: false,
+              evented: true,
+              globalCompositeOperation: 'source-atop',
+              lockScalingFlip: true,
+              padding: 15,
+              cornerSize: 30
+            })
+
+            fabric_text.setControlsVisibility({
+              tl: false,
+              bl: false,
+              tr: true,
+              br: true,
+              ml: false,
+              mb: false,
+              mr: false,
+              mt: false,
+              mtr: false
+            })
+            if(!self.product_custom_objects[custom_text_index]) {
+              self.product_custom_objects[custom_text_index] = [];
+              self.product_custom_objects[custom_text_index][custom_text_item_index] = null;
+            }
+
+            if(self.product_custom_objects[custom_text_index] && self.product_custom_objects[custom_text_index][custom_text_item_index]) {
+              if(custom_text_item.placement == "front") {
+                self.frontCanvas.remove(self.product_custom_objects[custom_text_index][custom_text_item_index])
+              } else if(custom_text_item.placement == 'back' && self.backCanvas) {
+                self.backCanvas.remove(self.product_custom_objects[custom_text_index][custom_text_item_index])
+              }
+            }
+
+            self.product_custom_objects[custom_text_index][custom_text_item_index] = fabric_text
+
+            if(custom_text_item.placement == 'front') {
+              self.frontCanvas.add(fabric_text)
+              render_front_canvas = true
+            } else if(custom_text_item.placement == 'back' && self.backCanvas) {
+              self.backCanvas.add(fabric_text)
+              render_back_canvas = true
+            }
+          })
+          if(render_front_canvas) {
+            self.frontCanvas.renderAll()
+          }
+          if(render_back_canvas) {
+            self.backCanvas.renderAll()
+          }
         }
-      }
-
-      self.product_custom_objects[custom_text_index][custom_text_item_index] = fabric_text
-
-      if(custom_text_item.placement == 'front') {
-        self.frontCanvas.add(fabric_text)
-        render_front_canvas = true
-      } else if(custom_text_item.placement == 'back' && self.backCanvas) {
-        self.backCanvas.add(fabric_text)
-        render_back_canvas = true
-      }
+      });
     })
     if(render_front_canvas) {
       self.frontCanvas.renderAll()
