@@ -3,7 +3,7 @@
     <template v-if="selectedProduct.productstyles[selected_style_index]">
       <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[selected_style_index].productdesigns" :key="design.id">
         <a @click="changeDesign(index); showPreview()">
-          <Scene canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"
+          <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[selected_style_index].front? storageUrl+selectedProduct.productstyles[selected_style_index].front.file_thumbnail_url : ''}"
                  :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
                  :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"

@@ -458,7 +458,7 @@ const getActiveProductData = () => {
       const post_data: Record<any, any> = {
         back_image: getCanvasImage.ref_back?.toDataURL("image/png"),
         custom_logos: Store.getters.getCustomLogos(),
-        measurement_ratio: selected_design.measurement_ratio,
+        measurement_ratio: selected_product.measurement_ratio,
         custom_logo_svgs: [],
         custom_texts: Store.getters.getCustomTexts(),
         custom_text_svgs: [],
