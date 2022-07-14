@@ -140,6 +140,9 @@ import { ProductColors, ProductFonts, SetSelectedProductCustomTexts } from "@/mi
   async mounted() {
     let self: Record<any, any> = this;
     self.$eventBus.$on("setSelectedProductCustomTexts", await self.setSelectedProductCustomTexts)
+    self.$eventBus.$on("customTextStoreUpdated", async () => {
+      await self.setSelectedProductCustomTexts()
+    })
     await self.productFonts()
     self.product_colors = await self.productColors()
   },

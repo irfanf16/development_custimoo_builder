@@ -432,7 +432,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                 }
               })
             }
-            
+
             // if(this.mainPreview) {
             //   opentype.load('https://custimoo.s3.us-east-1.amazonaws.com/files/3/product/font/DKsportswear_fonts/BebasNeue-Regular.woff', (err: Record<any, any>, font: Record<any, any>) => {
             //     if (err) {
@@ -881,6 +881,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
   }
 
   public loadScene(ImageData: Record<any, any>, side: string) {
+    let self: Record<any , any> = this;
     return new Promise((resolve) => {
       this.mounted = false
       let element = this.$refs.front as HTMLCanvasElement
@@ -985,10 +986,15 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
             }, 500)
           }
           this.mounted = true
+          self.setSelectedProductCustomTexts()
         }
         resolve('done')
       })
       canvas.on('object:modified', (e: Record<any, any>) => {
+        const fabric_object = e.target;
+        if(fabric_object.get("type") == "text") {
+          self.handleCustomTextModifiedEvent(e.target)
+        }
         let objects = canvas.getObjects('line');
         for (let i in objects) {
           canvas.remove(objects[i]);
@@ -1981,9 +1987,9 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
 
   public async addTextsNew(custom_text_info: Record<any, any>) {
     const self = this
-    if(self.product_custom_texts.length  == 0) {
-      await self.setSelectedProductCustomTexts()
-    }
+    // if(self.product_custom_texts.length  == 0) {
+    //   await self.setSelectedProductCustomTexts()
+    // }
     const custom_text_index = custom_text_info.custom_text_index;
     const custom_text_value = custom_text_info.value;
     self.product_custom_texts[custom_text_index] = custom_text_value;
@@ -2027,7 +2033,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
         _fontSizeMult: .835,
         placement: custom_text_item.placement,
         visible: custom_text_item.selected,
-        custom_text_index: customTextItemIndex
+        custom_text_index: custom_text_index,
+        custom_text_item_index: customTextItemIndex,
       })
       fabric_text.setControlsVisibility({
         tl: false,
@@ -2061,6 +2068,17 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     if(render_back_canvas) {
       self.backCanvas.renderAll()
     }
+  }
+
+  public handleCustomTextModifiedEvent(fabric_object: Record<any, any>) {
+    let self: Record<any, any> = this;
+    const custom_text_index =  fabric_object.get("custom_text_index");
+    const custom_text_item_index =  fabric_object.get("custom_text_item_index");
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = fabric_object.get("left");
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].y_axis = fabric_object.get("top");
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].angle = fabric_object.get("angle");
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$eventBus.$emit("customTextStoreUpdated");
   }
 
   public setShowSmall(side: string): void {
