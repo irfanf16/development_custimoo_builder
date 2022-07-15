@@ -180,7 +180,6 @@ export default {
     }else{
       var storageInterval = setInterval(()=>{
         let jwtToken = localStorage.getItem('jwtToken');
-        console.log('jwttoken',jwtToken)
         if(jwtToken && jwtToken !=''){
           self.authenticateUser(jwtToken)
           clearInterval(storageInterval);
