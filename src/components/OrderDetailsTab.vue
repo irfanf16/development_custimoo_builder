@@ -39,7 +39,7 @@
 
           <template v-if="isCustomerAuthenticated">
             <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-              <button class="btn btn-secondary fw-bold w-100" @click="generateSVG" >Generate SVG</button>
+<!--              <button class="btn btn-secondary fw-bold w-100" @click="generateSVG" >Generate SVG</button>-->
               <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
                 <template v-if="getProductEditInfoObject.editing">
                   <template v-if="getProductEditInfoObject.type == 'cart_product'">
@@ -279,20 +279,20 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       }
     }
   }
-  public async generateSVG(){
-    let cart_product:Record<any,any> = await getActiveProductData();
-    if(cart_product){
-      if(Object.prototype.hasOwnProperty.call(cart_product,'production_url') && cart_product.production_url){
-        let content:string = await this.fetchUrlContent(cart_product?.production_url);
-        let production_content = await this.parseSvgString(content,cart_product as Record<any,any>);
-        cart_product.svg_content = production_content;
-      }
-    }else{
-      return false;
-    }
-    console.log(cart_product.roster_detail);
-    console.log(cart_product.svg_content);
-  }
+  // public async generateSVG(){
+  //   let cart_product:Record<any,any> = await getActiveProductData();
+  //   if(cart_product){
+  //     if(Object.prototype.hasOwnProperty.call(cart_product,'production_url') && cart_product.production_url){
+  //       let content:string = await this.fetchUrlContent(cart_product?.production_url);
+  //       let production_content = await this.parseSvgString(content,cart_product as Record<any,any>);
+  //       cart_product.svg_content = production_content;
+  //     }
+  //   }else{
+  //     return false;
+  //   }
+  //   console.log(cart_product.roster_detail);
+  //   console.log(cart_product.svg_content);
+  // }
   public async addToCart() {
     let self: Record<any, any> = this;
     try {
