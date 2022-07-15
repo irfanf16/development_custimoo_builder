@@ -220,9 +220,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
   public viewportTransform: any
   public drawLines = false
   public product_custom_texts: Record<any, any>[] = []
-  public product_custom_objects: Record<any, any>[] = []
-  public product_fonts: Record<any, any>[] = []
   public product_custom_text_objects: Record<any, any>[] = []
+  public product_fonts: Record<any, any>[] = []
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -1989,26 +1988,41 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
   }
 
   public async addTextsNew(custom_text_info: Record<any, any>) {
-    const self = this
-    if(self.product_custom_texts.length  == 0) {
-      await self.setSelectedProductCustomTexts()
-    }
-    const custom_text_index = custom_text_info.index;
+    const self: Record<any, any> = this
+    const custom_text_index = custom_text_info.custom_text_index;
     const custom_text_value = custom_text_info.value;
     self.product_custom_texts[custom_text_index] = custom_text_value;
-    let custom_text = self.product_custom_texts[custom_text_info.index];
+    let custom_text = self.product_custom_texts[custom_text_index];
     let render_front_canvas = false;
     let render_back_canvas = false;
+    /*
+   * delete existing texts first and re render them
+   * */
+    if(self.product_custom_text_objects[custom_text_index]) {
+      self.product_custom_text_objects[custom_text_index].forEach((product_custom_text_object: any) => {
+        const placement = product_custom_text_object.get("placement");
+        if(placement == "front") {
+          self.frontCanvas.remove(product_custom_text_object)
+          console.log("removed item from front")
+        }
+        else if(placement == "back" && self.backCanvas) {
+          self.backCanvas.remove(product_custom_text_object)
+          console.log("removed item from back")
+        }
+      })
+    }
     // let fontOptions = custom_text_item.font_family
-    custom_text.items.forEach((custom_text_item:Record<any, any>, custom_text_item_index: number) => {
+    custom_text.items.forEach((custom_text_item:Record<any, any>, customTextItemIndex: number) => {
       let font = this.product_fonts.filter((font: Record<any, any>) => { return font.value == custom_text_item.font_family }) as Record<any, any>
       if(font.length == 0) {
         font = this.product_fonts[0] as Record<any, any>
+      } else {
+        font = font[0]
       }
 
       opentype.load(font.url, (err: Record<any, any>, font: Record<any, any>) => {
         if (err) {
-          console.log('Font could not be loaded: ' + err);
+          console.error('Font could not be loaded: ' + err);
         } else {
           // Now let's display it on a canvas with id "canvas"
           // const ctx = document.getElementById('canvas').getContext('2d');
@@ -2028,22 +2042,27 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
             const fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group
             fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
             fabric_text.set({
-              left: this.canvasWidth / this.mainCanvasWidth * custom_text_item.x_axis,
-              top: this.canvasHeight / this.mainCanvasHeight * custom_text_item.y_axis,
-              height: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
+              left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
+              top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
               angle: custom_text_item.rotation as number,
-              fill: custom_text_item.color,
-              stroke: 'red', //custom_text.outLineColor,
-              strokeWidth: 2, //parseInt(custom_text_item.outline_width)
               centeredScaling: true,
               selectable: this.canvasSelection,
-              hasControls: true, //custom_text_item.haveControls,
+              hasControls: true,
               hasBorders: false,
               evented: true,
               globalCompositeOperation: 'source-atop',
+              fill: custom_text_item.color,
+              stroke: custom_text_item.outline_color,
+              strokeWidth: parseInt(custom_text_item.outline_width),
+              paintFirst: 'stroke',
               lockScalingFlip: true,
               padding: 15,
-              cornerSize: 30
+              cornerSize: 30,
+              _fontSizeMult: .835,
+              placement: custom_text_item.placement,
+              visible: custom_text_item.selected,
+              custom_text_index: custom_text_index,
+              custom_text_item_index: customTextItemIndex,
             })
 
             fabric_text.setControlsVisibility({
@@ -2057,20 +2076,11 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
               mt: false,
               mtr: false
             })
-            if(!self.product_custom_objects[custom_text_index]) {
-              self.product_custom_objects[custom_text_index] = [];
-              self.product_custom_objects[custom_text_index][custom_text_item_index] = null;
+            if(!self.product_custom_text_objects[custom_text_index]) {
+              self.product_custom_text_objects[custom_text_index] = [];
+              self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
             }
-
-            if(self.product_custom_objects[custom_text_index] && self.product_custom_objects[custom_text_index][custom_text_item_index]) {
-              if(custom_text_item.placement == "front") {
-                self.frontCanvas.remove(self.product_custom_objects[custom_text_index][custom_text_item_index])
-              } else if(custom_text_item.placement == 'back' && self.backCanvas) {
-                self.backCanvas.remove(self.product_custom_objects[custom_text_index][custom_text_item_index])
-              }
-            }
-
-            self.product_custom_objects[custom_text_index][custom_text_item_index] = fabric_text
+            self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
 
             if(custom_text_item.placement == 'front') {
               self.frontCanvas.add(fabric_text)
@@ -2080,12 +2090,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
               render_back_canvas = true
             }
           })
-          if(render_front_canvas) {
-            self.frontCanvas.renderAll()
-          }
-          if(render_back_canvas) {
-            self.backCanvas.renderAll()
-          }
         }
       });
     })
