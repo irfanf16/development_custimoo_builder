@@ -177,15 +177,19 @@ export default class NewCustomizationText extends Mixins(ProductColors, ProductF
   handleCustomTextInputChange(updatedVal: string, custom_text_index: number) {
     let self:Record<any, any> = this;
     self.product_custom_texts[custom_text_index].value = updatedVal;
-    self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextUpdated", { custom_text_index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$eventBus.$emit("customTextUpdated", {
+      emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
+    });
   }
 
   handleCustomTextCheckboxChange(updatedVal: string, custom_text_index: number) {
     let self:Record<any, any> = this;
     console.log("custom_text_index", custom_text_index)
-    self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextUpdated", { custom_text_index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$eventBus.$emit("customTextUpdated", {
+      emitter: "checkbox", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
+    });
   }
 
   customTextColorUpdated( custom_text_index: number, custom_text_item_index: number, color: Record<any, any>, type: string) {
@@ -198,22 +202,28 @@ export default class NewCustomizationText extends Mixins(ProductColors, ProductF
       self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_color = color.value;
       self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_color_pantone = color.name;
     }
-    self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextUpdated", {custom_text_index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$eventBus.$emit("customTextUpdated", {
+      emitter: type, custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index, value: self.product_custom_texts[custom_text_index]
+    });
   }
 
   handleCustomTextOutlineUpdate( outline_value: number, custom_text_index: number, custom_text_item_index: number) {
     let self:Record<any, any> = this;
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_width = outline_value;
-    self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextUpdated", { custom_text_index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$eventBus.$emit("customTextUpdated", {
+      emitter: "outline_width", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index, value: self.product_custom_texts[custom_text_index]
+    });
   }
 
   handleCustomTextPlacementUpdate( placement: number, custom_text_index: number, custom_text_item_index: number) {
     let self:Record<any, any> = this;
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].placement = placement;
-    self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextUpdated", { custom_text_index:custom_text_index, value: self.product_custom_texts[custom_text_index]});
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$eventBus.$emit("customTextUpdated", {
+      emitter: "placement", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index, value: self.product_custom_texts[custom_text_index]
+    });
   }
 }
 </script>

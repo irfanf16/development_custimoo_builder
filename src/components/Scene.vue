@@ -1987,10 +1987,31 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
     }
   }
 
+  public async getCustomTextObject(custom_text_index: number, custom_text_item_index: number) {
+    console.log("")
+
+  }
+
+  public async deleteExistingTextsFromCanvas(custom_text_index:  number) {
+    const self: Record<any, any> = this;
+    self.product_custom_text_objects[custom_text_index].forEach((product_custom_text_object: any) => {
+      const placement = product_custom_text_object.get("placement");
+      if(placement == "front") {
+        self.frontCanvas.remove(product_custom_text_object)
+      }
+      else if(placement == "back" && self.backCanvas) {
+        self.backCanvas.remove(product_custom_text_object)
+      }
+    })
+    console.log("inside deleteExistingTextsFromCanvas")
+  }
+
   public async addTextsNew(custom_text_info: Record<any, any>) {
     const self: Record<any, any> = this
     const custom_text_index = custom_text_info.custom_text_index;
+    const custom_text_item_index = custom_text_info.custom_text_item_index;
     const custom_text_value = custom_text_info.value;
+    const emitter = custom_text_info.emitter
     self.product_custom_texts[custom_text_index] = custom_text_value;
     let custom_text = self.product_custom_texts[custom_text_index];
     let render_front_canvas = false;
@@ -1999,18 +2020,9 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, Product
    * delete existing texts first and re render them
    * */
     if(self.product_custom_text_objects[custom_text_index]) {
-      self.product_custom_text_objects[custom_text_index].forEach((product_custom_text_object: any) => {
-        const placement = product_custom_text_object.get("placement");
-        if(placement == "front") {
-          self.frontCanvas.remove(product_custom_text_object)
-          console.log("removed item from front")
-        }
-        else if(placement == "back" && self.backCanvas) {
-          self.backCanvas.remove(product_custom_text_object)
-          console.log("removed item from back")
-        }
-      })
+     await self.deleteExistingTextsFromCanvas(custom_text_index)
     }
+    console.log("after deleteExistingTextsFromCanvas")
     // let fontOptions = custom_text_item.font_family
     custom_text.items.forEach((custom_text_item:Record<any, any>, customTextItemIndex: number) => {
       let font = this.product_fonts.filter((font: Record<any, any>) => { return font.value == custom_text_item.font_family }) as Record<any, any>
