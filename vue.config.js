@@ -17,8 +17,9 @@ module.exports = {
     config.module
       .rule('vue')
       .use('vue-loader')
-      .tap(options => ({
-        ...options
-      }))
+      .tap(options => {
+        // modify the options...
+        return options
+      })
   }
 }
