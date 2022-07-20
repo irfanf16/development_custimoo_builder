@@ -203,13 +203,13 @@
                                :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
                                :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                                :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                               :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex"/>
+                               :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
 
                         <Scene v-else class="view-back" :measurement-ratio="design.measurement_ratio" ref="mainScene"
                                :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                                :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                                :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                               :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" />
+                               :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
                       </div>
                     </template>
 
@@ -297,7 +297,8 @@
             <b-button @click="resetStore" variant="secondary" class="p-1"><b-icon-arrow-clockwise /></b-button>
           </div>
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-            <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll" :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize"/>
+            <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll"
+                             :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
             <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
               <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
               <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
@@ -357,7 +358,7 @@ import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import { findIndex } from 'lodash'
-
+import opentype from 'opentype.js'
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -472,6 +473,7 @@ Vue.filter('formatDate', function(value:string) {
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
+  public products_fonts: Record<any, any> = []
   public logData = logData;
   public getActiveProductData = getActiveProductData;
   public tabIndex = 0
@@ -731,6 +733,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('SET_EDITING_ROSTER_PLAYER_INDEX', 0)
   }
 
+  @Watch('products')
+  productsChanged(newVal: Record<any, any>[]){
+    this.initProductsFonts(newVal)
+  }
+
   get editing_roster_player_index(): number {
     return this.$store.getters.getEditingRosterPlayerIndex
   }
@@ -926,6 +933,49 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.down = true;
     }
   }
+
+  public async initProductsFonts(products: Record<any, any>[]) {
+    for(let product_index = 0; product_index < products.length; product_index++) {
+      const product = products[product_index]
+      const productFonts = product.namefonts;
+      if (productFonts.length){
+        const item = JSON.parse(productFonts[0].json_data)
+        if(item) {
+          for(let i = 0; i < item.length; i++) {
+            const font = item[i]
+            let fontNameParam = font.path.split('/').reverse()
+            fontNameParam = fontNameParam[0].split('.')
+            const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+            const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}`
+            if(!this.products_fonts[fontName]) {
+              const font_object = await this.loadFont(url)
+              if(font_object) {
+                const final_font = {
+                  value: fontNameParam[0] as string,
+                  text: fontName as string,
+                  url:`${process.env.VUE_APP_STORAGE_URL}${font.path}`,
+                  opentype_font: font_object
+                }
+                Vue.set(this.products_fonts, fontNameParam[0], final_font)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  public loadFont(url: string) {
+    return new Promise((resolve) => {
+      opentype.load(url, (err: Record<any, any>, font_object: Record<any, any>) => {
+        if(!err) {
+          resolve(font_object);
+        } else {
+          resolve('')
+        }
+      })
+    })
+  }
+
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
       console.log('in open locker room')

@@ -19,43 +19,39 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 
 import Scene from '@/components/Scene.vue'
 import HorizontalScroll from "@/components/mobile/animations/HorizontalScroll";
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
-  components: {HorizontalScroll, Scene },
-  data: function () {
-    return {
-      storageUrl: process.env.VUE_APP_STORAGE_URL,
-      renderComponent : true,
-      multipleLogo:false,
-      animPlayed: false
-    }
-  },
-  props: {
-    showItems: Boolean
+@Component<ItemsGrid>({
+  components: {
+    HorizontalScroll,
+    Scene
   },
   mounted() {
-    // this.$root.$on('sliderEvent', () => { // here you need to use the arrow function
-    //  if(this.$refs && this.$refs.slider)
-    //   this.$refs.slider.goToIndex(0);
-    // })
     this.animPlayed = localStorage.getItem('animPlayed')
-  },
-  computed: {
-    products: function() {
-      return this.$store.getters.getProducts
-    }
-  },
-  methods: {
-    productDesigns: function (index) {
-      this.$store.commit('CHANGE_STYLE_INDEX', 0);
-      this.$store.dispatch("getModels", this.products[index].product_id);
-      this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
-      this.$store.dispatch('setColorSectionVisibility')
-    }
+  }
+})
+
+export default class ItemsGrid extends Vue {
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
+  @Prop({ required: false }) readonly showItems!: boolean
+  public storageUrl = process.env.VUE_APP_STORAGE_URL
+  public renderComponent = true
+  public multipleLogo = false
+  public animPlayed = false
+
+  get products() {
+    return this.$store.getters.getProducts
+  }
+
+  productDesigns(index: number) {
+    this.$store.commit('CHANGE_STYLE_INDEX', 0);
+    this.$store.dispatch("getModels", this.products[index].product_id);
+    this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
+    this.$store.dispatch('setColorSectionVisibility')
   }
 }
 

@@ -23,7 +23,7 @@
             Stock
           </button>
         </div>
-        <ItemsGrid :showItems="showItems" />
+        <ItemsGrid :showItems="showItems" :products_fonts="products_fonts" />
       </div>
     </div>
 
@@ -69,7 +69,7 @@
         </div>
       </div>
 
-      <SelectItemCarousel ref="itemsCarousel"/>
+      <SelectItemCarousel ref="itemsCarousel" :products_fonts="products_fonts" />
 
     </template>
 
@@ -81,7 +81,7 @@
       <span style="font-size: 16px">Designs Available</span>
     </h2>
     <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
-      <DesignAvailable />
+      <DesignAvailable :products_fonts="products_fonts" />
     </div>
   </div>
 </template>
@@ -118,6 +118,7 @@
 export default class ItemToCustomize extends Vue {
   @Prop({required: true}) categories!: any;
   @Prop({required: true}) uploaderOpened!: any;
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   public storage_url = process.env.VUE_APP_STORAGE_URL
   private showItems = false;

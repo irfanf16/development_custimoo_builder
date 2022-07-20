@@ -23,7 +23,6 @@ import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
 import { SetSelectedProductCustomTexts } from '@/mixins/SelectedProductMixin'
-import { handleMainProducts } from '@/mixins/LockerProduct'
 
 @Component<Scene>({
   async mounted() {
@@ -42,7 +41,6 @@ import { handleMainProducts } from '@/mixins/LockerProduct'
         fontFamily: 'Ubuntu'
       })
     }
-    await this.initProductsFonts(this.product_index)
     let frontPromise = this.loadScene(this.front, 'front')
     frontPromise.then(() => {
       if (this.back) {
@@ -152,7 +150,7 @@ import { handleMainProducts } from '@/mixins/LockerProduct'
   }
 })
 
-export default class Scene extends Mixins(SetSelectedProductCustomTexts, handleMainProducts) {
+export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
   @Prop({ required: true }) readonly front!: Record<string, unknown>;
   @Prop({ required: false }) readonly back!: Record<string, unknown>;
   @Prop({ required: false }) readonly backTextureUrl!: string;
@@ -179,6 +177,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, handleM
   @Prop({ required: false, default: true }) readonly canvasSelection!: boolean;
   @Prop({ required: false, default: 'customized' }) readonly productType!: string;
   @Prop({ required: false }) readonly colorGrouping!: Record<any, any>;
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>;
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
@@ -1967,16 +1966,13 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, handleM
 
   public async deleteExistingTextsFromCanvas(custom_text_index:  number) {
     const self: Record<any, any> = this;
-    self.product_custom_text_objects[custom_text_index].forEach((product_custom_text_object: any) => {
-      const placement = product_custom_text_object.get("placement");
-      if(placement == "front") {
-        self.frontCanvas.remove(product_custom_text_object)
+    const custom_text = self.product_custom_text_objects[custom_text_index]
+    for(let i = 0; i < custom_text.length; i++) {
+      self.frontCanvas.remove(custom_text[i])
+      if(this.back) {
+        self.backCanvas.remove(custom_text[i])
       }
-      else if(placement == "back" && self.backCanvas) {
-        self.backCanvas.remove(product_custom_text_object)
-      }
-    })
-    console.log("inside deleteExistingTextsFromCanvas")
+    }
   }
 
   public async addTextsNew(custom_text_info: Record<any, any>) {
@@ -1998,71 +1994,68 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts, handleM
 
     // let fontOptions = custom_text_item.font_family
     custom_text.items.forEach((custom_text_item:Record<any, any>, customTextItemIndex: number) => {
-      let font = this.product_fonts.filter((font: Record<any, any>) => { return font.value == custom_text_item.font_family }) as Record<any, any>
-      if(font.length == 0) {
-        font = this.product_fonts[0] as Record<any, any>
-      } else {
-        font = font[0]
+      let font = this.products_fonts[custom_text_item.font_family]
+
+      if(font) {
+        const path = font.opentype_font.getPath(custom_text.value);
+
+        let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
+          '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'
+        textSvg += path.toSVG()
+        textSvg += '\n</svg>'
+
+        fabric.loadSVGFromString(textSvg, (objects: any) => {
+          const fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group
+          fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
+          fabric_text.set({
+            left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
+            top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
+            angle: custom_text_item.rotation as number,
+            centeredScaling: true,
+            selectable: this.canvasSelection,
+            hasControls: true,
+            hasBorders: false,
+            evented: true,
+            globalCompositeOperation: 'source-atop',
+            fill: custom_text_item.color,
+            stroke: custom_text_item.outline_color,
+            strokeWidth: parseInt(custom_text_item.outline_width),
+            paintFirst: 'stroke',
+            lockScalingFlip: true,
+            padding: 15,
+            cornerSize: 30,
+            placement: custom_text_item.placement,
+            visible: custom_text_item.selected,
+            custom_text_index: custom_text_index,
+            custom_text_item_index: customTextItemIndex,
+          })
+
+          fabric_text.setControlsVisibility({
+            tl: false,
+            bl: false,
+            tr: true,
+            br: true,
+            ml: false,
+            mb: false,
+            mr: false,
+            mt: false,
+            mtr: false
+          })
+          if (!self.product_custom_text_objects[custom_text_index]) {
+            self.product_custom_text_objects[custom_text_index] = [];
+            self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
+          }
+          self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
+
+          if (custom_text_item.placement == 'front') {
+            self.frontCanvas.add(fabric_text)
+            render_front_canvas = true
+          } else if (custom_text_item.placement == 'back' && self.backCanvas) {
+            self.backCanvas.add(fabric_text)
+            render_back_canvas = true
+          }
+        })
       }
-
-      const path = font.opentype_font.getPath(custom_text.value);
-
-      let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
-        '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'
-      textSvg += path.toSVG()
-      textSvg += '\n</svg>'
-
-      fabric.loadSVGFromString(textSvg, (objects: any) => {
-        const fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group
-        fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
-        fabric_text.set({
-          left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
-          top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
-          angle: custom_text_item.rotation as number,
-          centeredScaling: true,
-          selectable: this.canvasSelection,
-          hasControls: true,
-          hasBorders: false,
-          evented: true,
-          globalCompositeOperation: 'source-atop',
-          fill: custom_text_item.color,
-          stroke: custom_text_item.outline_color,
-          strokeWidth: parseInt(custom_text_item.outline_width),
-          paintFirst: 'stroke',
-          lockScalingFlip: true,
-          padding: 15,
-          cornerSize: 30,
-          placement: custom_text_item.placement,
-          visible: custom_text_item.selected,
-          custom_text_index: custom_text_index,
-          custom_text_item_index: customTextItemIndex,
-        })
-
-        fabric_text.setControlsVisibility({
-          tl: false,
-          bl: false,
-          tr: true,
-          br: true,
-          ml: false,
-          mb: false,
-          mr: false,
-          mt: false,
-          mtr: false
-        })
-        if(!self.product_custom_text_objects[custom_text_index]) {
-          self.product_custom_text_objects[custom_text_index] = [];
-          self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
-        }
-        self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
-
-        if(custom_text_item.placement == 'front') {
-          self.frontCanvas.add(fabric_text)
-          render_front_canvas = true
-        } else if(custom_text_item.placement == 'back' && self.backCanvas) {
-          self.backCanvas.add(fabric_text)
-          render_back_canvas = true
-        }
-      })
     })
     if(render_front_canvas) {
       self.frontCanvas.renderAll()
