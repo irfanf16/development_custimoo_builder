@@ -11,7 +11,7 @@
                  :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                  :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"/>
         </a>
-        <h3>{{ design.design_name }} {{design.id}}</h3>
+        <h3>{{ design.design_name }}</h3>
       </div>
     </template>
   </div>
