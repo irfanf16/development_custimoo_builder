@@ -35,16 +35,6 @@
                   <div class="image-holder" id="both-svg" style="text-align: center;">
                     <img :src="product.product_locker_room.front_url" alt="">
                     <img :src="product.product_locker_room.back_url" alt="">
-<!--                    <Scene v-if="product.product_locker_room.design.back_design" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"-->
-<!--                           :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"-->
-<!--                           :back="{textureUrl: product.product_locker_room.design.back_design ? storageUrl+product.product_locker_room.design.back_design.file_url: '', modelUrl: product.product_locker_room.style.back ? storageUrl+product.product_locker_room.style.back.file_url : ''}"-->
-<!--                           :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)" :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"-->
-<!--                           :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="170" :canvasHeight="200" :preSetData="true" />-->
-<!--                    <Scene v-else class="view-back" :measurement-ratio="product.product_locker_room.design.measurement_ratio" :productType="product.product_locker_room.product_type" :colorGrouping="JSON.parse(product.product_locker_room.design.front_design.color_group)"-->
-<!--                           :front="{textureUrl: storageUrl+product.product_locker_room.design.front_design.file_url, modelUrl: product.product_locker_room.style.front ? storageUrl+product.product_locker_room.style.front.file_url : ''}"-->
-<!--                           :lockerDefaultColors="JSON.parse(product.product_locker_room.defaultcolors)" :lockerGroupColors="JSON.parse(product.product_locker_room.groupcolors)"-->
-<!--                           :logos="product.product_locker_room.style.logo.concat(JSON.parse(product.product_locker_room.custom_logos))"-->
-<!--                           :productNamesSetting="product.product_locker_room.productnames" :canvasSelection="false" :canvasWidth="170" :canvasHeight="200" :preSetData="true" />-->
                   </div>
 
                   <div class="pdf_description" v-if="product.product_locker_room.model_description   && product.allow_description" v-html="'<strong>Product Info: </strong>'+ product.product_locker_room.model_description.product_model_description"></div>
@@ -63,12 +53,11 @@
 <script lang="ts">
 
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
-import Scene from "@/components/Scene.vue";
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 
 @Component<DesignCollectionPdfView>({
   components: {
-    Scene, CustomizationPreview
+    CustomizationPreview
   },
 })
 

@@ -10,7 +10,7 @@ import {
   processColorsCustom, rosterDetailsInit
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
-import {getClosestColor} from "@/pantoneColor";
+import opentype from 'opentype.js'
 @Component
 export class LockerProducts extends Vue {
 
@@ -209,6 +209,38 @@ export class handleMainProducts extends Vue {
     this.$store.dispatch("getModels", selected_product.product_id);
 
     this.$root.$emit('sliderEvent');
+  }
+
+  get products(): [Record<any, any>] {
+    return this.$store.getters.getProducts
+  }
+
+  public product_fonts: Record<any, any>[] = []
+  public async initProductsFonts(product_index: number) {
+    const product = this.products[product_index]
+    const productFonts = product.namefonts;
+    if (productFonts.length){
+      const item = JSON.parse(productFonts[0].json_data)
+      if(item) {
+        item.forEach((font: any, key: number) => {
+          const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}`
+          opentype.load(url, (err: Record<any, any>, font_object: Record<any, any>) => {
+            if(!err) {
+              let fontNameParam = font.path.split('/').reverse()
+              fontNameParam = fontNameParam[0].split('.')
+              const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+              const final_font = {
+                value: fontNameParam[0] as string,
+                text: fontName as string,
+                url:`${process.env.VUE_APP_STORAGE_URL}${font.path}`,
+                opentype_font: font_object
+              }
+              this.product_fonts.push(final_font)
+            }
+          })
+        })
+      }
+    }
   }
 
   public async updateFactoryProduct(factory_product: Record<any, any>) {

@@ -8,7 +8,8 @@
            :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
            :logos="selectedProduct.productstyles[styleIndex].logo"
            :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
-           :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"/>
+           :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)"
+           :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex"/>
       </a>
       <h3>{{ design.design_name }}</h3>
     </div>
@@ -34,6 +35,9 @@ export default class DesignAvailable extends Vue {
   }
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
+  }
+  get selectedProductIndex(): number{
+    return this.$store.getters.getSelectedIndex
   }
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;

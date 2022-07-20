@@ -10,7 +10,7 @@
                      :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : ''}"
                      :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
                      :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
-                     :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id"/>
+                     :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id" :product_index="index"/>
             </div>
           </template>
           <h3 class="text-center">{{ product.product_name }}</h3>
