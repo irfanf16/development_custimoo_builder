@@ -11,7 +11,7 @@ const Auth:Module<any, any> = {
   getters:{
     isCustomerAuthenticated: (state: any) => !!state.jwtToken,
     getCustomer: (state:any) => {
-      return state.customer || localStorage.getItem("customer") ? JSON.parse(localStorage.getItem("customer") as string) : ''
+      return state.customer || (localStorage.getItem("customer") && localStorage.getItem("customer") !='' ) ? JSON.parse(localStorage.getItem("customer") as string) : ''
     },
     getCustomerPermissions:state => {
       return state.customer_permissions
@@ -21,7 +21,10 @@ const Auth:Module<any, any> = {
   mutations:{
     SET_CUSTOMER(state:Record<any, any>, payload){
       localStorage.setItem('jwtToken', payload.access_token)
-      localStorage.setItem('customer', JSON.stringify(payload.user))
+      if(payload && payload.user){
+        localStorage.setItem('customer', JSON.stringify(payload.user))
+      }
+
       state.jwtToken = payload.access_token
       state.customer = payload.user
     },
