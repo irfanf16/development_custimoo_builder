@@ -1994,67 +1994,117 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
 
     // let fontOptions = custom_text_item.font_family
     custom_text.items.forEach((custom_text_item:Record<any, any>, customTextItemIndex: number) => {
-      let font = this.products_fonts[custom_text_item.font_family]
+      let fabric_text: fabric.Text | fabric.Group
+      if(this.mainPreview) {
+        let font = this.products_fonts[custom_text_item.font_family]
+        if (font) {
+          const path = font.opentype_font.getPath(custom_text.value);
 
-      if(font) {
-        const path = font.opentype_font.getPath(custom_text.value);
+          let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'
+          textSvg += path.toSVG()
+          textSvg += '\n</svg>'
 
-        let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
-          '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'
-        textSvg += path.toSVG()
-        textSvg += '\n</svg>'
+          fabric.loadSVGFromString(textSvg, (objects: any) => {
+            fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group
+            fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
+            fabric_text.set({
+              left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
+              top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
+              angle: custom_text_item.rotation as number,
+              centeredScaling: true,
+              selectable: this.canvasSelection,
+              hasControls: true,
+              hasBorders: false,
+              evented: true,
+              globalCompositeOperation: 'source-atop',
+              fill: custom_text_item.color,
+              stroke: custom_text_item.outline_color,
+              strokeWidth: parseInt(custom_text_item.outline_width),
+              paintFirst: 'stroke',
+              lockScalingFlip: true,
+              padding: 15,
+              cornerSize: 30,
+              placement: custom_text_item.placement,
+              visible: custom_text_item.selected,
+              custom_text_index: custom_text_index,
+              custom_text_item_index: customTextItemIndex,
+            })
+            fabric_text.setControlsVisibility({
+              tl: false,
+              bl: false,
+              tr: true,
+              br: true,
+              ml: false,
+              mb: false,
+              mr: false,
+              mt: false,
+              mtr: false
+            })
+            if (!self.product_custom_text_objects[custom_text_index]) {
+              self.product_custom_text_objects[custom_text_index] = [];
+              self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
+            }
+            self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
 
-        fabric.loadSVGFromString(textSvg, (objects: any) => {
-          const fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group
-          fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
-          fabric_text.set({
-            left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
-            top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
-            angle: custom_text_item.rotation as number,
-            centeredScaling: true,
-            selectable: this.canvasSelection,
-            hasControls: true,
-            hasBorders: false,
-            evented: true,
-            globalCompositeOperation: 'source-atop',
-            fill: custom_text_item.color,
-            stroke: custom_text_item.outline_color,
-            strokeWidth: parseInt(custom_text_item.outline_width),
-            paintFirst: 'stroke',
-            lockScalingFlip: true,
-            padding: 15,
-            cornerSize: 30,
-            placement: custom_text_item.placement,
-            visible: custom_text_item.selected,
-            custom_text_index: custom_text_index,
-            custom_text_item_index: customTextItemIndex,
+            if (custom_text_item.placement == 'front') {
+              self.frontCanvas.add(fabric_text)
+              render_front_canvas = true
+            } else if (custom_text_item.placement == 'back' && self.backCanvas) {
+              self.backCanvas.add(fabric_text)
+              render_back_canvas = true
+            }
           })
-
-          fabric_text.setControlsVisibility({
-            tl: false,
-            bl: false,
-            tr: true,
-            br: true,
-            ml: false,
-            mb: false,
-            mr: false,
-            mt: false,
-            mtr: false
-          })
-          if (!self.product_custom_text_objects[custom_text_index]) {
-            self.product_custom_text_objects[custom_text_index] = [];
-            self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
-          }
-          self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
-
-          if (custom_text_item.placement == 'front') {
-            self.frontCanvas.add(fabric_text)
-            render_front_canvas = true
-          } else if (custom_text_item.placement == 'back' && self.backCanvas) {
-            self.backCanvas.add(fabric_text)
-            render_back_canvas = true
-          }
+        }
+      } else {
+        fabric_text = new fabric.Text(custom_text.value, {
+          left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
+          top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
+          angle: custom_text_item.rotation as number,
+          centeredScaling: true,
+          selectable: this.canvasSelection,
+          hasControls: true,
+          hasBorders: false,
+          evented: true,
+          globalCompositeOperation: 'source-atop',
+          fontFamily: custom_text_item.font_family,
+          fill: custom_text_item.color,
+          stroke: custom_text.outLineColor,
+          strokeWidth: parseInt(custom_text_item.outline_width),
+          paintFirst: 'stroke',
+          lockScalingFlip: true,
+          padding: 15,
+          cornerSize: 30,
+          fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
+          _fontSizeMult: .835,
+          placement: custom_text_item.placement,
+          visible: custom_text_item.selected,
+          custom_text_index: custom_text_item_index
         })
+        fabric_text.setControlsVisibility({
+          tl: false,
+          bl: false,
+          tr: true,
+          br: true,
+          ml: false,
+          mb: false,
+          mr: false,
+          mt: false,
+          mtr: false
+        })
+        if (!self.product_custom_text_objects[custom_text_index]) {
+          self.product_custom_text_objects[custom_text_index] = [];
+          self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
+        }
+        self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
+
+        if (custom_text_item.placement == 'front') {
+          self.frontCanvas.add(fabric_text)
+          render_front_canvas = true
+        } else if (custom_text_item.placement == 'back' && self.backCanvas) {
+          self.backCanvas.add(fabric_text)
+          render_back_canvas = true
+        }
       }
     })
     if(render_front_canvas) {
