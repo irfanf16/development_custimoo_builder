@@ -175,13 +175,17 @@ export default class NewCustomizationText extends Mixins(ProductColors, ProductF
   * methods starts
   * */
 
+  public handel_text_change_timer!: number
   handleCustomTextInputChange(updatedVal: string, custom_text_index: number) {
-    let self:Record<any, any> = this;
-    self.product_custom_texts[custom_text_index].value = updatedVal;
-    self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextUpdated", {
-      emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
-    });
+    clearTimeout (this.handel_text_change_timer);
+    this.handel_text_change_timer = setTimeout(() => {
+      let self:Record<any, any> = this;
+      self.product_custom_texts[custom_text_index].value = updatedVal;
+      self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
+      });
+    }, 300)
   }
 
   handleCustomTextCheckboxChange(updatedVal: string, custom_text_index: number) {

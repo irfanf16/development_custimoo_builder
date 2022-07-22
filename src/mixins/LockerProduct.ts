@@ -10,7 +10,6 @@ import {
   processColorsCustom, rosterDetailsInit
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
-import {getClosestColor} from "@/pantoneColor";
 @Component
 export class LockerProducts extends Vue {
 
@@ -209,6 +208,10 @@ export class handleMainProducts extends Vue {
     this.$store.dispatch("getModels", selected_product.product_id);
 
     this.$root.$emit('sliderEvent');
+  }
+
+  get products(): [Record<any, any>] {
+    return this.$store.getters.getProducts
   }
 
   public async updateFactoryProduct(factory_product: Record<any, any>) {
