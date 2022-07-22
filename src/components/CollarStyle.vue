@@ -26,7 +26,7 @@
                     <div class="collar-designs">
                       <template v-for="(style, i) in selectedProduct.productstyles">
                         <template v-if="selectedProduct.productstyles.length > 1">
-                          <b-button :key="i"  v-if="model.model_styles.includes(style.id)" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
+                          <b-button :key="i"  v-if="model.model_styles.includes(style.id)" :class="{'active': getLastActiveProductData.style_index === i}" variant="outline-light" @click="changeStyleIndex(i)">
                             <img :src="storageUrl+style.front.file_url " />
                           </b-button>
                         </template>
@@ -49,6 +49,7 @@
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import moment from "moment";
+import {findIndex} from "lodash";
     @Component<CollarStyle>({
 
     })
@@ -67,6 +68,11 @@ import moment from "moment";
       get selectedProduct(): Record<any, any>{
         return this.$store.getters.getSelectedProduct
       }
+
+      get getLastActiveProductData() {
+        return this.$store.getters.getLastActiveProductData
+      }
+
       get styleIndex():number{
         return  this.$store.getters.getCurrentStyleIndex;
       }
@@ -79,7 +85,7 @@ import moment from "moment";
         this.$store.commit('SET_SELECTED_MODEL_INDEX', modelIndex)
         for (let styleIndex = 0; styleIndex < this.selectedProduct.productstyles.length; styleIndex++) {
           if (this.productModels[modelIndex].model_styles.includes(this.selectedProduct.productstyles[styleIndex].id)) {
-            if(styleIndex != this.styleIndex) {
+            if(styleIndex != this.getLastActiveProductData.style_index) {
               this.changeStyleIndex(styleIndex)
               break;
             }
@@ -117,6 +123,10 @@ import moment from "moment";
           }
         }
         this.$store.commit('CHANGE_STYLE_INDEX', i);
+        let design_index = findIndex(this.selectedProduct.productstyles[i].productdesigns, "design_show")
+        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {style_index: i, style_id: this.selectedProduct.productstyles[i].id,
+          design_index:   design_index, design_id: this.selectedProduct.productstyles[i].productdesigns[design_index].id
+        })
       }
     }
 </script>

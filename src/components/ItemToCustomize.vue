@@ -29,30 +29,39 @@
 
     <template v-else>
       <div class="collection-btn mb-2 mt-3 d-flex gap-1">
-        <div class="px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0" >
-          <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                  @click="changeProductType(!$store.getters.getCustomized, 'customized')">
-            <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
-            Customized
-          </button>
+        <template v-if="getProductEditInfoObject.editing && ['cart_product', 'order_product'].includes(getProductEditInfoObject.type)">
+          <div class="px-1 d-flex align-items-center checkbox_buttons gap-2">
+            <button style="white-space: nowrap" type="button" class="btn btn-secondary active">
+              <span><b-icon icon="check-circle-fill"></b-icon></span>
+              {{ $store.getters.getCustomized ? "Customized" : "Stock" }}
+            </button>
+          </div>
+        </template>
+       <template v-else>
+         <div class="px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0" >
+           <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                   @click="changeProductType(!$store.getters.getCustomized, 'customized')">
+             <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
+             Customized
+           </button>
 
-          <button style="white-space: nowrap" type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                  @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
-            <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
-            Stock
-          </button>
-        </div>
+           <button style="white-space: nowrap" type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                   @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
+             <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
+             Stock
+           </button>
+         </div>
 
-        <div style="max-width: 230px; flex-shrink: 1; padding-left: 4px">
-          <b-input-group>
-            <template #append>
-              <b-input-group-text style="height: 33px; cursor: pointer" @click="searchProducts(true)"><strong class="text-secondary">X</strong></b-input-group-text>
-            </template>
-            <b-form-input type="text" style="height: 33px;" placeholder="Search" @keyup="searchProducts(false)" v-model="search_products" />
-          </b-input-group>
-        </div>
-<!--        <b-form-checkbox :checked="customized" @change="changeProductType($event,'customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
-<!--        <b-form-checkbox :checked="personalized" @change="changeProductType($event,'personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
+         <div style="max-width: 230px; flex-shrink: 1; padding-left: 4px">
+           <b-input-group>
+             <template #append>
+               <b-input-group-text style="height: 33px; cursor: pointer" @click="searchProducts(true)"><strong class="text-secondary">X</strong></b-input-group-text>
+             </template>
+             <b-form-input type="text" style="height: 33px;" placeholder="Search" @keyup="searchProducts(false)" v-model="search" />
+           </b-input-group>
+         </div>
+       </template>
+
       </div>
 
       <div class="d-flex align-items-center">
@@ -81,13 +90,13 @@
       <span style="font-size: 16px">Designs Available</span>
     </h2>
     <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
-      <DesignAvailable :products_fonts="products_fonts" />
+      <DesignAvailable :key="this.selectedProduct.productstyles[styleIndex].id" :products_fonts="products_fonts" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-  import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
   import Search from '@/components/Search.vue'
   import SelectItemCarousel from '../components/SelectItemCarousel.vue'
   import DesignAvailable from '../components/DesignAvailable.vue'
@@ -95,6 +104,7 @@
   import { dragscroll } from 'vue-dragscroll'
   import _ from 'lodash'
   import {http} from "@/httpCommon";
+  import {ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData} from "@/mixins/LockerProduct";
 
 @Component<ItemToCustomize>({
   components: {
@@ -111,14 +121,21 @@
     if(this.mobileScreen){
       this.$emit('switchTabs')
     }
+
+    let ecommerce_update_id = this.$route.query.update_item;
+    if(!ecommerce_update_id) {
+      this.$store.commit('SET_SELECTED_CATEGORIES', this.categories[0].id) // as this is on mounted so don't need to send get product call again
+    }
+    this.search = this.search_products
   }
 })
 
 
-export default class ItemToCustomize extends Vue {
+export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData) {
   @Prop({required: true}) categories!: any;
   @Prop({required: true}) uploaderOpened!: any;
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
+  @Prop({default: ''}) search_products!: any;
 
   public storage_url = process.env.VUE_APP_STORAGE_URL
   private showItems = false;
@@ -127,7 +144,7 @@ export default class ItemToCustomize extends Vue {
 
   public personalized = this.$store.getters.getPersonalized
   public customized = this.$store.getters.getCustomized
-  public search_products = '';
+  public search = '';
   public showLoader = false;
   public searchLoader = false;
   public timeout = 0;
@@ -143,6 +160,10 @@ export default class ItemToCustomize extends Vue {
     }
   }
 
+  @Watch('search')
+  searchChanged() {
+    this.$emit('update:search_products', this.search)
+  }
 
   public setSliderIndex() {
     (this.$refs['itemsCarousel'] as Record<any,any>).setSliderIndex()
@@ -152,22 +173,36 @@ export default class ItemToCustomize extends Vue {
     this.showDesigns = !this.showDesigns
   }
 
+  get selectedProduct(): Record<any, any>{
+    return this.$store.getters.getSelectedProduct
+  }
+
+  get styleIndex():number{
+    return  this.$store.getters.getCurrentStyleIndex
+  }
+
   public async searchProducts(isClear:boolean) {
     let self = this;
+    console.log("cleared")
     if(isClear)
     {
-      self.search_products = "";
+      self.search = "";
+      this.$emit('update:search_products', self.search)
+
     }
+    await this.resetLastActiveProductData()
+    await this.exitFromEditMode()
     if(this.timeout) clearTimeout(this.timeout);
     this.timeout = setTimeout(async () => {
       //search function
       await self.$store.dispatch('setSearchLoader', true)
       self.showLoader = true;
-      const itemCarousel = self.$refs['itemsCarousel'] as Record<any, any>
-      await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
-      this.$emit('update:search_products', self.search_products)
-      this.$emit('retrieveProducts','/list/products')
-      itemCarousel.setSliderIndex();
+     // const itemCarousel = self.$refs['itemsCarousel'] as Record<any, any>
+     //  await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
+      // this.$emit('update:search_products', self.search_products)
+      let query_params = [`title=${self.search_products}`]
+      this.$emit('retrieveProducts', query_params)
+     // itemCarousel.setSliderIndex();
     }, 700);
   }
 
@@ -194,18 +229,29 @@ export default class ItemToCustomize extends Vue {
         retrieve_products = true;
       }
     }
-    self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id: null});
+
+    // self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id: null});
     if(retrieve_products) {
+      await self.resetLastActiveProductData()
+      console.log("before new val", eval(prd_type))
+      eval(`${prd_type}=${new_val}`)
+      console.log("after new val", eval(prd_type))
       await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
-      self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
-      this.$emit('retrieveProducts','/list/products')
+      //exit from edit mode
+      await this.exitFromEditMode()
+
+      //self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
+      //let query_params = await this.setQueryParams()
+      this.$emit('retrieveProducts')
       itemCarousel.setSliderIndex();
     }
   }
 
-  public async  setBrands(category_id){
-    await this.$store.commit('SET_SELECTED_CATEGORIES', category_id)
-    this.$emit('retrieveProducts','/list/products' )
+  public async setBrands(category_id:number){
+    if(this.selectedBrand !== category_id){
+      await this.$store.commit('SET_SELECTED_CATEGORIES', category_id)
+      this.$emit('retrieveProducts')
+    }
   }
 
   get getPersonalized(): boolean {
@@ -224,8 +270,13 @@ export default class ItemToCustomize extends Vue {
     else
       return 0
   }
+  get getProductEditInfoObject() {
+    return this.$store.getters.getProductEditInfoObject;
+  }
 
-
+  get getLastActiveProductData() {
+    return this.$store.getters.getLastActiveProductData;
+  }
 }
 </script>
 

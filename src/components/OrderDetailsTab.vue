@@ -40,7 +40,17 @@
           <template v-if="isCustomerAuthenticated">
             <template v-if="$store.getters.getUpdateOrderItemProducts == null">
               <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
-                {{ editCart.cartId > 0 ? 'Update Item' : 'Add to Cart'}}
+                <template v-if="getProductEditInfoObject.editing">
+                  <template v-if="getProductEditInfoObject.type == 'cart_product'">
+                    Update Cart
+                  </template>
+                  <template v-else>
+                    Update Item
+                  </template>
+                </template>
+                <template v-else>
+                  Add to Cart
+                </template>
               </button>
               <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
                 <img width="20" height="20" src="../../src/assets/images/loading.gif" />
@@ -72,9 +82,15 @@ import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
 import ProductionScene from '@/components/ProductionScene.vue'
-import { getActiveProductData,urlToBase64,getFileExtensionType,fontsList } from "@/helpers/Helpers";
+import {
+  getActiveProductData,
+  urlToBase64,
+  getFileExtensionType,
+  fontsList,
+  handleResponseException
+} from "@/helpers/Helpers";
 import LoginForm from '@/components/LoginForm.vue'
-import {LockerProducts, handleMainProducts} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
 
 import {compact} from 'lodash';
 
@@ -96,7 +112,7 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
   }
 })
 
-export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts)  {
+export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts, ProductsQueryParamsMixin, exitEditMode)  {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>
@@ -109,6 +125,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   }
   public isLoading = false;
 
+  get getProductEditInfoObject() {
+    return this.$store.getters.getProductEditInfoObject
+  }
   public roster_detail: Record<any,any> = [];
 
   public production_file_info: Record<any,any> = {};
@@ -134,9 +153,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-  get editCart(): Record<any, any> {
-    return this.$store.getters.getEditCart
-  }
+  // get editCart(): Record<any, any> {
+  //   return this.$store.getters.getEditCart
+  // }
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails()
@@ -144,6 +163,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
   get logoColors(): [Record<any, any>] {
     return this.$store.getters.getLogosColors
+  }
+
+  get getLastActiveProductData() {
+    return this.$store.getters.getLastActiveProductData
   }
 
   get total(): number {
@@ -257,27 +280,31 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   }
 
   public async addToCart() {
+    let self: Record<any, any> = this;
     try {
       this.isLoading = true;
-     let cart_product = await getActiveProductData();
-     let content:string = await this.fetchUrlContent(cart_product?.production_url);
-
-      let production_content = await this.parseSvgString(content,cart_product as Record<any,any>);
+     let cart_product:Record<any,any> = await getActiveProductData();
+     if(cart_product){
+       if(Object.prototype.hasOwnProperty.call(cart_product,'production_url') && cart_product.production_url){
+         let content:string = await this.fetchUrlContent(cart_product?.production_url);
+         let production_content = await this.parseSvgString(content,cart_product as Record<any,any>);
+         cart_product.svg_content = production_content;
+       }
+     }else{
+        return false;
+     }
      this.$store.dispatch('setRevertRosterBOOL',true);
 
-     if(cart_product == null) {
-       return false;
-     }
-      cart_product.svg_content = production_content;
       let post_data = {
         factory_product: cart_product
       };
       let url = "carts"
-      if(this.$store.getters.getEditCart.cartId > 0) {
-        post_data.factory_product.id = this.$store.getters.getEditCart.cartItemId
-        url = `carts/cart-items/${this.$store.getters.getEditCart.cartId}/update`
+      let cart_edit_mode = false;
+      if(this.getProductEditInfoObject.editing && this.getProductEditInfoObject.type == "cart_product") {
+        cart_edit_mode = true
+        post_data.factory_product.id = this.getProductEditInfoObject.cart_product_info.cart_item_product.id
+        url = `carts/cart-items/${this.getProductEditInfoObject.cart_product_info.cart_item_id}/update`
       }
-
 
       let santacart = true;
       let company_domain = this.company.company_domain;
@@ -325,85 +352,79 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
       if(santacart){
         this.isLoading = true;
-        http.post(url, post_data).then((res: any) => {
+        http.post(url, post_data).then(async (res: any) => {
+          console.log("response", res.data.success)
           if (res.data.success == true){
-            let edit_cart = this.$store.getters.getEditCart.cartId > 0;
+            console.log("response if", res.data.success, cart_edit_mode)
+            let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
             let api_res:Record<any, any> = res.data.result
-            this.$store.dispatch('addToCart',api_res.items)
-            this.$store.dispatch('setEditCart', {key:'cartId',value:0});
-            this.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
-            this.showToast(res.data.message, 'SUCCESS');
-            this.$store.dispatch('addedToCart', true)
+            self.$store.dispatch('addToCart',api_res.items)
+            // self.$store.dispatch('setEditCart', {key:'cartId',value:0});
+            // self.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
+            await self.exitFromEditMode()
+            self.showToast(res.data.message, 'SUCCESS');
+            self.$store.dispatch('addedToCart', true)
             if(platform === 'wordpress'){
               let update_cart_id_data = new FormData();
               update_cart_id_data.append('santa_cart_id', api_res.new_created_id);
               update_cart_id_data.append('woocom_cart_id', ecommerce_cart_id);
               update_cart_id_data.append('action', 'add_custimoo_cart_id');
-
+              if(cart_edit_mode) {
+                await self.exitFromEditMode()
+              }
                http.post(ecom_url, update_cart_id_data).then((res: any) => {
                  window.location.href = company_domain + '/cart'
               }).catch(err => {
-                this.showErrorArr(err.response.data.errors)
+                self.showErrorArr(err.response.data.errors)
               });
 
-            } else {
-              if(edit_cart) {
-                this.retrieveProducts();
+            }
+            else {
+              if(cart_edit_mode) {
+                await self.exitFromEditMode()
+                let query_params = await self.setQueryParams
+                self.retrieveProducts(query_params);
               }
             }
-            this.isLoading = false;
-          }else{
+            self.isLoading = false;
+          }
+          else {
             if(res.data.status_code === 422){
-              this.showErrorValidation(res.data.errors);
-              this.isLoading = false
+              self.showErrorValidation(res.data.errors);
             }
-            else{
-              this.showError(res)
-              this.isLoading = false
+            if(cart_edit_mode) {
+              await self.exitFromEditMode()
+              let query_params = await self.setQueryParams
+              self.retrieveProducts(query_params);
             }
           }
-        }).catch(err => {
-          this.isLoading = false
-          this.showErrorArr(err.response.data.errors)
+          self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
+          self.isLoading = false
+
+        }).catch(async errorResponse => {
+          self.isLoading = false
+          handleResponseException(errorResponse)
+          if(cart_edit_mode) {
+            await self.exitFromEditMode()
+            let query_params = await self.setQueryParams
+            self.retrieveProducts(query_params);
+          }
         })
       }
 
     }
     catch (e) {
       console.error('error in add to cart',e)
-      this.isLoading = false
+      self.isLoading = false
     }
   }
 
-  public async retrieveProducts(url:string|null=null) {
+  public async retrieveProducts() {
     let self = this;
-    let sync_id = this.$route.query.sync_id;
-    if(url == null) {
-      url = `/list/products`;
-    }
-    let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
-    if(!url_obj.searchParams.has("customized")) {
-      url_obj.searchParams.append('customized', this.$store.getters.getCustomized)
-    }
-    if(!url_obj.searchParams.has("personalized")) {
-      url_obj.searchParams.append('personalized', this.$store.getters.getPersonalized)
-    }
-    if(self.search_products && !url_obj.searchParams.has("title")) {
-      url_obj.searchParams.append('title', self.search_products)
-    }
-    if(this.$route.query.update_order_product) {
-      url_obj.searchParams.append('update_order_product', this.$route.query.update_order_product);
-      url_obj.searchParams.append('order_item_id', this.$route.query.order_item_id);
-      url_obj.searchParams.append('activity_id', this.$route.query.activity_id);
-      //this.$router.replace('/')
-    }
-    url = url_obj.pathname + url_obj.search;
-    if(sync_id) {
-      if(url.indexOf("?") > 0) {
-        url += `&sync_id=${sync_id}`;
-      } else {
-        url = `?sync_id=${sync_id}`;
-      }
+
+    let url = `/list/products?customized=${this.getLastActiveProductData.customized}&personalized=${this.getLastActiveProductData.personalized}`;
+    if(this.getLastActiveProductData.search_products) {
+      url +=` &title=${this.getLastActiveProductData.search_products}`
     }
     http.get(url).then(async (response: Record<any, any>) => {
       if(response.data.products.data.length > 0 ){
@@ -635,217 +656,35 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   }
 
   public async fetchUrlContent(url:string) {
-    let fetch_content = await fetch(url);
-    let url_content   = await fetch_content.text();
-    return url_content;
+    if(url) {
+      let fetch_content = await fetch(url);
+      let url_content   = await fetch_content.text();
+      return url_content;
+    } else {
+      return "";
+    }
   }
 
-  public async parseSvgString(svg_string:string, factory_product: Record<any,any>) {
+  public async parseSvgString(svg_string:string, factory_product_content: Record<any,any>) {
     if(svg_string.substring(0, svg_string.lastIndexOf("</g>")) !== '') {
       let self = this;
       let production_content = "";
-      this.roster_detail = [];
 
-      //Applying Text and Logo on SVG
-      let custom_logos_texts_string = "";
-      let companies_name = [];
+      svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
 
-      // let elements = await self.getDocFromString(self.factory_product.custom_text_svgs);
+      let factory_product:Record<any,any> = await this.parseFactoryProduct(factory_product_content);
+      svg_string += `${this.getSVGPattern(factory_product.roster_detail,factory_product.measurement_ratio)}\n`
 
-      let custom_texts = factory_product.custom_texts;
-
-      let custom_name_index = custom_texts.findIndex((custom:Record<any,any>) => {
-        let is_roster_name = factory_product.roster_detail.findIndex((roaster:Record<any,any>) => {
-          return roaster.text == custom.text
-        });
-        return custom.type === 'name' && custom.text  && is_roster_name != -1;
-      })
-
-      let custom_number_index = custom_texts.findIndex((custom:Record<any,any>) => {
-        if(Object.prototype.hasOwnProperty.call(custom, 'text')){
-          let is_roster_number = factory_product.roster_detail.findIndex((roaster:Record<any,any>) => {
-            return roaster.number == custom.text
-          });
-          return custom.type === 'number' && custom.text && is_roster_number != -1;
-        }
-      })
-
-      let custom_text_svgs = factory_product.custom_text_svgs;
-
-      let sorted_custom_text_svgs = [];
-      if(custom_name_index > -1) {
-        if(factory_product.roster_detail.findIndex((roaster:Record<any,any>) => roaster.text == custom_texts[custom_name_index].text) > -1) {
-          sorted_custom_text_svgs.push({
-            svg: custom_text_svgs[custom_name_index],
-            type: 'name',
-            scaleX:custom_texts[custom_name_index].scaleX,
-            scaleY:custom_texts[custom_name_index].scaleY,
-            rotation:custom_texts[custom_name_index].rotation,
-          });
+      if((factory_product.custom_logos.length >= 1)){
+        let custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
+          return ((custom_logo.url != null || custom_logo.url != ""))
+        })
+        if(custom_logos_without_base64.length > 0){
+          let custom_logos = await this.$store.dispatch('converturlToBase64',{custom_logos:custom_logos_without_base64});
+          svg_string += `${await this.getLogoPattern(custom_logos.data.custom_logos,factory_product.measurement_ratio)}`
         }
       }
-
-      if(custom_number_index > -1) {
-        if(factory_product.roster_detail.findIndex((roaster:Record<any,any>) => roaster.number == custom_texts[custom_number_index].text) > -1) {
-          sorted_custom_text_svgs.push({
-            svg: custom_text_svgs[custom_number_index],
-            type: 'number',
-            scaleX:custom_texts[custom_number_index].scaleX,
-            scaleY:custom_texts[custom_number_index].scaleY,
-            rotation:custom_texts[custom_number_index].rotation,
-          });
-        }
-      }
-
-      let rest_of_text_svg : Record<any,any> = [];
-      custom_text_svgs.forEach((custom_text_svg:string,index:number) => {
-        if(index !== custom_name_index && index !== custom_number_index){
-          return rest_of_text_svg.push({
-            svg:custom_text_svg,
-            type:'common',
-            scaleX:custom_texts[index].scaleX,
-            scaleY:custom_texts[index].scaleY,
-            rotation:custom_texts[index].rotation,
-          });
-        }
-      });
-
-
-      rest_of_text_svg.forEach((text_svg:string)=>{
-        sorted_custom_text_svgs.push(text_svg);
-      });
-
-      for(let [indexrstr,roster_detail] of factory_product.roster_detail.entries()) {
-        let text = {};
-        let number = {};
-        let name_height = "";
-        let number_height = "";
-        companies_name = [];
-        for (let [index,custom_text_svg] of sorted_custom_text_svgs.entries()) {
-          let element = await self.getDocFromString(custom_text_svg.svg);
-          let el = element?.querySelector('g');
-          if(custom_text_svg.type === 'name' && el){
-            let tspan = el.querySelector('tspan');
-            if(tspan){
-              tspan.innerHTML = roster_detail.text
-              tspan.setAttribute('x','0');
-              tspan.setAttribute('y','0');
-              let el_text = el?.querySelector('text')
-              if(el_text){
-                text = {
-                  name :  new XMLSerializer().serializeToString(el_text),
-                  scaleX: custom_text_svg.scaleX,
-                  scaleY: custom_text_svg.scaleY,
-                  rotation: custom_text_svg.rotation,
-                };
-                name_height = factory_product.custom_texts[custom_name_index].originalHeight;
-              }
-            }
-
-          }
-          else if (custom_text_svg.type === 'number' && el){
-            let tspan = el.querySelector('tspan');
-            if(tspan){
-              tspan.innerHTML = roster_detail.number
-              tspan.setAttribute('x','0');
-              tspan.setAttribute('y','0');
-              let el_number = el?.querySelector('text')
-              if(el_number){
-                number = {
-                  name : new XMLSerializer().serializeToString(el_number),
-                  scaleX: custom_text_svg.scaleX,
-                  scaleY: custom_text_svg.scaleY,
-                  rotation: custom_text_svg.rotation,
-                }
-                number_height = factory_product.custom_texts[custom_number_index].originalHeight;
-              }
-
-            }
-
-
-          }
-          else {
-            if(el){
-              let tspan = el.querySelector('tspan');
-              if(tspan){
-                tspan.setAttribute('x','0');
-                tspan.setAttribute('y','0');
-                let el_common = el?.querySelector('text');
-                if(el_common){
-                  companies_name.push({
-                    name: {
-                      name: new XMLSerializer().serializeToString(el_common),
-                      scaleX: custom_text_svg.scaleX,
-                      scaleY: custom_text_svg.scaleY,
-                      rotation: custom_text_svg.rotation,
-                    },
-                    size: 'For ALL'
-                  })
-                }
-              }
-              let custom_logos_texts_string_mod = new XMLSerializer().serializeToString(el);
-              custom_logos_texts_string += custom_logos_texts_string_mod;
-            }
-
-          }
-
-
-        }
-
-        this.roster_detail.push(
-          {
-            text: text,
-            number: number,
-            size: roster_detail.size,
-            name_height: name_height,
-            number_height: number_height,
-          }
-        );
-      }
-      companies_name.forEach((company) => {
-        this.roster_detail.push(
-          {
-            text: company.name,
-            number:null,
-            size:company.size,
-            name_height: null,
-            number_height:null
-          }
-        )
-      })
-      let font_file = fontsList(this.selectedProduct)
-
-
-
-
-
-
-
-
-
-      for(let custom_logo_svg of factory_product.custom_logo_svgs) {
-        let logo_url = $(custom_logo_svg).find("img:eq(0)").attr("xlink:href")
-        if( logo_url) {
-          try {
-
-            let base64_logo = await urlToBase64(logo_url);
-            custom_logo_svg = custom_logo_svg.replace(logo_url, base64_logo)
-          } catch (errorResponse) {
-            console.log(errorResponse)
-          }
-        }
-        custom_logos_texts_string += custom_logo_svg;
-      }
-      if(custom_logos_texts_string) {
-        svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
-        // svg_string += `${custom_logos_texts_string}\n`
-        // svg_string += `${this.getSVGTable('Roaster Detail',['Name','Number','Size','Dimension'],this.roster_detail)}\n</g>\n</svg>`
-        svg_string += `${this.getSVGPattern(this.roster_detail,factory_product.measurement_ratio)}\n`
-        if(!(factory_product.custom_logos.length == 1 && factory_product.custom_logos[0].url === null)){
-          svg_string += `${await this.getLogoPattern(factory_product.custom_logos,factory_product.measurement_ratio)}`
-        }
-        svg_string += `\n</g>\n</svg>`;
-      }
+      svg_string += `\n</g>\n</svg>`;
       let svg_doc = await this.getDocFromString(svg_string);
       this.production_file_info = {
         width: $(svg_doc).find("svg").eq(0).attr("width"),
@@ -857,55 +696,32 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       };
 
 
-      //Applying Color on SVG
-      factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
-        $(svg_doc).find(`[id][fill]`).each(function(doc_item) {
-          let doc_elem_id = $(this).attr("id");
-          if(doc_elem_id) {
-            doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
-            if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
-              $(this).attr("fill", svg_group_item.color);
-            }
-          }
-        })
-      })
+      //Applying Color on SVG Start
+      this.applyColorToSVG(factory_product,svg_doc);
+      //Applying Color on SVG End
 
       //Add Fonts to SVgs Start
-      let font_style = document.createElementNS("http://www.w3.org/2000/svg","style");
-      for(let font of font_file){
-        font_style.innerHTML += ` @font-face{ font-family: ${font.text}; src: url('${font.url}');  }`;
+      let font_file = fontsList(this.selectedProduct);
+      if(font_file.length > 0){
+        let font_style = this.generateFontFile(font_file);
+        $(svg_doc).find("svg").eq(0).prepend(font_style)
       }
-      $(svg_doc).find("svg").eq(0).prepend(font_style)
       //Add Fonts to SVgs End
 
-      //Add Front and Back Images Side wise to svg
-      let group_back_image_tag = document.createElementNS("http://www.w3.org/2000/svg","g");
-      group_back_image_tag.setAttribute('transform',`matrix(1 0 0 1 ${parseFloat(self.production_file_info.width)} 0)`);
-      let back_image = document.createElementNS("http://www.w3.org/2000/svg","image");
-      back_image.setAttribute('xlink:href',`${factory_product.back_image}`);
-      back_image.setAttribute('height',`${(parseFloat(self.production_file_info.height)/2)}px`);
-      back_image.setAttribute('width',`${(parseFloat(self.production_file_info.height)/2)}px`);
-      group_back_image_tag.appendChild(back_image);
+      //Add Front and Back Images Shown on SVG Start
+      //Back Image
+      let group_back_image_tag = this.getGroupImageTag(factory_product,self.production_file_info,'back_image');
       $(svg_doc).find("g").eq(0).prepend(group_back_image_tag)
-
-
-      let group_front_image_tag = document.createElementNS("http://www.w3.org/2000/svg","g");
-      group_front_image_tag.setAttribute('transform',`matrix(1 0 0 1 ${parseFloat(self.production_file_info.width)} ${(parseFloat(self.production_file_info.width)/2) + 500})`);
-      let front_image = document.createElementNS("http://www.w3.org/2000/svg","image")
-      front_image.setAttribute('xlink:href',`${factory_product.front_image}`);
-      front_image.setAttribute('height',`${(parseFloat(self.production_file_info.height)/2)}px`);
-      front_image.setAttribute('width',`${(parseFloat(self.production_file_info.height)/2)}px`);
-      group_front_image_tag.appendChild(front_image);
+      //Front Image
+      let group_front_image_tag = this.getGroupImageTag(factory_product,self.production_file_info,'front_image');
       $(svg_doc).find("g").eq(0).prepend(group_front_image_tag)
-
-      //Add Front and Back Images Side wise to svg
+      //Add Front and Back Images Side wise to svg End
 
       $(svg_doc).find("svg").eq(0).attr({"width": (scaled_file_info.width * 2) + 'px', height: scaled_file_info.height + 'px'});
       let view_box = svg_doc?.querySelector('svg')?.getAttribute('viewBox');
       let view_box_dimensions = view_box?.split(" ");
       svg_doc?.querySelector('svg')?.setAttribute('viewBox',`${view_box_dimensions[0]} ${view_box_dimensions[1]} ${parseFloat(self.production_file_info.width) * 2} ${this.logo_pattern_last_value_y?this.logo_pattern_last_value_y:this.svg_pattern_last_value_y}`);
-      production_content = new XMLSerializer().serializeToString(svg_doc);
-
+      production_content = await this.serializer(svg_doc);
       return production_content;
     }
     else{
@@ -913,6 +729,127 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     }
 
     // self.$emit("update:production_file_obj", self.production_file_obj)
+  }
+
+  public async parseFactoryProduct(factory_product : Record<any, any>){
+    let default_svg_object = {
+      svg : null,
+      placement : null,
+      width : null,
+      height : null,
+      scaleX : null,
+      scaleY : null,
+      rotation:null,
+      original_height: null,
+    };
+    let empty_text = this.getDocFromString(`<g style="transform: rotate(0deg)"></g>`);
+
+    for (let index = 0; index < factory_product.roster_detail.length; index++) {
+      let detail = factory_product.roster_detail[index]
+      if(detail) {
+        if(Object.prototype.hasOwnProperty.call(detail,'svgs')){
+          if(Object.prototype.hasOwnProperty.call(detail.svgs,'name') && detail.svgs.name.svg){
+            let group_name_svg = await this.getDocFromString(detail.svgs.name.svg);
+            let svg_name_text = group_name_svg.querySelector('text');
+            if(svg_name_text){
+              svg_name_text?.setAttribute('font-size',`${detail.svgs.name.original_height}cm`);
+            }
+            let tspan_name = svg_name_text? svg_name_text.querySelector('tspan') : null;
+            if(tspan_name){
+              tspan_name.setAttribute('x','0');
+              tspan_name.setAttribute('y','0');
+            }
+            detail.svgs.name.text_svg = svg_name_text? await this.serializer(svg_name_text) : await this.serializer(empty_text);
+          }
+          else{
+            let svg_object : Record<any,any> = {};
+            svg_object['name'] = default_svg_object;
+            if(Object.prototype.hasOwnProperty.call(detail.svgs,'number')){
+              svg_object['number'] = detail.svgs.number;
+            }
+            else{
+              svg_object['number'] = default_svg_object;
+            }
+            detail.svgs = svg_object;
+            detail.svgs.name.text_svg = await this.serializer(empty_text);
+          }
+          if(Object.prototype.hasOwnProperty.call(detail.svgs,'number') && detail.svgs.number.svg){
+            let group_number_svg = await this.getDocFromString(detail.svgs.number.svg);
+            let svg_number_text = group_number_svg.querySelector('text');
+            if(svg_number_text){
+              svg_number_text?.setAttribute('font-size',`${detail.svgs.number.original_height}cm`);
+            }
+            let tspan_number = svg_number_text?svg_number_text?.querySelector('tspan') : null;
+            if(tspan_number){
+              tspan_number?.setAttribute('x','0');
+              tspan_number?.setAttribute('y','0');
+            }
+            detail.svgs.number.text_svg = svg_number_text? await this.serializer(svg_number_text) : await this.serializer(empty_text);
+          }
+          else{
+            let svg_object : Record<any,any> = {};
+            svg_object['number'] = default_svg_object;
+            if(Object.prototype.hasOwnProperty.call(detail.svgs,'name')){
+              svg_object['name'] = detail.svgs.name;
+            }
+            else{
+              svg_object['name'] = default_svg_object;
+            }
+            svg_object['name'] = detail.svgs.name;
+            detail.svgs = svg_object;
+            detail.svgs.number.text_svg = await this.serializer(empty_text);
+          }
+          Object.assign(factory_product.roster_detail[index], detail)
+        }
+        else {
+          let svg_object: Record<any, any> = {};
+          svg_object['name'] = default_svg_object;
+          svg_object['number'] = default_svg_object;
+          detail.svgs = svg_object;
+          Object.assign(factory_product.roster_detail[index], detail)
+        }
+      }
+    }
+    return factory_product;
+  }
+
+  public serializer(svg_doc: SVGTextElement | Document) {
+    return new Promise((resolve) => {
+      const xml = new XMLSerializer()
+      const xml_string = xml.serializeToString(svg_doc)
+      resolve(xml_string)
+    })
+  }
+
+  public applyColorToSVG(factory_product:Record<any,any>, svg_doc:Record<any,any>){
+    factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
+      $(svg_doc).find(`[id][fill]`).each  (function(doc_item) {
+        let doc_elem_id = $(this).attr("id");
+        if(doc_elem_id) {
+          doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
+          if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
+            $(this).attr("fill", svg_group_item.color);
+          }
+        }
+      })
+    })
+  }
+  public generateFontFile(font_file:Record<any,any>[]){
+    let font_style = document.createElementNS("http://www.w3.org/2000/svg","style");
+    for(let font of font_file){
+      font_style.innerHTML += ` @font-face{ font-family: ${font.text}; src: url('${font.url}');  }`;
+    }
+    return font_style;
+  }
+  public getGroupImageTag(factory_product:Record<any,any>,production_file_info:Record<any,any>,image_side:string){
+    let group_image_tag = document.createElementNS("http://www.w3.org/2000/svg","g");
+    group_image_tag.setAttribute('transform',`matrix(1 0 0 1 ${parseFloat(production_file_info.width)} ${(image_side === 'front_image')? ((parseFloat(production_file_info.width)/2) + 500) : 0 })`);
+    let back_image = document.createElementNS("http://www.w3.org/2000/svg","image");
+    back_image.setAttribute('xlink:href',`${factory_product[image_side]}`);
+    back_image.setAttribute('height',`${(parseFloat(production_file_info.height)/2)}px`);
+    back_image.setAttribute('width',`${(parseFloat(production_file_info.height)/2)}px`);
+    group_image_tag.appendChild(back_image);
+    return group_image_tag;
   }
   public getSVGPattern(values:Record<any,any>,measurement_ratio:number){
     return `
@@ -936,27 +873,57 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
         ${values.map((value:Record<any,any>,index:number) => {
       return `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${5000})">
-                <g transform="matrix(${value.text.scaleX/measurement_ratio} 0 0 ${value.text.scaleY/measurement_ratio} 0 ${500 + index * 1000})">
-                      <g style="transform: rotate(${value.text?value.text.rotation : '0'}deg)">${value.text.name?value.text.name : ''}</g>
-                </g>
-                <g transform="matrix(${(value.number?value.number.scaleX:1)/measurement_ratio} 0 0 ${(value.number?value.number.scaleY:1)/measurement_ratio} 1000 ${500 + index * 1000})" >
-                      <g style="transform: rotate(${value.number?value.number.rotation : '0'}deg)">${value.number? value.number.name : ''}</g>
-                </g>
-                <g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
+                ${Object.prototype.hasOwnProperty.call(value,'svgs')?
+                  `<g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
+                      <g style="transform: rotate(${value.svgs.name.rotation?value.svgs.name.rotation : '0'}deg)">${value.svgs.name.text_svg}</g>
+                   </g>`
+                :
+                  `<g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
+                      <g style="transform: rotate(0deg)"></g>
+                   </g>`
+                }
+                ${Object.prototype.hasOwnProperty.call(value, 'svgs') ?
+                  `<g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})" >
+                        <g style="transform: rotate(${value.svgs.number.rotation ? value.svgs.number.rotation : '0'}deg)">${value.svgs.number.text_svg}</g>
+                    </g>`
+                  :
+                  `<g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
+                      <g style="transform: rotate(0deg)"></g>
+                   </g>`
+                  }
+                ${Object.prototype.hasOwnProperty.call(value, 'size') ?
+                `<g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.size? value.size : ''} </tspan>
+                        <tspan x="0" y="0">${value.size ? value.size : ''} </tspan>
                     </text>
-                </g>
-                <g transform="matrix(1 0 0 1 3000 ${500 + index * 1000})">
+                </g>`
+                :
+                `<g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
+                        <g style="transform: rotate(0deg)"></g>
+                 </g>`
+               }
+                ${Object.prototype.hasOwnProperty.call(value, 'svgs') ?
+                `<g transform="matrix(1 0 0 1 3000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.name_height? value.name_height + 'cm /' + parseFloat(value.name_height/this.INCH_TO_CENTIMETER).toFixed(2) + 'in'  : ''} </tspan>
+                        <tspan x="0" y="0">${value.svgs.name.original_height ? value.svgs.name.original_height + 'cm /' + parseFloat(value.svgs.name.original_height / this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
                     </text>
-                </g>
-                <g transform="matrix(1 0 0 1 4000 ${500 + index * 1000})">
+                </g>`
+                :
+                `<g transform="matrix(1 0 0 1 3000 ${500 + index * 1000})">
+                        <g style="transform: rotate(0deg)"></g>
+                 </g>`
+                }
+                ${Object.prototype.hasOwnProperty.call(value, 'svgs') ?
+                  `<g transform="matrix(1 0 0 1 4000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.number_height? value.number_height + 'cm /' + parseFloat(value.number_height/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
+                        <tspan x="0" y="0">${value.svgs.number.original_height? value.svgs.number.original_height + 'cm /' + parseFloat(value.svgs.number.original_height/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
                     </text>
-                </g>
+                </g>`
+                  :
+                  `<g transform="matrix(1 0 0 1 4000 ${500 + index * 1000})">
+                        <g style="transform: rotate(0deg)"></g>
+                    </g>`
+                }
                 ${this.svg_pattern_last_value_y = ((500 + index * 1000) + 5000)}
                 </g>`
 
@@ -981,14 +948,35 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     let index = 0;
     for(let index in values) {
       let value = values[index];
-      let original_url = Object.prototype.hasOwnProperty.call(value,'original_logo_url');
+      let original_url = Object.prototype.hasOwnProperty.call(value,'original_logo_url') && value.original_logo_url;
       let updated_url = original_url?value.original_logo_url:value.url;
-      if(getFileExtensionType('raster', updated_url) ){
-        await urlToBase64(`${this.storage_url}${updated_url}`).then(async (base64) => {
+      let has_base64 = Object.prototype.hasOwnProperty.call(value,'base_64')?true:false;
+      if(updated_url !== null && updated_url !== "" && updated_url !== undefined){
+        if(getFileExtensionType('raster', updated_url) ){
+          if(has_base64){
+            svg_group_el += `
+                <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
+                <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
+                    ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${value.base_64}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/></g>`:''}
+                </g>
+                <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">${value.side? value.side : ''} </tspan>
+                    </text>
+                </g>
+                <g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="0" y="0">${value.originalWidth? value.originalWidth + 'cm x' + value.originalHeight + 'cm /' + parseFloat(value.originalWidth/this.INCH_TO_CENTIMETER).toFixed(2) + 'in x' + parseFloat(value.originalHeight/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
+                    </text>
+                </g>
+                ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/measurement_ratio))}
+                </g>`
+          }
+        } else {
           svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
                 <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
-                    ${updated_url?`<image xlink:href="${base64}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/>`:''}
+                    ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${this.storage_url}${updated_url}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/></g>`:''}
                 </g>
                 <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
@@ -1002,27 +990,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
                 </g>
                 ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/measurement_ratio))}
                 </g>`
-        })
-      } else {
-        svg_group_el += `
-                <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${this.svg_pattern_last_value_y + 500})">
-                <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
-                    ${updated_url?`<image xlink:href="${this.storage_url}${updated_url}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/>`:''}
-                </g>
-                <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
-                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.side? value.side : ''} </tspan>
-                    </text>
-                </g>
-                <g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
-                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.originalWidth? value.originalWidth + 'cm x' + value.originalHeight + 'cm /' + parseFloat(value.originalWidth/this.INCH_TO_CENTIMETER).toFixed(2) + 'in x' + parseFloat(value.originalHeight/this.INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
-                    </text>
-                </g>
-                ${this.logo_pattern_last_value_y = (((500 + index * 1000) + (this.svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/measurement_ratio))}
-                </g>`
+        }
+        ++index;
       }
-      ++index;
     }
     return svg_group_el;
   }

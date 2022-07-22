@@ -24,7 +24,7 @@
             <BIconDash class="minus" /> Collapse
           </span>
           <span class="plus d-flex align-items-center">
-            <BIconPlus class="plus" /> Expand
+            <BIconPlus class="plus" /> Modify
           </span>
         </button>
       </div>

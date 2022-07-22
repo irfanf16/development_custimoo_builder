@@ -99,7 +99,7 @@ window.Echo = new Echo({
   },
 });
 
-import { getCompany } from "@/helpers/Helpers";
+import {getCompany, getPermissions} from "@/helpers/Helpers";
 
 export default {
   store, router,
@@ -117,8 +117,10 @@ export default {
       }
     }
   },
-  mounted: async () => {
+  mounted: async function() {
     await getCompany();
+    // This will only work on your root Vue component since it's using $parent
+    const { shadowRoot } = this.$parent.$options
     let elem = document.createElement('link');
     elem.rel = ' stylesheet'
     elem.type = 'text/css';
@@ -138,14 +140,13 @@ export default {
       })
     }
 
-    if(this.$root.$options.shadowRoot) {
+    if(shadowRoot) {
       let ubuntu_font = document.createElement("style")
       ubuntu_font.append = '@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap")'
       document.head.append(ubuntu_font)
     }
 
-    // This will only work on your root Vue component since it's using $parent
-    const { shadowRoot } = this.$parent.$options
+
     const id = 'fa-styles'
 
     if (!shadowRoot.getElementById(`${id}`)) {
@@ -155,6 +156,8 @@ export default {
       shadowRoot.appendChild(faStyles)
     }
     const token = this.$router.currentRoute.query.token
+    let self = this;
+
     if (token){
       let customer = await this.$store.dispatch('getCustomerFromToken', token)
       if (customer){
@@ -172,13 +175,58 @@ export default {
         alert('no customer')
       }
       this.$store.commit('SET_RECENT_LOGOS')
+    }else{
+      let jwtcustomer = localStorage.getItem('customer');
+
+      if(!jwtcustomer || jwtcustomer==''){
+          var storageInterval = setInterval(()=>{
+            let jwtToken = localStorage.getItem('jwtToken');
+            if(jwtToken && jwtToken !=''){
+                self.authenticateUser(jwtToken)
+                clearInterval(storageInterval);
+              }
+            }, 500)
+      }
     }
+
     const customer =  this.$store.getters.getCustomer;
     window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
       this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
     })
+  },
+  methods:{
+    async authenticateUser(token){
+      let customer = await this.$store.dispatch('getCustomerFromToken', token)
+
+      if (customer){
+        let payload = {
+          access_token: token,
+          user: customer
+        }
+
+        this.$store.commit('SET_CUSTOMER', payload)
+        if(!localStorage.getItem('browserToken')){
+          await this.$store.dispatch('setBrowserToken')
+        }
+        await this.$store.dispatch("getLockers");
+        await this.$store.dispatch('getLockerRoomColors')
+        await this.$store.dispatch('getCartServer', {})
+        await this.$store.dispatch('getNotifications')
+        await  getPermissions()
+
+        window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
+          this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
+        })
+
+      }else{
+        alert('no customer')
+      }
+      this.$store.commit('SET_RECENT_LOGOS')
+    }
   }
 }
+Vue.config.devtools = true
+
 </script>
 
 <style lang="scss">

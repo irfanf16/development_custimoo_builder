@@ -1410,6 +1410,14 @@ button {
                     bottom: 1px;
                 }
             }
+
+            ul.nav{
+                li{
+                    a{
+                        white-space: nowrap;
+                    }
+                }
+            }
         }
     }
 

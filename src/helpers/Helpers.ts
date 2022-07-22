@@ -425,91 +425,82 @@ const pathInfo = (file_path: string, ) => {
   };
 }
 
-const checkSceneMounted = async () => {
-  const scene_ref = Store.getters.getCanvasImage.scene
-  if(scene_ref.mounted) {
-    return true
-  } else {
-    setTimeout(checkSceneMounted, 500)
-  }
-}
+const getActiveProductData = () => {
+  return new Promise((resolve) => {
+    const interval = setInterval(() => {
+      const scene_ref = Store.getters.getCanvasImage.scene
+      if (!(scene_ref && scene_ref.mounted)) {
+        console.log('not reslove')
+        return
+      }
 
-const getActiveProductData = async () => {
-  await checkSceneMounted()
-  const scene_ref = Store.getters.getCanvasImage.scene
-  const getCanvasImage = Store.getters.getCanvasImage
+      const getCanvasImage = Store.getters.getCanvasImage
 
+      const style_index = Store.getters.getCurrentStyleIndex;
+      const selected_product = Store.getters.getSelectedProduct;
+      const product_style = selected_product.productstyles[style_index];
+      const lockerEditStatus = Store.getters.getEditStatus;
+      let product_name = selected_product.product_name
+      //selected_design will always return array having single object
+      const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
 
-  if (getCanvasImage) {
-    const style_index = Store.getters.getCurrentStyleIndex;
-    const selected_product = Store.getters.getSelectedProduct;
-    const product_style = selected_product.productstyles[style_index];
-    const lockerEditStatus = Store.getters.getEditStatus;
-    let product_name = selected_product.product_name
-     //selected_design will always return array having single object
-    const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
-
-    let design_name = selected_design.design_name;
-    if(lockerEditStatus){
-      const lockerEditProductName = Store.getters.getEditProductName;
-      if(lockerEditProductName)
-        design_name = lockerEditProductName
-    }
-    product_name = `${product_name} - ${design_name}`;
-    const product_models = Store.getters.getProductModels;
-    const selected_model_index = Store.getters.getSelectedModelIndex;
-    scene_ref.frontCanvas.discardActiveObject().renderAll()
-    scene_ref.backCanvas.discardActiveObject().renderAll()
-    const post_data: Record<any, any> = {
-      back_image: getCanvasImage.ref_back?.toDataURL("image/png"),
-      custom_logos: Store.getters.getCustomLogos(),
-      measurement_ratio: selected_design.measurement_ratio,
-      custom_logo_svgs: [],
-      custom_texts: Store.getters.getCustomTexts(),
-      custom_text_svgs: [],
-      colors: Store.getters.getLogosColors,
-      design_id: selected_design.id,
-      defaultcolors: Store.getters.getDefaultColors,
-      front_image: getCanvasImage.ref_front.toDataURL("image/png"),
-      groupcolors: Store.getters.getGroupColors,
-      logo_colors: Store.getters.getLogosColors,
-      model_id: product_models[selected_model_index].id,
-      product_id: selected_product.product_id,
-      ecommerce_post_id: selected_product.ecommerce_product_id,
-      sync_id: selected_product.sync_id,
-      product_type: selected_product.product_type,
-      product_name: product_name,
-      pdf_file: null,
-      production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
-      // front_design:front_design,
-      roster_detail: Store.getters.getRosterDetails(),
-      style_id: product_style.id,
-      svg_groups: Store.getters.getSvgGroups,
-      ecommerce_cart_id:null
-    }
-    if(scene_ref.customTextObjects) {
-      for (const custom_text_object of scene_ref.customTextObjects) {
-        if (custom_text_object && Object.keys(custom_text_object).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
-          post_data.custom_text_svgs.push(custom_text_object.toSVG());
+      let design_name = selected_design.design_name;
+      if(lockerEditStatus){
+        const lockerEditProductName = Store.getters.getEditProductName;
+        if(lockerEditProductName)
+          design_name = lockerEditProductName
+      }
+      product_name = `${product_name} - ${design_name}`;
+      const product_models = Store.getters.getProductModels;
+      const selected_model_index = Store.getters.getSelectedModelIndex;
+      scene_ref.frontCanvas.discardActiveObject().renderAll()
+      scene_ref.backCanvas.discardActiveObject().renderAll()
+      const post_data: Record<any, any> = {
+        back_image: getCanvasImage.ref_back?.toDataURL("image/png"),
+        custom_logos: Store.getters.getCustomLogos(),
+        measurement_ratio: selected_product.measurement_ratio,
+        custom_logo_svgs: [],
+        custom_texts: Store.getters.getCustomTexts(),
+        custom_text_svgs: [],
+        colors: Store.getters.getLogosColors,
+        design_id: selected_design.id,
+        defaultcolors: Store.getters.getDefaultColors,
+        front_image: getCanvasImage.ref_front.toDataURL("image/png"),
+        groupcolors: Store.getters.getGroupColors,
+        logo_colors: Store.getters.getLogosColors,
+        model_id: product_models[selected_model_index].id,
+        product_id: selected_product.product_id,
+        ecommerce_post_id: selected_product.ecommerce_product_id,
+        sync_id: selected_product.sync_id,
+        product_type: selected_product.product_type,
+        product_name: product_name,
+        pdf_file: null,
+        production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
+        // front_design:front_design,
+        roster_detail: Store.getters.getRosterDetails(),
+        style_id: product_style.id,
+        svg_groups: Store.getters.getSvgGroups,
+        ecommerce_cart_id:null
+      }
+      if(scene_ref.customTextObjects) {
+        for (const custom_text_object of scene_ref.customTextObjects) {
+          if (custom_text_object && Object.keys(custom_text_object).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
+            post_data.custom_text_svgs.push(custom_text_object.toSVG());
+          }
         }
       }
-    }
-    if(scene_ref.customLogoObjects) {
-      for (const custom_logo_svg of scene_ref.customLogoObjects) {
-        if(custom_logo_svg && Object.keys(custom_logo_svg).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
-          post_data.custom_logo_svgs.push(custom_logo_svg);
+      if(scene_ref.customLogoObjects) {
+        for (const custom_logo_svg of scene_ref.customLogoObjects) {
+          if(custom_logo_svg && Object.keys(custom_logo_svg).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
+            post_data.custom_logo_svgs.push(custom_logo_svg);
+          }
         }
       }
-    }
-    return post_data;
-  } else {
-    VsToast.show({
-      title: 'Please let scene load',
-      variant: 'info',
-      timeout: 5000
-    });
-    return null;
-  }
+
+      clearInterval(interval)
+      resolve(post_data)
+    }, 500)
+  })
 }
 
 const initCustomTexts = (retrieved_products: Record<any, any>) => {
@@ -781,9 +772,37 @@ const getNewCustomTexts = async (product_ids_string: string, custom_text_types_s
   return custom_texts;
 }
 
+const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
+  if(for_all_edit_modes) {
+    return { editing: false, type: null,
+      filters: { customized: true, personalized: false, search_products: '' },
+      locker_product_info: { product_id: null, locker_product_id: null, style_id: null, design_id: null },
+      cart_product_info: { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null },
+      order_product_info: { order_item_id:  null, activity_id: null, order_products: null}
+    }
+  }
+  let response_obj = null;
+  switch (type) {
+    case "filters":
+      response_obj = { customized: true, personalized: false, search_products: '' }
+      break;
+    case "locker_product":
+      response_obj = { product_id: null, locker_product_id: null, style_id: null, design_id: null }
+      break;
+    case "cart_product":
+      response_obj = { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null }
+      break;
+    case "order_product":
+      response_obj = { order_item_id:  null, activity_id: null, order_products: null}
+    break;
+    default:
+      console.error(`Error while getting edit mode default object. Expecting value (filters, locker_product, cart_product, order_product) while (${type}) is given `)
+  }
+  return response_obj;
+}
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getNewCustomTexts
+  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getNewCustomTexts, getEditModeDefaultObjFor
 };
