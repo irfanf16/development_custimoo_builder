@@ -195,7 +195,7 @@ const getSelectedProductPantones = (product_id = null) => {
 
     selectedProduct.colors.forEach((product_colors: any, key: number) => {
     if(key == 0){
-      const colors = JSON.parse(product_colors.json_data)
+      const colors = product_colors.json_data
       colors.forEach((color: any) => {
         //let pantone = color.name
         let pantone = ''
@@ -229,7 +229,7 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
 
   selectedProduct.namecolors.forEach((colors: any, key: number) => {
     const finalColor = {color_text: []}
-    finalColor.color_text = JSON.parse(colors.json_data)
+    finalColor.color_text =colors.json_data
     fontsColors = fontsColors.concat(finalColor)
   })
   if (fontsColors.length) {
@@ -246,7 +246,7 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
   const fontOptions:any = [];
 
    if (productFonts.length){
-     const item = JSON.parse(productFonts[0].json_data)
+     const item = productFonts[0].json_data
      if(item) {
        item.forEach((fonts: any, key: number) => {
          let fontNameParam = fonts.path.split('/').reverse()
@@ -604,7 +604,7 @@ const rosterDetailsInit = (retrieved_products: Record<any, any>) => {
 
 const getRosterDetailDefaultObject = (product = Store.getters.getSelectedProduct) => {
   if (product.sizes.length){
-    const productSizes = JSON.parse(product.sizes[0].json_data)
+    const productSizes = product.sizes[0].json_data
     return {
       text: '',
       number: '',

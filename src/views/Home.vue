@@ -939,7 +939,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       const product = products[product_index]
       const productFonts = product.namefonts;
       if (productFonts.length){
-        const item = JSON.parse(productFonts[0].json_data)
+        const item = productFonts[0].json_data
         if(item) {
           for(let i = 0; i < item.length; i++) {
             const font = item[i]
@@ -1029,7 +1029,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
-      this.colors = JSON.parse(response.data.json_data)
+      this.colors = response.data.json_data
     }).catch((e: any) => {
       console.log(e)
     });

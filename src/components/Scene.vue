@@ -703,7 +703,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
           if (distinguishPart.length && comparePart.length && distinguishPart[0].color == comparePart[0].color) {
             let changeColor: Record<any, any> = {}
             for (let index in this.productColors) {
-              let colors = JSON.parse(this.productColors[index].json_data)
+              let colors = this.productColors[index].json_data
               for (let i in colors) {
                 if (colors[i].value != comparePart[0].color) {
                   changeColor = colors[i]

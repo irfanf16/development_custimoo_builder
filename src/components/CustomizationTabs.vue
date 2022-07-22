@@ -281,7 +281,7 @@ export default class CustomizationTabs extends Vue {
     let cumulative_size:Record<any,any> = [];
     Object.values(this.selectedProduct.sizes).forEach((value)=>{
       if(Object.prototype.hasOwnProperty.call(value as Record<any,any>,'json_data')){
-        cumulative_size.push(JSON.parse(value.json_data));
+        cumulative_size.push(value.json_data);
       }
     })
     let sizes = [] as Record<any,any>;
@@ -355,7 +355,7 @@ export default class CustomizationTabs extends Vue {
     this.productColors = []
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
-      finalColor.color_text = JSON.parse(colors.json_data)
+      finalColor.color_text = colors.json_data
       this.productColors = this.productColors.concat(finalColor)
     })
     if (this.lockerColors.length > 0){
@@ -374,7 +374,7 @@ export default class CustomizationTabs extends Vue {
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: []}
-      finalColor.color_text = JSON.parse(colors.json_data)
+      finalColor.color_text = colors.json_data
       this.fontsColors = this.fontsColors.concat(finalColor)
     })
     if (this.fontsColors.length) {
@@ -402,7 +402,7 @@ export default class CustomizationTabs extends Vue {
     let productFonts = this.selectedProduct.namefonts
     let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
     if (productFonts.length){
-      let item = JSON.parse(productFonts[0].json_data)
+      let item = productFonts[0].json_data
       if(item) {
         this.fontOptions = []
         item.forEach((fonts: any, key: number) => {

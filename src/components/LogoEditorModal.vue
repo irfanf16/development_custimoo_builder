@@ -253,7 +253,7 @@ export default class LogoEditorModal extends Mixins(ErrorMessages, ModalAction) 
     this.productColors = []
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
       let finalColor = { color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.')) }
-      finalColor.color_text = JSON.parse(colors.json_data)
+      finalColor.color_text = colors.json_data
       this.productColors = this.productColors.concat(finalColor)
     })
     let locker_colors = this.lockerColors
