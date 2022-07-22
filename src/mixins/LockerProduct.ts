@@ -3,7 +3,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import {findIndex} from 'lodash';
 import {
   fontsColorsManipulation,
-  fontsList, getNewCustomTexts,
+  fontsList,
   getRandom,
   initCustomLogos,
   initCustomTexts,
@@ -273,7 +273,6 @@ export class handleMainProducts extends Vue {
   public async setCustomTexts(selected_product: Record<any, any>) {
     let self: Record<any, any> = this;
     let custom_texts = selected_product.product_texts;
-    // let custom_texts = await getNewCustomTexts(`${self.$store.getters.getSelectedProductId},17,18`, "name:3,number:2", 2)
     self.$store.commit("SET_NEW_CUSTOM_TEXTS", JSON.parse(JSON.stringify(custom_texts)))
     self.$eventBus.$emit("setSelectedProductCustomTexts");
   }

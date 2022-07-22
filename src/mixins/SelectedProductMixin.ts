@@ -67,10 +67,8 @@ export class SetSelectedProductCustomTexts extends Vue {
   async setSelectedProductCustomTexts() {
     const self: Record<any, any> = this;
     const selected_product = self.$store.getters.getSelectedProduct
-    console.log("selected_product", selected_product)
     if(selected_product) {
       const selected_product_custom_texts = self.$store.getters.getNewCustomTexts(selected_product.id)
-      console.log("selected_product_custom_texts", selected_product_custom_texts)
       if(selected_product_custom_texts) {
         self.product_custom_texts = JSON.parse(JSON.stringify(selected_product_custom_texts));
       } else {

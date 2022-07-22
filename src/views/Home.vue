@@ -939,7 +939,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       const product = products[product_index]
       const productFonts = product.namefonts;
       if (productFonts.length){
-        const item = JSON.parse(productFonts[0].json_data)
+        const item = productFonts[0].json_data
         if(item) {
           for(let i = 0; i < item.length; i++) {
             const font = item[i]
