@@ -763,7 +763,7 @@ const getNewCustomTexts = async (product_ids_string: string, custom_text_types_s
           rotation: 0,
           outline_enabled: true,
           outline_width: 2,
-          font_family: "BebasNeue-Regular",
+          font_family: "AGENCYB",
           color: "#F4F5F0",
           color_pantone: "WHITE",
           outline_color:"#292A2D",

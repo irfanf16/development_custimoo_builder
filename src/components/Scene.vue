@@ -968,13 +968,14 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
         const fabric_object = e.target;
         if(fabric_object.get("type") == "text") {
           self.handleCustomTextModifiedEvent(e.target)
+        } else {
+          self.objectMove(e, side)
         }
         let objects = canvas.getObjects('line');
         for (let i in objects) {
           canvas.remove(objects[i]);
         }
         this.drawLines = false
-        self.objectMove(e, side)
         self.addToOtherSide(e.target, side)
       })
 
@@ -1492,73 +1493,59 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
 
   public objectMove(e: any, side: string) {
     const self = this;
-    if (e.target.text) {
-      this.customTexts.forEach((text, index) => {
-        if (e.target.textIndex == index) {
+    this.customLogos.forEach((logo, index) => {
+      if (logo) {
+        let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
+        if (logoUrl == e.target._element.src.split("?")[0] && logo.logoIndex == e.target.logoIndex) {
           if (e.action == 'drag') {
-            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), { 'action': e.action })
-            this.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
-            self.$store.dispatch('updateCustomTextAttribute', {
+            let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
+            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
+            self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
-              on_all: false,
               attribute: 'x_axis',
               value: e.target.left
             })
-            self.$store.dispatch('updateCustomTextAttribute', {
+            self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
-              on_all: false,
               attribute: 'y_axis',
               value: e.target.top
             })
           } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), { 'action': e.action })
-            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
+            let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
+            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
             const width = e.target.width * e.target.scaleX;
             const height = e.target.height * e.target.scaleY;
-            const outLineWidth = e.target.strokeWidth * e.target.scaleX
-            self.$store.dispatch('updateCustomTextAttribute', {
+            self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
-              on_all: false,
               attribute: 'scaleX',
               value: e.target.scaleX
             })
-            self.$store.dispatch('updateCustomTextAttribute', {
+            self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
-              on_all: false,
               attribute: 'originalWidth',
-              value: (width * this.measurementRatio).toFixed(1)
+              value: Math.floor(width * this.measurementRatio)
             })
-            self.$store.dispatch('updateCustomTextAttribute', {
+            self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
-              on_all: false,
               attribute: 'scaleY',
               value: e.target.scaleY
             })
-            self.$store.dispatch('updateCustomTextAttribute', {
+            self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
-              on_all: false,
               attribute: 'originalHeight',
-              value: (height * this.measurementRatio).toFixed(1)
-            })
-            self.$store.dispatch('updateCustomTextAttribute', {
-              index: index,
-              on_all: false,
-              attribute: 'originalOutLineWidth',
-              value: (outLineWidth * this.measurementRatio).toFixed(1)
+              value: Math.floor(height * this.measurementRatio)
             })
           } else if (e.action == 'rotate') {
-            let before_update = this.updateTextObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), { 'action': e.action })
-            this.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customTexts' })
-            self.$store.dispatch('updateCustomTextAttribute', {
+            let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
+            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
+            self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
-              on_all: false,
               attribute: 'rotation',
               value: e.target.angle
             })
           }
-          self.$store.dispatch('updateCustomTextAttribute', {
+          self.$store.dispatch('updateCustomLogoAttribute', {
             index: index,
-            on_all: false,
             attribute: 'action',
             value: e.action
           })
@@ -1568,73 +1555,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
           }
           this.showDimensions(e, dimText)
         }
-      })
-    } else {
-      this.customLogos.forEach((logo, index) => {
-        if (logo) {
-          let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
-          if (logoUrl == e.target._element.src.split("?")[0] && logo.logoIndex == e.target.logoIndex) {
-            if (e.action == 'drag') {
-              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-              self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-              self.$store.dispatch('updateCustomLogoAttribute', {
-                index: index,
-                attribute: 'x_axis',
-                value: e.target.left
-              })
-              self.$store.dispatch('updateCustomLogoAttribute', {
-                index: index,
-                attribute: 'y_axis',
-                value: e.target.top
-              })
-            } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-              self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-              const width = e.target.width * e.target.scaleX;
-              const height = e.target.height * e.target.scaleY;
-              self.$store.dispatch('updateCustomLogoAttribute', {
-                index: index,
-                attribute: 'scaleX',
-                value: e.target.scaleX
-              })
-              self.$store.dispatch('updateCustomLogoAttribute', {
-                index: index,
-                attribute: 'originalWidth',
-                value: Math.floor(width * this.measurementRatio)
-              })
-              self.$store.dispatch('updateCustomLogoAttribute', {
-                index: index,
-                attribute: 'scaleY',
-                value: e.target.scaleY
-              })
-              self.$store.dispatch('updateCustomLogoAttribute', {
-                index: index,
-                attribute: 'originalHeight',
-                value: Math.floor(height * this.measurementRatio)
-              })
-            } else if (e.action == 'rotate') {
-              let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-              self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-              self.$store.dispatch('updateCustomLogoAttribute', {
-                index: index,
-                attribute: 'rotation',
-                value: e.target.angle
-              })
-            }
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'action',
-              value: e.action
-            })
-            let dimText = this.dimTextFront
-            if (e.target.side == 'back') {
-              dimText = this.dimTextBack
-            }
-            this.showDimensions(e, dimText)
-          }
-        }
-      })
-    }
+      }
+    })
   }
 
   public async addModel(modelUrl: string, side: string) {
@@ -1839,7 +1761,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     let object = e.target;
     const width = (object.width as number * object.scaleX * this.measurementRatio)
     const height = (object.height as number * object.scaleY * this.measurementRatio)
-
+    console.log(width, object.width, object.scaleX, this.measurementRatio)
     if (width != 0 || height != 0) {
       dimText.set({
         left: object.left,
@@ -2029,6 +1951,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
               visible: custom_text_item.selected,
               custom_text_index: custom_text_index,
               custom_text_item_index: customTextItemIndex,
+              type: "text"
             })
             fabric_text.setControlsVisibility({
               tl: false,
@@ -2050,9 +1973,25 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
             if (custom_text_item.placement == 'front') {
               self.frontCanvas.add(fabric_text)
               render_front_canvas = true
+              fabric_text.on('selected', (e: Record<any, any>) => {
+                this.showDimensions(e, self.dimTextFront)
+              })
+              self.frontCanvas.on('selection:cleared', () => {
+                self.dimTextFront.set({
+                  visible: false
+                })
+              })
             } else if (custom_text_item.placement == 'back' && self.backCanvas) {
               self.backCanvas.add(fabric_text)
               render_back_canvas = true
+              fabric_text.on('selected', (e: Record<any, any>) => {
+                this.showDimensions(e, self.dimTextBack)
+              })
+              self.backCanvas.on('selection:cleared', () => {
+                self.dimTextBack.set({
+                  visible: false
+                })
+              })
             }
           })
         }
@@ -2079,7 +2018,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
           _fontSizeMult: .835,
           placement: custom_text_item.placement,
           visible: custom_text_item.selected,
-          custom_text_index: custom_text_item_index
+          custom_text_index: custom_text_index,
+          custom_text_item_index: customTextItemIndex,
         })
         fabric_text.setControlsVisibility({
           tl: false,
