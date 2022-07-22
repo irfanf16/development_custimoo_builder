@@ -139,6 +139,7 @@ import { ProductColors, ProductFonts, SetSelectedProductCustomTexts } from "@/mi
   },
   async mounted() {
     let self: Record<any, any> = this;
+    console.log("mounted")
     self.$eventBus.$on("setSelectedProductCustomTexts", await self.setSelectedProductCustomTexts)
     self.$eventBus.$on("customTextStoreUpdated", async () => {
       await self.setSelectedProductCustomTexts()

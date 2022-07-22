@@ -19,7 +19,7 @@ export class ProductColors extends Vue {
               name: product_color_file.file_name,
               type: "file_colors",
               selected_color_index: null,
-              colors: JSON.parse(product_color_file.json_data)
+              colors: product_color_file.json_data
             }
             product_color_files.push(product_file_colors_data);
           })
@@ -50,7 +50,7 @@ export class ProductFonts extends Vue {
     const self: Record<any, any> = this;
     const product_name_fonts = self.$store.getters.getSelectedProduct.namefonts
     product_name_fonts.forEach((product_name_font: Record<any, any>) => {
-      const name_font_data = JSON.parse(product_name_font.json_data)
+      const name_font_data = product_name_font.json_data
       name_font_data.forEach((name_font_datum: Record<any, any>) => {
         self.product_fonts.push({
           label: name_font_datum.name.replace('-', ' ').toUpperCase(),
@@ -67,8 +67,10 @@ export class SetSelectedProductCustomTexts extends Vue {
   async setSelectedProductCustomTexts() {
     const self: Record<any, any> = this;
     const selected_product = self.$store.getters.getSelectedProduct
+    console.log("selected_product", selected_product)
     if(selected_product) {
       const selected_product_custom_texts = self.$store.getters.getNewCustomTexts(selected_product.id)
+      console.log("selected_product_custom_texts", selected_product_custom_texts)
       if(selected_product_custom_texts) {
         self.product_custom_texts = JSON.parse(JSON.stringify(selected_product_custom_texts));
       } else {

@@ -921,7 +921,6 @@ const ProductAttributes:Module<any, any> = {
     },
     //this is parameterized getter that's why in vue devtool it will always return function. Also it will not be cached instead it will always executed when we use getter
      getNewCustomTexts: state => (product_id = "all") =>  {
-       console.log("inside vuuex", product_id)
       if(product_id == "all") {
         return state.new_custom_texts;
       } else {

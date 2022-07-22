@@ -236,7 +236,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
       let finalColor = { color_text: [] }
-      finalColor.color_text = JSON.parse(colors.json_data)
+      finalColor.color_text = colors.json_data
       this.fontsColors = this.fontsColors.concat(finalColor)
     })
     if (this.fontsColors.length) {
