@@ -1,4 +1,5 @@
 import { Component, Vue } from 'vue-property-decorator'
+// @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 
 @Component
@@ -27,6 +28,7 @@ export default class ErrorMessages extends Vue{
         errArr.push(errors[field][0]);
       });
       errArr.forEach(element => {
+        // @ts-ignore
         Vue.$toast.open({
           message: element,
           type: 'error',
@@ -44,6 +46,7 @@ export default class ErrorMessages extends Vue{
       errArr.push(errors[field][0]);
     });
     errArr.forEach(element => {
+      // @ts-ignore
       Vue.$toast.open({
         message: element,
         type: 'error',
@@ -60,6 +63,7 @@ export default class ErrorMessages extends Vue{
        errArr.push(errors[field]);
      });
      errArr.forEach(element => {
+       // @ts-ignore
        Vue.$toast.open({
          message: element,
          type: 'error',
