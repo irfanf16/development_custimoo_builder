@@ -188,6 +188,7 @@ export class handleMainProducts extends Vue {
     }
     await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index});
+    await self.setCustomTexts(retrieved_products[product_index])
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);
     await this.$store.dispatch("getModels", retrieved_products[product_index].id);
     this.$root.$emit('sliderEvent', product_index);

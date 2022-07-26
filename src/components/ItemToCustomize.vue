@@ -123,7 +123,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     }
 
     let ecommerce_update_id = this.$route.query.update_item;
-    if(!ecommerce_update_id) {
+    if(!ecommerce_update_id && this.categories.length) {
       this.$store.commit('SET_SELECTED_CATEGORIES', this.categories[0].id) // as this is on mounted so don't need to send get product call again
     }
     this.search = this.search_products
