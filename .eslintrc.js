@@ -24,6 +24,6 @@ module.exports = {
     "no-explicit-any": 0,
     "no-var": 0,
     "no-mixed-spaces-and-tabs": 0,
-    "@typescript-eslint/ban-ts-comment": true
+    "@typescript-eslint/ban-ts-comment": 0
   }
 }
