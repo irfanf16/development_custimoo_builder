@@ -75,7 +75,7 @@ const Cart:Module<any, any> = {
       let address = null
       const response = await http.get(`/addresses`);
       let addresses = response.data.result
-      addresses = addresses.filter(obj => obj.default == 1)
+      addresses = addresses.filter((obj: Record<any, any>) => obj.default == 1)
       if (addresses.length > 0){
         address = addresses[0]
         commit('ADD_SHIPPING_ADDRESS',addresses[0])

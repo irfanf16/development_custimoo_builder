@@ -505,6 +505,7 @@ const ProductAttributes:Module<any, any> = {
       if (text_item){
         Vue.set(text_item, customTextAttribute.attribute, customTextAttribute.value)
       }
+      // @ts-ignore
       const selectedProduct = this.getters.getSelectedProduct;
       const settings = selectedProduct['productnames'][customTextAttribute.index]
       if(settings && settings.text_follows_product){
@@ -638,7 +639,8 @@ const ProductAttributes:Module<any, any> = {
     },
     OVERRIDE_TEXT(state:Record<any, any>, payload) {
       state.customTexts = {};
-      initCustomTexts(this.getters.getProducts) // getters works fine
+      // @ts-ignore
+      initCustomTexts(this.getters.getaProducts) // getters works fine
       const locker_texts = JSON.parse(payload.text)
 
       locker_texts.forEach((text: Record<any, any>, index: number) => {

@@ -4,6 +4,7 @@ import {getClosestColor} from "@/pantoneColor";
 import {default as $} from "jquery";
 import Axios, {AxiosError} from "axios";
 import Vue from "vue";
+// @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
 
@@ -184,8 +185,8 @@ const processColorsCustom = (colors: []) => {
 
 }
 
-const getSelectedProductPantones = (product_id = null) => {
-  const productPantones = []
+const getSelectedProductPantones = (product_id: null|number = null) => {
+  const productPantones: Record<any, any>[] = []
   let selectedProduct = Store.getters.getSelectedProduct;
   if(product_id){
     const search_product = getProductById(product_id);
@@ -209,9 +210,9 @@ const getSelectedProductPantones = (product_id = null) => {
   return productPantones;
 }
 
-const getProductById = (product_id) => {
+const getProductById = (product_id: number) => {
   const products = Store.getters.getProducts;
-  const selected_product = products.find((product) => product.id == product_id)
+  const selected_product = products.find((product: Record<any, any>) => product.id == product_id)
    return selected_product
 }
 
