@@ -641,7 +641,7 @@ const ProductAttributes:Module<any, any> = {
     OVERRIDE_TEXT(state:Record<any, any>, payload) {
       state.customTexts = {};
       // @ts-ignore
-      initCustomTexts(this.getters.getaProducts) // getters works fine
+      initCustomTexts(this.getters.getProducts) // getters works fine
       const locker_texts = JSON.parse(payload.text)
 
       locker_texts.forEach((text: Record<any, any>, index: number) => {
