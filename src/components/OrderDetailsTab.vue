@@ -517,9 +517,12 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     })
   }
 
-  public async getDocFromString(doc_string: string, type:DOMParserSupportedType ="image/svg+xml") {
-    let parser = new DOMParser();
-    return  parser.parseFromString(doc_string, type);
+  public getDocFromString(doc_string: string, type:DOMParserSupportedType ="image/svg+xml") {
+    return new Promise((resolve) => {
+      const parser = new DOMParser();
+      const parsed = parser.parseFromString(doc_string, type);
+      resolve(parsed)
+    })
   }
 
   public htmlPdfGenerator() {
@@ -742,7 +745,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       rotation:null,
       original_height: null,
     };
-    let empty_text = this.getDocFromString(`<g style="transform: rotate(0deg)"></g>`);
+    let empty_text = await this.getDocFromString(`<g style="transform: rotate(0deg)"></g>`);
 
     for (let index = 0; index < factory_product.roster_detail.length; index++) {
       let detail = factory_product.roster_detail[index]
