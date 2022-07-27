@@ -362,10 +362,12 @@ export class handleMainProducts extends Vue {
       case "order_product": //in case of editing order product only one product shown. So product index will always be 0
         active_index = product_edit_info_object.order_product_info.order_products.active_index;
         let order_edit_product = product_edit_info_object.order_product_info.order_products.factory_products[active_index]
+        let roster_details = order_edit_product.roster_detail;
         style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
           return product_style.id == order_edit_product.style_id;
         });
         design_id =  order_edit_product.design_id;
+        this.$store.commit('UPDATE_ROSTER',roster_details);
         if(order_edit_product.product_type == "customized") {
           await this.$store.dispatch('setProductType', { prd_type: "customized", value: true });
           await this.$store.dispatch('setProductType', { prd_type: "personalized", value: false });

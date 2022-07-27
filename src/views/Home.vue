@@ -360,7 +360,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
-import {logData, getActiveProductData, getPermissions, handleResponseException} from "@/helpers/Helpers";
+import {logData, getActiveProductData, getPermissions, handleResponseException,parseSvgString,fetchUrlContent} from "@/helpers/Helpers";
 import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import { Popper } from 'popper-vue'
@@ -1468,8 +1468,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async UpdateOrderProducts() {
     let self = this;
-    let updated_product = await getActiveProductData();
+    let updated_product:Record<any,any> = await getActiveProductData();
     if(updated_product == null) {
+      return false;
+    }
+    if(updated_product){
+      if(Object.prototype.hasOwnProperty.call(updated_product,'production_url') && updated_product?.production_url){
+        let content:string = await fetchUrlContent(updated_product?.production_url);
+        let production_content = await parseSvgString(content,updated_product as Record<any,any>);
+        updated_product.svg_content = production_content;
+      }
+    }else{
       return false;
     }
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info
@@ -1485,6 +1494,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
    // self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product;
     let url = `order_item/${order_item_id}/update/products`;
     this.showLoader = true
+
     http.post(url, {factory_products:  order_products_info_obj.order_products.factory_products}).then(async (res: any) => {
       await self.exitFromEditMode()
       this.showLoader = false
