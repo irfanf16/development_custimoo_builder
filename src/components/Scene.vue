@@ -884,9 +884,6 @@ export default class Scene extends Vue {
       const self = this
 
       Promise.all(promises).then((values) => {
-        if (this.mainPreview) {
-          console.log('promises reslove call done')
-        }
         let texture = this.frontTexture
         model = this.frontModel
         if (side == 'back') {

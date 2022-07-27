@@ -153,7 +153,6 @@ export class handleMainProducts extends Vue {
           product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
             return retrieved_product.id == last_active_prod_data.product_id
           })
-          console.log("product indesx", product_index)
           if(product_index >= 0 ) {
             style_index = last_active_prod_data.style_index;
             design_id = last_active_prod_data.design_id
@@ -175,14 +174,12 @@ export class handleMainProducts extends Vue {
             return product_design.design_show
           })
           design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
-          console.log("else search", self.search_products)
           let set_last_active_product_data = { design_index: design_index, design_id: design_id, product_index: 0, product_id:  product_id,
             search_products: self.search_products, style_index: 0, style_id: retrieved_products[0].productstyles[0].id,
             page_no: 1, customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized, custom_texts: [], custom_logos: [],
             default_colors: [], group_colors: [],
           }
           self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
-          console.log("else search123", self.search_products)
         }
       }
       // await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: append_products});
@@ -592,7 +589,6 @@ export class ProductsQueryParamsMixin extends Vue {
       ];
     }
     else {
-      console.log("inside main else", self.getProductEditInfoObject.order_product_info)
       //if route have update_order_product query parameter then it means the order edit product changed so we need to exit from existing edit mode and re set order edit mode
       if(self.$route.query.update_order_product) {
         self.exitFromEditMode()
@@ -646,15 +642,27 @@ export class ProductsQueryParamsMixin extends Vue {
         }
       }
       else {
-        console.log("Getting query params from last active product")
+        console.log("Getting query params from last active product", self.getLastActiveProductData)
         query_params = [
           `customized=${self.getLastActiveProductData.customized}`, `personalized=${self.getLastActiveProductData.personalized}`
         ];
         if(self.getLastActiveProductData.product_id) {
           query_params.push(`active_product_id=${self.getLastActiveProductData.product_id}`, 'paginate=false')
         }
-          if(self.getLastActiveProductData.search_products) {
+
+        if(self.getLastActiveProductData.search_products) {
           query_params.push(`title=${self.getLastActiveProductData.search_products}`)
+        }
+
+        if(self.getLastActiveProductData.category_id) {
+          query_params.push(`category_id=${self.getLastActiveProductData.category_id}`)
+        } else {
+          const categories = this.$store.getters.getCategories;
+          if(categories.length > 0) {
+            let category = categories[0]
+            query_params.push(`category_id=${category.id}`)
+            self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: 0, category_id: category.id})
+          }
         }
       }
     }
@@ -678,8 +686,9 @@ export class exitEditMode extends Vue {
 export class resetLastActiveProductData extends Vue {
   public async resetLastActiveProductData() {
     this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-      design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
-      page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: []
+      category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
+      page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
+      roster_detail: [],
     })
   }
 }

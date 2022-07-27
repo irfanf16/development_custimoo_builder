@@ -305,7 +305,8 @@
             <b-button @click="resetStore" variant="secondary" class="p-1"><b-icon-arrow-clockwise /></b-button>
           </div>
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-            <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll" :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize"/>
+            <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll"
+                             :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize"/>
             <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
               <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
               <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
@@ -416,11 +417,11 @@ Vue.filter('formatDate', function(value:string) {
       await this.$store.dispatch('getLockerRoomColors')
       await this.$store.dispatch('getCartServer', {})
     }
+    await this.$store.dispatch('setCategories')
     let query_params = await this.setQueryParams()
     await this.retrieveProducts(query_params)
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
     this.jwtToken = localStorage.getItem('jwtToken') as string
-    await this.$store.dispatch('setCategories')
     // await this.$store.dispatch('setJwtToken')
     if(!localStorage.getItem('browserToken')){
       await this.$store.dispatch('setBrowserToken')
@@ -1028,7 +1029,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
-      this.colors = JSON.parse(response.data.json_data)
+      if(response.data.length) {
+        this.colors = JSON.parse(response.data.json_data)
+      }
     }).catch((e: any) => {
       console.log(e)
     });
@@ -1387,10 +1390,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
 
-    const categories = this.$store.getters.getSelectedCategories;
-    if(categories.length > 0){
-      url_obj.searchParams.append('categories', categories.toString())
-    }
     query_params.forEach((query_param: string) => {
       let query_param_array = query_param.split("=");
       if(url_obj.searchParams.has(query_param_array[0])) {
@@ -1400,6 +1399,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     })
     url = url_obj.pathname + url_obj.search;
+    console.log('urls', url)
     if(sync_id) {
       if(url.indexOf("?") > 0) {
         url += `&sync_id=${sync_id}`;
