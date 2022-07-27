@@ -357,7 +357,7 @@ import Scene from "@/components/Scene.vue";
 import $ from 'jquery';
 import CustomTabs from "@/components/CustomTabs.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
 import {logData, getActiveProductData, getPermissions, handleResponseException} from "@/helpers/Helpers";
@@ -397,6 +397,7 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
+    let self: Record<any, any> = this;
     this.is_shared_product = this.$route.params.name ?  true : false
 
 
@@ -417,6 +418,11 @@ Vue.filter('formatDate', function(value:string) {
       await this.$store.dispatch('getLockerRoomColors')
       await this.$store.dispatch('getCartServer', {})
     }
+    let {sync_id, customizer_preview} = self.$route.query;
+    if(sync_id) {
+      await self.resetLastActiveProductData()
+    }
+
     await this.$store.dispatch('setCategories')
     let query_params = await this.setQueryParams()
     await this.retrieveProducts(query_params)
@@ -445,7 +451,7 @@ Vue.filter('formatDate', function(value:string) {
   // }
 })
 
-export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode) {
+export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData) {
   public logData = logData;
   public tabIndex = 0
   // private products: any[] = []
@@ -1386,7 +1392,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async retrieveProducts(query_params: string[] = []) {
     let self = this;
-    let sync_id = this.$route.query.sync_id;
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
 
@@ -1400,13 +1405,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     })
     url = url_obj.pathname + url_obj.search;
     console.log('urls', url)
-    if(sync_id) {
-      if(url.indexOf("?") > 0) {
-        url += `&sync_id=${sync_id}`;
-      } else {
-        url = `?sync_id=${sync_id}`;
-      }
-    }
+    // if(sync_id) {
+    //   if(url.indexOf("?") > 0) {
+    //     url += `&sync_id=${sync_id}`;
+    //   } else {
+    //     url = `?sync_id=${sync_id}`;
+    //   }
+    // }
     http.get(url).then(async (response: Record<any, any>) => {
       if(response.data.products.data.length > 0 ){
         const validate_data  = await self.beforeSetDataValidateActiveProductData(response.data.products.data)

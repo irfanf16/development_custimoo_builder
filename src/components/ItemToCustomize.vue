@@ -64,7 +64,7 @@
 
       </div>
 
-      <div class="d-flex align-items-center">
+      <div class="d-flex align-items-center" v-if="getProductEditInfoObject.editing=false">
         <div class="fade-right w-100 py-2" >
           <div class="overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList ">
             <div  v-for="(category, categoryIndex) in categories" :key="`category_${categoryIndex}`" style="white-space: nowrap"
@@ -123,7 +123,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 
     let ecommerce_update_id = this.$route.query.update_item;
     if(!ecommerce_update_id) {
-      this.$store.commit('SET_SELECTED_CATEGORIES', this.categories[0].id) // as this is on mounted so don't need to send get product call again
+     // this.$store.commit('SET_SELECTED_CATEGORIES', this.categories[0].id) // as this is on mounted so don't need to send get product call again
     }
     this.search = this.search_products
   }

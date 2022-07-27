@@ -588,7 +588,6 @@ const rosterDetailsInit = (retrieved_products: Record<any, any>) => {
   retrieved_products.forEach((product: Record<any, any>) => {
     if(!Store.getters.getAllRosterDetails[product.id]) {
       const payload = getRosterDetailDefaultObject(product)
-      console.log('first time roster init')
       Store.dispatch('setRosterDetails', { pid : product.id, index: 0, roster: payload })
     }
   })

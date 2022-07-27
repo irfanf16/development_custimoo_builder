@@ -650,6 +650,7 @@ export default class Scene extends Vue {
       this.backCanvas.renderAll()
     }
     this.unHideColorGrouping()
+    this.changeGroupColor(this.groupColors)
   }
 
   public setInitialColors(): void {
@@ -835,11 +836,6 @@ export default class Scene extends Vue {
     if (Object.keys(this.lockerGroupColors).length) {
       if (this.productType == 'customized') {
         await this.changeGroupColor(this.lockerGroupColors)
-      }
-    }
-    else if (Object.keys(this.groupColors).length && !this.lockerDefaultColors.length) {
-      if (this.productType == 'customized') {
-        await this.changeGroupColor(this.groupColors)
       }
     }
     this.showLoader = false
