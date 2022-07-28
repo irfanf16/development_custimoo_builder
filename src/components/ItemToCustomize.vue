@@ -64,7 +64,7 @@
 
       </div>
 
-      <div class="d-flex align-items-center" v-if="getProductEditInfoObject.editing=false">
+      <div class="d-flex align-items-center" v-if="getProductEditInfoObject.editing==false">
         <div class="fade-right w-100 py-2" >
           <div class="overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList ">
             <div  v-for="(category, categoryIndex) in categories" :key="`category_${categoryIndex}`" style="white-space: nowrap"

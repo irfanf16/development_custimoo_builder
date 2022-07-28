@@ -38,9 +38,10 @@
 <!--          </button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+            <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product'">
 <!--              <button class="btn btn-secondary fw-bold w-100" @click="generateSVG" >Generate SVG</button>-->
               <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
+
                 <template v-if="getProductEditInfoObject.editing">
                   <template v-if="getProductEditInfoObject.type == 'cart_product'">
                     Update Cart

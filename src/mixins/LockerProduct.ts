@@ -143,11 +143,11 @@ export class handleMainProducts extends Vue {
     * */
     let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
     if(is_editing) {
-      console.log('editing mode');
+     // console.log('editing mode');
       ({product_index, style_index, design_id, active_index} = await self.handleEditMode(retrieved_products));
     }
     else {
-      console.log('not editing mode');
+     // console.log('not editing mode');
       let last_active_prod_data = self.$store.getters.getLastActiveProductData;
       if(editing_product_detail ) {
         product_index = response_data.active_product_index;
@@ -252,7 +252,7 @@ export class handleMainProducts extends Vue {
   public async beforeSetDataValidateActiveProductData(retrieved_products: Record<any, any>[]) {
     let self = this;
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject;
-    console.log('before validate', product_edit_info_object)
+    //console.log('before validate', product_edit_info_object)
     let product_index = -1;
     let style_index = -1;
     let design_id = null;
@@ -529,7 +529,7 @@ export class handleMainProducts extends Vue {
   }
 
   public async setCartProductData(retrieved_products: Record<any, any>[]) {
-    console.log("setting cart product data")
+    //console.log("setting cart product data")
     let self: Record<any, any> = this;
     await this.$store.commit('RESET_CUSTOM_TEXTS')
     await this.$store.commit('RESET_CUSTOM_LOGOS')
@@ -539,7 +539,7 @@ export class handleMainProducts extends Vue {
     let retrieved_cart_product = retrieved_products[0];
     this.$store.dispatch("getModels", retrieved_cart_product.product_id);
     let selectedIndex = retrieved_cart_product.productstyles.findIndex((productstyle: Record<any, any>) => productstyle.id === cart_item_product.style_id);
-    console.log('style indx', selectedIndex, cart_item_product.style_id, retrieved_cart_product.productstyles)
+    //console.log('style indx', selectedIndex, cart_item_product.style_id, retrieved_cart_product.productstyles)
     if(selectedIndex < 0) {
       console.log("Style not found while editing cart product")
     }
@@ -599,7 +599,7 @@ export class ProductsQueryParamsMixin extends Vue {
     let {sync_id, customizer_preview, update_cart} = self.$route.query
     let query_params: string[] = [];
     if(sync_id) {
-      console.log('inside sync id')
+     // console.log('inside sync id')
       query_params.push(`sync_id=${sync_id}`, 'paginate=false')
       if(update_cart) {
         query_params.push(`active_product_type=cart_product`, 'paginate=false')

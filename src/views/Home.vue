@@ -248,14 +248,17 @@
                     </b-button>
 
                     <template v-else-if="isCustomerAuthenticated">
-                      <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                        <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
-                          Add to Cart
-                        </b-button>
-                        <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                          <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-                        </b-button>
+                      <template v-if="!getProductEditInfoObject.editing">
+                        <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                          <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                            Add to Cart
+                          </b-button>
+                          <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
+                            <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                          </b-button>
+                        </template>
                       </template>
+
                     </template>
                     <template v-else>
                       <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
@@ -417,6 +420,7 @@ Vue.filter('formatDate', function(value:string) {
       await this.$store.dispatch("getLockers");
       await this.$store.dispatch('getLockerRoomColors')
       await this.$store.dispatch('getCartServer', {})
+
     }
     let {sync_id, customizer_preview} = self.$route.query;
     if(sync_id) {
@@ -630,7 +634,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       self.$store.dispatch('setActiveTab', ind);
     }
     else {
-      console.log(ind, isHome)
+     // console.log(ind, isHome)
 
       this.hideOtherTab()
       if($(".sideNav li a").length){
@@ -1238,7 +1242,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
           }
         }
-        console.log("modal opens from here")
+       // console.log("modal opens from here")
         this.showVModal('locker-modal')
 
         if(this.ref.saveToLockerModal) {
@@ -1404,14 +1408,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     })
     url = url_obj.pathname + url_obj.search;
-    console.log('urls', url)
-    // if(sync_id) {
-    //   if(url.indexOf("?") > 0) {
-    //     url += `&sync_id=${sync_id}`;
-    //   } else {
-    //     url = `?sync_id=${sync_id}`;
-    //   }
-    // }
+    //console.log('urls', url)
+
     http.get(url).then(async (response: Record<any, any>) => {
       if(response.data.products.data.length > 0 ){
         const validate_data  = await self.beforeSetDataValidateActiveProductData(response.data.products.data)
