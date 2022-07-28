@@ -766,10 +766,14 @@ const fetchUrlContent = async (url:string) => {
   }
 }
 
-const getDocFromString = async (doc_string: string, type:DOMParserSupportedType ="image/svg+xml") => {
-  const parser = new DOMParser();
-  return  parser.parseFromString(doc_string, type);
+const getDocFromString = (doc_string: string, type:DOMParserSupportedType ="image/svg+xml") => {
+  return new Promise((resolve) => {
+    const parser = new DOMParser();
+    const parsed = parser.parseFromString(doc_string, type);
+    resolve(parsed)
+  })
 }
+
 const serializer = (svg_doc: SVGTextElement | Document) => {
   return new Promise((resolve) => {
     const xml = new XMLSerializer()
@@ -789,7 +793,7 @@ const parseFactoryProduct = async (factory_product : Record<any, any>) => {
     rotation:null,
     original_height: null,
   };
-  const empty_text = getDocFromString(`<g style="transform: rotate(0deg)"></g>`);
+  const empty_text = await getDocFromString(`<g style="transform: rotate(0deg)"></g>`);
 
   for (let index = 0; index < factory_product.roster_detail.length; index++) {
     const detail = factory_product.roster_detail[index]
