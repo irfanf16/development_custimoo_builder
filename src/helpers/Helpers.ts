@@ -774,7 +774,7 @@ const getDocFromString = (doc_string: string, type:DOMParserSupportedType ="imag
   })
 }
 
-const serializer = (svg_doc: SVGTextElement | Document) => {
+const serializer = (svg_doc: SVGTextElement | Document): Promise<string> => {
   return new Promise((resolve) => {
     const xml = new XMLSerializer()
     const xml_string = xml.serializeToString(svg_doc)
@@ -801,7 +801,7 @@ const parseFactoryProduct = async (factory_product : Record<any, any>) => {
       if(Object.prototype.hasOwnProperty.call(detail,'svgs')){
         if(Object.prototype.hasOwnProperty.call(detail.svgs,'name') && detail.svgs.name.svg){
           const group_name_svg = await getDocFromString(detail.svgs.name.svg);
-          const svg_name_text = group_name_svg.querySelector('text');
+          const svg_name_text = (group_name_svg as Record<any,any>).querySelector('text');
           if(svg_name_text){
             svg_name_text?.setAttribute('font-size',`${detail.svgs.name.original_height}cm`);
           }
@@ -810,7 +810,7 @@ const parseFactoryProduct = async (factory_product : Record<any, any>) => {
             tspan_name.setAttribute('x','0');
             tspan_name.setAttribute('y','0');
           }
-          detail.svgs.name.text_svg = svg_name_text? await serializer(svg_name_text) : await serializer(empty_text);
+          detail.svgs.name.text_svg = svg_name_text? await serializer(svg_name_text) : await serializer(empty_text as SVGTextElement | Document);
         }
         else{
           const svg_object : Record<any,any> = {};
@@ -822,11 +822,11 @@ const parseFactoryProduct = async (factory_product : Record<any, any>) => {
             svg_object['number'] = default_svg_object;
           }
           detail.svgs = svg_object;
-          detail.svgs.name.text_svg = await serializer(empty_text);
+          detail.svgs.name.text_svg = await serializer(empty_text as SVGTextElement | Document);
         }
         if(Object.prototype.hasOwnProperty.call(detail.svgs,'number') && detail.svgs.number.svg){
           const group_number_svg = await getDocFromString(detail.svgs.number.svg);
-          const svg_number_text = group_number_svg.querySelector('text');
+          const svg_number_text = (group_number_svg as Record<any,any>).querySelector('text');
           if(svg_number_text){
             svg_number_text?.setAttribute('font-size',`${detail.svgs.number.original_height}cm`);
           }
@@ -835,7 +835,7 @@ const parseFactoryProduct = async (factory_product : Record<any, any>) => {
             tspan_number?.setAttribute('x','0');
             tspan_number?.setAttribute('y','0');
           }
-          detail.svgs.number.text_svg = svg_number_text? await serializer(svg_number_text) : await serializer(empty_text);
+          detail.svgs.number.text_svg = svg_number_text? await serializer(svg_number_text) : await serializer(empty_text as SVGTextElement | Document);
         }
         else{
           const svg_object : Record<any,any> = {};
@@ -848,7 +848,7 @@ const parseFactoryProduct = async (factory_product : Record<any, any>) => {
           }
           svg_object['name'] = detail.svgs.name;
           detail.svgs = svg_object;
-          detail.svgs.number.text_svg = await serializer(empty_text);
+          detail.svgs.number.text_svg = await serializer(empty_text as SVGTextElement | Document);
         }
         Object.assign(factory_product.roster_detail[index], detail)
       }
@@ -951,7 +951,7 @@ const getSVGPattern = (values:Record<any,any>,measurement_ratio:number) => {
                 ${Object.prototype.hasOwnProperty.call(value, 'svgs') ?
       `<g transform="matrix(1 0 0 1 3000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.svgs.name.original_height ? value.svgs.name.original_height + 'cm /' + parseFloat(value.svgs.name.original_height / INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
+                        <tspan x="0" y="0">${value.svgs.name.original_height ? value.svgs.name.original_height + 'cm /' + parseFloat((value.svgs.name.original_height / INCH_TO_CENTIMETER).toFixed(2)) + 'in' : ''} </tspan>
                     </text>
                 </g>`
       :
@@ -962,7 +962,7 @@ const getSVGPattern = (values:Record<any,any>,measurement_ratio:number) => {
                 ${Object.prototype.hasOwnProperty.call(value, 'svgs') ?
       `<g transform="matrix(1 0 0 1 4000 ${500 + index * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.svgs.number.original_height? value.svgs.number.original_height + 'cm /' + parseFloat(value.svgs.number.original_height/ INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
+                        <tspan x="0" y="0">${value.svgs.number.original_height? value.svgs.number.original_height + 'cm /' + parseFloat((value.svgs.number.original_height/ INCH_TO_CENTIMETER).toFixed(2)) + 'in' : ''} </tspan>
                     </text>
                 </g>`
       :
@@ -1003,42 +1003,42 @@ const getLogoPattern = async (values:Record<any,any>,measurement_ratio:string) =
         if(has_base64){
           svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${svg_pattern_last_value_y + 500})">
-                <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
-                    ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${value.base_64}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/></g>`:''}
+                <g transform="matrix(1 0 0 1 0 ${250 + parseInt(index) * 1000})">
+                    ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${value.base_64}" height="${(value.actualHeight * value.scaleY)/parseFloat(measurement_ratio)}px" width="${(value.actualWidth * value.scaleX)/parseFloat(measurement_ratio)}px"/></g>`:''}
                 </g>
-                <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
+                <g transform="matrix(1 0 0 1 1000 ${500 + parseInt(index) * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
                         <tspan x="0" y="0">${value.side? value.side : ''} </tspan>
                     </text>
                 </g>
-                <g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
+                <g transform="matrix(1 0 0 1 2000 ${500 + parseInt(index) * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.originalWidth? value.originalWidth + 'cm x' + value.originalHeight + 'cm /' + parseFloat(value.originalWidth/INCH_TO_CENTIMETER).toFixed(2) + 'in x' + parseFloat(value.originalHeight/INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
+                        <tspan x="0" y="0">${value.originalWidth? value.originalWidth + 'cm x' + value.originalHeight + 'cm /' + parseFloat((value.originalWidth/INCH_TO_CENTIMETER).toFixed(2)) + 'in x' + parseFloat((value.originalHeight/INCH_TO_CENTIMETER).toFixed(2)) + 'in' : ''} </tspan>
                     </text>
                 </g>
-                ${logo_pattern_last_value_y = (((500 + index * 1000) + (svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/measurement_ratio))}
+                ${logo_pattern_last_value_y = (((500 + parseInt(index) * 1000) + (svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/parseFloat(measurement_ratio)))}
                 </g>`
         }
       } else {
         svg_group_el += `
                 <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${svg_pattern_last_value_y + 500})">
-                <g transform="matrix(1 0 0 1 0 ${250 + index * 1000})">
-                    ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${process.env.VUE_APP_STORAGE_URL}${updated_url}" height="${(value.actualHeight * value.scaleY)/measurement_ratio}px" width="${(value.actualWidth * value.scaleX)/measurement_ratio}px"/></g>`:''}
+                <g transform="matrix(1 0 0 1 0 ${250 + parseInt(index) * 1000})">
+                    ${updated_url?`<g style="transform: rotate(${value.rotation}deg)"><image xlink:href="${process.env.VUE_APP_STORAGE_URL}${updated_url}" height="${(value.actualHeight * value.scaleY)/parseFloat(measurement_ratio)}px" width="${(value.actualWidth * value.scaleX)/parseFloat(measurement_ratio)}px"/></g>`:''}
                 </g>
-                <g transform="matrix(1 0 0 1 1000 ${500 + index * 1000})">
+                <g transform="matrix(1 0 0 1 1000 ${500 + parseInt(index) * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
                         <tspan x="0" y="0">${value.side? value.side : ''} </tspan>
                     </text>
                 </g>
-                <g transform="matrix(1 0 0 1 2000 ${500 + index * 1000})">
+                <g transform="matrix(1 0 0 1 2000 ${500 + parseInt(index) * 1000})">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
-                        <tspan x="0" y="0">${value.originalWidth? value.originalWidth + 'cm x' + value.originalHeight + 'cm /' + parseFloat(value.originalWidth/INCH_TO_CENTIMETER).toFixed(2) + 'in x' + parseFloat(value.originalHeight/INCH_TO_CENTIMETER).toFixed(2) + 'in' : ''} </tspan>
+                        <tspan x="0" y="0">${value.originalWidth? value.originalWidth + 'cm x' + value.originalHeight + 'cm /' + parseFloat((value.originalWidth/INCH_TO_CENTIMETER).toFixed(2)) + 'in x' + parseFloat((value.originalHeight/INCH_TO_CENTIMETER).toFixed(2)) + 'in' : ''} </tspan>
                     </text>
                 </g>
-                ${logo_pattern_last_value_y = (((500 + index * 1000) + (svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/measurement_ratio))}
+                ${logo_pattern_last_value_y = (((500 + parseInt(index) * 1000) + (svg_pattern_last_value_y + 500)) + 500 +((value.actualHeight * value.scaleY)/parseFloat(measurement_ratio)))}
                 </g>`
       }
-      ++index;
+      index = index + 1;
     }
   }
   return svg_group_el;
@@ -1064,42 +1064,43 @@ const parseSvgString = async (svg_string:string, factory_product_content: Record
     }
     svg_string += `\n</g>\n</svg>`;
     const svg_doc = await getDocFromString(svg_string);
-    const production_file_info = {
-      width: $(svg_doc).find("svg").eq(0).attr("width"),
-      height: $(svg_doc).find("svg").eq(0).attr("height")
+    const production_file_info:Record<any, any> = {
+      width: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("width"),
+      height: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("height")
     }
-    const scaled_file_info = {
+    const scaled_file_info : Record<any,any> = {
       width : parseFloat(production_file_info.width),
       height : logo_pattern_last_value_y?logo_pattern_last_value_y:svg_pattern_last_value_y,
     };
 
 
     //Applying Color on SVG Start
-    applyColorToSVG(factory_product,svg_doc);
+    applyColorToSVG(factory_product,svg_doc as SVGTextElement|Document);
     //Applying Color on SVG End
 
     //Add Fonts to SVgs Start
     const font_file = fontsList(Store.getters.getSelectedProduct);
     if(font_file.length > 0){
       const font_style = generateFontFile(font_file);
-      $(svg_doc).find("svg").eq(0).prepend(font_style)
+      $(svg_doc as SVGTextElement|Document).find("svg").eq(0).prepend(font_style)
     }
     //Add Fonts to SVgs End
 
     //Add Front and Back Images Shown on SVG Start
     //Back Image
     const group_back_image_tag = getGroupImageTag(factory_product,production_file_info,'back_image');
-    $(svg_doc).find("g").eq(0).prepend(group_back_image_tag)
+    $(svg_doc as SVGTextElement|Document).find("g").eq(0).prepend(group_back_image_tag)
     //Front Image
     const group_front_image_tag = getGroupImageTag(factory_product,production_file_info,'front_image');
-    $(svg_doc).find("g").eq(0).prepend(group_front_image_tag)
+    $(svg_doc as SVGTextElement|Document).find("g").eq(0).prepend(group_front_image_tag)
     //Add Front and Back Images Side wise to svg End
 
-    $(svg_doc).find("svg").eq(0).attr({"width": (scaled_file_info.width * 2) + 'px', height: scaled_file_info.height + 'px'});
-    const view_box = svg_doc?.querySelector('svg')?.getAttribute('viewBox');
+    $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr({"width": (scaled_file_info.width * 2) + 'px', height: scaled_file_info.height + 'px'});
+    const view_box = (svg_doc as SVGTextElement|Document)?.querySelector('svg')?.getAttribute('viewBox');
     const view_box_dimensions = view_box?.split(" ");
-    svg_doc?.querySelector('svg')?.setAttribute('viewBox',`${view_box_dimensions[0]} ${view_box_dimensions[1]} ${parseFloat(production_file_info.width) * 2} ${logo_pattern_last_value_y?logo_pattern_last_value_y:svg_pattern_last_value_y}`);
-    production_content = await serializer(svg_doc);
+    // @ts-ignore
+    (svg_doc as SVGTextElement|Document)?.querySelector('svg')?.setAttribute('viewBox',`${view_box_dimensions[0]} ${view_box_dimensions[1]} ${parseFloat(production_file_info.width) * 2} ${logo_pattern_last_value_y?logo_pattern_last_value_y:svg_pattern_last_value_y}`);
+    production_content = await serializer(svg_doc as SVGTextElement|Document);
     return production_content;
   }
   else{
