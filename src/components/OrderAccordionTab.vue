@@ -67,13 +67,16 @@
                 <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front.file_url " alt="Collar"/>
               </div>
               <div class="collar-details">
-<!--                <strong>{{ selectedProduct.productstyles[styleIndex].name }}</strong>-->
                 <strong>{{selectedProduct.productstyles[styleIndex].name }}</strong>
                 <div class="d-flex flex-wrap align-items-center" v-for="(item, i) in selectedProduct.addons" :key="i">
                   <div class="category mr-3">{{ item.addon.name }}</div>
                   <div class="price">+${{ item.addon.price }}</div>
                 </div>
               </div>
+            </div>
+            <div class="order-collar-style d-flex flex-column text-left mt-2" v-if="productModels[modelIndex]">
+              <strong style="font-weight: bold;">{{productModels[modelIndex].model_name}}</strong>
+              <div v-html="productModels[modelIndex].product_model_description" style="font-size: small;" class="my-1"></div>
             </div>
           </b-card-body>
         </b-collapse>
@@ -188,6 +191,9 @@ export default class OrderAccordion extends Vue {
 
   get productModels(): Record<any, any> {
     return this.$store.getters.getProductModels
+  }
+  get modelIndex(): Record<any,any>{
+    return this.$store.getters.getSelectedModelIndex;
   }
 
   public updateText (index:number) {
