@@ -52,7 +52,7 @@
       </b-collapse>
     </b-card>
 
-    <template v-if="selectedProduct.productstyles.length > 1">
+    <template>
       <b-card no-body>
         <b-card-header header-tag="header" class="p-1" role="tab">
           <b-button block v-b-toggle.accordion-3 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Style</span> <span
