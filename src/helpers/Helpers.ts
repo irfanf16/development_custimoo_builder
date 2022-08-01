@@ -1108,10 +1108,27 @@ const parseSvgString = async (svg_string:string, factory_product_content: Record
   }
 }
 
+const unitConversion = (setting:Record<any,any>, value:number) => {
+  switch( setting.conversion_operator ) {
+    case 'multiply':
+      return (value * (parseFloat(setting.conversion_value)));
+      break;
+    case 'divide':
+      return (value / (parseFloat(setting.conversion_value)));
+      break;
+    default:
+      return value
+  }
+}
+const fetchSettings = async () => {
+  const setting = await Store.dispatch('fetchGeneralSettings','measurement_unit');
+}
+
 //Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent
+  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
+  fetchSettings,unitConversion
 };
