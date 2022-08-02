@@ -26,3 +26,4 @@ pnpm-debug.log*
 
 src/assets/css/custom.css
 src/assets/css/custom.css.map
+env.development
