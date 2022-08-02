@@ -102,7 +102,6 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
 
   public async loadMoreProduct(slide_index: number) {
     let self = this;
-    console.log("slide index", slide_index)
     // let main_products_info = await self.$store.getters.getMainProductsInfo;
     let next_page_no = self.$store.getters.getProductsNextPageNo;
     if(next_page_no) {

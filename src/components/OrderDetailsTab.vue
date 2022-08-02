@@ -38,8 +38,10 @@
 <!--          </button>-->
 
           <template v-if="isCustomerAuthenticated">
-            <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+            <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product'">
+<!--              <button class="btn btn-secondary fw-bold w-100" @click="generateSVG" >Generate SVG</button>-->
               <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
+
                 <template v-if="getProductEditInfoObject.editing">
                   <template v-if="getProductEditInfoObject.type == 'cart_product'">
                     Update Cart
@@ -87,8 +89,8 @@ import {
   urlToBase64,
   getFileExtensionType,
   fontsList,
-  handleResponseException
-} from "@/helpers/Helpers";
+  handleResponseException, unitConversion
+} from '@/helpers/Helpers'
 import LoginForm from '@/components/LoginForm.vue'
 import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
 
@@ -253,7 +255,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     }
     self.customLogos.forEach((logos: Record<any, any>, index: number) => {
       if(logos.url) {
-        let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
+        const converted_width = unitConversion(logos.originalHeight)
+        const converted_height = unitConversion(logos.originalWidth)
+        let logoDimension = converted_width.value + converted_width.unit + ' x ' + converted_height.value + converted_height.unit
         self.toDataURLCustom(this.storageUrl+logos.url, (dataUrl: any) => {
           if (dataUrl) {
             self.base64Logos.push({'b64logo': dataUrl, 'logoSize': logoDimension})
@@ -278,7 +282,20 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       }
     }
   }
-
+  // public async generateSVG(){
+  //   let cart_product:Record<any,any> = await getActiveProductData();
+  //   if(cart_product){
+  //     if(Object.prototype.hasOwnProperty.call(cart_product,'production_url') && cart_product.production_url){
+  //       let content:string = await this.fetchUrlContent(cart_product?.production_url);
+  //       let production_content = await this.parseSvgString(content,cart_product as Record<any,any>);
+  //       cart_product.svg_content = production_content;
+  //     }
+  //   }else{
+  //     return false;
+  //   }
+  //   console.log(cart_product.roster_detail);
+  //   console.log(cart_product.svg_content);
+  // }
   public async addToCart() {
     let self: Record<any, any> = this;
     try {
@@ -517,9 +534,12 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     })
   }
 
-  public async getDocFromString(doc_string: string, type:DOMParserSupportedType ="image/svg+xml") {
-    let parser = new DOMParser();
-    return  parser.parseFromString(doc_string, type);
+  public getDocFromString(doc_string: string, type:DOMParserSupportedType ="image/svg+xml") {
+    return new Promise((resolve) => {
+      const parser = new DOMParser();
+      const parsed = parser.parseFromString(doc_string, type);
+      resolve(parsed)
+    })
   }
 
   public htmlPdfGenerator() {
@@ -742,7 +762,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       rotation:null,
       original_height: null,
     };
-    let empty_text = this.getDocFromString(`<g style="transform: rotate(0deg)"></g>`);
+    let empty_text = await this.getDocFromString(`<g style="transform: rotate(0deg)"></g>`);
 
     for (let index = 0; index < factory_product.roster_detail.length; index++) {
       let detail = factory_product.roster_detail[index]

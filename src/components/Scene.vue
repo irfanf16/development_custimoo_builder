@@ -21,8 +21,8 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
 import { SetSelectedProductCustomTexts } from '@/mixins/SelectedProductMixin'
+import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
 
 @Component<Scene>({
   async mounted() {
@@ -665,6 +665,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
       this.backCanvas.renderAll()
     }
     this.unHideColorGrouping()
+    this.changeGroupColor(this.groupColors)
   }
 
   public setInitialColors(): void {
@@ -852,11 +853,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
         await this.changeGroupColor(this.lockerGroupColors)
       }
     }
-    else if (Object.keys(this.groupColors).length && !this.lockerDefaultColors.length) {
-      if (this.productType == 'customized') {
-        await this.changeGroupColor(this.groupColors)
-      }
-    }
     this.showLoader = false
   }
 
@@ -900,9 +896,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
       const self: Record<any, any> = this
 
       Promise.all(promises).then((values) => {
-        if (this.mainPreview) {
-          console.log('promises reslove call done')
-        }
         let texture = this.frontTexture
         model = this.frontModel
         if (side == 'back') {
@@ -1793,10 +1786,12 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     const height = (object.height as number * object.scaleY * this.measurementRatio)
     console.log(width, object.width, object.scaleX, this.measurementRatio)
     if (width != 0 || height != 0) {
+      const converted_width = unitConversion(width)
+      const converted_height = unitConversion(height)
       dimText.set({
         left: object.left,
         top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-        text: 'Size ' + width.toFixed(1) + 'cm x ' + height.toFixed(1) + 'cm',
+        text: 'Size ' + converted_width.value + converted_width.unit + ' x ' + converted_height.value + converted_height.unit,
         visible: true
       }).bringToFront()
     }

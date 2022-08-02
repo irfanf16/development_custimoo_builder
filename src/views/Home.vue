@@ -248,14 +248,17 @@
                     </b-button>
 
                     <template v-else-if="isCustomerAuthenticated">
-                      <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                        <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
-                          Add to Cart
-                        </b-button>
-                        <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                          <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-                        </b-button>
+                      <template v-if="!getProductEditInfoObject.editing">
+                        <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                          <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                            Add to Cart
+                          </b-button>
+                          <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
+                            <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                          </b-button>
+                        </template>
                       </template>
+
                     </template>
                     <template v-else>
                       <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
@@ -357,10 +360,10 @@ import Scene from "@/components/Scene.vue";
 import $ from 'jquery';
 import CustomTabs from "@/components/CustomTabs.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
-import {logData, getActiveProductData, getPermissions, handleResponseException} from "@/helpers/Helpers";
+import {logData, getActiveProductData, getPermissions, handleResponseException,parseSvgString,fetchUrlContent} from "@/helpers/Helpers";
 import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import { Popper } from 'popper-vue'
@@ -397,9 +400,10 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
+    let self: Record<any, any> = this;
     this.is_shared_product = this.$route.params.name ?  true : false
 
-
+    await this.$store.dispatch('fetchGeneralSettings','measurement_unit')
     this.setRecentLogos()
 
     if (this.hideColorSection){
@@ -416,12 +420,18 @@ Vue.filter('formatDate', function(value:string) {
       await this.$store.dispatch("getLockers");
       await this.$store.dispatch('getLockerRoomColors')
       await this.$store.dispatch('getCartServer', {})
+
     }
+    let {sync_id, customizer_preview} = self.$route.query;
+    if(sync_id) {
+      await self.resetLastActiveProductData()
+    }
+
+    await this.$store.dispatch('setCategories')
     let query_params = await this.setQueryParams()
     await this.retrieveProducts(query_params)
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
     this.jwtToken = localStorage.getItem('jwtToken') as string
-    await this.$store.dispatch('setCategories')
     // await this.$store.dispatch('setJwtToken')
     if(!localStorage.getItem('browserToken')){
       await this.$store.dispatch('setBrowserToken')
@@ -445,7 +455,7 @@ Vue.filter('formatDate', function(value:string) {
   // }
 })
 
-export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode) {
+export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData) {
   public products_fonts: Record<any, any> = []
   public logData = logData;
   public tabIndex = 0
@@ -625,7 +635,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       self.$store.dispatch('setActiveTab', ind);
     }
     else {
-      console.log(ind, isHome)
+     // console.log(ind, isHome)
 
       this.hideOtherTab()
       if($(".sideNav li a").length){
@@ -1081,7 +1091,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
-      this.colors = response.data.json_data
+      if(response.data.length) {
+        this.colors = JSON.parse(response.data.json_data)
+      }
     }).catch((e: any) => {
       console.log(e)
     });
@@ -1282,7 +1294,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
           }
         }
-        console.log("modal opens from here")
+       // console.log("modal opens from here")
         this.showVModal('locker-modal')
 
         if(this.ref.saveToLockerModal) {
@@ -1436,14 +1448,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async retrieveProducts(query_params: string[] = []) {
     let self = this;
-    let sync_id = this.$route.query.sync_id;
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
 
-    const categories = this.$store.getters.getSelectedCategories;
-    if(categories.length > 0){
-      url_obj.searchParams.append('categories', categories.toString())
-    }
     query_params.forEach((query_param: string) => {
       let query_param_array = query_param.split("=");
       if(url_obj.searchParams.has(query_param_array[0])) {
@@ -1453,13 +1460,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     })
     url = url_obj.pathname + url_obj.search;
-    if(sync_id) {
-      if(url.indexOf("?") > 0) {
-        url += `&sync_id=${sync_id}`;
-      } else {
-        url = `?sync_id=${sync_id}`;
-      }
-    }
+    //console.log('urls', url)
+
     http.get(url).then(async (response: Record<any, any>) => {
       if(response.data.products.data.length > 0 ){
         const validate_data  = await self.beforeSetDataValidateActiveProductData(response.data.products.data)
@@ -1516,8 +1518,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async UpdateOrderProducts() {
     let self = this;
-    let updated_product = await getActiveProductData();
+    let updated_product:Record<any,any> = await getActiveProductData();
     if(updated_product == null) {
+      return false;
+    }
+    if(updated_product){
+      if(Object.prototype.hasOwnProperty.call(updated_product,'production_url') && updated_product?.production_url){
+        let content:string = await fetchUrlContent(updated_product?.production_url);
+        let production_content = await parseSvgString(content,updated_product as Record<any,any>);
+        updated_product.svg_content = production_content;
+      }
+    }else{
       return false;
     }
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info
@@ -1533,6 +1544,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
    // self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product;
     let url = `order_item/${order_item_id}/update/products`;
     this.showLoader = true
+
     http.post(url, {factory_products:  order_products_info_obj.order_products.factory_products}).then(async (res: any) => {
       await self.exitFromEditMode()
       this.showLoader = false

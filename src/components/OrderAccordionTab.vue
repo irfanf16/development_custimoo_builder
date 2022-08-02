@@ -52,7 +52,7 @@
       </b-collapse>
     </b-card>
 
-    <template v-if="selectedProduct.productstyles.length > 1">
+    <template>
       <b-card no-body>
         <b-card-header header-tag="header" class="p-1" role="tab">
           <b-button block v-b-toggle.accordion-3 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Style</span> <span
@@ -67,13 +67,16 @@
                 <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front.file_url " alt="Collar"/>
               </div>
               <div class="collar-details">
-<!--                <strong>{{ selectedProduct.productstyles[styleIndex].name }}</strong>-->
                 <strong>{{selectedProduct.productstyles[styleIndex].name }}</strong>
                 <div class="d-flex flex-wrap align-items-center" v-for="(item, i) in selectedProduct.addons" :key="i">
                   <div class="category mr-3">{{ item.addon.name }}</div>
                   <div class="price">+${{ item.addon.price }}</div>
                 </div>
               </div>
+            </div>
+            <div class="order-collar-style d-flex flex-column text-left mt-2" v-if="productModels[modelIndex]">
+              <strong style="font-weight: bold;">{{productModels[modelIndex].model_name}}</strong>
+              <div v-html="productModels[modelIndex].product_model_description" style="font-size: small;" class="my-1"></div>
             </div>
           </b-card-body>
         </b-collapse>
@@ -98,9 +101,9 @@
                   <span class="text-uppercase">{{ logo.side }}</span>
                   <div class="d-flex mt-1 badge badge-light">
                     Size:
-                    <span class="ml-1">{{ logo.originalWidth }}cm</span>
+                    <span class="ml-1">{{ unit_conversion(logo.originalWidth) }}</span>
                     <span class="ml-1">x</span>
-                    <span class="ml-1">{{ logo.originalHeight }}cm</span>
+                    <span class="ml-1">{{ unit_conversion(logo.originalHeight) }}</span>
                   </div>
                 </div>
 
@@ -129,8 +132,7 @@
               <template v-for="(text, index) in customTexts">
                 <div :key="index" v-if="text.text" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
                   <span class="name">{{ text.name_of_placement }}</span>
-                  <span>{{ text.originalHeight }}cm</span>
-<!--                  <span>{{ text.originalWidth }}cm</span>-->
+                  <span>{{ unit_conversion(text.originalWidth)  + ' x ' + unit_conversion(text.originalHeight) }}</span>
                 </div>
               </template>
             </div>
@@ -144,6 +146,7 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import { findIndex } from 'lodash'
+import { unitConversion } from '@/helpers/Helpers'
 
 @Component<OrderAccordion>({})
 export default class OrderAccordion extends Vue {
@@ -189,6 +192,9 @@ export default class OrderAccordion extends Vue {
   get productModels(): Record<any, any> {
     return this.$store.getters.getProductModels
   }
+  get modelIndex(): Record<any,any>{
+    return this.$store.getters.getSelectedModelIndex;
+  }
 
   public updateText (index:number) {
       this.activeRow = index
@@ -196,6 +202,11 @@ export default class OrderAccordion extends Vue {
 
   public checkIndex(text_type: string) {
     return findIndex(this.customTexts, { type: text_type })
+  }
+
+  public unit_conversion(value: number): string {
+    const converted = unitConversion(value)
+    return converted.value + converted.unit
   }
 }
 </script>

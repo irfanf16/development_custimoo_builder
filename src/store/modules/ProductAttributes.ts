@@ -114,7 +114,8 @@ const ProductAttributes:Module<any, any> = {
     //could be locker_product, cart_product, order_product
     product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null },
     last_active_product_data: {
-      design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
+      //todo updating this object make sure to do same update on LockerProduct.ts file method resetLastActiveProductData()
+      category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
       page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
       roster_detail: [],
     },
@@ -223,7 +224,7 @@ const ProductAttributes:Module<any, any> = {
         state.products[state.selectedIndex].customLogos = payload;
       }
     },
-    categories(state: Record<any, any>, categories: Record<any, any>) {
+    async categories(state: Record<any, any>, categories: Record<any, any>) {
       if(categories){
         state.categories = categories
       }
@@ -640,7 +641,7 @@ const ProductAttributes:Module<any, any> = {
     OVERRIDE_TEXT(state:Record<any, any>, payload) {
       state.customTexts = {};
       // @ts-ignore
-      initCustomTexts(this.getters.getaProducts) // getters works fine
+      initCustomTexts(this.getters.getProducts) // getters works fine
       const locker_texts = JSON.parse(payload.text)
 
       locker_texts.forEach((text: Record<any, any>, index: number) => {
@@ -1210,16 +1211,15 @@ const ProductAttributes:Module<any, any> = {
     setProductType({commit}, payload) {
       commit('SET_PRODUCT_TYPE', payload)
     },
-    // setEditCart({commit}, payload) {
-    //   commit('SET_EDIT_CART', payload)
-    // },
-    setCategories({commit}){
+    async setCategories({commit}){
       const url = '/product/categories'
-      http.get(url).then((response: any) => {
-        commit('categories', response.data)
-      }).catch((e: any) => {
-        console.log(e)
+      const response = await http.get(url).catch((e: any) => {
+        console.error('error while getting categories',e)
       });
+      if(response) {
+        await commit('categories', response.data)
+      }
+
     },
     setCustomLogos({commit}, payload){
       commit('customLogos', payload)

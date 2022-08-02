@@ -102,6 +102,8 @@ export class handleMainProducts extends Vue {
     let self: Record<any, any> = this;
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject
     let response_data = response.data;
+    let active_product_index = response.data.active_product_index
+    let active_product_id = response.data.active_product_id
     let response_products_obj = response_data.products;
     let retrieved_products = response_products_obj.data;
     let append_products =  response_products_obj.current_page > 1;
@@ -140,9 +142,11 @@ export class handleMainProducts extends Vue {
     * */
     let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
     if(is_editing) {
+     // console.log('editing mode');
       ({product_index, style_index, design_id, active_index} = await self.handleEditMode(retrieved_products));
     }
     else {
+     // console.log('not editing mode');
       let last_active_prod_data = self.$store.getters.getLastActiveProductData;
       if(editing_product_detail ) {
         product_index = response_data.active_product_index;
@@ -152,7 +156,6 @@ export class handleMainProducts extends Vue {
           product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
             return retrieved_product.id == last_active_prod_data.product_id
           })
-          console.log("product indesx", product_index)
           if(product_index >= 0 ) {
             style_index = last_active_prod_data.style_index;
             design_id = last_active_prod_data.design_id
@@ -166,22 +169,31 @@ export class handleMainProducts extends Vue {
           }
           this.$store.commit('SET_CUSTOM_LOGOS', {product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos})
           this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
-        } else {
-          product_index = 0
-          product_id = retrieved_products[0].id
+        }
+        else {
+          let {sync_id, customizer_preview, update_cart} = self.$route.query
+          if(sync_id) {
+            product_index = retrieved_products.findIndex((retrieved_product: Record<any, any>) => {
+              return retrieved_product.sync_id === sync_id;
+            });
+            product_index = product_index >=0 ? product_index : 0
+            product_id = retrieved_products[product_index]
+          }
+          else {
+            product_index = 0
+            product_id = retrieved_products[product_index]
+          }
           style_index = 0;
           let design_index = findIndex(retrieved_products[product_index].productstyles[style_index].productdesigns, (product_design: Record<any, any>) => {
             return product_design.design_show
           })
           design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
-          console.log("else search", self.search_products)
           let set_last_active_product_data = { design_index: design_index, design_id: design_id, product_index: 0, product_id:  product_id,
             search_products: self.search_products, style_index: 0, style_id: retrieved_products[0].productstyles[0].id,
             page_no: 1, customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized, custom_texts: [], custom_logos: [],
             default_colors: [], group_colors: [],
           }
           self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
-          console.log("else search123", self.search_products)
         }
       }
       // await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: append_products});
@@ -209,7 +221,6 @@ export class handleMainProducts extends Vue {
       await self.setCartProductData(retrieved_products)
       return false;
     }
-
     if(product_edit_info_object.type == "order_product") {
       await self.updateFactoryProduct(product_edit_info_object.order_product_info.order_products.factory_products[active_index]);
       return false;
@@ -241,6 +252,7 @@ export class handleMainProducts extends Vue {
   public async beforeSetDataValidateActiveProductData(retrieved_products: Record<any, any>[]) {
     let self = this;
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject;
+    //console.log('before validate', product_edit_info_object)
     let product_index = -1;
     let style_index = -1;
     let design_id = null;
@@ -350,10 +362,12 @@ export class handleMainProducts extends Vue {
       case "order_product": //in case of editing order product only one product shown. So product index will always be 0
         active_index = product_edit_info_object.order_product_info.order_products.active_index;
         let order_edit_product = product_edit_info_object.order_product_info.order_products.factory_products[active_index]
+        let roster_details = order_edit_product.roster_detail;
         style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
           return product_style.id == order_edit_product.style_id;
         });
         design_id =  order_edit_product.design_id;
+        this.$store.commit('UPDATE_ROSTER',roster_details);
         if(order_edit_product.product_type == "customized") {
           await this.$store.dispatch('setProductType', { prd_type: "customized", value: true });
           await this.$store.dispatch('setProductType', { prd_type: "personalized", value: false });
@@ -525,7 +539,7 @@ export class handleMainProducts extends Vue {
   }
 
   public async setCartProductData(retrieved_products: Record<any, any>[]) {
-    console.log("setting cart product data")
+    //console.log("setting cart product data")
     let self: Record<any, any> = this;
     await this.$store.commit('RESET_CUSTOM_TEXTS')
     await this.$store.commit('RESET_CUSTOM_LOGOS')
@@ -535,6 +549,7 @@ export class handleMainProducts extends Vue {
     let retrieved_cart_product = retrieved_products[0];
     this.$store.dispatch("getModels", retrieved_cart_product.product_id);
     let selectedIndex = retrieved_cart_product.productstyles.findIndex((productstyle: Record<any, any>) => productstyle.id === cart_item_product.style_id);
+    //console.log('style indx', selectedIndex, cart_item_product.style_id, retrieved_cart_product.productstyles)
     if(selectedIndex < 0) {
       console.log("Style not found while editing cart product")
     }
@@ -591,80 +606,101 @@ export class ProductsQueryParamsMixin extends Vue {
 
   public async setQueryParams() {
     let self: Record<any, any> = this;
+    let {sync_id, customizer_preview, update_cart} = self.$route.query
     let query_params: string[] = [];
-    if (self.$route.params.name) {
-      let shared_url = self.$route.path
-      if (shared_url.charAt(0) === '/'){
-        shared_url = shared_url.substring(1)
+    if(sync_id) {
+     // console.log('inside sync id')
+      query_params.push(`sync_id=${sync_id}`, 'paginate=false')
+      if(update_cart) {
+        query_params.push(`active_product_type=cart_product`, 'paginate=false')
       }
-      query_params = [
-        `shared_url=${shared_url}`, "active_product_type=share_product", 'paginate=false'
-      ];
     }
     else {
-      console.log("inside main else", self.getProductEditInfoObject.order_product_info)
-      //if route have update_order_product query parameter then it means the order edit product changed so we need to exit from existing edit mode and re set order edit mode
-      if(self.$route.query.update_order_product) {
-        self.exitFromEditMode()
-      }
-    //if self.getProductEditInfoObject.order_product_info is null then it means user came for order detail page and we need to set the edit order data
-      if(self.$route.query.update_order_product && self.getProductEditInfoObject.order_product_info == null) {
-        self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-          editing: true, type: "order_product", filters: null, locker_product_info: null, cart_product_info: null, order_product_info: {
-            order_item_id:  self.$route.query.order_item_id, activity_id: self.$route.query.activity_id
-          }
-        })
-      }
-      if(self.getProductEditInfoObject.editing) {
-        console.log("inside editing", self.getProductEditInfoObject.editing)
-        if(self.getProductEditInfoObject.type == "locker_product") {
-          console.log("inside editing locker_product")
-          query_params = [
-            `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
-            `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
-            `active_product_child_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
-            `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
-          ];
+      if (self.$route.params.name) {
+        let shared_url = self.$route.path
+        if (shared_url.charAt(0) === '/'){
+          shared_url = shared_url.substring(1)
         }
-        else if(self.getProductEditInfoObject.type == "cart_product") {
-          console.log("inside editing cart_product")
-          query_params = [
-            `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
-            `active_product_id=${self.getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`,
-            `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
-          ];
-        }
-        else if(self.getProductEditInfoObject.type == "order_product") {
-          console.log("inside editing order_product")
-          let order_product_info = self.getProductEditInfoObject.order_product_info
-          query_params = [
-            `customized=${true}`, `personalized=${true}`, `order_item_id=${self.$route.query.order_item_id}`,  'paginate=false'
-          ];
-          if(order_product_info.order_products) {
-            let active_index = order_product_info.order_products.active_index
-            let product_id = order_product_info.order_products.factory_products[active_index].product_id;
-            query_params.push(`update_order_product_id=${product_id}`);
-          } else {
-            query_params.push(`activity_id=${self.$route.query.activity_id}`, 'active_product_type=order_product')
-          }
-          if(self.$route.query.activity_id) {
-            let route_query_params = Object.assign({}, self.$route.query);
-            delete route_query_params.update_order_product;
-            delete route_query_params.activity_id;
-            self.$router.replace({ route_query_params });
-          }
-        }
+        query_params = [
+          `shared_url=${shared_url}`, "active_product_type=share_product", 'paginate=false'
+        ];
       }
       else {
-        console.log("Getting query params from last active product")
-        query_params = [
-          `customized=${self.getLastActiveProductData.customized}`, `personalized=${self.getLastActiveProductData.personalized}`
-        ];
-        if(self.getLastActiveProductData.product_id) {
-          query_params.push(`active_product_id=${self.getLastActiveProductData.product_id}`, 'paginate=false')
+        //if route have update_order_product query parameter then it means the order edit product changed so we need to exit from existing edit mode and re set order edit mode
+        if(self.$route.query.update_order_product) {
+          self.exitFromEditMode()
         }
+        //if self.getProductEditInfoObject.order_product_info is null then it means user came for order detail page and we need to set the edit order data
+        if(self.$route.query.update_order_product && self.getProductEditInfoObject.order_product_info == null) {
+          self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
+            editing: true, type: "order_product", filters: null, locker_product_info: null, cart_product_info: null, order_product_info: {
+              order_item_id:  self.$route.query.order_item_id, activity_id: self.$route.query.activity_id
+            }
+          })
+        }
+        if(self.getProductEditInfoObject.editing) {
+          console.log("inside editing", self.getProductEditInfoObject.editing)
+          if(self.getProductEditInfoObject.type == "locker_product") {
+            console.log("inside editing locker_product")
+            query_params = [
+              `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
+              `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
+              `active_product_child_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
+              `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
+            ];
+          }
+          else if(self.getProductEditInfoObject.type == "cart_product") {
+            console.log("inside editing cart_product")
+            query_params = [
+              `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
+              `active_product_id=${self.getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`,
+              `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
+            ];
+          }
+          else if(self.getProductEditInfoObject.type == "order_product") {
+            console.log("inside editing order_product")
+            let order_product_info = self.getProductEditInfoObject.order_product_info
+            query_params = [
+              `customized=${true}`, `personalized=${true}`, `order_item_id=${self.$route.query.order_item_id}`,  'paginate=false'
+            ];
+            if(order_product_info.order_products) {
+              let active_index = order_product_info.order_products.active_index
+              let product_id = order_product_info.order_products.factory_products[active_index].product_id;
+              query_params.push(`update_order_product_id=${product_id}`);
+            } else {
+              query_params.push(`activity_id=${self.$route.query.activity_id}`, 'active_product_type=order_product')
+            }
+            if(self.$route.query.activity_id) {
+              let route_query_params = Object.assign({}, self.$route.query);
+              delete route_query_params.update_order_product;
+              delete route_query_params.activity_id;
+              self.$router.replace({ route_query_params });
+            }
+          }
+        }
+        else {
+          console.log("Getting query params from last active product", self.getLastActiveProductData)
+          query_params = [
+            `customized=${self.getLastActiveProductData.customized}`, `personalized=${self.getLastActiveProductData.personalized}`
+          ];
+          if(self.getLastActiveProductData.product_id) {
+            query_params.push(`active_product_id=${self.getLastActiveProductData.product_id}`, 'paginate=false')
+          }
+
           if(self.getLastActiveProductData.search_products) {
-          query_params.push(`title=${self.getLastActiveProductData.search_products}`)
+            query_params.push(`title=${self.getLastActiveProductData.search_products}`)
+          }
+
+          if(self.getLastActiveProductData.category_id) {
+            query_params.push(`category_id=${self.getLastActiveProductData.category_id}`)
+          } else {
+            const categories = this.$store.getters.getCategories;
+            if(categories.length > 0) {
+              let category = categories[0]
+              query_params.push(`category_id=${category.id}`)
+              self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: 0, category_id: category.id})
+            }
+          }
         }
       }
     }
@@ -688,8 +724,9 @@ export class exitEditMode extends Vue {
 export class resetLastActiveProductData extends Vue {
   public async resetLastActiveProductData() {
     this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-      design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
-      page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: []
+      category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
+      page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
+      roster_detail: [],
     })
   }
 }

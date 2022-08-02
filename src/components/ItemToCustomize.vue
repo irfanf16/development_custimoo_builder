@@ -64,14 +64,13 @@
 
       </div>
 
-      <div class="d-flex align-items-center">
-<!--        <div class="pr-2 font-weight-bold">-->
-<!--          Brands:-->
-<!--        </div>-->
+      <div class="d-flex align-items-center" v-if="getProductEditInfoObject.editing==false">
         <div class="fade-right w-100 py-2" >
           <div class="overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList ">
-            <div  v-for="(category, i) in categories" :key="i" style="white-space: nowrap" :style="{color: (selectedBrand == category.id) ? '#000 !important': '#999 !important'}"
-                 :class="{ 'pr-3': i + 1 == categories.length, 'activeBrand': (selectedBrand == category.id) }" role="button" @click="setBrands(category.id)">
+            <div  v-for="(category, categoryIndex) in categories" :key="`category_${categoryIndex}`" style="white-space: nowrap"
+                  :style="{color: (selectedCategory.index == categoryIndex) ? '#000 !important': '#999 !important'}"
+                  :class="{ 'pr-3': categoryIndex + 1 == categories.length, 'activeBrand': (selectedCategory.index == categoryIndex) }"
+                  role="button" @click="handleCategoryUpdate(categoryIndex)">
               <img :src="`${storage_url}${category.image_url}`"  height="30">
               </div>
           </div>
@@ -124,7 +123,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 
     let ecommerce_update_id = this.$route.query.update_item;
     if(!ecommerce_update_id && this.categories.length) {
-      this.$store.commit('SET_SELECTED_CATEGORIES', this.categories[0].id) // as this is on mounted so don't need to send get product call again
+      // this.$store.commit('SET_SELECTED_CATEGORIES', this.categories[0].id) // as this is on mounted so don't need to send get product call again
     }
     this.search = this.search_products
   }
@@ -132,7 +131,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 
 
 export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData) {
-  @Prop({required: true}) categories!: any;
+  // @Prop({required: true}) categories!: any;
   @Prop({required: true}) uploaderOpened!: any;
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({default: ''}) search_products!: any;
@@ -183,7 +182,6 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
   public async searchProducts(isClear:boolean) {
     let self = this;
-    console.log("cleared")
     if(isClear)
     {
       self.search = "";
@@ -247,29 +245,32 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     }
   }
 
-  public async setBrands(category_id:number){
-    if(this.selectedBrand !== category_id){
-      await this.$store.commit('SET_SELECTED_CATEGORIES', category_id)
-      this.$emit('retrieveProducts')
+  public async handleCategoryUpdate(category_index:number){
+    let self: Record<any, any> = this;
+    let selected_category = self.categories[category_index]
+    if(this.getLastActiveProductData.category_id !== selected_category.id){
+      await this.$store.commit('SET_SELECTED_CATEGORIES', selected_category.id)
+      await this.resetLastActiveProductData()
+      self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: category_index, category_id: selected_category.id});
+      let query_params = [`category_id=${selected_category.id}`]
+      this.$emit('retrieveProducts', query_params)
     }
   }
+
+  /* getters/computed props starts */
 
   get getPersonalized(): boolean {
     return this.$store.getters.getPersonalized
   }
+
   get getCustomized(): boolean {
     return this.$store.getters.getCustomized
   }
+
   get StockCount():number{
     return this.$store.getters.getStockCount
   }
-  get selectedBrand():number{
-    const selectedBrand =  this.$store.getters.getSelectedCategories
-    if(selectedBrand.length > 0)
-      return selectedBrand[0]
-    else
-      return 0
-  }
+
   get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject;
   }
@@ -277,6 +278,19 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   get getLastActiveProductData() {
     return this.$store.getters.getLastActiveProductData;
   }
+
+  get selectedCategory() {
+    let self = this;
+    let category_index = self.getLastActiveProductData.category_index
+    let category_id = self.getLastActiveProductData.category_id
+    return { index: category_index, id: category_id }
+  }
+
+  get categories(): Record<any, any>[] {
+    return this.$store.getters.getCategories
+  }
+
+  /* getters/computed props ends */
 }
 </script>
 
