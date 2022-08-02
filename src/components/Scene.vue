@@ -260,6 +260,10 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     return this.$store.getters.getSelectedProductId
   }
 
+  get newCustomTexts(): Record<any, any>[] {
+    return this.$store.getters.getNewCustomTexts(this.product_id)
+  }
+
   @Watch('customLogos', {
     deep: true
   })
@@ -959,6 +963,15 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
             })
           }
 
+          if(this.newCustomTexts) {
+            this.newCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
+              if(custom_text.value) {
+                const text = { value: custom_text, custom_text_index: index }
+                this.addTextsNew(text)
+              }
+            })
+          }
+
           if (this.mainPreview) {
             this.setProductionSVG()
             this.$store.commit('STORE_CANVAS_IMAGE', {
@@ -1056,7 +1069,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
       if ('logoIndex' in obj) {
         logoLength++
       }
-      if ('textIndex' in obj) {
+      if ('custom_text_index' in obj) {
         textLength++
       }
     })
@@ -1374,8 +1387,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
       }
 
       let addIndex
-      if (target.text) {
-        addIndex = target.textIndex
+      if (target.type == 'text') {
+        addIndex = target.custom_text_index + '' + target.custom_text_item_index
       } else {
         addIndex = target.logoIndex
       }
@@ -1475,7 +1488,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
               this.backCanvas.remove(otherSideObjects[addIndex])
             }
           }
-          otherSideObjects.splice(addIndex, 1)
+          delete otherSideObjects[addIndex]
         }
       }
     }
@@ -1787,8 +1800,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
         visible: true
       }).bringToFront()
     }
-
-
   }
 
   public addTexts(text: Record<any, any>, textIndex: null | number = null) {
@@ -1917,10 +1928,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
   public async addTextsNew(custom_text_info: Record<any, any>) {
     const self: Record<any, any> = this
     const custom_text_index = custom_text_info.custom_text_index;
-    const custom_text_item_index = custom_text_info.custom_text_item_index;
-    const custom_text_value = custom_text_info.value;
-    const emitter = custom_text_info.emitter
-    self.product_custom_texts[custom_text_index] = custom_text_value;
+    self.product_custom_texts[custom_text_index] = custom_text_info.value;
     let custom_text = self.product_custom_texts[custom_text_index];
     let render_front_canvas = false;
     let render_back_canvas = false;
@@ -1935,7 +1943,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     custom_text.items.forEach((custom_text_item:Record<any, any>, customTextItemIndex: number) => {
       let fabric_text: fabric.Text | fabric.Group
       if(this.mainPreview) {
-        let font = this.products_fonts[custom_text_item.font_family]
+        let font = this.products_fonts[custom_text.font_family]
         if (font) {
           const path = font.opentype_font.getPath(custom_text.value);
 
@@ -1968,7 +1976,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
               visible: custom_text_item.selected,
               custom_text_index: custom_text_index,
               custom_text_item_index: customTextItemIndex,
-              type: "text"
+              type: "text",
+              side: custom_text_item.placement
             })
             fabric_text.setControlsVisibility({
               tl: false,
@@ -2010,6 +2019,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                 })
               })
             }
+            this.addToOtherSide(fabric_text, custom_text_item.placement)
           })
         }
       } else {
@@ -2037,6 +2047,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
           visible: custom_text_item.selected,
           custom_text_index: custom_text_index,
           custom_text_item_index: customTextItemIndex,
+          side: custom_text_item.placement
         })
         fabric_text.setControlsVisibility({
           tl: false,
@@ -2062,6 +2073,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
           self.backCanvas.add(fabric_text)
           render_back_canvas = true
         }
+        this.addToOtherSide(fabric_text, custom_text_item.placement)
       }
     })
     if(render_front_canvas) {

@@ -24,11 +24,12 @@
           <div class="fade-right w-100 py-2">
             <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList ">
               <div v-for="(product_font, product_font_index) in product_fonts" :key="`product_font_${product_font_index}`"
+                   @click="handleCustomTextFontChange(customTextIndex,  product_font.value)"
                    :style="{ fontSize: '20px',  fontFamily: product_font.value}"
                    style="white-space: nowrap"
                    :class="{ 'pr-3': product_font_index + 1 == product_fonts.length }" role="button">
                 <span :key="`product_custom_text_${customTextIndex}_font-${product_font_index}`"
-                      v-b-tooltip.right="product_custom_text.value ? product_font.label : ''">
+                      v-b-tooltip.top="product_custom_text.value ? product_font.label : ''">
                   {{product_custom_text.value ? product_custom_text.value : product_font.value}}
                 </span>
               </div>
@@ -227,6 +228,15 @@ export default class NewCustomizationText extends Mixins(ProductColors, ProductF
     self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextUpdated", {
       emitter: "placement", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index, value: self.product_custom_texts[custom_text_index]
+    });
+  }
+  handleCustomTextFontChange(custom_text_index: number, selected_font: string) {
+    console.log(selected_font, ' index ', custom_text_index)
+    let self:Record<any, any> = this;
+    self.product_custom_texts[custom_text_index].font_family = selected_font;
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$eventBus.$emit("customTextUpdated", {
+      emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
     });
   }
 }
