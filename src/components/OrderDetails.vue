@@ -64,6 +64,7 @@ import {http} from "@/httpCommon";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
+import { unitConversion } from '@/helpers/Helpers'
 
 type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
@@ -159,7 +160,9 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     }
     self.customLogos.forEach((logos: Record<any, any>, index: number) => {
       if(logos.url) {
-        let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
+        const converted_width = unitConversion(logos.originalHeight)
+        const converted_height = unitConversion(logos.originalWidth)
+        let logoDimension = converted_width.value + converted_width.unit + ' x ' + converted_height.value + converted_height.unit
         self.toDataURLCustom(this.storageUrl+logos.url, (dataUrl: any) => {
           if (dataUrl) {
             self.base64Logos.push({'b64logo': dataUrl, 'logoSize': logoDimension})
