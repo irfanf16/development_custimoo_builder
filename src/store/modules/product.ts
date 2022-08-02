@@ -317,7 +317,7 @@ const Product:Module<any, any> = {
     async fetchGeneralSettings({commit}, type){
       const res =  await http.get(`/get-configuration/${type}`).then((res) => {
         if(res.data.status_code === 200){
-          commit('SET_SETTING',res.data.result)
+          commit('SET_SETTING', res.data.result)
         }
         return res
       });

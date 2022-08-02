@@ -7,6 +7,7 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
+import store from '../store'
 
 const getLogoSettingsObject = () => {
   return {
@@ -1108,20 +1109,18 @@ const parseSvgString = async (svg_string:string, factory_product_content: Record
   }
 }
 
-const unitConversion = (setting:Record<any,any>, value:number) => {
+const unitConversion = (value:number) => {
+  const setting = store.getters.getSetting
   switch( setting.conversion_operator ) {
     case 'multiply':
-      return (value * (parseFloat(setting.conversion_value)));
+      return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
       break;
     case 'divide':
-      return (value / (parseFloat(setting.conversion_value)));
+      return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
       break;
     default:
-      return value
+      return { value: value.toFixed(1), unit: setting.unit }
   }
-}
-const fetchSettings = async () => {
-  const setting = await Store.dispatch('fetchGeneralSettings','measurement_unit');
 }
 
 //Functions related to SVG parsing end
@@ -1130,5 +1129,5 @@ export {
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
   getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
-  fetchSettings,unitConversion
+  unitConversion
 };
