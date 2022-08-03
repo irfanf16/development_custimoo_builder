@@ -204,10 +204,11 @@ export default {
           await this.$store.dispatch('setBrowserToken')
         }
         await this.$store.dispatch("getLockers");
+        await this.$store.commit("SET_RECENT_LOGOS");
         await this.$store.dispatch('getLockerRoomColors')
         await this.$store.dispatch('getCartServer', {})
         await this.$store.dispatch('getNotifications')
-        await  getPermissions()
+        await getPermissions()
 
       }else{
         alert('no customer')
