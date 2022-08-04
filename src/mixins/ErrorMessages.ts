@@ -28,11 +28,9 @@ export default class ErrorMessages extends Vue{
         errArr.push(errors[field][0]);
       });
       errArr.forEach(element => {
-        // @ts-ignore
-        Vue.$toast.open({
-          message: element,
-          type: 'error',
-          dismissible: true,
+        VsToast.show({
+          title: element,
+          variant: 'error',
           duration: 5000,
           position: 'bottom-left'
         });
@@ -46,11 +44,9 @@ export default class ErrorMessages extends Vue{
       errArr.push(errors[field][0]);
     });
     errArr.forEach(element => {
-      // @ts-ignore
-      Vue.$toast.open({
-        message: element,
-        type: 'error',
-        dismissible: true,
+      VsToast.show({
+        title: element,
+        variant: 'error',
         duration: 5000,
         position: 'bottom-left'
       });
@@ -63,11 +59,9 @@ export default class ErrorMessages extends Vue{
        errArr.push(errors[field]);
      });
      errArr.forEach(element => {
-       // @ts-ignore
-       Vue.$toast.open({
-         message: element,
-         type: 'error',
-         dismissible: true,
+       VsToast.show({
+         title: element,
+         variant: 'error',
          duration: 5000,
          position: 'bottom-left'
        });

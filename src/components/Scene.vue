@@ -21,7 +21,7 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getSelectedProductPantones, setLogoSettings } from '@/helpers/Helpers'
+import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
 
 @Component<Scene>({
   async mounted() {
@@ -1834,15 +1834,15 @@ export default class Scene extends Vue {
     const height = (object.height as number * object.scaleY * this.measurementRatio)
 
     if (width != 0 || height != 0) {
+      const converted_width = unitConversion(width)
+      const converted_height = unitConversion(height)
       dimText.set({
         left: object.left,
         top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-        text: 'Size ' + width.toFixed(1) + 'cm x ' + height.toFixed(1) + 'cm',
+        text: 'Size ' + converted_width.value + converted_width.unit + ' x ' + converted_height.value + converted_height.unit,
         visible: true
       }).bringToFront()
     }
-
-
   }
 
   public addTexts(text: Record<any, any>, textIndex: null | number = null) {

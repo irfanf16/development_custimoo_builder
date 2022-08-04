@@ -4,7 +4,7 @@
     <div v-if="collection">
       <a :href="`${storageUrl}${collection.link}`" download target="_blank" class="download-pdf rounded-circle btn btn-secondary light"><BIconDownload /></a>
       <div id="collectionPdfContainer">
-        <div class="pdf_cover">
+        <div v-if="company.id == 1" class="pdf_cover">
           <h1 class="text-white p-4">{{ collection.name }} </h1>
 
           <div class="logo">
@@ -12,7 +12,7 @@
           </div>
         </div>
 
-        <div class="pdf_page" v-for="(products_chunks,idx)  in collection.collection_products" :key="idx">
+        <div class="pdf_page" v-for="(products_chunks,idx)  in collection.collection_products" :key="idx" :style="{ background: company.id == 1? `url('img/page_background.png') no-repeat center` : `url('img/page_background_2.png') no-repeat center` }">
           <table class="print-table">
             <tbody>
             <tr>
@@ -99,6 +99,9 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages) {
   public storageUrl = process.env.VUE_APP_STORAGE_URL
   public collection = null;
 
+  get company() {
+    return this.$store.getters.getCompany
+  }
   getCollection(): void {
     this.showLoader = true
     const collection_file_name = this.$route.params.collection_file_name;

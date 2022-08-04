@@ -19,6 +19,7 @@ const Product:Module<any, any> = {
     },
     update_order_item_products: null,
     product_locker_id:0,
+    setting:{}
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -56,6 +57,9 @@ const Product:Module<any, any> = {
     },
     getProductLockerId(state:Record<any,any>){
       return state.product_locker_id;
+    },
+    getSetting(state:Record<any,any>){
+      return state.setting
     }
   },
   mutations:{
@@ -126,6 +130,9 @@ const Product:Module<any, any> = {
     },
     SET_PRODUCT_LOCKER_ID(state:Record<any,any>,id){
       state.product_locker_id = id;
+    },
+    SET_SETTING(state:Record<any,any>,setting){
+      state.setting = setting;
     }
   },
   actions: {
@@ -306,6 +313,14 @@ const Product:Module<any, any> = {
     },
     async updateMainProductsInfo({commit}, payload){
       commit('UPDATE_MAIN_PRODUCTS_INFO', payload)
+    },
+    async fetchGeneralSettings({commit}, type){
+      const res =  await http.get(`/get-configuration/${type}`).then((res) => {
+        if(res.data.status_code === 200){
+          commit('SET_SETTING', res.data.result)
+        }
+        return res
+      });
     },
 
   }
