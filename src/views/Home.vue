@@ -23,7 +23,7 @@
                     <template v-if="getProductEditInfoObject.editing == false || getProductEditInfoObject.type == 'locker_product'">
 <!--                    <template>-->
                       <template v-if="isCustomerAuthenticated">
-                        <b-button :key="'lockerRoom'" v-if="roomWithProducts.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
+                        <b-button :key="'lockerRoom'" v-if="lockers.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                       </template>
                       <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
                         <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
@@ -1623,10 +1623,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   get roomWithProducts():Record<any, any>{
-    const room = this.$store.getters.getLockerProducts
-    return room
+    return this.$store.getters.getLockerProducts
   }
 
+  get lockers(): Record<any, any> {
+    return this.$store.getters.getLockers
+  }
 
   public async shareProduct(product: Record<any, any>, ind: number, i: number) {
     try {
