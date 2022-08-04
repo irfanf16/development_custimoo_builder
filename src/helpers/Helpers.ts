@@ -285,6 +285,18 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
   const original_logo = logo.logo_url;
   const is_transparent = false;
   logo_url = original_logo;
+
+  let image_colors = [];
+  if(logo.logo_colors != null) {
+    image_colors = processColorsCustom(JSON.parse(logo.logo_colors))
+    let image_color_count = image_colors.length;
+    while(image_color_count < 4 ) {
+      image_colors.push({hex: null, pantone: null, name: null});
+      ++image_color_count;
+    }
+  }
+
+
   const payload = [{
     index: customTabIndex,
     attribute: 'url',
@@ -322,6 +334,11 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
       index: customTabIndex,
       attribute: 'original_logo_url',
       value: logo.original_logo_url
+    },
+    {
+      index: customTabIndex,
+      attribute: 'logo_colors',
+      value: image_colors
     },
 
   ];
@@ -365,12 +382,6 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
   else {
     if(customTabIndex == 0) {
       if(logo.logo_colors != null) {
-        const image_colors = processColorsCustom(JSON.parse(logo.logo_colors))
-        let image_color_count = image_colors.length;
-        while(image_color_count < 4 ) {
-          image_colors.push({hex: null, pantone: null, name: null});
-          ++image_color_count;
-        }
         Store.dispatch("SET_LOGO_COLORS", image_colors);
         Store.dispatch("initialLogoColors", JSON.stringify(image_colors));
         Store.commit("UPDATE_USING_COLOR_LOGOS", false);
