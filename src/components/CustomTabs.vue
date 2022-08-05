@@ -123,19 +123,12 @@
         </svg>
       </span>
     </div>
-    <EditRosterAreaTab v-show="false" @open-add-to-locker="openAddToLocker" ref="edit-roster" :productSizes="productSizes"/>
+    <EditRosterAreaTab v-show="false" @open-add-to-locker="openAddToLocker" ref="edit-roster" :productSizes="productSizes" :products_fonts="products_fonts" />
   </div>
 </template>
 
 <script lang="ts">
 import {Component, Prop, PropSync, Vue, Watch} from 'vue-property-decorator'
-// import ColorAccordion from '@/components/ColorAccordion.vue'
-// import LogoPlacementTabs from './LogoPlacementTabs.vue'
-// import CustomizationText from '@/components/CustomizationText.vue'
-// import CollarStyle from '@/components/CollarStyle.vue'
-// import EditRosterArea from '@/components/EditRosterArea.vue'
-// import UploadLogo from '@/components/UploadLogo.vue'
-// import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 import TextCustomization from "@/components/mobile/TextCustomization.vue";
 import Collars from "@/components/mobile/Collars.vue";
@@ -145,7 +138,6 @@ import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
-import ErrorMessages from "@/mixins/ErrorMessages";
 import {getRosterDetailDefaultObject} from "@/helpers/Helpers";
 
 @Component<CustomTabs>({
@@ -155,13 +147,6 @@ import {getRosterDetailDefaultObject} from "@/helpers/Helpers";
     EditRosterAreaTab,
     Collars,
     RosterTableMobile
-    // ColorAccordion,
-    // LogoPlacementTabs,
-    // CustomizationText,
-    // CollarStyle,
-    // EditRosterArea,
-    // ColorTabs,
-    // UploadLogo
   },
   async mounted() {
     this.productColorsManipulation()
@@ -174,6 +159,7 @@ import {getRosterDetailDefaultObject} from "@/helpers/Helpers";
 })
 
 export default class CustomTabs extends Vue {
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop() activeTab!: number
   @Prop() sideTabIndex!: number
   @Prop() maximized!: boolean

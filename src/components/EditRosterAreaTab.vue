@@ -24,7 +24,7 @@
         <div class="d-flex flex-wrap justify-content-between">
           <RosterDetails :productSizes="sizeOptions" ref="rostermodal" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit"/>
           <div class="roster-preview-area">
-            <CustomizationPreview :designs="products[designsIndex]"/>
+            <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts" />
   <!--          <OrderDetails/>-->
           </div>
         </div>
@@ -94,6 +94,7 @@ import ModalAction from "@/mixins/ModalAction";
 })
 
 export default class EditRosterAreaTab extends Mixins(ModalAction) {
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) productSizes!: any
   private products: any[] = []
   public designsIndex = 0

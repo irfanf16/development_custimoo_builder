@@ -66,11 +66,6 @@ const routes: Array<RouteConfig> = [
     component: ThreeD
   },
   {
-    path: '/confirm-order',
-    name: 'ConfirmOrder',
-    component: ConfirmOrder
-  },
-  {
     path:'/share/:product/:name',
     name: 'ShareUrl',
     component: Home
