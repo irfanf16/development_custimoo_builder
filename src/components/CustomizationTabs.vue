@@ -34,7 +34,7 @@
             <div v-if="hideTab.colorHide">
               <h2 class="fw-bold fz-16 p-3 d-none d-lg-block">Choose Color</h2>
               <div class="d-none d-lg-block">
-                <ColorAccordion :productColors="productColors"/>
+                <ColorAccordion :productColors="productColors" :key="selectedProduct.id" />
               </div>
               <!--            for mobile-->
               <div class="color-tabs d-lg-none">

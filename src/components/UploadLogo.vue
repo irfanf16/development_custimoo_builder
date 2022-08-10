@@ -112,7 +112,7 @@ import {
   fileToBase64,
   getLogoObject,
   getSelectedProductPantones,
-  getUploadedLogoObject,
+  getUploadedLogoObject, processColorsCustom,
   setCustomLogo,
   setLogoSettings
 } from '../helpers/Helpers'
@@ -284,6 +284,8 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.url = resp.data.file.logo_url;
         custom_logo.id = resp.data.file.id;
         custom_logo.upload = true
+        let logo_colors = processColorsCustom(this.colors)
+        custom_logo.logo_colors = logo_colors
         let customObj = await getUploadedLogoObject(resp.data.file)
         this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
         this.$store.commit('SET_COLORS_FROM_RECENT',false)
@@ -357,7 +359,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
       await this.$store.dispatch("initialLogoColors", JSON.stringify(this.imageColors));
     }
   }
-
 
 
   public deleteLogo() {
