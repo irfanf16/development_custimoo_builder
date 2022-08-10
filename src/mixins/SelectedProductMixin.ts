@@ -1,6 +1,4 @@
 import {Component, Vue} from "vue-property-decorator";
-import {initCustomLogos, initCustomTexts, processColorsCustom, rosterDetailsInit} from "@/helpers/Helpers";
-import {forEach} from "lodash";
 
 @Component
 export class ProductColors extends Vue {
@@ -70,7 +68,7 @@ export class SetSelectedProductCustomTexts extends Vue {
     if(selected_product) {
       const selected_product_custom_texts = self.$store.getters.getNewCustomTexts(selected_product.id)
       if(selected_product_custom_texts) {
-        self.product_custom_texts = JSON.parse(JSON.stringify(selected_product_custom_texts));
+        self.product_custom_texts = selected_product_custom_texts;
       } else {
         console.error(`product (${selected_product.id}) not found while setting selected product custom texts`)
       }

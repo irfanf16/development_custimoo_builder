@@ -121,7 +121,8 @@ const ProductAttributes:Module<any, any> = {
     },
     editing_roster_player_index: 0,
     selectedCategories:[],
-    products_next_page_no: null //null value mean has no more pages
+    products_next_page_no: null, //null value mean has no more pages,
+    products_rosters:{}
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -932,33 +933,66 @@ const ProductAttributes:Module<any, any> = {
     SET_NEW_CUSTOM_TEXTS(state:Record<any, any>, payload) {
       if("index" in payload) {
         /*
-        * the index type should be one of "product", "product_text". if index_type = "product" then it means we want to update all custom texts of specific product.
-        * if index_type = "product_text" then it means we want to update product specific custom_text of product
-        * */
-        const index_type: string = payload.index_type ? payload.index_type : 'product_text';
-        /*
-        * By default we consider active product id to change custom text. If we want to update custom text if user wants
-        * to update custom text other than selected product then we get that product id
-        * */
+         * By default we consider active product id to change custom text. If we want to update custom text if user wants
+         * to update custom text other than selected product then we get that product id
+       * */
         const product_id: number = payload.product_id ? payload.product_id : state.selectedPrdId;
-        //if index_type = "product" then we will update all custom texts of product
-        if(index_type == "product") {
-          Vue.set(state.new_custom_texts, product_id, payload.value)
+        if(state.new_custom_texts[product_id][payload.index] == undefined) {
+          state.new_custom_texts[product_id].push(payload.value)
+          return false
         }
         else {
-          Vue.set(state.new_custom_texts[product_id], payload.index, payload.value)
+          /*
+          * the index type should be one of "product", "product_text". if index_type = "product" then it means we want to update all custom texts of specific product.
+          * if index_type = "product_text" then it means we want to update product specific custom_text of product
+          * */
+          const index_type: string = payload.index_type ? payload.index_type : 'product_text';
+          //if index_type = "product" then we will update all custom texts of product
+          if(index_type == "product") {
+            Vue.set(state.new_custom_texts, product_id, payload.value)
+          }
+          else {
+            Vue.set(state.new_custom_texts[product_id], payload.index, payload.value)
+          }
         }
+
       } else {
         state.new_custom_texts = payload;
       }
     },
     SET_PRODUCTS_NEXT_PAGE_NO(state:Record<any, any>, payload){
       state.products_next_page_no = payload;
-    }
+    },
+    SET_PRODUCTS_ROSTERS(state:Record<any, any>, payload: Record<any, any>){
+      if(payload && 'product_id' in payload) {
+        if('roster_index' in payload) {
+          let product_roster_item = state.products_rosters[payload.product_id][payload.roster_index];
+          product_roster_item = Object.assign(product_roster_item, payload.roster_data)
+          Vue.set(state.products_rosters[payload.product_id], payload.roster_index, product_roster_item)
+        } else {
+          let product_roster = state.products_rosters[payload.product_id];
+          product_roster = Object.assign(product_roster, payload.roster_data)
+          Vue.set(state.products_rosters, payload.product_id, product_roster)
+        }
+      } else {
+        const products_rosters: Record<any, any> = {}
+        if(state.products.length > 0) {
+          state.products.forEach((product: Record<any, any>) => {
+            const product_first_size_name = product.sizes.length > 0 ? product.sizes[0].json_data[0].name : '';
+            products_rosters[product.id] = [{
+              text: '',  number: '',  size_index: 0,  size: product_first_size_name,  code: product_first_size_name, quantity: 1, information: ''
+            }]
+          })
+          state.products_rosters = products_rosters;
+        } else {
+          console.info("No products found. So can't set products roster information")
+        }
+      }
+    },
   },
   getters: {
-    getSelectedProductCustomTexts: state =>  {
-      return state.new_custom_texts
+    selectedProductCustomTexts: state =>  {
+      return state.new_custom_texts[state.selectedPrdId]
     },
     //this is parameterized getter that's why in vue devtool it will always return function. Also it will not be cached instead it will always executed when we use getter
      getNewCustomTexts: state => (product_id = "all") =>  {
@@ -1112,6 +1146,9 @@ const ProductAttributes:Module<any, any> = {
         return []
       }
       return state.rosterDetails[prd_id]
+    },
+    getSelectedProductRoster: state => {
+      return state.products_rosters[state.selectedPrdId]
     },
     getAllRosterDetails: state  => {
       return state.rosterDetails
@@ -1492,6 +1529,9 @@ const ProductAttributes:Module<any, any> = {
     setLastActiveProductData({commit}, payload) {
       commit('SET_LAST_ACTIVE_PRODUCT_DATA', payload)
 
+    },
+    setProductsRosters({commit}, payload) {
+      commit('SET_PRODUCTS_ROSTERS', payload)
     }
   }
 }

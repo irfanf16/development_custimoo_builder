@@ -104,7 +104,7 @@
                     <div>
                       <label :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`">Placement</label>
                       <b-form-select :style="{ fontSize: '18px', height: '44px' }" :value="product_custom_text_item.placement"
-                                     :options="['front', 'back']" :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
+                                     :options="['Front', 'Back']" :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
                                      :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
                                      @change="handleCustomTextPlacementUpdate($event, customTextIndex, productCustomTextItemIndex)"
                       ></b-form-select>
@@ -122,6 +122,9 @@
         </div>
       </b-collapse>
     </div>
+    <span class="minus d-flex align-item-right" @click="addCustomText">
+        <BIconPlus class="plus" /> Add
+    </span>
   </div>
 </template>
 
@@ -131,6 +134,7 @@ import { Component, Mixins, Prop, Watch, Vue } from 'vue-property-decorator'
 import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
 import { ProductColors, ProductFonts, SetSelectedProductCustomTexts } from "@/mixins/SelectedProductMixin";
+import {find, filter} from "lodash";
 
 
 @Component<NewCustomizationText>({
@@ -161,6 +165,7 @@ export default class NewCustomizationText extends Mixins(ProductColors, ProductF
   public product_fonts: Record<any, any>[] = []
   public product_colors: Record<any, any>[] = []
   public product_custom_texts: Record<any, any>[] = []
+  public default_font_obj = ''
 
   /* component props goes here */
 
@@ -168,23 +173,33 @@ export default class NewCustomizationText extends Mixins(ProductColors, ProductF
   /* component getters/computed properties goes here */
 
   get getSelectedProduct(): Record<any, any> {
-    return this.$store.getters.getSelectedProduct
+    let selected_product = this.$store.getters.getSelectedProduct;
+    let product_first_font = selected_product.namefonts.length > 0 ? selected_product.namefonts[0] : null;
+    if(product_first_font) {
+      this.default_font_obj = product_first_font.json_data.length > 0 ? product_first_font.json_data[0] : null;
+    }
+    return selected_product;
   }
 
   /*
   * methods starts
   * */
 
-  public handel_text_change_timer!: number
+  public handle_text_change_timer!: number
   handleCustomTextInputChange(updatedVal: string, custom_text_index: number) {
-    clearTimeout (this.handel_text_change_timer);
-    this.handel_text_change_timer = setTimeout(() => {
+    clearTimeout (this.handle_text_change_timer);
+    this.handle_text_change_timer = setTimeout(() => {
       let self:Record<any, any> = this;
-      self.product_custom_texts[custom_text_index].value = updatedVal;
-      self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+      let updated_custom_text = self.product_custom_texts[custom_text_index]
+      updated_custom_text.value = updatedVal;
+      self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: updated_custom_text})
       self.$eventBus.$emit("customTextUpdated", {
-        emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
+        emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: updated_custom_text
       });
+      if(updated_custom_text.is_first_name || updated_custom_text.is_first_number) {
+        const roster_key = self.product_custom_texts[custom_text_index].type == 'name' ? 'text' : 'number';
+        self.$store.dispatch('setProductsRosters', {product_id: self.getSelectedProduct.id, roster_index: 0, roster_data: { [roster_key] : updatedVal } })
+      }
     }, 300)
   }
 
@@ -231,13 +246,48 @@ export default class NewCustomizationText extends Mixins(ProductColors, ProductF
     });
   }
   handleCustomTextFontChange(custom_text_index: number, selected_font: string) {
-    console.log(selected_font, ' index ', custom_text_index)
     let self:Record<any, any> = this;
     self.product_custom_texts[custom_text_index].font_family = selected_font;
     self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextUpdated", {
       emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
     });
+  }
+
+  addCustomText() {
+    let self: Record<any, any> = this;
+    let custom_text = self.resetCustomTextObject();
+    self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: self.product_custom_texts.length, value: custom_text })
+
+   // first_custom_text.
+  }
+
+  resetCustomTextObject(custom_text = null) {
+    let self: Record<any, any> = this;
+    if(custom_text == null) {
+      custom_text = find(self.product_custom_texts, ['is_first_name', true]);
+      if(custom_text == undefined) {
+        custom_text = find(self.product_custom_texts, ['is_first_number', true]);
+      }
+    }
+    let custom_text_names_count = filter(self.product_custom_texts, ['type', 'name']).length;
+    custom_text = JSON.parse(JSON.stringify(custom_text));
+    custom_text = Object.assign(custom_text, {
+      following_product_ids: [], following_products: [], font_family: self.default_font_obj ? self.default_font_obj.name : '',
+      id: null, items: [custom_text.items[0]], label: 'Custom Text ' + (custom_text_names_count + 1), type: 'name', updated_at: null, value: ''
+    })
+    if('is_first_name' in custom_text) {
+      custom_text.is_first_name = false
+    }
+    if('is_first_number' in custom_text) {
+      custom_text.is_first_number = false
+    }
+    custom_text.items[0] = Object.assign(custom_text.items[0], {
+      color: 'WHITE', color_pantone: '#F4F5F0', font_family: self.default_font_obj ? self.default_font_obj.name : '', height: 50,
+      is_locked: false, label: 'Custom Text ' + (custom_text_names_count + 1), outline_color: 'WHITE', outline_color_pantone: '#F4F5F0',
+      outline_enabled: 1, outline_width: 0, placement: 'Front', rotation: 0, width: 50, x_axis: 300, y_axis: 300
+    })
+    return custom_text;
   }
 }
 </script>

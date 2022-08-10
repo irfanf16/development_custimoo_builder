@@ -55,25 +55,25 @@
           <div class="remove"></div>
         </div>
       </div>
-      <template v-for="(product_roster_item, productRosterItemIndex) in productRoster">
-        <div class="roster-row mb-2" :key="`roster_item_${productRosterItemIndex}`">
+      <template v-for="(roster, index) in rosterDetails">
+        <div class="roster-row mb-2" :key="index">
           <div class="align-left">
-            <template v-if="allowNameAndNumbers">
+            <template v-if="selectedProduct.allow_name_number">
               <div class="hide-show">
-                <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="editRosterPlayer(productRosterItemIndex)">
-                  <font-awesome-icon :icon="['fas', productRosterItemIndex === eyeIndex ? 'eye' : 'eye-slash']" />
+                <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="editRosterPlayer(index)">
+                  <font-awesome-icon :icon="['fas', index === eyeIndex ? 'eye' : 'eye-slash']" />
                 </a>
               </div>
               <div v-if="custom_name_index != -1" class="roster-name">
-                <b-form-input :value="product_roster_item.text" @input="handleRosterUpdate($event, 'name', productRosterItemIndex)"></b-form-input>
+                <b-form-input ref="myInputs" v-model="roster.text" @focus="editRosterPlayer(index)"></b-form-input>
               </div>
               <div v-if="custom_number_index != -1" :style="{maxWidth: custom_name_index == -1 && '70%', flexBasis: custom_name_index == -1 && '70%'}" class="shirt-no">
-                <b-form-input class="text-center" :value="product_roster_item.number"
-                               @input="handleRosterUpdate($event, 'number', productRosterItemIndex)"></b-form-input>
+                <b-form-input  ref="myInputs" class="text-center" v-model="roster.number"
+                  @focus="editRosterPlayer(index)"></b-form-input>
               </div>
             </template>
             <div class="shirt-size" :class="{ 'no-name-number': !(custom_name_index != -1 || custom_number_index != -1)}">
-              <b-form-select @input="updateRosterSize($event, roster)" v-model="roster.size_index">
+              <b-form-select ref="myInputs" @input="updateRosterSize($event, roster)" v-model="roster.size_index">
                 <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
                   {{ productSize.text }}</b-form-select-option>
               </b-form-select>
@@ -81,10 +81,10 @@
           </div>
           <div class="align-right">
             <div class="qty">
-              <b-form-input class="text-center" placeholder="0" v-model="roster.quantity"></b-form-input>
+              <b-form-input class="text-center" ref="myInputs" placeholder="0" v-model="roster.quantity"></b-form-input>
             </div>
             <div class="remove" v-if="rosterDetails.length > 1">
-              <a @click="removeIndex(productRosterItemIndex)">
+              <a @click="removeIndex(index)">
                 <font-awesome-icon :icon="['fas', 'trash-alt']" />
               </a>
             </div>
@@ -106,6 +106,7 @@
     </div>
 
     <div class="d-flex justify-content-center mt-3" v-if="getProductEditInfoObject.editing == false">
+<!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
       <template v-if="!isCustomerAuthenticated" >
         <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
           :disabled="canvasImage.scene == null">
@@ -142,17 +143,15 @@ import ModalAction from "@/mixins/ModalAction";
   },
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
-  /* component props starts */
-  @Prop({required: false}) lockerRosters: Record<any, any>[]
   @Prop({ required: true }) productSizes!: any
-
-  /* component data properties starts */
-  public currentIcon = 'eye-slash'
+  @Prop({required: false}) lockerRosters: Record<any, any>[]
+  private roster: any[] = []
   public fileData: Record<any, any>[] = []
+  public selected = this.productSizes[0]
   public firstColor!: Record<any, any>
-  public fontsColors: any[] = []
-  public fontOptions: Record<any, any>[] = []
-  public isLoading = false;
+  public secondColor!: Record<any, any>
+  public currentIcon = 'eye-slash'
+  public ref = this.$refs as Record<any, any>
   public obj = {
     text: '',
     number: '',
@@ -162,13 +161,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     quantity: 5,
     information: ''
   };
-  private roster: any[] = []
-  public ref = this.$refs as Record<any, any>
   public rosters: any[] = []
-  public selected = this.productSizes[0]
-  public secondColor!: Record<any, any>
-
-  /* component computed props starts */
+  public fontsColors: any[] = []
+  public fontOptions: Record<any, any>[] = []
+  public isLoading = false;
 
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
@@ -192,23 +188,19 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       this.showToast("Quantity must be atleast 1", "error")
     } // toast message if quantity is zero
   }
-
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-
-  get allowNameAndNumbers() {
-    return this.selectedProduct.allow_name_number
-  }
-
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails()
   }
-
   get company() {
     return this.$store.getters.getCompany
   }
 
+  // get editCart(): Record<any, any> {
+  //   return this.$store.getters.getEditCart
+  // }
   get rosterFirstNameAndNumber(): string | null {
     let editing_roster_player_index = this.editing_roster_player_index
     if (this.rosterDetails && this.rosterDetails.length > 0) {
@@ -224,7 +216,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   get customText(): Record<any, any>[] {
     return this.$store.getters.getCustomTexts();
   }
-
   get eyeIndex(): number {
     return this.$store.getters.getEyeIndex;
   }
@@ -232,12 +223,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   get canvasImage() {
     return this.$store.getters.getCanvasImage
   }
-
-  get productRoster(): Record<any, any>[] {
-    return this.$store.getters.getSelectedProductRoster
-  }
-
-  /* component methods starts */
 
   public addPlayer(obj: Record<any, any>) {
     this.$emit('addPlayer', this.rosterDetails.length);
@@ -254,7 +239,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public changeRoster(res:any){
     this.$store.commit('UPDATE_ROSTER', JSON.parse(res))
   }
-
   public removeIndex(ind: number) {
     if (this.customText.length > 0) {
       if (this.customText[0]) {
@@ -278,7 +262,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       this.secondColor = this.fontsColors[0].color_text ? this.fontsColors[0].color_text[1] : this.fontsColors[0].color_text[0]
     }
   }
-
   public close() {
     this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
@@ -350,35 +333,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     //   })
     //
     // }
-  }
-
-  public handleRosterUpdate(updated_val:string, type: string, roster_index: number) {
-    const self: Record<any, any> = this;
-    let roster_updated_key = type == 'name' ? 'text' : 'number';
-    let product_id = self.selectedProduct.id;
-    let roster_data = {
-      [roster_updated_key] : updated_val
-    }
-    self.$store.dispatch('setProductsRosters', {product_id: product_id, roster_index: roster_index, roster_data: roster_data})
-    //The custom text first item of type name and numbers are synced with the first row (name and number) of the roster.
-    if(roster_index == 0) {
-      self.syncRosterWithCustomText(type, updated_val)
-      // self.$eventBus.$emit('sync-roster-with-text', {type: type, value: updated_val})
-    }
-  }
-
-  public async syncRosterWithCustomText(type: string, text_number_value: string) {
-    const self: Record<any, any> = this;
-    let product_custom_texts = self.$store.getters.selectedProductCustomTexts;
-    const custom_name_number_index = type == 'name' ? this.custom_name_index : this.custom_number_index;
-    //The custom text first item of type name or number depending upon type is synced with the first row input with label name or number.
-    if(custom_name_number_index >= 0) {
-      let custom_text_synced_with_roster = JSON.parse(JSON.stringify(product_custom_texts[custom_name_number_index]));
-      custom_text_synced_with_roster.value = text_number_value
-      self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_name_number_index, value: custom_text_synced_with_roster})
-    }
-    // self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-
   }
 
 }

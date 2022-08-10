@@ -230,6 +230,7 @@ export class handleMainProducts extends Vue {
     initCustomTexts(retrieved_products)
     initCustomLogos(retrieved_products)
     rosterDetailsInit(retrieved_products)
+    this.$store.dispatch("setProductsRosters");
 
     let customLogos = this.$store.getters.getCustomLogoObject
     for (const product of retrieved_products) {

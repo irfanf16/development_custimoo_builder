@@ -1990,8 +1990,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
               self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
             }
             self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
-
-            if (custom_text_item.placement == 'front') {
+            if (custom_text_item.placement == 'Front') {
               self.frontCanvas.add(fabric_text)
               render_front_canvas = true
               fabric_text.on('selected', (e: Record<any, any>) => {
@@ -2002,7 +2001,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                   visible: false
                 })
               })
-            } else if (custom_text_item.placement == 'back' && self.backCanvas) {
+            } else if (custom_text_item.placement == 'Back' && self.backCanvas) {
               self.backCanvas.add(fabric_text)
               render_back_canvas = true
               fabric_text.on('selected', (e: Record<any, any>) => {
@@ -2017,7 +2016,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
             this.addToOtherSide(fabric_text, custom_text_item.placement)
           })
         }
-      } else {
+      }
+      else {
         fabric_text = new fabric.Text(custom_text.value, {
           left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
           top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
@@ -2061,16 +2061,18 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
         }
         self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
 
-        if (custom_text_item.placement == 'front') {
+        if (custom_text_item.placement == 'Front') {
           self.frontCanvas.add(fabric_text)
           render_front_canvas = true
-        } else if (custom_text_item.placement == 'back' && self.backCanvas) {
+        }
+        else if (custom_text_item.placement == 'Back' && self.backCanvas) {
           self.backCanvas.add(fabric_text)
           render_back_canvas = true
         }
         this.addToOtherSide(fabric_text, custom_text_item.placement)
       }
     })
+    console.log('render_front_canvas', render_front_canvas, render_back_canvas)
     if(render_front_canvas) {
       self.frontCanvas.renderAll()
     }
