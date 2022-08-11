@@ -396,6 +396,9 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
   if("isAxiosError" in errorResponse) {
     // errorResponse.response.data object have keys { exception, file, line, message, trace }
     message = errorResponse.response?.data?.message;
+    if(!message) {
+      message = errorResponse.response?.statusText;
+    }
     console.error("Error (Axios): ", message)
   } else {
     message = errorResponse.message;
@@ -1185,11 +1188,17 @@ const unitConversion = (value:number) => {
   }
 }
 
+const rosterDefaultItem = () => {
+  return {
+    text: '',  number: '',  size_index: 0,  size: '',  code: '', quantity: 1, information: ''
+  }
+}
+
 //Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
   getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getNewCustomTexts, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
-  unitConversion
+  unitConversion, rosterDefaultItem
 };

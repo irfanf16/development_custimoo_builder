@@ -256,25 +256,21 @@ export default class NewCustomizationText extends Mixins(ProductColors, ProductF
 
   addCustomText() {
     let self: Record<any, any> = this;
-    let custom_text = self.resetCustomTextObject();
+    let custom_text = find(self.product_custom_texts, ['is_first_name', true]);
+    if(custom_text == undefined) {
+      custom_text = find(self.product_custom_texts, ['is_first_number', true]);
+    }
+    custom_text = self.resetCustomTextObject(custom_text);
     self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: self.product_custom_texts.length, value: custom_text })
-
-   // first_custom_text.
   }
 
-  resetCustomTextObject(custom_text = null) {
+  resetCustomTextObject(custom_text: Record<any, any>) {
     let self: Record<any, any> = this;
-    if(custom_text == null) {
-      custom_text = find(self.product_custom_texts, ['is_first_name', true]);
-      if(custom_text == undefined) {
-        custom_text = find(self.product_custom_texts, ['is_first_number', true]);
-      }
-    }
     let custom_text_names_count = filter(self.product_custom_texts, ['type', 'name']).length;
     custom_text = JSON.parse(JSON.stringify(custom_text));
     custom_text = Object.assign(custom_text, {
       following_product_ids: [], following_products: [], font_family: self.default_font_obj ? self.default_font_obj.name : '',
-      id: null, items: [custom_text.items[0]], label: 'Custom Text ' + (custom_text_names_count + 1), type: 'name', updated_at: null, value: ''
+      id: null, items: [custom_text?.items[0]], label: 'Custom Text ' + (custom_text_names_count + 1), type: 'name', updated_at: null, value: ''
     })
     if('is_first_name' in custom_text) {
       custom_text.is_first_name = false

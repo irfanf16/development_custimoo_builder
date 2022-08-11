@@ -70,9 +70,10 @@ import RosterDetails from '@/components/RosterDetails.vue'
 import {http} from "@/httpCommon";
 import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
-import { getRosterDetailDefaultObject } from '@/helpers/Helpers'
+import {getRosterDetailDefaultObject, handleResponseException} from '@/helpers/Helpers'
 import { findIndex } from 'lodash'
 import ModalAction from "@/mixins/ModalAction";
+import {AxiosError, AxiosResponse} from "axios";
 
 
 @Component<EditRosterAreaTab>({
@@ -84,11 +85,8 @@ import ModalAction from "@/mixins/ModalAction";
   },
     async mounted() {
     this.setProductSizes()
-    if (this.isCustomerAuthenticated){
-      let res  = await http.get("products/roster")
-      if (res.status == 200){
-        this.products_roster = res.data
-      }
+    if (this.isCustomerAuthenticated) {
+      await this.getLockerProductsRosters()
     }
   }
 })
@@ -264,6 +262,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
       }
     })
   }
+
   public async downloadTemplate(){
     await http.get('template/download',{
       responseType: 'blob',
@@ -274,6 +273,18 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
       link.download = 'roster_template.xlsx';
       link.click();
     })
+  }
+
+  public async getLockerProductsRosters() {
+    let response: any = await http.get("products/roster").catch((errorResponse: AxiosError) => {
+      handleResponseException(errorResponse)
+    })
+    if(response) {
+      let response_data: Record<any, any> = response.data;
+      if (response_data.success) {
+        this.products_roster = response_data.result.rosters
+      }
+    }
   }
 
 

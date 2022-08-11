@@ -2,6 +2,7 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
+import {rosterDefaultItem} from "@/helpers/Helpers";
 import {
   getRosterDetailDefaultObject,
   initCustomLogos,
@@ -970,18 +971,16 @@ const ProductAttributes:Module<any, any> = {
           product_roster_item = Object.assign(product_roster_item, payload.roster_data)
           Vue.set(state.products_rosters[payload.product_id], payload.roster_index, product_roster_item)
         } else {
-          let product_roster = state.products_rosters[payload.product_id];
-          product_roster = Object.assign(product_roster, payload.roster_data)
-          Vue.set(state.products_rosters, payload.product_id, product_roster)
+          Vue.set(state.products_rosters, payload.product_id, payload.roster_data)
         }
       } else {
         const products_rosters: Record<any, any> = {}
         if(state.products.length > 0) {
+          const default_roster_item = rosterDefaultItem()
           state.products.forEach((product: Record<any, any>) => {
             const product_first_size_name = product.sizes.length > 0 ? product.sizes[0].json_data[0].name : '';
-            products_rosters[product.id] = [{
-              text: '',  number: '',  size_index: 0,  size: product_first_size_name,  code: product_first_size_name, quantity: 1, information: ''
-            }]
+            const roster_item = Object.assign(default_roster_item, {size: product_first_size_name,  code: product_first_size_name})
+            products_rosters[product.id] = [roster_item]
           })
           state.products_rosters = products_rosters;
         } else {
@@ -989,6 +988,9 @@ const ProductAttributes:Module<any, any> = {
         }
       }
     },
+    REMOVE_ROSTER_ITEM(state:Record<any, any>, payload: number) {
+     state.products_rosters[state.selectedPrdId].splice(payload, 1)
+    }
   },
   getters: {
     selectedProductCustomTexts: state =>  {

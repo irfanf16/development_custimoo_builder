@@ -1922,6 +1922,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
 
   public async addTextsNew(custom_text_info: Record<any, any>) {
     const self: Record<any, any> = this
+    let fabric_control_visibility = { tl: false, bl: false, tr: true, br: true, ml: false, mb: false, mr: false, mt: false, mtr: false }
     const custom_text_index = custom_text_info.custom_text_index;
     self.product_custom_texts[custom_text_index] = custom_text_info.value;
     let custom_text = self.product_custom_texts[custom_text_index];
@@ -1939,6 +1940,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
       let fabric_text: fabric.Text | fabric.Group
       if(this.mainPreview) {
         let font = this.products_fonts[custom_text.font_family]
+        console.log('font', font, custom_text)
         if (font) {
           const path = font.opentype_font.getPath(custom_text.value);
 
@@ -1974,17 +1976,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
               type: "text",
               side: custom_text_item.placement
             })
-            fabric_text.setControlsVisibility({
-              tl: false,
-              bl: false,
-              tr: true,
-              br: true,
-              ml: false,
-              mb: false,
-              mr: false,
-              mt: false,
-              mtr: false
-            })
+            fabric_text.setControlsVisibility(fabric_control_visibility)
             if (!self.product_custom_text_objects[custom_text_index]) {
               self.product_custom_text_objects[custom_text_index] = [];
               self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
@@ -1993,6 +1985,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
             if (custom_text_item.placement == 'Front') {
               self.frontCanvas.add(fabric_text)
               render_front_canvas = true
+              console.log('inside front', render_front_canvas)
               fabric_text.on('selected', (e: Record<any, any>) => {
                 this.showDimensions(e, self.dimTextFront)
               })
@@ -2001,7 +1994,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                   visible: false
                 })
               })
-            } else if (custom_text_item.placement == 'Back' && self.backCanvas) {
+            }
+            else if (custom_text_item.placement == 'Back' && self.backCanvas) {
               self.backCanvas.add(fabric_text)
               render_back_canvas = true
               fabric_text.on('selected', (e: Record<any, any>) => {
@@ -2016,6 +2010,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
             this.addToOtherSide(fabric_text, custom_text_item.placement)
           })
         }
+        console.log('main previews', render_front_canvas, render_back_canvas, custom_text_item.placement)
       }
       else {
         fabric_text = new fabric.Text(custom_text.value, {
@@ -2044,17 +2039,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
           custom_text_item_index: customTextItemIndex,
           side: custom_text_item.placement
         })
-        fabric_text.setControlsVisibility({
-          tl: false,
-          bl: false,
-          tr: true,
-          br: true,
-          ml: false,
-          mb: false,
-          mr: false,
-          mt: false,
-          mtr: false
-        })
+        fabric_text.setControlsVisibility(fabric_control_visibility)
         if (!self.product_custom_text_objects[custom_text_index]) {
           self.product_custom_text_objects[custom_text_index] = [];
           self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
@@ -2072,7 +2057,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
         this.addToOtherSide(fabric_text, custom_text_item.placement)
       }
     })
-    console.log('render_front_canvas', render_front_canvas, render_back_canvas)
     if(render_front_canvas) {
       self.frontCanvas.renderAll()
     }
