@@ -2,10 +2,7 @@
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
-        <!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
-        <!--        <vue-scrollbar :speed="20" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">-->
         <div class="myscroll">
-          <!--        <vuescroll :ops="ops">-->
           <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
@@ -57,11 +54,6 @@
                 <div :key="index" v-if="customText.hasOwnProperty('text')">
                   <CustomizationText @removeTab="removeTab(index, selectedProduct.id)" :productFonts="selectedProduct.namefonts" :customTextIndex="index"
                                      :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-<!--                  <template v-if="index + 1  > selectedProduct.productnames.length">-->
-<!--                    <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">-->
-<!--                      - -->
-<!--                    </b-button>-->
-<!--                  </template>-->
                 </div>
               </template>
               <div v-if="selectedProduct.allow_extra_text" class="px-3 pt-3 p-lg-4 text-right">
@@ -72,11 +64,6 @@
             </div>
             <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
               <b-tabs>
-                <!-- <div class="p-lg-4 text-right">
-                  <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
-                    +
-                  </b-button>
-                </div> -->
                 <template v-for="(customText, index) in customTexts">
                   <b-tab :key="index" v-if="customText.hasOwnProperty('text')">
                     <template #title>
@@ -159,9 +146,7 @@ import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
-import {getClosestColor} from '@/pantoneColor'
 import RecentLogos from "@/components/RecentLogos.vue";
-import {sortTextsArray} from "@/helpers/Helpers";
 
 @Component<CustomizationTabs>({
   components: {
@@ -191,39 +176,8 @@ export default class CustomizationTabs extends Vue {
   public set = false
   public previous_tab='';
   public ref = this.$refs as Record<any, any>
-  private ops = {
-    // vuescroll: {
-    //   mode: 'native'
-    // },
-    // scrollpanel: { scrollingX: false, scrollingY: true },
-    // rail: {
-    //   background: '#219F84',
-    //   opacity: '0.2',
-    //   gutterOfSide: '0',
-    // },
-    // bar: {
-    //   background: '#219F84',
-    //   opacity: '0.9',
-    // }
-  }
-
-  // private settings = {
-  //   suppressScrollY: false,
-  //   suppressScrollX: true,
-  //   wheelPropagation: false,
-  //   wheelSpeed: 3
-  // }
-
-  // public setScroll(){
-  //   // alert('scrollBar[0].scrollTop')
-  //   let scrollBar:Record<any, any> = this.$refs['Scrollbar'];
-  //
-  //   // scrollBar.scrollToY(0);
-  //   console.log('scroll', )
-  // }
 
   public styling = {
-    /* Scrollbar */
     scrollbar: {
       width: "100%",
       height: "calc(100vh - 220px)"
@@ -391,11 +345,6 @@ export default class CustomizationTabs extends Vue {
 
   public setHideTab(index: string, value: boolean) {
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
-    // if(this.previous_tab === 'teamHide'){
-    //   this.renderText();
-    //   // this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
-    // }
-
     this.$store.dispatch('setHideTab', {index: index, value: value})
     this.previous_tab = index;
   }
