@@ -427,7 +427,7 @@ export class handleMainProducts extends Vue {
       text: JSON.stringify(factory_product.custom_texts),
       product_id:factory_product.product_id
     }
-    await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', texts);
+    await this.$store.dispatch('OVERRIDE_PRODUCT_CUSTOM_TEXT', texts);
     await this.$store.dispatch('overRideDefaultColors', factory_product.defaultcolors);
     await this.$store.dispatch('overRideGroupColors', factory_product.groupcolors);
     selected_product.productstyles[selected_product_style_index].productdesigns.forEach((item: Record<any, any>) => {
@@ -498,7 +498,7 @@ export class handleMainProducts extends Vue {
     await this.$store.commit('RESET_ALL_COLORS')
 
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', active_product_detail);
-    await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', active_product_detail);
+    await this.$store.dispatch('OVERRIDE_PRODUCT_CUSTOM_TEXT', active_product_detail);
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(active_product_detail.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(active_product_detail.groupcolors));
 
@@ -568,7 +568,10 @@ export class handleMainProducts extends Vue {
       product_id: cart_item_product.product_id
     }
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
-    await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', texts);
+    console.log('shahziab', cart_item_product)
+    this.$store.dispatch("OVERRIDE_PRODUCT_CUSTOM_TEXT", cart_item_product.product_custom_texts)
+    //self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+
     await this.$store.dispatch('overRideDefaultColors', cart_item_product.defaultcolors);
     await this.$store.dispatch('overRideGroupColors', cart_item_product.groupcolors);
     retrieved_cart_product.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {

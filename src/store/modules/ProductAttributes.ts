@@ -640,16 +640,8 @@ const ProductAttributes:Module<any, any> = {
         }
       })
     },
-    OVERRIDE_TEXT(state:Record<any, any>, payload) {
-      state.customTexts = {};
-      // @ts-ignore
-      initCustomTexts(this.getters.getProducts) // getters works fine
-      const locker_texts = JSON.parse(payload.text)
-
-      locker_texts.forEach((text: Record<any, any>, index: number) => {
-        const add_text = {text: text, index: index, prd_id : payload.product_id}
-        this.dispatch('setCustomTexts', add_text)
-      })
+    OVERRIDE_PRODUCT_CUSTOM_TEXT(state:Record<any, any>, payload) {
+     Vue.set(state.product_custom_texts, state.selectedPrdId, payload)
     },
     OVERRIDE_DEFAULT_COLOR(state:Record<any, any>, payload){
       state.defaultColors = payload;
@@ -1357,8 +1349,8 @@ const ProductAttributes:Module<any, any> = {
     async OVERRIDE_CUSTOM_LOGOS({commit}, payload:Record<any, any>){
      await commit('OVERRIDE_LOGOS', payload);
     },
-    async OVERRIDE_CUSTOM_TEXT({commit}, payload:Record<any, any>){
-     await commit('OVERRIDE_TEXT', payload);
+    async OVERRIDE_PRODUCT_CUSTOM_TEXT({commit}, payload:Record<any, any>){
+     await commit('OVERRIDE_PRODUCT_CUSTOM_TEXT', payload);
     },
     overRideDefaultColors({commit}, payload:Record<any, any>){
       commit('OVERRIDE_DEFAULT_COLOR', payload);

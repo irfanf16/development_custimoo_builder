@@ -96,17 +96,6 @@
                                  :productSizes="productSizes" ref="edit-roster-area-tab" :products_fonts="products_fonts" />
             </div>
           </b-tab>
-          <b-tab>
-            <template #title>
-              <a>
-              <span class="icon-holder">
-                <BIconFileTextFill />
-              </span>
-                Test
-              </a>
-            </template>
-          </b-tab>
-          <!--        </vuescroll>-->
         </div>
       </b-tabs>
     </div>

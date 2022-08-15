@@ -477,6 +477,7 @@ const getActiveProductData = () => {
         measurement_ratio: selected_product.measurement_ratio,
         custom_logo_svgs: [],
         custom_texts: Store.getters.getCustomTexts(),
+        product_custom_texts: Store.getters.selectedProductCustomTexts,
         custom_text_svgs: [],
         colors: Store.getters.getLogosColors,
         design_id: selected_design.id,
@@ -494,6 +495,7 @@ const getActiveProductData = () => {
         production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
         // front_design:front_design,
         roster_detail: Store.getters.getRosterDetails(),
+        product_roster_detail: Store.getters.getSelectedProductRoster,
         style_id: product_style.id,
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null

@@ -227,6 +227,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let self = this;
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index]
+    console.log('cart_item_product', cart_item_product)
     let cart_product_type = cart_item_product.product_type
     let is_customized = false;
     let is_personalized = false;
@@ -248,70 +249,17 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       },
       order_product_info: null
     })
-    this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
+    self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: cart_item_product.product_roster_detail })
+
+    //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
     this.$root.$emit('rostershared', '')
     let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product`;
     self.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
-   // await self.$store.dispatch("updateMainProductsInfo", { has_more_products: false, next_page: null, active_product_id: cart_item_product.product_id });
     await http.get(url).then(async (response: Record<any, any>) => {
       await (this as Record<any, any>).handleMainProducts(response);
-      // await this.$store.commit('RESET_CUSTOM_TEXTS')
-      // await this.$store.commit('RESET_CUSTOM_LOGOS')
-      // await this.$store.commit('RESET_ALL_COLORS')
-      // let selected_product = this.$store.getters.getSelectedProduct;
-      // let selectedIndex = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === cart_item_product.style_id);
-      // await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
-      // let customLogos = this.$store.getters.getCustomLogoObject
-      // if (!customLogos[cart_item_product.product_id]) {
-      //   await this.$store.dispatch('setCustomObj', cart_item_product.product_id)
-      // }
-      //
-      // let logos = {
-      //   custom_logos: JSON.stringify(cart_item_product.custom_logos),
-      //   product_id: cart_item_product.product_id
-      // }
-      // let texts = {
-      //   text: JSON.stringify(cart_item_product.custom_texts),
-      //   product_id: cart_item_product.product_id
-      // }
-      // await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
-      // await this.$store.dispatch('OVERRIDE_CUSTOM_TEXT', texts);
-      // await this.$store.dispatch('overRideDefaultColors', cart_item_product.defaultcolors);
-      // await this.$store.dispatch('overRideGroupColors', cart_item_product.groupcolors);
-      // selected_product.productstyles[selectedIndex].productdesigns.forEach((item: Record<any, any>) => {
-      //   if (item.id == cart_item_product.design_id) {
-      //     Vue.set(item, 'design_show', 1)
-      //     this.$store.dispatch('setSelectedProductDesignID', item.id)
-      //   } else {
-      //     Vue.set(item, 'design_show', 0)
-      //   }
-      // });
-      //
-      // //set logo colors
-      // let logo_colors = []
-      // if (!cart_item_product.colors && cart_item_product.custom_logos) {
-      //   //fetch from server
-      //   let logos = cart_item_product.custom_logos
-      //   if (logos.length > 0) {
-      //     let color_str: any = await this.fetchLogoColors(logos[0].id);
-      //     let image_colors = processColorsCustom(JSON.parse(color_str))
-      //     let image_color_count = image_colors.length;
-      //     while (image_color_count < 4) {
-      //       image_colors.push({ hex: null, pantone: null, name: null });
-      //       ++image_color_count;
-      //     }
-      //     logo_colors = image_colors
-      //   }
-      // }
-      // else {
-      //   logo_colors = cart_item_product.colors
-      // }
-      // await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
 
     })
     await this.$store.dispatch('setProductType', { prd_type: cart_item_product.product_type, value: true });
-    // await this.$store.dispatch('setEditCart', { key: 'cartId', value: cart_item.id });
-    // await this.$store.dispatch('setEditCart', { key: 'cartItemId', value: cart_item_product.id });
     this.hideVModal('cart-modal')
     if (!edit) {
       await this.$store.dispatch('setTabMain', {value: (this.mainTotalTabs + 1)})

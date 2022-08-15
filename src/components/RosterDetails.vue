@@ -392,7 +392,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
       roster_data['size'] = selected_size.value
       roster_data['code'] = selected_size.value
     }
-    console.log('shaah', roster_data)
     self.$store.dispatch('setProductsRosters', {product_id: product_id, roster_index: roster_index, roster_data: roster_data})
     //The custom text first item of type name and numbers are synced with the first row (name and number) of the roster.
     if(roster_index == 0 && ['name', 'number'].includes(type)) {
