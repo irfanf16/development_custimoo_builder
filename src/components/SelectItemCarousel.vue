@@ -71,6 +71,9 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     let style_index = 0;
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
+    let product_custom_texts = self.selectedProduct.product_texts;
+    console.log('product_custom_texts', product_custom_texts)
+    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS",product_custom_texts)
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);
     this.$store.dispatch("getModels", this.products[index].product_id);
     this.$store.dispatch('setColorSectionVisibility')

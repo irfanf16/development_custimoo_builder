@@ -568,7 +568,6 @@ export class handleMainProducts extends Vue {
       product_id: cart_item_product.product_id
     }
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
-    console.log('shahziab', cart_item_product)
     this.$store.dispatch("OVERRIDE_PRODUCT_CUSTOM_TEXT", cart_item_product.product_custom_texts)
     //self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
 
