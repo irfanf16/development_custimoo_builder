@@ -7,7 +7,6 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
-import store from '../store'
 
 const getLogoSettingsObject = () => {
   return {
@@ -75,8 +74,7 @@ const getLogoObject = (index = 0) => {
 * Index = -1 means we are getting all settings rather that getting settings at specific index.When index is given then the return type will be object or null. Otherwise return type will be array. That could be empty
 * */
 
-const getLogoSettings = (index = -1, default_obj = true,product_id = 0) => {
-
+const getLogoSettings = (index = -1, default_obj = true, product_id = 0) => {
   //get logo settings based on product id
   if(product_id > 0) {
     const product = Store.getters.getProducts.find((prd:any) => {
@@ -441,7 +439,7 @@ const pathInfo = (file_path: string, ) => {
   };
 }
 
-const getActiveProductData = () => {
+const getActiveProductData = (products_fonts: Record<any, any>) => {
   return new Promise((resolve) => {
     const interval = setInterval(() => {
       const scene_ref = Store.getters.getCanvasImage.scene
@@ -449,11 +447,42 @@ const getActiveProductData = () => {
         console.log('not reslove')
         return
       }
+      const selected_product = Store.getters.getSelectedProduct;
+      const newCustomTexts = Store.getters.getNewCustomTexts(selected_product.id)
+      const roster_details = Store.getters.getSelectedProductRoster
+      const text_objects: Record<any, any>[] = []
+      for(let text_index = 0; text_index < newCustomTexts.length; text_index++) {
+        const custom_text = newCustomTexts[text_index]
+        const font = products_fonts[custom_text.font_family]
+        if(custom_text.is_first_name) {
+          for(let roster_index = 0; roster_index < roster_details.length; roster_index++) {
+            const roster_detail = roster_details[roster_index]
+            if(roster_detail.text) {
+              const text_object_by_roster: Record<any, any>[] = []
+              const path = font.opentype_font.getPath(roster_detail.text)
+              for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
+                const custom_text_item = custom_text.items[items_index]
+                path.fill = custom_text_item.color
+                path.stroke = custom_text_item.outline_color
+                path.strokeWidth = parseInt(custom_text_item.outline_width)
+                path.transform = 'scale(1.5)'
+                path.x = custom_text_item.x_axis
+                path.y = custom_text_item.y_axis
+                const svg_string = path.toSVG()
+                const parser = new DOMParser();
+                const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
+                dom_svg.style.translate = '120px 100px'
+                text_object_by_roster.push({svg: dom_svg.outerHTML})
+              }
+              Vue.set(text_objects, text_index, text_object_by_roster)
+            }
+          }
+        }
+      }
+      console.log(text_objects)
 
       const getCanvasImage = Store.getters.getCanvasImage
-
       const style_index = Store.getters.getCurrentStyleIndex;
-      const selected_product = Store.getters.getSelectedProduct;
       const product_style = selected_product.productstyles[style_index];
       const lockerEditStatus = Store.getters.getEditStatus;
       let product_name = selected_product.product_name
@@ -1178,7 +1207,7 @@ const parseSvgString = async (svg_string:string, factory_product_content: Record
 }
 
 const unitConversion = (value:number) => {
-  const setting = store.getters.getSetting
+  const setting = Store.getters.getSetting
   switch( setting.conversion_operator ) {
     case 'multiply':
       return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }

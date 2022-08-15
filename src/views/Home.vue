@@ -1495,7 +1495,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async loadOrderItemProduct(action: string) {
     let self = this;
-    let updated_product = await getActiveProductData();
+    let updated_product = await getActiveProductData(this.products_fonts);
     if(updated_product == null) {
       return false;
     }
@@ -1521,7 +1521,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async UpdateOrderProducts() {
     let self = this;
-    let updated_product:Record<any,any> = await getActiveProductData();
+    let updated_product:Record<any,any> = await getActiveProductData(this.products_fonts);
     if(updated_product == null) {
       return false;
     }

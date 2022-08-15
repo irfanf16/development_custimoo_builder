@@ -56,7 +56,7 @@
       <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
-      <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details" />
+      <OrderDetailsTab :products_fonts="products_fonts" @open-add-to-locker="openAddToLocker" ref="order-details" />
     </div>
   </div>
 </template>

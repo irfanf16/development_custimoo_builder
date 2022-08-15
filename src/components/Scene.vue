@@ -27,7 +27,7 @@ import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/h
 @Component<Scene>({
   async mounted() {
     let self: Record<any, any> = this;
-    self.$eventBus.$on("customTextUpdated", self.addTextsNew)
+    self.$eventBus.$on("customTextUpdated", this.addTextsNew)
     self.$eventBus.$on("customTextRemoved", self.deleteExistingTextsFromCanvas)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
@@ -148,6 +148,17 @@ import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/h
         canvas.requestRenderAll();
       }
     })
+
+    if(!this.mainPreview) {
+      self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
+        const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
+        if(text && this.product_custom_text_objects[indexes.custom_text_index] && this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
+          const textObject = this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
+          const otherSideObject = this.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
+          this.eventAction(text, textObject, otherSideObject)
+        }
+      })
+    }
   }
 })
 
@@ -229,11 +240,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
   get customLogos(): [Record<any, any>] {
     let product_id = this.product_id ? this.product_id : this.selectedProductId
     return this.$store.getters.getCustomLogos(product_id)
-  }
-
-  get customTexts(): [Record<any, any>] {
-    let product_id = this.product_id ? this.product_id : this.selectedProductId
-    return this.$store.getters.getCustomTexts(product_id)
   }
 
   get manageComponents(): Record<any, any> {
@@ -367,108 +373,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     }
   }
 
-  @Watch('customTexts', {
-    deep: true, immediate: true
-  })
-  customTextsChanged(newVal: [Record<any, any>]) {
-    if (this.mounted) {
-      const self = this
-      if (this.customTextObjects.length != this.customTexts.filter((text: Record<any, any>) => text && text.text).length) {
-        this.customTextObjects.forEach((item: Record<any, any>, index: number) => {
-          if (item && (!Object.keys(this.customTexts[item.textIndex]).length || this.customTexts[item.textIndex].text == '' || !this.customTexts[item.textIndex].text)) {
-            this.frontCanvas.remove(this.customTextObjects[item.textIndex])
-            if (this.backCanvas) {
-              this.backCanvas.remove(this.customTextObjects[item.textIndex])
-            }
-            this.customTextObjects[item.textIndex] = null
-            if (this.otherSideTexts[item.textIndex]) {
-              this.frontCanvas.remove(this.otherSideTexts[item.textIndex])
-              if (this.backCanvas) {
-                this.backCanvas.remove(this.otherSideTexts[item.textIndex])
-              }
-              this.otherSideTexts[item.textIndex] = null
-            }
-          }
-        })
-      }
-      newVal.forEach((text: Record<any, any>) => {
-        if ((this.customTextObjects[text.textIndex] && text.side != this.customTextObjects[text.textIndex].side) || (this.customTextObjects[text.textIndex] && !text.text)) {
-          self.frontCanvas.remove(this.customTextObjects[text.textIndex])
-          if (self.backCanvas) {
-            self.backCanvas.remove(this.customTextObjects[text.textIndex])
-          }
-          this.customTextObjects[text.textIndex] = null
-          if (this.mainPreview) {
-            this.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", { index: text.textIndex, data: null })
-          }
-          if (this.otherSideTexts[text.textIndex]) {
-            self.frontCanvas.remove(this.otherSideTexts[text.textIndex])
-            if (self.backCanvas) {
-              self.backCanvas.remove(this.otherSideTexts[text.textIndex])
-            }
-            this.otherSideTexts[text.textIndex] = null
-          }
-        }
-      })
-
-      newVal.forEach((text, index) => {
-        if ((text.side == 'back' && self.backCanvas) || text.side == 'front') {
-          let addText = true
-          if (this.customTextObjects[text.textIndex] && this.customTextObjects[text.textIndex].text != '') {
-            let textObject = this.customTextObjects[text.textIndex]
-            const otherSideObject = this.otherSideTexts[text.textIndex]
-            let canvas = this.frontCanvas
-            if (text.side == 'back') {
-              canvas = this.backCanvas
-            }
-            textObject.text = text.text
-            textObject.fontFamily = text.fontFamily
-            textObject.set('fill', text.fillColor)
-            textObject.set('stroke', text.outLineColor)
-            textObject.set('strokeWidth', parseInt(text.outLineWidth))
-            canvas.renderAll()
-
-            if(this.mainPreview) {
-              const width = (textObject.width as number * textObject.scaleX * this.measurementRatio).toFixed(1)
-              const height = (textObject.height as number * textObject.scaleY * this.measurementRatio).toFixed(1)
-              const outLineWidth = (textObject.strokeWidth as number * this.measurementRatio).toFixed(1)
-              self.$store.dispatch('updateCustomTextWithoutTrigger', {
-                index: index,
-                data: {
-                  actualWidth: textObject.width,
-                  actualHeight: textObject.height,
-                  originalWidth: width,
-                  originalHeight: height,
-                  originalOutLineWidth: outLineWidth,
-                }
-              })
-            }
-            this.eventAction(text, textObject, otherSideObject)
-            addText = false
-          }
-
-          if (addText && text.text != '') {
-            let finalText = JSON.parse(JSON.stringify(text))
-            if (!text.action && self.productNamesSetting[index] && !text.textIndex) {
-              finalText.width = self.productNamesSetting[index].width
-              finalText.height = self.productNamesSetting[index].height
-              finalText.x_axis = self.productNamesSetting[index].x_axis
-              finalText.y_axis = self.productNamesSetting[index].y_axis
-              finalText.rotation = self.productNamesSetting[index].rotation
-            }
-            self.addTexts(finalText, index)
-          }
-        }
-      })
-
-      if (this.mainPreview) {
-        //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
-        this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
-      }
-      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "custom_texts": this.customTexts})
-    }
-  }
-
   @Watch('defaultColors', {
     deep: true
   })
@@ -502,50 +406,29 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
   }
 
   public eventAction(item: Record<any, any>, object: Record<any, any>, otherSideObject: Record<any, any>) {
-    if (item.action == 'drag') {
-      object.center() //add center because all events only trigger if use it in fabric js.
-      object.set({
-        left: this.canvasWidth / this.mainCanvasWidth * item.x_axis,
-        top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
+    object.center()
+    object.set({
+      left: this.canvasWidth / this.mainCanvasWidth * item.x_axis,
+      top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
+    })
+    object.rotate(item.rotation as number)
+    let multiplyBy = object.text? 1 : this.canvasWidth / this.mainCanvasWidth
+    object.scaleX = item.scaleX * multiplyBy
+    object.scaleY = item.scaleY * multiplyBy
+
+    if (otherSideObject) {
+      const left = otherSideObject.left
+      const top = otherSideObject.top
+      otherSideObject.center()
+      otherSideObject.set({
+        left: left,
+        top: top
       })
-    } else if (item.action == 'scale' || item.action == 'scaleX' || item.action == 'scaleY') {
-      object.center()
-      object.set({
-        left: this.canvasWidth / this.mainCanvasWidth * item.x_axis,
-        top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
-      })
-      let multiplyBy = object.text? 1 : this.canvasWidth / this.mainCanvasWidth
-      object.scaleX = item.scaleX * multiplyBy
-      object.scaleY = item.scaleY * multiplyBy
-      if (otherSideObject) {
-        const left = otherSideObject.left
-        const top = otherSideObject.top
-        otherSideObject.center()
-        otherSideObject.set({
-          left: left,
-          top: top
-        })
-        otherSideObject.scaleX = item.scaleX * multiplyBy
-        otherSideObject.scaleY = item.scaleY * multiplyBy
-      }
-    } else if (item.action == 'rotate') {
-      object.center()
-      object.set({
-        left: this.canvasWidth / this.mainCanvasWidth * item.x_axis,
-        top: this.canvasHeight / this.mainCanvasHeight * item.y_axis
-      })
-      object.rotate(item.rotation as number)
-      if (otherSideObject) {
-        const left = otherSideObject.left
-        const top = otherSideObject.top
-        otherSideObject.center()
-        otherSideObject.set({
-          left: left,
-          top: top
-        })
-        otherSideObject.rotate(item.rotation as number)
-      }
+      otherSideObject.scaleX = item.scaleX * multiplyBy
+      otherSideObject.scaleY = item.scaleY * multiplyBy
+      otherSideObject.rotate(item.rotation as number)
     }
+
     object.setCoords()
   }
 
@@ -948,13 +831,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                 }
               })
             }
-          }
-          if (this.customTexts.length || this.texts.length) {
-            let texts = this.texts
-            texts = texts.concat(this.customTexts) as [Record<any, any>]
-            texts.forEach((text: Record<any, any>, index: number) => {
-              this.addTexts(text, index)
-            })
           }
 
           if(this.productCustomTexts) {
@@ -1931,32 +1807,97 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     const custom_text_index = custom_text_info.custom_text_index;
     self.product_custom_texts[custom_text_index] = custom_text_info.value;
     let custom_text = self.product_custom_texts[custom_text_index];
-    let render_front_canvas = false;
-    let render_back_canvas = false;
-    /*
-   * delete existing texts first and re render them
-   * */
-    if(self.product_custom_text_objects[custom_text_index]) {
-     await self.deleteExistingTextsFromCanvas(custom_text_index)
-    }
 
-    // let fontOptions = custom_text_item.font_family
-    custom_text.items.forEach((custom_text_item:Record<any, any>, customTextItemIndex: number) => {
-      let fabric_text: fabric.Text | fabric.Group
-      if(this.mainPreview) {
-        let font = this.products_fonts[custom_text.font_family]
-        if (font) {
-          const path = font.opentype_font.getPath(custom_text.value);
+    if(this.product_id == custom_text.product_id) {
+      let render_front_canvas = false;
+      let render_back_canvas = false;
+      /*
+       * delete existing texts first and re render them
+       * */
+      if (self.product_custom_text_objects[custom_text_index]) {
+        await self.deleteExistingTextsFromCanvas(custom_text_index)
+      }
 
-          let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
-            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'
-          textSvg += path.toSVG()
-          textSvg += '\n</svg>'
+      if (custom_text.value) {
+        custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
+          let fabric_text: fabric.Text | fabric.Group
+          if (this.mainPreview) {
+            const font = this.products_fonts[custom_text.font_family]
+            if (font) {
+              const path = font.opentype_font.getPath(custom_text.value)
 
-          fabric.loadSVGFromString(textSvg, (objects: any) => {
-            fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group
-            fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
-            fabric_text.set({
+              let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'
+              textSvg += path.toSVG()
+              textSvg += '\n</svg>'
+
+              fabric.loadSVGFromString(textSvg, (objects: any) => {
+                fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group
+                fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
+                fabric_text.set({
+                  left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
+                  angle: custom_text_item.rotation as number,
+                  centeredScaling: true,
+                  selectable: this.canvasSelection,
+                  hasControls: true,
+                  hasBorders: false,
+                  evented: true,
+                  globalCompositeOperation: 'source-atop',
+                  fill: custom_text_item.color,
+                  stroke: custom_text_item.outline_color,
+                  strokeWidth: parseInt(custom_text_item.outline_width),
+                  paintFirst: 'stroke',
+                  lockScalingFlip: true,
+                  padding: 15,
+                  cornerSize: 30,
+                  placement: custom_text_item.placement,
+                  visible: custom_text_item.selected,
+                  custom_text_index: custom_text_index,
+                  custom_text_item_index: customTextItemIndex,
+                  type: "text",
+                  side: custom_text_item.placement
+                })
+
+                if (custom_text_item.scaleX && custom_text_item.scaleY) {
+                  fabric_text.scaleX = custom_text_item.scaleX
+                  fabric_text.scaleY = custom_text_item.scaleY
+                }
+                fabric_text.setControlsVisibility(fabric_control_visibility)
+                if (!self.product_custom_text_objects[custom_text_index]) {
+                  self.product_custom_text_objects[custom_text_index] = [];
+                  self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
+                }
+                self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
+                if (custom_text_item.placement == 'Front') {
+                  self.frontCanvas.add(fabric_text)
+                  fabric_text.bringToFront()
+                  render_front_canvas = true
+                  fabric_text.on('selected', (e: Record<any, any>) => {
+                    this.showDimensions(e, self.dimTextFront)
+                  })
+                  self.frontCanvas.on('selection:cleared', () => {
+                    self.dimTextFront.set({
+                      visible: false
+                    })
+                  })
+                } else if (custom_text_item.placement == 'Back' && self.backCanvas) {
+                  self.backCanvas.add(fabric_text)
+                  render_back_canvas = true
+                  fabric_text.on('selected', (e: Record<any, any>) => {
+                    this.showDimensions(e, self.dimTextBack)
+                  })
+                  self.backCanvas.on('selection:cleared', () => {
+                    self.dimTextBack.set({
+                      visible: false
+                    })
+                  })
+                }
+                this.addToOtherSide(fabric_text, custom_text_item.placement)
+              })
+            }
+          } else {
+            fabric_text = new fabric.Text(custom_text.value, {
               left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
               top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
               angle: custom_text_item.rotation as number,
@@ -1966,104 +1907,52 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
               hasBorders: false,
               evented: true,
               globalCompositeOperation: 'source-atop',
+              fontFamily: custom_text_item.font_family,
+              fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
               fill: custom_text_item.color,
-              stroke: custom_text_item.outline_color,
+              stroke: custom_text.outLineColor,
               strokeWidth: parseInt(custom_text_item.outline_width),
               paintFirst: 'stroke',
               lockScalingFlip: true,
               padding: 15,
               cornerSize: 30,
+              _fontSizeMult: .835,
               placement: custom_text_item.placement,
               visible: custom_text_item.selected,
               custom_text_index: custom_text_index,
               custom_text_item_index: customTextItemIndex,
-              type: "text",
               side: custom_text_item.placement
             })
+            fabric_text.scaleToHeight(custom_text_item.height as number)
+            if (custom_text_item.scaleX && custom_text_item.scaleY) {
+              fabric_text.scaleX = custom_text_item.scaleX
+              fabric_text.scaleY = custom_text_item.scaleY
+            }
+
             fabric_text.setControlsVisibility(fabric_control_visibility)
             if (!self.product_custom_text_objects[custom_text_index]) {
               self.product_custom_text_objects[custom_text_index] = [];
               self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
             }
             self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
+
             if (custom_text_item.placement == 'Front') {
               self.frontCanvas.add(fabric_text)
               render_front_canvas = true
-              fabric_text.on('selected', (e: Record<any, any>) => {
-                this.showDimensions(e, self.dimTextFront)
-              })
-              self.frontCanvas.on('selection:cleared', () => {
-                self.dimTextFront.set({
-                  visible: false
-                })
-              })
-            }
-            else if (custom_text_item.placement == 'Back' && self.backCanvas) {
+            } else if (custom_text_item.placement == 'Back' && self.backCanvas) {
               self.backCanvas.add(fabric_text)
               render_back_canvas = true
-              fabric_text.on('selected', (e: Record<any, any>) => {
-                this.showDimensions(e, self.dimTextBack)
-              })
-              self.backCanvas.on('selection:cleared', () => {
-                self.dimTextBack.set({
-                  visible: false
-                })
-              })
             }
-            this.addToOtherSide(fabric_text, custom_text_item.placement)
-          })
-        }
-      }
-      else {
-        fabric_text = new fabric.Text(custom_text.value, {
-          left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
-          top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
-          angle: custom_text_item.rotation as number,
-          centeredScaling: true,
-          selectable: this.canvasSelection,
-          hasControls: true,
-          hasBorders: false,
-          evented: true,
-          globalCompositeOperation: 'source-atop',
-          fontFamily: custom_text_item.font_family,
-          fill: custom_text_item.color,
-          stroke: custom_text.outLineColor,
-          strokeWidth: parseInt(custom_text_item.outline_width),
-          paintFirst: 'stroke',
-          lockScalingFlip: true,
-          padding: 15,
-          cornerSize: 30,
-          fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
-          _fontSizeMult: .835,
-          placement: custom_text_item.placement,
-          visible: custom_text_item.selected,
-          custom_text_index: custom_text_index,
-          custom_text_item_index: customTextItemIndex,
-          side: custom_text_item.placement
+            // this.addToOtherSide(fabric_text, custom_text_item.placement)
+          }
         })
-        fabric_text.setControlsVisibility(fabric_control_visibility)
-        if (!self.product_custom_text_objects[custom_text_index]) {
-          self.product_custom_text_objects[custom_text_index] = [];
-          self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
-        }
-        self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
-
-        if (custom_text_item.placement == 'Front') {
-          self.frontCanvas.add(fabric_text)
-          render_front_canvas = true
-        }
-        else if (custom_text_item.placement == 'Back' && self.backCanvas) {
-          self.backCanvas.add(fabric_text)
-          render_back_canvas = true
-        }
-        this.addToOtherSide(fabric_text, custom_text_item.placement)
       }
-    })
-    if(render_front_canvas) {
-      self.frontCanvas.renderAll()
-    }
-    if(render_back_canvas) {
-      self.backCanvas.renderAll()
+      if (render_front_canvas) {
+        this.frontCanvas.renderAll()
+      }
+      if (render_back_canvas) {
+        this.backCanvas.renderAll()
+      }
     }
   }
 
@@ -2073,9 +1962,11 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     const custom_text_item_index =  fabric_object.get("custom_text_item_index");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = fabric_object.get("left");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].y_axis = fabric_object.get("top");
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].angle = fabric_object.get("angle");
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = fabric_object.get("angle");
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleX = fabric_object.get("scaleX");
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleY = fabric_object.get("scaleY");
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextStoreUpdated");
+    self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
   }
 
   public setShowSmall(side: string): void {

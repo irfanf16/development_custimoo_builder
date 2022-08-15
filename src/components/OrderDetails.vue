@@ -28,7 +28,7 @@
               <b-button class="btn btn-secondary fw-bold w-100 mb-2" v-b-modal.modal-login>Summary</b-button>
             </template>
             <template>
-              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary"   @click="getLockers">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'roster' }} url</b-button>
+              <b-button v-if="isCustomerAuthenticated" variant="outline-secondary" @click="getLockers">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'roster' }} url</b-button>
               <AddLockerRoomModal :rosterUrl="true"  ref="share" />
             </template>
             <template v-if="shared_url">
@@ -81,16 +81,10 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
 })
 
 export default class OrderDetails extends Mixins(ErrorMessages)  {
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
-  public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>
-  public pdf_front_image = null;
-  public pdf_back_image = null;
-  public showModal = false
   public shared_url = ""
-  public production_file_obj = {
-    url: null, content: null
-  }
+  public production_file_obj = { url: null, content: null }
+  public showLoader = false
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -121,11 +115,6 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
   public buyNow() {
     this.$router.push('/confirm-order')
   }
-  get canvasImage() {
-    return this.$store.getters.getCanvasImage
-  }
-
-  public showLoader = false
 
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
@@ -139,11 +128,6 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     return this.$store.getters.getSvgGroups
   }
 
-
-  get productionSVGs(): Record<any, any> {
-    return this.$store.getters.getProductionSVGs
-  }
-
   get editStatus():boolean{
     return  this.$store.getters.getEditStatus
   }
@@ -151,214 +135,8 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     return this.$store.getters.getCompany
   }
 
-
-  public logosConversionToBase64() {
-    const self = this
-    self.base64Logos = []
-    if (!self.customLogos.length) {
-      self.htmlPdfGenerator()
-    }
-    self.customLogos.forEach((logos: Record<any, any>, index: number) => {
-      if(logos.url) {
-        const converted_width = unitConversion(logos.originalHeight)
-        const converted_height = unitConversion(logos.originalWidth)
-        let logoDimension = converted_width.value + converted_width.unit + ' x ' + converted_height.value + converted_height.unit
-        self.toDataURLCustom(this.storageUrl+logos.url, (dataUrl: any) => {
-          if (dataUrl) {
-            self.base64Logos.push({'b64logo': dataUrl, 'logoSize': logoDimension})
-            if (index == self.customLogos.length - 1) {
-              self.htmlPdfGenerator()
-            }
-          }
-        })
-      }
-    })
-  }
-
-   public async  generateProductionPdf() {
-    let self = this;
-    this.showLoader = true;
-    let style_index = this.$store.getters.getCurrentStyleIndex;
-    let selected_product = this.$store.getters.getSelectedProduct;
-    const product_id = selected_product.product_id;
-    let product_style = selected_product.productstyles[style_index];
-    const product_style_id = product_style.id;
-    let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
-    const product_design_id = selectedDesign[0].id;
-
-    let product_models = this.$store.getters.getProductModels;
-    let selected_model_index = this.$store.getters.getSelectedModelIndex;
-
-    let product_model_id = 0;
-    if(product_models.length > 0) {
-      const selected_model = product_models[selected_model_index];
-      product_model_id = selected_model.id;
-    }
-    let form_data = new FormData();
-    if(self.production_file_obj.url) {
-      form_data.append('original_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "original_file.svg", {
-        type: "image/svg+xml",
-      }));
-    }
-    form_data.append("product_id", product_id);
-    form_data.append("product_style_id", product_style_id);
-    form_data.append("product_design_id", product_design_id);
-    form_data.append("product_model_id", product_model_id.toString());
-    let order_detail = await self.getOrderDetail();
-    form_data.append("order_detail", JSON.stringify(order_detail));
-    let p2 = new Promise((resolve) => {
-      this.pdf_front_image = this.canvasImage.ref_front.toDataURL("image/png")
-      this.pdf_back_image = this.canvasImage.ref_back.toDataURL("image/png")
-      resolve(1);
-    });
-
-    p2.then((value) => {
-      if(value){
-        const element = document.getElementById("production-pdf-html")
-        const opt = {
-          margin: [0, 0, 0, 0],
-          filename: 'production.pdf',
-          image: {type: "jpeg", quality: 1},
-
-          jsPDF: {
-            unit: "in",
-            format: "letter",
-            orientation: 'landscape'
-          }
-        };
-        html2pdf().set(opt).from(element).toPdf().get("pdf")
-          .output('datauristring')
-          .then(function(pdfAsString: string) {
-            form_data.append("order_file", pdfAsString)
-            const res = http.post('orders/create', form_data);
-          }).save('final_design');
-        this.showLoader = false
-      }
-    })
-  }
-
-  public async getDocFromString(doc_string: string, type:DOMParserSupportedType ="image/svg+xml") {
-    let parser = new DOMParser();
-    return  parser.parseFromString(doc_string, type);
-  }
-
-  public generateProductionPdf_back(e: any) {
-    this.showLoader = true
-    $('meta[name=viewport]').attr('content', 'width=1024')
-    let frontCanvas = this.productionSVGs.front
-    let backCanvas = this.productionSVGs.back
-
-    let front = new fabric.Canvas(this.$refs.pdfFront as HTMLCanvasElement)
-    front.setHeight(600);
-    front.setWidth(600);
-    let back = new fabric.Canvas(this.$refs.pdfBack as HTMLCanvasElement)
-    back.setHeight(600);
-    back.setWidth(600);
-    let emptyCallback = () => { console }
-    front.loadFromJSON(JSON.stringify(frontCanvas), emptyCallback, emptyCallback)
-    back.loadFromJSON(JSON.stringify(backCanvas), emptyCallback, emptyCallback)
-
-    let front2dCtx = front.getContext()
-    let back2dCtx = back.getContext()
-    let front2D = $(front2dCtx.canvas)
-    let back2D = $(back2dCtx.canvas)
-
-    $(front2D).attr("id", "front-pdf")
-    $(back2D).attr("id", "back-pdf")
-    $(front2D).attr("class", "canvas")
-    $(back2D).attr("class", "canvas")
-
-    $.each($(front2D).data(), (i) => {
-      $(front2D).removeAttr("data-" + i)
-    })
-    $.each($(back2D).data(), (i) => {
-      $(back2D).removeAttr("data-" + i)
-    })
-
-    let frontViewPdf = front2D.get(0)
-    let backViewPdf = back2D.get(0)
-
-    $("#front-svg").html(frontViewPdf)
-    $("#back-svg").html(backViewPdf)
-    this.logosConversionToBase64()
-  }
-
-  public htmlPdfGenerator() {
-    let style_index = this.$store.getters.getCurrentStyleIndex;
-    let selected_product = this.$store.getters.getSelectedProduct;
-    const product_id = selected_product.product_id;
-    let product_style = selected_product.productstyles[style_index];
-    const product_style_id = product_style.id;
-    let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
-    const product_design_id = selectedDesign[0].id;
-
-    let product_models = this.$store.getters.getProductModels;
-    let selected_model_index = this.$store.getters.getSelectedModelIndex;
-
-    let product_model_id = 0;
-    if(product_models.length > 0) {
-      const selected_model = product_models[selected_model_index];
-      product_model_id = selected_model.id;
-    }
-    let order_payload = {
-      product_id,
-      product_style_id,
-      product_design_id,
-      product_model_id,
-      order_file: ''
-    }
-
-    setTimeout(() => {
-      const element = document.getElementById("production-pdf-html")
-      const opt = {
-        margin: [15, 10, 25, 10],
-        filename: 'production.pdf',
-        image: {type: "jpeg", quality: 1},
-        html2canvas: {
-          dpi: 192,
-          scale: 4,
-          useCORS: true,
-          letterRendering: true,
-        },
-        jsPDF: {
-          unit: "mm",
-          format: "letter",
-          orientation: 'landscape'
-        }
-      };
-      html2pdf()
-        .set(opt)
-        .from(element)
-        .toPdf()
-        .get("pdf")
-        .output('datauristring')
-        .then(function(pdfAsString: string) {
-          order_payload.order_file = pdfAsString;
-          const res = http.post('orders/create', order_payload);
-        })
-        .save()
-
-      $('meta[name=viewport]').attr('content', 'width=device-width')
-      this.showLoader = false
-    }, 1000)
-  }
-
-  public toDataURLCustom(url: string, callback: any) {
-    let xhr = new XMLHttpRequest()
-    xhr.onload = function () {
-      let reader = new FileReader()
-      reader.onloadend = function () {
-        callback(reader.result)
-      }
-      reader.readAsDataURL(xhr.response)
-    }
-    xhr.open('GET', url)
-    xhr.responseType = 'blob'
-    xhr.send()
-  }
-  public async getLockers(){
+  public async getLockers() {
     if (!this.editStatus){
-      alert("athun khul rya")
       await this.$store.dispatch("getLockers");
       this.ref['share'].showSaveToLockerRoomModal()
     }else{
@@ -366,6 +144,7 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
       this.shared_url = res.data
     }
   }
+
   public copyLink() {
     let testingCodeToCopy = document.querySelector("#shared_url_link") as Record<any, any>
     testingCodeToCopy.select()
@@ -376,20 +155,6 @@ export default class OrderDetails extends Mixins(ErrorMessages)  {
     } catch (err) {
       alert('Oops, unable to copy');
     }
-  }
-
-  public async getOrderDetail() {
-    let self = this;
-    let order_detail: { [key: string]: Record<any, any> } = {}
-    order_detail.roster_detail = self.rosterDetails;
-    order_detail.svg_groups = self.svgGroups;
-    order_detail.custom_texts = self.customTexts;
-    order_detail.custom_logos = self.customLogos;
-    //if logo colors are being used then we will send it otherwise not
-    if(self.$store.getters.getUsingColorLogos) {
-      order_detail.logo_colors = self.logoColors
-    }
-    return order_detail;
   }
 }
 </script>
