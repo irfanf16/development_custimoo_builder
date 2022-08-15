@@ -111,7 +111,7 @@ const ProductAttributes:Module<any, any> = {
     },
     revertRosterBool:false,
     hideSaveLockerButton: false,
-    new_custom_texts: {},
+    product_custom_texts: {},
     //could be locker_product, cart_product, order_product
     product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null },
     last_active_product_data: {
@@ -931,15 +931,15 @@ const ProductAttributes:Module<any, any> = {
     SET_EDITING_ROSTER_PLAYER_INDEX(state:Record<any, any>, payload){
       state.editing_roster_player_index = payload;
     },
-    SET_NEW_CUSTOM_TEXTS(state:Record<any, any>, payload) {
+    SET_PRODUCT_CUSTOM_TEXTS(state:Record<any, any>, payload) {
       if("index" in payload) {
         /*
          * By default we consider active product id to change custom text. If we want to update custom text if user wants
          * to update custom text other than selected product then we get that product id
        * */
         const product_id: number = payload.product_id ? payload.product_id : state.selectedPrdId;
-        if(state.new_custom_texts[product_id][payload.index] == undefined) {
-          state.new_custom_texts[product_id].push(payload.value)
+        if(state.product_custom_texts[product_id][payload.index] == undefined) {
+          state.product_custom_texts[product_id].push(payload.value)
           return false
         }
         else {
@@ -950,16 +950,19 @@ const ProductAttributes:Module<any, any> = {
           const index_type: string = payload.index_type ? payload.index_type : 'product_text';
           //if index_type = "product" then we will update all custom texts of product
           if(index_type == "product") {
-            Vue.set(state.new_custom_texts, product_id, payload.value)
+            Vue.set(state.product_custom_texts, product_id, payload.value)
           }
           else {
-            Vue.set(state.new_custom_texts[product_id], payload.index, payload.value)
+            Vue.set(state.product_custom_texts[product_id], payload.index, payload.value)
           }
         }
 
       } else {
-        state.new_custom_texts = payload;
+        state.product_custom_texts = payload;
       }
+    },
+    REMOVE_CUSTOM_TEXT(state: Record<any, any>, payload) {
+      state.product_custom_texts[state.selectedPrdId].splice(payload, 1)
     },
     SET_PRODUCTS_NEXT_PAGE_NO(state:Record<any, any>, payload){
       state.products_next_page_no = payload;
@@ -994,14 +997,14 @@ const ProductAttributes:Module<any, any> = {
   },
   getters: {
     selectedProductCustomTexts: state =>  {
-      return state.new_custom_texts[state.selectedPrdId]
+      return state.product_custom_texts[state.selectedPrdId]
     },
     //this is parameterized getter that's why in vue devtool it will always return function. Also it will not be cached instead it will always executed when we use getter
-     getNewCustomTexts: state => (product_id = "all") =>  {
+    productCustomTexts: state => (product_id = "all") =>  {
       if(product_id == "all") {
-        return state.new_custom_texts;
+        return state.product_custom_texts;
       } else {
-        return state.new_custom_texts[product_id];
+        return state.product_custom_texts[product_id];
       }
     },
     getSearchLoader: state => {

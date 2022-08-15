@@ -765,6 +765,7 @@ const getPermissions = async () => {
   }
 }
 
+//todo remove this method after finalizing custom texts
 const getNewCustomTexts = async (product_ids_string: string, custom_text_types_string: string, count= 1) => {
   const custom_texts: Record<any, any> = {};
   const product_ids: string[] = product_ids_string.split(",");

@@ -50,36 +50,18 @@
               </a>
             </template>
             <div class="d-none d-lg-block">
-              <template v-for="(customText, index) in customTexts">
-                <div :key="index" v-if="customText.hasOwnProperty('text')">
-                  <CustomizationText @removeTab="removeTab(index, selectedProduct.id)" :productFonts="selectedProduct.namefonts" :customTextIndex="index"
-                                     :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-                </div>
-              </template>
-              <div v-if="selectedProduct.allow_extra_text" class="px-3 pt-3 p-lg-4 text-right">
-                <b-button class="add-logo-btn" @click="addTab(customTexts)">
-                  +
-                </b-button>
-              </div>
+                <CustomizationText />
             </div>
             <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
               <b-tabs>
-                <template v-for="(customText, index) in customTexts">
-                  <b-tab :key="index" v-if="customText.hasOwnProperty('text')">
-                    <template #title>
-                      Player Name
-                    </template>
-                    <div>
-                      <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
-                                         :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-                      <template v-if="index + 1  > selectedProduct.productnames.length">
-                        <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">
-                          -
-                        </b-button>
-                      </template>
-                    </div>
-                  </b-tab>
-                </template>
+                <b-tab>
+                  <template #title>
+                    Player Name
+                  </template>
+                  <div>
+                    <CustomizationText />
+                  </div>
+                </b-tab>
               </b-tabs>
             </div>
           </b-tab>
@@ -123,9 +105,6 @@
                 Test
               </a>
             </template>
-            <div class="team-roaster-area p-4">
-              <NewCustomizationText />
-            </div>
           </b-tab>
           <!--        </vuescroll>-->
         </div>
@@ -140,7 +119,6 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
 import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
-import NewCustomizationText from '@/components/NewCustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
@@ -154,7 +132,6 @@ import RecentLogos from "@/components/RecentLogos.vue";
     ColorAccordion,
     LogoPlacementTabs,
     CustomizationText,
-    NewCustomizationText,
     CollarStyle,
     EditRosterAreaTab,
     ColorTabs,

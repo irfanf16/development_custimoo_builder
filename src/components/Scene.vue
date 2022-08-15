@@ -28,6 +28,7 @@ import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/h
   async mounted() {
     let self: Record<any, any> = this;
     self.$eventBus.$on("customTextUpdated", this.addTextsNew)
+    self.$eventBus.$on("customTextRemoved", self.deleteExistingTextsFromCanvas)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -266,8 +267,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     return this.$store.getters.getSelectedProductId
   }
 
-  get newCustomTexts(): Record<any, any>[] {
-    return this.$store.getters.getNewCustomTexts(this.product_id)
+  get productCustomTexts(): Record<any, any>[] {
+    return this.$store.getters.productCustomTexts(this.product_id)
   }
 
   @Watch('customLogos', {
@@ -832,8 +833,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
             }
           }
 
-          if(this.newCustomTexts) {
-            this.newCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
+          if(this.productCustomTexts) {
+            this.productCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
               if(custom_text.value) {
                 const text = { value: custom_text, custom_text_index: index }
                 this.addTextsNew(text)
@@ -1793,10 +1794,15 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
         self.backCanvas.remove(custom_text[i])
       }
     }
+    self.product_custom_text_objects.splice(custom_text_index, 1)
   }
 
   public async addTextsNew(custom_text_info: Record<any, any>) {
     const self: Record<any, any> = this
+    if(custom_text_info.emitter == 'add_button') {
+      self.product_custom_text_objects.push(null)
+      return false;
+    }
     let fabric_control_visibility = { tl: false, bl: false, tr: true, br: true, ml: false, mb: false, mr: false, mt: false, mtr: false }
     const custom_text_index = custom_text_info.custom_text_index;
     self.product_custom_texts[custom_text_index] = custom_text_info.value;
@@ -1959,7 +1965,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = fabric_object.get("angle");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleX = fabric_object.get("scaleX");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleY = fabric_object.get("scaleY");
-    self.$store.commit("SET_NEW_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
   }
 
