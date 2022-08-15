@@ -408,9 +408,9 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     if(custom_name_number_index >= 0) {
       let custom_text_synced_with_roster = JSON.parse(JSON.stringify(product_custom_texts[custom_name_number_index]));
       custom_text_synced_with_roster.value = text_number_value
-      self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_name_number_index, value: custom_text_synced_with_roster})
+      self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_name_number_index, value: custom_text_synced_with_roster})
     }
-    // self.$store.commit("SET_NEW_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    // self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
 
   }
 

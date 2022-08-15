@@ -25,7 +25,6 @@
           <RosterDetails :productSizes="sizeOptions" ref="rostermodal" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit"/>
           <div class="roster-preview-area">
             <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts" />
-  <!--          <OrderDetails/>-->
           </div>
         </div>
       </div>
