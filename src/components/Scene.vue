@@ -1673,113 +1673,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     }
   }
 
-  public addTexts(text: Record<any, any>, textIndex: null | number = null) {
-    const self = this
-    if ('textIndex' in text) {
-      textIndex = text.textIndex
-    } else {
-      let product_id = this.product_id ? this.product_id : this.selectedProductId
-      this.$store.dispatch('updateCustomTextWithoutTrigger', {
-        index: textIndex,
-        product_id: product_id,
-        data: {
-          textIndex: textIndex,
-        }
-      })
-    }
-    if (text.text && text.text != '' && (text.side == 'front' || (text.side == 'back' && self.back)) && !this.customTextObjects[textIndex as number]) {
-      let textBox = new fabric.Text(text.text, {
-        left: self.canvasWidth / self.mainCanvasWidth * text.x_axis,
-        top: self.canvasHeight / self.mainCanvasHeight * text.y_axis,
-        angle: text.rotation as number,
-        centeredScaling: true,
-        selectable: this.canvasSelection,
-        hasControls: true,
-        hasBorders: false,
-        evented: true,
-        globalCompositeOperation: 'source-atop',
-        fontFamily: text.fontFamily,
-        fill: text.fillColor,
-        stroke: text.outLineColor,
-        strokeWidth: parseInt(text.outLineWidth),
-        paintFirst: 'stroke',
-        lockScalingFlip: true,
-        padding: 15,
-        cornerSize: 30,
-        fontSize: self.canvasHeight / self.mainCanvasHeight * text.height,
-        _fontSizeMult: .835,
-      })
-
-      if (text.scaleX && text.scaleY) {
-        textBox.scaleX = text.scaleX
-        textBox.scaleY = text.scaleY
-      }
-
-      let canvas = self.frontCanvas
-      let model = self.frontModel
-      let dimText = self.dimTextFront
-      if (text.side == 'back') {
-        canvas = self.backCanvas
-        model = self.backModel
-        dimText = self.dimTextBack
-      }
-      textBox.setControlsVisibility({
-        tl: false,
-        bl: false,
-        tr: true,
-        br: true,
-        ml: false,
-        mb: false,
-        mr: false,
-        mt: false,
-        mtr: false
-      })
-
-      Object.assign(textBox, {
-        textIndex: textIndex,
-        side: text.side
-      })
-      self.customTextObjects[textIndex as number] = textBox
-      canvas.add(textBox)
-      if (this.productType == 'customized') {
-        model.bringToFront()
-      }
-      canvas.renderAll()
-
-      this.addToOtherSide(textBox, text.side)
-
-      if (this.mainPreview) {
-        self.$store.commit("UPDATE_CUSTOM_TEXT_OBJECTS", { index: textIndex, data: textBox });
-        const scaleX = textBox.scaleX as number
-        const scaleY = textBox.scaleY as number
-        const width = (textBox.width as number * scaleX * this.measurementRatio).toFixed(1)
-        const height = (textBox.height as number * scaleY * this.measurementRatio).toFixed(1)
-        const outLineWidth = (textBox.strokeWidth as number * this.measurementRatio).toFixed(1)
-        self.$store.dispatch('updateCustomTextWithoutTrigger', {
-          index: textIndex,
-          data: {
-            actualWidth: textBox.width,
-            actualHeight: textBox.height,
-            originalWidth: width,
-            originalHeight: height,
-            originalOutLineWidth: outLineWidth,
-            scaleX: textBox.scaleX,
-            scaleY: textBox.scaleY
-          }
-        })
-      }
-
-      textBox.on('selected', (e: Record<any, any>) => {
-        this.showDimensions(e, dimText)
-      })
-      canvas.on('selection:cleared', () => {
-        dimText.set({
-          visible: false
-        })
-      })
-    }
-  }
-
   public async getCustomTextObject(custom_text_index: number, custom_text_item_index: number) {
     console.log("")
 
@@ -1862,7 +1755,12 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                 if (custom_text_item.scaleX && custom_text_item.scaleY) {
                   fabric_text.scaleX = custom_text_item.scaleX
                   fabric_text.scaleY = custom_text_item.scaleY
+                } else {
+                  custom_text_item.scaleX = fabric_text.scaleX
+                  custom_text_item.scaleY = fabric_text.scaleY
                 }
+
+                self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: this.product_custom_texts[custom_text_index]})
                 fabric_text.setControlsVisibility(fabric_control_visibility)
                 if (!self.product_custom_text_objects[custom_text_index]) {
                   self.product_custom_text_objects[custom_text_index] = [];

@@ -448,38 +448,75 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         return
       }
       const selected_product = Store.getters.getSelectedProduct;
-      const newCustomTexts = Store.getters.getNewCustomTexts(selected_product.id)
+      const productCustomTexts = Store.getters.productCustomTexts(selected_product.id)
       const roster_details = Store.getters.getSelectedProductRoster
-      const text_objects: Record<any, any>[] = []
-      for(let text_index = 0; text_index < newCustomTexts.length; text_index++) {
-        const custom_text = newCustomTexts[text_index]
-        const font = products_fonts[custom_text.font_family]
-        if(custom_text.is_first_name) {
-          for(let roster_index = 0; roster_index < roster_details.length; roster_index++) {
-            const roster_detail = roster_details[roster_index]
-            if(roster_detail.text) {
-              const text_object_by_roster: Record<any, any>[] = []
-              const path = font.opentype_font.getPath(roster_detail.text)
-              for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
-                const custom_text_item = custom_text.items[items_index]
+      const roster_texts : Record<any, any> = {}
+
+      for(let roster_index = 0; roster_index < roster_details.length; roster_index++) {
+        const roster_detail = roster_details[roster_index]
+
+        const text_object = {
+          size: roster_detail.size,
+          quantity: roster_detail.quantity,
+          name: {
+            label: '',
+            value: roster_detail.text,
+            font_family: '',
+            items: [] as Record<any, any>[]
+          },
+          number: {
+            label: '',
+            value: roster_detail.number,
+            font_family: '',
+            items: [] as Record<any, any>[]
+          }
+        }
+        for(let text_index = 0; text_index < productCustomTexts.length; text_index++) {
+          const custom_text = productCustomTexts[text_index]
+          const font = products_fonts[custom_text.font_family]
+          if(custom_text.is_first_name || custom_text.is_first_number) {
+
+            const path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : ''
+
+            for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
+              const custom_text_item = custom_text.items[items_index]
+              if(path) {
                 path.fill = custom_text_item.color
                 path.stroke = custom_text_item.outline_color
                 path.strokeWidth = parseInt(custom_text_item.outline_width)
-                path.transform = 'scale(1.5)'
-                path.x = custom_text_item.x_axis
-                path.y = custom_text_item.y_axis
+                path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
                 const svg_string = path.toSVG()
                 const parser = new DOMParser();
                 const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
                 dom_svg.style.translate = '120px 100px'
-                text_object_by_roster.push({svg: dom_svg.outerHTML})
               }
-              Vue.set(text_objects, text_index, text_object_by_roster)
+
+              const converted_width = unitConversion(custom_text_item.width * custom_text_item.scaleX * selected_product.measurement_ratio)
+              const converted_height = unitConversion(custom_text_item.height * custom_text_item.scaleY * selected_product.measurement_ratio)
+              const text_item_object = {
+                label: custom_text_item.label,
+                width: converted_width.value,
+                height: converted_height.value,
+                unit: converted_width.unit,
+                path: path
+              }
+              if(custom_text.is_first_name) {
+                text_object.name.label = custom_text.label
+                text_object.name.font_family = custom_text.font_family
+                text_object.name.items.push(text_item_object)
+              } else if(custom_text.is_first_number) {
+                text_object.number.label = custom_text.label
+                text_object.number.font_family = custom_text.font_family
+                text_object.number.items.push(text_item_object)
+              }
             }
+
+            Vue.set(roster_texts, text_index, text_object)
           }
+
         }
       }
-      console.log(text_objects)
+      console.log(roster_texts)
 
       const getCanvasImage = Store.getters.getCanvasImage
       const style_index = Store.getters.getCurrentStyleIndex;
