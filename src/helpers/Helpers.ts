@@ -451,6 +451,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const productCustomTexts = Store.getters.productCustomTexts(selected_product.id)
       const roster_details = Store.getters.getSelectedProductRoster
       const roster_texts : Record<any, any> = {}
+      const common : Record<any, any>[] = []
 
       for(let roster_index = 0; roster_index < roster_details.length; roster_index++) {
         const roster_detail = roster_details[roster_index]
@@ -471,52 +472,62 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
             items: [] as Record<any, any>[]
           }
         }
+        const common_object = {
+          label: '',
+          value: '',
+          font_family: '',
+          items: [] as Record<any, any>[]
+        }
         for(let text_index = 0; text_index < productCustomTexts.length; text_index++) {
           const custom_text = productCustomTexts[text_index]
           const font = products_fonts[custom_text.font_family]
-          if(custom_text.is_first_name || custom_text.is_first_number) {
-
-            const path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : ''
-
-            for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
-              const custom_text_item = custom_text.items[items_index]
-              if(path) {
-                path.fill = custom_text_item.color
-                path.stroke = custom_text_item.outline_color
-                path.strokeWidth = parseInt(custom_text_item.outline_width)
-                path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
-                const svg_string = path.toSVG()
-                const parser = new DOMParser();
-                const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
-                dom_svg.style.translate = '120px 100px'
-              }
-
-              const converted_width = unitConversion(custom_text_item.width * custom_text_item.scaleX * selected_product.measurement_ratio)
-              const converted_height = unitConversion(custom_text_item.height * custom_text_item.scaleY * selected_product.measurement_ratio)
-              const text_item_object = {
-                label: custom_text_item.label,
-                width: converted_width.value,
-                height: converted_height.value,
-                unit: converted_width.unit,
-                path: path
-              }
-              if(custom_text.is_first_name) {
-                text_object.name.label = custom_text.label
-                text_object.name.font_family = custom_text.font_family
-                text_object.name.items.push(text_item_object)
-              } else if(custom_text.is_first_number) {
-                text_object.number.label = custom_text.label
-                text_object.number.font_family = custom_text.font_family
-                text_object.number.items.push(text_item_object)
-              }
+          const path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : ''
+          for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
+            const custom_text_item = custom_text.items[items_index]
+            const converted_width = unitConversion(custom_text_item.width * custom_text_item.scaleX * selected_product.measurement_ratio)
+            const converted_height = unitConversion(custom_text_item.height * custom_text_item.scaleY * selected_product.measurement_ratio)
+            const text_item_object = {
+              label: custom_text_item.label,
+              width: converted_width.value,
+              height: converted_height.value,
+              unit: converted_width.unit,
+              svg: ''
+            }
+            if(path) {
+              path.fill = custom_text_item.color
+              path.stroke = custom_text_item.outline_color
+              path.strokeWidth = parseInt(custom_text_item.outline_width)
+              path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
+              const svg_string = path.toSVG()
+              const parser = new DOMParser();
+              const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
+              dom_svg.style.translate = '120px 100px'
+              text_item_object.svg = dom_svg.outerHTML
             }
 
-            Vue.set(roster_texts, text_index, text_object)
+            if(custom_text.is_first_name) {
+              text_object.name.label = custom_text.label
+              text_object.name.font_family = custom_text.font_family
+              text_object.name.items.push(text_item_object)
+            } else if(custom_text.is_first_number) {
+              text_object.number.label = custom_text.label
+              text_object.number.font_family = custom_text.font_family
+              text_object.number.items.push(text_item_object)
+            } else if(roster_index == 0) {
+              common_object.label = custom_text.label
+              common_object.value = custom_text.value
+              common_object.font_family = custom_text.font_family
+              common_object.items.push(text_item_object)
+            }
           }
-
+        }
+        Vue.set(roster_texts, roster_index, text_object)
+        if(common_object.value) {
+          Vue.set(common, common.length, common_object)
         }
       }
       console.log(roster_texts)
+      console.log(common)
 
       const getCanvasImage = Store.getters.getCanvasImage
       const style_index = Store.getters.getCurrentStyleIndex;
@@ -542,9 +553,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         custom_logos: Store.getters.getCustomLogos(),
         measurement_ratio: selected_product.measurement_ratio,
         custom_logo_svgs: [],
-        custom_texts: Store.getters.getCustomTexts(),
-        product_custom_texts: Store.getters.selectedProductCustomTexts,
-        custom_text_svgs: [],
+        product_custom_texts: productCustomTexts,
+        product_custom_text_objects: {roster: roster_texts, common: common},
         colors: Store.getters.getLogosColors,
         design_id: selected_design.id,
         defaultcolors: Store.getters.getDefaultColors,
@@ -560,18 +570,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         pdf_file: null,
         production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
         // front_design:front_design,
-        roster_detail: Store.getters.getRosterDetails(),
         product_roster_detail: Store.getters.getSelectedProductRoster,
         style_id: product_style.id,
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
-      }
-      if(scene_ref.customTextObjects) {
-        for (const custom_text_object of scene_ref.customTextObjects) {
-          if (custom_text_object && Object.keys(custom_text_object).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
-            post_data.custom_text_svgs.push(custom_text_object.toSVG());
-          }
-        }
       }
       if(scene_ref.customLogoObjects) {
         for (const custom_logo_svg of scene_ref.customLogoObjects) {
