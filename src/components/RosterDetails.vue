@@ -61,15 +61,19 @@
             <template v-if="allowNameAndNumbers">
               <div class="hide-show">
                 <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="editRosterPlayer(productRosterItemIndex)">
-                  <font-awesome-icon :icon="['fas', productRosterItemIndex === eyeIndex ? 'eye' : 'eye-slash']" />
+                  <font-awesome-icon :icon="['fas', productRosterItemIndex == active_roster_index ? 'eye' : 'eye-slash']" />
                 </a>
               </div>
               <div v-if="custom_name_index != -1" class="roster-name">
-                <b-form-input :value="product_roster_item.text" @input="handleRosterUpdate($event, 'name', productRosterItemIndex)"></b-form-input>
+                <b-form-input :value="product_roster_item.text" @input="handleRosterUpdate($event, 'name', productRosterItemIndex)"
+                              @focus.stop="handleRosterItemFocus(productRosterItemIndex)"
+                ></b-form-input>
               </div>
               <div v-if="custom_number_index != -1" :style="{maxWidth: custom_name_index == -1 && '70%', flexBasis: custom_name_index == -1 && '70%'}" class="shirt-no">
                 <b-form-input class="text-center" :value="product_roster_item.number"
-                               @input="handleRosterUpdate($event, 'number', productRosterItemIndex)"></b-form-input>
+                              @input="handleRosterUpdate($event, 'number', productRosterItemIndex)"
+                              @focus.stop="handleRosterItemFocus(productRosterItemIndex)"
+                ></b-form-input>
               </div>
             </template>
             <div class="shirt-size" :class="{ 'no-name-number': !(custom_name_index != -1 || custom_number_index != -1)}">
@@ -84,7 +88,7 @@
               <b-form-input class="text-center" placeholder="0" @input="handleRosterUpdate($event, 'quantity', productRosterItemIndex)"
                             :value="product_roster_item.quantity"></b-form-input>
             </div>
-            <div class="remove" v-if="productRosterItemIndex > 0">
+            <div class="remove" v-if="productRosterItemIndex > 0 && active_roster_index != productRosterItemIndex">
               <a @click="$store.commit('REMOVE_ROSTER_ITEM', productRosterItemIndex)">
                 <font-awesome-icon :icon="['fas', 'trash-alt']" />
               </a>
@@ -170,6 +174,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public selected = this.productSizes[0]
   public secondColor!: Record<any, any>
   public selected_locker_roster = null
+  public active_roster_index = 0
 
   /* component computed props starts */
 
@@ -272,6 +277,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public changeRoster(locker_roster_id:any){
     let self: Record<any, any> = this;
     if(locker_roster_id) {
+      this.active_roster_index = 0
       let selected_roster = find(this.lockerRosters, ["id", locker_roster_id])
       selected_roster = JSON.parse(JSON.stringify(selected_roster))
       let roster_items = selected_roster ? selected_roster.roster_detail : null;
@@ -378,7 +384,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     })
   }
 
-  public handleRosterUpdate(updated_val:string, type: string, roster_index: number) {
+  public async handleRosterUpdate(updated_val:string, type: string, roster_index: number) {
     const self: Record<any, any> = this;
     let roster_updated_key = type == 'name' ? 'text' : type;
     let product_id = self.selectedProduct.id;
@@ -394,8 +400,8 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     }
     self.$store.dispatch('setProductsRosters', {product_id: product_id, roster_index: roster_index, roster_data: roster_data})
     //The custom text first item of type name and numbers are synced with the first row (name and number) of the roster.
-    if(roster_index == 0 && ['name', 'number'].includes(type)) {
-      self.syncRosterWithCustomText(type, updated_val)
+    if(['name', 'number'].includes(type)) {
+      await self.syncRosterWithCustomText(type, updated_val)
     }
   }
 
@@ -403,13 +409,42 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     const self: Record<any, any> = this;
     let product_custom_texts = self.$store.getters.selectedProductCustomTexts;
     const custom_name_number_index = type == 'name' ? this.custom_name_index : this.custom_number_index;
+    console.log('custom_name_number_index', custom_name_number_index)
     //The custom text first item of type name or number depending upon type is synced with the first row input with label name or number.
     if(custom_name_number_index >= 0) {
       let custom_text_synced_with_roster = JSON.parse(JSON.stringify(product_custom_texts[custom_name_number_index]));
       custom_text_synced_with_roster.value = text_number_value
       self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_name_number_index, value: custom_text_synced_with_roster})
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index: custom_name_number_index, value: custom_text_synced_with_roster
+      });
     }
-    // self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+
+  }
+
+  public handleRosterItemFocus(roster_index: number) {
+    let self: Record<any, any> = this;
+    this.active_roster_index = roster_index;
+    let product_custom_texts = this.$store.getters.selectedProductCustomTexts;
+    let active_roster = this.productRoster[roster_index]
+
+    if(this.custom_number_index >= 0) {
+      let custom_number_text = product_custom_texts[this.custom_number_index]
+      custom_number_text.value = active_roster.number
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:self.custom_number_index, value: custom_number_text
+      });
+    }
+
+
+    if(this.custom_name_index >= 0) {
+      let custom_name_text = product_custom_texts[this.custom_name_index]
+      custom_name_text.value = active_roster.text
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:self.custom_name_index, value: custom_name_text
+      });
+    }
+
 
   }
 
