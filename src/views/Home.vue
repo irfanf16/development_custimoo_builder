@@ -737,10 +737,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.initProductsFonts(newVal)
   }
 
-  get editing_roster_player_index(): number {
-    return this.$store.getters.getEditingRosterPlayerIndex
-  }
-
   get cartItemsCount(){
     return this.$store.getters.getCartItemsCount
   }
