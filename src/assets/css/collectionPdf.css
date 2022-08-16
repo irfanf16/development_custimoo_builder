@@ -400,7 +400,6 @@ img{
     background-size: cover !important;
     width: 100%;
     min-height: 100vh;
-    background: url('../images/page_background.png') no-repeat center;
     /*page-break-after: always !important;*/
     page-break-inside: avoid !important;
     page-break-after: avoid !important;

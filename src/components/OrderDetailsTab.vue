@@ -89,8 +89,8 @@ import {
   urlToBase64,
   getFileExtensionType,
   fontsList,
-  handleResponseException
-} from "@/helpers/Helpers";
+  handleResponseException, unitConversion
+} from '@/helpers/Helpers'
 import LoginForm from '@/components/LoginForm.vue'
 import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
 
@@ -255,7 +255,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     }
     self.customLogos.forEach((logos: Record<any, any>, index: number) => {
       if(logos.url) {
-        let logoDimension = logos.originalHeight + 'cm x ' + logos.originalWidth + 'cm'
+        const converted_width = unitConversion(logos.originalHeight)
+        const converted_height = unitConversion(logos.originalWidth)
+        let logoDimension = converted_width.value + converted_width.unit + ' x ' + converted_height.value + converted_height.unit
         self.toDataURLCustom(this.storageUrl+logos.url, (dataUrl: any) => {
           if (dataUrl) {
             self.base64Logos.push({'b64logo': dataUrl, 'logoSize': logoDimension})
