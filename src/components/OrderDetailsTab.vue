@@ -259,9 +259,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     try {
       // this.isLoading = true;
      let cart_product: Record<any,any> = await getActiveProductData(this.products_fonts)
-     if(cart_product) {
-        return false;
-     }
+
      this.$store.dispatch('setRevertRosterBOOL',true);
 
       let post_data: Record<any, any> = {

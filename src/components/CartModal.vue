@@ -45,7 +45,7 @@
               </td>
               <td>
                 <a style="font-weight: bold; cursor:pointer; color:blue;text-decoration: underline" @click="editCartItem(cart_item_index, factory_product_index, false)">
-                  {{ factory_product.roster_detail | itemQtyCount(factory_product.roster_detail) }}
+                  {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
                 </a>
               </td>
               <td class="cursor-pointer"> <a data-title="Delete Event"
