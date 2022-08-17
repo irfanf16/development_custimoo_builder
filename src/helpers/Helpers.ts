@@ -501,7 +501,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               const svg_string = path.toSVG()
               const parser = new DOMParser();
               const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
-              dom_svg.style.translate = '120px 100px'
+              dom_svg.style.translate = '0px 40px'
               text_item_object.svg = dom_svg.outerHTML
             }
 
