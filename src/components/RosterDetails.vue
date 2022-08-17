@@ -66,13 +66,13 @@
               </div>
               <div v-if="custom_name_index != -1" class="roster-name">
                 <b-form-input :value="product_roster_item.text" @input="handleRosterUpdate($event, 'name', productRosterItemIndex)"
-                              @focus.stop="handleRosterItemFocus(productRosterItemIndex)"
+                              @focus="handleRosterItemFocus(productRosterItemIndex)"
                 ></b-form-input>
               </div>
               <div v-if="custom_number_index != -1" :style="{maxWidth: custom_name_index == -1 && '70%', flexBasis: custom_name_index == -1 && '70%'}" class="shirt-no">
                 <b-form-input class="text-center" :value="product_roster_item.number"
                               @input="handleRosterUpdate($event, 'number', productRosterItemIndex)"
-                              @focus.stop="handleRosterItemFocus(productRosterItemIndex)"
+                              @focus="handleRosterItemFocus(productRosterItemIndex)"
                 ></b-form-input>
               </div>
             </template>
@@ -444,8 +444,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
         emitter: "input", custom_text_index:self.custom_name_index, value: custom_name_text
       });
     }
-
-
   }
 
 }

@@ -257,125 +257,122 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   public async addToCart() {
     let self: Record<any, any> = this;
     try {
-      // this.isLoading = true;
-     let cart_product: Record<any,any> = await getActiveProductData(this.products_fonts)
 
-     this.$store.dispatch('setRevertRosterBOOL',true);
+      // this.isLoading = true;
+      let cart_product: Record<any, any> = await getActiveProductData(this.products_fonts)
+      this.$store.dispatch('setRevertRosterBOOL', true)
 
       let post_data: Record<any, any> = {
         factory_product: cart_product
       }
-      let url = "carts"
-      let cart_edit_mode = false;
-      if(this.getProductEditInfoObject.editing && this.getProductEditInfoObject.type == "cart_product") {
+      let url = 'carts'
+      let cart_edit_mode = false
+      if (this.getProductEditInfoObject.editing && this.getProductEditInfoObject.type == 'cart_product') {
         cart_edit_mode = true
         post_data.factory_product.id = this.getProductEditInfoObject.cart_product_info.cart_item_product.id
         url = `carts/cart-items/${this.getProductEditInfoObject.cart_product_info.cart_item_id}/update`
       }
 
-      let santacart = true;
-      let company_domain = this.company.company_domain;
+      let santacart = true
+      let company_domain = this.company.company_domain
 
-      let platform = this.company.platform;
-      let ecommerce_cart_id = null;
-      let ecom_url = company_domain + '/wp-admin/admin-ajax.php';
+      let platform = this.company.platform
+      let ecommerce_cart_id = null
+      let ecom_url = company_domain + '/wp-admin/admin-ajax.php'
 
-      if(platform === 'wordpress'){
-        if(cart_product.sync_id === "" || cart_product.ecommerce_post_id === ""){
-          return false;
+      if (platform === 'wordpress') {
+        if (cart_product.sync_id === '' || cart_product.ecommerce_post_id === '') {
+          return false
         }
 
-        let ecom_form_data = new FormData();
+        let ecom_form_data = new FormData()
 
-        let ecommerce_update_id = this.$route.query.update_item;
-        if(ecommerce_update_id){
-          ecom_form_data.append('action', 'custimoo_update_cart');
-          ecom_form_data.append('update_item', ecommerce_update_id);
-        }else{
-          ecom_form_data.append('action', 'custimoo_add_to_cart');
-          ecom_form_data.append('product_name', cart_product.product_name);
+        let ecommerce_update_id = this.$route.query.update_item
+        if (ecommerce_update_id) {
+          ecom_form_data.append('action', 'custimoo_update_cart')
+          ecom_form_data.append('update_item', ecommerce_update_id)
+        } else {
+          ecom_form_data.append('action', 'custimoo_add_to_cart')
+          ecom_form_data.append('product_name', cart_product.product_name)
         }
 
-        ecom_form_data.append('product_id', cart_product.ecommerce_post_id);
-        ecom_form_data.append('quantity', this.total);
-        ecom_form_data.append('product_front_image', cart_product.front_image);
+        ecom_form_data.append('product_id', cart_product.ecommerce_post_id)
+        ecom_form_data.append('quantity', this.total)
+        ecom_form_data.append('product_front_image', cart_product.front_image)
 
         await http.post(ecom_url, ecom_form_data).then((res: any) => {
-          if(!res.data.status){
+          if (!res.data.status) {
             santacart = false
-            this.showToast(res.data.message, 'ERROR');
-          }else{
-            ecommerce_cart_id = res.data.ecommerce_cart_id;
+            this.showToast(res.data.message, 'ERROR')
+          } else {
+            ecommerce_cart_id = res.data.ecommerce_cart_id
           }
         }).catch(err => {
           santacart = false
           this.isLoading = false
           this.showErrorArr(err.response.data.errors)
-        });
+        })
 
-        post_data.factory_product.ecommerce_cart_id = ecommerce_cart_id;
+        post_data.factory_product.ecommerce_cart_id = ecommerce_cart_id
       }
 
-      if(santacart){
-        this.isLoading = true;
+      if (santacart) {
+        this.isLoading = true
         http.post(url, post_data).then(async (res: any) => {
-          if (res.data.success == true){
-            let api_res:Record<any, any> = res.data.result
-            self.$store.dispatch('addToCart',api_res.items)
+          if (res.data.success == true) {
+            let api_res: Record<any, any> = res.data.result
+            self.$store.dispatch('addToCart', api_res.items)
             await self.exitFromEditMode()
-            self.showToast(res.data.message, 'SUCCESS');
+            self.showToast(res.data.message, 'SUCCESS')
             self.$store.dispatch('addedToCart', true)
-            if(platform === 'wordpress'){
-              let update_cart_id_data = new FormData();
-              update_cart_id_data.append('santa_cart_id', api_res.new_created_id);
-              update_cart_id_data.append('woocom_cart_id', ecommerce_cart_id);
-              update_cart_id_data.append('action', 'add_custimoo_cart_id');
-              if(cart_edit_mode) {
+            if (platform === 'wordpress') {
+              let update_cart_id_data = new FormData()
+              update_cart_id_data.append('santa_cart_id', api_res.new_created_id)
+              update_cart_id_data.append('woocom_cart_id', ecommerce_cart_id)
+              update_cart_id_data.append('action', 'add_custimoo_cart_id')
+              if (cart_edit_mode) {
                 await self.exitFromEditMode()
               }
-               http.post(ecom_url, update_cart_id_data).then((res: any) => {
-                 window.location.href = company_domain + '/cart'
+              http.post(ecom_url, update_cart_id_data).then((res: any) => {
+                window.location.href = company_domain + '/cart'
               }).catch(err => {
                 self.showErrorArr(err.response.data.errors)
-              });
+              })
 
-            }
-            else {
-              if(cart_edit_mode) {
+            } else {
+              if (cart_edit_mode) {
                 await self.exitFromEditMode()
                 let query_params = await self.setQueryParams
-                self.retrieveProducts(query_params);
+                self.retrieveProducts(query_params)
               }
             }
-            self.isLoading = false;
-          }
-          else {
-            if(res.data.status_code === 422){
-              self.showErrorValidation(res.data.errors);
+            self.isLoading = false
+          } else {
+            if (res.data.status_code === 422) {
+              self.showErrorValidation(res.data.errors)
             }
-            if(cart_edit_mode) {
+            if (cart_edit_mode) {
               await self.exitFromEditMode()
               let query_params = await self.setQueryParams
-              self.retrieveProducts(query_params);
+              self.retrieveProducts(query_params)
             }
           }
-          self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
+          self.showToast(res.data.message, res.data.success ? 'SUCCESS' : 'ERROR')
           self.isLoading = false
 
         }).catch(async errorResponse => {
           self.isLoading = false
           handleResponseException(errorResponse)
-          if(cart_edit_mode) {
+          if (cart_edit_mode) {
             await self.exitFromEditMode()
             let query_params = await self.setQueryParams
-            self.retrieveProducts(query_params);
+            self.retrieveProducts(query_params)
           }
         })
       }
 
-    }
-    catch (e) {
-      console.error('error in add to cart',e)
+    } catch (e) {
+      console.error('error in add to cart', e)
       self.isLoading = false
     }
   }

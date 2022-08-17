@@ -472,16 +472,24 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
             items: [] as Record<any, any>[]
           }
         }
-        const common_object = {
-          label: '',
-          value: '',
-          font_family: '',
-          items: [] as Record<any, any>[]
-        }
         for(let text_index = 0; text_index < productCustomTexts.length; text_index++) {
           const custom_text = productCustomTexts[text_index]
+          const common_object = {
+            label: '',
+            value: '',
+            font_family: '',
+            items: [] as Record<any, any>[]
+          }
           const font = products_fonts[custom_text.font_family]
-          const path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : ''
+          let path: Record<any, any>
+          if(custom_text.is_first_name) {
+            path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : ''
+          } else if(custom_text.is_first_number) {
+            path = roster_detail.number? font.opentype_font.getPath(roster_detail.number) : ''
+          } else if(roster_index == 0) {
+            path = custom_text.value? font.opentype_font.getPath(custom_text.value) : ''
+          }
+
           for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
             const custom_text_item = custom_text.items[items_index]
             const converted_width = unitConversion(custom_text_item.width * custom_text_item.scaleX * selected_product.measurement_ratio)
@@ -493,16 +501,23 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               unit: converted_width.unit,
               svg: ''
             }
+
             if(path) {
               path.fill = custom_text_item.color
               path.stroke = custom_text_item.outline_color
               path.strokeWidth = parseInt(custom_text_item.outline_width)
               path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
+              const boundingBox = path.getBoundingBox()
+              boundingBox.y1 = Math.abs(boundingBox.y1)
+              console.log(boundingBox)
               const svg_string = path.toSVG()
               const parser = new DOMParser();
               const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
-              dom_svg.style.translate = '120px 100px'
-              text_item_object.svg = dom_svg.outerHTML
+              dom_svg.style.translate = '0px ' + boundingBox.y1 + 'px'
+              const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+                'viewBox="0 0 ' + boundingBox.x2 + ' ' + boundingBox.y1 +'"> \n' + dom_svg.outerHTML + '\n</svg>'
+              text_item_object.svg = svg_with_tag
             }
 
             if(custom_text.is_first_name) {
@@ -518,13 +533,14 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               common_object.value = custom_text.value
               common_object.font_family = custom_text.font_family
               common_object.items.push(text_item_object)
+
+              if(common_object.value) {
+                Vue.set(common, common.length, common_object)
+              }
             }
           }
         }
         Vue.set(roster_texts, roster_index, text_object)
-        if(common_object.value) {
-          Vue.set(common, common.length, common_object)
-        }
       }
       console.log(roster_texts)
       console.log(common)

@@ -1757,6 +1757,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                 } else {
                   custom_text_item.scaleX = fabric_text.scaleX
                   custom_text_item.scaleY = fabric_text.scaleY
+                  custom_text_item.width = fabric_text.width
+                  custom_text_item.height = fabric_text.height
                 }
 
                 self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: this.product_custom_texts[custom_text_index]})
