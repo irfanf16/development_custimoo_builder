@@ -509,7 +509,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
               const boundingBox = path.getBoundingBox()
               boundingBox.y1 = Math.abs(boundingBox.y1)
-              console.log(boundingBox)
               const svg_string = path.toSVG()
               const parser = new DOMParser();
               const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
@@ -542,8 +541,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         }
         Vue.set(roster_texts, roster_index, text_object)
       }
-      console.log(roster_texts)
-      console.log(common)
 
       const getCanvasImage = Store.getters.getCanvasImage
       const style_index = Store.getters.getCurrentStyleIndex;
