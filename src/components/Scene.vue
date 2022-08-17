@@ -432,7 +432,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     object.setCoords()
   }
 
-  public changeGroupColor(groupColors: Record<any, any>): void {
+  public async changeGroupColor(groupColors: Record<any, any>): void {
     let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
     this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
@@ -507,7 +507,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     this.unHideColorGrouping()
   }
 
-  public changeDefaultColors(defaultColors: [Record<any, any>]): void {
+  public async changeDefaultColors(defaultColors: [Record<any, any>]): void {
     let appliedDefaultColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
@@ -549,7 +549,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
       this.backCanvas.renderAll()
     }
     this.unHideColorGrouping()
-    this.changeGroupColor(this.groupColors)
   }
 
   public setInitialColors(): void {
