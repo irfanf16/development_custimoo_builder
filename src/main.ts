@@ -91,6 +91,9 @@ Vue.filter("TitleCase", (value:Record<any,any>) => {
 
 Vue.prototype.$eventBus = new Vue();
 
+import { logData } from '@/helpers/Helpers'
+Vue.prototype.$logData = logData;
+
 new Vue({
   router,
   store,

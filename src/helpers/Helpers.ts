@@ -413,10 +413,6 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
   });
 }
 
-const logData = (data: any) => {
-  console.info("data logged", data)
-}
-
 const CustimooOrderFlowStatuses : Record<any, any> = {
   submitted_for_factory_review: 'Submitted for Factory Review',
   factory_approved: 'Factory Approved',
@@ -449,7 +445,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       }
       const selected_product = Store.getters.getSelectedProduct;
       const productCustomTexts = Store.getters.productCustomTexts(selected_product.id)
-      const roster_details = Store.getters.getSelectedProductRoster
+      const roster_details = Store.getters.getSelectedProductRoster()
       const roster_texts : Record<any, any> = {}
       const common : Record<any, any>[] = []
 
@@ -570,7 +566,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         pdf_file: null,
         production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
         // front_design:front_design,
-        product_roster_detail: Store.getters.getSelectedProductRoster,
+        product_roster_detail: Store.getters.getSelectedProductRoster(),
         style_id: product_style.id,
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
@@ -1263,6 +1259,15 @@ const rosterDefaultItem = () => {
   return {
     text: '',  number: '',  size_index: 0,  size: '',  code: '', quantity: 1, information: ''
   }
+}
+
+const logData = (...args: Record<any, any>[]) => {
+  console.log('arge', args.constructor.name)
+  const data: Record<any, any> = {}
+  args.forEach((arg, arg_index) => {
+    data[arg_index] = arg
+  })
+  console.log('Logging data', data)
 }
 
 //Functions related to SVG parsing end

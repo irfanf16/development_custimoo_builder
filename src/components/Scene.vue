@@ -120,7 +120,7 @@ import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/h
 
         let target = transform.target;
         let canvas = target.canvas;
-        if ('textIndex' in target) {
+        if ('text_index' in target) {
           let before_update = self.updateTextObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomTextObject)), {'action': 'customTexts'})
           self.$store.commit('UPDATE_UNDO', {data: before_update, action: 'customTexts'})
           self.$store.dispatch('updateCustomTextAttribute', {
@@ -146,6 +146,16 @@ import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/h
         }
         canvas.remove(target);
         canvas.requestRenderAll();
+        if("text_index" in target) {
+          handleCustomTextDeletedFromCanvas(target.text_index);
+        }
+      }
+
+      function handleCustomTextDeletedFromCanvas(custom_text_index: number) {
+        self.product_custom_text_objects[custom_text_index] = null;
+        let updated_custom_text = self.$store.getters.selectedProductCustomTexts(custom_text_index);
+        updated_custom_text.value = "";
+        self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: updated_custom_text})
       }
     })
 
@@ -231,7 +241,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
   public viewportTransform: any
   public drawLines = false
   public product_custom_texts: Record<any, any>[] = []
-  public product_custom_text_objects: Record<any, any>[] = []
+  public product_custom_text_objects: Record<any, any>|null[] = []
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -1678,22 +1688,32 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
 
   }
 
-  public async deleteExistingTextsFromCanvas(custom_text_index:  number) {
+  public async deleteExistingTextsFromCanvas(custom_text_index:  number, remove_custom_text_object = true) {
     const self: Record<any, any> = this;
     const custom_text = self.product_custom_text_objects[custom_text_index]
-    for(let i = 0; i < custom_text.length; i++) {
-      self.frontCanvas.remove(custom_text[i])
-      if(this.back) {
-        self.backCanvas.remove(custom_text[i])
+    if(custom_text) {
+      for(let i = 0; i < custom_text.length; i++) {
+        self.frontCanvas.remove(custom_text[i])
+        if(this.back) {
+          self.backCanvas.remove(custom_text[i])
+        }
       }
     }
-    self.product_custom_text_objects.splice(custom_text_index, 1)
+    /*
+    * remove_custom_text_object will be true only when we remove custom text that has been manuallya dded
+    * */
+    if(remove_custom_text_object) {
+      self.product_custom_text_objects.splice(custom_text_index, 1)
+    } else {
+      self.product_custom_text_objects[custom_text_index] = null
+    }
   }
 
   public async addTextsNew(custom_text_info: Record<any, any>) {
     const self: Record<any, any> = this
+    await this.syncCustomTextsWithCustomTextsObjects()
     if(custom_text_info.emitter == 'add_button') {
-      self.product_custom_text_objects.push(null)
+      /* in case of add button we just need to execute method syncCustomTextsWithCustomTextsObjects() that's why returning here  */
       return false;
     }
     let fabric_control_visibility = { tl: false, bl: false, tr: true, br: true, ml: false, mb: false, mr: false, mt: false, mtr: false }
@@ -1708,7 +1728,7 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
        * delete existing texts first and re render them
        * */
       if (self.product_custom_text_objects[custom_text_index]) {
-        await self.deleteExistingTextsFromCanvas(custom_text_index)
+        await self.deleteExistingTextsFromCanvas(custom_text_index, false)
       }
 
       if (custom_text.value) {
@@ -1749,7 +1769,9 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                   custom_text_index: custom_text_index,
                   custom_text_item_index: customTextItemIndex,
                   type: "text",
-                  side: custom_text_item.placement
+                  side: custom_text_item.placement,
+                  text_index: custom_text_index,
+                  manually_added: custom_text.manually_added
                 })
 
                 if (custom_text_item.scaleX && custom_text_item.scaleY) {
@@ -1819,7 +1841,9 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
               visible: custom_text_item.selected,
               custom_text_index: custom_text_index,
               custom_text_item_index: customTextItemIndex,
-              side: custom_text_item.placement
+              side: custom_text_item.placement,
+              text_index: custom_text_index,
+              manually_added: custom_text.manually_added
             })
             fabric_text.scaleToHeight(custom_text_item.height as number)
             if (custom_text_item.scaleX && custom_text_item.scaleY) {
@@ -1850,6 +1874,16 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
       }
       if (render_back_canvas) {
         this.backCanvas.renderAll()
+      }
+    }
+  }
+
+  public async syncCustomTextsWithCustomTextsObjects() {
+    let custom_texts_count = this.$store.getters.getCustomTexts().length
+    let difference = custom_texts_count - this.product_custom_text_objects.length
+    if(difference > 0) {
+      for(let i=1; i <= difference; i++) {
+        this.product_custom_text_objects.push(null)
       }
     }
   }

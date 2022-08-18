@@ -66,13 +66,13 @@
               </div>
               <div v-if="custom_name_index != -1" class="roster-name">
                 <b-form-input :value="product_roster_item.text" @input="handleRosterUpdate($event, 'name', productRosterItemIndex)"
-                              @focus.stop="handleRosterItemFocus(productRosterItemIndex)"
+                              @focus="handleRosterItemFocus(productRosterItemIndex)"
                 ></b-form-input>
               </div>
               <div v-if="custom_number_index != -1" :style="{maxWidth: custom_name_index == -1 && '70%', flexBasis: custom_name_index == -1 && '70%'}" class="shirt-no">
                 <b-form-input class="text-center" :value="product_roster_item.number"
                               @input="handleRosterUpdate($event, 'number', productRosterItemIndex)"
-                              @focus.stop="handleRosterItemFocus(productRosterItemIndex)"
+                              @focus="handleRosterItemFocus(productRosterItemIndex)"
                 ></b-form-input>
               </div>
             </template>
@@ -233,6 +233,14 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     return this.$store.getters.getCustomTexts();
   }
 
+  get custom_name_index() : number {
+    return findIndex(this.customText, { type: 'name' })
+  }
+
+  get custom_number_index() : number {
+    return findIndex(this.customText, { type: 'number' })
+  }
+
   get eyeIndex(): number {
     return this.$store.getters.getEyeIndex;
   }
@@ -242,7 +250,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   }
 
   get productRoster(): Record<any, any>[] {
-    return this.$store.getters.getSelectedProductRoster
+    return this.$store.getters.getSelectedProductRoster()
   }
 
   /* component methods starts */
@@ -266,21 +274,13 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
     })
   }
 
-  get custom_name_index() : number {
-    return findIndex(this.customText, { type: 'name' })
-  }
-
-  get custom_number_index() : number {
-    return findIndex(this.customText, { type: 'number' })
-  }
-
   public changeRoster(locker_roster_id:any){
     let self: Record<any, any> = this;
     if(locker_roster_id) {
       this.active_roster_index = 0
       let selected_roster = find(this.lockerRosters, ["id", locker_roster_id])
       selected_roster = JSON.parse(JSON.stringify(selected_roster))
-      let roster_items = selected_roster ? selected_roster.roster_detail : null;
+      let roster_items = selected_roster ? selected_roster.product_roster_detail : null;
       roster_items = roster_items.map((roster_item: Record<any, any>) => {
         let size_index = findIndex(self.productSizes, ["value", roster_item.size])
         if(size_index == -1 ) {
@@ -407,9 +407,8 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
 
   public async syncRosterWithCustomText(type: string, text_number_value: string) {
     const self: Record<any, any> = this;
-    let product_custom_texts = self.$store.getters.selectedProductCustomTexts;
+    let product_custom_texts = self.$store.getters.selectedProductCustomTexts();
     const custom_name_number_index = type == 'name' ? this.custom_name_index : this.custom_number_index;
-    console.log('custom_name_number_index', custom_name_number_index)
     //The custom text first item of type name or number depending upon type is synced with the first row input with label name or number.
     if(custom_name_number_index >= 0) {
       let custom_text_synced_with_roster = JSON.parse(JSON.stringify(product_custom_texts[custom_name_number_index]));
@@ -425,7 +424,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   public handleRosterItemFocus(roster_index: number) {
     let self: Record<any, any> = this;
     this.active_roster_index = roster_index;
-    let product_custom_texts = this.$store.getters.selectedProductCustomTexts;
+    let product_custom_texts = this.$store.getters.selectedProductCustomTexts();
     let active_roster = this.productRoster[roster_index]
 
     if(this.custom_number_index >= 0) {

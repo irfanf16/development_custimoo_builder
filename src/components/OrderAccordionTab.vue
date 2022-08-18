@@ -21,7 +21,7 @@
       </b-collapse>
     </b-card>
 
-    <b-card no-body v-if="rosterDetails.length > 0">
+    <b-card no-body v-if="product_roster_detail && product_roster_detail.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-2 class="p-3 d-flex align-items-center justify-content-between"><span class="text">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span> <span
           class="accordion-icon"></span></b-button>
@@ -35,16 +35,13 @@
               <span>Size</span>
               <span>Qty</span>
             </div>
-            <template v-for="(roster, key) in rosterDetails">
+            <template v-for="(roster, key) in product_roster_detail">
               <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key)">
                 <span v-if="checkIndex('name') != -1" class="name">{{ roster.text }}</span>
                 <span v-if="checkIndex('number') != -1">{{ roster.number }}</span>
 
                 <span>{{ roster.size }}</span>
                 <span>{{ roster.quantity }}</span>
-<!--                <span>-->
-<!--                  {{getCustomTexts.length}}-->
-<!--                </span>-->
               </div>
             </template>
           </div>
@@ -148,8 +145,8 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import { findIndex } from 'lodash'
 import { unitConversion } from '@/helpers/Helpers'
 
-@Component<OrderAccordion>({})
-export default class OrderAccordion extends Vue {
+@Component<OrderAccordionTab>({})
+export default class OrderAccordionTab extends Vue {
   private activeRow = 0
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
@@ -162,8 +159,8 @@ export default class OrderAccordion extends Vue {
     return this.$store.getters.getCompany
   }
 
-  get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails()
+  get product_roster_detail(): [Record<any, any>] {
+    return this.$store.getters.getSelectedProductRoster()
   }
   get getCustomTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts(this.selectedProduct)
