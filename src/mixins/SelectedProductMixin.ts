@@ -72,9 +72,9 @@ export class SetSelectedProductCustomTexts extends Vue {
         // product_custom_text_objects property exists only in scene component. This property contains the custom texts
         // fabric components and also it's contains equal items to custom texts. So if we have 5 custom texts then we
         // initialize this property to 5 null items
-        if(self.product_custom_text_objects) {
+        /*if(self.product_custom_text_objects) {
           self.product_custom_text_objects = Array(selected_product_custom_texts.length).fill(null);
-        }
+        }*/
       } else {
         console.error(`product (${selected_product.id}) not found while setting selected product custom texts`)
       }
