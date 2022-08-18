@@ -481,7 +481,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
             items: [] as Record<any, any>[]
           }
           const font = products_fonts[custom_text.font_family]
-          let path: Record<any, any>
+          let path: Record<any, any> = {}
           if(custom_text.is_first_name) {
             path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : ''
           } else if(custom_text.is_first_number) {
@@ -499,7 +499,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               width: converted_width.value,
               height: converted_height.value,
               unit: converted_width.unit,
-              svg: ''
+              svg: '',
+              margin:''
             }
 
             if(path) {
@@ -514,9 +515,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
               dom_svg.style.translate = '0px ' + boundingBox.y1 + 'px'
               const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
-                '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+                '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
                 'viewBox="0 0 ' + boundingBox.x2 + ' ' + boundingBox.y1 +'"> \n' + dom_svg.outerHTML + '\n</svg>'
               text_item_object.svg = svg_with_tag
+              text_item_object.margin = boundingBox.y1
             }
 
             if(custom_text.is_first_name) {
