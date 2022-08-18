@@ -443,8 +443,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
         emitter: "input", custom_text_index:self.custom_name_index, value: custom_name_text
       });
     }
-
-
   }
 
 }
