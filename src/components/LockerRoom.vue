@@ -66,8 +66,9 @@
                                   @click.stop="shareProduct(product, ind, i)"><font-awesome-icon
                           :icon="['fas', 'share-alt']"/>
                           </b-button>
-                          <!--                            v-if="$refs['share'+i+''+ind]"-->
+
                           <Popper
+                            v-if="$refs['share'+i+''+ind]"
                             style="font-size: 12px;"
                             :is-open="popperID == ('share'+i+''+ind)"
                             :anchor-el="$refs['share'+i+''+ind][0]"
