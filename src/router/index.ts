@@ -113,6 +113,16 @@ router.beforeEach(async (to, from, next) => {
       await store.commit('SET_CUSTOMER', payload)
     }
   }
+  // remove ! sign from url that cause to customizer not load on page refresh mainly on evolution
+  let lastUrl = location.href;
+  new MutationObserver(() => {
+    const url = location.href;
+    if (url !== lastUrl) {
+      lastUrl = url;
+      history.pushState(null, 'customizer', window.location.href.replace('!', ''));
+    }
+  }).observe(document, {subtree: true, childList: true});
+
   next()
 })
 
