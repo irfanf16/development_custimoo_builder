@@ -36,7 +36,7 @@
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in rosterDetails">
-              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key)">
+              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key, roster)">
                 <span v-if="checkIndex('name') != -1" class="name">{{ roster.text }}</span>
                 <span v-if="checkIndex('number') != -1">{{ roster.number }}</span>
 
@@ -196,8 +196,13 @@ export default class OrderAccordion extends Vue {
     return this.$store.getters.getSelectedModelIndex;
   }
 
-  public updateText (index:number) {
-      this.activeRow = index
+  public updateText (index:number, roster:Record<any, any>) {
+      this.activeRow = index;
+      this.$store.dispatch('updateCustomTextAttribute', { index: 0, on_all: true, attribute: 'text', value: roster.text })
+      this.$store.dispatch('updateCustomTextAttribute', { index: 1, on_all: true, attribute: 'text', value: roster.number })
+
+      console.log('roster', roster);
+      
   }
 
   public checkIndex(text_type: string) {
