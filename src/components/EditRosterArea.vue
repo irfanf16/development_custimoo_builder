@@ -7,7 +7,7 @@
       <div class="d-flex flex-wrap justify-content-between">
         <RosterDetails :productSizes="sizeOptions" @addPlayer="rosterDetailsInit"/>
         <div class="roster-preview-area">
-          <CustomizationPreview :designs="products[designsIndex]"/>
+          <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts" />
           <OrderDetails/>
         </div>
       </div>
@@ -66,6 +66,7 @@ import {getRosterDetailDefaultObject} from "@/helpers/Helpers";
 })
 
 export default class EditRosterArea extends Vue {
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) productSizes!: any
   private products: any[] = []
   public designsIndex = 0

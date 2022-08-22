@@ -10,7 +10,7 @@
                      :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : ''}"
                      :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
                      :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
-                     :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id"/>
+                     :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id" :product_index="index" :products_fonts="products_fonts"/>
             </div>
           </template>
           <h3 class="text-center">{{ product.product_name }}</h3>
@@ -41,6 +41,7 @@ Vue.use(SlitherSlider)
 
 
 export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode) {
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
   public renderComponent =  true;
@@ -70,6 +71,9 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     let style_index = 0;
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
+    let product_custom_texts = self.selectedProduct.product_texts;
+    console.log('product_custom_texts', product_custom_texts)
+    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS",product_custom_texts)
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);
     this.$store.dispatch("getModels", this.products[index].product_id);
     this.$store.dispatch('setColorSectionVisibility')

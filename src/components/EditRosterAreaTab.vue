@@ -14,7 +14,7 @@
            @opened="$emit('setRosterOpen', true)"
            name="rostermodal" class="roster-modal" size="xl"
              footer-class="hide-modal-footer d-none"
-          @closed="close"
+          @closed="close" @before-close="handleRosterModalBeforeClose"
         >
       <div class="modal-header d-flex justify-content-between">
         <span class="fs-5 font-weight-bolder">Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span>
@@ -24,8 +24,7 @@
         <div class="d-flex flex-wrap justify-content-between">
           <RosterDetails :productSizes="sizeOptions" ref="rostermodal" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit"/>
           <div class="roster-preview-area">
-            <CustomizationPreview :designs="products[designsIndex]"/>
-  <!--          <OrderDetails/>-->
+            <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts" />
           </div>
         </div>
       </div>
@@ -57,7 +56,7 @@
       <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
-      <OrderDetailsTab @open-add-to-locker="openAddToLocker" ref="order-details" />
+      <OrderDetailsTab :products_fonts="products_fonts" @open-add-to-locker="openAddToLocker" ref="order-details" />
     </div>
   </div>
 </template>
@@ -70,9 +69,10 @@ import RosterDetails from '@/components/RosterDetails.vue'
 import {http} from "@/httpCommon";
 import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
-import { getRosterDetailDefaultObject } from '@/helpers/Helpers'
+import {getRosterDetailDefaultObject, handleResponseException} from '@/helpers/Helpers'
 import { findIndex } from 'lodash'
 import ModalAction from "@/mixins/ModalAction";
+import {AxiosError, AxiosResponse} from "axios";
 
 
 @Component<EditRosterAreaTab>({
@@ -84,16 +84,14 @@ import ModalAction from "@/mixins/ModalAction";
   },
     async mounted() {
     this.setProductSizes()
-    if (this.isCustomerAuthenticated){
-      let res  = await http.get("products/roster")
-      if (res.status == 200){
-        this.products_roster = res.data
-      }
+    if (this.isCustomerAuthenticated) {
+      await this.getLockerProductsRosters()
     }
   }
 })
 
 export default class EditRosterAreaTab extends Mixins(ModalAction) {
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) productSizes!: any
   private products: any[] = []
   public designsIndex = 0
@@ -108,21 +106,29 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   private setActionBeforeLogin(val:string){
     this.$emit('setActionBeforeLogin', val)
   }
+
+  /* getters/computed props starts */
+
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
+
   get company(){
     return this.$store.getters.getCompany
   }
+
   get allproducts(){
     return this.$store.getters.getProducts
   }
+
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails()
   }
+
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
   }
+
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
@@ -130,6 +136,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex;
   }
+
   get notifications(){
     return this.$store.getters.getNotifications
   }
@@ -137,6 +144,20 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject
   }
+
+  get customText(): Record<any, any>[] {
+    return this.$store.getters.getCustomTexts();
+  }
+
+  get custom_name_index() : number {
+    return findIndex(this.customText, { type: 'name' })
+  }
+
+  get custom_number_index() : number {
+    return findIndex(this.customText, { type: 'number' })
+  }
+
+  /* getters/computed props ends */
 
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
@@ -263,6 +284,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
       }
     })
   }
+
   public async downloadTemplate(){
     await http.get('template/download',{
       responseType: 'blob',
@@ -273,6 +295,39 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
       link.download = 'roster_template.xlsx';
       link.click();
     })
+  }
+
+  public async getLockerProductsRosters() {
+    let response: any = await http.get("products/roster").catch((errorResponse: AxiosError) => {
+      handleResponseException(errorResponse)
+    })
+    if(response) {
+      let response_data: Record<any, any> = response.data;
+      if (response_data.success) {
+        this.products_roster = response_data.result.rosters
+      }
+    }
+  }
+
+  handleRosterModalBeforeClose() {
+    let self:Record<any, any>  = this;
+    let first_roster_item = this.$store.getters.getSelectedProductRoster(0);
+    if(this.custom_name_index >= 0) {
+      let custom_text_of_type_name = this.customText[this.custom_name_index];
+      custom_text_of_type_name.value = first_roster_item.text
+      this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: this.custom_name_index, value: custom_text_of_type_name})
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index: this.custom_name_index, custom_text_item_index: null, value: custom_text_of_type_name
+      });
+    }
+    if(this.custom_number_index >= 0) {
+      let custom_text_of_type_number = this.customText[this.custom_number_index];
+      custom_text_of_type_number.value = first_roster_item.number
+      this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: this.custom_number_index, value: custom_text_of_type_number})
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index: this.custom_number_index, custom_text_item_index: null, value: custom_text_of_type_number
+      });
+    }
   }
 
 

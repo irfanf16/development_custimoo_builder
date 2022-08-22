@@ -89,6 +89,11 @@ Vue.filter("TitleCase", (value:Record<any,any>) => {
   return value.toLowerCase().replace(/(?:^|\s|-)\S/g, (x:Record<any,any>) => x.toUpperCase());
 });
 
+Vue.prototype.$eventBus = new Vue();
+
+import { logData } from '@/helpers/Helpers'
+Vue.prototype.$logData = logData;
+
 new Vue({
   router,
   store,

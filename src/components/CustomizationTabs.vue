@@ -2,10 +2,7 @@
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
-        <!--        <vue-custom-scrollbar class="scroll-area"  :settings="settings">-->
-        <!--        <vue-scrollbar :speed="20" classes="my-scrollbar" ref="Scrollbar" :style="styling.scrollbar">-->
         <div class="myscroll">
-          <!--        <vuescroll :ops="ops">-->
           <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
@@ -53,46 +50,18 @@
               </a>
             </template>
             <div class="d-none d-lg-block">
-              <template v-for="(customText, index) in customTexts">
-                <div :key="index" v-if="customText.hasOwnProperty('text')">
-                  <CustomizationText @removeTab="removeTab(index, selectedProduct.id)" :productFonts="selectedProduct.namefonts" :customTextIndex="index"
-                                     :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-<!--                  <template v-if="index + 1  > selectedProduct.productnames.length">-->
-<!--                    <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">-->
-<!--                      - -->
-<!--                    </b-button>-->
-<!--                  </template>-->
-                </div>
-              </template>
-              <div v-if="selectedProduct.allow_extra_text" class="px-3 pt-3 p-lg-4 text-right">
-                <b-button class="add-logo-btn" @click="addTab(customTexts)">
-                  +
-                </b-button>
-              </div>
+                <CustomizationText />
             </div>
             <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
               <b-tabs>
-                <!-- <div class="p-lg-4 text-right">
-                  <b-button class="add-logo-btn" @click="addTab(customTexts.length)">
-                    +
-                  </b-button>
-                </div> -->
-                <template v-for="(customText, index) in customTexts">
-                  <b-tab :key="index" v-if="customText.hasOwnProperty('text')">
-                    <template #title>
-                      Player Name
-                    </template>
-                    <div>
-                      <CustomizationText :productFonts="selectedProduct.namefonts" :customTextIndex="index"
-                                         :fontsColors="fontsColors" :fontOptions="fontOptions"/>
-                      <template v-if="index + 1  > selectedProduct.productnames.length">
-                        <b-button class="add-logo-btn ml-1" @click="removeTab(index, selectedProduct.id)">
-                          -
-                        </b-button>
-                      </template>
-                    </div>
-                  </b-tab>
-                </template>
+                <b-tab>
+                  <template #title>
+                    Player Name
+                  </template>
+                  <div>
+                    <CustomizationText />
+                  </div>
+                </b-tab>
               </b-tabs>
             </div>
           </b-tab>
@@ -123,10 +92,10 @@
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</h2>
-              <EditRosterAreaTab @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="openAddToLocker" :productSizes="productSizes" ref="edit-roster-area-tab"/>
+              <EditRosterAreaTab @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="openAddToLocker"
+                                 :productSizes="productSizes" ref="edit-roster-area-tab" :products_fonts="products_fonts" />
             </div>
           </b-tab>
-          <!--        </vuescroll>-->
         </div>
       </b-tabs>
     </div>
@@ -144,9 +113,7 @@ import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
-import {getClosestColor} from '@/pantoneColor'
 import RecentLogos from "@/components/RecentLogos.vue";
-import {sortTextsArray} from "@/helpers/Helpers";
 
 @Component<CustomizationTabs>({
   components: {
@@ -167,6 +134,7 @@ import {sortTextsArray} from "@/helpers/Helpers";
   },
 })
 export default class CustomizationTabs extends Vue {
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) isColorShuffled!: boolean
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
@@ -174,39 +142,8 @@ export default class CustomizationTabs extends Vue {
   public set = false
   public previous_tab='';
   public ref = this.$refs as Record<any, any>
-  private ops = {
-    // vuescroll: {
-    //   mode: 'native'
-    // },
-    // scrollpanel: { scrollingX: false, scrollingY: true },
-    // rail: {
-    //   background: '#219F84',
-    //   opacity: '0.2',
-    //   gutterOfSide: '0',
-    // },
-    // bar: {
-    //   background: '#219F84',
-    //   opacity: '0.9',
-    // }
-  }
-
-  // private settings = {
-  //   suppressScrollY: false,
-  //   suppressScrollX: true,
-  //   wheelPropagation: false,
-  //   wheelSpeed: 3
-  // }
-
-  // public setScroll(){
-  //   // alert('scrollBar[0].scrollTop')
-  //   let scrollBar:Record<any, any> = this.$refs['Scrollbar'];
-  //
-  //   // scrollBar.scrollToY(0);
-  //   console.log('scroll', )
-  // }
 
   public styling = {
-    /* Scrollbar */
     scrollbar: {
       width: "100%",
       height: "calc(100vh - 220px)"
@@ -266,7 +203,7 @@ export default class CustomizationTabs extends Vue {
     let cumulative_size:Record<any,any> = [];
     Object.values(this.selectedProduct.sizes).forEach((value)=>{
       if(Object.prototype.hasOwnProperty.call(value as Record<any,any>,'json_data')){
-        cumulative_size.push(JSON.parse(value.json_data));
+        cumulative_size.push(value.json_data);
       }
     })
     let sizes = [] as Record<any,any>;
@@ -340,7 +277,7 @@ export default class CustomizationTabs extends Vue {
     this.productColors = []
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
-      finalColor.color_text = JSON.parse(colors.json_data)
+      finalColor.color_text = colors.json_data
       this.productColors = this.productColors.concat(finalColor)
     })
     if (this.lockerColors.length > 0){
@@ -359,7 +296,7 @@ export default class CustomizationTabs extends Vue {
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
       let finalColor = {color_text: []}
-      finalColor.color_text = JSON.parse(colors.json_data)
+      finalColor.color_text = colors.json_data
       this.fontsColors = this.fontsColors.concat(finalColor)
     })
     if (this.fontsColors.length) {
@@ -374,11 +311,6 @@ export default class CustomizationTabs extends Vue {
 
   public setHideTab(index: string, value: boolean) {
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
-    // if(this.previous_tab === 'teamHide'){
-    //   this.renderText();
-    //   // this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
-    // }
-
     this.$store.dispatch('setHideTab', {index: index, value: value})
     this.previous_tab = index;
   }
@@ -387,7 +319,7 @@ export default class CustomizationTabs extends Vue {
     let productFonts = this.selectedProduct.namefonts
     let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
     if (productFonts.length){
-      let item = JSON.parse(productFonts[0].json_data)
+      let item = productFonts[0].json_data
       if(item) {
         this.fontOptions = []
         item.forEach((fonts: any, key: number) => {

@@ -8,7 +8,6 @@ import OrderDetail from '../views/OrderDetail.vue'
 import Orders from '../views/Orders.vue'
 import ThreeD from '../views/ThreeD.vue'
 import ShareRoster from '../views/ShareRoster.vue'
-import ConfirmOrder from '../views/ConfirmOrder.vue'
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
 import OrderListing from "@/views/OrderListing.vue";
 import Dashboard from "@/views/Dashboard.vue";
@@ -64,11 +63,6 @@ const routes: Array<RouteConfig> = [
     path: '/3d',
     name: 'ThreeD',
     component: ThreeD
-  },
-  {
-    path: '/confirm-order',
-    name: 'ConfirmOrder',
-    component: ConfirmOrder
   },
   {
     path:'/share/:product/:name',

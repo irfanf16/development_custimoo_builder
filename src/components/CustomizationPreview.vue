@@ -7,13 +7,15 @@
                  :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type" />
+                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
+                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
 
           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type" />
+                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
+                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
         </div>
       </template>
     </div>
@@ -29,11 +31,15 @@
     }
   })
   export default class CustomizationPreview extends Vue {
+    @Prop({ required: true }) readonly products_fonts!: Record<any, any>
     @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
     private storageUrl = process.env.VUE_APP_STORAGE_URL
 
     get selectedProduct(): Record<any, any>{
       return this.$store.getters.getSelectedProduct
+    }
+    get selectedProductIndex(): number{
+      return this.$store.getters.getSelectedIndex
     }
     get styleIndex():number{
       return  this.$store.getters.getCurrentStyleIndex

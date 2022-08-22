@@ -9,7 +9,8 @@
                  :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
                  :logos="selectedProduct.productstyles[selected_style_index].logo"
                  :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
-                 :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"/>
+                 :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)"
+                 :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
         </a>
         <h3>{{ design.design_name }}</h3>
       </div>
@@ -33,6 +34,8 @@ import Scene from '@/components/Scene.vue'
 })
 
 export default class DesignAvailable extends Vue {
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
+
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   @Prop() activeTab!: number;
   public selected_style_index = 0
@@ -42,6 +45,9 @@ export default class DesignAvailable extends Vue {
   }
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
+  }
+  get selectedProductIndex(): number{
+    return this.$store.getters.getSelectedIndex
   }
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;

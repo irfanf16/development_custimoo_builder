@@ -7,7 +7,6 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
-import store from '../store'
 
 const getLogoSettingsObject = () => {
   return {
@@ -75,8 +74,7 @@ const getLogoObject = (index = 0) => {
 * Index = -1 means we are getting all settings rather that getting settings at specific index.When index is given then the return type will be object or null. Otherwise return type will be array. That could be empty
 * */
 
-const getLogoSettings = (index = -1, default_obj = true,product_id = 0) => {
-
+const getLogoSettings = (index = -1, default_obj = true, product_id = 0) => {
   //get logo settings based on product id
   if(product_id > 0) {
     const product = Store.getters.getProducts.find((prd:any) => {
@@ -197,7 +195,7 @@ const getSelectedProductPantones = (product_id: null|number = null) => {
 
     selectedProduct.colors.forEach((product_colors: any, key: number) => {
     if(key == 0){
-      const colors = JSON.parse(product_colors.json_data)
+      const colors = product_colors.json_data
       colors.forEach((color: any) => {
         //let pantone = color.name
         let pantone = ''
@@ -231,7 +229,7 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
 
   selectedProduct.namecolors.forEach((colors: any, key: number) => {
     const finalColor = {color_text: []}
-    finalColor.color_text = JSON.parse(colors.json_data)
+    finalColor.color_text =colors.json_data
     fontsColors = fontsColors.concat(finalColor)
   })
   if (fontsColors.length) {
@@ -248,7 +246,7 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
   const fontOptions:any = [];
 
    if (productFonts.length){
-     const item = JSON.parse(productFonts[0].json_data)
+     const item = productFonts[0].json_data
      if(item) {
        item.forEach((fonts: any, key: number) => {
          let fontNameParam = fonts.path.split('/').reverse()
@@ -396,6 +394,9 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
   if("isAxiosError" in errorResponse) {
     // errorResponse.response.data object have keys { exception, file, line, message, trace }
     message = errorResponse.response?.data?.message;
+    if(!message) {
+      message = errorResponse.response?.statusText;
+    }
     console.error("Error (Axios): ", message)
   } else {
     message = errorResponse.message;
@@ -410,10 +411,6 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
     variant: 'info',
     timeout: 5000
   });
-}
-
-const logData = (data: any) => {
-  console.info("data logged", data)
 }
 
 const CustimooOrderFlowStatuses : Record<any, any> = {
@@ -439,7 +436,7 @@ const pathInfo = (file_path: string, ) => {
   };
 }
 
-const getActiveProductData = () => {
+const getActiveProductData = (products_fonts: Record<any, any>) => {
   return new Promise((resolve) => {
     const interval = setInterval(() => {
       const scene_ref = Store.getters.getCanvasImage.scene
@@ -447,11 +444,105 @@ const getActiveProductData = () => {
         console.log('not reslove')
         return
       }
+      const selected_product = Store.getters.getSelectedProduct;
+      const productCustomTexts = Store.getters.productCustomTexts(selected_product.id)
+      const roster_details = Store.getters.getSelectedProductRoster()
+      const roster_texts : Record<any, any> = {}
+      const common : Record<any, any>[] = []
+
+      for(let roster_index = 0; roster_index < roster_details.length; roster_index++) {
+        const roster_detail = roster_details[roster_index]
+
+        const text_object = {
+          size: roster_detail.size,
+          quantity: roster_detail.quantity,
+          name: {
+            label: '',
+            value: roster_detail.text,
+            font_family: '',
+            items: [] as Record<any, any>[]
+          },
+          number: {
+            label: '',
+            value: roster_detail.number,
+            font_family: '',
+            items: [] as Record<any, any>[]
+          }
+        }
+        for(let text_index = 0; text_index < productCustomTexts.length; text_index++) {
+          const custom_text = productCustomTexts[text_index]
+          const common_object = {
+            label: '',
+            value: '',
+            font_family: '',
+            items: [] as Record<any, any>[]
+          }
+          const font = products_fonts[custom_text.font_family]
+          let path: Record<any, any> = {}
+          if(custom_text.is_first_name) {
+            path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : {}
+          } else if(custom_text.is_first_number) {
+            path = roster_detail.number? font.opentype_font.getPath(roster_detail.number) : {}
+          } else if(roster_index == 0) {
+            path = custom_text.value? font.opentype_font.getPath(custom_text.value) : {}
+          }
+
+          for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
+            const custom_text_item = custom_text.items[items_index]
+            const converted_width = unitConversion(custom_text_item.width * custom_text_item.scaleX * selected_product.measurement_ratio)
+            const converted_height = unitConversion(custom_text_item.height * custom_text_item.scaleY * selected_product.measurement_ratio)
+            const text_item_object = {
+              label: custom_text_item.label,
+              width: converted_width.value,
+              height: converted_height.value,
+              unit: converted_width.unit,
+              svg: '',
+              margin:''
+            }
+
+            if(Object.keys(path).length) {
+              path.fill = custom_text_item.color
+              path.stroke = custom_text_item.outline_color
+              path.strokeWidth = parseInt(custom_text_item.outline_width)
+              path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
+              const boundingBox = path.getBoundingBox()
+              boundingBox.y1 = Math.abs(boundingBox.y1)
+              const svg_string = path.toSVG()
+              const parser = new DOMParser();
+              const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
+              dom_svg.style.translate = '0px ' + boundingBox.y1 + 'px'
+              const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+                'viewBox="0 0 ' + boundingBox.x2 + ' ' + boundingBox.y1 +'"> \n' + dom_svg.outerHTML + '\n</svg>'
+              text_item_object.svg = svg_with_tag
+              text_item_object.margin = boundingBox.y1
+            }
+
+            if(custom_text.is_first_name) {
+              text_object.name.label = custom_text.label
+              text_object.name.font_family = custom_text.font_family
+              text_object.name.items.push(text_item_object)
+            } else if(custom_text.is_first_number) {
+              text_object.number.label = custom_text.label
+              text_object.number.font_family = custom_text.font_family
+              text_object.number.items.push(text_item_object)
+            } else if(roster_index == 0) {
+              common_object.label = custom_text.label
+              common_object.value = custom_text.value
+              common_object.font_family = custom_text.font_family
+              common_object.items.push(text_item_object)
+
+              if(common_object.value) {
+                Vue.set(common, common.length, common_object)
+              }
+            }
+          }
+        }
+        Vue.set(roster_texts, roster_index, text_object)
+      }
 
       const getCanvasImage = Store.getters.getCanvasImage
-
       const style_index = Store.getters.getCurrentStyleIndex;
-      const selected_product = Store.getters.getSelectedProduct;
       const product_style = selected_product.productstyles[style_index];
       const lockerEditStatus = Store.getters.getEditStatus;
       let product_name = selected_product.product_name
@@ -474,8 +565,8 @@ const getActiveProductData = () => {
         custom_logos: Store.getters.getCustomLogos(),
         measurement_ratio: selected_product.measurement_ratio,
         custom_logo_svgs: [],
-        custom_texts: Store.getters.getCustomTexts(),
-        custom_text_svgs: [],
+        product_custom_texts: productCustomTexts,
+        product_custom_text_objects: {roster: roster_texts, common: common},
         colors: Store.getters.getLogosColors,
         design_id: selected_design.id,
         defaultcolors: Store.getters.getDefaultColors,
@@ -491,17 +582,10 @@ const getActiveProductData = () => {
         pdf_file: null,
         production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
         // front_design:front_design,
-        roster_detail: Store.getters.getRosterDetails(),
+        product_roster_detail: Store.getters.getSelectedProductRoster(),
         style_id: product_style.id,
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
-      }
-      if(scene_ref.customTextObjects) {
-        for (const custom_text_object of scene_ref.customTextObjects) {
-          if (custom_text_object && Object.keys(custom_text_object).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
-            post_data.custom_text_svgs.push(custom_text_object.toSVG());
-          }
-        }
       }
       if(scene_ref.customLogoObjects) {
         for (const custom_logo_svg of scene_ref.customLogoObjects) {
@@ -608,7 +692,7 @@ const rosterDetailsInit = (retrieved_products: Record<any, any>) => {
 
 const getRosterDetailDefaultObject = (product = Store.getters.getSelectedProduct) => {
   if (product.sizes.length){
-    const productSizes = JSON.parse(product.sizes[0].json_data)
+    const productSizes = product.sizes[0].json_data
     return {
       text: '',
       number: '',
@@ -736,6 +820,58 @@ const getPermissions = async () => {
     Store.commit('SET_CUSTOMER_PERMISSIONS', [])
     return [];
   }
+}
+
+//todo remove this method after finalizing custom texts
+const getNewCustomTexts = async (product_ids_string: string, custom_text_types_string: string, count= 1) => {
+  const custom_texts: Record<any, any> = {};
+  const product_ids: string[] = product_ids_string.split(",");
+  product_ids.forEach((product_id: string) => {
+    custom_texts[product_id] = []
+    let x_axis = 200
+    let y_axis = 100
+    const custom_text_types = custom_text_types_string.split(",")
+    for(let i=0; i<count; i++) {
+      const custom_text_type_count: string[] = custom_text_types[i].split(":");
+      const custom_text_type = custom_text_type_count[0]
+      const custom_text_type_child_count = custom_text_type_count.length == 2 ? custom_text_type_count[1] : 1;
+      const custom_text_obj: Record<any, any> = {
+        product_id: product_id,
+        type: custom_text_type,   //name, number, team_name
+        label: `${custom_text_type}_${product_id}`,
+        value: "",
+        following_products: false,
+        following_product_ids: [],
+        active_item_index: 0,
+        items: []
+      }
+      for(let i=0; i < custom_text_type_child_count; i++) {
+        custom_text_obj.items.push({
+          label: `item_${i}`,
+          placement:[0,1].includes(i) ? 'back' : 'front',
+          width: 50,
+          height: 50,
+          x_axis: x_axis,
+          y_axis: y_axis,
+          rotation: 0,
+          outline_enabled: true,
+          outline_width: 2,
+          font_family: "AGENCYB",
+          color: "#F4F5F0",
+          color_pantone: "WHITE",
+          outline_color:"#292A2D",
+          outline_color_pantone: "BLACK",
+          arc_text_allowed: false,
+          is_locked: false,
+          selected: true
+        })
+        x_axis += 60;
+        y_axis += 60
+      }
+      custom_texts[product_id].push(custom_text_obj)
+    }
+  })
+  return custom_texts;
 }
 
 const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
@@ -1126,7 +1262,7 @@ const parseSvgString = async (svg_string:string, factory_product_content: Record
 }
 
 const unitConversion = (value:number) => {
-  const setting = store.getters.getSetting
+  const setting = Store.getters.getSetting
   switch( setting.conversion_operator ) {
     case 'multiply':
       return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
@@ -1139,11 +1275,26 @@ const unitConversion = (value:number) => {
   }
 }
 
+const rosterDefaultItem = () => {
+  return {
+    text: '',  number: '',  size_index: 0,  size: '',  code: '', quantity: 1, information: ''
+  }
+}
+
+const logData = (...args: Record<any, any>[]) => {
+  console.log('arge', args.constructor.name)
+  const data: Record<any, any> = {}
+  args.forEach((arg, arg_index) => {
+    data[arg_index] = arg
+  })
+  console.log('Logging data', data)
+}
+
 //Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
-  unitConversion
+  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getNewCustomTexts, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
+  unitConversion, rosterDefaultItem
 };

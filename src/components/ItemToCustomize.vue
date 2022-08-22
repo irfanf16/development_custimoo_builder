@@ -23,7 +23,7 @@
             Stock
           </button>
         </div>
-        <ItemsGrid :showItems="showItems" />
+        <ItemsGrid :showItems="showItems" :products_fonts="products_fonts" />
       </div>
     </div>
 
@@ -77,7 +77,7 @@
         </div>
       </div>
 
-      <SelectItemCarousel ref="itemsCarousel"/>
+      <SelectItemCarousel ref="itemsCarousel" :products_fonts="products_fonts" />
 
     </template>
 
@@ -89,7 +89,7 @@
       <span style="font-size: 16px">Designs Available</span>
     </h2>
     <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
-      <DesignAvailable :key="this.selectedProduct.productstyles[styleIndex].id"/>
+      <DesignAvailable :key="this.selectedProduct.productstyles[styleIndex].id" :products_fonts="products_fonts" />
     </div>
   </div>
 </template>
@@ -122,8 +122,8 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     }
 
     let ecommerce_update_id = this.$route.query.update_item;
-    if(!ecommerce_update_id) {
-     // this.$store.commit('SET_SELECTED_CATEGORIES', this.categories[0].id) // as this is on mounted so don't need to send get product call again
+    if(!ecommerce_update_id && this.categories.length) {
+      // this.$store.commit('SET_SELECTED_CATEGORIES', this.categories[0].id) // as this is on mounted so don't need to send get product call again
     }
     this.search = this.search_products
   }
@@ -133,6 +133,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData) {
   // @Prop({required: true}) categories!: any;
   @Prop({required: true}) uploaderOpened!: any;
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({default: ''}) search_products!: any;
 
   public storage_url = process.env.VUE_APP_STORAGE_URL

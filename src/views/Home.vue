@@ -6,8 +6,11 @@
       <b-row>
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val" @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" v-if="!mobileScreen" @open-add-to-locker="getLockers(true)" :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" />
-            <CustomTabs @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex" @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" v-else />
+            <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
+                               @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
+                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" :products_fonts="products_fonts" />
+            <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
+                        @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" :products_fonts="products_fonts" />
           </b-col>
 
           <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" ref="preview-column" class="preview-column position-relative" >
@@ -210,13 +213,13 @@
                                  :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
+                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
 
                           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
                                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" />
+                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
                         </div>
                       </template>
                     </template>
@@ -309,7 +312,7 @@
           </div>
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
             <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll"
-                             :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize"/>
+                             :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
             <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
               <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
               <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
@@ -369,8 +372,7 @@ import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import { findIndex } from 'lodash'
-import store from '@/store'
-
+import opentype from 'opentype.js'
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -457,6 +459,7 @@ Vue.filter('formatDate', function(value:string) {
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData) {
+  public products_fonts: Record<any, any> = []
   public logData = logData;
   public tabIndex = 0
   // private products: any[] = []
@@ -729,107 +732,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('SET_EDITING_ROSTER_PLAYER_INDEX', 0)
   }
 
-  get editing_roster_player_index(): number {
-    return this.$store.getters.getEditingRosterPlayerIndex
+  @Watch('products')
+  productsChanged(newVal: Record<any, any>[]){
+    this.initProductsFonts(newVal)
   }
-
-  get rosterFirstNameAndNumber(): string | null {
-    if (this.rosterDetails && this.rosterDetails.length > 0) {
-      // |;| is just name and number separator
-      let roster_text = this.rosterDetails[this.editing_roster_player_index].text ? this.rosterDetails[this.editing_roster_player_index].text : ''
-      let roster_num = this.rosterDetails[this.editing_roster_player_index].number ? this.rosterDetails[this.editing_roster_player_index].number : ''
-      return `${roster_text}|;|${roster_num}`;
-    } else {
-      return null;
-    }
-  }
-
-  @Watch('rosterFirstNameAndNumber', { deep: true })
-  async onRosterFirstNameAndNumberChanged(newVal: string) {
-    let name = "";
-    let number = "";
-    if (newVal) {
-      let name_and_number_array = newVal.split("|;|");
-      name = name_and_number_array[0]? name_and_number_array[0] : ""
-      number = name_and_number_array[1]? name_and_number_array[1] : ""
-    }
-    let custom_text = this.$store.getters.getCustomTexts()
-
-    if (custom_text) {
-      const custom_name_index = findIndex(this.customTexts, { type: 'name' })
-      const custom_number_index = findIndex(this.customTexts, { type: 'number' })
-      let roster_details = this.rosterDetails;
-      let svg_object:Record<any,any> = {}
-      if (custom_name_index != -1) {
-        await this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, attribute: 'text', value: name })
-        if(name){
-          const interval = setInterval(() => {
-            if(this.customTextObjects[custom_name_index] && name == this.customTextObjects[custom_name_index].text)
-            svg_object['name'] = {
-              svg : this.customTextObjects[custom_name_index].toSVG(),
-              placement : this.customTextObjects[custom_name_index].side,
-              width : this.customTextObjects[custom_name_index].width,
-              height : this.customTextObjects[custom_name_index].height,
-              scaleX : this.customTextObjects[custom_name_index].scaleX,
-              scaleY : this.customTextObjects[custom_name_index].scaleY,
-              rotation: this.customTexts[custom_name_index].rotation,
-              original_height: this.customTexts[custom_name_index].originalHeight,
-            }
-            roster_details[this.editing_roster_player_index].svgs = svg_object;
-            clearInterval(interval)
-          }, 500)
-        }else{
-          svg_object['name'] = {
-            svg : null,
-            placement : null,
-            width : null,
-            height : null,
-            scaleX : null,
-            scaleY : null,
-            rotation:null,
-            original_height: null
-          };
-          roster_details[this.editing_roster_player_index].svgs = svg_object
-        }
-        this.$store.commit('UPDATE_ROSTER',roster_details);
-      }
-      if (custom_number_index != -1) {
-        await this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, attribute: 'text', value: number })
-        if(number){
-          const interval = setInterval(() => {
-            if (this.customTextObjects[custom_number_index] && number == this.customTextObjects[custom_number_index].text) {
-              svg_object['number'] = {
-                svg: this.customTextObjects[custom_number_index].toSVG(),
-                placement: this.customTextObjects[custom_number_index].side,
-                width: this.customTextObjects[custom_number_index].width,
-                height: this.customTextObjects[custom_number_index].height,
-                scaleX: this.customTextObjects[custom_number_index].scaleX,
-                scaleY: this.customTextObjects[custom_number_index].scaleY,
-                rotation: this.customTexts[custom_number_index].rotation,
-                original_height: this.customTexts[custom_name_index].originalHeight,
-              };
-              roster_details[this.editing_roster_player_index].svgs = svg_object;
-              clearInterval(interval)
-            }
-          }, 500)
-        }else{
-          svg_object['number'] = {
-            svg : null,
-            placement : null,
-            width : null,
-            height : null,
-            scaleX : null,
-            scaleY : null,
-            rotation:null,
-            original_height: null
-          };
-          roster_details[this.editing_roster_player_index].svgs =  svg_object;
-        }
-        this.$store.commit('UPDATE_ROSTER',roster_details);
-      }
-    }
-  }
-
 
   get cartItemsCount(){
     return this.$store.getters.getCartItemsCount
@@ -926,6 +832,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
+  get selectedProductIndex(): number{
+    return this.$store.getters.getSelectedIndex
+  }
   get hideSaveLockerButton():boolean{
     return this.$store.getters.getHideSaveLockerButton;
   }
@@ -986,6 +895,49 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.down = true;
     }
   }
+
+  public async initProductsFonts(products: Record<any, any>[]) {
+    for(let product_index = 0; product_index < products.length; product_index++) {
+      const product = products[product_index]
+      const productFonts = product.namefonts;
+      if (productFonts.length){
+        const item = productFonts[0].json_data
+        if(item) {
+          for(let i = 0; i < item.length; i++) {
+            const font = item[i]
+            let fontNameParam = font.path.split('/').reverse()
+            fontNameParam = fontNameParam[0].split('.')
+            const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+            const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}`
+            if(!this.products_fonts[fontName]) {
+              const font_object = await this.loadFont(url)
+              if(font_object) {
+                const final_font = {
+                  value: fontNameParam[0] as string,
+                  text: fontName as string,
+                  url:`${process.env.VUE_APP_STORAGE_URL}${font.path}`,
+                  opentype_font: font_object
+                }
+                Vue.set(this.products_fonts, fontNameParam[0], final_font)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  public loadFont(url: string) {
+    return new Promise((resolve) => {
+      opentype.load(url, (err: Record<any, any>, font_object: Record<any, any>) => {
+        if(!err) {
+          resolve(font_object);
+        } else {
+          resolve('')
+        }
+      })
+    })
+  }
+
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
       console.log('in open locker room')
@@ -1441,7 +1393,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async loadOrderItemProduct(action: string) {
     let self = this;
-    let updated_product = await getActiveProductData();
+    let updated_product = await getActiveProductData(this.products_fonts);
     if(updated_product == null) {
       return false;
     }
@@ -1467,7 +1419,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async UpdateOrderProducts() {
     let self = this;
-    let updated_product:Record<any,any> = await getActiveProductData();
+    let updated_product:Record<any,any> = await getActiveProductData(this.products_fonts);
     if(updated_product == null) {
       return false;
     }

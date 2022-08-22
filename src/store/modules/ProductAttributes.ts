@@ -2,6 +2,7 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import get = Reflect.get;
+import {rosterDefaultItem} from "@/helpers/Helpers";
 import {
   getRosterDetailDefaultObject,
   initCustomLogos,
@@ -21,7 +22,7 @@ import {
 import {log} from "fabric/fabric-impl";
 import {getClosestColor} from "@/pantoneColor";
 import product from "@/store/modules/product";
-import {findIndex, isEmpty} from "lodash";
+import {findIndex, flatten, isEmpty} from "lodash";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
@@ -110,7 +111,7 @@ const ProductAttributes:Module<any, any> = {
     },
     revertRosterBool:false,
     hideSaveLockerButton: false,
-
+    product_custom_texts: {},
     //could be locker_product, cart_product, order_product
     product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null },
     last_active_product_data: {
@@ -121,7 +122,8 @@ const ProductAttributes:Module<any, any> = {
     },
     editing_roster_player_index: 0,
     selectedCategories:[],
-    products_next_page_no: null //null value mean has no more pages
+    products_next_page_no: null, //null value mean has no more pages,
+    products_rosters:{}
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -638,16 +640,8 @@ const ProductAttributes:Module<any, any> = {
         }
       })
     },
-    OVERRIDE_TEXT(state:Record<any, any>, payload) {
-      state.customTexts = {};
-      // @ts-ignore
-      initCustomTexts(this.getters.getProducts) // getters works fine
-      const locker_texts = JSON.parse(payload.text)
-
-      locker_texts.forEach((text: Record<any, any>, index: number) => {
-        const add_text = {text: text, index: index, prd_id : payload.product_id}
-        this.dispatch('setCustomTexts', add_text)
-      })
+    OVERRIDE_PRODUCT_CUSTOM_TEXT(state:Record<any, any>, payload) {
+     Vue.set(state.product_custom_texts, state.selectedPrdId, payload)
     },
     OVERRIDE_DEFAULT_COLOR(state:Record<any, any>, payload){
       state.defaultColors = payload;
@@ -895,7 +889,7 @@ const ProductAttributes:Module<any, any> = {
       }
       state.canvasImage.scene = payload.scene
     },
-    SET_HIDE_SAVE_LOCKER_BUTTON(state:Record<any, any>, payload){
+    zSET_HIDE_SAVE_LOCKER_BUTTON(state:Record<any, any>, payload){
       state.hideSaveLockerButton = payload
     },
     SET_REVERT_ROSTER_BOOL(state:Record<any, any>, payload){
@@ -929,11 +923,131 @@ const ProductAttributes:Module<any, any> = {
     SET_EDITING_ROSTER_PLAYER_INDEX(state:Record<any, any>, payload){
       state.editing_roster_player_index = payload;
     },
+    SET_PRODUCT_CUSTOM_TEXTS_back(state:Record<any, any>, payload) {
+      if("index" in payload) {
+        /*
+         * By default we consider active product id to change custom text. If we want to update custom text if user wants
+         * to update custom text other than selected product then we get that product id
+       * */
+        const product_id: number = payload.product_id ? payload.product_id : state.selectedPrdId;
+        if(state.product_custom_texts[product_id][payload.index] == undefined) {
+          state.product_custom_texts[product_id].push(payload.value)
+          return false
+        }
+        else {
+          /*
+          * the index type should be one of "product", "product_text". if index_type = "product" then it means we want to update all custom texts of specific product.
+          * if index_type = "product_text" then it means we want to update product specific custom_text of product
+          * */
+          const index_type: string = payload.index_type ? payload.index_type : 'product_text';
+          //if index_type = "product" then we will update all custom texts of product
+          if(index_type == "product") {
+            Vue.set(state.product_custom_texts, product_id, payload.value)
+          }
+          else {
+            Vue.set(state.product_custom_texts[product_id], payload.index, payload.value)
+          }
+        }
+      } else {
+        state.product_custom_texts = payload;
+      }
+    },
+    SET_PRODUCT_CUSTOM_TEXTS(state:Record<any, any>, payload) {
+      if(payload.append) {
+        //in case of append payload contains the custom texts of all retrieved products. It will contain arrays custom texts of all products
+        const products_custom_texts = payload.value;
+        products_custom_texts.forEach((product_custom_texts: Record<any, any>[]) => {
+          const product_id = product_custom_texts.length > 0 ? product_custom_texts[0].product_id : null;
+          if(product_id) {
+            state.product_custom_texts[product_id] = product_custom_texts
+          }
+        })
+        return false;
+      }
+      if("index" in payload) {
+        /*
+         * By default we consider active product id to change custom text.If user wants to update custom text other than
+         *  selected product then we get that product id
+       * */
+        const product_id: number = payload.product_id ? payload.product_id : state.selectedPrdId;
+        /*
+        * This if condition checks it the custom text exists in given index or not. If not then we push custom text.
+        * This is usually case when user manually add custom text by clicking add new text button
+        * */
+        if(state.product_custom_texts[product_id][payload.index] == undefined) {
+          console.log('inside undefined')
+          state.product_custom_texts[product_id].push(payload.value)
+          return false
+        }
+        else {
+          /*
+          * the index type should be one of "product", "product_text". if index_type = "product" then it means we want to update all custom texts of specific product.
+          * if index_type = "product_text" then it means we want to update product specific custom_text of product
+          * */
+          const index_type: string = payload.index_type ? payload.index_type : 'product_text';
+          //if index_type = "product" then we will update all custom texts of product
+          if(index_type == "product") {
+            Vue.set(state.product_custom_texts, product_id, payload.value)
+          }
+          else {
+            Vue.set(state.product_custom_texts[product_id], payload.index, payload.value)
+          }
+        }
+      } else {
+        console.info("The custom text index missing in payload")
+      }
+    },
+    REMOVE_CUSTOM_TEXT(state: Record<any, any>, payload) {
+      state.product_custom_texts[state.selectedPrdId].splice(payload, 1)
+    },
     SET_PRODUCTS_NEXT_PAGE_NO(state:Record<any, any>, payload){
       state.products_next_page_no = payload;
+    },
+    SET_PRODUCTS_ROSTERS(state:Record<any, any>, payload: Record<any, any>){
+      if(payload && 'product_id' in payload) {
+        if('roster_index' in payload) {
+          let product_roster_item = state.products_rosters[payload.product_id][payload.roster_index];
+          product_roster_item = Object.assign(product_roster_item, payload.roster_data)
+          Vue.set(state.products_rosters[payload.product_id], payload.roster_index, product_roster_item)
+        } else {
+          Vue.set(state.products_rosters, payload.product_id, payload.roster_data)
+        }
+      } else {
+        const products_rosters: Record<any, any> = {}
+        if(state.products.length > 0) {
+          const default_roster_item = rosterDefaultItem()
+          state.products.forEach((product: Record<any, any>) => {
+            const product_first_size_name = product.sizes.length > 0 ? product.sizes[0].json_data[0].name : '';
+            const roster_item = Object.assign(default_roster_item, {size: product_first_size_name,  code: product_first_size_name})
+            products_rosters[product.id] = [roster_item]
+          })
+          state.products_rosters = products_rosters;
+        } else {
+          console.info("No products found. So can't set products roster information")
+        }
+      }
+    },
+    REMOVE_ROSTER_ITEM(state:Record<any, any>, payload: number) {
+     state.products_rosters[state.selectedPrdId].splice(payload, 1)
     }
   },
   getters: {
+    selectedProductCustomTexts: state => (custom_text_index = -1) =>  {
+      /*
+      * if custom_item_index is given then object will be return else array of objects will be return
+      * */
+      if(custom_text_index != -1)
+        return state.product_custom_texts[state.selectedPrdId][custom_text_index]
+      return state.product_custom_texts[state.selectedPrdId]
+    },
+    //this is parameterized getter that's why in vue devtool it will always return function. Also it will not be cached instead it will always executed when we use getter
+    productCustomTexts: state => (product_id = "all") =>  {
+      if(product_id == "all") {
+        return state.product_custom_texts;
+      } else {
+        return state.product_custom_texts[product_id];
+      }
+    },
     getSearchLoader: state => {
       return state.searchLoader
     },
@@ -1051,19 +1165,11 @@ const ProductAttributes:Module<any, any> = {
     getSelectedDesignId: state => {
       return state.selectedDesignId
     },
-    // getCustomTexts: state => {
-    //   return state.customTexts
-    // },
-
-    getCustomTexts: state => (prd_id = state.selectedPrdId, for_all_products= false) => {
+    getCustomTexts: state => (for_all_products= false, product_id = state.selectedPrdId) => {
       if(for_all_products)
-        return state.customTexts
-      if(!state.customTexts[prd_id]) {
-        return []
-      }
-      return state.customTexts[prd_id]
+        return state.product_custom_texts
+      return state.product_custom_texts[product_id] ? state.product_custom_texts[product_id] : []
     },
-
     getDefaultColors: state => {
       return state.defaultColors
     },
@@ -1078,6 +1184,11 @@ const ProductAttributes:Module<any, any> = {
         return []
       }
       return state.rosterDetails[prd_id]
+    },
+    getSelectedProductRoster: state => (roster_index = -1) => {
+      if(roster_index >= 0)
+        return state.products_rosters[state.selectedPrdId][roster_index]
+      return state.products_rosters[state.selectedPrdId]
     },
     getAllRosterDetails: state  => {
       return state.rosterDetails
@@ -1281,8 +1392,8 @@ const ProductAttributes:Module<any, any> = {
     async OVERRIDE_CUSTOM_LOGOS({commit}, payload:Record<any, any>){
      await commit('OVERRIDE_LOGOS', payload);
     },
-    async OVERRIDE_CUSTOM_TEXT({commit}, payload:Record<any, any>){
-     await commit('OVERRIDE_TEXT', payload);
+    async OVERRIDE_PRODUCT_CUSTOM_TEXT({commit}, payload:Record<any, any>){
+     await commit('OVERRIDE_PRODUCT_CUSTOM_TEXT', payload);
     },
     overRideDefaultColors({commit}, payload:Record<any, any>){
       commit('OVERRIDE_DEFAULT_COLOR', payload);
@@ -1458,6 +1569,9 @@ const ProductAttributes:Module<any, any> = {
     setLastActiveProductData({commit}, payload) {
       commit('SET_LAST_ACTIVE_PRODUCT_DATA', payload)
 
+    },
+    setProductsRosters({commit}, payload) {
+      commit('SET_PRODUCTS_ROSTERS', payload)
     }
   }
 }
