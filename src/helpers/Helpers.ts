@@ -479,11 +479,11 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
           const font = products_fonts[custom_text.font_family]
           let path: Record<any, any> = {}
           if(custom_text.is_first_name) {
-            path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : ''
+            path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : {}
           } else if(custom_text.is_first_number) {
-            path = roster_detail.number? font.opentype_font.getPath(roster_detail.number) : ''
+            path = roster_detail.number? font.opentype_font.getPath(roster_detail.number) : {}
           } else if(roster_index == 0) {
-            path = custom_text.value? font.opentype_font.getPath(custom_text.value) : ''
+            path = custom_text.value? font.opentype_font.getPath(custom_text.value) : {}
           }
 
           for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
@@ -499,7 +499,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               margin:''
             }
 
-            if(path) {
+            if(Object.keys(path).length) {
               path.fill = custom_text_item.color
               path.stroke = custom_text_item.outline_color
               path.strokeWidth = parseInt(custom_text_item.outline_width)
