@@ -72,7 +72,8 @@
                 <td>
                   <div class="d-flex gap-1 flex-wrap">
                     <div v-for="(item, index) in order.items" :key="index" class="d-inline-flex well py-1 px-2 bg-light gap-1 align-items-center">
-                      <span class="factory_status" :class="item.status">{{item.status | Status}}</span>
+                      <span class="factory_status submitted_for_factory_review"  v-if="item.status == 'order_approve'">{{ 'submitted_for_factory_review' | Status}}</span>
+                      <span class="factory_status" :class="item.status" v-else>{{item.status | Status}}</span>
                     </div>
                   </div>
                 </td>
