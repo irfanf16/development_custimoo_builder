@@ -24,6 +24,7 @@
 </template>
 <script>
 const FACTORYREVIEW = "submitted_for_factory_review"
+const ORDERAPPROVE = "order_approve"
 const FACTORYAPPROVED = "factory_approved"
 const FACTORYREJECTED = "factory_rejected"
 const CUSTOMERREVIEW = "submitted_for_customer_review"
@@ -43,6 +44,7 @@ export default {
   data() {
     return {
       FACTORYREVIEW: FACTORYREVIEW,
+      ORDERAPPROVE: ORDERAPPROVE,
       FACTORYAPPROVED: FACTORYAPPROVED,
       FACTORYREJECTED: FACTORYREJECTED,
       CUSTOMERREVIEW: CUSTOMERREVIEW,
@@ -63,7 +65,7 @@ export default {
   methods: {
     setStatuses() {
      this.resetStatuses();
-      if(this.item_status == FACTORYREVIEW){
+      if(this.item_status == FACTORYREVIEW || this.item_status ==  ORDERAPPROVE){
         this.order_created = true
       }else if(this.item_status == FACTORYAPPROVED){
         this.order_created = true
