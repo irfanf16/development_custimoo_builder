@@ -959,7 +959,7 @@ const ProductAttributes:Module<any, any> = {
         products_custom_texts.forEach((product_custom_texts: Record<any, any>[]) => {
           const product_id = product_custom_texts.length > 0 ? product_custom_texts[0].product_id : null;
           if(product_id) {
-            state.product_custom_texts[product_id] = product_custom_texts
+            Vue.set(state.product_custom_texts, product_id, product_custom_texts)
           }
         })
         return false;

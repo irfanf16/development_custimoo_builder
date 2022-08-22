@@ -469,8 +469,7 @@ export class handleMainProducts extends Vue {
     const retrieved_products_custom_texts = retrieved_products.map(retrieved_product => retrieved_product.product_texts);
     console.log('retrieved_products_custom_texts', retrieved_products_custom_texts)
    // let custom_texts = selected_product.product_texts;
-    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {append: true, value: retrieved_products_custom_texts})
-    self.$eventBus.$emit("setSelectedProductCustomTexts");
+    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
   }
   public async fetchLogoColors(id:number) {
     let colors = null
