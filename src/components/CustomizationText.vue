@@ -3,7 +3,7 @@
     <div class="px-3 pt-3 p-lg-4" v-for="(product_custom_text, customTextIndex) in product_custom_texts" :key="`parent-${selectedProductId+customTextIndex}`">
 
       <h2 :key="`header-${selectedProductId+customTextIndex}`" class="fw-bold mb-2 fz-18 d-flex align-items-center justify-content-between">
-        <span>{{ product_custom_text.label }}</span>aaa
+        <span>{{ product_custom_text.label }}</span>
        <template v-if="product_custom_text.manually_added">
          <b-button class="ml-1 light" size="sm" style="min-width: unset; line-height: normal" variant="dark" :key="`custom_text_${customTextIndex}_removed_btn`"
                    @click="removeCustomText(customTextIndex)">
