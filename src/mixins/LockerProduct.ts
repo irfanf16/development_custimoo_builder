@@ -382,7 +382,7 @@ export class handleMainProducts extends Vue {
           return retrieved_product.id == product_edit_info_object.locker_product_info.product_id
         });
         if(product_index >= 0) {
-          style_index = findIndex(retrieved_products[0].productstyles, (product_style: Record<any, any>) => {
+          style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
             return product_style.id == product_edit_info_object.locker_product_info.style_id;
           });
         }
