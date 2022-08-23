@@ -23,6 +23,7 @@ import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import { SetSelectedProductCustomTexts } from '@/mixins/SelectedProductMixin'
 import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
+import {find} from "lodash";
 
 @Component<Scene>({
   async mounted() {
@@ -279,6 +280,10 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
 
   get productCustomTexts(): Record<any, any>[] {
     return this.$store.getters.productCustomTexts(this.product_id)
+  }
+
+  get allProductsCustomTexts(): Record<any, any> {
+    return this.$store.getters.productCustomTexts()
   }
 
   @Watch('customLogos', {
@@ -1708,8 +1713,20 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     }
   }
 
+  public async isCustomTextAllowed(custom_text_index: number) {
+    let custom_text = this.product_custom_texts[custom_text_index];
+    let text_allowed_product_ids = [custom_text.product_id, ...custom_text.following_product_ids]
+    let is_custom_text_allowed = text_allowed_product_ids.includes(this.product_id)
+    if(this.product_id != custom_text.product_id) {
+      const following_product_custom_text = this.allProductsCustomTexts[this.product_id]?.[custom_text_index];
+      is_custom_text_allowed = following_product_custom_text && following_product_custom_text.type == custom_text.type
+    }
+    return is_custom_text_allowed;
+  }
+
   public async addTextsNew(custom_text_info: Record<any, any>) {
     const self: Record<any, any> = this
+    this.allProductsCustomTexts[this.product_id]?.[custom_text_info.custom_text_index];
     await this.syncCustomTextsWithCustomTextsObjects()
     if(custom_text_info.emitter == 'add_button') {
       /* in case of add button we just need to execute method syncCustomTextsWithCustomTextsObjects() that's why returning here  */
@@ -1719,8 +1736,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
     const custom_text_index = custom_text_info.custom_text_index;
     self.product_custom_texts[custom_text_index] = custom_text_info.value;
     let custom_text = self.product_custom_texts[custom_text_index];
-
-    if(this.product_id == custom_text.product_id) {
+    let add_custom_text = await this.isCustomTextAllowed(custom_text_index);
+    if(add_custom_text) {
       let render_front_canvas = false;
       let render_back_canvas = false;
       /*
@@ -1817,7 +1834,8 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
                 this.addToOtherSide(fabric_text, custom_text_item.placement)
               })
             }
-          } else {
+          }
+          else {
             fabric_text = new fabric.Text(custom_text.value, {
               left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
               top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
@@ -1866,7 +1884,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
               self.backCanvas.add(fabric_text)
               render_back_canvas = true
             }
-            // this.addToOtherSide(fabric_text, custom_text_item.placement)
           }
         })
       }

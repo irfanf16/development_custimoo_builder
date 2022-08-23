@@ -975,7 +975,6 @@ const ProductAttributes:Module<any, any> = {
         * This is usually case when user manually add custom text by clicking add new text button
         * */
         if(state.product_custom_texts[product_id][payload.index] == undefined) {
-          console.log('inside undefined')
           state.product_custom_texts[product_id].push(payload.value)
           return false
         }
