@@ -163,8 +163,8 @@ import ModalAction from "@/mixins/ModalAction";
       get productModels(): Record<any, any> {
         return this.$store.getters.getProductModels;
       }
-      get rosterDetails(): [Record<any, any>] {
-        return this.$store.getters.getRosterDetails()
+      get productRosterDetail(): [Record<any, any>] {
+        return this.$store.getters.getSelectedProductRoster()
       }
       get mainProductType():string{
         let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
@@ -228,7 +228,7 @@ import ModalAction from "@/mixins/ModalAction";
             groupcolors: this.groupColors,
             locker_front_png: locker_front_png,
             locker_back_png: locker_back_png,
-            roster_details: this.rosterDetails,
+            product_roster_detail: this.productRosterDetail,
             svgcolors: distinct
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
@@ -296,7 +296,7 @@ import ModalAction from "@/mixins/ModalAction";
             groupcolors: this.groupColors,
             locker_front_png: locker_front_png,
             locker_back_png: locker_back_png,
-            roster_details: this.rosterDetails,
+            roster_details: this.productRosterDetail,
             svgcolors: distinct
           }
         let res = await this.$store.dispatch("SHARE_DESIGN_URL", locker);

@@ -36,9 +36,11 @@ export class LockerProducts extends Vue {
 
       http.get(url).then(async (response: Record<any, any>) => {
         let active_product_detail = response.data.editing_product_detail;
+        console.log('active_product_detail', active_product_detail)
         //todo need to confirm this logic. I think it's have no effect
         if(active_product_detail.product_roster_detail) {
-          this.$store.commit('UPDATE_ROSTER', active_product_detail.product_roster_detail)
+          self.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
+          //this.$store.commit('UPDATE_ROSTER', active_product_detail.product_roster_detail)
         }
         this.$root.$emit('rostershared', '')
         //todo ends her
@@ -467,10 +469,8 @@ export class handleMainProducts extends Vue {
   public async setRetrievedProductsCustomTexts(retrieved_products: Record<any, any>[]) {
     let self: Record<any, any> = this;
     const retrieved_products_custom_texts = retrieved_products.map(retrieved_product => retrieved_product.product_texts);
-    console.log('retrieved_products_custom_texts', retrieved_products_custom_texts)
    // let custom_texts = selected_product.product_texts;
-    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {append: true, value: retrieved_products_custom_texts})
-    self.$eventBus.$emit("setSelectedProductCustomTexts");
+    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
   }
   public async fetchLogoColors(id:number) {
     let colors = null
@@ -485,7 +485,7 @@ export class handleMainProducts extends Vue {
   }
 
   public async setLockerProductData(active_product_detail:Record<any, any>) {
-    let self = this;
+    let self: Record<any, any> = this;
     let selected_product = self.$store.getters.getSelectedProduct;
     let style_index = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === active_product_detail.style_id);
     if(style_index < 0 ) {
@@ -504,7 +504,15 @@ export class handleMainProducts extends Vue {
 
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', active_product_detail);
     if(active_product_detail.text.length == 0) {
-      await this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', hey: 'dfg', value: selected_product.product_texts[selected_product.id]});
+      await this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: selected_product.product_texts[selected_product.id]});
+    }
+    else {
+      await this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: active_product_detail.text});
+      active_product_detail.text.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
+        self.$eventBus.$emit("customTextUpdated", {
+          emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
+        });
+      })
     }
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(active_product_detail.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(active_product_detail.groupcolors));

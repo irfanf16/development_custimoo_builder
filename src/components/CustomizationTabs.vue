@@ -189,8 +189,6 @@ export default class CustomizationTabs extends Vue {
     return this.$store.getters.getProducts
   }
 
-
-
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
   }
@@ -200,23 +198,7 @@ export default class CustomizationTabs extends Vue {
   }
 
   get productSizes(){
-    let cumulative_size:Record<any,any> = [];
-    Object.values(this.selectedProduct.sizes).forEach((value)=>{
-      if(Object.prototype.hasOwnProperty.call(value as Record<any,any>,'json_data')){
-        cumulative_size.push(value.json_data);
-      }
-    })
-    let sizes = [] as Record<any,any>;
-    if(cumulative_size.length > 0){
-      cumulative_size.forEach((size_array:Record<any,any>) => {
-        if(size_array.length > 0){
-          size_array.forEach((size:Record<any,any>) => {
-            sizes.push(size);
-          })
-        }
-      })
-    }
-    return sizes;
+    return this.selectedProduct.sizes[0].json_data
   }
 
 

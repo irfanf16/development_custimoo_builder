@@ -1,8 +1,8 @@
 <template>
   <div class="customization-text-area">
-    <div class="px-3 pt-3 p-lg-4" v-for="(product_custom_text, customTextIndex) in product_custom_texts" :key="`parent-${customTextIndex}`">
+    <div class="px-3 pt-3 p-lg-4" v-for="(product_custom_text, customTextIndex) in product_custom_texts" :key="`parent-${selectedProductId+customTextIndex}`">
 
-      <h2 class="fw-bold mb-2 fz-18 d-flex align-items-center justify-content-between">
+      <h2 :key="`header-${selectedProductId+customTextIndex}`" class="fw-bold mb-2 fz-18 d-flex align-items-center justify-content-between">
         <span>{{ product_custom_text.label }}</span>
        <template v-if="product_custom_text.manually_added">
          <b-button class="ml-1 light" size="sm" style="min-width: unset; line-height: normal" variant="dark" :key="`custom_text_${customTextIndex}_removed_btn`"
@@ -12,8 +12,8 @@
        </template>
       </h2>
 
-      <div class="d-flex">
-        <b-form-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here" :value="product_custom_text.value"
+      <div :key="`main-${selectedProductId+customTextIndex}`" class="d-flex">
+        <b-form-input :key="`text-${selectedProductId+customTextIndex}`" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here" :value="product_custom_text.value"
                       @input="handleCustomTextInputChange($event, customTextIndex)"></b-form-input>
         <button v-b-toggle="`accordion-${customTextIndex}`"
                 class="d-flex align-items-center btn btn-secondary light">
@@ -25,9 +25,8 @@
           </span>
         </button>
       </div>
-      <b-collapse accordion="my-accordion" :id="`accordion-${customTextIndex}`"  :ref="`accordion-${customTextIndex}`" role="tabpanel">
+      <b-collapse accordion="my-accordion" :key="`accordion-${selectedProductId+customTextIndex}`" :id="`accordion-${customTextIndex}`"  :ref="`accordion-${customTextIndex}`" role="tabpanel">
         <div class="font-type-area">
-
           <div class="fade-right w-100 py-2">
             <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList ">
               <div v-for="(product_font, product_font_index) in product_fonts" :key="`product_font_${product_font_index}`"
@@ -143,7 +142,7 @@
 import { Component, Mixins, Prop, Watch, Vue } from 'vue-property-decorator'
 import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
-import { ProductColors, ProductFonts, SetSelectedProductCustomTexts } from "@/mixins/SelectedProductMixin";
+import { ProductColors, ProductFonts } from "@/mixins/SelectedProductMixin";
 import {find, filter} from "lodash";
 
 
@@ -154,10 +153,6 @@ import {find, filter} from "lodash";
   },
   async mounted() {
     let self: Record<any, any> = this;
-    self.$eventBus.$on("setSelectedProductCustomTexts", await self.setSelectedProductCustomTexts)
-    self.$eventBus.$on("customTextStoreUpdated", async () => {
-      await self.setSelectedProductCustomTexts()
-    })
     await self.productFonts()
     self.product_colors = await self.productColors()
   },
@@ -170,11 +165,10 @@ import {find, filter} from "lodash";
   }
 })
 
-export default class CustomizationText extends Mixins(ProductColors, ProductFonts, SetSelectedProductCustomTexts) {
+export default class CustomizationText extends Mixins(ProductColors, ProductFonts) {
   /* component data properties goes here */
   public product_fonts: Record<any, any>[] = []
   public product_colors: Record<any, any>[] = []
-  public product_custom_texts: Record<any, any>[] = []
   public default_font_obj = ''
 
   /* component props goes here */
@@ -185,12 +179,18 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
+  get selectedProductId(): Record<any, any> {
+    return this.$store.getters.getSelectedProductId
+  }
   get logoColors(): [] {
     return this.$store.getters.getLogosColors
   }
 
   get lockerColors() {
     return this.$store.getters.getLockerColors
+  }
+  get product_custom_texts() {
+    return this.$store.getters.productCustomTexts(this.selectedProductId)
   }
 
   /*
@@ -202,9 +202,12 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
     clearTimeout (this.handle_text_change_timer);
     this.handle_text_change_timer = setTimeout(() => {
       let self:Record<any, any> = this;
-      let updated_custom_text = self.product_custom_texts[custom_text_index]
+      let updated_custom_text = this.product_custom_texts[custom_text_index]
       updated_custom_text.value = updatedVal;
       self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: updated_custom_text})
+      updated_custom_text.following_product_ids.forEach((following_product_id: number) => {
+        self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: following_product_id, value: updated_custom_text})
+      })
       self.$eventBus.$emit("customTextUpdated", {
         emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: updated_custom_text
       });
