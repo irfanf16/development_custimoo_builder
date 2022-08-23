@@ -17,7 +17,7 @@
     </div>
     <div class="order-details-area">
       <div class="qty-area">
-        <div class="qty-details" v-for="(roster,index) in rosterDetails" :key="index">
+        <div class="qty-details" v-for="(roster,index) in productRosterDetail" :key="index">
         </div>
         <div class="order-row total">
           <div class="total">Total</div>
@@ -162,6 +162,11 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     return this.$store.getters.getRosterDetails()
   }
 
+
+  get productRosterDetail(): [Record<any, any>] {
+    return this.$store.getters.getSelectedProductRoster()
+  }
+
   get logoColors(): [Record<any, any>] {
     return this.$store.getters.getLogosColors
   }
@@ -172,8 +177,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
   get total(): number {
     let sum = 0;
-    if (this.rosterDetails){
-      this.rosterDetails.forEach((item) => {
+    console.log('this.productRosterDetail', this.productRosterDetail)
+    if (this.productRosterDetail){
+      this.productRosterDetail.forEach((item) => {
         sum += parseInt(item.quantity);
       })
     }
@@ -504,7 +510,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   public async getOrderDetail() {
     let self = this;
     let order_detail: { [key: string]: Record<any, any> } = {}
-    order_detail.roster_detail = self.rosterDetails;
+    order_detail.roster_detail = self.productRosterDetail;
     order_detail.svg_groups = self.svgGroups;
     order_detail.custom_texts = this.customTexts.filter((custom_text) => custom_text.text.length > 0);
     order_detail.custom_logos = self.customLogos;

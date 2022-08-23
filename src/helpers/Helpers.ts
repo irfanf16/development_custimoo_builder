@@ -1266,7 +1266,7 @@ const unitConversion = (value:number) => {
       return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
       break;
     default:
-      return { value: value.toFixed(1), unit: setting.unit }
+      return { value: parseFloat(value).toFixed(1), unit: setting.unit }
   }
 }
 

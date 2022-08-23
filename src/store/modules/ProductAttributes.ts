@@ -964,12 +964,12 @@ const ProductAttributes:Module<any, any> = {
         })
         return false;
       }
+      /*
+       * By default we consider active product id to change custom text.If user wants to update custom text other than
+       *  selected product then we get that product id
+     * */
+      const product_id: number = payload.product_id ? payload.product_id : state.selectedPrdId;
       if("index" in payload) {
-        /*
-         * By default we consider active product id to change custom text.If user wants to update custom text other than
-         *  selected product then we get that product id
-       * */
-        const product_id: number = payload.product_id ? payload.product_id : state.selectedPrdId;
         /*
         * This if condition checks it the custom text exists in given index or not. If not then we push custom text.
         * This is usually case when user manually add custom text by clicking add new text button
@@ -993,7 +993,7 @@ const ProductAttributes:Module<any, any> = {
           }
         }
       } else {
-        console.info("The custom text index missing in payload")
+        Vue.set(state.product_custom_texts, product_id, payload.value)
       }
     },
     REMOVE_CUSTOM_TEXT(state: Record<any, any>, payload) {
