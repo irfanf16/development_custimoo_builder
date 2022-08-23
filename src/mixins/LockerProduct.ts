@@ -1,16 +1,19 @@
 /* eslint-disable */
-import { Component, Vue } from 'vue-property-decorator'
+import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
 import {
   fontsColorsManipulation,
-  fontsList,
-  getRandom,
+  fontsList, getActiveProductData,
+  getRandom, handleResponseException,
   initCustomLogos,
   initCustomTexts,
-  processColorsCustom, rosterDetailsInit
+  processColorsCustom, rosterDetailsInit,
+  fetchUrlContent,parseSvgString
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import {getClosestColor} from "@/pantoneColor";
+import ErrorMessages from "@/mixins/ErrorMessages";
+
 @Component
 export class LockerProducts extends Vue {
 
@@ -94,6 +97,36 @@ export class LockerProducts extends Vue {
       })
     return colors
   }
+  public async fetchLockerProduct(room_id: number, room_product: Record<any, any>, share_url=""){
+    let self: Record<any, any> = this;
+    self.search_products = ''
+    await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
+    let is_customized = this.$store.getters.getCustomized
+    let is_personalized = this.$store.getters.getPersonalized
+    let room_product_id = room_product.id;
+    let product_id = room_product.product_id;
+    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
+      editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
+      locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id},
+      cart_product_info: null, order_product_info: null
+    })
+    let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
+    if(share_url) {
+      url += `?share_url=${share_url}`;
+    }
+
+    http.get(url).then(async (response: Record<any, any>) => {
+      let active_product_detail = response.data.editing_product_detail;
+      //todo need to confirm this logic. I think it's have no effect
+      if(active_product_detail.roster_detail) {
+        this.$store.commit('UPDATE_ROSTER', JSON.parse(active_product_detail.roster_detail))
+      }
+      //todo ends her
+      await self.handleMainProducts(response, active_product_detail);
+    }, (error:Record<any, any>) => {
+      console.error("Error while retrieving products",error)
+    })
+  }
 }
 
 @Component
@@ -115,9 +148,7 @@ export class handleMainProducts extends Vue {
     }
     await this.$store.dispatch('setStockCount',response.data.stock_count);
     if(append_products) {
-      console.log("append products")
       await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: true});
-     // this.$root.$emit('sliderEvent');
       return false;
     }
     await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
@@ -350,7 +381,11 @@ export class handleMainProducts extends Vue {
         product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
           return retrieved_product.id == product_edit_info_object.locker_product_info.product_id
         });
-        style_index = product_edit_info_object.locker_product_info.style_index;
+        if(product_index >= 0) {
+          style_index = findIndex(retrieved_products[0].productstyles, (product_style: Record<any, any>) => {
+            return product_style.id == product_edit_info_object.locker_product_info.style_id;
+          });
+        }
         design_id = product_edit_info_object.locker_product_info.design_id;
         break;
       case "cart_product": //in case of editing cart product only one product shown. So product index will always be 0
@@ -589,6 +624,7 @@ export class handleMainProducts extends Vue {
     }
     await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
   }
+
 }
 
 @Component
@@ -717,6 +753,198 @@ export class resetLastActiveProductData extends Vue {
       category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
       page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
       roster_detail: [],
+    })
+  }
+}
+
+@Component
+export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitEditMode) {
+  get total(): number {
+    let sum = 0;
+    let roster_details = this.$store.getters.getRosterDetails()
+    if (roster_details){
+      roster_details.forEach((item:Record<any, any>) => {
+        sum += parseInt(item.quantity);
+      })
+    }
+    return sum;
+  }
+
+  public async addToCartMixin() {
+    let self: Record<any, any> = this;
+    try {
+      self.$store.dispatch('setCartLoading',true);
+      let collection_view = self.$store.getters.getCollectionView;
+      let cart_product = await getActiveProductData();
+      if(cart_product){
+        if(Object.prototype.hasOwnProperty.call(cart_product,'production_url') && (cart_product as Record<any,any>).production_url){
+          let content:string = await fetchUrlContent((cart_product as Record<any,any>).production_url);
+          let production_content = await parseSvgString(content,cart_product as Record<any,any>);
+          (cart_product as Record<any,any>).svg_content = production_content;
+        }
+      }else{
+        return false;
+      }
+      self.$store.dispatch('setRevertRosterBOOL',true);
+
+      let post_data = {
+        factory_product: cart_product
+      };
+      let url = "carts"
+      let cart_edit_mode = false;
+      let product_edit_info_object = self.$store.getters.getProductEditInfoObject
+      let company = self.$store.getters.getCompany;
+      if(product_edit_info_object.editing && product_edit_info_object.type == "cart_product") {
+        cart_edit_mode = true;
+        (post_data as Record<any,any>).factory_product.id = product_edit_info_object.cart_product_info.cart_item_product.id
+        url = `carts/cart-items/${product_edit_info_object.cart_product_info.cart_item_id}/update`
+      }
+
+      let santacart = true;
+      let company_domain = company.company_domain;
+
+      let platform = company.platform;
+      let ecommerce_cart_id: string|null = null;
+      let ecom_url = company_domain + '/wp-admin/admin-ajax.php';
+
+      if(platform === 'wordpress'){
+        if((cart_product as Record<any, any>).sync_id === "" || (cart_product as Record<any, any>).ecommerce_post_id === ""){
+          return false;
+        }
+
+        let ecom_form_data = new FormData();
+
+        let ecommerce_update_id = self.$route.query.update_item;
+        if(ecommerce_update_id){
+          ecom_form_data.append('action', 'custimoo_update_cart');
+          ecom_form_data.append('update_item', ecommerce_update_id);
+        }else{
+          ecom_form_data.append('action', 'custimoo_add_to_cart');
+          ecom_form_data.append('product_name', (cart_product as Record<any, any>).product_name);
+        }
+
+        ecom_form_data.append('product_id', (cart_product as Record<any, any>).ecommerce_post_id);
+        ecom_form_data.append('quantity', self.total);
+        ecom_form_data.append('product_front_image', (cart_product as Record<any, any>).front_image);
+
+        await http.post(ecom_url, ecom_form_data).then((res: any) => {
+          if(!res.data.status){
+            santacart = false
+            self.showToast(res.data.message, 'ERROR');
+          }else{
+            ecommerce_cart_id = res.data.ecommerce_cart_id;
+          }
+        }).catch(err => {
+          santacart = false
+          self.isLoading = false
+          self.showErrorArr(err.response.data.errors)
+        });
+
+        (post_data as Record<any,any>).factory_product.ecommerce_cart_id = ecommerce_cart_id;
+      }
+      if(santacart){
+        self.isLoading = true;
+        http.post(url, post_data).then(async (res: any) => {
+          console.log("response", res.data.success)
+          if (res.data.success == true){
+            console.log("response if", res.data.success, cart_edit_mode)
+            let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
+            let api_res:Record<any, any> = res.data.result
+            self.$store.dispatch('addToCart',api_res.items)
+            // self.$store.dispatch('setEditCart', {key:'cartId',value:0});
+            // self.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
+            await self.exitFromEditMode()
+            self.showToast(res.data.message, 'SUCCESS');
+            self.$store.dispatch('addedToCart', true)
+            if(platform === 'wordpress'){
+              let update_cart_id_data = new FormData();
+              update_cart_id_data.append('santa_cart_id', api_res.new_created_id);
+              update_cart_id_data.append('woocom_cart_id', ecommerce_cart_id as string);
+              update_cart_id_data.append('action', 'add_custimoo_cart_id');
+              if(cart_edit_mode) {
+                await self.exitFromEditMode()
+              }
+              http.post(ecom_url, update_cart_id_data).then((res: any) => {
+                window.location.href = company_domain + '/cart'
+              }).catch(err => {
+                self.showErrorArr(err.response.data.errors)
+              });
+
+            }
+            else {
+              if(cart_edit_mode) {
+                await self.exitFromEditMode()
+                let query_params = await self.setQueryParams
+                self.retrieveProducts(query_params);
+              }
+            }
+            self.$store.dispatch('setCartLoading',true);
+          }
+          else {
+            if(res.data.status_code === 422){
+              self.showErrorValidation(res.data.errors);
+            }
+            if(cart_edit_mode) {
+              await self.exitFromEditMode()
+              let query_params = await self.setQueryParams
+              self.retrieveProducts(query_params);
+            }
+          }
+          self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
+          self.$store.dispatch('setCartLoading',false);
+
+          if(collection_view){
+            self.$root.$emit('getNextProduct');
+          }
+          // self.hideVModal('rostermodal');
+          // self.$root.$emit('showCartModal');
+        }).catch(async errorResponse => {
+          self.$store.dispatch('setCartLoading',false);
+          handleResponseException(errorResponse)
+          if(cart_edit_mode) {
+            await self.exitFromEditMode()
+            let query_params = await self.setQueryParams
+            self.retrieveProducts(query_params);
+            self.hideVModal('rostermodal');
+          }
+        })
+      }
+    }
+    catch (e) {
+      console.error('error in add to cart',e)
+      self.$store.dispatch('setCartLoading',false);
+    }
+  }
+
+  public async retrieveProducts() {
+    let self = this;
+    let get_last_active_product_data = self.$store.getters.getLastActiveProductData;
+    let update_order_item_products = self.$store.getters.getUpdateOrderItemProducts;
+    let search_loader = this.$store.getters.getSearchLoader;
+    let show_loader = this.$store.getters.getShowLoader;
+
+    let url = `/list/products?customized=${get_last_active_product_data.customized}&personalized=${get_last_active_product_data.personalized}`;
+    if(get_last_active_product_data.search_products) {
+      url +=` &title=${get_last_active_product_data.search_products}`
+    }
+    http.get(url).then(async (response: Record<any, any>) => {
+      if(response.data.products.data.length > 0 ){
+        await self.handleMainProducts(response);
+        if(update_order_item_products) {
+          await self.updateFactoryProduct(update_order_item_products.factory_products[update_order_item_products.active_index]);
+        }
+
+        if(show_loader || search_loader){
+          await self.$store.dispatch('setShowLoader', false)
+          await self.$store.dispatch('setSearchLoader', false)
+        }
+      }else{
+        this.showError("No Product Found")
+        await self.$store.dispatch('setShowLoader', false)
+        await self.$store.dispatch('setSearchLoader', false)
+      }
+    }, (error) => {
+      console.error("Error while getting order detail", error?.response?.data?.message)
     })
   }
 }

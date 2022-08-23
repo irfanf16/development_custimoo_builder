@@ -12,7 +12,8 @@ const Event:Module<any, any> = {
     locker_events:[],
     selected_year: selected_year,
     emailTemplates: [],
-    yearlyPlannerTemplates:[]
+    yearlyPlannerTemplates:[],
+    collection_view: false,
   },
   getters: {
     showEventPopup(state:Record<any, any>){
@@ -51,6 +52,9 @@ const Event:Module<any, any> = {
     monthlyEvents: state => (month:string) => {
       return state.locker_events.find((event:Record<any, any>) => month == event.month)
     },
+    getCollectionView(state:Record<any, any>){
+      return state.collection_view;
+    },
   },
   mutations: {
     SHOW_EVENT_POPUP(state:Record<any, any>, paylod:boolean){
@@ -70,6 +74,9 @@ const Event:Module<any, any> = {
     },
     SET_EVENT_TEMPLATES(state:Record<any, any>, paylod:number){
       state.yearlyPlannerTemplates = paylod;
+    },
+    SET_COLLECTION_VIEW(state:Record<any,any>,payload:boolean){
+      state.collection_view = payload;
     }
   },
   actions: {
@@ -104,6 +111,9 @@ const Event:Module<any, any> = {
     async copyEvents({commit}, payload){
       return await http.post("events/copy", payload)
     },
+    setCollectionView({commit},payload){
+      commit('SET_COLLECTION_VIEW',payload);
+    }
 
   }
 }

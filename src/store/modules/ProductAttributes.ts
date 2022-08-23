@@ -26,6 +26,7 @@ const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
     searchLoader: false,
+    showLoader:true,
     lockerActiveTabIndex:0,
     lockerTabsIndex:0,
     isShareDesign : false,
@@ -112,7 +113,7 @@ const ProductAttributes:Module<any, any> = {
     hideSaveLockerButton: false,
 
     //could be locker_product, cart_product, order_product
-    product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null },
+    product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null},
     last_active_product_data: {
       //todo updating this object make sure to do same update on LockerProduct.ts file method resetLastActiveProductData()
       category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
@@ -931,6 +932,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_PRODUCTS_NEXT_PAGE_NO(state:Record<any, any>, payload){
       state.products_next_page_no = payload;
+    },
+    SET_SHOW_LOADER(state:Record<any,any>,payload){
+      state.showLoader = payload;
     }
   },
   getters: {
@@ -1150,6 +1154,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getProductsNextPageNo(state:Record<any,any>) {
       return state.products_next_page_no;
+    },
+    getShowLoader(state:Record<any,any>){
+      return state.showLoader;
     }
   },
   actions: {
@@ -1458,6 +1465,9 @@ const ProductAttributes:Module<any, any> = {
     setLastActiveProductData({commit}, payload) {
       commit('SET_LAST_ACTIVE_PRODUCT_DATA', payload)
 
+    },
+    setShowLoader({commit},payload){
+      commit("SET_SHOW_LOADER",payload);
     }
   }
 }

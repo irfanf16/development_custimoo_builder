@@ -105,7 +105,7 @@
       </button>
     </div>
 
-    <div class="d-flex justify-content-center mt-3" v-if="getProductEditInfoObject.editing == false">
+    <div class="d-flex justify-content-center mt-3" v-if="getProductEditInfoObject.editing == false || (getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product')">
 <!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
       <template v-if="!isCustomerAuthenticated" >
         <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
@@ -113,9 +113,15 @@
           Add to Cart
         </button>
       </template>
-      <template v-else-if="!isLoading">
+      <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product')">
         <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
           :disabled="canvasImage.scene == null">
+          Add to Cart
+        </button>
+      </template>
+      <template v-else-if="!getCartLoading">
+        <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin"
+                :disabled="canvasImage.scene == null">
           Add to Cart
         </button>
       </template>
@@ -131,6 +137,7 @@
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { findIndex } from 'lodash';
 import ErrorMessages from '@/mixins/ErrorMessages';
+import {cartModalData} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 
 
@@ -142,7 +149,7 @@ import ModalAction from "@/mixins/ModalAction";
     this.fontsList()
   },
 })
-export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
+export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData) {
   @Prop({ required: true }) productSizes!: any
   @Prop({required: false}) lockerRosters: Record<any, any>[]
   private roster: any[] = []
@@ -169,6 +176,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
+  get getCartLoading(): boolean {
+    return this.$store.getters.getCartLoading;
+  }
+
 
   get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject;
