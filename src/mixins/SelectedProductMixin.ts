@@ -59,27 +59,3 @@ export class ProductFonts extends Vue {
     })
   }
 }
-
-@Component
-export class SetSelectedProductCustomTexts extends Vue {
-  async setSelectedProductCustomTexts() {
-    const self: Record<any, any> = this;
-    const selected_product = self.$store.getters.getSelectedProduct
-    if(selected_product) {
-      const selected_product_custom_texts = self.$store.getters.productCustomTexts(selected_product.id)
-      if(selected_product_custom_texts) {
-        self.product_custom_texts = selected_product_custom_texts;
-        // product_custom_text_objects property exists only in scene component. This property contains the custom texts
-        // fabric components and also it's contains equal items to custom texts. So if we have 5 custom texts then we
-        // initialize this property to 5 null items
-        /*if(self.product_custom_text_objects) {
-          self.product_custom_text_objects = Array(selected_product_custom_texts.length).fill(null);
-        }*/
-      } else {
-        console.error(`product (${selected_product.id}) not found while setting selected product custom texts`)
-      }
-    } else {
-      console.error(`selected product not found while setting selected product custom texts`)
-    }
-  }
-}

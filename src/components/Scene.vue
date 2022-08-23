@@ -21,7 +21,6 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { SetSelectedProductCustomTexts } from '@/mixins/SelectedProductMixin'
 import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
 import {find} from "lodash";
 
@@ -173,7 +172,7 @@ import {find} from "lodash";
   }
 })
 
-export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
+export default class Scene extends Vue {
   @Prop({ required: true }) readonly front!: Record<string, unknown>;
   @Prop({ required: false }) readonly back!: Record<string, unknown>;
   @Prop({ required: false }) readonly backTextureUrl!: string;
@@ -868,7 +867,6 @@ export default class Scene extends Mixins(SetSelectedProductCustomTexts) {
             }, 500)
           }
           this.mounted = true
-          self.setSelectedProductCustomTexts()
           this.showLoader = false
         }
         resolve('done')
