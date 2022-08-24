@@ -296,7 +296,7 @@ import ModalAction from "@/mixins/ModalAction";
             groupcolors: this.groupColors,
             locker_front_png: locker_front_png,
             locker_back_png: locker_back_png,
-            roster_details: this.productRosterDetail,
+            product_roster_detail: this.productRosterDetail,
             svgcolors: distinct
           }
         let res = await this.$store.dispatch("SHARE_DESIGN_URL", locker);

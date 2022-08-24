@@ -65,7 +65,7 @@
               </b-tabs>
             </div>
           </b-tab>
-          <b-tab @click="getModels">
+          <b-tab>
             <button @click="setHideTab('styleHide', !hideTab.styleHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('styleHide', true)" >

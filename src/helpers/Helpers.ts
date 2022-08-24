@@ -586,6 +586,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         groupcolors: Store.getters.getGroupColors,
         logo_colors: Store.getters.getLogosColors,
         model_id: product_models[selected_model_index].id,
+        model_name: product_models[selected_model_index].model_name,
         product_id: selected_product.product_id,
         ecommerce_post_id: selected_product.ecommerce_product_id,
         sync_id: selected_product.sync_id,
@@ -1282,8 +1283,10 @@ const unitConversion = (value:number) => {
     case 'divide':
       return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
       break;
-    default:
-      return { value: value, unit: setting.unit }
+    default: {
+      const value_string = value ? value.toString() : '';
+      return {value: parseFloat(value_string).toFixed(1), unit: setting.unit}
+    }
   }
 }
 

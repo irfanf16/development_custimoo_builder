@@ -1091,7 +1091,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       id: this.getProductEditInfoObject.locker_product_info.locker_product_id,
       locker_front_png: locker_front_png,
       locker_back_png: locker_back_png,
-      roster: this.rosterDetails,
+      product_roster_detail: this.rosterDetails,
       svgcolors: distinct
     }
 
