@@ -421,7 +421,6 @@ Vue.filter('formatDate', function(value:string) {
       await this.$store.dispatch("getLockers");
       await this.$store.dispatch('getLockerRoomColors')
       await this.$store.dispatch('getCartServer', {})
-
     }
     let {sync_id, customizer_preview} = self.$route.query;
     if(sync_id) {

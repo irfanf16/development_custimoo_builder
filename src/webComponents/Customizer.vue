@@ -100,6 +100,7 @@ window.Echo = new Echo({
 });
 
 import {getCompany, getPermissions} from "@/helpers/Helpers";
+import { authenticateUser } from '../helpers/Helpers'
 
 export default {
   store, router,
@@ -155,38 +156,21 @@ export default {
       faStyles.textContent = dom.css()
       shadowRoot.appendChild(faStyles)
     }
+
     const token = this.$router.currentRoute.query.token
-    let self = this;
-
     if (token){
-      let customer = await this.$store.dispatch('getCustomerFromToken', token)
-      if (customer){
-        let payload = {
-          access_token: token,
-          user: customer
+      localStorage.setItem('jwtToken', token)
+      await authenticateUser(token)
+      await this.$store.dispatch('resetStore')
+      await this.$router.push({name: 'Home'})
+    } else{
+      let storageInterval = setInterval(()=>{
+        let jwtToken = localStorage.getItem('jwtToken');
+        if(jwtToken && jwtToken !=''){
+          authenticateUser(jwtToken)
+          clearInterval(storageInterval);
         }
-        this.$store.commit('SET_CUSTOMER', payload)
-        if(!localStorage.getItem('browserToken')){
-          await this.$store.dispatch('setBrowserToken')
-        }
-        this.$router.push({name: 'Home'})
-        this.$store.dispatch('resetStore')
-      }else{
-        alert('no customer')
-      }
-      this.$store.commit('SET_RECENT_LOGOS')
-    }else{
-      let jwtcustomer = localStorage.getItem('customer');
-
-      if(!jwtcustomer || jwtcustomer==''){
-          var storageInterval = setInterval(()=>{
-            let jwtToken = localStorage.getItem('jwtToken');
-            if(jwtToken && jwtToken !=''){
-                self.authenticateUser(jwtToken)
-                clearInterval(storageInterval);
-              }
-            }, 500)
-      }
+      }, 500)
     }
 
     const customer =  this.$store.getters.getCustomer;
@@ -195,35 +179,6 @@ export default {
     })
   },
   methods:{
-    async authenticateUser(token){
-      let customer = await this.$store.dispatch('getCustomerFromToken', token)
-
-      if (customer){
-        let payload = {
-          access_token: token,
-          user: customer
-        }
-
-        this.$store.commit('SET_CUSTOMER', payload)
-        if(!localStorage.getItem('browserToken')){
-          await this.$store.dispatch('setBrowserToken')
-        }
-        await this.$store.dispatch("getLockers");
-        await this.$store.commit("SET_RECENT_LOGOS");
-        await this.$store.dispatch('getLockerRoomColors')
-        await this.$store.dispatch('getCartServer', {})
-        await this.$store.dispatch('getNotifications')
-        await getPermissions()
-
-        window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
-          this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
-        })
-
-      }else{
-        alert('no customer')
-      }
-      this.$store.commit('SET_RECENT_LOGOS')
-    }
   }
 }
 Vue.config.devtools = true
