@@ -1,8 +1,8 @@
 <template>
-  <div class="available-designs-section px-3 px-lg-0" v-if="selectedProduct">
+  <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
     <template v-if="selectedProduct.productstyles[selected_style_index]">
       <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[selected_style_index].productdesigns" :key="design.id">
-        <a @click="changeDesign(index); showPreview()">
+        <a @click="changeDesign(index); showPreview()" v-if="index < 12 || loadDesigns">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[selected_style_index].front? storageUrl+selectedProduct.productstyles[selected_style_index].front.file_thumbnail_url : ''}"
                  :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
@@ -30,6 +30,11 @@ import Scene from '@/components/Scene.vue'
     if(this.selectedProduct.productstyles[this.getLastActiveProductData.style_index]) {
       this.selected_style_index = this.getLastActiveProductData.style_index
     }
+
+    (this.$refs['designs'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)})
+  },
+  beforeDestroy() {
+    (this.$refs['designs'] as Record<any, any>).removeEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)})
   }
 })
 
@@ -55,6 +60,15 @@ export default class DesignAvailable extends Vue {
 
   get getLastActiveProductData(): Record<any, any> {
     return this.$store.getters.getLastActiveProductData
+  }
+
+  public loadDesigns = false
+
+  public loadIt($event:Record<any, any>) {
+    let designHt = $event.target.clientHeight/3
+    if(designHt <= $event.target.scrollTop){
+      this.loadDesigns = true
+    }
   }
 
   public changeDesign(index: number) {
@@ -135,6 +149,7 @@ export default class DesignAvailable extends Vue {
     margin-bottom: 10px;
     flex-basis: 25%;
     max-width: 25%;
+    min-height: 150px;
 
     a {
       display: block;
