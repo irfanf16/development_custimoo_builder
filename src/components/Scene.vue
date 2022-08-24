@@ -159,7 +159,7 @@ import {find} from "lodash";
       }
     })
 
-    if(!this.mainPreview) {
+    if(!this.mainPreview && this.selectedProductId == this.product_id) {
       self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
         const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
         if(text && this.product_custom_text_objects[indexes.custom_text_index] && this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
@@ -930,7 +930,7 @@ export default class Scene extends Vue {
 
       canvas.on('object:scaling', (e: Record<any, any>) => {
         let dimText = this.dimTextFront
-        if (e.target.side == 'back') {
+        if (e.target.side == 'back' || e.target.side == 'Back') {
           dimText = this.dimTextBack
         }
         this.showDimensions(e, dimText)
@@ -1230,7 +1230,7 @@ export default class Scene extends Vue {
     }
 
     let dimText = this.dimTextFront
-    if (e.target.side == 'back') {
+    if (e.target.side == 'back' || e.target.side == 'Back') {
       dimText = this.dimTextBack
     }
     this.showDimensions(e, dimText)
@@ -1278,7 +1278,22 @@ export default class Scene extends Vue {
       }
 
       let centerPoint = target.getCenterPoint()
-      const boundingDistance = {
+
+      let boundingDistance = {
+        left: Math.abs(boundingRect.left - centerPoint.x),
+        top: Math.abs(boundingRect.top - centerPoint.y),
+        right: Math.abs(boundingRect.right - centerPoint.x),
+        bottom: Math.abs(boundingRect.bottom - centerPoint.y)
+      } as Record<any, any>
+
+      let actualNearTo = 'left'
+      Object.keys(boundingDistance).forEach((key: string) => {
+        if (boundingDistance[key] < boundingDistance[actualNearTo]) {
+          actualNearTo = key
+        }
+      })
+
+      boundingDistance = {
         left: Math.abs(boundingRect.left - centerPoint.x),
         top: Math.abs(boundingRect.top - centerPoint.y) + 100,
         right: Math.abs(boundingRect.right - centerPoint.x),
@@ -1326,6 +1341,13 @@ export default class Scene extends Vue {
         if (otherSideObjects[addIndex]) {
           otherSideObjects[addIndex].left = addLeft
           otherSideObjects[addIndex].top = addTop
+          if(actualNearTo == 'top') {
+            otherSideObjects[addIndex].flipX = true
+            otherSideObjects[addIndex].flipY = true
+          } else {
+            otherSideObjects[addIndex].flipX = false
+            otherSideObjects[addIndex].flipY = false
+          }
           if (side == 'back') {
             this.frontCanvas.renderAll()
           } else {
@@ -1335,6 +1357,10 @@ export default class Scene extends Vue {
           }
         } else {
           let objectAdd = fabric.util.object.clone(target)
+          if(actualNearTo == 'top') {
+            objectAdd.flipX = true
+            objectAdd.flipY = true
+          }
           objectAdd.left = addLeft
           objectAdd.top = addTop
           objectAdd.hasControls = false
@@ -1451,7 +1477,7 @@ export default class Scene extends Vue {
             value: e.action
           })
           let dimText = this.dimTextFront
-          if (e.target.side == 'back') {
+          if (e.target.side == 'back' || e.target.side == 'Back') {
             dimText = this.dimTextBack
           }
           this.showDimensions(e, dimText)
@@ -1679,11 +1705,6 @@ export default class Scene extends Vue {
     }
   }
 
-  public async getCustomTextObject(custom_text_index: number, custom_text_item_index: number) {
-    console.log("")
-
-  }
-
   public async deleteExistingTextsFromCanvas(custom_text_index:  number, remove_custom_text_object = true) {
     const self: Record<any, any> = this;
     const custom_text = self.product_custom_text_objects[custom_text_index]
@@ -1902,6 +1923,7 @@ export default class Scene extends Vue {
     let self: Record<any, any> = this;
     const custom_text_index =  fabric_object.get("custom_text_index");
     const custom_text_item_index =  fabric_object.get("custom_text_item_index");
+    console.log('custom_text_index ', custom_text_index, ' custom_text_item_index ', custom_text_item_index)
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = fabric_object.get("left");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].y_axis = fabric_object.get("top");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = fabric_object.get("angle");

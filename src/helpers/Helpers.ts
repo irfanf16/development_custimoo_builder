@@ -573,6 +573,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         groupcolors: Store.getters.getGroupColors,
         logo_colors: Store.getters.getLogosColors,
         model_id: product_models[selected_model_index].id,
+        model_name: product_models[selected_model_index].model_name,
         product_id: selected_product.product_id,
         ecommerce_post_id: selected_product.ecommerce_product_id,
         sync_id: selected_product.sync_id,
@@ -1265,8 +1266,10 @@ const unitConversion = (value:number) => {
     case 'divide':
       return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
       break;
-    default:
-      return { value: parseFloat(value).toFixed(1), unit: setting.unit }
+    default: {
+      const value_string = value ? value.toString() : '';
+      return {value: parseFloat(value_string).toFixed(1), unit: setting.unit}
+    }
   }
 }
 
@@ -1285,11 +1288,35 @@ const logData = (...args: Record<any, any>[]) => {
   console.log('Logging data', data)
 }
 
+const authenticateUser = async (token: string) => {
+  const customer = await Store.dispatch('getCustomerFromToken', token)
+  if (customer){
+    const payload = {
+      access_token: token,
+      user: customer
+    }
+    Store.commit('SET_CUSTOMER', payload)
+    if(!localStorage.getItem('browserToken')){
+      await Store.dispatch('setBrowserToken')
+    }
+    await Store.dispatch("getLockers");
+    await Store.commit("SET_RECENT_LOGOS");
+    await Store.dispatch('getLockerRoomColors')
+    await Store.dispatch('getCartServer', {})
+    await Store.dispatch('getNotifications')
+    await getPermissions()
+
+  }else{
+    alert('no customer')
+  }
+  Store.commit('SET_RECENT_LOGOS')
+}
+
 //Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
   getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getNewCustomTexts, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
-  unitConversion, rosterDefaultItem
+  unitConversion, rosterDefaultItem, authenticateUser
 };
