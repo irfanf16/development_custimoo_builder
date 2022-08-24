@@ -177,7 +177,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
   get total(): number {
     let sum = 0;
-    console.log('this.productRosterDetail', this.productRosterDetail)
     if (this.productRosterDetail){
       this.productRosterDetail.forEach((item) => {
         sum += parseInt(item.quantity);

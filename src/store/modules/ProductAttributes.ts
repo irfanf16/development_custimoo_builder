@@ -993,7 +993,6 @@ const ProductAttributes:Module<any, any> = {
           }
         }
       } else {
-        console.log('inside else', state.product_custom_texts, product_id, payload)
         Vue.set(state.product_custom_texts, product_id, payload.value)
       }
     },
