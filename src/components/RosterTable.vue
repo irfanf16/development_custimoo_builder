@@ -103,7 +103,7 @@ export default class RosterTable extends Vue {
     this.rosterDetails.splice(ind, 1)
   }
   public saveRoster(id:number, url:string){
-    http.post('update/roster', {id:id, roster: this.rosterDetails, url:url}).then((res) => {
+    http.post('update/roster', {id:id, product_roster_detail: this.rosterDetails, url:url}).then((res) => {
       if (res.status == 201){
         this.$router.push('/')
       }

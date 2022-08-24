@@ -40,7 +40,6 @@ export class LockerProducts extends Vue {
         //todo need to confirm this logic. I think it's have no effect
         if(active_product_detail.product_roster_detail) {
           self.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
-          //this.$store.commit('UPDATE_ROSTER', active_product_detail.product_roster_detail)
         }
         this.$root.$emit('rostershared', '')
         //todo ends her
@@ -504,7 +503,7 @@ export class handleMainProducts extends Vue {
 
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', active_product_detail);
     if(active_product_detail.text.length == 0) {
-      await this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: selected_product.product_texts[selected_product.id]});
+      await this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: selected_product.product_texts});
     }
     else {
       await this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: active_product_detail.text});
