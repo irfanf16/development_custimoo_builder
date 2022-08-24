@@ -497,10 +497,21 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               height: converted_height.value,
               unit: converted_width.unit,
               svg: '',
-              margin:''
+              margin:'',
+              color:[] as Record<any, any>[]
             }
 
             if(Object.keys(path).length) {
+
+              const text_color_info = {
+                hex:'',
+                name:'',
+                pantone:''
+              }
+              text_color_info['hex'] = custom_text_item.color
+              text_color_info['name'] = custom_text_item.color
+              text_color_info['pantone'] = ''
+
               path.fill = custom_text_item.color
               path.stroke = custom_text_item.outline_color
               path.strokeWidth = parseInt(custom_text_item.outline_width)
@@ -516,6 +527,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                 'viewBox="0 0 ' + boundingBox.x2 + ' ' + boundingBox.y1 +'"> \n' + dom_svg.outerHTML + '\n</svg>'
               text_item_object.svg = svg_with_tag
               text_item_object.margin = boundingBox.y1
+              text_item_object.color.push(text_color_info);
             }
 
             if(custom_text.is_first_name) {
@@ -1271,7 +1283,7 @@ const unitConversion = (value:number) => {
       return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
       break;
     default:
-      return { value: parseFloat(value).toFixed(1), unit: setting.unit }
+      return { value: value, unit: setting.unit }
   }
 }
 
