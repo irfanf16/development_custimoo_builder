@@ -819,22 +819,16 @@ export default class Scene extends Vue {
       await this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
-    if (this.productType == 'customized' && this.lockerDefaultColors.length) {
-      let lockerDefaultColors = this.lockerDefaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-      if (lockerDefaultColors.length) {
-        await this.changeDefaultColors(lockerDefaultColors)
-      }
-    }
-    else if (this.productType == 'customized' && this.defaultColors.length) {
+    if (this.productType == 'customized' && this.defaultColors.length) {
       let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       if (defaultColors.length) {
         await this.changeDefaultColors(defaultColors)
       }
     }
 
-    if (Object.keys(this.lockerGroupColors).length) {
+    if (Object.keys(this.groupColors).length) {
       if (this.productType == 'customized') {
-        await this.changeGroupColor(this.lockerGroupColors)
+        await this.changeGroupColor(this.groupColors)
       }
     }
     this.showLoader = false

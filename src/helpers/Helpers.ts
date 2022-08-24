@@ -1134,11 +1134,35 @@ const unitConversion = (value:number) => {
   }
 }
 
+const authenticateUser = async (token: string) => {
+  const customer = await store.dispatch('getCustomerFromToken', token)
+  if (customer){
+    const payload = {
+      access_token: token,
+      user: customer
+    }
+    store.commit('SET_CUSTOMER', payload)
+    if(!localStorage.getItem('browserToken')){
+      await store.dispatch('setBrowserToken')
+    }
+    await store.dispatch("getLockers");
+    await store.commit("SET_RECENT_LOGOS");
+    await store.dispatch('getLockerRoomColors')
+    await store.dispatch('getCartServer', {})
+    await store.dispatch('getNotifications')
+    await getPermissions()
+
+  }else{
+    alert('no customer')
+  }
+  store.commit('SET_RECENT_LOGOS')
+}
+
 //Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
   getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
-  unitConversion
+  unitConversion, authenticateUser
 };

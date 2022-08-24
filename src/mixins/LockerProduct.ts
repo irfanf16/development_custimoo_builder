@@ -350,7 +350,12 @@ export class handleMainProducts extends Vue {
         product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
           return retrieved_product.id == product_edit_info_object.locker_product_info.product_id
         });
-        style_index = product_edit_info_object.locker_product_info.style_index;
+        if(product_index >= 0) {
+          style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
+            return product_style.id == product_edit_info_object.locker_product_info.style_id;
+          });
+        }
+        // style_index = product_edit_info_object.locker_product_info.style_index;
         design_id = product_edit_info_object.locker_product_info.design_id;
         break;
       case "cart_product": //in case of editing cart product only one product shown. So product index will always be 0
