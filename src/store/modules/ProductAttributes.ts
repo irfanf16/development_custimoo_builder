@@ -730,16 +730,18 @@ const ProductAttributes:Module<any, any> = {
       state.selectedIndex = 0;
       state.styleIndex = 0 ;
       const select_product = state.products[state.selectedIndex];
-      state.selectedPrdId = select_product.id
+      if(select_product) {
+        state.selectedPrdId = select_product.id
 
-      select_product.productstyles[state.styleIndex].productdesigns.forEach((item: Record<any, any>) => {
-        if (item.is_default) {
-          Vue.set(item, 'design_show', 1)
-          state.selectedDesignId = item.id
-        } else {
-          Vue.set(item, 'design_show', 0)
-        }
-      });
+        select_product.productstyles[state.styleIndex].productdesigns.forEach((item: Record<any, any>) => {
+          if (item.is_default) {
+            Vue.set(item, 'design_show', 1)
+            state.selectedDesignId = item.id
+          } else {
+            Vue.set(item, 'design_show', 0)
+          }
+        })
+      }
     },
     RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
       state.customTextObjects = [];
@@ -993,7 +995,6 @@ const ProductAttributes:Module<any, any> = {
           }
         }
       } else {
-        console.log('inside else', state.product_custom_texts, product_id, payload)
         Vue.set(state.product_custom_texts, product_id, payload.value)
       }
     },

@@ -17,7 +17,7 @@ import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 window.io = require('socket.io-client');
 
-import { getCompany } from "@/helpers/Helpers";
+import { authenticateUser, getCompany, getPermissions } from '@/helpers/Helpers'
 
 // console.log(localStorage.getItem('access_tokens'))
 window.Echo = new Echo({
@@ -44,25 +44,15 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
   },
   async mounted() {
     await getCompany();
-    const token = this.$router.currentRoute.query.token
+
+    const token = this.$router.currentRoute.query.token as string
     if (token){
-      let customer = await this.$store.dispatch('getCustomerFromToken', token)
-      if (customer){
-        let payload = {
-          access_token: token,
-          user: customer
-        }
-        this.$store.commit('SET_CUSTOMER', payload)
-        if(!localStorage.getItem('browserToken')){
-          await this.$store.dispatch('setBrowserToken')
-        }
-        this.$router.push({name: 'Home'})
-        this.$store.dispatch('resetStore')
-      }else{
-        alert('no customer')
-      }
-      this.$store.commit('SET_RECENT_LOGOS')
+      localStorage.setItem('jwtToken', token)
+      await authenticateUser(token)
+      await this.$store.dispatch('resetStore')
+      await this.$router.push({name: 'Home'})
     }
+
     const customer =  this.$store.getters.getCustomer;
 
     window.Echo.channel(`notification.${this.enviorment}.${customer.id}`).listen('RoasterUpdatedEvent',  (e: Record<any,any>) => {
