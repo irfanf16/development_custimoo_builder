@@ -1,11 +1,10 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import Home from '../views/Home.vue'
-import ShareRoster from '../views/ShareRoster.vue'
-import ConfirmOrder from '../views/ConfirmOrder.vue'
-import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
+import store from '@/store'
 
-
+const Home = ()=> import('../views/Home.vue')
+const ShareRoster = ()=> import('../views/ShareRoster.vue')
+const CollectionViewPDF = ()=> import('@/views/CollectionViewPDF.vue')
 
 Vue.use(VueRouter)
 
@@ -14,11 +13,6 @@ const routes: Array<RouteConfig> = [
     path: '/',
     name: 'Home',
     component: Home
-  },
-  {
-    path: '/confirm-order',
-    name: 'ConfirmOrder',
-    component: ConfirmOrder
   },
   {
     path:'/share/:product/:name',
@@ -44,6 +38,31 @@ const routes: Array<RouteConfig> = [
 
 const router = new VueRouter({
   routes
+})
+
+router.beforeEach(async (to, from, next) => {
+  const jwtToken = localStorage.getItem('jwtToken')
+  if (!store.getters.getCustomer && jwtToken){
+    const customer = await store.dispatch('getCustomerFromToken', jwtToken)
+    if (customer){
+      const payload = {
+        access_token: jwtToken,
+        user: customer
+      }
+      await store.commit('SET_CUSTOMER', payload)
+    }
+  }
+  // remove ! sign from url that cause to customizer not load on page refresh mainly on evolution
+  let lastUrl = location.href;
+  new MutationObserver(() => {
+    const url = location.href;
+    if (url !== lastUrl) {
+      lastUrl = url;
+      history.pushState(null, 'customizer', window.location.href.replace('!', ''));
+    }
+  }).observe(document, {subtree: true, childList: true});
+
+  next()
 })
 
 export default router
