@@ -51,7 +51,8 @@
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
-import {getClosestColor, pantones, getPantoneColor} from '@/pantoneColor'
+import {getClosestColor, pantones, getColorEncoding} from '@/pantoneColor'
+import {getSelectedProductPantones} from "@/helpers/Helpers";
 
 @Component<ColorAccordion>({
   components: {
@@ -108,6 +109,9 @@ export default class ColorAccordion extends Vue {
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
+  get getColorType(): string {
+    return this.$store.getters.getColorType;
+  }
 
   public selectType(index: number, showOther = false) {
     if (showOther){
@@ -144,12 +148,13 @@ export default class ColorAccordion extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantoneColor = getClosestColor(color.hex) // this is sub-menu other tab of color tab in menu
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantoneColor = getClosestColor(color.hex,selectProductPantonesList,this.getColorType) // this is sub-menu other tab of color tab in menu
     this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
   }
 
   public changePantoneColor() {
-   let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
+   let pantoneColor = getColorEncoding(this.svgGroups[this.selectAccordionIndex].pantone,this.getColorType);
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
       this.pantoneMessage = ''

@@ -19,7 +19,8 @@ const Product:Module<any, any> = {
     },
     update_order_item_products: null,
     product_locker_id:0,
-    setting:{}
+    setting:{},
+    color_type:'product_color',
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -60,6 +61,9 @@ const Product:Module<any, any> = {
     },
     getSetting(state:Record<any,any>){
       return state.setting
+    },
+    getColorType(state:Record<any,any>){
+      return state.color_type;
     }
   },
   mutations:{
@@ -133,6 +137,9 @@ const Product:Module<any, any> = {
     },
     SET_SETTING(state:Record<any,any>,setting){
       state.setting = setting;
+    },
+    SET_COLOR_TYPE(state:Record<any,any>,color_type){
+      state.color_type = color_type;
     }
   },
   actions: {
@@ -322,6 +329,20 @@ const Product:Module<any, any> = {
         return res
       });
     },
+    async setColorType({commit},type){
+      return new Promise((resolve,reject) => {
+         http.get(`/get-configuration/${type}`).then((res) => {
+          if(res.data.status_code === 200){
+            console.log('response');
+            console.log(res.data.result);
+            commit('SET_COLOR_TYPE', res.data.result.value.color_type);
+          }
+          resolve(res);
+        }).catch(e => {
+          reject(e);
+         })
+      });
+    }
 
   }
 }

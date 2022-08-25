@@ -146,7 +146,7 @@ import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {getRosterDetailDefaultObject} from "@/helpers/Helpers";
+import {getRosterDetailDefaultObject, getSelectedProductPantones} from "@/helpers/Helpers";
 
 @Component<CustomTabs>({
   components: {
@@ -533,6 +533,9 @@ export default class CustomTabs extends Vue {
   get groupColors(){
     return this.$store.getters.getGroupColors
   }
+  get getColorType(){
+    return this.$store.getters.getColorType;
+  }
   // public showColor(index: number) {
   //   this.selectAccordionIndex = index
   // }
@@ -691,7 +694,8 @@ export default class CustomTabs extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantoneColor = getClosestColor(color.hex)
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantoneColor = getClosestColor(color.hex,selectProductPantonesList,this.getColorType);
     this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone})
   }
 }

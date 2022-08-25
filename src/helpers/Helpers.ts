@@ -177,8 +177,9 @@ const processColorsCustom = (colors: []) => {
   const deletedCount = uniqueColors.length - 4
   uniqueColors.splice(4, deletedCount)
   const selectProductPantonesList = getSelectedProductPantones()
+  const color_type = Store.getters.getColorType;
   uniqueColors.forEach((color: string) => {
-    const pantoneColor = getClosestColor(color, selectProductPantonesList);
+    const pantoneColor = getClosestColor(color, selectProductPantonesList,color_type);
     //const pantoneColor = getClosestColor(color);
     imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
   })
@@ -519,6 +520,7 @@ const getActiveProductData = () => {
 const initCustomTexts = (retrieved_products: Record<any, any>) => {
   retrieved_products.forEach((product:any) => {
     const custom_texts = Store.getters.getCustomTexts(product.id)
+    const color_type = Store.getters.getColorType;
     if(!custom_texts || !(custom_texts && custom_texts.length)) {
       product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
         const obj = fontsColorsManipulation(product)
@@ -527,12 +529,12 @@ const initCustomTexts = (retrieved_products: Record<any, any>) => {
 
         const selectProductPantonesList = getSelectedProductPantones(product.id)
 
-        const pantone = getClosestColor(obj.firstColor.value, selectProductPantonesList);
+        const pantone = getClosestColor(obj.firstColor.value, selectProductPantonesList,color_type);
         if (pantone && pantone.pantone && pantone.pantone != 'undefined') {
           fill_color_pantone = pantone.pantone;
         }
         let outLine_color_pantone = obj.secondColor.name;
-        const opantone = getClosestColor(obj.secondColor.value, selectProductPantonesList);
+        const opantone = getClosestColor(obj.secondColor.value, selectProductPantonesList, color_type);
         if (opantone && opantone.pantone && opantone.pantone != 'undefined') {
           outLine_color_pantone = opantone.pantone;
         }

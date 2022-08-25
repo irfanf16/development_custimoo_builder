@@ -159,6 +159,10 @@ export default class CustomizationText extends Vue {
     return this.$store.getters.getSelectedProduct.productnames;
   }
 
+  get getColorType(){
+    return this.$store.getters.getColorType;
+  }
+
   public setOpenIndex(index: any) {
     this.openIndex = index;
   }
@@ -232,7 +236,7 @@ export default class CustomizationText extends Vue {
   public setColor(color: Record<any, any>) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     const selectProductPantonesList = getSelectedProductPantones()
-    let pantone = getClosestColor(color.value, selectProductPantonesList);
+    let pantone = getClosestColor(color.value, selectProductPantonesList,this.getColorType);
     let color_pantone = color.name;
     if (pantone && pantone.pantone && pantone.pantone != 'undefined') {
       color_pantone = pantone.pantone;

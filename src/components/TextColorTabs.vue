@@ -39,8 +39,9 @@
 <script lang="ts">
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
+import {getSelectedProductPantones} from "@/helpers/Helpers";
 
-import {getClosestColor, pantones, getPantoneColor} from '@/pantoneColor'
+import {getClosestColor, pantones, getColorEncoding} from '@/pantoneColor'
 
 @Component<TextColorTabs>({
   components: {
@@ -83,6 +84,10 @@ export default class TextColorTabs extends Vue {
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
+  get getColorType(): string {
+    return this.$store.getters.getColorType;
+  }
+
   public showColor(index: number) {
     this.selectAccordionIndex = index
   }
@@ -123,17 +128,18 @@ export default class TextColorTabs extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-   let pantone = getClosestColor(color.hex); // this is sub-menu other tab of text tab in menu
+    let selectProductPantoneList = getSelectedProductPantones();
+   let pantone = getClosestColor(color.hex,selectProductPantoneList,this.getColorType); // this is sub-menu other tab of text tab in menu
     if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
       this.pantoneColorVal = pantone.pantone;
     }
 
-    let pantoneColor = getClosestColor(color.hex)
+    let pantoneColor = getClosestColor(color.hex,selectProductPantoneList,this.getColorType)
     this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
   }
 
   public changePantoneColor() {
-   let pantoneColor = getPantoneColor(this.svgGroups[this.selectAccordionIndex].pantone)
+   let pantoneColor = getColorEncoding(this.svgGroups[this.selectAccordionIndex].pantone,this.getColorType)
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
       this.pantoneMessage = ''
