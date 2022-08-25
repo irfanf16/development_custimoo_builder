@@ -20,8 +20,6 @@ const get_rgbObject = (hexColor: string) => {
 
 const getClosestColor = (inputHex: string, pantonesArray: Record<any, any>[]= [], colorType = 'pantone') => {
   let RGBList: RGBColor[] = [];
-  console.log('Color Type');
-  console.log(colorType);
   let sample_pantones: Record<any, any> [] = [];
 
   let merged_colors: Record<any,any> [] = [];

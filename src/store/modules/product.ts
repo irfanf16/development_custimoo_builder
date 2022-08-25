@@ -333,8 +333,6 @@ const Product:Module<any, any> = {
       return new Promise((resolve,reject) => {
          http.get(`/get-configuration/${type}`).then((res) => {
           if(res.data.status_code === 200){
-            console.log('response');
-            console.log(res.data.result);
             commit('SET_COLOR_TYPE', res.data.result.value.color_type);
           }
           resolve(res);

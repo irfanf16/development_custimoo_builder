@@ -778,19 +778,14 @@ export default class Scene extends Vue {
         }
         if (!item.id.includes('inside')) {
           if (item.fill.includes('rgb')) {
-            console.log(item.fill);
             item.fill = rgbHex(item.fill).includes('#')?rgbHex(item.fill): '#' + rgbHex(item.fill);
           }
           let pantone_product_id = null;
           if(this.product_id){
             pantone_product_id = this.product_id;
           }
-          console.log(item);
           const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
           const pantoneColor = getClosestColor(item.fill, selectProductPantonesList,this.getColorType)
-          console.log(pantoneColor);
-          console.log(item.fill);
-          console.log('Color Checking');
 
           this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
         }
@@ -826,7 +821,6 @@ export default class Scene extends Vue {
     this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
 
     if (this.mainPreview) {
-      console.log(this.svgGroups);
       await this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
