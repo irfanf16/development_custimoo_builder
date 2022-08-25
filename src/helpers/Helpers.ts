@@ -489,13 +489,12 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 
           for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
             const custom_text_item = custom_text.items[items_index]
-            const converted_width = unitConversion(custom_text_item.width * custom_text_item.scaleX * selected_product.measurement_ratio)
-            const converted_height = unitConversion(custom_text_item.height * custom_text_item.scaleY * selected_product.measurement_ratio)
+            const setting = Store.getters.getSetting
             const text_item_object = {
               label: custom_text_item.label,
-              width: converted_width.value,
-              height: converted_height.value,
-              unit: converted_width.unit,
+              width: custom_text_item.originalWidth,
+              height: custom_text_item.originalHeight,
+              unit: setting.unit,
               svg: '',
               color:[] as Record<any, any>[]
             }
