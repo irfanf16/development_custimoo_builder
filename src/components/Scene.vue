@@ -533,9 +533,10 @@ export default class Scene extends Vue {
     object.setCoords()
   }
 
-  public async changeGroupColor(groupColors: Record<any, any>): void {
+  public async changeGroupColor(groupColors: Record<any, any>) {
     let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-    this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+    let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
+    texture.forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
       if (groupColors[item.id]) {
         item.set('fill', groupColors[item.id].color)
@@ -572,7 +573,8 @@ export default class Scene extends Vue {
     })
     this.frontCanvas.renderAll()
     if (this.back) {
-      this.backTexture.getObjects().forEach((item: Record<any, any>) => {
+      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
+      texture.forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
         if (groupColors[item.id]) {
           item.set('fill', groupColors[item.id].color);
@@ -632,7 +634,8 @@ export default class Scene extends Vue {
       }
     })
 
-    this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+    let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
+    texture.forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
       if (appliedDefaultColors[item.id]) {
         item.set('fill', appliedDefaultColors[item.id]);
@@ -641,7 +644,8 @@ export default class Scene extends Vue {
     this.frontCanvas.renderAll()
 
     if (this.back) {
-      this.backTexture.getObjects().forEach((item: Record<any, any>) => {
+      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
+      texture.forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
         if (appliedDefaultColors[item.id]) {
           item.set('fill', appliedDefaultColors[item.id]);
@@ -675,7 +679,8 @@ export default class Scene extends Vue {
       svgGroup.name = defaultSvgGroups[svgGroup.id].name
     })
 
-    this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+    let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
+    texture.forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
       if (appliedDefaultColors[item.id]) {
         item.set('fill', appliedDefaultColors[item.id]);
@@ -684,7 +689,8 @@ export default class Scene extends Vue {
     this.frontCanvas.renderAll()
 
     if (this.back) {
-      this.backTexture.getObjects().forEach((item: Record<any, any>) => {
+      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
+      texture.forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
         if (appliedDefaultColors[item.id]) {
           item.set('fill', appliedDefaultColors[item.id]);
@@ -723,7 +729,8 @@ export default class Scene extends Vue {
               const closestColor = getClosestColor('#000000', selectProductPantonesList)
               changeColor = { value: closestColor.hex, name: closestColor.name, pantone: closestColor.pantone }
             }
-            this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+            let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
+            texture.forEach((item: Record<any, any>) => {
               item.id = item.id.toLowerCase()
               if (key.toLowerCase() == item.id) {
                 item.set('fill', changeColor.value);
@@ -731,7 +738,8 @@ export default class Scene extends Vue {
             })
             this.frontCanvas.renderAll()
             if (this.back) {
-              this.backTexture.getObjects().forEach((item: Record<any, any>) => {
+              texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
+              texture.forEach((item: Record<any, any>) => {
                 item.id = item.id.toLowerCase()
                 if (key.toLowerCase() == item.id) {
                   item.set('fill', changeColor.value);
@@ -765,7 +773,8 @@ export default class Scene extends Vue {
   public async getSvgGroups() {
     this.svgGroups = []
     this.initialSvgGroups = []
-    this.frontTexture.getObjects().forEach((item: Record<any, any>) => {
+    let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
+    texture.forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
       if (!item.id.includes('noncustomizable') && !this.containsObject({ id: item.id })) {
         let count = 1
@@ -788,7 +797,8 @@ export default class Scene extends Vue {
     })
 
     if (this.backTexture) {
-      this.backTexture.getObjects().forEach((item: Record<any, any>) => {
+      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
+      texture.forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
         if (!item.id.includes('noncustomizable') && !this.containsObject({ id: item.id })) {
           let count = 1
