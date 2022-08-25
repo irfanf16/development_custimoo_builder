@@ -1,6 +1,5 @@
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
-<!--    <Header />-->
     <router-view/>
   </div>
 </template>
@@ -181,7 +180,6 @@ export default {
   methods:{
   }
 }
-Vue.config.devtools = true
 
 </script>
 
