@@ -497,7 +497,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               height: converted_height.value,
               unit: converted_width.unit,
               svg: '',
-              margin:'',
+              actualWidth:'',
+              actualHeight:'',
               color:[] as Record<any, any>[]
             }
 
@@ -526,7 +527,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                 '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
                 'viewBox="0 0 ' + boundingBox.x2 + ' ' + boundingBox.y1 +'"> \n' + dom_svg.outerHTML + '\n</svg>'
               text_item_object.svg = svg_with_tag
-              text_item_object.margin = boundingBox.y1
+              text_item_object.actualWidth = boundingBox.x2
+              text_item_object.actualHeight = boundingBox.y1
               text_item_object.color.push(text_color_info);
             }
 
