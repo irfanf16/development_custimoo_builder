@@ -489,14 +489,14 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 
           for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
             const custom_text_item = custom_text.items[items_index]
-            const setting = Store.getters.getSetting
+
             const text_item_object = {
               label: custom_text_item.label,
-              width: custom_text_item.originalWidth,
-              height: custom_text_item.originalHeight,
-              unit: setting.unit,
+              width: '',
+              height: '',
+              unit: '',
               svg: '',
-              color:[] as Record<any, any>[]
+              color: [] as Record<any, any>[]
             }
 
             if(Object.keys(path).length) {
@@ -516,13 +516,23 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
               const boundingBox = path.getBoundingBox()
               boundingBox.y1 = Math.abs(boundingBox.y1)
+              const width = boundingBox.x2 - boundingBox.x1
+              const height = boundingBox.y1 + boundingBox.y2
               const svg_string = path.toSVG()
               const parser = new DOMParser();
               const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
-              dom_svg.style.translate = '0px ' + boundingBox.y1 + 'px'
+              dom_svg.style.translate = '0px ' + height + 'px'
               const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
-                'viewBox="0 0 ' + boundingBox.x2 + ' ' + boundingBox.y1 +'"> \n' + dom_svg.outerHTML + '\n</svg>'
+                'viewBox="0 0 ' + width + ' ' + height +'"> \n' + dom_svg.outerHTML + '\n</svg>'
+
+
+              const converted_width = unitConversion(width * custom_text_item.scaleX * selected_product.measurement_ratio)
+              const converted_height = unitConversion(height * custom_text_item.scaleY * selected_product.measurement_ratio)
+
+              text_item_object.width = converted_width.value;
+              text_item_object.height = converted_height.value;
+              text_item_object.unit = converted_height.unit;
               text_item_object.svg = svg_with_tag
               text_item_object.color.push(text_color_info);
             }

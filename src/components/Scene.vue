@@ -1811,13 +1811,6 @@ export default class Scene extends Vue {
                   custom_text_item.scaleY = fabric_text.scaleY
                   custom_text_item.width = fabric_text.width
                   custom_text_item.height = fabric_text.height
-
-                  const width = (fabric_text.width as number * fabric_text.scaleX * this.measurementRatio)
-                  const height = (fabric_text.height as number * fabric_text.scaleY * this.measurementRatio)
-                  const converted_width = unitConversion(width)
-                  const converted_height = unitConversion(height)
-                  custom_text_item.originalWidth = converted_width.value
-                  custom_text_item.originalHeight = converted_height.value
                 }
 
                 self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: this.product_custom_texts[custom_text_index]})
