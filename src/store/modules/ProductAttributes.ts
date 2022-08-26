@@ -400,12 +400,6 @@ const ProductAttributes:Module<any, any> = {
         logo_url = original_logo
       }
       Vue.set(state.customLogos[state.selectedPrdId][payload.index], 'url', logo_url )
-     // if(logo.is_transparent===true){
-     //    logo_url = transparent_logo;
-     //  }else{
-     //    logo_url = original_logo;
-     //  }
-     // Vue.set(state.customLogos[payload.index], 'url', logo_url )
 
     },
     TOGGLE_LOGO_CHECK(state: Record<any, any>, payload:any) {
