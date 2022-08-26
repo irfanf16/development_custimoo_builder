@@ -31,10 +31,13 @@ import Scene from '@/components/Scene.vue'
       this.selected_style_index = this.getLastActiveProductData.style_index
     }
 
-    (this.$refs['designs'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)})
+    (this.$refs['designs'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
+    (this.$refs['designs'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{this.loadIt($event)});
+    console.log('mounted')
   },
   beforeDestroy() {
-    (this.$refs['designs'] as Record<any, any>).removeEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)})
+    (this.$refs['designs'] as Record<any, any>).removeEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
+    (this.$refs['designs'] as Record<any, any>).removeEventListener('touchmove', ($event:Record<any, any>)=>{this.loadIt($event)});
   }
 })
 
@@ -43,7 +46,8 @@ export default class DesignAvailable extends Vue {
 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   @Prop() activeTab!: number;
-  public selected_style_index = 0
+  public selected_style_index = 0;
+  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
@@ -67,6 +71,8 @@ export default class DesignAvailable extends Vue {
   public loadIt($event:Record<any, any>) {
     let designHt = $event.target.clientHeight/3
     if(designHt <= $event.target.scrollTop){
+      this.loadDesigns = true
+    }else if(this.mobileScreen){
       this.loadDesigns = true
     }
   }

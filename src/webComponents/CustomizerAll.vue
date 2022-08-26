@@ -8,7 +8,7 @@
 <script>
 import Vue from 'vue'
 import {LockerProducts} from "@/mixins/LockerProduct";
-import router from './../router'
+import router from './router'
 import store from '../store'
 import Navbar from '@/components/Navbar.vue';
 import Gleap from 'gleap';

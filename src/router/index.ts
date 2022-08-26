@@ -1,19 +1,19 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import Home from '../views/Home.vue'
-import Addresses from '../views/Addresses.vue'
-import Cart from '../views/Cart.vue'
-import Order from '../views/Order.vue'
-import OrderDetail from '../views/OrderDetail.vue'
-import Orders from '../views/Orders.vue'
-import ThreeD from '../views/ThreeD.vue'
-import ShareRoster from '../views/ShareRoster.vue'
-import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
-import OrderListing from "@/views/OrderListing.vue";
-import Dashboard from "@/views/Dashboard.vue";
-import Thankyou from "@/views/Thankyou.vue";
 import store from '@/store'
 
+const Home = ()=> import('../views/Home.vue')
+const Addresses = ()=> import('../views/Addresses.vue')
+const Cart = ()=> import('../views/Cart.vue')
+const Order = ()=> import('../views/Order.vue')
+const OrderDetail = ()=> import('../views/OrderDetail.vue')
+const Orders = ()=> import('../views/Orders.vue')
+// const ThreeD = ()=> import('../views/ThreeD.vue')
+const ShareRoster = ()=> import('../views/ShareRoster.vue')
+const CollectionViewPDF = ()=> import('@/views/CollectionViewPDF.vue')
+const OrderListing = ()=> import("@/views/OrderListing.vue")
+const Dashboard = ()=> import("@/views/Dashboard.vue")
+const Thankyou = ()=> import("@/views/Thankyou.vue")
 
 
 Vue.use(VueRouter)
@@ -59,11 +59,11 @@ const routes: Array<RouteConfig> = [
     name: 'Orders',
     component: Orders
   },
-  {
-    path: '/3d',
-    name: 'ThreeD',
-    component: ThreeD
-  },
+  // {
+  //   path: '/3d',
+  //   name: 'ThreeD',
+  //   component: ThreeD
+  // },
   {
     path:'/share/:product/:name',
     name: 'ShareUrl',
