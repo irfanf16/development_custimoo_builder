@@ -925,35 +925,6 @@ const ProductAttributes:Module<any, any> = {
     SET_EDITING_ROSTER_PLAYER_INDEX(state:Record<any, any>, payload){
       state.editing_roster_player_index = payload;
     },
-    SET_PRODUCT_CUSTOM_TEXTS_back(state:Record<any, any>, payload) {
-      if("index" in payload) {
-        /*
-         * By default we consider active product id to change custom text. If we want to update custom text if user wants
-         * to update custom text other than selected product then we get that product id
-       * */
-        const product_id: number = payload.product_id ? payload.product_id : state.selectedPrdId;
-        if(state.product_custom_texts[product_id][payload.index] == undefined) {
-          state.product_custom_texts[product_id].push(payload.value)
-          return false
-        }
-        else {
-          /*
-          * the index type should be one of "product", "product_text". if index_type = "product" then it means we want to update all custom texts of specific product.
-          * if index_type = "product_text" then it means we want to update product specific custom_text of product
-          * */
-          const index_type: string = payload.index_type ? payload.index_type : 'product_text';
-          //if index_type = "product" then we will update all custom texts of product
-          if(index_type == "product") {
-            Vue.set(state.product_custom_texts, product_id, payload.value)
-          }
-          else {
-            Vue.set(state.product_custom_texts[product_id], payload.index, payload.value)
-          }
-        }
-      } else {
-        state.product_custom_texts = payload;
-      }
-    },
     SET_PRODUCT_CUSTOM_TEXTS(state:Record<any, any>, payload) {
       if(payload.append) {
         //in case of append payload contains the custom texts of all retrieved products. It will contain arrays custom texts of all products
@@ -991,7 +962,9 @@ const ProductAttributes:Module<any, any> = {
             Vue.set(state.product_custom_texts, product_id, payload.value)
           }
           else {
-            Vue.set(state.product_custom_texts[product_id], payload.index, payload.value)
+            let product_custom_text = state.product_custom_texts[product_id][payload.index];
+            product_custom_text = {...product_custom_text, ...payload.value}
+            Vue.set(state.product_custom_texts[product_id], payload.index, product_custom_text)
           }
         }
       } else {

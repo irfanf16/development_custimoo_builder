@@ -1725,12 +1725,13 @@ export default class Scene extends Vue {
       self.product_custom_text_objects[custom_text_index] = null
     }
   }
-
+ /*
+ * This method check if custom text have following products. If yes then add custom text to the follwoing product
+ * */
   public async isCustomTextAllowed(custom_text_index: number) {
     let custom_text = this.product_custom_texts[custom_text_index];
-    let text_allowed_product_ids = [custom_text.product_id, ...custom_text.following_product_ids]
-    let is_custom_text_allowed = text_allowed_product_ids.includes(this.product_id)
-    if(this.product_id != custom_text.product_id) {
+    let is_custom_text_allowed = this.product_id == custom_text.product_id;
+    if(custom_text.following_product_ids.includes(this.product_id)) {
       const following_product_custom_text = this.allProductsCustomTexts[this.product_id]?.[custom_text_index];
       is_custom_text_allowed = following_product_custom_text && following_product_custom_text.type == custom_text.type
     }
@@ -1812,8 +1813,9 @@ export default class Scene extends Vue {
                   custom_text_item.width = fabric_text.width
                   custom_text_item.height = fabric_text.height
                 }
-
-                self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: this.product_custom_texts[custom_text_index]})
+                if(this.product_id == this.selectedProductId) {
+                  self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: { items: this.product_custom_texts[custom_text_index].items }})
+                }
                 fabric_text.setControlsVisibility(fabric_control_visibility)
                 if (!self.product_custom_text_objects[custom_text_index]) {
                   self.product_custom_text_objects[custom_text_index] = [];
