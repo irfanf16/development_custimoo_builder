@@ -104,19 +104,10 @@ import {getClosestColor} from "@/pantoneColor";
 
   },
   async mounted() {
-  /*  if(this.numberOfLogosAllowed > 0) {
-      this.allowedLogosLimit = this.numberOfLogosAllowed
-    }*/
-    // if(this.imageColors.length > 0 && this.initialExtractedColors.length ==0){
-    //   await  this.$store.dispatch("initialLogoColors", JSON.stringify(this.imageColors));
-    // }
     this.$root.$on('changeLogoTabIndex', (index:number) => {
       // here you need to use the arrow function
       this.tabIndex = index;
     })
-    /*this.$nextTick(function() {
-      // this.initFirstLogoTab(0)
-    });*/
   }
 })
 export default class LogoPlacementTabs extends Vue {
@@ -157,7 +148,6 @@ export default class LogoPlacementTabs extends Vue {
   public selectedSwatchIndex = -1
   public defSwatchColor = '#ffffff'
   public defSwatchPantone = '11-0601'
-  /*public custom_logo_tabs = getCustomLogos(true, true)*/
 
 
 
@@ -245,42 +235,6 @@ export default class LogoPlacementTabs extends Vue {
     console.log("tabidex", this.tabIndex)
   }
 
-/*  public async addTab_back(index: number){
-    if(this.numberOfLogos < this.allowedLogosLimit) {
-      let logoSetting: Record<any, any>
-      if(this.logosSetting[index]) {
-        logoSetting = this.logosSetting[index] as Record<any, any>
-      }else {
-        logoSetting = {
-          width: 200,
-          x_axis: 150,
-          y_axis: 190,
-          rotation: 0,
-          haveControls: true,
-          side: 'front'
-        }
-      }
-      let logo = {
-        id:null,
-        url: '',
-        width: logoSetting.width,
-        height: logoSetting.height,
-        x_axis: logoSetting.x_axis,
-        y_axis: logoSetting.y_axis,
-        rotation: logoSetting.rotation as number,
-        haveControls: Boolean(!logoSetting.is_locked),
-        side: logoSetting.side,
-        customLogo: true
-      }
-      await this.$store.dispatch('setCustomLogos', logo)
-      this.tabIndex = this.customLogos.length - 1
-      await this.$store.dispatch('setLogoTab', this.tabIndex)
-
-      let component = this.$refs['logoUploadModalOpener'+ index] as Record<any, any>
-      component[0].modalHandler()
-    }
-  }*/
-
   public removeLogoTab(index: number){
     let payload = {
       index: index
@@ -344,17 +298,8 @@ export default class LogoPlacementTabs extends Vue {
     this.$emit('setColorShuffled', false)
     if(this.imageColors && this.imageColors.length > 1) {
       this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
-        /*.filter((imageColor: Record<any, any>, icIdx) => {
-        return imageColor.hex
-      })*/;
     /*  let empty_logo_indexes: any = [];*/
       let imageColors = JSON.parse(JSON.stringify(this.imageColors))
-        /*.filter((imageColor: Record<any, any>, icIdx) => {
-        if(imageColor.hex == null) {
-          empty_logo_indexes.push(icIdx);
-        }
-        return imageColor.hex
-      })*/
 
       let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
         if (currentIndex !== 1) return previousValue;
@@ -368,10 +313,6 @@ export default class LogoPlacementTabs extends Vue {
           imageColors.reduce(shuffle)
         }
       }
-     /* empty_logo_indexes.forEach((emptyLogoIndex: number) => {
-        imageColors[emptyLogoIndex] = {hex: null, pantone: null, name: null};
-      });*/
-
 
       this.$store.dispatch("SET_LOGO_COLORS", imageColors);
       this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
