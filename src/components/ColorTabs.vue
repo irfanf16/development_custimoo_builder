@@ -59,6 +59,7 @@ import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 import {getClosestColor} from '@/pantoneColor'
 import ModalAction from "@/mixins/ModalAction";
+import {getSelectedProductPantones} from "@/helpers/Helpers";
 
 
 @Component<ColorTabs>({
@@ -103,6 +104,10 @@ export default class ColorTabs extends Mixins(ModalAction) {
     return this.$store.getters.getGroupColors
   }
 
+  get getColorType(){
+    return this.$store.getters.getColorType;
+  }
+
   public showColor(index: number) {
     this.selectTabIndex = index
   }
@@ -139,7 +144,8 @@ export default class ColorTabs extends Mixins(ModalAction) {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantoneColor = getClosestColor(color.hex)
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantoneColor = getClosestColor(color.hex,selectProductPantonesList, this.getColorType);
     this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone})
   }
 }

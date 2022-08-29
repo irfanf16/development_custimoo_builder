@@ -38,7 +38,7 @@
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
-import {getClosestColor, getPantoneColor} from '@/pantoneColor'
+import {getClosestColor, getColorEncoding} from '@/pantoneColor'
 import {getSelectedProductPantones} from "@/helpers/Helpers";
 
 @Component<LogoColorTabs>({
@@ -126,6 +126,10 @@ export default class LogoColorTabs extends Vue {
     return this.$store.getters.getSelectedProduct
   }
 
+  get getColorType(): string {
+    return this.$store.getters.getColorType;
+  }
+
   get svgGroups() {
     return this.$store.getters.getSvgGroups
   }
@@ -162,13 +166,14 @@ export default class LogoColorTabs extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantoneColor = getClosestColor(color.hex) // this is other tab of logo tab
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantoneColor = getClosestColor(color.hex,selectProductPantonesList,this.getColorType) // this is other tab of logo tab
     this.setSwatchColor({hex: pantoneColor.hex.toUpperCase(), name: pantoneColor.name, pantone: pantoneColor.pantone})
     this.pantoneColorVal = pantoneColor.pantone
   }
 
   public changePantoneColor() {
-    let pantoneColor = getPantoneColor(this.pantoneColorVal)
+    let pantoneColor = getColorEncoding(this.pantoneColorVal,this.getColorType);
     if (pantoneColor) {
       this.setSwatchColor({hex: pantoneColor.hex.toUpperCase(), name: pantoneColor.name, pantone: pantoneColor.pantone })
       this.$emit('update:defSwatchColor',  pantoneColor.hex)
@@ -181,7 +186,7 @@ export default class LogoColorTabs extends Vue {
 
   public setColor(color: Record<any, any>) {
     const selectProductPantonesList = getSelectedProductPantones()
-    let pantoneColor = getClosestColor(color.value, selectProductPantonesList)
+    let pantoneColor = getClosestColor(color.value, selectProductPantonesList,this.getColorType);
     this.$emit('update:defSwatchColor',  color.value)
     this.pantoneColorVal = pantoneColor.pantone
     this.setSwatchColor({hex: color.value, name: color.name, pantone: pantoneColor.pantone})

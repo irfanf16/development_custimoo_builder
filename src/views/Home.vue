@@ -406,7 +406,8 @@ Vue.filter('formatDate', function(value:string) {
     let self: Record<any, any> = this;
     this.is_shared_product = this.$route.params.name ?  true : false
 
-    await this.$store.dispatch('fetchGeneralSettings','measurement_unit')
+    await this.$store.dispatch('fetchGeneralSettings','measurement_unit');
+    await this.$store.dispatch('setColorType','color_type');
     this.setRecentLogos()
 
     if (this.hideColorSection){

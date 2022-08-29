@@ -209,6 +209,10 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     return this.$store.getters.getLogoUrl
   }
 
+  get getColorType(): string {
+    return this.$store.getters.getColorType;
+  }
+
 /*  get manageComponents(): [] {
     return this.$store.getters.getManageComponents
   }*/
@@ -340,7 +344,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     const selectProductPantonesList = getSelectedProductPantones()
     uniqueColors.forEach((color: string) => {
      // console.log(color)
-      let pantoneColor = getClosestColor(color, selectProductPantonesList)
+      let pantoneColor = getClosestColor(color, selectProductPantonesList, this.getColorType);
       //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })

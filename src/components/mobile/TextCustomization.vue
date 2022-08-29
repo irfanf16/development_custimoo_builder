@@ -175,12 +175,13 @@ export default class TextCustomization extends Vue {
   }
 
   public changeColor(color: Record<any, any>) {
-    let pantone = getClosestColor(color.hex); // for other color in
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantone = getClosestColor(color.hex,selectProductPantonesList, this.getColorType); // for other color in
     if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
       this.pantoneColorVal = pantone.pantone;
     }
 
-    let pantoneColor = getClosestColor(color.hex)
+    let pantoneColor = getClosestColor(color.hex,selectProductPantonesList,this.getColorType);
     this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
   }
 
@@ -208,6 +209,10 @@ export default class TextCustomization extends Vue {
       }
     })
     return locker_colors
+  }
+
+  get getColorType(){
+    return this.$store.getters.getColorType;
   }
 
   get customTexts(): [Record<any, any>] {
@@ -308,7 +313,7 @@ export default class TextCustomization extends Vue {
   public setColor(color: Record<any, any>) {
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomTextObject)), action: 'customTexts' })
     const selectProductPantonesList = getSelectedProductPantones()
-    let pantone = getClosestColor(color.value, selectProductPantonesList);
+    let pantone = getClosestColor(color.value, selectProductPantonesList, this.getColorType);
     let color_pantone = color.name;
     // console.log(pantone.pantone);
     if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
