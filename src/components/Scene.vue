@@ -1952,6 +1952,12 @@ export default class Scene extends Vue {
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = fabric_object.get("angle");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleX = fabric_object.get("scaleX");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleY = fabric_object.get("scaleY");
+    const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
+    const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
+    const converted_width = unitConversion(width)
+    const converted_height = unitConversion(height)
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalWidth = converted_width.value;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height.value;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
   }
