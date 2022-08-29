@@ -802,12 +802,12 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     return sum;
   }
 
-  public async addToCartMixin() {
+  public async addToCartMixin(product_fonts: Record<any, any>[]) {
     let self: Record<any, any> = this;
     try {
       self.$store.dispatch('setCartLoading',true);
       let collection_view = self.$store.getters.getCollectionView;
-      let cart_product = await getActiveProductData();
+      let cart_product = await getActiveProductData(product_fonts);
       if(cart_product){
         if(Object.prototype.hasOwnProperty.call(cart_product,'production_url') && (cart_product as Record<any,any>).production_url){
           let content:string = await fetchUrlContent((cart_product as Record<any,any>).production_url);
