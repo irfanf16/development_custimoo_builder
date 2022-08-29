@@ -12,17 +12,12 @@ import {
 } from '../../helpers/Helpers'
 
 import {
-  fontsColorsManipulation, fontsList,
-  getLogoObject,
   getLogoSettings,
   setLogoSettings,
-  sortTextsArray,
   getProductLogoSetting
 } from "../../helpers/Helpers"
-import {log} from "fabric/fabric-impl";
-import {getClosestColor} from "@/pantoneColor";
 import product from "@/store/modules/product";
-import {findIndex, flatten, isEmpty} from "lodash";
+import {isEmpty} from "lodash";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,

@@ -74,27 +74,10 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
     return this.$store.getters.getSelectedProduct
   }
 
-  // @Watch('recentLogos',{deep:true,immediate: true})
-  //
-  // recentLogosChanged(newLogos: []) {
-  //   alert()
-  // }
-
   public async deleteRecentLogo(recentLogo:any) {
     try {
-      // if(!recentLogo.canLogoDelete) {
-      //   const ok = await this.ref['delete-logo-ref'].showConfirm()
-      //   if (ok) {
-      //     await this.$store.dispatch('logoutCustomer');
-      //     await this.$store.commit('SET_RECENT_LOGOS')
-      //   }
-      // }
-      // return false
       const resp = await http.delete(`recent/logos/delete/${recentLogo.id}`);
       this.showToast(resp.data.message,'SUCCESS')
-      // let updated_logos = this.$store.getters.getRecentLogos.filter((recent_logo:any) => {
-      //   return recent_logo.id != recentLogo.id
-      // })
       this.$store.commit('SET_RECENT_LOGOS')
     }
     catch (e){
@@ -108,7 +91,6 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
       if(logo)
         return logo.id == recentLogo.id
     })
-  //  if(logo_exists || !recentLogo.canLogoDelete)
     if(logo_exists)
       return false
 

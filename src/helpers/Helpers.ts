@@ -13,6 +13,7 @@ const getLogoSettingsObject = () => {
     id: null,
     product_id: null,
     product_style_id: null,
+    following_product_ids: null,
     rotation: 0,
     width: 57,
     height: 57,

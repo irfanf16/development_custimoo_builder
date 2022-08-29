@@ -108,7 +108,7 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
-import {getLogoObject, getSelectedProductPantones, getUploadedLogoObject, setLogoSettings} from '../helpers/Helpers'
+import { getSelectedProductPantones, getUploadedLogoObject, setLogoSettings} from '../helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import ModalAction from "@/mixins/ModalAction";
 

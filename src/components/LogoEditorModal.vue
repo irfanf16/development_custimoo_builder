@@ -94,7 +94,7 @@
 
 <script lang="ts">
 
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import CreateLockerRoomModal from '@/components/LogoEditorModal.vue'
 
 import ColorTabs from "@/components/ColorTabs.vue";

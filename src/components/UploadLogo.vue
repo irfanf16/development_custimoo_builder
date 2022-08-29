@@ -90,11 +90,8 @@ import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
 import {
-  fileToBase64,
-  getLogoObject,
   getSelectedProductPantones,
   getUploadedLogoObject, processColorsCustom,
-  setCustomLogo,
   setLogoSettings
 } from '../helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
@@ -272,7 +269,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
           custom_logo: custom_logo
         }
         this.$store.commit('customLogos', payload)
-        // await setCustomLogo(customObj, this.customLogoIndex)
         this.hideModal()
         await this.getLogoColors()
         this.$store.commit('SET_RECENT_LOGOS');
