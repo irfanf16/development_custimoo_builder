@@ -1,21 +1,6 @@
 <template>
-<!--  <div class="upload-logo-opener">-->
-<!--    <span class="close" @click="hideAll"><BIconX /></span>-->
-
-<!--    <div class="logo-option-area mb-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">-->
-<!--      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground">-->
-<!--        Remove Logo Background-->
-<!--      </b-form-checkbox>-->
-
   <div style="padding-bottom: 10px" class="upload-logo-opener" v-if="customLogos">
-
     <div class="logo-option-area mb-3 mt-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-
-<!--      <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
-        <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="A">Remove Logo Background</b-form-radio>
-        <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="B">Remove Smart Logo Background</b-form-radio>
-      </b-form-group>-->
-
       <div class="w-100 text-left position-relative logo-edit-btn-updated">
         <div class="d-sm-block d-lg-block continue-btn-holder pt-1" style="padding: 0">
           <b-button v-if="!mobileScreen" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">Logo Editor</b-button>
@@ -23,8 +8,6 @@
         </div>
       </div>
     </div>
-
-
     <div class="btn btn-secondary modal-handler" >
       <div class="upload-box position-relative" :class="{'pulse-animation': !(showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url)}" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
         <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
@@ -67,8 +50,6 @@
     <b-button v-if="mobileScreen" style="position:absolute; left: 0; top: -38px; width: auto" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">
       <b-icon-pencil fl /> Edit Logo
     </b-button>
-
-
     <modal :width="500" :resizable="true" :scrollable="true" height="auto" :reset="true"
            :shiftY="0" name="upload-logo-disclaimer" id="upload-logo-disclaimer" size="md" :hide-footer="true"
            :hide-header="true" class="upload-logo-disclaimer" ref="upload-logo-disclaimer">
@@ -215,10 +196,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   get logoUrl(): Record<any, any>[] {
     return this.$store.getters.getLogoUrl
   }
-
-/*  get manageComponents(): [] {
-    return this.$store.getters.getManageComponents
-  }*/
 
   public modalHandler() {
     if (this.open_modal) {
@@ -381,10 +358,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
       this.$store.dispatch('toggleLogoBackgroud', payload)
     }
   }
-
-  // public changeLogoBackground(val) {
-  //
-  // }
 
   public updateLogoFromLogoEditor(colors = []) {
     this.colors = colors
@@ -584,21 +557,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
       font-size: 32px;
     }
   }
-
-  //.remove-img {
-  //  position: absolute;
-  //  left: auto;
-  //  width: 20px;
-  //  height: 20px;
-  //  border-radius: 50%;
-  //  background: #F8E1E2;
-  //  //display: flex;
-  //  //flex-wrap: wrap;
-  //  //justify-content: center;
-  //  //align-items: center;
-  //  font-size: 10px;
-  //  color: #D53943;
-  //}
 }
 
 .upload-logo-content {

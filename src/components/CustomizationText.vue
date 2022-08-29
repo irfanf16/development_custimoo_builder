@@ -204,9 +204,9 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
       let self:Record<any, any> = this;
       let updated_custom_text = this.product_custom_texts[custom_text_index]
       updated_custom_text.value = updatedVal;
-      self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: updated_custom_text})
+      self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: {value: updatedVal}})
       updated_custom_text.following_product_ids.forEach((following_product_id: number) => {
-        self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: following_product_id, value: updated_custom_text})
+        self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: following_product_id, value: {value: updatedVal}})
       })
       self.$eventBus.$emit("customTextUpdated", {
         emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: updated_custom_text

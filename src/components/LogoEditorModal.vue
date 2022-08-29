@@ -41,16 +41,6 @@
 
             <div style="width: 50%" class="child-check" v-if="this.$store.getters.getColorCheck">
               <div>
-                <!-- <b-button style="width:36px !important; height: 36px;" class="color-circle"
-                  :id="'colors-' + customLogoIndex" @click="toggleColorTabs()" :style="{ background: selectedColor }">
-                </b-button>
-                <b-popover :show.sync="colorTabClick" :target="'colors-' + customLogoIndex" custom-class="share-tooltip"
-                  triggers="click">
-                  <span @click="closeColorTabs" class="modal-close">
-                    <BIconX />
-                  </span>
-                  <ColorTabs :productColors="productColors" onlyColorsTabs="true" @setColorOfLogo="setColorOfLogo" />
-                </b-popover> -->
                 <b-button style="width:36px !important; height: 36px;" class="color-circle"
                   :id="'colors-' + customLogoIndex" @click="toggleLogoColorModal()"
                   :style="{ background: selectedColor }">
