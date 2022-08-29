@@ -1911,9 +1911,15 @@ export default class Scene extends Vue {
         })
       }
       if (render_front_canvas) {
+        if (this.productType == 'customized') {
+          this.frontModel.bringToFront()
+        }
         this.frontCanvas.renderAll()
       }
       if (render_back_canvas) {
+        if (this.productType == 'customized') {
+          this.backModel.bringToFront()
+        }
         this.backCanvas.renderAll()
       }
     }
