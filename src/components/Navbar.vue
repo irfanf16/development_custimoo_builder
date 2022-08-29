@@ -1,5 +1,10 @@
 <template>
     <ul class="d-flex gap-3 main-nav">
+      <li class="position-relative" v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin') && showCartIcon">
+        <a  class="icon mr-0" @click="openCartModal">
+          <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
+        </a>
+      </li>
       <li>
         <router-link class="d-inline-flex align-items-center fs-2 font-weight-bolder" active-class="active" :to="'/'" exact>
           <svg style="width:1.3em;height:1.3em" viewBox="0 0 24 24">
@@ -42,15 +47,33 @@
 </template>
 
 <script>
-
+import ModalAction from "@/mixins/ModalAction";
 export default {
     name: 'Navbar',
+    mixins:[ModalAction],
     components: {},
     computed:{
       isCustomerAuthenticated: function () {
         return this.$store.getters.isCustomerAuthenticated;
+      },
+      showCartIcon:function(){
+        return this.$store.getters.getCartIconShow;
+      },
+      cartItemsCount:function(){
+        return this.$store.getters.getCartItemsCount
+      },
+      company: function (){
+        return this.$store.getters.getCompany
       }
-    }
+
+    },
+    methods:{
+      openCartModal(){
+        if(this.cartItemsCount > 0) {
+          this.showVModal('cart-modal')
+        }
+      }
+  }
 }
 </script>
 

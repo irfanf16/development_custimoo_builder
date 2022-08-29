@@ -22,6 +22,7 @@ const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
     searchLoader: false,
+    showLoader:true,
     lockerActiveTabIndex:0,
     lockerTabsIndex:0,
     isShareDesign : false,
@@ -108,7 +109,7 @@ const ProductAttributes:Module<any, any> = {
     hideSaveLockerButton: false,
     product_custom_texts: {},
     //could be locker_product, cart_product, order_product
-    product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null },
+    product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null},
     last_active_product_data: {
       //todo updating this object make sure to do same update on LockerProduct.ts file method resetLastActiveProductData()
       category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
@@ -991,7 +992,10 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     REMOVE_ROSTER_ITEM(state:Record<any, any>, payload: number) {
-     state.products_rosters[state.selectedPrdId].splice(payload, 1)
+      state.products_rosters[state.selectedPrdId].splice(payload, 1)
+    },
+    SET_SHOW_LOADER(state:Record<any,any>,payload){
+      state.showLoader = payload;
     }
   },
   getters: {
@@ -1224,6 +1228,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getProductsNextPageNo(state:Record<any,any>) {
       return state.products_next_page_no;
+    },
+    getShowLoader(state:Record<any,any>){
+      return state.showLoader;
     }
   },
   actions: {
@@ -1535,6 +1542,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setProductsRosters({commit}, payload) {
       commit('SET_PRODUCTS_ROSTERS', payload)
+    },
+    setShowLoader({commit},payload){
+      commit("SET_SHOW_LOADER",payload);
     }
   }
 }

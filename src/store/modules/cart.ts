@@ -8,7 +8,9 @@ const Cart:Module<any, any> = {
     cart_items: [],
     shipping_address: null,
     show_cart_modal:false,
-    added_to_cart: false
+    added_to_cart: false,
+    cart_loading:false,
+    cart_icon_show:false,
   },
   getters: {
     getCartItemsCount(state:Record<any, any>){
@@ -30,6 +32,12 @@ const Cart:Module<any, any> = {
     getAddedToCart(state:Record<any, any>){
       return state.added_to_cart;
     },
+    getCartLoading(state:Record<any,any>){
+      return state.cart_loading;
+    },
+    getCartIconShow(state:Record<any,any>){
+      return state.cart_icon_show;
+    },
   },
   mutations: {
     ADD_TO_CART(state: Record<any, any>, payload: boolean){
@@ -43,7 +51,13 @@ const Cart:Module<any, any> = {
     },
     SHOW_CART_MODAL(state: Record<any, any>, payload: boolean){
       state.show_cart_modal = payload
-    }
+    },
+    SET_CART_LOADING(state:Record<any,any>,payload:boolean){
+      state.cart_loading = payload;
+    },
+    SET_CART_ICON_SHOW(state:Record<any,any>, payload:boolean){
+      state.cart_icon_show = payload;
+    },
   },
   actions: {
     addToCart({commit},payload){
@@ -82,6 +96,12 @@ const Cart:Module<any, any> = {
       }
 
       return address
+    },
+    setCartLoading({commit},payload){
+      commit('SET_CART_LOADING',payload);
+    },
+    setCartIconShow({commit},payload){
+      commit("SET_CART_ICON_SHOW",payload);
     }
   }
 }
