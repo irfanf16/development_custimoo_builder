@@ -53,7 +53,7 @@
     </modal>
 
     <div class="d-lg-none">
-      <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
+      <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" :products_fonts="products_fonts" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
       <OrderDetailsTab :products_fonts="products_fonts" @open-add-to-locker="openAddToLocker" ref="order-details" />
