@@ -5788,6 +5788,14 @@ $fontSize: 0.5;
             overflow: hidden;
         }
 
+        & + .outline-slider-area {
+            &>div{
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+        }
+
         .tabs{
             max-width: 100%;
             overflow: hidden;

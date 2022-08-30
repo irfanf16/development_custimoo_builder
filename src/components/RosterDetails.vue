@@ -125,7 +125,7 @@
         </button>
       </template>
       <template v-else-if="!getCartLoading">
-        <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin"
+        <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
                 :disabled="canvasImage.scene == null">
           Add to Cart
         </button>
@@ -157,6 +157,7 @@ import { rosterDefaultItem } from "@/helpers/Helpers";
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   /* component props starts */
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: false}) lockerRosters: Record<any, any>[]
   @Prop({ required: true }) productSizes!: any
 
