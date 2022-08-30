@@ -1286,16 +1286,16 @@ const parseSvgString = async (svg_string:string, factory_product_content: Record
 
 const unitConversion = (value:number) => {
   const setting = Store.getters.getSetting
-  switch( setting.value.conversion_operator ) {
+  switch( setting.conversion_operator ) {
     case 'multiply':
-      return { value: (value * (parseFloat(setting.value.conversion_value))).toFixed(1), unit: setting.value.unit }
+      return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
       break;
     case 'divide':
-      return { value: (value / (parseFloat(setting.value.conversion_value))).toFixed(1), unit: setting.value.unit }
+      return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
       break;
     default: {
       const value_string = value ? value.toString() : '';
-      return {value: parseFloat(value_string).toFixed(1), unit: setting.value.unit}
+      return {value: parseFloat(value_string).toFixed(1), unit: setting.unit}
     }
   }
 }
