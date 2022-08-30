@@ -5742,6 +5742,77 @@ $fontSize: 0.5;
     display: none !important;
 }
 
+.show_hide_text{
+    .nav-tabs{
+        @extend .theme-scroll-h;
+        
+        display: flex;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        gap: 10px;
+        overflow-x: auto;
+        margin-top: 0.5rem;
+        padding-left: 0;
+        padding-right: 0;
+
+        .nav-item{
+            &:only-child{
+                display: none;
+            }
+
+            a{
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+        }
+    }
+}
+
+.show_hide_text.customization-tabs{
+    max-width: 100%;
+
+    @media only screen and (min-width: 992px){
+        margin: 0;
+    }
+
+    .text-color-holder.customization-tabs{
+        overflow: hidden;
+        max-width: 100%;
+
+        @media only screen and (min-width: 992px){
+            margin: 0;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .tabs{
+            max-width: 100%;
+            overflow: hidden;
+
+            @media (min-width:992px){
+                max-width: 100%;
+                overflow: hidden;
+            }
+
+            .color-holder{
+                @extend .theme-scroll;
+                margin-top: 15px;
+            }
+        }
+
+
+        .customization-tabs{
+            @media only screen and (min-width: 992px){
+                margin: 0;
+                max-width: 100%;
+            }
+        }
+    }
+}
+
 .cartAnim{
     position: absolute;
     opacity: 0;
