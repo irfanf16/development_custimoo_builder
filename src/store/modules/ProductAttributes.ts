@@ -908,7 +908,7 @@ const ProductAttributes:Module<any, any> = {
         //in case of append payload contains the custom texts of all retrieved products. It will contain arrays custom texts of all products
         const products_custom_texts = payload.value;
         products_custom_texts.forEach((product_custom_texts: Record<any, any>[]) => {
-          const product_id = product_custom_texts.length > 0 ? product_custom_texts[0].product_id : null;
+          const product_id = product_custom_texts && product_custom_texts.length > 0 ? product_custom_texts[0].product_id : null;
           if(product_id) {
             Vue.set(state.product_custom_texts, product_id, product_custom_texts)
           }
