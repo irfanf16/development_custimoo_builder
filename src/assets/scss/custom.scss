@@ -466,6 +466,27 @@ button {
     }
 }
 
+.h-100 {
+    & > .customization-tabs {
+        & > .tabs {
+            & >.tab-content {
+                max-height: calc(100vh - 250px);
+                // max-height: calc(100vh - 230px);
+                //overflow-y: auto;
+                //&::-webkit-scrollbar{
+                //    width: 5px;
+                //}
+                //&::-webkit-scrollbar-track {
+                //    background: #f1f1f1;
+                //}
+                //&::-webkit-scrollbar-thumb {
+                //    background: #219F84;
+                //}
+            }
+        }
+    }
+}
+
 .customization-tabs {
     position: fixed;
     left: 0;
@@ -1490,19 +1511,19 @@ button {
         }
     }
 
-    .tab-content {
-        max-height: calc(100vh - 250px);
-        //overflow-y: auto;
-        //&::-webkit-scrollbar{
-        //    width: 5px;
-        //}
-        //&::-webkit-scrollbar-track {
-        //    background: #f1f1f1;
-        //}
-        //&::-webkit-scrollbar-thumb {
-        //    background: #219F84;
-        //}
-    }
+    // .tab-content {
+    //     // max-height: calc(100vh - 250px);
+    //     //overflow-y: auto;
+    //     //&::-webkit-scrollbar{
+    //     //    width: 5px;
+    //     //}
+    //     //&::-webkit-scrollbar-track {
+    //     //    background: #f1f1f1;
+    //     //}
+    //     //&::-webkit-scrollbar-thumb {
+    //     //    background: #219F84;
+    //     //}
+    // }
 
     .logo-placement-holder {
         display: flex;
@@ -5740,6 +5761,94 @@ $fontSize: 0.5;
 
 [title='Powered by marker.js']{
     display: none !important;
+}
+
+.show_hide_text{
+    .nav-tabs{
+        @extend .theme-scroll-h;
+        
+        display: flex;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        gap: 10px;
+        overflow-x: auto;
+        margin-top: 0.5rem;
+        padding-left: 0;
+        padding-right: 0;
+
+        &:empty{
+            display: none;
+        }
+
+        .nav-item{
+            &:only-child{
+                display: none;
+            }
+
+            a{
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+        }
+    }
+}
+
+.show_hide_text.customization-tabs{
+    max-width: 100%;
+
+    @media only screen and (min-width: 992px){
+        margin: 0;
+        height: auto;
+        max-height: 10000px ;
+    }
+
+    .text-color-holder.customization-tabs{
+        overflow: hidden;
+        max-width: 100%;
+
+        @media only screen and (min-width: 992px){
+            margin: 0;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        & + .outline-slider-area {
+            flex-direction: column-reverse;
+            gap: 10px;
+
+            &>div{
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+        }
+
+        .tabs{
+            max-width: 100%;
+            overflow: hidden;
+
+            @media (min-width:992px){
+                max-width: 100%;
+                overflow: hidden;
+            }
+
+            .color-holder{
+                @extend .theme-scroll;
+                margin-top: 15px;
+            }
+        }
+
+
+        .customization-tabs{
+            @media only screen and (min-width: 992px){
+                margin: 0;
+                max-width: 100%;
+            }
+        }
+    }
 }
 
 .cartAnim{
