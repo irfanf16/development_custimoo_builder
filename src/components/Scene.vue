@@ -29,6 +29,7 @@ import {find} from "lodash";
     let self: Record<any, any> = this;
     self.$eventBus.$on("customTextUpdated", this.addTextsNew)
     self.$eventBus.$on("customTextRemoved", self.deleteExistingTextsFromCanvas)
+    self.$eventBus.$on("resetTextsCanvas", self.resetTextsFromCanvas)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -241,7 +242,7 @@ export default class Scene extends Vue {
   public viewportTransform: any
   public drawLines = false
   public product_custom_texts: Record<any, any>[] = []
-  public product_custom_text_objects: Record<any, any>|null[] = []
+  public product_custom_text_objects: Record<any, any>[] | null[] = []
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -1717,6 +1718,23 @@ export default class Scene extends Vue {
         text: 'Size ' + converted_width.value + converted_width.unit + ' x ' + converted_height.value + converted_height.unit,
         visible: true
       }).bringToFront()
+    }
+  }
+
+  public async resetTextsFromCanvas() {
+    if(this.product_custom_text_objects) {
+      for (let objectIndex = 0; objectIndex < this.product_custom_text_objects.length; objectIndex++) {
+        const custom_text = this.product_custom_text_objects[objectIndex] as Record<any, any>
+        if(custom_text != null) {
+          for(let i = 0; i < custom_text.length; i++) {
+            this.frontCanvas.remove(custom_text[i])
+            if(this.back) {
+              this.backCanvas.remove(custom_text[i])
+            }
+          }
+        }
+      }
+      this.product_custom_text_objects = []
     }
   }
 

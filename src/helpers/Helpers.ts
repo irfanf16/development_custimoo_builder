@@ -623,55 +623,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
   })
 }
 
-const initCustomTexts = (retrieved_products: Record<any, any>) => {
-  retrieved_products.forEach((product:any) => {
-    const custom_texts = Store.getters.getCustomTexts(product.id)
-    const color_type = Store.getters.getColorType;
-    if(!custom_texts || !(custom_texts && custom_texts.length)) {
-      product.productnames.forEach(async (productName: Record<any, any>, index: number) => {
-        const obj = fontsColorsManipulation(product)
-        //calculate colors pantone on init
-        let fill_color_pantone = obj.firstColor.name;
-
-        const selectProductPantonesList = getSelectedProductPantones(product.id)
-
-        const pantone = getClosestColor(obj.firstColor.value, selectProductPantonesList,color_type);
-        if (pantone && pantone.pantone && pantone.pantone != 'undefined') {
-          fill_color_pantone = pantone.pantone;
-        }
-        let outLine_color_pantone = obj.secondColor.name;
-        const opantone = getClosestColor(obj.secondColor.value, selectProductPantonesList, color_type);
-        if (opantone && opantone.pantone && opantone.pantone != 'undefined') {
-          outLine_color_pantone = opantone.pantone;
-        }
-
-        const text = {
-          text: '',
-          type: productName.type,
-          width: productName.width,
-          height: productName.height,
-          x_axis: productName.x_axis,
-          y_axis: productName.y_axis,
-          rotation: productName.rotation,
-          name_of_placement: productName.name_of_placement,
-          haveControls: Boolean(!productName.is_locked),
-          outlineEnabled: Boolean(productName.outline_enabled),
-          side: productName.side,
-          fontFamily: fontsList(product)[0].value,
-          fillColor: obj.firstColor.value,
-          fillColorPantone: fill_color_pantone,
-          outLineColor: obj.secondColor.value,
-          outLineColorPantone: outLine_color_pantone,
-          outLineWidth: 0,
-          textIndex: index,
-          selectColor: false
-        }
-        await Store.dispatch('setCustomTexts', {index: index, text: text, prd_id: product.id})
-      })
-    }
-  });
-}
-
 const initCustomLogos = (retrieved_products: Record<any, any>) => {
   retrieved_products.forEach((product: Record<any, any>) => {
     if(product.is_logo_allowed) {
@@ -845,56 +796,14 @@ const getPermissions = async () => {
   }
 }
 
-//todo remove this method after finalizing custom texts
-const getNewCustomTexts = async (product_ids_string: string, custom_text_types_string: string, count= 1) => {
-  const custom_texts: Record<any, any> = {};
-  const product_ids: string[] = product_ids_string.split(",");
-  product_ids.forEach((product_id: string) => {
-    custom_texts[product_id] = []
-    let x_axis = 200
-    let y_axis = 100
-    const custom_text_types = custom_text_types_string.split(",")
-    for(let i=0; i<count; i++) {
-      const custom_text_type_count: string[] = custom_text_types[i].split(":");
-      const custom_text_type = custom_text_type_count[0]
-      const custom_text_type_child_count = custom_text_type_count.length == 2 ? custom_text_type_count[1] : 1;
-      const custom_text_obj: Record<any, any> = {
-        product_id: product_id,
-        type: custom_text_type,   //name, number, team_name
-        label: `${custom_text_type}_${product_id}`,
-        value: "",
-        following_products: false,
-        following_product_ids: [],
-        active_item_index: 0,
-        items: []
-      }
-      for(let i=0; i < custom_text_type_child_count; i++) {
-        custom_text_obj.items.push({
-          label: `item_${i}`,
-          placement:[0,1].includes(i) ? 'back' : 'front',
-          width: 50,
-          height: 50,
-          x_axis: x_axis,
-          y_axis: y_axis,
-          rotation: 0,
-          outline_enabled: true,
-          outline_width: 2,
-          font_family: "AGENCYB",
-          color: "#F4F5F0",
-          color_pantone: "WHITE",
-          outline_color:"#292A2D",
-          outline_color_pantone: "BLACK",
-          arc_text_allowed: false,
-          is_locked: false,
-          selected: true
-        })
-        x_axis += 60;
-        y_axis += 60
-      }
-      custom_texts[product_id].push(custom_text_obj)
+const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[]) => {
+  const product_texts = Store.getters.getCustomTexts(true)
+  const retrieved_products_custom_texts = retrieved_products.map((retrieved_product: Record<any, any>) => {
+    if(retrieved_product.product_texts && !product_texts[retrieved_product.id]) {
+      return JSON.parse(JSON.stringify(retrieved_product.product_texts)) //remove two way binding for reset function
     }
   })
-  return custom_texts;
+  Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
 }
 
 const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
@@ -1344,6 +1253,6 @@ export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomLogos, initCustomTexts, rosterDetailsInit, getSelectedProductPantones, getNewCustomTexts, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
+  getUploadedLogoObject, initCustomLogos, rosterDetailsInit, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser
 };

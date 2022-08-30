@@ -1290,7 +1290,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public async resetStore(){
-    let self = this;
+    const self: Record<any, any> = this;
 
     const ok = await this.ref['reset-changes'].showConfirm()
 
@@ -1309,11 +1309,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       // }
       this.updateOrderItemProducts = null;
       this.$store.dispatch('resetStore')
+      self.$eventBus.$emit('resetTextsCanvas')
       this.$store.dispatch('setTabMain',{value: 0});
       (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
       this.$store.dispatch('SET_LOGO_COLORS', [])
       this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
-      await this.retrieveProducts()
+      // await this.retrieveProducts()
+      //todo need to call retrieveProducts only in edit mode
     }
 
     if(this.mobileScreen){

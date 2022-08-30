@@ -1,12 +1,10 @@
 import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
-import get = Reflect.get;
-import {rosterDefaultItem} from "@/helpers/Helpers";
+import { rosterDefaultItem, setRetrievedProductsCustomTexts } from '@/helpers/Helpers'
 import {
   getRosterDetailDefaultObject,
   initCustomLogos,
-  initCustomTexts,
   rosterDetailsInit,
   setCustomLogo
 } from '../../helpers/Helpers'
@@ -98,7 +96,6 @@ const ProductAttributes:Module<any, any> = {
     editLockerProduct: [],
     canvas_ready: false,
     notifications:[],
-    customTextObjects:[],
     customLogoObjects:[],
     cartItemId:'',
     editCart: {
@@ -113,7 +110,7 @@ const ProductAttributes:Module<any, any> = {
     last_active_product_data: {
       //todo updating this object make sure to do same update on LockerProduct.ts file method resetLastActiveProductData()
       category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
-      page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
+      page_no: 1, customized: true, personalized: false, product_custom_texts: {}, custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
       roster_detail: [],
     },
     editing_roster_player_index: 0,
@@ -714,8 +711,7 @@ const ProductAttributes:Module<any, any> = {
         cartItemId: ''
       }
 
-      state.rosterDetails = {}
-      rosterDetailsInit(state.products)
+      // state.products_rosters = {}
 
       state.selectedIndex = 0;
       state.styleIndex = 0 ;
@@ -734,9 +730,8 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
-      state.customTextObjects = [];
-      state.customTexts = {}
-      initCustomTexts(state.products)
+      state.product_custom_texts = {}
+      setRetrievedProductsCustomTexts(state.products)
     },
     RESET_CUSTOM_LOGOS: (state: Record<any, any>) => {
       state.logoTabIndex = 0;
@@ -865,13 +860,6 @@ const ProductAttributes:Module<any, any> = {
       state.canvasImage.ref_front = payload.scene.$refs.front
       state.canvasImage.ref_back = payload.scene.$refs.back
       state.canvasImage.scene = payload.scene
-    },
-    UPDATE_CUSTOM_TEXT_OBJECTS(state:Record<any, any>, payload){
-      if(Object.prototype.hasOwnProperty.call(payload, "index")) {
-        state.customTextObjects[payload.index] = payload.data
-      } else {
-        state.customTextObjects.push(payload.data)
-      }
     },
     UPDATE_CUSTOM_LOGO_OBJECTS(state:Record<any, any>, payload){
       if(Object.prototype.hasOwnProperty.call(payload, "index")) {
@@ -1201,9 +1189,6 @@ const ProductAttributes:Module<any, any> = {
     },
     getUsingColorLogos(state:Record<any, any>){
       return state.using_logo_colors
-    },
-    customTextObjects(state:Record<any, any>){
-      return state.customTextObjects
     },
     customLogoObjects(state:Record<any, any>){
       return state.customLogoObjects
