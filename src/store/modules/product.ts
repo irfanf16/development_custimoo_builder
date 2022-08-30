@@ -21,7 +21,6 @@ const Product:Module<any, any> = {
     product_locker_id:0,
     setting:{},
     color_type:'product_color',
-    product_fonts:[],
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -65,9 +64,6 @@ const Product:Module<any, any> = {
     },
     getColorType(state:Record<any,any>){
       return state.color_type;
-    },
-    getProductFonts(state:Record<any,any>){
-      return state.product_fonts;
     }
   },
   mutations:{
@@ -144,9 +140,6 @@ const Product:Module<any, any> = {
     },
     SET_COLOR_TYPE(state:Record<any,any>,color_type){
       state.color_type = color_type;
-    },
-    SET_PRODUCT_FONTS(state:Record<any,any>, payload){
-      state.product_fonts[payload.index] = payload.value;
     }
   },
   actions: {

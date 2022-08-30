@@ -918,7 +918,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
                   url:`${process.env.VUE_APP_STORAGE_URL}${font.path}`,
                   opentype_font: font_object
                 }
-                this.$store.commit('SET_PRODUCT_FONTS',{index: fontNameParam[0], value: final_font});
+                Vue.set(this.products_fonts, fontNameParam[0], final_font)
               }
             }
           }
