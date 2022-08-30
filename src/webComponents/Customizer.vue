@@ -85,6 +85,13 @@ library.add(faBell)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 import VModal from 'vue-js-modal'
 Vue.use(VModal)
+
+Vue.filter("TitleCase", (value) => {
+  return value.toLowerCase().replace(/(?:^|\s|-)\S/g, (x) => x.toUpperCase());
+});
+
+Vue.prototype.$eventBus = new Vue();
+
 import Echo from "laravel-echo";
 window.io = require('socket.io-client');
 window.Echo = new Echo({
