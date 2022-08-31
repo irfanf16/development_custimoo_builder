@@ -366,7 +366,15 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
-import {logData, getActiveProductData, getPermissions, handleResponseException,parseSvgString,fetchUrlContent} from "@/helpers/Helpers";
+import {
+  logData,
+  getActiveProductData,
+  getPermissions,
+  handleResponseException,
+  parseSvgString,
+  fetchUrlContent,
+  getRandom
+} from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
 import { Popper } from 'popper-vue'
@@ -908,8 +916,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             let fontNameParam = font.path.split('/').reverse()
             fontNameParam = fontNameParam[0].split('.')
             const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-            const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}`
-            if(!this.products_fonts[fontName]) {
+            const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}?num=${getRandom()}`
+            if(!this.products_fonts[fontNameParam[0]]) {
               const font_object = await this.loadFont(url)
               if(font_object) {
                 const final_font = {

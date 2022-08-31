@@ -1343,7 +1343,7 @@ export default class Scene extends Vue {
           const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')
           const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, centerPoint.y, 0, 1, 'left')
           const outside = direction.left - checkPointX
-          const modelSpaceLeft = directionFromRight.left + (width / 2) - 8
+          const modelSpaceLeft = directionFromRight.left + (width / 2) - 3
           addLeft = modelSpaceLeft - outside
           addTop = target.top
         } else {
