@@ -452,9 +452,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const roster_texts : Record<any, any> = {}
       const common : Record<any, any>[] = []
 
+
       for(let roster_index = 0; roster_index < roster_details.length; roster_index++) {
         const roster_detail = roster_details[roster_index]
-
+        // console.log('roster_detail', roster_detail)
         const text_object = {
           size: roster_detail.size,
           quantity: roster_detail.quantity,
@@ -481,16 +482,21 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
           }
           const font = products_fonts[custom_text.font_family]
           let path: Record<any, any> = {}
+          let text_for_test_char = '';
           if(custom_text.is_first_name) {
+            text_for_test_char = roster_detail.text
             path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : {}
           } else if(custom_text.is_first_number) {
+            text_for_test_char = roster_detail.number
             path = roster_detail.number? font.opentype_font.getPath(roster_detail.number) : {}
           } else if(roster_index == 0) {
+            text_for_test_char = custom_text.value
             path = custom_text.value? font.opentype_font.getPath(custom_text.value) : {}
           }
 
           for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
             const custom_text_item = custom_text.items[items_index]
+
 
             const text_item_object = {
               label: custom_text_item.label,
@@ -516,6 +522,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               path.stroke = custom_text_item.outline_color
               path.strokeWidth = parseInt(custom_text_item.outline_width)
               path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
+
+
               const boundingBox = path.getBoundingBox()
               boundingBox.y1 = Math.abs(boundingBox.y1)
               const width = boundingBox.x2 - boundingBox.x1
@@ -523,7 +531,29 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               const svg_string = path.toSVG()
               const parser = new DOMParser();
               const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
-              dom_svg.style.translate = '0px ' + height + 'px'
+             // dom_svg.style.translate = '0px ' + height + 'px'
+
+              let transform_height = height;
+              if(custom_text.type == 'name'){
+
+                let minus_height = false;
+                 if(text_for_test_char.indexOf('y') > -1  )
+                  { minus_height = true }
+                 else if(text_for_test_char.indexOf('q') > -1)
+                  { minus_height = true }
+                 else if(text_for_test_char.indexOf('j') > -1)
+                  { minus_height = true }
+                 else if(text_for_test_char.indexOf('p') > -1)
+                  { minus_height = true }
+                 else if(text_for_test_char.indexOf('g') > -1)
+                  { minus_height = true }
+
+                if(minus_height)
+                  transform_height -= 15;
+              }
+              // console.log('transform_height',transform_height ,' ', height, ' ', text_for_test_char)
+              dom_svg.setAttribute('transform','translate(-1 '+transform_height+')')
+
               const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
                 'viewBox="0 0 ' + width + ' ' + height +'"> \n' + dom_svg.outerHTML + '\n</svg>'
