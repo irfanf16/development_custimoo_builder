@@ -170,6 +170,7 @@ import opentype from 'opentype.js'
       this.addToCart();
       if(this.room_products.length > 0 && (this.room_product_index > (this.room_products.length -1))){
         this.hide();
+        this.room_product_index = 0 ;
       }
     });
   },
@@ -422,8 +423,6 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
     return new Promise((resolve,reject) => {
       this.collection?.collection_products.map((collection_product:Record<any,any>) => {
         collection_product.map((collection: Record<any, any>) => {
-          console.log('collection');
-          console.log(collection);
           room_products.push({
             room_id: collection.product_locker_room.room_id,
             product: {
