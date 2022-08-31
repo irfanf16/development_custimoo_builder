@@ -6,9 +6,8 @@ import {
   fontsList, getActiveProductData,
   getRandom, handleResponseException,
   initCustomLogos,
-  initCustomTexts,
   processColorsCustom, rosterDetailsInit,
-  fetchUrlContent,parseSvgString
+  fetchUrlContent, parseSvgString, setRetrievedProductsCustomTexts
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import {getClosestColor} from "@/pantoneColor";
@@ -233,7 +232,7 @@ export class handleMainProducts extends Vue {
     }
     await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index});
-    await self.setRetrievedProductsCustomTexts(retrieved_products)
+    await setRetrievedProductsCustomTexts(retrieved_products)
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);
     await this.$store.dispatch("getModels", retrieved_products[product_index].id);
     this.$root.$emit('sliderEvent', product_index);
@@ -260,7 +259,6 @@ export class handleMainProducts extends Vue {
     }
 
     let selected_product = this.$store.getters.getSelectedProduct;
-    initCustomTexts(retrieved_products)
     initCustomLogos(retrieved_products)
     rosterDetailsInit(retrieved_products)
     this.$store.dispatch("setProductsRosters");
@@ -348,8 +346,7 @@ export class handleMainProducts extends Vue {
           return retrieved_product.id == last_active_product_data.product_id
         });
         if(product_index < 0 ) {
-          console.log("invalid last product id", last_active_product_data.product_id)
-          validated = false
+          validated = true
           message = "Did not find last active product data"
           //if last active product not found then reset the last active product data object
           this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
@@ -498,12 +495,6 @@ export class handleMainProducts extends Vue {
     await this.$store.dispatch('setProductType', {prd_type: factory_product.product_type, value: true});
   }
 
-  public async setRetrievedProductsCustomTexts(retrieved_products: Record<any, any>[]) {
-    let self: Record<any, any> = this;
-    const retrieved_products_custom_texts = retrieved_products.map(retrieved_product => retrieved_product.product_texts);
-   // let custom_texts = selected_product.product_texts;
-    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
-  }
   public async fetchLogoColors(id:number) {
     let colors = null
     await http.get(`logos/colors?id=${id}`)

@@ -44,21 +44,17 @@
 
         </div>
         <div >
-          <div>
-            Show
-            <template v-for="(child_text, child_text_index) in product_custom_text.items.length">
-              <b-form-checkbox v-model="product_custom_text.items[child_text_index].selected" :name="`custom_text_child_${child_text_index}_checkbox`"
-              :key="`custom_text_child_${child_text_index}_checkbox`" @change="handleCustomTextCheckboxChange($event, customTextIndex)">
-                {{ product_custom_text.items[child_text_index].label }}
-              </b-form-checkbox>
-            </template>
-          </div>
-          <div class="customization-tabs">
+          <div class="customization-tabs show_hide_text">
             <b-tabs content-class="mt-3" align="center">
               <template v-for="(product_custom_text_item, productCustomTextItemIndex) in product_custom_text.items">
                 <b-tab v-model="product_custom_text.active_item_index" :key="`custom_${product_custom_text.type}_${customTextIndex}_children_${productCustomTextItemIndex}`">
                 <!-- Tabs title slot -->
                   <template slot="title">
+                    <span @click="($event)=>$event.stopPropagation()">
+                      <b-form-checkbox v-model="product_custom_text.items[productCustomTextItemIndex].selected" :name="`custom_text_child_${productCustomTextItemIndex}_checkbox`"
+                      :key="`custom_text_child_${productCustomTextItemIndex}_checkbox`" @change="handleCustomTextCheckboxChange($event, customTextIndex)">
+                      </b-form-checkbox>
+                    </span>
                     {{product_custom_text_item.label}}
                   </template>
 
