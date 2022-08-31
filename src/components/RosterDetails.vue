@@ -118,7 +118,7 @@
           Add to Cart
         </button>
       </template>
-      <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product')">
+      <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
         <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
           :disabled="canvasImage.scene == null">
           Add to Cart
@@ -155,7 +155,7 @@ import { rosterDefaultItem } from "@/helpers/Helpers";
     this.fontsList()
   },
 })
-export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
+export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData) {
   /* component props starts */
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: false}) lockerRosters: Record<any, any>[]
@@ -193,8 +193,9 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction) {
   get getCartLoading(): boolean {
     return this.$store.getters.getCartLoading;
   }
-
-
+  get getCollectionView():boolean{
+    return this.$store.getters.getCollectionView;
+  }
   get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject;
   }

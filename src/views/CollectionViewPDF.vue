@@ -73,7 +73,7 @@
           </table>
           <div class="pdf_description" style="display: flex;flex-direction: row-reverse;">
             <template v-if="isAuthenticated">
-              <button  class="btn btn-secondary" style="width:10%" v-if="!CartLoading" @click="addToCart">
+              <button  class="btn btn-secondary" style="width:10%" v-if="!getCartLoading" @click="addToCart">
                 Purchase
               </button>
               <button v-else class="btn btn-secondary" style="width:10%" :disabled="true" >
@@ -81,7 +81,7 @@
               </button>
             </template>
             <template v-else>
-              <button  class="btn btn-secondary" style="width:10%" v-if="!CartLoading"  @click="setActionBeforeLogin('addToCart')">
+              <button  class="btn btn-secondary" style="width:10%" v-if="!getCartLoading"  @click="setActionBeforeLogin('addToCart')">
                 Purchase
               </button>
               <button v-else class="btn btn-secondary" style="width:10%" :disabled="true" >
@@ -111,9 +111,9 @@
         </div>
         <div class="modal-body">
           <div class="d-flex flex-wrap justify-content-between">
-            <RosterDetails ref="rosterDetailsModal" :productSizes="sizeOptions"  :lockerRosters="products_roster" @addPlayer="rosterDetailsInit"/>
+            <RosterDetails ref="rosterDetailsModal" :productSizes="sizeOptions"  :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts"/>
             <div class="roster-preview-area">
-              <CustomizationPreview :designs="products[designsIndex]"/>
+              <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts"/>
             </div>
           </div>
         </div>
@@ -138,6 +138,7 @@ import RosterDetails from '@/components/RosterDetails.vue'
 import {findIndex} from "lodash";
 import CartModal from "@/components/CartModal.vue";
 import ConfirmModal from "@/components/ConfirmModal.vue";
+import opentype from 'opentype.js'
 
 
 
@@ -147,6 +148,11 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
     this.getCollection()
     this.$store.dispatch('setCartIconShow',true);
     this.$store.dispatch('setCollectionView',true);
+    this.$nextTick(() => {
+      if (!this.rosterDetails.length) {
+        this.rosterDetailsInit()
+      }
+    })
 
     if (this.isAuthenticated){
       let res  = await http.get("products/roster")
@@ -175,7 +181,7 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
 })
 
 export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProducts,handleMainProducts,ModalAction) {
-
+  public products_fonts: Record<any, any> = []
   public showLoader = false
   public storageUrl = process.env.VUE_APP_STORAGE_URL
   public collection = null;
@@ -188,7 +194,6 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   public selectedItemIndex: number|null  = null;
   public room_products = [];
   public room_product_index = 0;
-  public CartLoading = false;
 
   public show_roster = false;
 
@@ -198,10 +203,6 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
 
   get editing_roster_player_index(): number {
     return this.$store.getters.getEditingRosterPlayerIndex
-  }
-
-  get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails()
   }
 
   get customTexts(): [Record<any, any>] {
@@ -242,113 +243,64 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
-
-  get rosterFirstNameAndNumber(): string | null {
-    if (this.selectedProduct && this.rosterDetails && this.rosterDetails.length > 0) {
-      // |;| is just name and number separator
-      let roster_text = this.rosterDetails[this.editing_roster_player_index].text ? this.rosterDetails[this.editing_roster_player_index].text : ''
-      let roster_num = this.rosterDetails[this.editing_roster_player_index].number ? this.rosterDetails[this.editing_roster_player_index].number : ''
-      return `${roster_text}|;|${roster_num}`;
-    } else {
-      return null;
-    }
-  }
-
-  @Watch('rosterFirstNameAndNumber', { deep: true })
-  async onRosterFirstNameAndNumberChanged(newVal: string) {
-    if(this.selectedProduct){
-      let name = "";
-      let number = "";
-      if (newVal) {
-        let name_and_number_array = newVal.split("|;|");
-        name = name_and_number_array[0]? name_and_number_array[0] : ""
-        number = name_and_number_array[1]? name_and_number_array[1] : ""
-      }
-      let custom_text = this.$store.getters.getCustomTexts()
-
-      if (custom_text) {
-        const custom_name_index = findIndex(this.customTexts, { type: 'name' })
-        const custom_number_index = findIndex(this.customTexts, { type: 'number' })
-        let roster_details = this.rosterDetails;
-        let svg_object:Record<any,any> = {}
-        if (custom_name_index != -1) {
-          await this.$store.dispatch('updateCustomTextAttribute', { index: custom_name_index, attribute: 'text', value: name })
-          if(name){
-            const interval = setInterval(() => {
-              if(this.customTextObjects[custom_name_index] && name == this.customTextObjects[custom_name_index].text && this.customTextObjects[custom_name_index].constructor.name === 'klass' )
-                svg_object['name'] = {
-                  svg : this.customTextObjects[custom_name_index].toSVG(),
-                  placement : this.customTextObjects[custom_name_index].side,
-                  width : this.customTextObjects[custom_name_index].width,
-                  height : this.customTextObjects[custom_name_index].height,
-                  scaleX : this.customTextObjects[custom_name_index].scaleX,
-                  scaleY : this.customTextObjects[custom_name_index].scaleY,
-                  rotation: this.customTexts[custom_name_index].rotation,
-                  original_height: this.customTexts[custom_name_index].originalHeight,
-                }
-              roster_details[this.editing_roster_player_index].svgs = svg_object;
-              clearInterval(interval)
-            }, 500)
-          }else{
-            svg_object['name'] = {
-              svg : null,
-              placement : null,
-              width : null,
-              height : null,
-              scaleX : null,
-              scaleY : null,
-              rotation:null,
-              original_height: null
-            };
-            roster_details[this.editing_roster_player_index].svgs = svg_object
-          }
-          this.$store.commit('UPDATE_ROSTER',roster_details);
-        }
-        if (custom_number_index != -1) {
-          await this.$store.dispatch('updateCustomTextAttribute', { index: custom_number_index, attribute: 'text', value: number })
-          if(number){
-            const interval = setInterval(() => {
-              if (this.customTextObjects[custom_number_index] && number == this.customTextObjects[custom_number_index].text && this.customTextObjects[custom_number_index].constructor.name === 'klass') {
-                svg_object['number'] = {
-                  svg: this.customTextObjects[custom_number_index].toSVG(),
-                  placement: this.customTextObjects[custom_number_index].side,
-                  width: this.customTextObjects[custom_number_index].width,
-                  height: this.customTextObjects[custom_number_index].height,
-                  scaleX: this.customTextObjects[custom_number_index].scaleX,
-                  scaleY: this.customTextObjects[custom_number_index].scaleY,
-                  rotation: this.customTexts[custom_number_index].rotation,
-                  original_height: this.customTexts[custom_name_index].originalHeight,
-                };
-                roster_details[this.editing_roster_player_index].svgs = svg_object;
-                clearInterval(interval)
-              }
-            }, 500)
-          }else{
-            svg_object['number'] = {
-              svg : null,
-              placement : null,
-              width : null,
-              height : null,
-              scaleX : null,
-              scaleY : null,
-              rotation:null,
-              original_height: null
-            };
-            roster_details[this.editing_roster_player_index].svgs =  svg_object;
-          }
-          this.$store.commit('UPDATE_ROSTER',roster_details);
-        }
-      }
-    }
-  }
-
-
   get products(){
     return this.$store.getters.getProducts;
   }
 
+  @Watch('products')
+  productsChanged(newVal: Record<any, any>[]){
+    this.initProductsFonts(newVal)
+  }
+
+  public loadFont(url: string) {
+    return new Promise((resolve) => {
+      opentype.load(url, (err: Record<any, any>, font_object: Record<any, any>) => {
+        if(!err) {
+          resolve(font_object);
+        } else {
+          resolve('')
+        }
+      })
+    })
+  }
+
+  public async initProductsFonts(products: Record<any, any>[]) {
+    for(let product_index = 0; product_index < products.length; product_index++) {
+      const product = products[product_index]
+      const productFonts = product.namefonts;
+      if (productFonts.length){
+        const item = productFonts[0].json_data
+        if(item) {
+          for(let i = 0; i < item.length; i++) {
+            const font = item[i]
+            let fontNameParam = font.path.split('/').reverse()
+            fontNameParam = fontNameParam[0].split('.')
+            const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+            const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}`
+            if(!this.products_fonts[fontName]) {
+              const font_object = await this.loadFont(url)
+              if(font_object) {
+                const final_font = {
+                  value: fontNameParam[0] as string,
+                  text: fontName as string,
+                  url:`${process.env.VUE_APP_STORAGE_URL}${font.path}`,
+                  opentype_font: font_object
+                }
+                Vue.set(this.products_fonts, fontNameParam[0], final_font)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+
   get company() {
     return this.$store.getters.getCompany
+  }
+  get getCartLoading(): boolean {
+    return this.$store.getters.getCartLoading;
   }
 
   get isAuthenticated(){
@@ -357,6 +309,9 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
 
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
+  }
+  get rosterDetails(): [Record<any, any>] {
+    return this.$store.getters.getRosterDetails()
   }
 
   public async show(){
@@ -407,23 +362,20 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
       });
   }
 
-  public rosterDetailsInit(index = 0, product = this.selectedProduct) {
-    let payload = getRosterDetailDefaultObject(product)
-    if(this.sizeOptions.length > 0) {
-      payload.size = this.sizeOptions[0].text;
-      payload.code = this.sizeOptions[0].value;
+  public rosterDetailsInit() {
+    if(this.show_roster){
+      let payload = getRosterDetailDefaultObject()
+      this.$store.dispatch('setRosterDetails', {index: this.rosterDetails.length, roster: payload})
     }
-    this.$store.dispatch('setRosterDetails', { pid : product.id, index: index, roster: payload })
   }
 
 
   async addToCart(){
     var self = this;
     if(self.room_products.length > 0 && (self.room_product_index <= (self.room_products.length -1))){
-      self.CartLoading = true;
       let room_product = self.room_products[self.room_product_index];
         if(self.isAuthenticated){
-          await self.fetchLockerProduct(room_product.room_id,room_product.product);
+          await self.fetchProductForCollectionView(room_product.room_id,room_product.product);
           setTimeout(async ()=> {
             self.show_roster = true;
             await self.setProductSizes();
@@ -433,7 +385,6 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
               self.ref['rosterDetailsModal'].fontsList();
             },500)
           },1500);
-          self.CartLoading = false;
           self.room_product_index = self.room_product_index + 1 ;
         }
         else{
@@ -460,23 +411,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   }
   get productSizes(){
     if(this.show_roster){
-      let cumulative_size:Record<any,any> = [];
-      Object.values(this.selectedProduct.sizes).forEach((value)=>{
-        if(Object.prototype.hasOwnProperty.call(value as Record<any,any>,'json_data')){
-          cumulative_size.push(JSON.parse(value.json_data));
-        }
-      })
-      let sizes = [] as Record<any,any>;
-      if(cumulative_size.length > 0){
-        cumulative_size.forEach((size_array:Record<any,any>) => {
-          if(size_array.length > 0){
-            size_array.forEach((size:Record<any,any>) => {
-              sizes.push(size);
-            })
-          }
-        })
-      }
-      return sizes;
+      return this.selectedProduct.sizes[0].json_data
     }
     else{
       return [];

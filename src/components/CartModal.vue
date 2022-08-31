@@ -120,7 +120,7 @@ import ModalAction from "@/mixins/ModalAction";
   components: {},
   filters: {
     itemQtyCount: (value: Record<any, any>) => {
-      if (value.length > 0) {
+      if (value && value.length > 0) {
         let quantity = 0;
         value.forEach((roster: Record<any, any>) => {
           quantity += parseInt(roster.quantity);
@@ -221,6 +221,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       this.shipping_address = address
     }
 
+  }
+  public hide(){
+    this.hideVModal('cart-modal');
   }
 
   public async editCartItem(cart_item_index: number, factory_product_index: number, edit=true) {
