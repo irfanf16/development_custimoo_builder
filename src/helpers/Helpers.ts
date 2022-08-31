@@ -516,6 +516,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               path.stroke = custom_text_item.outline_color
               path.strokeWidth = parseInt(custom_text_item.outline_width)
               path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
+
+
               const boundingBox = path.getBoundingBox()
               boundingBox.y1 = Math.abs(boundingBox.y1)
               const width = boundingBox.x2 - boundingBox.x1
@@ -523,7 +525,9 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               const svg_string = path.toSVG()
               const parser = new DOMParser();
               const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
-              dom_svg.style.translate = '0px ' + height + 'px'
+             // dom_svg.style.translate = '0px ' + height + 'px'
+              dom_svg.setAttribute('transform','translate(-1 '+(height-1)+')')
+
               const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
                 'viewBox="0 0 ' + width + ' ' + height +'"> \n' + dom_svg.outerHTML + '\n</svg>'
