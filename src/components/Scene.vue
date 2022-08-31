@@ -884,16 +884,16 @@ export default class Scene extends Vue {
       canvas.on('object:modified', (e: Record<any, any>) => {
         const fabric_object = e.target;
         if(fabric_object.get("type") == "text") {
-          self.handleCustomTextModifiedEvent(e.target)
+          this.handleCustomTextModifiedEvent(e.target)
         } else {
-          self.objectMove(e, side)
+          this.objectMove(e, side)
         }
         let objects = canvas.getObjects('line');
         for (let i in objects) {
           canvas.remove(objects[i]);
         }
         this.drawLines = false
-        self.addToOtherSide(e.target, side)
+        this.addToOtherSide(e.target, side)
       })
 
       let ctx = canvas.getSelectionContext()
@@ -1270,6 +1270,7 @@ export default class Scene extends Vue {
   }
 
   public addToOtherSide(target: any, side: string) {
+    side = side.toLowerCase()
     if(side == 'back' || (this.back && side == 'front')) {
       let texture = this.frontTexture
       let canvas = this.frontCanvas
@@ -1342,14 +1343,14 @@ export default class Scene extends Vue {
           const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')
           const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, centerPoint.y, 0, 1, 'left')
           const outside = direction.left - checkPointX
-          const modelSpaceLeft = directionFromRight.left + (width / 2) + 10
+          const modelSpaceLeft = directionFromRight.left + (width / 2) - 3
           addLeft = modelSpaceLeft - outside
           addTop = target.top
         } else {
           const direction = this.targetNonTransparent(canvas, texture, target.left+ width, target.top, 0, 1, 'left')
           const directionFromRight = this.targetNonTransparent(canvas, texture, model_start, centerPoint.y, 0, 1, 'right')
           const outside = checkPointX - direction.left
-          const modelSpaceRight = directionFromRight.left - (width / 2) - 10
+          const modelSpaceRight = directionFromRight.left - (width / 2) + 3
           addLeft = modelSpaceRight + outside
           addTop = target.top
         }
@@ -1364,6 +1365,9 @@ export default class Scene extends Vue {
             otherSideObjects[addIndex].flipX = false
             otherSideObjects[addIndex].flipY = false
           }
+          otherSideObjects[addIndex].scaleX = target.scaleX
+          otherSideObjects[addIndex].scaleY = target.scaleY
+          otherSideObjects[addIndex].angle = target.angle
           if (side == 'back') {
             this.frontCanvas.renderAll()
           } else {
@@ -1879,6 +1883,9 @@ export default class Scene extends Vue {
                     })
                   })
                 }
+                this.frontCanvas.renderAll()
+                this.frontCanvas.renderAll()
+                console.log(custom_text_item.placement)
                 this.addToOtherSide(fabric_text, custom_text_item.placement)
               })
             }

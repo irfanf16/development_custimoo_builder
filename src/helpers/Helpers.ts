@@ -829,8 +829,8 @@ const getPermissions = async () => {
 const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[]) => {
   const product_texts = Store.getters.getCustomTexts(true)
   const retrieved_products_custom_texts = retrieved_products.map((retrieved_product: Record<any, any>) => {
-    if(retrieved_product.product_texts && !product_texts[retrieved_product.id]) {
-      return JSON.parse(JSON.stringify(retrieved_product.product_texts)) //remove two way binding for reset function
+    if(retrieved_product.product_texts && !(product_texts[retrieved_product.id] && product_texts[retrieved_product.id].map((product_text: Record<any, any>) => product_text.value).length)) {
+      return JSON.parse(JSON.stringify(retrieved_product.product_texts)) //remove two-way binding for reset function
     }
   })
   Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })

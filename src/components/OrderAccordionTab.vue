@@ -171,11 +171,11 @@ export default class OrderAccordionTab extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
+    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => (custom_logo && custom_logo.url != ""));
   }
 
   get customTexts(): [Record<any, any>] {
-    return this.$store.getters.getCustomTexts().filter((custom_logo:any) => !(custom_logo == null || custom_logo.url == ""));
+    return this.$store.getters.getCustomTexts().filter((custom_text:any) => (custom_text && custom_text.value != ""));
   }
 
   get svgGroups(): [Record<any, any>] {

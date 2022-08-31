@@ -98,32 +98,23 @@ export class LockerProducts extends Vue {
       })
     return colors
   }
-  public async fetchLockerProduct(room_id: number, room_product: Record<any, any>, share_url=""){
+  public async fetchProductForCollectionView(room_id: number, room_product: Record<any, any>, share_url=""){
     let self: Record<any, any> = this;
-    self.search_products = ''
-    await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
-    let is_customized = this.$store.getters.getCustomized
-    let is_personalized = this.$store.getters.getPersonalized
+    // await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
-    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-      editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
-      locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id},
-      cart_product_info: null, order_product_info: null
-    })
-    let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
-    if(share_url) {
-      url += `?share_url=${share_url}`;
-    }
+    let url = `list/products?active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
 
     http.get(url).then(async (response: Record<any, any>) => {
       let active_product_detail = response.data.editing_product_detail;
       //todo need to confirm this logic. I think it's have no effect
-      if(active_product_detail.roster_detail) {
-        this.$store.commit('UPDATE_ROSTER', JSON.parse(active_product_detail.roster_detail))
+      if(active_product_detail.product_roster_detail) {
+        // this.$store.commit('UPDATE_ROSTER', JSON.parse(active_product_detail.roster_detail))
+        this.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
       }
+
       //todo ends her
-      await self.handleMainProducts(response, active_product_detail);
+      await self.handleCollectionProducts( response, product_id , room_product_id , room_product.style_id , room_product.design_id );
     }, (error:Record<any, any>) => {
       console.error("Error while retrieving products",error)
     })
@@ -262,6 +253,66 @@ export class handleMainProducts extends Vue {
     initCustomLogos(retrieved_products)
     rosterDetailsInit(retrieved_products)
     this.$store.dispatch("setProductsRosters");
+
+    let customLogos = this.$store.getters.getCustomLogoObject
+    for (const product of retrieved_products) {
+      if(!customLogos[product.id]) {
+        await this.$store.dispatch('setCustomObj', product.id)
+      }
+    }
+    this.$store.dispatch('setColorSectionVisibility')
+    this.$store.dispatch("getModels", selected_product.product_id);
+    selected_product.productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
+      if (item.id == design_id) {
+        Vue.set(item, 'design_show', 1)
+        this.$store.dispatch('setSelectedProductDesignID', item.id)
+      } else {
+        Vue.set(item, 'design_show', 0)
+      }
+    });
+  }
+
+  public async handleCollectionProducts(response: Record<any, any>, product_id: number , room_product_id: number , style_id:number , design_id: number){
+    let self: Record<any, any> = this;
+    let response_data = response.data;
+    let active_product_index = response.data.active_product_index
+    let active_product_id = response.data.active_product_id
+    let response_products_obj = response_data.products;
+    let retrieved_products = response_products_obj.data;
+    let append_products =  response_products_obj.current_page > 1;
+    await this.$store.dispatch('setStockCount',response.data.stock_count);
+    await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
+    await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
+
+    let product_index = 0;
+    let style_index = 0;
+
+    let editing_product_detail = response_data.editing_product_detail
+    let active_index = 0;
+    /*
+    * The default value for edit_product_index is -1. -1 Means product is not being edited. product_edit_info_object.editing check is added as the edit_product_index
+    * will have value only when it's being edited.
+    * */
+    product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
+      return retrieved_product.id == product_id
+    });
+    if(product_index >= 0) {
+      style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
+        return product_style.id == style_id;
+      });
+    }
+
+    await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
+    await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index});
+    await setRetrievedProductsCustomTexts(retrieved_products)
+    this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+    await this.$store.dispatch("getModels", retrieved_products[product_index].id);
+    this.$root.$emit('sliderEvent', product_index);
+    //If we are editing locker product then set the locker product data and return
+
+    await self.setLockerProductData(editing_product_detail)
+    let selected_product = this.$store.getters.getSelectedProduct;
+    initCustomLogos(retrieved_products)
 
     let customLogos = this.$store.getters.getCustomLogoObject
     for (const product of retrieved_products) {
@@ -510,6 +561,7 @@ export class handleMainProducts extends Vue {
   public async setLockerProductData(active_product_detail:Record<any, any>) {
     let self: Record<any, any> = this;
     let selected_product = self.$store.getters.getSelectedProduct;
+    let collection_view = self.$store.getters.getCollectionView;
     let style_index = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === active_product_detail.style_id);
     if(style_index < 0 ) {
       style_index = 0
@@ -572,9 +624,11 @@ export class handleMainProducts extends Vue {
 
     this.$store.commit('RESET_UNDO');
     this.$store.commit('RESET_REDO');
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
     await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
-    this.$emit('hideLockerRoomModal')
+    if(!collection_view){
+      this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
+      this.$emit('hideLockerRoomModal')
+    }
   }
 
   public async setCartProductData(retrieved_products: Record<any, any>[]) {
@@ -796,20 +850,11 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   public async addToCartMixin(product_fonts: Record<any, any>[]) {
     let self: Record<any, any> = this;
     try {
+
       self.$store.dispatch('setCartLoading',true);
       let collection_view = self.$store.getters.getCollectionView;
       let cart_product = await getActiveProductData(product_fonts);
-      if(cart_product){
-        if(Object.prototype.hasOwnProperty.call(cart_product,'production_url') && (cart_product as Record<any,any>).production_url){
-          let content:string = await fetchUrlContent((cart_product as Record<any,any>).production_url);
-          let production_content = await parseSvgString(content,cart_product as Record<any,any>);
-          (cart_product as Record<any,any>).svg_content = production_content;
-        }
-      }else{
-        return false;
-      }
       self.$store.dispatch('setRevertRosterBOOL',true);
-
       let post_data = {
         factory_product: cart_product
       };
