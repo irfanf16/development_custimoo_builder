@@ -29,7 +29,7 @@
     </b-modal>
 
     <div class="d-lg-none">
-      <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes"/>
+      <RosterDetails @addPlayer="rosterDetailsInit" :productSizes="productSizes" :products_fonts="products_fonts" />
     </div>
     <div class="team-order-details">
       <OrderDetails/>
