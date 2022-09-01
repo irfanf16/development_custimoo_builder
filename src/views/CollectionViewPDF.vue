@@ -168,8 +168,6 @@ import opentype from 'opentype.js'
     }
     this.$root.$on('getNextProduct', () => {
       this.hide();
-      this.selectedItemIndex = null;
-      this.current_index = null;
     });
   },
   async destroyed() {
@@ -322,6 +320,8 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
 
   public hide(){
     this.hideVModal('rostermodal')
+    this.selectedItemIndex = null;
+    this.current_index = null;
   }
 
   public close(){
