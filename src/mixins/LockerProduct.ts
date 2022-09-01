@@ -6,7 +6,7 @@ import {
   fontsList, getActiveProductData,
   getRandom, handleResponseException,
   initCustomLogos,
-  processColorsCustom, rosterDetailsInit,
+  processColorsCustom,
   fetchUrlContent, parseSvgString, setRetrievedProductsCustomTexts
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
