@@ -337,6 +337,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
     let self = this;
+    let collection_view = self.$store.getters.getCollectionView;
 
     setTimeout(() =>{
       if(self.getProductEditInfoObject.editing && self.getProductEditInfoObject.type == 'cart_product'){
@@ -344,12 +345,18 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
         self.isLoading = true;
         (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
         this.hideVModal('rostermodal')
+        if(collection_view){
+          this.$root.$emit('closeCollectionView');
+        }
         if(this.company.platform != 'wordpress'){
           this.showVModal('cart-modal')
         }
         self.isLoading = false;
 
       }else{
+        if(collection_view){
+          this.$root.$emit('closeCollectionView');
+        }
         this.hideVModal('rostermodal')
       }
     },500);

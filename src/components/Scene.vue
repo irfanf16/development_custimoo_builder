@@ -1768,7 +1768,7 @@ export default class Scene extends Vue {
   public async isCustomTextAllowed(custom_text_index: number) {
     let custom_text = this.product_custom_texts[custom_text_index];
     let is_custom_text_allowed = this.product_id == custom_text.product_id;
-    if(custom_text.following_product_ids.includes(this.product_id)) {
+    if(Object.prototype.hasOwnProperty.call(custom_text, "following_product_ids") && custom_text.following_product_ids.includes(this.product_id)) {
       const following_product_custom_text = this.allProductsCustomTexts[this.product_id]?.[custom_text_index];
       is_custom_text_allowed = following_product_custom_text && following_product_custom_text.type == custom_text.type
     }

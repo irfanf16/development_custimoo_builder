@@ -100,7 +100,6 @@ export class LockerProducts extends Vue {
   }
   public async fetchProductForCollectionView(room_id: number, room_product: Record<any, any>, share_url=""){
     let self: Record<any, any> = this;
-    // await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
     let url = `list/products?active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
@@ -109,10 +108,8 @@ export class LockerProducts extends Vue {
       let active_product_detail = response.data.editing_product_detail;
       //todo need to confirm this logic. I think it's have no effect
       if(active_product_detail.product_roster_detail) {
-        // this.$store.commit('UPDATE_ROSTER', JSON.parse(active_product_detail.roster_detail))
         this.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
       }
-
       //todo ends her
       await self.handleCollectionProducts( response, product_id , room_product_id , room_product.style_id , room_product.design_id );
     }, (error:Record<any, any>) => {
@@ -282,11 +279,8 @@ export class handleMainProducts extends Vue {
   public async handleCollectionProducts(response: Record<any, any>, product_id: number , room_product_id: number , style_id:number , design_id: number){
     let self: Record<any, any> = this;
     let response_data = response.data;
-    let active_product_index = response.data.active_product_index
-    let active_product_id = response.data.active_product_id
     let response_products_obj = response_data.products;
     let retrieved_products = response_products_obj.data;
-    let append_products =  response_products_obj.current_page > 1;
     await this.$store.dispatch('setStockCount',response.data.stock_count);
     await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
     await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
@@ -295,7 +289,6 @@ export class handleMainProducts extends Vue {
     let style_index = 0;
 
     let editing_product_detail = response_data.editing_product_detail
-    let active_index = 0;
     /*
     * The default value for edit_product_index is -1. -1 Means product is not being edited. product_edit_info_object.editing check is added as the edit_product_index
     * will have value only when it's being edited.

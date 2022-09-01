@@ -1,6 +1,6 @@
 <template>
 <!--  <div class="grid grid-mobile-4 gap-2 pick-item mt-3">-->
-  <div class="d-flex gap-1 pick-item mt-3 hide-scroll overflow-auto">
+  <div class="d-flex gap-1 pick-item mt-1 hide-scroll overflow-auto" :class="{'mt-3': !mobileScreen}">
     <HorizontalScroll v-if="showItems && !animPlayed" />
     <div v-for="(product, index) in products" :key="index">
       <div ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
@@ -43,6 +43,7 @@ export default class ItemsGrid extends Vue {
   public renderComponent = true
   public multipleLogo = false
   public animPlayed = false
+  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   get products() {
     return this.$store.getters.getProducts
