@@ -139,137 +139,144 @@ export class handleMainProducts extends Vue {
       this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
     }
     await this.$store.dispatch('setStockCount',response.data.stock_count);
-    if(append_products) {
-      await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: true});
-      return false;
-    }
-    await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
-    await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
-    let update_order_product = response_data.update_order_products_data;
-    if(product_edit_info_object.type == 'order_product' && update_order_product) {
-      let order_products = Object.assign({}, product_edit_info_object.order_product_info, {order_products: update_order_product})
-      self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: true, type: "order_product", filters: null, locker_product_info: null,
-        cart_product_info: null, order_product_info: order_products
-      })
-      product_edit_info_object.order_product_info = order_products
-    }
-    let product_id = null;
-    let product_index = 0;
-    let selected_style = null;
-    let style_index = 0;
-    let design_id = 0;
-    let editing_product_detail = response_data.editing_product_detail
-    let active_index = 0;
-    /*
-    * The default value for edit_product_index is -1. -1 Means product is not being edited. product_edit_info_object.editing check is added as the edit_product_index
-    * will have value only when it's being edited.
-    * */
-    let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
-    if(is_editing) {
-      ({product_index, style_index, design_id, active_index} = await self.handleEditMode(retrieved_products));
-    }
-    else {
-     // console.log('not editing mode');
-      let last_active_prod_data = self.$store.getters.getLastActiveProductData;
-      if(editing_product_detail ) {
-        product_index = response_data.active_product_index;
+
+    const prms = new Promise((resolve) => {
+      self.$eventBus.$emit('initProductsFonts', retrieved_products, resolve)
+    })
+    prms.then(async () => {
+      if(append_products) {
+        await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: true});
+        return false;
+      }
+      await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
+      await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
+      let update_order_product = response_data.update_order_products_data;
+      if(product_edit_info_object.type == 'order_product' && update_order_product) {
+        let order_products = Object.assign({}, product_edit_info_object.order_product_info, {order_products: update_order_product})
+        self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: true, type: "order_product", filters: null, locker_product_info: null,
+          cart_product_info: null, order_product_info: order_products
+        })
+        product_edit_info_object.order_product_info = order_products
+      }
+      let product_id = null;
+      let product_index = 0;
+      let selected_style = null;
+      let style_index = 0;
+      let design_id = 0;
+      let editing_product_detail = response_data.editing_product_detail
+      let active_index = 0;
+      /*
+      * The default value for edit_product_index is -1. -1 Means product is not being edited. product_edit_info_object.editing check is added as the edit_product_index
+      * will have value only when it's being edited.
+      * */
+      let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
+      if(is_editing) {
+        ({product_index, style_index, design_id, active_index} = await self.handleEditMode(retrieved_products));
       }
       else {
-        if(last_active_prod_data.product_id) {
-          product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
-            return retrieved_product.id == last_active_prod_data.product_id
-          })
-          if(product_index >= 0 ) {
-            style_index = last_active_prod_data.style_index;
-            design_id = last_active_prod_data.design_id
-          } else {
-            product_index = 0
-            style_index = 0
+       // console.log('not editing mode');
+        let last_active_prod_data = self.$store.getters.getLastActiveProductData;
+        if(editing_product_detail ) {
+          product_index = response_data.active_product_index;
+        }
+        else {
+          if(last_active_prod_data.product_id) {
+            product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
+              return retrieved_product.id == last_active_prod_data.product_id
+            })
+            if(product_index >= 0 ) {
+              style_index = last_active_prod_data.style_index;
+              design_id = last_active_prod_data.design_id
+            } else {
+              product_index = 0
+              style_index = 0
+              let design_index = findIndex(retrieved_products[product_index].productstyles[style_index].productdesigns, (product_design: Record<any, any>) => {
+                return product_design.design_show
+              })
+              design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
+            }
+            this.$store.commit('SET_CUSTOM_LOGOS', {product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos})
+            this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
+          }
+          else {
+            let {sync_id, customizer_preview, update_cart} = self.$route.query
+            if(sync_id) {
+              product_index = retrieved_products.findIndex((retrieved_product: Record<any, any>) => {
+                return retrieved_product.sync_id === sync_id;
+              });
+              product_index = product_index >=0 ? product_index : 0
+              product_id = retrieved_products[product_index]
+            }
+            else {
+              product_index = 0
+              product_id = retrieved_products[product_index]
+            }
+            style_index = 0;
             let design_index = findIndex(retrieved_products[product_index].productstyles[style_index].productdesigns, (product_design: Record<any, any>) => {
               return product_design.design_show
             })
             design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
+            let set_last_active_product_data = { design_index: design_index, design_id: design_id, product_index: 0, product_id:  product_id,
+              search_products: self.search_products, style_index: 0, style_id: retrieved_products[0].productstyles[0].id,
+              page_no: 1, customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized, custom_texts: [], custom_logos: [],
+              default_colors: [], group_colors: [],
+            }
+            self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
           }
-          this.$store.commit('SET_CUSTOM_LOGOS', {product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos})
-          this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
-        }
-        else {
-          let {sync_id, customizer_preview, update_cart} = self.$route.query
-          if(sync_id) {
-            product_index = retrieved_products.findIndex((retrieved_product: Record<any, any>) => {
-              return retrieved_product.sync_id === sync_id;
-            });
-            product_index = product_index >=0 ? product_index : 0
-            product_id = retrieved_products[product_index]
-          }
-          else {
-            product_index = 0
-            product_id = retrieved_products[product_index]
-          }
-          style_index = 0;
-          let design_index = findIndex(retrieved_products[product_index].productstyles[style_index].productdesigns, (product_design: Record<any, any>) => {
-            return product_design.design_show
-          })
-          design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
-          let set_last_active_product_data = { design_index: design_index, design_id: design_id, product_index: 0, product_id:  product_id,
-            search_products: self.search_products, style_index: 0, style_id: retrieved_products[0].productstyles[0].id,
-            page_no: 1, customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized, custom_texts: [], custom_logos: [],
-            default_colors: [], group_colors: [],
-          }
-          self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
         }
       }
-      // await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: append_products});
-    }
-    await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
-    await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index});
-    await setRetrievedProductsCustomTexts(retrieved_products)
-    this.$store.commit('CHANGE_STYLE_INDEX', style_index);
-    await this.$store.dispatch("getModels", retrieved_products[product_index].id);
-    this.$root.$emit('sliderEvent', product_index);
-    //If we are editing locker product then set the locker product data and return
-    if(self.is_shared_product  || product_edit_info_object.type == "locker_product") {
-      //if editing product detail not found then probably that locker product has been deleted or not found for some reason
-      if(editing_product_detail) {
-        await self.setLockerProductData(editing_product_detail)
-      } else {
-        self.exitFromEditMode();
-        let query_params = await self.setQueryParams()
-        self.retrieveProducts(query_params)
-      }
-      return false;
-    }
+      retrieved_products[product_index].productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
+        if (item.id == design_id) {
+          Vue.set(item, 'design_show', 1)
+          this.$store.dispatch('setSelectedProductDesignID', item.id)
+        } else {
+          Vue.set(item, 'design_show', 0)
+        }
+      })
 
-    if(product_edit_info_object.type == "cart_product") {
-      await self.setCartProductData(retrieved_products)
-      return false;
-    }
-    if(product_edit_info_object.type == "order_product") {
-      await self.updateFactoryProduct(product_edit_info_object.order_product_info.order_products.factory_products[active_index]);
-      return false;
-    }
+      await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
+      await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index});
+      await setRetrievedProductsCustomTexts(retrieved_products)
+      this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+      await this.$store.dispatch("getModels", retrieved_products[product_index].id);
+      this.$root.$emit('sliderEvent', product_index);
 
-    let selected_product = this.$store.getters.getSelectedProduct;
-    initCustomLogos(retrieved_products)
-    rosterDetailsInit(retrieved_products)
-    this.$store.dispatch("setProductsRosters");
 
-    let customLogos = this.$store.getters.getCustomLogoObject
-    for (const product of retrieved_products) {
-      if(!customLogos[product.id]) {
-        await this.$store.dispatch('setCustomObj', product.id)
+      //If we are editing locker product then set the locker product data and return
+      if(self.is_shared_product  || product_edit_info_object.type == "locker_product") {
+        //if editing product detail not found then probably that locker product has been deleted or not found for some reason
+        if(editing_product_detail) {
+          await self.setLockerProductData(editing_product_detail)
+        } else {
+          self.exitFromEditMode();
+          let query_params = await self.setQueryParams()
+          self.retrieveProducts(query_params)
+        }
+        return false;
       }
-    }
-    this.$store.dispatch('setColorSectionVisibility')
-    this.$store.dispatch("getModels", selected_product.product_id);
-    selected_product.productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
-      if (item.id == design_id) {
-        Vue.set(item, 'design_show', 1)
-        this.$store.dispatch('setSelectedProductDesignID', item.id)
-      } else {
-        Vue.set(item, 'design_show', 0)
+
+      if(product_edit_info_object.type == "cart_product") {
+        await self.setCartProductData(retrieved_products)
+        return false;
       }
-    });
+      if(product_edit_info_object.type == "order_product") {
+        await self.updateFactoryProduct(product_edit_info_object.order_product_info.order_products.factory_products[active_index]);
+        return false;
+      }
+
+      let selected_product = this.$store.getters.getSelectedProduct;
+      initCustomLogos(retrieved_products)
+      this.$store.dispatch("setProductsRosters");
+
+      let customLogos = this.$store.getters.getCustomLogoObject
+      for (const product of retrieved_products) {
+        if(!customLogos[product.id]) {
+          await this.$store.dispatch('setCustomObj', product.id)
+        }
+      }
+      this.$store.dispatch('setColorSectionVisibility')
+      this.$store.dispatch("getModels", selected_product.product_id);
+    })
   }
 
   public async handleCollectionProducts(response: Record<any, any>, product_id: number , room_product_id: number , style_id:number , design_id: number){
@@ -583,11 +590,6 @@ export class handleMainProducts extends Vue {
     }
     else {
       await this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: active_product_detail.text});
-      active_product_detail.text.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
-        self.$eventBus.$emit("customTextUpdated", {
-          emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
-        });
-      })
     }
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(active_product_detail.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(active_product_detail.groupcolors));
@@ -661,12 +663,6 @@ export class handleMainProducts extends Vue {
     }
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
     this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { value: cart_item_product.product_custom_texts })
-    cart_item_product.product_custom_texts.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
-      self.$eventBus.$emit("customTextUpdated", {
-        emitter: "edit_cart", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
-      });
-    })
-
 
     //self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
 

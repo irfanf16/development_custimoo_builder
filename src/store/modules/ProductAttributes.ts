@@ -5,7 +5,6 @@ import { rosterDefaultItem, setRetrievedProductsCustomTexts } from '@/helpers/He
 import {
   getRosterDetailDefaultObject,
   initCustomLogos,
-  rosterDetailsInit,
   setCustomLogo
 } from '../../helpers/Helpers'
 
@@ -577,12 +576,6 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.svgGroups[color.index], 'pantone', color.pantone)
         Vue.set(state.svgGroups[color.index], 'name', color.name)
       }
-    },
-    rosterDetails(state: Record<any, any>, rosterDetail: Record<any, any>) {
-      if(!state.rosterDetails[rosterDetail.pid]){
-        Vue.set(state.rosterDetails, rosterDetail.pid, [])
-      }
-      Vue.set(state.rosterDetails[rosterDetail.pid], rosterDetail.index , rosterDetail.roster)
     },
     updateAllRoster(state: Record<any, any>, rosterDetail: [Record<any, any>]){
       state.rosterDetails = rosterDetail

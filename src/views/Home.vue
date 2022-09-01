@@ -412,6 +412,10 @@ Vue.filter('formatDate', function(value:string) {
 
   async mounted() {
     let self: Record<any, any> = this;
+    await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
+      await this.initProductsFonts(products, resolve)
+    })
+
     this.is_shared_product = this.$route.params.name ?  true : false
 
     await this.$store.dispatch('fetchGeneralSettings','measurement_unit');
@@ -740,11 +744,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('SET_EDITING_ROSTER_PLAYER_INDEX', 0)
   }
 
-  @Watch('products')
-  productsChanged(newVal: Record<any, any>[]){
-    this.initProductsFonts(newVal)
-  }
-
   get cartItemsCount(){
     return this.$store.getters.getCartItemsCount
   }
@@ -904,7 +903,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  public async initProductsFonts(products: Record<any, any>[]) {
+  public async initProductsFonts(products: Record<any, any>[], resolve: any) {
     for(let product_index = 0; product_index < products.length; product_index++) {
       const product = products[product_index]
       const productFonts = product.namefonts;
@@ -932,6 +931,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           }
         }
       }
+      resolve('done')
     }
   }
   public loadFont(url: string) {

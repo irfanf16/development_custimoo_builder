@@ -685,15 +685,6 @@ const initCustomLogos = (retrieved_products: Record<any, any>) => {
   })
 }
 
-const rosterDetailsInit = (retrieved_products: Record<any, any>) => {
-  retrieved_products.forEach((product: Record<any, any>) => {
-    if(!Store.getters.getAllRosterDetails[product.id]) {
-      const payload = getRosterDetailDefaultObject(product)
-      Store.dispatch('setRosterDetails', { pid : product.id, index: 0, roster: payload })
-    }
-  })
-}
-
 const getRosterDetailDefaultObject = (product = Store.getters.getSelectedProduct) => {
   if (product.sizes.length){
     const productSizes = product.sizes[0].json_data
@@ -1283,6 +1274,6 @@ export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomLogos, rosterDetailsInit, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
+  getUploadedLogoObject, initCustomLogos, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser
 };
