@@ -148,6 +148,7 @@ import opentype from 'opentype.js'
     this.getCollection()
     this.$store.dispatch('setCartIconShow', true);
     this.$store.dispatch('setCollectionView', true);
+    await this.$store.dispatch('fetchGeneralSettings','measurement_unit');
     this.$nextTick(() => {
       if (!this.rosterDetails.length) {
         this.rosterDetailsInit()
