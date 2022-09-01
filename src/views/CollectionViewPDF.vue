@@ -169,6 +169,10 @@ import opentype from 'opentype.js'
     this.$root.$on('getNextProduct', () => {
       this.hide();
     });
+    this.$root.$on('closeCollectionView', () => {
+      this.selectedItemIndex = null;
+      this.current_index = null;
+    })
   },
   async destroyed() {
     this.$store.dispatch('setCartIconShow',false);
@@ -328,6 +332,8 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
     const self = this;
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
     self.$modal.hide('rostermodal')
+    this.selectedItemIndex = null;
+    this.current_index = null;
   }
 
   public setProductSizes() {
