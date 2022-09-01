@@ -67,28 +67,28 @@
                 <div class="pdf_price" v-if="collection_product.allow_price && collection_product.product_price"><strong>Price: </strong>
                   {{collection_product.product_price}}
                 </div>
+                <div class="pdf_price d-flex justify-content-end">
+                  <template v-if="isAuthenticated">
+                    <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs" @click="addToCart(collection_product,idxs)">
+                      Purchase
+                    </button>
+                    <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
+                      <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs"  @click="setActionBeforeLogin('addToCart',collection_product,idxs)">
+                      Purchase
+                    </button>
+                    <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
+                      <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                    </button>
+                  </template>
+                </div>
               </td>
             </tr>
             </tbody>
           </table>
-          <div class="pdf_description" style="display: flex;flex-direction: row-reverse;">
-            <template v-if="isAuthenticated">
-              <button  class="btn btn-secondary" style="width:10%" v-if="!getCartLoading" @click="addToCart">
-                Purchase
-              </button>
-              <button v-else class="btn btn-secondary" style="width:10%" :disabled="true" >
-                <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-              </button>
-            </template>
-            <template v-else>
-              <button  class="btn btn-secondary" style="width:10%" v-if="!getCartLoading"  @click="setActionBeforeLogin('addToCart')">
-                Purchase
-              </button>
-              <button v-else class="btn btn-secondary" style="width:10%" :disabled="true" >
-                <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-              </button>
-            </template>
-          </div>
         </div>
       </div>
     </div>
@@ -146,35 +146,32 @@ import opentype from 'opentype.js'
   components: {LoginForm,CustomizationPreview,RosterDetails,CartModal,ConfirmModal},
   async mounted() {
     this.getCollection()
-    this.$store.dispatch('setCartIconShow',true);
-    this.$store.dispatch('setCollectionView',true);
+    this.$store.dispatch('setCartIconShow', true);
+    this.$store.dispatch('setCollectionView', true);
     this.$nextTick(() => {
       if (!this.rosterDetails.length) {
         this.rosterDetailsInit()
       }
     })
 
-    if (this.isAuthenticated){
-      let res  = await http.get("products/roster")
-      if (res.status == 200){
+    if (this.isAuthenticated) {
+      let res = await http.get("products/roster")
+      if (res.status == 200) {
         this.products_roster = res.data
       }
       await this.$store.dispatch('getCartServer', {})
-      this.$root.$on('showCartModal', () =>{
+      this.$root.$on('showCartModal', () => {
         let self = this;
         self.showVModal('cart-modal')
       })
 
     }
     this.$root.$on('getNextProduct', () => {
-      this.addToCart();
-      if(this.room_products.length > 0 && (this.room_product_index > (this.room_products.length -1))){
-        this.hide();
-        this.room_product_index = 0 ;
-      }
+      this.hide();
+      this.selectedItemIndex = null;
+      this.current_index = null;
     });
   },
-
   async destroyed() {
     this.$store.dispatch('setCartIconShow',false);
     this.$store.dispatch('setCollectionView',false);
@@ -195,6 +192,8 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   public selectedItemIndex: number|null  = null;
   public room_products = [];
   public room_product_index = 0;
+  public current_product = {};
+  public current_index = null;
 
   public show_roster = false;
 
@@ -226,8 +225,10 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
       }
     }
   }
-  public async setActionBeforeLogin(type: string) {
+  public async setActionBeforeLogin(type: string , product:Record<any,any>,idxs) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
+    this.current_product = product;
+    this.current_index = idxs
     this.$store.commit('SET_SELECTION_MODE',{
       readonly:false,
       collectionAddmoreMode:false,
@@ -240,7 +241,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
 
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'addToCart') {
-      this.addToCart();
+      this.addToCart(this.current_product,this.current_index);
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
@@ -371,27 +372,31 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   }
 
 
-  async addToCart(){
+  async addToCart(room_product:Record<any,any>,idxs:number){
     var self = this;
-    if(self.room_products.length > 0 && (self.room_product_index <= (self.room_products.length -1))){
-      let room_product = self.room_products[self.room_product_index];
-        if(self.isAuthenticated){
-          await self.fetchProductForCollectionView(room_product.room_id,room_product.product);
-          setTimeout(async ()=> {
-            self.show_roster = true;
-            await self.setProductSizes();
-            await this.show();
-            setTimeout(()=>{
-              self.ref['rosterDetailsModal'].fontsColorsManipulation();
-              self.ref['rosterDetailsModal'].fontsList();
-            },500)
-          },1500);
-          self.room_product_index = self.room_product_index + 1 ;
-        }
-        else{
-          this.ref['loginModal'].show();
-        }
+    this.selectedItemIndex = idxs;
+    try{
+      if(self.isAuthenticated){
+        await self.fetchProductForCollectionView(room_product.product_locker_room.room_id,room_product.product_locker_room);
+        setTimeout(async ()=> {
+          self.show_roster = true;
+          await self.setProductSizes();
+          await this.show();
+          setTimeout(()=>{
+            self.ref['rosterDetailsModal'].fontsColorsManipulation();
+            self.ref['rosterDetailsModal'].fontsList();
+          },500)
+        },1500);
+        self.room_product_index = self.room_product_index + 1 ;
       }
+      else{
+        this.ref['loginModal'].show();
+      }
+    }catch (e){
+      this.showError(e);
+      this.selectedItemIndex = null;
+      this.current_index = null;
+    }
 
   }
   async deleteCartItem(item:Record<any,any>){
