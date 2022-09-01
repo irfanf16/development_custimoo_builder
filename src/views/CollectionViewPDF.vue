@@ -381,30 +381,23 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   async addToCart(room_product:Record<any,any>,idxs:number){
     var self = this;
     this.selectedItemIndex = idxs;
-    try{
-      if(self.isAuthenticated){
-        await self.fetchProductForCollectionView(room_product.product_locker_room.room_id,room_product.product_locker_room);
-        setTimeout(async ()=> {
-          self.show_roster = true;
-          await self.setProductSizes();
-          await this.show();
-          setTimeout(()=>{
-            self.ref['rosterDetailsModal'].fontsColorsManipulation();
-            self.ref['rosterDetailsModal'].fontsList();
-          },500)
-        },1500);
-        self.room_product_index = self.room_product_index + 1 ;
-      }
-      else{
-        this.ref['loginModal'].show();
-      }
-    }catch (e){
-      this.showError(e);
-      this.selectedItemIndex = null;
-      this.current_index = null;
-    }
 
+    if(self.isAuthenticated){
+      await self.fetchProductForCollectionView(room_product.product_locker_room.room_id,room_product.product_locker_room);
+      self.show_roster = true;
+      await self.setProductSizes();
+      await this.show();
+      setTimeout(()=>{
+        self.ref['rosterDetailsModal'].fontsColorsManipulation();
+        self.ref['rosterDetailsModal'].fontsList();
+      },500)
+      self.room_product_index = self.room_product_index + 1 ;
+    }
+    else{
+      this.ref['loginModal'].show();
+    }
   }
+
   async deleteCartItem(item:Record<any,any>){
     const response = await this.ref['delete-cart-item'].showConfirm();
     if(response){

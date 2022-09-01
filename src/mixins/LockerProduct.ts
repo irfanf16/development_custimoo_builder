@@ -98,13 +98,14 @@ export class LockerProducts extends Vue {
       })
     return colors
   }
+
   public async fetchProductForCollectionView(room_id: number, room_product: Record<any, any>, share_url=""){
     let self: Record<any, any> = this;
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
-    let url = `list/products?active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
+    let url = `list/products?active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1`;
 
-    http.get(url).then(async (response: Record<any, any>) => {
+    await http.get(url).then(async (response: Record<any, any>) => {
       let active_product_detail = response.data.editing_product_detail;
       //todo need to confirm this logic. I think it's have no effect
       if(active_product_detail.product_roster_detail) {
@@ -293,16 +294,13 @@ export class handleMainProducts extends Vue {
     * The default value for edit_product_index is -1. -1 Means product is not being edited. product_edit_info_object.editing check is added as the edit_product_index
     * will have value only when it's being edited.
     * */
-    product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
-      return retrieved_product.id == product_id
-    });
+    product_index = 0
     if(product_index >= 0) {
       style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
         return product_style.id == style_id;
       });
     }
-
-    await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
+    await this.$store.commit('SET_PRODUCTS', {products: [retrieved_products[product_index]]});
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index});
     await setRetrievedProductsCustomTexts(retrieved_products)
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);
