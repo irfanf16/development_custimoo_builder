@@ -89,6 +89,8 @@
                       <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                       <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
                       <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
+                      <a style="margin-left:6px" :href="company.login_code.logout_action"  v-if="isCustomerAuthenticated && company.platform == 'cdnExceptLogin' && company.login_code.logout_type == 'url'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></a>
+
                     </li>
                     <li><a>
                       <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
