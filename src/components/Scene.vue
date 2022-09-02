@@ -1269,7 +1269,7 @@ export default class Scene extends Vue {
     }
   }
 
-  public addToOtherSide(target: any, side: string) {
+  public addToOtherSide(target: any, side: string, clone_again = false) {
     side = side.toLowerCase()
     if(side == 'back' || (this.back && side == 'front')) {
       let texture = this.frontTexture
@@ -1355,6 +1355,20 @@ export default class Scene extends Vue {
           addTop = target.top
         }
 
+        if(clone_again) {
+          if (otherSideObjects[addIndex]) {
+            if (side == 'back') {
+              this.frontCanvas.remove(otherSideObjects[addIndex])
+            } else {
+              if (this.back) {
+                this.backCanvas.remove(otherSideObjects[addIndex])
+              }
+            }
+            delete otherSideObjects[addIndex]
+          }
+        }
+        // console.log('target.angle', target.angle)
+        // console.log('clone.angle', 180 - target.angle)
         if (otherSideObjects[addIndex]) {
           otherSideObjects[addIndex].left = addLeft
           otherSideObjects[addIndex].top = addTop
@@ -1367,7 +1381,8 @@ export default class Scene extends Vue {
           }
           otherSideObjects[addIndex].scaleX = target.scaleX
           otherSideObjects[addIndex].scaleY = target.scaleY
-          otherSideObjects[addIndex].angle = target.angle
+          otherSideObjects[addIndex].angle = - target.angle
+
           if (side == 'back') {
             this.frontCanvas.renderAll()
           } else {
@@ -1381,6 +1396,7 @@ export default class Scene extends Vue {
             objectAdd.flipX = true
             objectAdd.flipY = true
           }
+          objectAdd.angle = - objectAdd.angle
           objectAdd.left = addLeft
           objectAdd.top = addTop
           objectAdd.hasControls = false
@@ -1617,7 +1633,7 @@ export default class Scene extends Vue {
         img.set({
           left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
           top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
-          angle: logo.rotation as number,
+          angle: logo.rotation< 0? 360 - logo.rotation : logo.rotation  as number,
           centeredScaling: true,
           selectable: this.canvasSelection,
           //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
@@ -1751,6 +1767,13 @@ export default class Scene extends Vue {
         if(this.back) {
           self.backCanvas.remove(custom_text[i])
         }
+        const otherSideText = this.otherSideTexts[custom_text_index + '' + i]
+        if(otherSideText) {
+          self.frontCanvas.remove(otherSideText)
+          if(this.back) {
+            self.backCanvas.remove(otherSideText)
+          }
+        }
       }
     }
     /*
@@ -1817,7 +1840,7 @@ export default class Scene extends Vue {
                 fabric_text.set({
                   left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
                   top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
-                  angle: custom_text_item.rotation as number,
+                  angle: custom_text_item.rotation < 0? 360 - custom_text_item.rotation : custom_text_item.rotation  as number,
                   centeredScaling: true,
                   selectable: this.canvasSelection,
                   hasControls: true,
@@ -1885,8 +1908,7 @@ export default class Scene extends Vue {
                 }
                 this.frontCanvas.renderAll()
                 this.frontCanvas.renderAll()
-                console.log(custom_text_item.placement)
-                this.addToOtherSide(fabric_text, custom_text_item.placement)
+                this.addToOtherSide(fabric_text, custom_text_item.placement, true)
               })
             }
           }
@@ -1894,7 +1916,7 @@ export default class Scene extends Vue {
             fabric_text = new fabric.Text(custom_text.value, {
               left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
               top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
-              angle: custom_text_item.rotation as number,
+              angle: custom_text_item.rotation < 0? 360 - custom_text_item.rotation : custom_text_item.rotation  as number,
               centeredScaling: true,
               selectable: this.canvasSelection,
               hasControls: true,
