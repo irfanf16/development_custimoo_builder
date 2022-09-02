@@ -1356,7 +1356,7 @@ export default class Scene extends Vue {
       }
 
       let otherSideObjects = this.otherSideLogos
-      if (target.text) {
+      if (target.custom_text_index) {
         otherSideObjects = this.otherSideTexts
       }
       if (canvas.isTargetTransparent(texture, checkPointX, centerPoint.y)) {
@@ -1776,6 +1776,13 @@ export default class Scene extends Vue {
             this.frontCanvas.remove(custom_text[i])
             if(this.back) {
               this.backCanvas.remove(custom_text[i])
+            }
+            const otherSideText = this.otherSideTexts[objectIndex + '' + i]
+            if(otherSideText) {
+              this.frontCanvas.remove(otherSideText)
+              if(this.back) {
+                this.backCanvas.remove(otherSideText)
+              }
             }
           }
         }
