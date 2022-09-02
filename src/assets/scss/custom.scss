@@ -5768,9 +5768,9 @@ $fontSize: 0.5;
         @extend .theme-scroll-h;
         
         display: flex;
-        justify-content: flex-start;
+        justify-content: flex-start !important;
         flex-wrap: nowrap;
-        gap: 10px;
+        gap: 5px;
         overflow-x: auto;
         margin-top: 0.5rem;
         padding-left: 0;
@@ -5791,6 +5791,11 @@ $fontSize: 0.5;
                 justify-content: center;
                 white-space: nowrap;
                 flex-shrink: 0;
+                border: 1px solid #ddd;
+
+                &.active{
+                    border: 1px solid #81beb1;
+                }
             }
         }
     }
