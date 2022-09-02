@@ -69,7 +69,7 @@ export default class DesignAvailable extends Vue {
   public loadDesigns = false
 
   public loadIt($event:Record<any, any>) {
-    let designHt = $event.target.clientHeight/3
+    let designHt = 10
     if(designHt <= $event.target.scrollTop){
       this.loadDesigns = true
     }else if(this.mobileScreen){
