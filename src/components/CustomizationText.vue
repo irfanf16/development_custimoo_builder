@@ -124,7 +124,7 @@
         </div>
       </b-collapse>
     </div>
-    <div class="px-3 pt-3 p-lg-4 text-right">
+    <div class="px-3 pt-3 p-lg-4 text-right" v-if="selectedProduct.allow_extra_text">
       <b-button class="add-logo-btn" @click="addCustomText">
         +
       </b-button>
@@ -291,7 +291,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
     custom_text = JSON.parse(JSON.stringify(custom_text));
     custom_text = Object.assign(custom_text, {
       following_product_ids: [], following_products: [], font_family: self.default_font_obj ? self.default_font_obj.name : '',
-      id: null, items: [custom_text?.items[0]], label: 'Custom Text ' + (custom_text_names_count + 1), type: 'name', updated_at: null, value: '',
+      id: null, items: [{...custom_text?.items[0], ...{selected: true}}], label: 'Fixed Text ' + (custom_text_names_count + 1), type: 'name', updated_at: null, value: '',
       manually_added: true
     })
     if('is_first_name' in custom_text) {
@@ -302,7 +302,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
     }
     custom_text.items[0] = Object.assign(custom_text.items[0], {
       color: 'WHITE', color_pantone: '#F4F5F0', font_family: self.default_font_obj ? self.default_font_obj.name : '', height: 50,
-      is_locked: false, label: 'Custom Text ' + (custom_text_names_count + 1), outline_color: 'WHITE', outline_color_pantone: '#F4F5F0',
+      is_locked: false, label: 'Fixed Text ' + (custom_text_names_count + 1), outline_color: 'WHITE', outline_color_pantone: '#F4F5F0',
       outline_enabled: 1, outline_width: 0, placement: 'Front', rotation: 0, width: 50, x_axis: 300, y_axis: 300, scaleX: 0, scaleY: 0
     })
     return custom_text;

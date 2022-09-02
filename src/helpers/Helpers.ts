@@ -495,97 +495,100 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
           }
           if(Object.prototype.hasOwnProperty.call(custom_text, "items")){
             for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
+
               const custom_text_item = custom_text.items[items_index]
+              if(custom_text_item.selected){
+
+                  const text_item_object = {
+                    label: custom_text_item.label,
+                    width: '',
+                    height: '',
+                    unit: '',
+                    svg: '',
+                    color: [] as Record<any, any>[]
+                  }
+
+                  if (Object.keys(path).length) {
+
+                    const text_color_info = {
+                      hex: '',
+                      name: '',
+                      pantone: ''
+                    }
+                    text_color_info['hex'] = custom_text_item.color
+                    text_color_info['name'] = custom_text_item.color
+                    text_color_info['pantone'] = ''
+
+                    path.fill = custom_text_item.color
+                    path.stroke = custom_text_item.outline_color
+                    path.strokeWidth = parseInt(custom_text_item.outline_width)
+                    path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
 
 
-              const text_item_object = {
-                label: custom_text_item.label,
-                width: '',
-                height: '',
-                unit: '',
-                svg: '',
-                color: [] as Record<any, any>[]
-              }
+                    const boundingBox = path.getBoundingBox()
+                    boundingBox.y1 = Math.abs(boundingBox.y1)
+                    const width = boundingBox.x2 - boundingBox.x1
+                    const height = boundingBox.y1 + boundingBox.y2
+                    const svg_string = path.toSVG()
+                    const parser = new DOMParser();
+                    const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
+                    // dom_svg.style.translate = '0px ' + height + 'px'
 
-              if(Object.keys(path).length) {
+                    let transform_height = height;
+                    if (custom_text.type == 'name') {
 
-                const text_color_info = {
-                  hex:'',
-                  name:'',
-                  pantone:''
-                }
-                text_color_info['hex'] = custom_text_item.color
-                text_color_info['name'] = custom_text_item.color
-                text_color_info['pantone'] = ''
+                      let minus_height = false;
+                      if (text_for_test_char.indexOf('y') > -1) {
+                        minus_height = true
+                      } else if (text_for_test_char.indexOf('q') > -1) {
+                        minus_height = true
+                      } else if (text_for_test_char.indexOf('j') > -1) {
+                        minus_height = true
+                      } else if (text_for_test_char.indexOf('p') > -1) {
+                        minus_height = true
+                      } else if (text_for_test_char.indexOf('g') > -1) {
+                        minus_height = true
+                      }
 
-                path.fill = custom_text_item.color
-                path.stroke = custom_text_item.outline_color
-                path.strokeWidth = parseInt(custom_text_item.outline_width)
-                path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
+                      if (minus_height)
+                        transform_height -= 15;
+                    }
+                    // console.log('transform_height',transform_height ,' ', height, ' ', text_for_test_char)
+                    dom_svg.setAttribute('transform', 'translate(-1 ' + transform_height + ')')
 
-
-                const boundingBox = path.getBoundingBox()
-                boundingBox.y1 = Math.abs(boundingBox.y1)
-                const width = boundingBox.x2 - boundingBox.x1
-                const height = boundingBox.y1 + boundingBox.y2
-                const svg_string = path.toSVG()
-                const parser = new DOMParser();
-                const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
-                // dom_svg.style.translate = '0px ' + height + 'px'
-
-                let transform_height = height;
-                if(custom_text.type == 'name'){
-
-                  let minus_height = false;
-                  if(text_for_test_char.indexOf('y') > -1  )
-                  { minus_height = true }
-                  else if(text_for_test_char.indexOf('q') > -1)
-                  { minus_height = true }
-                  else if(text_for_test_char.indexOf('j') > -1)
-                  { minus_height = true }
-                  else if(text_for_test_char.indexOf('p') > -1)
-                  { minus_height = true }
-                  else if(text_for_test_char.indexOf('g') > -1)
-                  { minus_height = true }
-
-                  if(minus_height)
-                    transform_height -= 15;
-                }
-                // console.log('transform_height',transform_height ,' ', height, ' ', text_for_test_char)
-                dom_svg.setAttribute('transform','translate(-1 '+transform_height+')')
-
-                const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
-                  '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
-                  'viewBox="0 0 ' + width + ' ' + height +'"> \n' + dom_svg.outerHTML + '\n</svg>'
+                    const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
+                      '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+                      'viewBox="0 0 ' + width + ' ' + height + '"> \n' + dom_svg.outerHTML + '\n</svg>'
 
 
-                const converted_width = unitConversion(width * custom_text_item.scaleX * selected_product.measurement_ratio)
-                const converted_height = unitConversion(height * custom_text_item.scaleY * selected_product.measurement_ratio)
+                    const converted_width = unitConversion(width * custom_text_item.scaleX * selected_product.measurement_ratio)
+                    const converted_height = unitConversion(height * custom_text_item.scaleY * selected_product.measurement_ratio)
 
-                text_item_object.width = converted_width.value;
-                text_item_object.height = converted_height.value;
-                text_item_object.unit = converted_height.unit;
-                text_item_object.svg = svg_with_tag
-                text_item_object.color.push(text_color_info);
-              }
+                    text_item_object.width = converted_width.value;
+                    text_item_object.height = converted_height.value;
+                    text_item_object.unit = converted_height.unit;
+                    text_item_object.svg = svg_with_tag
+                    text_item_object.color.push(text_color_info);
+                  }
 
-              if(custom_text.is_first_name) {
-                text_object.name.label = custom_text.label
-                text_object.name.font_family = custom_text.font_family
-                text_object.name.items.push(text_item_object)
-              } else if(custom_text.is_first_number) {
-                text_object.number.label = custom_text.label
-                text_object.number.font_family = custom_text.font_family
-                text_object.number.items.push(text_item_object)
-              } else if(roster_index == 0) {
-                common_object.label = custom_text.label
-                common_object.value = custom_text.value
-                common_object.font_family = custom_text.font_family
-                common_object.items.push(text_item_object)
+                  if (custom_text.is_first_name) {
+                    text_object.name.label = custom_text.label
+                    text_object.name.font_family = custom_text.font_family
+                    text_object.name.items.push(text_item_object)
+                  } else if (custom_text.is_first_number) {
+                    text_object.number.label = custom_text.label
+                    text_object.number.font_family = custom_text.font_family
+                    text_object.number.items.push(text_item_object)
+                  } else if (roster_index == 0) {
+                    common_object.label = custom_text.label
+                    common_object.value = custom_text.value
+                    common_object.font_family = custom_text.font_family
+                    common_object.items.push(text_item_object)
 
-                if(common_object.value) {
-                  Vue.set(common, common.length, common_object)
-                }
+                    if (common_object.value) {
+                      Vue.set(common, common.length, common_object)
+                    }
+                  }
               }
             }
           }
