@@ -189,6 +189,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   }
 
   public setProductSizes() {
+    this.sizeOptions = [];
     this.productSizes.forEach((size: any, key: number) => {
       let sizes = {value: size.name, text: size.name}
       this.sizeOptions = this.sizeOptions.concat([sizes])

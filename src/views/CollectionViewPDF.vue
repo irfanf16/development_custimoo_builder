@@ -257,10 +257,10 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
     this.initProductsFonts(newVal)
   }
 
-  @Watch('productSizes')
-  productSizeChanged(){
-    this.setProductSizes();
-  }
+  // @Watch('productSizes')
+  // productSizeChanged(){
+  //   this.setProductSizes();
+  // }
 
   public loadFont(url: string) {
     return new Promise((resolve) => {
@@ -344,6 +344,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
 
   public setProductSizes() {
     if(this.show_roster){
+      this.sizeOptions = [];
       this.productSizes.forEach((size: any, key: number) => {
         let sizes = {value: size.name, text: size.name}
         this.sizeOptions = this.sizeOptions.concat([sizes])
