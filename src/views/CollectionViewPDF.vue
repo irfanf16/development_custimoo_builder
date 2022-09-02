@@ -257,6 +257,11 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
     this.initProductsFonts(newVal)
   }
 
+  @Watch('productSizes')
+  productSizeChanged(){
+    this.setProductSizes();
+  }
+
   public loadFont(url: string) {
     return new Promise((resolve) => {
       opentype.load(url, (err: Record<any, any>, font_object: Record<any, any>) => {

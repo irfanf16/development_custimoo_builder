@@ -62,7 +62,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Prop} from 'vue-property-decorator'
+import {Component, Mixins, Prop,Watch} from 'vue-property-decorator'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import OrderDetailsTab from '@/components/OrderDetailsTab.vue'
 import RosterDetails from '@/components/RosterDetails.vue'
@@ -181,6 +181,11 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
       payload.code = this.sizeOptions[0].value;
     }
     this.$store.dispatch('setRosterDetails', { pid : product.id, index: index, roster: payload })
+  }
+
+  @Watch('productSizes')
+  productSizeChanged(){
+    this.setProductSizes();
   }
 
   public setProductSizes() {
