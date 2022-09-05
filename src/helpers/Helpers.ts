@@ -505,7 +505,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     height: '',
                     unit: '',
                     svg: '',
-                    color: [] as Record<any, any>[]
+                    color: [] as Record<any, any>[],
+                    svg_height:''
                   }
 
                   if (Object.keys(path).length) {
@@ -533,7 +534,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     const parser = new DOMParser();
                     const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
                     // dom_svg.style.translate = '0px ' + height + 'px'
-
+                    text_item_object.svg_height = height
                     let transform_height = height;
                     if (custom_text.type == 'name') {
 
