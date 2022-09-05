@@ -1349,25 +1349,34 @@ export default class Scene extends Vue {
           nearTo = key
         }
       })
+      let moreToWords = 'left'
+      if(boundingDistance.right < boundingDistance.left) {
+        moreToWords = 'right'
+      }
 
       let checkPointX = target.left + (target.width * target.scaleX / 2)
       if (nearTo == 'left') {
         checkPointX = target.left - (target.width * target.scaleX / 2)
       }
 
+      let checkPointY = centerPoint.y
+      if(actualNearTo == 'top') {
+        checkPointY = centerPoint.y - 8
+      }
+
       let otherSideObjects = this.otherSideLogos
       if (target.custom_text_index) {
         otherSideObjects = this.otherSideTexts
       }
-      if (canvas.isTargetTransparent(texture, checkPointX, centerPoint.y)) {
+      if (canvas.isTargetTransparent(texture, checkPointX, checkPointY)) {
         let addLeft
         let addTop
         const model_start = (texture.left - ((texture.width * texture.scaleX) / 2)) - 1
         const model_end = (texture.left + ((texture.width * texture.scaleX) / 2)) + 1
         const width = target.width * target.scaleX;
-        if (nearTo == 'left') {
+        if (moreToWords == 'left') {
           const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')
-          const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, centerPoint.y, 0, 1, 'left')
+          const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, checkPointY, 0, 1, 'left')
           const outside = direction.left - checkPointX
           const modelSpaceLeft = directionFromRight.left + (width / 2) - 3
           addLeft = modelSpaceLeft - outside
