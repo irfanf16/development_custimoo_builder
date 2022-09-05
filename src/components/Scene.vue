@@ -118,18 +118,24 @@ import {find} from "lodash";
       }
 
       function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
-
         let target = transform.target;
         let canvas = target.canvas;
-        if ('text_index' in target) {
-          let before_update = self.updateTextObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomTextObject)), {'action': 'customTexts'})
-          self.$store.commit('UPDATE_UNDO', {data: before_update, action: 'customTexts'})
-          self.$store.dispatch('updateCustomTextAttribute', {
-            index: target.textIndex,
-            on_all: true,
-            attribute: 'text',
-            value: ''
-          })
+        let custom_text_index = target.custom_text_index
+        let custom_text_item_index = target.custom_text_item_index
+        if ('custom_text_index' in target) {
+          handleFabricCustomTextRemoved(target)
+          // let before_update = self.updateTextObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomTextObject)), {'action': 'customTexts'})
+          // self.$store.commit('UPDATE_UNDO', {data: before_update, action: 'customTexts'})
+          // let delete_product_custom_text = JSON.parse(JSON.stringify(self.productCustomTexts[custom_text_index]));
+          // delete_product_custom_text.items[custom_text_item_index].selected = false
+          // self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: delete_product_custom_text})
+          // self.$eventBus.$emit("customTextUpdated", {
+          //   emitter: "fabric:deleted", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index,
+          //   value: delete_product_custom_text
+          // });
+          // delete_product_custom_text.following_product_ids.forEach((following_product_id: number) => {
+          //   //self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: following_product_id, value: {value: updatedVal}})
+          // })
         } else {
           let logo = setLogoSettings(target.logoIndex);
           logo.logoIndex = target.logoIndex;
@@ -147,9 +153,29 @@ import {find} from "lodash";
         }
         canvas.remove(target);
         canvas.requestRenderAll();
-        if("text_index" in target) {
-          handleCustomTextDeletedFromCanvas(target.text_index);
-        }
+      }
+
+      function handleFabricCustomTextRemoved(target: Record<any, any>) {
+        let custom_text_index = target.custom_text_index
+        let custom_text_item_index = target.custom_text_item_index
+        let all_products_custom_texts  = JSON.parse(JSON.stringify(self.allProductsCustomTexts))
+        console.log('all_products_custom_texts', all_products_custom_texts)
+        let removed_custom_text: Record<any, any> = JSON.parse(JSON.stringify(self.productCustomTexts[custom_text_index]));
+        console.log('removed_custom_text', removed_custom_text)
+        let following_product_ids = removed_custom_text.following_product_ids
+        following_product_ids.push(self.selectedProductId)
+        following_product_ids.forEach((following_product_id: number) => {
+          let product_custom_text = all_products_custom_texts[following_product_id][custom_text_index];
+          if(product_custom_text) {
+            if(product_custom_text.items[custom_text_item_index]) {
+              product_custom_text.items[custom_text_item_index].selected = false;
+              self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: following_product_id, value: {
+                  items: product_custom_text.items
+                }})
+            }
+          }
+        })
+
       }
 
       function handleCustomTextDeletedFromCanvas(custom_text_index: number) {
@@ -1330,7 +1356,7 @@ export default class Scene extends Vue {
       }
 
       let otherSideObjects = this.otherSideLogos
-      if (target.text) {
+      if (target.custom_text_index) {
         otherSideObjects = this.otherSideTexts
       }
       if (canvas.isTargetTransparent(texture, checkPointX, centerPoint.y)) {
@@ -1750,6 +1776,13 @@ export default class Scene extends Vue {
             this.frontCanvas.remove(custom_text[i])
             if(this.back) {
               this.backCanvas.remove(custom_text[i])
+            }
+            const otherSideText = this.otherSideTexts[objectIndex + '' + i]
+            if(otherSideText) {
+              this.frontCanvas.remove(otherSideText)
+              if(this.back) {
+                this.backCanvas.remove(otherSideText)
+              }
             }
           }
         }
