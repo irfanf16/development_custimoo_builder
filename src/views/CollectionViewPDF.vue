@@ -67,7 +67,7 @@
                 <div class="pdf_price" v-if="collection_product.allow_price && collection_product.product_price"><strong>Price: </strong>
                   {{collection_product.product_price}}
                 </div>
-                <div class="pdf_price d-flex justify-content-end">
+                <div class="pdf_price d-flex justify-content-end" v-if="company.platform !== 'self'">
                   <template v-if="isAuthenticated">
                     <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs" @click="addToCart(collection_product,idxs)">
                       Purchase
