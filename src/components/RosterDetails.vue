@@ -60,7 +60,7 @@
           <div class="align-left">
             <template v-if="allowNameAndNumbers">
               <div class="hide-show">
-                <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="editRosterPlayer(productRosterItemIndex)">
+                <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="handleRosterItemFocus(productRosterItemIndex)">
                   <font-awesome-icon :icon="['fas', productRosterItemIndex == active_roster_index ? 'eye' : 'eye-slash']" />
                 </a>
               </div>
