@@ -120,23 +120,10 @@ import {find} from "lodash";
       function deleteObject(eventData: Record<any, any>, transform: Record<any, any>) {
         let target = transform.target;
         let canvas = target.canvas;
-        let custom_text_index = target.custom_text_index
-        let custom_text_item_index = target.custom_text_item_index
         if ('custom_text_index' in target) {
-          handleFabricCustomTextRemoved(target)
-          // let before_update = self.updateTextObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomTextObject)), {'action': 'customTexts'})
-          // self.$store.commit('UPDATE_UNDO', {data: before_update, action: 'customTexts'})
-          // let delete_product_custom_text = JSON.parse(JSON.stringify(self.productCustomTexts[custom_text_index]));
-          // delete_product_custom_text.items[custom_text_item_index].selected = false
-          // self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: delete_product_custom_text})
-          // self.$eventBus.$emit("customTextUpdated", {
-          //   emitter: "fabric:deleted", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index,
-          //   value: delete_product_custom_text
-          // });
-          // delete_product_custom_text.following_product_ids.forEach((following_product_id: number) => {
-          //   //self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: following_product_id, value: {value: updatedVal}})
-          // })
-        } else {
+        handleFabricCustomTextRemoved(target)
+        }
+        else {
           let logo = setLogoSettings(target.logoIndex);
           logo.logoIndex = target.logoIndex;
           logo.removeLogo = true
@@ -156,26 +143,24 @@ import {find} from "lodash";
       }
 
       function handleFabricCustomTextRemoved(target: Record<any, any>) {
-        let custom_text_index = target.custom_text_index
+        let custom_text_index = target.custom_text_index;
         let custom_text_item_index = target.custom_text_item_index
         let all_products_custom_texts  = JSON.parse(JSON.stringify(self.allProductsCustomTexts))
-        console.log('all_products_custom_texts', all_products_custom_texts)
-        let removed_custom_text: Record<any, any> = JSON.parse(JSON.stringify(self.productCustomTexts[custom_text_index]));
-        console.log('removed_custom_text', removed_custom_text)
-        let following_product_ids = removed_custom_text.following_product_ids
-        following_product_ids.push(self.selectedProductId)
-        following_product_ids.forEach((following_product_id: number) => {
-          let product_custom_text = all_products_custom_texts[following_product_id][custom_text_index];
-          if(product_custom_text) {
-            if(product_custom_text.items[custom_text_item_index]) {
-              product_custom_text.items[custom_text_item_index].selected = false;
-              self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: following_product_id, value: {
-                  items: product_custom_text.items
-                }})
-            }
-          }
-        })
+        let product_custom_texts: Record<any, any> = all_products_custom_texts[self.selectedProductId];
+        let removed_custom_text = product_custom_texts[custom_text_index]
+        removed_custom_text.items[custom_text_item_index].selected = false
+        /*
+        * check if there is any active item if not then remove the value of custom text
+        * */
+        let custom_text_active_item = find(removed_custom_text.items, ['selected', true])
+        if(custom_text_active_item == undefined ) {
+          removed_custom_text.value = '';
+        }
 
+        self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: removed_custom_text})
+        self.$eventBus.$emit("customTextUpdated", {
+          emitter: "checkbox", custom_text_index:custom_text_index, custom_text_item_index: null, value: removed_custom_text
+        });
       }
 
       function handleCustomTextDeletedFromCanvas(custom_text_index: number) {
@@ -1402,8 +1387,6 @@ export default class Scene extends Vue {
             delete otherSideObjects[addIndex]
           }
         }
-        // console.log('target.angle', target.angle)
-        // console.log('clone.angle', 180 - target.angle)
         if (otherSideObjects[addIndex]) {
           otherSideObjects[addIndex].left = addLeft
           otherSideObjects[addIndex].top = addTop
@@ -2035,7 +2018,6 @@ export default class Scene extends Vue {
     let self: Record<any, any> = this;
     const custom_text_index =  fabric_object.get("custom_text_index");
     const custom_text_item_index =  fabric_object.get("custom_text_item_index");
-    console.log('custom_text_index ', custom_text_index, ' custom_text_item_index ', custom_text_item_index)
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = fabric_object.get("left");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].y_axis = fabric_object.get("top");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = fabric_object.get("angle");
