@@ -506,7 +506,9 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     unit: '',
                     svg: '',
                     color: [] as Record<any, any>[],
-                    svg_height:''
+                    svg_height:'',
+                    outline_color:'',
+                    outline_width:0
                   }
 
                   if (Object.keys(path).length) {
@@ -570,6 +572,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     text_item_object.unit = converted_height.unit;
                     text_item_object.svg = svg_with_tag
                     text_item_object.color.push(text_color_info);
+                    text_item_object.outline_color = custom_text_item.outline_color;
+                    text_item_object.outline_width = parseInt(custom_text_item.outline_width);
                   }
 
                   if (custom_text.is_first_name) {
