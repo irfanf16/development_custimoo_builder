@@ -43,6 +43,8 @@ export class LockerProducts extends Vue {
         //todo need to confirm this logic. I think it's have no effect
         if(active_product_detail.product_roster_detail) {
           self.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
+        } else {
+          this.$store.dispatch("setProductsRosters");
         }
         this.$root.$emit('rostershared', '')
         //todo ends her

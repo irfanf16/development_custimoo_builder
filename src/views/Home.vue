@@ -1324,6 +1324,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
       this.$store.dispatch('SET_LOGO_COLORS', [])
       this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+      this.$store.dispatch("setProductsRosters")
       // await this.retrieveProducts()
       //todo need to call retrieveProducts only in edit mode
     }
