@@ -297,10 +297,12 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
       let roster_items = selected_roster ? selected_roster.product_roster_detail : null;
       roster_items = roster_items.map((roster_item: Record<any, any>) => {
         let size_index = findIndex(self.productSizes, ["value", roster_item.size])
-        if(size_index == -1 ) {
-          console.error(`The locker roster (${locker_roster_id}) size (${roster_item.size}) not found`)
+        let roster_size = roster_item.size;
+        if(size_index === -1 ) {
+          size_index = 0
+          roster_size = this.productSizes[0].text
         }
-        return Object.assign(roster_item, {code: roster_item.size, size_index: size_index})
+        return Object.assign(roster_item, {code: roster_size, size_index: size_index})
       })
       self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
       let first_roster_item = roster_items[0]
