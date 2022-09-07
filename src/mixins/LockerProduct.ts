@@ -128,8 +128,6 @@ export class handleMainProducts extends Vue {
     let self: Record<any, any> = this;
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject
     let response_data = response.data;
-    let active_product_index = response.data.active_product_index
-    let active_product_id = response.data.active_product_id
     let response_products_obj = response_data.products;
     let retrieved_products = response_products_obj.data;
     let append_products =  response_products_obj.current_page > 1;
@@ -491,6 +489,7 @@ export class handleMainProducts extends Vue {
   }
 
   public async updateFactoryProduct(factory_product: Record<any, any>) {
+    let self: Record<any, any> = this;
     let selected_product = this.$store.getters.getSelectedProduct;
     let selected_product_style_index = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === factory_product.style_id);
     await this.$store.commit('CHANGE_STYLE_INDEX', selected_product_style_index)
@@ -513,6 +512,16 @@ export class handleMainProducts extends Vue {
       product_id:factory_product.product_id
     }
     this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { value: factory_product.product_custom_texts })
+
+    if(factory_product.product_custom_texts) {
+      factory_product.product_custom_texts.forEach((custom_text: Record<any, any>, index: number) => {
+        if(custom_text.value) {
+          const text = { value: custom_text, custom_text_index: index }
+          self.$eventBus.$emit('customTextUpdated', text)
+        }
+      })
+    }
+
     await this.$store.dispatch('overRideDefaultColors', factory_product.defaultcolors);
     await this.$store.dispatch('overRideGroupColors', factory_product.groupcolors);
     selected_product.productstyles[selected_product_style_index].productdesigns.forEach((item: Record<any, any>) => {
@@ -582,7 +591,13 @@ export class handleMainProducts extends Vue {
       await this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: selected_product.product_texts});
     }
     else {
-      await this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: active_product_detail.text});
+      this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: active_product_detail.text});
+      active_product_detail.text.forEach((custom_text: Record<any, any>, index: number) => {
+        if(custom_text.value) {
+          const text = { value: custom_text, custom_text_index: index }
+          self.$eventBus.$emit('customTextUpdated', text)
+        }
+      })
     }
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(active_product_detail.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(active_product_detail.groupcolors));
@@ -657,7 +672,14 @@ export class handleMainProducts extends Vue {
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
     this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { value: cart_item_product.product_custom_texts })
 
-    //self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    if(cart_item_product.product_custom_texts) {
+      cart_item_product.product_custom_texts.forEach((custom_text: Record<any, any>, index: number) => {
+        if(custom_text.value) {
+          const text = { value: custom_text, custom_text_index: index }
+          self.$eventBus.$emit('customTextUpdated', text)
+        }
+      })
+    }
 
     await this.$store.dispatch('overRideDefaultColors', cart_item_product.defaultcolors);
     await this.$store.dispatch('overRideGroupColors', cart_item_product.groupcolors);

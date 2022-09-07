@@ -1064,6 +1064,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.generate_share_url = share_url
     if (!this.getProductEditInfoObject.editing){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+      return
     }
 
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
@@ -1110,13 +1111,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       await http.post('updatelockerproduct', locker).then(async (successResponse) => {
         let response_data = successResponse.data;
         let toast_type = "ERROR"
-        if(response_data.success) {
-          toast_type = "SUCCESS"
-          self.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
-        }
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
-        self.exitFromEditMode();
+        this.exitFromEditMode();
         let query_params = await self.setQueryParams()
         self.retrieveProducts(query_params)
       }).catch(async errorResponse => {
