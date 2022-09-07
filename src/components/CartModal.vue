@@ -83,7 +83,7 @@
             </div>
           </template>
           <div v-else class="px-2 pt-1 pb-2">
-            <router-link :to="'address?cart=1'" class="btn btn-secondary btn-sm my-orders">
+            <router-link :to="'/address?cart=1'" class="btn btn-secondary btn-sm my-orders">
               <span style="font-size: 0.9em">
                 <b-icon-plus />
               </span> Add
@@ -99,7 +99,7 @@
           </div>
         </div>
       </div>
-      <div class="d-flex justify-content-center">
+      <div class="d-flex justify-content-center" v-if="company.platform !== 'self'">
         <b-button class="mt-4" @click="createOrder">Finalize Order</b-button>
       </div>
     </div>
@@ -172,6 +172,10 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
   get cartItems() {
     return this.$store.getters.getCartItems
+  }
+
+  get company(){
+    return this.$store.getters.getCompany;
   }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
