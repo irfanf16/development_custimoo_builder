@@ -131,7 +131,7 @@ import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import LoginForm from '@/components/LoginForm.vue'
 import {LockerProducts,handleMainProducts} from "@/mixins/LockerProduct"
-import {getRosterDetailDefaultObject} from "@/helpers/Helpers";
+import { getRandom, getRosterDetailDefaultObject } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import RosterDetails from '@/components/RosterDetails.vue'
@@ -145,6 +145,11 @@ import opentype from 'opentype.js'
 @Component<CollectionViewPDF>({
   components: {LoginForm,CustomizationPreview,RosterDetails,CartModal,ConfirmModal},
   async mounted() {
+    let self: Record<any, any> = this;
+    await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
+      await this.initProductsFonts(products, resolve)
+    })
+
     this.getCollection()
     this.$store.dispatch('setCartIconShow', true);
     this.$store.dispatch('setCollectionView', true);
@@ -244,18 +249,11 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
 
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'addToCart') {
-      this.addToCart(this.current_product,this.current_index);
+      this.addToCart(this.current_product, this.current_index);
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
-  get products(){
-    return this.$store.getters.getProducts;
-  }
 
-  @Watch('products')
-  productsChanged(newVal: Record<any, any>[]){
-    this.initProductsFonts(newVal)
-  }
 
   // @Watch('productSizes')
   // productSizeChanged(){
@@ -274,7 +272,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
     })
   }
 
-  public async initProductsFonts(products: Record<any, any>[]) {
+  public async initProductsFonts(products: Record<any, any>[], resolve: any) {
     for(let product_index = 0; product_index < products.length; product_index++) {
       const product = products[product_index]
       const productFonts = product.namefonts;
@@ -286,8 +284,8 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
             let fontNameParam = font.path.split('/').reverse()
             fontNameParam = fontNameParam[0].split('.')
             const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-            const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}`
-            if(!this.products_fonts[fontName]) {
+            const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}?num=${getRandom()}`
+            if(!this.products_fonts[fontNameParam[0]]) {
               const font_object = await this.loadFont(url)
               if(font_object) {
                 const final_font = {
@@ -302,6 +300,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
           }
         }
       }
+      resolve('done')
     }
   }
 
@@ -391,13 +390,11 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
 
     if(self.isAuthenticated){
       await self.fetchProductForCollectionView(room_product.product_locker_room.room_id,room_product.product_locker_room);
-      self.show_roster = true;
-      await self.setProductSizes();
-      await this.show();
+
       setTimeout(()=>{
         self.ref['rosterDetailsModal'].fontsColorsManipulation();
         self.ref['rosterDetailsModal'].fontsList();
-      },500)
+      },10000)
       self.room_product_index = self.room_product_index + 1 ;
     }
     else{

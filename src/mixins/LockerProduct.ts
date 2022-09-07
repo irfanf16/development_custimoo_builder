@@ -282,52 +282,63 @@ export class handleMainProducts extends Vue {
     let response_data = response.data;
     let response_products_obj = response_data.products;
     let retrieved_products = response_products_obj.data;
-    await this.$store.dispatch('setStockCount',response.data.stock_count);
-    await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
-    await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
 
-    let product_index = 0;
-    let style_index = 0;
+    const prms = new Promise((resolve) => {
+      self.$eventBus.$emit('initProductsFonts', retrieved_products, resolve)
+    })
 
-    let editing_product_detail = response_data.editing_product_detail
-    /*
-    * The default value for edit_product_index is -1. -1 Means product is not being edited. product_edit_info_object.editing check is added as the edit_product_index
-    * will have value only when it's being edited.
-    * */
-    product_index = 0
-    if(product_index >= 0) {
-      style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
-        return product_style.id == style_id;
+    prms.then(async () => {
+      await this.$store.dispatch('setStockCount',response.data.stock_count);
+      await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
+      await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
+
+      let product_index = 0;
+      let style_index = 0;
+
+      let editing_product_detail = response_data.editing_product_detail
+      /*
+      * The default value for edit_product_index is -1. -1 Means product is not being edited. product_edit_info_object.editing check is added as the edit_product_index
+      * will have value only when it's being edited.
+      * */
+      product_index = 0
+      if(product_index >= 0) {
+        style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
+          return product_style.id == style_id;
+        });
+      }
+      await this.$store.commit('SET_PRODUCTS', { products: retrieved_products });
+      await this.$store.dispatch('setSelectedIndex', { selectedIndex: product_index });
+      await setRetrievedProductsCustomTexts(retrieved_products)
+      this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+      await this.$store.dispatch("getModels", retrieved_products[product_index].id);
+      this.$root.$emit('sliderEvent', product_index);
+      //If we are editing locker product then set the locker product data and return
+
+      await self.setLockerProductData(editing_product_detail)
+      let selected_product = this.$store.getters.getSelectedProduct;
+      initCustomLogos(retrieved_products)
+
+      let customLogos = this.$store.getters.getCustomLogoObject
+      for (const product of retrieved_products) {
+        if (!customLogos[product.id]) {
+          await this.$store.dispatch('setCustomObj', product.id)
+        }
+      }
+      this.$store.dispatch('setColorSectionVisibility')
+      this.$store.dispatch("getModels", selected_product.product_id);
+      selected_product.productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
+        if (item.id == design_id) {
+          Vue.set(item, 'design_show', 1)
+          this.$store.dispatch('setSelectedProductDesignID', item.id)
+        } else {
+          Vue.set(item, 'design_show', 0)
+        }
       });
-    }
-    await this.$store.commit('SET_PRODUCTS', {products: [retrieved_products[product_index]]});
-    await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index});
-    await setRetrievedProductsCustomTexts(retrieved_products)
-    this.$store.commit('CHANGE_STYLE_INDEX', style_index);
-    await this.$store.dispatch("getModels", retrieved_products[product_index].id);
-    this.$root.$emit('sliderEvent', product_index);
-    //If we are editing locker product then set the locker product data and return
 
-    await self.setLockerProductData(editing_product_detail)
-    let selected_product = this.$store.getters.getSelectedProduct;
-    initCustomLogos(retrieved_products)
-
-    let customLogos = this.$store.getters.getCustomLogoObject
-    for (const product of retrieved_products) {
-      if(!customLogos[product.id]) {
-        await this.$store.dispatch('setCustomObj', product.id)
-      }
-    }
-    this.$store.dispatch('setColorSectionVisibility')
-    this.$store.dispatch("getModels", selected_product.product_id);
-    selected_product.productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
-      if (item.id == design_id) {
-        Vue.set(item, 'design_show', 1)
-        this.$store.dispatch('setSelectedProductDesignID', item.id)
-      } else {
-        Vue.set(item, 'design_show', 0)
-      }
-    });
+      self.show_roster = true;
+      await self.setProductSizes();
+      await self.show();
+    })
   }
 
   public async beforeSetDataValidateActiveProductData(retrieved_products: Record<any, any>[]) {
