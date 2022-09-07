@@ -70,14 +70,6 @@ export default class LockerRoomModal extends Mixins(ModalAction){
     })
   }
 
-  // public hideLockerRoomModal (modalName:string) {
-  //   (this.$modal as Record<any, any>).hide(modalName)
-  // }
-  //
-  // public showLockerRoomModal () {
-  //   (this.$modal as Record<any, any>).show('locker-modal')
-  // }
-
   public addDesignCollection () {
     this.ref['lockerRoom'].addDesignCollection();
     this.$store.commit("Change_Locker_Active_Tab", 3)
