@@ -1247,7 +1247,6 @@ const rosterDefaultItem = () => {
 }
 
 const logData = (...args: Record<any, any>[]) => {
-  console.log('arge', args.constructor.name)
   const data: Record<any, any> = {}
   args.forEach((arg, arg_index) => {
     data[arg_index] = arg

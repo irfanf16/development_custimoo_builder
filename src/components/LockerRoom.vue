@@ -18,7 +18,7 @@
           <div>
             <b-card no-body>
               <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
-              <b-tabs v-else card v-model="lockerActiveTabIndex" @changed="checkINdex" :no-fade="true">
+              <b-tabs v-else card v-model="lockerActiveTabIndex" @changed="handleLockerRoomChanged" @input="handleTabChanged" :no-fade="true">
                 <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" >
                   <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                              :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
@@ -89,23 +89,6 @@
                               </div>
                             </aside>
                           </Popper>
-
-<!--                          <b-tooltip :target="'share'+i+''+ind" custom-class="share-tooltip" placement="bottom"-->
-<!--                                     triggers="focus">-->
-<!--                            <div class="share-holder">-->
-<!--                              <h3>Copy link-->
-<!--                                ..and Share</h3>-->
-<!--                              <div class="share-form">-->
-<!--                                <b-form inline>-->
-<!--                                  <b-form-input :id="'copy-'+ind"-->
-<!--                                                :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"-->
-
-<!--                                  ></b-form-input>-->
-<!--                                  <buttonclick="copyLink(product, ind) ">Copy Link</b-button>-->
-<!--                                </b-form>-->
-<!--                              </div>-->
-<!--                            </div>-->
-<!--                          </b-tooltip>-->
                         </li>
                         <li v-if="!getSelectionMode.readonly">
                           <a style="font-size: 12px;"  @click="showDesignModal(product)">
@@ -182,7 +165,6 @@
                         <div class="image-holder">
                           <div class="convas_container" :key="collection_product_index"
                                v-for="(collection_product,collection_product_index) in collection.collection_products">
-<!--                            <b-form-checkbox v-model="selectedCollectionProducts" v-bind:value="collection.id"></b-form-checkbox>-->
                             <template v-if="collection_product_index < 3">
                               <img :src="collection_product.product_locker_room.product_url"
                                    :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'"
@@ -292,7 +274,6 @@
       <div class="modal-body">
         <div class="pt-4 design-name-form">
             <div>
-<!--                <label for="inline-form-input-productname" class="w-100 d-block mb-2">Design Name</label>-->
               <div class="d-flex align-items-end gap-2 justify-content-between">
                 <div class="w-100 d-block">
                   <label class="w-100 d-block">Name of Design</label>
@@ -354,8 +335,6 @@ import ModalAction from "@/mixins/ModalAction";
     draggable
   },
   mounted() {
-    console.log(this.$store.getters.getLockerTabsIndex)
-    console.log(this.$store.getters.getActiveLockerProduct)
     let href: any = location.href;
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
@@ -381,16 +360,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public collection_base_url = ''
   public yearly_planner_template_id = null;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
-  // public isSafari = () => {
-  //   let ua = navigator.userAgent.toLowerCase();
-  //   if (ua.indexOf('safari') != -1) {
-  //     if (ua.indexOf('chrome') > -1) {
-  //       return false; //Chrome
-  //     } else {
-  //       return true // Safari
-  //     }
-  //   }
-  // }
 
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
@@ -844,10 +813,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public clickYearlyTab(evt:any,room_id:number) {
-    // console.log('evt',evt.target.className)
-    // console.table('evt active',evt.target.classList)
-    // console.table('evt asdasdasd',evt.target.classList)
-
     this.getLockerEvents(room_id)
   }
 
@@ -879,8 +844,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.lockerActiveTabIndex = 0
     this.viewLoader = false;
   }
-  public checkINdex(){
+  public handleLockerRoomChanged(){
     this.lockerActiveTabIndex = 0
+    this.$store.commit("Change_Locker_Active_Tab", 0)
+  }
+  public handleTabChanged(tabIndex: number){
+    this.lockerActiveTabIndex = tabIndex
+    this.$store.commit("Change_Locker_Active_Tab", tabIndex)
   }
   public productsAddedToLocker(payload: Record<any, any>) {
     let clones = payload.clone ? [payload.clone] : payload.clones;
@@ -1179,62 +1149,19 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
 }
 
-//.create-lockerroom{
-//  .btn{
-//    padding: 0;
-//    font-size: 24px;
-//    line-height: 1;
-//    font-weight: 700;
-//    color: #fff;
-//    background: #219f84;
-//    width: 24px;
-//    height: 24px;
-//    border-radius: 50%;
-//    display: flex;
-//    flex-wrap: wrap;
-//    justify-content: center;
-//    align-items: center;
-//    border: none;
-//    @media only screen and (min-width: 992px){
-//      padding: 10px 30px;
-//      border: 1px solid #E7F4F1;
-//      border-radius: 0.25rem;
-//      width: auto;
-//      height: auto;
-//      font-size: 14px;
-//      font-weight: 400;
-//    }
-//    span{
-//      @media only screen and (max-width: 991px){display: none;}
-//    }
-//  }
-//}
-
 .products-holder {
   width: 100%;
-  //overflow-x: auto;
-  //white-space: nowrap;
-  //flex-wrap: nowrap;
-  //padding-top: 7px;
   @media only screen and (min-width: 992px) {
     width: 100%;
-    //overflow-x: hidden;
-    //white-space: normal;
-    //padding-top: 0;
   }
 
   .products-block {
-    //flex: 0 0 22%;
-    //margin: 0 0.3rem 10px;
-    //display: inline-block;
     position: relative;
     @media only screen and (min-width: 992px) {
-      //margin: 0 0.6rem 25px;
-      //max-width: 22%;
+
     }
     @media only screen and (min-width: 1199px) {
-      //flex: 0 0 18%;
-      //max-width: 18%;
+
     }
 
     .image-holder {
@@ -1322,81 +1249,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       }
     }
   }
-
-  //.products-holder{
-  //    width: 100%;
-  //    overflow-x: auto;
-  //    white-space: nowrap;
-  //    padding-top: 7px;
-  //    @media only screen and (min-width: 992px){
-  //        width: 100%;
-  //        overflow-x: hidden;
-  //        white-space: normal;
-  //        padding-top: 0;
-  //    }
-  //    .products-block{
-  //        flex: 0 0 22%;
-  //        max-width: 22%;
-  //        margin: 0 0.3rem 10px;
-  //        display: inline-block;
-  //        @media only screen and (min-width: 992px){
-  //            margin: 0 0.6rem 25px;
-  //        }
-  //        @media only screen and (min-width: 1199px){
-  //            flex: 0 0 18%;
-  //            max-width: 18%;
-  //        }
-  //        .image-holder{
-  //            position: relative;
-  //            margin: 0;
-  //            @media only screen and (min-width: 992px){overflow: hidden;}
-  //            img{
-  //                display: block;
-  //                max-width: 100%;
-  //                margin: 0 auto;
-  //                height: auto;
-  //            }
-  //            .product-icons{
-  //                list-style: none;
-  //                padding: 0;
-  //                margin: 0;
-  //                position: absolute;
-  //                right: -5px;
-  //                top: -5px;
-  //                z-index: 1;
-  //                @media only screen and (min-width: 992px){
-  //                    right: 5px;
-  //                    top: 5px;
-  //                }
-  //                li{
-  //                    display: block;
-  //                    margin: 0 0 5px;
-  //                }
-  //                a{
-  //                    display: flex;
-  //                    flex-wrap: wrap;
-  //                    justify-content: center;
-  //                    align-items: center;
-  //                    width: 20px;
-  //                    height: 20px;
-  //                    font-size: 9px;
-  //                    color: #219f84;
-  //                    background: #fff;
-  //                    border-radius: 50%;
-  //                    @media only screen and (min-width: 992px){
-  //                        width: 30px;
-  //                        height: 30px;
-  //                        font-size: 14px;
-  //                    }
-  //                    &.remove{
-  //                        background: #F8E1E2;
-  //                        color: #D53943;
-  //                    }
-  //                }
-  //            }
-  //        }
-  //    }
-  //}
 }
 
 .lockerroom-color-folders {
@@ -1465,49 +1317,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       }
     }
   }
-  //.color-holder {
-  //  flex: 0 0 45%;
-  //  max-width: 45%;
-  //  position: absolute;
-  //  right: 0;
-  //  top: 0;
-  //  width: 100%;
-  //  height: 100%;
-  //  max-height: 180px;
-  //  @media only screen and (min-width: 768px) {
-  //    max-height: 300px;
-  //    top: 50%;
-  //    transform: translateY(-50%);
-  //  }
-  //  @media only screen and (min-width: 1200px) {
-  //    flex: 0 0 25%;
-  //    max-width: 25%;
-  //  }
-  //
-  //  &::-webkit-scrollbar {
-  //    display: none;
-  //  }
-  //
-  //  .color-container {
-  //    gap: 7px;
-  //    @media only screen and (min-width: 410px) {
-  //      gap: 35px;
-  //    }
-  //    @media only screen and (min-width: 768px) {
-  //      gap: 25px;
-  //    }
-  //    @media only screen and (min-width: 1200px) {
-  //      gap: 7px;
-  //    }
-  //    @media only screen and (min-width: 1274px) {
-  //      gap: 7px;
-  //    }
-  //
-  //    .color-box {
-  //      margin: 0 auto 5px;
-  //    }
-  //  }
-  //}
 
   .color-folder-holder {
     overflow-y: auto;
