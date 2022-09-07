@@ -83,7 +83,7 @@
             </div>
           </template>
           <div v-else class="px-2 pt-1 pb-2">
-            <router-link :to="'address?cart=1'" class="btn btn-secondary btn-sm my-orders">
+            <router-link :to="'/address?cart=1'" class="btn btn-secondary btn-sm my-orders">
               <span style="font-size: 0.9em">
                 <b-icon-plus />
               </span> Add
