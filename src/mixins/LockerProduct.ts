@@ -1,16 +1,10 @@
 /* eslint-disable */
 import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
-import {
-  fontsColorsManipulation,
-  fontsList, getActiveProductData,
-  getRandom, handleResponseException,
-  initCustomLogos,
-  processColorsCustom,
-  fetchUrlContent, parseSvgString, setRetrievedProductsCustomTexts
-} from '@/helpers/Helpers'
+import { getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
+         setRetrievedProductsCustomTexts, resetLastActiveProductData
+       } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
-import {getClosestColor} from "@/pantoneColor";
 import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component
@@ -54,7 +48,6 @@ export class LockerProducts extends Vue {
       }, (error:Record<any, any>) => {
         console.error("Error while retrieving products",error)
       })
-     // await this.$store.dispatch('setProductType', {prd_type: locker_product_type, value: true});
   }
 
   get getLockerProducts() {
@@ -203,11 +196,11 @@ export class handleMainProducts extends Vue {
                 return retrieved_product.sync_id === sync_id;
               });
               product_index = product_index >=0 ? product_index : 0
-              product_id = retrieved_products[product_index]
+              product_id = retrieved_products[product_index].id
             }
             else {
               product_index = 0
-              product_id = retrieved_products[product_index]
+              product_id = retrieved_products[product_index].id
             }
             style_index = 0;
             let design_index = findIndex(retrieved_products[product_index].productstyles[style_index].productdesigns, (product_design: Record<any, any>) => {
@@ -342,9 +335,8 @@ export class handleMainProducts extends Vue {
   }
 
   public async beforeSetDataValidateActiveProductData(retrieved_products: Record<any, any>[]) {
-    let self = this;
+    let self: Record<any, any> = this;
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject;
-    //console.log('before validate', product_edit_info_object)
     let product_index = -1;
     let style_index = -1;
     let design_id = null;
@@ -405,17 +397,11 @@ export class handleMainProducts extends Vue {
         product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
           return retrieved_product.id == last_active_product_data.product_id
         });
-        if(product_index < 0 ) {
+        if(product_index >= 0 ) {
           validated = true
           message = "Did not find last active product data"
           //if last active product not found then reset the last active product data object
-          this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-            design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
-            page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
-            product_roster_detail: [],
-          })
-        } else {
-          validated = true
+         resetLastActiveProductData()
         }
       } else {
         validated = true
@@ -842,16 +828,6 @@ export class exitEditMode extends Vue {
   }
   public async exitFromEditMode() {
     this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null
-    })
-  }
-}
-@Component
-export class resetLastActiveProductData extends Vue {
-  public async resetLastActiveProductData() {
-    this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-      category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
-      page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
-      product_roster_detail: [],
     })
   }
 }
