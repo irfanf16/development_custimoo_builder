@@ -508,6 +508,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     color: [] as Record<any, any>[],
                     svg_height:'',
                     outline_color:'',
+                    outline_color_pantone:'',
                     outline_width:0
                   }
 
@@ -519,8 +520,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       pantone: ''
                     }
                     text_color_info['hex'] = custom_text_item.color
-                    text_color_info['name'] = custom_text_item.color
-                    text_color_info['pantone'] = ''
+                    text_color_info['name'] = custom_text_item.color_pantone
+                    text_color_info['pantone'] = custom_text_item.color_pantone
 
                     path.fill = custom_text_item.color
                     path.stroke = custom_text_item.outline_color
@@ -573,6 +574,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     text_item_object.svg = svg_with_tag
                     text_item_object.color.push(text_color_info);
                     text_item_object.outline_color = custom_text_item.outline_color;
+                    text_item_object.outline_color_pantone = custom_text_item.outline_color_pantone;
                     text_item_object.outline_width = parseInt(custom_text_item.outline_width);
                   }
 
