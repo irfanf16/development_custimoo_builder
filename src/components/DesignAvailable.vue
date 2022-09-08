@@ -32,11 +32,12 @@ import Scene from '@/components/Scene.vue'
     }
 
     (this.$refs['designs'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
+    (this.$refs['designs'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{this.loadIt($event)});
     (this.$refs['designs'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{this.loadIt($event)});
-    console.log('mounted')
   },
   beforeDestroy() {
     (this.$refs['designs'] as Record<any, any>).removeEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
+    (this.$refs['designs'] as Record<any, any>).removeEventListener('mousewheel', ($event:Record<any, any>)=>{this.loadIt($event)});
     (this.$refs['designs'] as Record<any, any>).removeEventListener('touchmove', ($event:Record<any, any>)=>{this.loadIt($event)});
   }
 })
@@ -69,6 +70,8 @@ export default class DesignAvailable extends Vue {
   public loadDesigns = false
 
   public loadIt($event:Record<any, any>) {
+    $event.stopPropagation()
+    
     let designHt = 10
     if(designHt <= $event.target.scrollTop){
       this.loadDesigns = true
