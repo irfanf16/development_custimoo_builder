@@ -5,7 +5,8 @@ import { rosterDefaultItem, setRetrievedProductsCustomTexts } from '@/helpers/He
 import {
   getRosterDetailDefaultObject,
   initCustomLogos,
-  setCustomLogo
+  setCustomLogo,
+  lastActiveProductDefaultObject
 } from '../../helpers/Helpers'
 
 import {
@@ -106,12 +107,7 @@ const ProductAttributes:Module<any, any> = {
     product_custom_texts: {},
     //could be locker_product, cart_product, order_product
     product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null},
-    last_active_product_data: {
-      //todo updating this object make sure to do same update on LockerProduct.ts file method resetLastActiveProductData()
-      category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
-      page_no: 1, customized: true, personalized: false, product_custom_texts: {}, custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
-      roster_detail: [],
-    },
+    last_active_product_data: lastActiveProductDefaultObject(),
     editing_roster_player_index: 0,
     selectedCategories:[],
     products_next_page_no: null, //null value mean has no more pages,

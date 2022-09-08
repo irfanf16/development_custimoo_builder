@@ -1280,11 +1280,24 @@ const authenticateUser = async (token: string) => {
   Store.commit('SET_RECENT_LOGOS')
 }
 
+const lastActiveProductDefaultObject = () => {
+  return {
+    category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
+    page_no: 1, customized: true, personalized: false, product_custom_texts: {}, custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
+    roster_detail: []
+  }
+}
+
+const resetLastActiveProductData = async () => {
+  const last_active_product_default_object = lastActiveProductDefaultObject()
+  Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_product_default_object)
+}
+
 //Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
   getUploadedLogoObject, initCustomLogos, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
-  unitConversion, rosterDefaultItem, authenticateUser
+  unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData
 };

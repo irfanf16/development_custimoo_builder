@@ -113,9 +113,8 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
   import DesignAvailable from '../components/DesignAvailable.vue'
   import ItemsGrid from "@/components/ItemsGrid.vue";
   import { dragscroll } from 'vue-dragscroll'
-  import _ from 'lodash'
-  import {http} from "@/httpCommon";
-  import {ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData} from "@/mixins/LockerProduct";
+  import { resetLastActiveProductData } from '@/helpers/Helpers'
+  import {ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
 
 @Component<ItemToCustomize>({
   components: {
@@ -142,7 +141,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 })
 
 
-export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData) {
+export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode) {
   // @Prop({required: true}) categories!: any;
   @Prop({required: true}) uploaderOpened!: any;
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
@@ -200,7 +199,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       this.$emit('update:search_products', self.search)
 
     }
-    await this.resetLastActiveProductData()
+    await resetLastActiveProductData()
     await this.exitFromEditMode()
     if(this.timeout) clearTimeout(this.timeout);
     this.timeout = setTimeout(async () => {
@@ -242,7 +241,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
     // self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id: null});
     if(retrieve_products) {
-      await self.resetLastActiveProductData()
+      await resetLastActiveProductData()
       console.log("before new val", eval(prd_type))
       eval(`${prd_type}=${new_val}`)
       console.log("after new val", eval(prd_type))
@@ -262,7 +261,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     let selected_category = self.categories[category_index]
     if(this.getLastActiveProductData.category_id !== selected_category.id){
       await this.$store.commit('SET_SELECTED_CATEGORIES', selected_category.id)
-      await this.resetLastActiveProductData()
+      await resetLastActiveProductData()
       self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: category_index, category_id: selected_category.id});
       let query_params = [`category_id=${selected_category.id}`]
       this.$emit('retrieveProducts', query_params)
@@ -309,7 +308,6 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 <style scoped lang="scss">
   .select-items{
     overflow: hidden;
-    max-height: 0;
     transition: all 0.2s ease;
     overflow-y: auto;
 

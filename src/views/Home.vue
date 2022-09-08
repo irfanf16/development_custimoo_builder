@@ -365,7 +365,7 @@ import Scene from "@/components/Scene.vue";
 import $ from 'jquery';
 import CustomTabs from "@/components/CustomTabs.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
 import {
@@ -375,7 +375,7 @@ import {
   handleResponseException,
   parseSvgString,
   fetchUrlContent,
-  getRandom
+  getRandom, resetLastActiveProductData
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -441,7 +441,7 @@ Vue.filter('formatDate', function(value:string) {
     }
     let {sync_id, customizer_preview} = self.$route.query;
     if(sync_id) {
-      await self.resetLastActiveProductData()
+      await resetLastActiveProductData()
     }
 
     await this.$store.dispatch('setCategories')
@@ -472,7 +472,7 @@ Vue.filter('formatDate', function(value:string) {
   // }
 })
 
-export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode, resetLastActiveProductData) {
+export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode) {
   public products_fonts: Record<any, any> = []
   public logData = logData;
   public tabIndex = 0
