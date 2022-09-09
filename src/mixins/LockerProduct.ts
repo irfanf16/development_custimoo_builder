@@ -397,11 +397,13 @@ export class handleMainProducts extends Vue {
         product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
           return retrieved_product.id == last_active_product_data.product_id
         });
-        if(product_index >= 0 ) {
+        if(product_index < 0 ) {
           validated = true
           message = "Did not find last active product data"
           //if last active product not found then reset the last active product data object
-         resetLastActiveProductData()
+          resetLastActiveProductData()
+        } else {
+          validated = true
         }
       } else {
         validated = true
