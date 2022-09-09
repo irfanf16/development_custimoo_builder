@@ -32,12 +32,12 @@
               <div v-for="(product_font, product_font_index) in product_fonts" :key="`product_font_${product_font_index}`"
                    @click="handleCustomTextFontChange(customTextIndex,  product_font.value)"
                    :style="{ fontSize: '20px',  fontFamily: product_font.value}"
-                   style="white-space: nowrap"
+                   style="white-space: nowrap" @mouseenter="setLeft"
                    :class="{ 'pr-3': product_font_index + 1 == product_fonts.length }" role="button">
-                <span :key="`product_custom_text_${customTextIndex}_font-${product_font_index}`"
-                      v-b-tooltip.top="product_custom_text.value ? product_font.label : ''">
-                  {{product_custom_text.value ? product_custom_text.value : product_font.value}}
-                </span>
+                  <div class="font_tooltip">{{product_custom_text.value ? product_font.label : ''}}</div>
+                  <span :key="`product_custom_text_${customTextIndex}_font-${product_font_index}`">
+                    {{product_custom_text.value ? product_custom_text.value : product_font.value}}
+                  </span>
               </div>
             </div>
           </div>
@@ -192,6 +192,14 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   /*
   * methods starts
   * */
+
+  public setLeft($event:Record<any, any>){
+    // console.log('eventX', $event.pageX);
+    // console.log('eventY', $event.pageY);
+    // console.log('event', $event.target.children[0]);
+    $event.target.children[0].style.top = $event.pageY+"px"
+    $event.target.children[0].style.left = $event.pageX+"px"
+  }
 
   public handle_text_change_timer!: number
   handleCustomTextInputChange(updatedVal: string, custom_text_index: number) {
