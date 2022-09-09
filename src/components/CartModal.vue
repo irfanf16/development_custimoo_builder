@@ -10,7 +10,7 @@
     </div>
 
     <div class="theme-scroll" style="height: calc(100% - 65px); overflow-y: auto; padding-bottom: 20px">
-      <div class="loader relative" v-if="viewLoader || ($root.$refs.Order_Details && $root.$refs.Order_Details.isLoading)"><img src="../../src/assets/images/loading.gif" /></div>
+      <div class="loader relative" v-if="viewLoader || cartLoading"><img src="../../src/assets/images/loading.gif" /></div>
       <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
         <thead class="bg-light">
           <tr>
@@ -179,6 +179,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
+  }
+  get cartLoading(): Record<any, any>{
+    return this.$store.getters.getCartLoading;
   }
   public createOrder() {
     let payload = {}

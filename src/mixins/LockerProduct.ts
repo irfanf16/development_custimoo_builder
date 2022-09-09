@@ -846,6 +846,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   }
 
   public async addToCartMixin(product_fonts: Record<any, any>[]) {
+    console.log('global cart function')
     let self: Record<any, any> = this;
     try {
 
@@ -902,14 +903,14 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           }
         }).catch(err => {
           santacart = false
-          self.isLoading = false
+          self.$store.dispatch('setCartLoading',false);
           self.showErrorArr(err.response.data.errors)
         });
 
         (post_data as Record<any,any>).factory_product.ecommerce_cart_id = ecommerce_cart_id;
       }
       if(santacart){
-        self.isLoading = true;
+        self.$store.dispatch('setCartLoading',true);
         http.post(url, post_data).then(async (res: any) => {
           console.log("response", res.data.success)
           if (res.data.success == true){

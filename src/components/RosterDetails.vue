@@ -167,7 +167,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public firstColor!: Record<any, any>
   public fontsColors: any[] = []
   public fontOptions: Record<any, any>[] = []
-  public isLoading = false;
   public obj = {
     text: '',
     number: '',
@@ -200,12 +199,11 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getProductEditInfoObject;
   }
 
-  private addToCart() {
+  private async addToCart() {
     if (!this.rosterDetails.some(el => el.quantity == 0)) {
-      this.isLoading = true;
-      (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
+      await this.addToCartMixin(this.products_fonts);
       this.hideVModal('rostermodal')
-      this.isLoading = false;
+
       if(this.company.platform != 'wordpress'){
         this.showVModal('cart-modal')
       }
@@ -265,6 +263,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   get productRoster(): Record<any, any>[] {
     return this.$store.getters.getSelectedProductRoster()
+  }
+
+  get isLoading(): Record<any, any>[] {
+    return this.$store.getters.getCartLoading;
   }
 
   /* component methods starts */
@@ -341,11 +343,11 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     let self = this;
     let collection_view = self.$store.getters.getCollectionView;
 
-    setTimeout(() =>{
+    setTimeout(async () =>{
       if(self.getProductEditInfoObject.editing && self.getProductEditInfoObject.type == 'cart_product'){
      // if(this.editCart.cartId && this.editCart.cartItemId){
-        self.isLoading = true;
-        (this.$root.$refs as Record<any,any>).Order_Details.addToCart();
+
+        await self.addToCartMixin(self.products_fonts);
         this.hideVModal('rostermodal')
         if(collection_view){
           this.$root.$emit('closeCollectionView');
@@ -353,7 +355,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
         if(this.company.platform != 'wordpress'){
           this.showVModal('cart-modal')
         }
-        self.isLoading = false;
+
 
       }else{
         if(collection_view){

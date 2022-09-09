@@ -255,7 +255,7 @@
                     <template v-else-if="isCustomerAuthenticated">
                       <template v-if="!getProductEditInfoObject.editing">
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                          <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                          <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
                             Add to Cart
                           </b-button>
                           <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -365,9 +365,10 @@ import Scene from "@/components/Scene.vue";
 import $ from 'jquery';
 import CustomTabs from "@/components/CustomTabs.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
+
 import {
   logData,
   getActiveProductData,
@@ -472,7 +473,7 @@ Vue.filter('formatDate', function(value:string) {
   // }
 })
 
-export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode) {
+export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode, cartModalData) {
   public products_fonts: Record<any, any> = []
   public logData = logData;
   public tabIndex = 0
@@ -893,6 +894,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       return  false
     }
   }
+  get cartLoading(): Record<any, any>{
+    return this.$store.getters.getCartLoading;
+  }
   public dropdownStyle = { } as any
   public down = false
   public notificationsDropDown(){
@@ -967,7 +971,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
   private async addToCart() {
-    await logData((this.$root.$refs as Record<any,any>).Order_Details.addToCart());
+    await this.addToCartMixin(this.products_fonts);
     if(this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress'){
       this.showVModal('cart-modal')
     }

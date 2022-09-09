@@ -40,7 +40,7 @@
           <template v-if="isCustomerAuthenticated">
             <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product'">
 <!--              <button class="btn btn-secondary fw-bold w-100" @click="generateSVG" >Generate SVG</button>-->
-              <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCart" :disabled="canvasImage.scene == null">
+              <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCartMixin(products_fonts)" :disabled="canvasImage.scene == null">
 
                 <template v-if="getProductEditInfoObject.editing">
                   <template v-if="getProductEditInfoObject.type == 'cart_product'">
@@ -90,7 +90,7 @@ import {
   unitConversion
 } from '@/helpers/Helpers'
 import LoginForm from '@/components/LoginForm.vue'
-import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData} from "@/mixins/LockerProduct";
 
 import {compact} from 'lodash';
 
@@ -112,7 +112,7 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
   }
 })
 
-export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts, ProductsQueryParamsMixin, exitEditMode) {
+export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
