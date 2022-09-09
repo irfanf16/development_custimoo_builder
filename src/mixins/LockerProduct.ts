@@ -310,7 +310,7 @@ export class handleMainProducts extends Vue {
       await self.setLockerProductData(editing_product_detail)
       let selected_product = this.$store.getters.getSelectedProduct;
       initCustomLogos(retrieved_products)
-
+      this.$store.dispatch('setProductsRosters')
       let customLogos = this.$store.getters.getCustomLogoObject
       for (const product of retrieved_products) {
         if (!customLogos[product.id]) {
@@ -397,11 +397,13 @@ export class handleMainProducts extends Vue {
         product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
           return retrieved_product.id == last_active_product_data.product_id
         });
-        if(product_index >= 0 ) {
+        if(product_index < 0 ) {
           validated = true
           message = "Did not find last active product data"
           //if last active product not found then reset the last active product data object
-         resetLastActiveProductData()
+          resetLastActiveProductData()
+        } else {
+          validated = true
         }
       } else {
         validated = true
