@@ -376,7 +376,7 @@ import {
   handleResponseException,
   parseSvgString,
   fetchUrlContent,
-  getRandom, resetLastActiveProductData
+  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -415,6 +415,7 @@ Vue.filter('formatDate', function(value:string) {
 
   async mounted() {
     let self: Record<any, any> = this;
+    this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', lastActiveProductDefaultObject())
     await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
       await this.initProductsFonts(products, resolve)
     })
