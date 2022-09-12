@@ -158,6 +158,7 @@ export default class LogoEditorModal extends Mixins(ErrorMessages, ModalAction) 
     this.showLoader = true
     let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
     let data = new FormData();
+    data.append("logo_id", custom_logo.id);
     data.append("logo", this.$store.getters.getLogoEditor.image);
     data.append("product_id", this.$store.getters.getSelectedProduct.id);
     http.post('/customer/update/logo', data)
