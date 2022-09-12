@@ -234,7 +234,7 @@
                   <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'">
                     <template v-if="isCustomerAuthenticated">
                       <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                        <b-button v-if="!($root.$refs.Order_Details && $root.$refs.Order_Details.isLoading)"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                        <b-button v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
                           Update Cart
                         </b-button>
                         <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
