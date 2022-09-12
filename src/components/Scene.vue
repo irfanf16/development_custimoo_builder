@@ -486,18 +486,16 @@ export default class Scene extends Vue {
           })
         }
       } else if (!defaultColors.length) {
-        let svgIndex = 0
         this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
           if (svgGroup.id == item.id) {
-            svgIndex = index
+            if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
+              item.set('fill', this.initialSvgGroups[index].color)
+              if (!this.back) {
+                Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+              }
+            }
           }
         })
-        if (this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
-          item.set('fill', this.initialSvgGroups[svgIndex].color)
-          if (!this.back) {
-            Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
-          }
-        }
       }
     })
     this.frontCanvas.renderAll()
