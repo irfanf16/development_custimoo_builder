@@ -26,9 +26,12 @@
                     <div class="collar-designs">
                       <template v-for="(style, i) in selectedProduct.productstyles">
                         <template v-if="selectedProduct.productstyles.length > 1">
-                          <b-button :key="i"  v-if="model.model_styles.includes(style.id)" :class="{'active': getLastActiveProductData.style_index === i}" variant="outline-light" @click="changeStyleIndex(i)">
-                            <img :src="storageUrl+style.front.file_url " />
-                          </b-button>
+                          <div :key="i+'collar'" class="text-center">
+                            <b-button :key="i"  v-if="model.model_styles.includes(style.id)" :class="{'active': getLastActiveProductData.style_index === i}" variant="outline-light" @click="changeStyleIndex(i)">
+                              <img :src="storageUrl+style.front.file_url " />
+                            </b-button>
+                            <span class="mt-1 d-inline-flex">{{style.name}}</span>
+                          </div>
                         </template>
                       </template>
                     </div>
