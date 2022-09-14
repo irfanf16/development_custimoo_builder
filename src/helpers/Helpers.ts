@@ -417,7 +417,7 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
 
 const CustimooOrderFlowStatuses : Record<any, any> = {
   submitted_for_factory_review: 'Submitted for Factory Review',
-  order_approve: 'Order approve',
+  order_approve: 'Marked to Factory',
   factory_approved: 'Factory Approved',
   factory_rejected: 'Factory Rejected',
   submitted_for_customer_review: 'Submitted for Customer Review',
@@ -719,7 +719,7 @@ const activityStatus = {
     message: "Waiting for manufacturer review artwork.",
   },
   order_approve: {
-    title: "Order Approve",
+    title: "Marked to Factory",
     message: "Order is forwarded to factory.",
   },
   factory_approved: {
