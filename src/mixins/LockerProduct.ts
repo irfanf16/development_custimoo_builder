@@ -2,8 +2,9 @@
 import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
 import { getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
-         setRetrievedProductsCustomTexts, resetLastActiveProductData
-       } from '@/helpers/Helpers'
+  setRetrievedProductsCustomTexts, resetLastActiveProductData,
+  fontsColorsManipulation, fontsList, initCustomLogos1, rosterDetailsInit, fetchUrlContent,parseSvgString
+} from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 

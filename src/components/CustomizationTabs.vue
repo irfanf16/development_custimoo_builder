@@ -18,6 +18,19 @@
                                  :logosSetting="selectedProduct.logos_setting"/>
             </div>
           </b-tab>
+          <b-tab>
+            <template #title>
+              <a>
+                <span class="icon-holder">
+                  <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
+                </span>
+                Logo
+              </a>
+            </template>
+            <div class="logo-placement-tabs">
+              <LogoPlacementTab />
+            </div>
+          </b-tab>
           <b-tab v-if="selectedProduct.product_type !== 'personalized'">
             <button @click="setHideTab('colorHide', !hideTab.colorHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
@@ -107,6 +120,7 @@
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
 import LogoPlacementTabs from './LogoPlacementTabs.vue'
+import LogoPlacementTab from '@/components/Logo/LogoPlacementTab.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
@@ -120,6 +134,7 @@ import RecentLogos from "@/components/RecentLogos.vue";
     RecentLogos,
     ColorAccordion,
     LogoPlacementTabs,
+    LogoPlacementTab,
     CustomizationText,
     CollarStyle,
     EditRosterAreaTab,

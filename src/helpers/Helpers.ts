@@ -15,13 +15,23 @@ const getLogoSettingsObject = () => {
     product_style_id: null,
     following_product_ids: null,
     rotation: 0,
+    originalWidth: 57,
+    originalHeight: 57,
     width: 57,
     height: 57,
     name_of_placement: "chest",
     side: "front",
     x_axis: 300,
     y_axis: 300,
-    is_locked: false
+    is_locked: false,
+    original_logo: null,
+    transparent_logo: null,
+    smart_transparent_logo: null,
+    original_logo_url: null,
+    is_smart_transparent: null,
+    url: null,
+    haveControls: true,
+    logo_colors: []
   }
 }
 
@@ -697,6 +707,30 @@ const initCustomLogos = (retrieved_products: Record<any, any>) => {
   })
 }
 
+const initCustomLogos1 = (retrieved_products: Record<any, any>) => {
+  const custom_logos_by_products: Record<any, any> = {}
+  retrieved_products.forEach((product: Record<any, any>) => {
+    if(product.is_logo_allowed) {
+      let first_logo_setting = getLogoSettingsObject();
+      if(product.logos_setting.length) {
+        delete product.logos_setting.created_at
+        delete product.logos_setting.updated_at
+        first_logo_setting = { ...first_logo_setting, ...product.logos_setting[0], ...{id: null} }
+      }
+      custom_logos_by_products[product.id] = [first_logo_setting]
+    }
+  })
+  console.log('custom_logos_by_products', custom_logos_by_products)
+}
+
+const rosterDetailsInit = (retrieved_products: Record<any, any>) => {
+  retrieved_products.forEach((product: Record<any, any>) => {
+    if(!Store.getters.getAllRosterDetails[product.id]) {
+      const payload = getRosterDetailDefaultObject(product)
+      Store.dispatch('setRosterDetails', { pid : product.id, index: 0, roster: payload })
+    }
+  })
+}
 const getRosterDetailDefaultObject = (product = Store.getters.getSelectedProduct) => {
   if (product.sizes.length){
     const productSizes = product.sizes[0].json_data
@@ -1297,7 +1331,8 @@ const resetLastActiveProductData = async () => {
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomLogos, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
-  unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting,
+  getCompany, getPermissions, getUploadedLogoObject, initCustomLogos, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor,
+  parseSvgString,fetchUrlContent, unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
+  initCustomLogos1, rosterDetailsInit,
 };
