@@ -512,15 +512,6 @@ export class handleMainProducts extends Vue {
     }
     this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { value: factory_product.product_custom_texts })
 
-    if(factory_product.product_custom_texts) {
-      factory_product.product_custom_texts.forEach((custom_text: Record<any, any>, index: number) => {
-        if(custom_text.value) {
-          const text = { value: custom_text, custom_text_index: index }
-          self.$eventBus.$emit('customTextUpdated', text)
-        }
-      })
-    }
-
     await this.$store.dispatch('overRideDefaultColors', factory_product.defaultcolors);
     await this.$store.dispatch('overRideGroupColors', factory_product.groupcolors);
     selected_product.productstyles[selected_product_style_index].productdesigns.forEach((item: Record<any, any>) => {
@@ -591,12 +582,6 @@ export class handleMainProducts extends Vue {
     }
     else {
       this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: active_product_detail.text});
-      active_product_detail.text.forEach((custom_text: Record<any, any>, index: number) => {
-        if(custom_text.value) {
-          const text = { value: custom_text, custom_text_index: index }
-          self.$eventBus.$emit('customTextUpdated', text)
-        }
-      })
     }
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(active_product_detail.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(active_product_detail.groupcolors));
@@ -670,15 +655,6 @@ export class handleMainProducts extends Vue {
     }
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
     this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { value: cart_item_product.product_custom_texts })
-
-    if(cart_item_product.product_custom_texts) {
-      cart_item_product.product_custom_texts.forEach((custom_text: Record<any, any>, index: number) => {
-        if(custom_text.value) {
-          const text = { value: custom_text, custom_text_index: index }
-          self.$eventBus.$emit('customTextUpdated', text)
-        }
-      })
-    }
 
     await this.$store.dispatch('overRideDefaultColors', cart_item_product.defaultcolors);
     await this.$store.dispatch('overRideGroupColors', cart_item_product.groupcolors);
