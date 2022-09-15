@@ -61,13 +61,13 @@
                     <span v-html="collection_product.product_locker_room.model_description.product_model_description"></span>
                   </template>
                 </div>
-                <div class="pdf_description"><strong>Description: </strong>
+                <div v-if="collection_product.product_note != ''" class="pdf_description"><strong>Description: </strong>
                   {{ collection_product.product_note }}
                 </div>
                 <div class="pdf_price" v-if="collection_product.allow_price && collection_product.product_price"><strong>Price: </strong>
                   {{collection_product.product_price}}
                 </div>
-                <div class="pdf_price d-flex justify-content-end" v-if="company.platform !== 'self'">
+                <div class="pdf_price d-flex justify-content-center" style="border: none" v-if="company.platform !== 'self'">
                   <template v-if="isAuthenticated">
                     <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs" @click="addToCart(collection_product,idxs)">
                       Purchase

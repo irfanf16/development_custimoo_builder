@@ -848,6 +848,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   }
 
   public async addToCartMixin(product_fonts: Record<any, any>[]) {
+    console.log('global cart function')
     let self: Record<any, any> = this;
     try {
 
@@ -891,8 +892,16 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           ecom_form_data.append('product_name', (cart_product as Record<any, any>).product_name);
         }
 
+        let roster_detail = await this.$store.getters.getSelectedProductRoster()
+
+        let total_quantity = 0;
+        for(let i=0; i < roster_detail.length;  i++){
+          let roster = roster_detail[i];
+          total_quantity += parseInt(roster.quantity);
+        }
+
         ecom_form_data.append('product_id', (cart_product as Record<any, any>).ecommerce_post_id);
-        ecom_form_data.append('quantity', self.total);
+        ecom_form_data.append('quantity', total_quantity.toString());
         ecom_form_data.append('product_front_image', (cart_product as Record<any, any>).front_image);
 
         await http.post(ecom_url, ecom_form_data).then((res: any) => {
@@ -904,14 +913,14 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           }
         }).catch(err => {
           santacart = false
-          self.isLoading = false
+          self.$store.dispatch('setCartLoading',false);
           self.showErrorArr(err.response.data.errors)
         });
 
         (post_data as Record<any,any>).factory_product.ecommerce_cart_id = ecommerce_cart_id;
       }
       if(santacart){
-        self.isLoading = true;
+        self.$store.dispatch('setCartLoading',true);
         http.post(url, post_data).then(async (res: any) => {
           console.log("response", res.data.success)
           if (res.data.success == true){
@@ -933,7 +942,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 await self.exitFromEditMode()
               }
               http.post(ecom_url, update_cart_id_data).then((res: any) => {
-                window.location.href = company_domain + '/cart'
+                if(!collection_view) {
+                  window.location.href = company_domain + '/cart'
+                }
               }).catch(err => {
                 self.showErrorArr(err.response.data.errors)
               });

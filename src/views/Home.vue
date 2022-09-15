@@ -234,7 +234,7 @@
                   <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'">
                     <template v-if="isCustomerAuthenticated">
                       <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                        <b-button v-if="!($root.$refs.Order_Details && $root.$refs.Order_Details.isLoading)"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                        <b-button v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
                           Update Cart
                         </b-button>
                         <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -255,7 +255,7 @@
                     <template v-else-if="isCustomerAuthenticated">
                       <template v-if="!getProductEditInfoObject.editing">
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                          <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!$root.$refs.Order_Details.isLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                          <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
                             Add to Cart
                           </b-button>
                           <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -365,9 +365,10 @@ import Scene from "@/components/Scene.vue";
 import $ from 'jquery';
 import CustomTabs from "@/components/CustomTabs.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData} from "@/mixins/LockerProduct";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
+
 import {
   logData,
   getActiveProductData,
@@ -375,7 +376,7 @@ import {
   handleResponseException,
   parseSvgString,
   fetchUrlContent,
-  getRandom, resetLastActiveProductData
+  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -414,6 +415,7 @@ Vue.filter('formatDate', function(value:string) {
 
   async mounted() {
     let self: Record<any, any> = this;
+    this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', lastActiveProductDefaultObject())
     await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
       await this.initProductsFonts(products, resolve)
     })
@@ -472,7 +474,7 @@ Vue.filter('formatDate', function(value:string) {
   // }
 })
 
-export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode) {
+export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode, cartModalData) {
   public products_fonts: Record<any, any> = []
   public logData = logData;
   public tabIndex = 0
@@ -893,6 +895,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       return  false
     }
   }
+  get cartLoading(): Record<any, any>{
+    return this.$store.getters.getCartLoading;
+  }
   public dropdownStyle = { } as any
   public down = false
   public notificationsDropDown(){
@@ -970,7 +975,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
   private async addToCart() {
-    await logData((this.$root.$refs as Record<any,any>).Order_Details.addToCart());
+    await this.addToCartMixin(this.products_fonts);
     if(this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress'){
       this.showVModal('cart-modal')
     }

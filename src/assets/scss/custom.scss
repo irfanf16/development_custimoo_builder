@@ -5591,7 +5591,7 @@ $fontSize: 0.5;
 
 .theme-scroll {
     &::-webkit-scrollbar {
-        width: 3px;
+        width: 7px;
     }
 
     &::-webkit-scrollbar-track {
@@ -5599,16 +5599,25 @@ $fontSize: 0.5;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: #219F84;
+        background: rgba(33, 159, 132, 0.267);
+        border-radius: 100px;
     }
 
     scrollbar-color: #219F84 #f1f1f1;
     scrollbar-width: thin;
+
+    &:hover{
+        &::-webkit-scrollbar-thumb {
+            background: #219F84;
+        }
+    }
 }
 
 .theme-scroll-h {
+    transition: 0.3s all ease-in-out;
+
     &::-webkit-scrollbar {
-        height: 3px;
+        height: 7px;
     }
 
     &::-webkit-scrollbar-track {
@@ -5616,11 +5625,18 @@ $fontSize: 0.5;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: #219F84;
+        background: rgba(33, 159, 132, 0.267);
+        border-radius: 100px;
     }
 
     scrollbar-color: #219F84 #f1f1f1;
     scrollbar-width: thin;
+
+    &:hover{
+        &::-webkit-scrollbar-thumb {
+            background: #219F84;
+        }
+    }
 }
 
 .page-item.active {
@@ -5874,6 +5890,44 @@ $fontSize: 0.5;
     }
 }
 
+.fontList{
+    &>div{
+        &:hover{
+            .font_tooltip{
+                display: block;
+            }
+        }
+    }
+}
+.font_tooltip{
+    position: fixed;
+    background-color: rgba(0,0,0,0.8);
+    padding: 7px 10px;
+    border-radius: 20px;
+    color: #fff;
+    line-height: 1;
+    font-size: 14px;
+    z-index: 1000;
+    display: none;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+    // &::after{
+    //     content: "";
+    //     display: block;
+    //     height: 10px;
+    //     width: 10px;
+    //     background-color: rebeccapurple;
+    //     position: absolute;
+    //     left: 0;
+    //     top: 0;
+    //     right: 0;
+    //     margin: 0 auto;
+    // }
+
+    &:empty{
+        display: none !important;
+    }
+}
 
 @keyframes cartAnimation {
     to {

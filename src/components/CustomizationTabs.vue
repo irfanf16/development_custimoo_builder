@@ -423,16 +423,23 @@ export default class CustomizationTabs extends Vue {
   overflow-y: auto;
 
   &::-webkit-scrollbar{
-    width: 3px;
+    width: 7px;
   }
   &::-webkit-scrollbar-track {
     background: #f1f1f1;
   }
   &::-webkit-scrollbar-thumb {
-    background: #219F84;
+    background: rgba(33, 159, 132, 0.267);
+    border-radius: 100px;
   }
 
   scrollbar-color: #219F84 #f1f1f1;
   scrollbar-width: thin;
+
+  &:hover{
+    &::-webkit-scrollbar-thumb {
+      background: #219F84;
+    }
+  }
 }
 </style>

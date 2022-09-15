@@ -1,19 +1,8 @@
 import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
-import { rosterDefaultItem, setRetrievedProductsCustomTexts } from '@/helpers/Helpers'
-import {
-  getRosterDetailDefaultObject,
-  initCustomLogos,
-  setCustomLogo,
-  lastActiveProductDefaultObject
-} from '../../helpers/Helpers'
-
-import {
-  getLogoSettings,
-  setLogoSettings,
-  getProductLogoSetting
-} from "../../helpers/Helpers"
+import { rosterDefaultItem, setRetrievedProductsCustomTexts,getRosterDetailDefaultObject, initCustomLogos, setCustomLogo,
+  getLogoSettings, setLogoSettings, getProductLogoSetting, logData } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
 const ProductAttributes:Module<any, any> = {
@@ -107,7 +96,7 @@ const ProductAttributes:Module<any, any> = {
     product_custom_texts: {},
     //could be locker_product, cart_product, order_product
     product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null},
-    last_active_product_data: lastActiveProductDefaultObject(),
+    last_active_product_data: {}, //it's default value is being set from Home.vue mounted method through commit 'SET_LAST_ACTIVE_PRODUCT_DATA'
     editing_roster_player_index: 0,
     selectedCategories:[],
     products_next_page_no: null, //null value mean has no more pages,
@@ -568,9 +557,10 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
-        Vue.set(state.svgGroups[color.index], 'color', color.color)
-        Vue.set(state.svgGroups[color.index], 'pantone', color.pantone)
-        Vue.set(state.svgGroups[color.index], 'name', color.name)
+        const index = color.index
+        delete color.index
+        color = {...state.svgGroups[index], ...color}
+        Vue.set(state.svgGroups, index, color)
       }
     },
     updateAllRoster(state: Record<any, any>, rosterDetail: [Record<any, any>]){

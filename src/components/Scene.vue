@@ -475,35 +475,32 @@ export default class Scene extends Vue {
       item.id = item.id.toLowerCase()
       if (groupColors[item.id]) {
         item.set('fill', groupColors[item.id].color)
-        let svgIndex = 0
         this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
           if (svgGroup.id == item.id) {
-            svgIndex = index
             svgGroup.color = groupColors[item.id].color
             svgGroup.pantone = groupColors[item.id].pantone
+            if (this.mainPreview) {
+              this.$store.dispatch('updateSvgGroups', {
+                index: index,
+                color: groupColors[item.id].color,
+                pantone: groupColors[item.id].pantone,
+                name: groupColors[item.id].name
+              })
+            }
+
           }
         })
-        if (this.mainPreview) {
-          this.$store.dispatch('updateSvgGroups', {
-            index: svgIndex,
-            color: groupColors[item.id].color,
-            pantone: groupColors[item.id].pantone,
-            name: groupColors[item.id].name
-          })
-        }
       } else if (!defaultColors.length) {
-        let svgIndex = 0
         this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
           if (svgGroup.id == item.id) {
-            svgIndex = index
+            if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
+              item.set('fill', this.initialSvgGroups[index].color)
+              if (!this.back) {
+                Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+              }
+            }
           }
         })
-        if (this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
-          item.set('fill', this.initialSvgGroups[svgIndex].color)
-          if (!this.back) {
-            Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
-          }
-        }
       }
     })
     this.frontCanvas.renderAll()
@@ -514,30 +511,26 @@ export default class Scene extends Vue {
         if (groupColors[item.id]) {
           item.set('fill', groupColors[item.id].color);
           if (this.mainPreview) {
-            let svgIndex = 0
             this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
               if (svgGroup.id == item.id) {
-                svgIndex = index
+                this.$store.dispatch('updateSvgGroups', {
+                  index: index,
+                  color: groupColors[item.id].color,
+                  pantone: groupColors[item.id].pantone,
+                  name: groupColors[item.id].name
+                })
               }
-            })
-            this.$store.dispatch('updateSvgGroups', {
-              index: svgIndex,
-              color: groupColors[item.id].color,
-              pantone: groupColors[item.id].pantone,
-              name: groupColors[item.id].name
             })
           }
         } else if (!defaultColors.length) {
-          let svgIndex = 0
           this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
             if (svgGroup.id == item.id) {
-              svgIndex = index
+              if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
+                item.set('fill', this.initialSvgGroups[index].color)
+                Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+              }
             }
           })
-          if (this.svgGroups[svgIndex].color != this.initialSvgGroups[svgIndex].color) {
-            item.set('fill', this.initialSvgGroups[svgIndex].color)
-            Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
-          }
         }
       })
       this.backCanvas.renderAll()
