@@ -97,6 +97,14 @@ export default class ColorAccordion extends Vue {
   //   // this.$emit('setScroll')
   // }
 
+  @Watch('productColors', {
+    deep: true
+  })
+
+  productColorsChanged(){
+    this.selectType(this.selectTypeIndex, false)
+  }
+
   get svgGroups() {
     return this.$store.getters.getSvgGroups
   }

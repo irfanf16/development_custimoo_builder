@@ -193,7 +193,7 @@ export default class CustomizationTabs extends Vue {
     return this.$store.getters.getSelectedProduct.productnames;
   }
 
-  get logoColors(): [] {
+  get logoColors(): any[] {
     return this.$store.getters.getLogosColors
   }
 
@@ -230,7 +230,7 @@ export default class CustomizationTabs extends Vue {
   })
 
   tabIndexChanged() {
-    this.$emit('tabIndexChange', this.tabIndex)
+    this.$emit('tabIndexChange', this.tabIndex);
   }
 
   @Watch('selectedProduct', {
@@ -250,6 +250,15 @@ export default class CustomizationTabs extends Vue {
   lockerColorsChanged(newval:any, old:any) {
     this.productColorsManipulation()
   }
+  
+  @Watch('logoColors', {
+    deep: true
+  })
+
+
+  logoColorsChanged(newval:any, old:any) {
+    this.productColorsManipulation()
+  }
 
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
@@ -262,10 +271,12 @@ export default class CustomizationTabs extends Vue {
       finalColor.color_text = colors.json_data
       this.productColors = this.productColors.concat(finalColor)
     })
-    if (this.lockerColors.length > 0){
-      this.productColors = this.productColors.concat(this.lockerColors)
-    }
+    // if (this.lockerColors.length > 0){
+    //   this.productColors = this.productColors.concat(this.lockerColors)
+    // }
     if(this.logoColors.length){
+      console.log('logoColors', this.logoColors);
+      
       let logoColorsNew: any[] = []
       this.logoColors.forEach((color: any, index: number) => {
         logoColorsNew = logoColorsNew.concat([{name: color.pantone, value: color.hex, position: index+1}])
