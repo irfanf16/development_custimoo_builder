@@ -93,7 +93,7 @@
 
                     </li>
                     <li><a>
-                      <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
+                      <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']" title="Reset to default"/>
                     </a></li>
                     <li v-if="isCustomerAuthenticated">
                       <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
@@ -1310,11 +1310,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const ok = await this.ref['reset-changes'].showConfirm()
 
     if (ok) {
-      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-        design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
-        page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
-        roster_detail: [],
-      })
+      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', lastActiveProductDefaultObject())
       await self.exitFromEditMode()
       // if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
       //   await this.$store.dispatch('setEditCart', {key:'cartId',value:0});

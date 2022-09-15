@@ -710,7 +710,7 @@ const ProductAttributes:Module<any, any> = {
     },
     RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
       state.product_custom_texts = {}
-      setRetrievedProductsCustomTexts(state.products)
+      setRetrievedProductsCustomTexts(state.products, true)
     },
     RESET_CUSTOM_LOGOS: (state: Record<any, any>) => {
       state.logoTabIndex = 0;
