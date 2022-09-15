@@ -1950,7 +1950,7 @@ export default class Scene extends Vue {
               fontFamily: custom_text_item.font_family,
               fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
               fill: custom_text_item.color,
-              stroke: custom_text.outLineColor,
+              stroke: custom_text_item.outline_color,
               strokeWidth: parseInt(custom_text_item.outline_width),
               paintFirst: 'stroke',
               lockScalingFlip: true,
