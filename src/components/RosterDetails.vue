@@ -113,26 +113,34 @@
     <div class="d-flex justify-content-center mt-3" v-if="getProductEditInfoObject.editing == false || (getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product')">
 <!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
       <template v-if="!isCustomerAuthenticated" >
-        <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
-          :disabled="canvasImage.scene == null">
-          Add to Cart
-        </button>
+        <template v-if="company.platform !== 'self'">
+          <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
+                  :disabled="canvasImage.scene == null">
+            Add to Cart
+          </button>
+        </template>
       </template>
       <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
-        <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
-          :disabled="canvasImage.scene == null">
-          Add to Cart
-        </button>
+        <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+          <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
+            :disabled="canvasImage.scene == null">
+            Add to Cart
+          </button>
+        </template>
       </template>
       <template v-else-if="!getCartLoading">
-        <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
-                :disabled="canvasImage.scene == null">
-          Add to Cart
-        </button>
+        <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+          <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
+                  :disabled="canvasImage.scene == null">
+            Add to Cart
+          </button>
+
+        </template>
       </template>
       <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
         <img width="20" height="20" src="../../src/assets/images/loading.gif" />
       </button>
+
     </div>
 
   </div>
@@ -267,6 +275,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   get isLoading(): Record<any, any>[] {
     return this.$store.getters.getCartLoading;
+  }
+
+  get customerPermissions(){
+    return this.$store.getters.getCustomerPermissions
   }
 
   /* component methods starts */
