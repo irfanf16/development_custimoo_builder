@@ -15,7 +15,7 @@ import {
   getProductLogoSetting
 } from "../../helpers/Helpers"
 import product from "@/store/modules/product";
-import {isEmpty} from "lodash";
+import {isEmpty, findIndex} from "lodash";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
@@ -884,10 +884,19 @@ const ProductAttributes:Module<any, any> = {
     SET_LAST_ACTIVE_PRODUCT_DATA(state:Record<any, any>, payload)
     {
       const updated_payload: Record<any, any> = {};
-      for (const [payload_key, payload_value] of Object.entries(payload)) {
-        updated_payload[payload_key] = payload_value
+      /*
+      * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
+      * reflected in state.last_active_product_data.product_custom_texts
+      * */
+      if('product_custom_texts' in payload) {
+        state.last_active_product_data.product_custom_texts = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
       }
-      state.last_active_product_data = Object.assign({}, state.last_active_product_data, updated_payload);
+      else {
+        for (const [payload_key, payload_value] of Object.entries(payload)) {
+          updated_payload[payload_key] = payload_value
+        }
+        state.last_active_product_data = Object.assign({}, state.last_active_product_data, updated_payload);
+      }
     },
     SET_EDITING_ROSTER_PLAYER_INDEX(state:Record<any, any>, payload){
       state.editing_roster_player_index = payload;
