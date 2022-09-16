@@ -126,9 +126,6 @@ import RecentLogos from "@/components/RecentLogos.vue";
     SaveLogoModal,
     SaveColorModal,
     LogoColorTabs
-  },
-  mounted() {
-    console.log('ready', this.logoColorUsed)
   }
 })
 

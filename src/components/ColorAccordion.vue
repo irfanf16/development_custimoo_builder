@@ -7,7 +7,7 @@
           <span class="color">
             <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
             <span class="color-pantone-name">{{ svgElement.pantone }}<span style="text-transform: uppercase; display: block">{{ svgElement.name }}</span><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
-          </span>
+          </span>   
           <span class="accordion-icon"></span>
         </b-button>
       </b-card-header>
@@ -73,6 +73,7 @@ import {getSelectedProductPantones} from "@/helpers/Helpers";
 })
 export default class ColorAccordion extends Vue {
   @Prop({required: true}) productColors!: any
+  @Prop({required: true}) tabIndex!: any
 
   public color= '#59c7f9'
   public pantoneColorVal= '18-0107'
@@ -103,6 +104,20 @@ export default class ColorAccordion extends Vue {
 
   productColorsChanged(){
     this.selectType(this.selectTypeIndex, false)
+  }
+
+  @Watch('tabIndex', {
+    deep: true
+  })
+
+  tabIndexChanged(){
+    if(this.productColors[this.selectTypeIndex]){
+      return false;
+    }else{
+      this.selectType(this.selectTypeIndex-1, false)
+    }
+    
+    // this.selectType(1, false)
   }
 
   get svgGroups() {

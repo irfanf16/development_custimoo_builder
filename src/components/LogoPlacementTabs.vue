@@ -155,16 +155,7 @@ export default class LogoPlacementTabs extends Vue {
     return this.$store.getters.getLogosColors
   }
 
-  @Watch('imageColors', {
-    deep: true
-  })
-
-  imageColorsChanged(newval:any, old:any) {
-    console.log('aass', this.imageColors);
-  }
-
   get customLogos(): [Record<any, any>] {
-    //return this.$store.getters.getCustomLogos()
      return  getCustomLogos(true, true);
   }
 
