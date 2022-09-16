@@ -8,8 +8,11 @@
         </template>
       </div>
       <div class="d-flex gap-1" v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails.length > 0">
-        <b-button v-if="productModels.length > 0 && Object.prototype.hasOwnProperty.call(productModels[modelIndex],'image_url') && productModels[modelIndex].image_url" @click="showSizeChart()" class="btn btn-secondary fs-3 btn-sm"
-                  title="Size Chart">
+        <a v-if="productModels.length > 0 && Object.prototype.hasOwnProperty.call(productModels[modelIndex],'image_url') && productModels[modelIndex].image_url" class="btn btn-secondary fs-3 btn-sm"
+                  title="Size Chart"
+           :href="`${storage_url}${productModels[modelIndex].image_url}`"
+           target="_blank"
+        >
           <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet">
             <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
                fill="currentColor" stroke="none">
@@ -22,7 +25,7 @@
               -149 -159 -330 -340 l-330 -330 -518 518 -517 517 1855 1855 c1020 1020 1857 1855 1860 1855 3 0 237 -232 520 -515z"/>
             </g>
           </svg>
-        </b-button>
+        </a>
         <b-button @click="updateRosterPlayerNameFormat('capitalized')" class="btn btn-secondary fs-3 btn-sm"
           title="Capitalize">
           <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" vie wBox="0 0 16 16">
@@ -157,31 +160,6 @@
       </button>
 
     </div>
-    <modal  :width="screenWidth"
-            :resizable="true"
-            :scrollable="true"
-            height="auto"
-            :reset="true"
-            :shiftY="0"
-            name="viewSizeChartModal"
-            ref="viewSizeChartModal"
-            id="view-size-chart-modal"
-            v-if="productModels.length > 0 && Object.prototype.hasOwnProperty.call(productModels[modelIndex],'image_url') && productModels[modelIndex].image_url"
-            size="lg"
-            hide-title hide-footer>
-      <div class="modal-header d-flex justify-content-between">
-        <span class="fs-5 font-weight-bold">Size Chart</span>
-        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
-      </div>
-      <div class="modal-body" v-if="productModels.length > 0 && Object.prototype.hasOwnProperty.call(productModels[modelIndex],'image_url') && productModels[modelIndex].image_url">
-        <div class="form-holder" :class="{active: isActive}">
-          <div class="form-area d-flex align-items-center justify-content-center p-4">
-            <img :src="`${storage_url}${productModels.length > 0 && Object.prototype.hasOwnProperty.call(productModels[modelIndex],'image_url')?productModels[modelIndex].image_url:''}`" class="h-auto w-auto" style="max-width: 100%;" alt="size-chart">
-          </div>
-        </div>
-      </div>
-    </modal>
-
   </div>
 </template>
 
@@ -517,12 +495,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
         emitter: "input", custom_text_index:self.custom_name_index, value: custom_name_text
       });
     }
-  }
-  public showSizeChart() {
-    this.$modal.show('viewSizeChartModal');
-  }
-  public hide(){
-    this.$modal.hide('viewSizeChartModal')
   }
 
 }
