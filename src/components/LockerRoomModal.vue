@@ -49,7 +49,6 @@ export default class LockerRoomModal extends Mixins(ModalAction){
   private screenWidth = this.mobileScreen ? window.screen.availWidth : (window.screen.availWidth - 100)
 
   private showCollectionModal = () => {
-    // alert("asd")
     this.$emit('showCollectionModal')
   }
 
