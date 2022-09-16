@@ -279,23 +279,11 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   }
 
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails()
+    return this.$store.getters.getSelectedProductRoster()
   }
 
   get company() {
     return this.$store.getters.getCompany
-  }
-
-  get rosterFirstNameAndNumber(): string | null {
-    let editing_roster_player_index = this.editing_roster_player_index
-    if (this.rosterDetails && this.rosterDetails.length > 0) {
-      // |;| is just name and number separator
-      let roster_text = this.rosterDetails[editing_roster_player_index].text ? this.rosterDetails[editing_roster_player_index].text : ''
-      let roster_num = this.rosterDetails[editing_roster_player_index].number ? this.rosterDetails[editing_roster_player_index].number : ''
-      return `${roster_text}|;|${roster_num}`;
-    } else {
-      return null;
-    }
   }
 
   get customText(): Record<any, any>[] {
