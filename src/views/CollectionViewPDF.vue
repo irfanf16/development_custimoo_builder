@@ -67,22 +67,27 @@
                 <div class="pdf_price" v-if="collection_product.allow_price && collection_product.product_price"><strong>Price: </strong>
                   {{collection_product.product_price}}
                 </div>
-                <div class="pdf_price d-flex justify-content-center" style="border: none" v-if="company.platform !== 'self'">
+                <div class="pdf_price d-flex justify-content-center" style="border: none" >
                   <template v-if="isAuthenticated">
-                    <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs" @click="addToCart(collection_product,idxs)">
+                    <template v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+                      <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs" @click="addToCart(collection_product,idxs)">
                       Purchase
                     </button>
-                    <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
-                      <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-                    </button>
+                      <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
+                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                      </button>
+                    </template>
                   </template>
                   <template v-else>
-                    <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs"  @click="setActionBeforeLogin('addToCart',collection_product,idxs)">
-                      Purchase
-                    </button>
-                    <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
-                      <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-                    </button>
+                    <template v-if="company.platform !== 'self'">
+                      <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs"  @click="setActionBeforeLogin('addToCart',collection_product,idxs)">
+                        Purchase
+                      </button>
+                      <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
+                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                      </button>
+                    </template>
+
                   </template>
                 </div>
               </td>
@@ -131,7 +136,7 @@ import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import LoginForm from '@/components/LoginForm.vue'
 import {LockerProducts,handleMainProducts} from "@/mixins/LockerProduct"
-import { getRandom, getRosterDetailDefaultObject } from '@/helpers/Helpers'
+import {getPermissions, getRandom, getRosterDetailDefaultObject} from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import RosterDetails from '@/components/RosterDetails.vue'
@@ -145,6 +150,10 @@ import opentype from 'opentype.js'
 @Component<CollectionViewPDF>({
   components: {LoginForm,CustomizationPreview,RosterDetails,CartModal,ConfirmModal},
   async mounted() {
+    if(this.isAuthenticated){
+      await  getPermissions()
+    }
+
     let self: Record<any, any> = this;
     await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
       await this.initProductsFonts(products, resolve)
@@ -219,6 +228,10 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
 
   get actionBeforeLogin(): string {
     return this.$store.getters.getActionBeforeLogin
+  }
+
+  get customerPermissions(){
+    return this.$store.getters.getCustomerPermissions
   }
 
   public gotoLogin(){

@@ -126,9 +126,6 @@ import RecentLogos from "@/components/RecentLogos.vue";
     SaveLogoModal,
     SaveColorModal,
     LogoColorTabs
-  },
-  mounted() {
-    console.log('ready', this.logoColorUsed)
   }
 })
 
@@ -198,9 +195,9 @@ export default class LogoUploader extends Vue {
   get lockerColors(){
     return this.$store.getters.getLockerColors
   }
-  get logoColors(): [] {
-    return this.$store.getters.getLogosColors
-  }
+  // get logoColors(): [] {
+  //   return this.$store.getters.getLogosColors
+  // }
   get getRecentLogos() {
     return this.$store.getters.getRecentLogos
   }

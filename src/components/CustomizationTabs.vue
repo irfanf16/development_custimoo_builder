@@ -44,7 +44,7 @@
             <div v-if="hideTab.colorHide">
               <h2 class="fw-bold fz-16 p-3 d-none d-lg-block">Choose Color</h2>
               <div class="d-none d-lg-block">
-                <ColorAccordion :productColors="productColors" :key="selectedProduct.id" />
+                <ColorAccordion :tabIndex="tabIndex" :productColors="productColors" :key="selectedProduct.id" />
               </div>
               <!--            for mobile-->
               <div class="color-tabs d-lg-none">
@@ -208,7 +208,7 @@ export default class CustomizationTabs extends Vue {
     return this.$store.getters.getSelectedProduct.productnames;
   }
 
-  get logoColors(): [] {
+  get logoColors(): any[] {
     return this.$store.getters.getLogosColors
   }
 
@@ -245,7 +245,7 @@ export default class CustomizationTabs extends Vue {
   })
 
   tabIndexChanged() {
-    this.$emit('tabIndexChange', this.tabIndex)
+    this.$emit('tabIndexChange', this.tabIndex);
   }
 
   @Watch('selectedProduct', {
@@ -265,6 +265,15 @@ export default class CustomizationTabs extends Vue {
   lockerColorsChanged(newval:any, old:any) {
     this.productColorsManipulation()
   }
+  
+  @Watch('logoColors', {
+    deep: true
+  })
+
+
+  logoColorsChanged(newval:any, old:any) {
+    this.productColorsManipulation()
+  }
 
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
@@ -277,9 +286,9 @@ export default class CustomizationTabs extends Vue {
       finalColor.color_text = colors.json_data
       this.productColors = this.productColors.concat(finalColor)
     })
-    if (this.lockerColors.length > 0){
-      this.productColors = this.productColors.concat(this.lockerColors)
-    }
+    // if (this.lockerColors.length > 0){
+    //   this.productColors = this.productColors.concat(this.lockerColors)
+    // }
     if(this.logoColors.length){
       let logoColorsNew: any[] = []
       this.logoColors.forEach((color: any, index: number) => {

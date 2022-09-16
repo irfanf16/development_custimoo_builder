@@ -99,7 +99,7 @@
           </div>
         </div>
       </div>
-      <div class="d-flex justify-content-center" v-if="company.platform !== 'self'">
+      <div class="d-flex justify-content-center" v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
         <b-button class="mt-4" @click="createOrder">Finalize Order</b-button>
       </div>
     </div>
@@ -182,6 +182,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
   get cartLoading(): Record<any, any>{
     return this.$store.getters.getCartLoading;
+  }
+  get customerPermissions(){
+    return this.$store.getters.getCustomerPermissions
   }
   public createOrder() {
     let payload = {}

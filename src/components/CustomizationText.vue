@@ -61,31 +61,32 @@
                 <!-- Tabs content starts -->
 
                   <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
-                  <div class="text-color-holder customization-tabs">
+                  <div v-if="product_custom_text" class="text-color-holder customization-tabs" :class="{'no-outline': product_custom_text.items[productCustomTextItemIndex].outline_width == 0}">
                     <b-tabs content-class="mt-3">
-                      <b-tab v-for="(select_color_type, selectColorTypeIndex) in ['Fill Color', 'Outline Color']"
-                             :key="`select_color_type_${selectColorTypeIndex}`">
-                        <template slot="title">
-                          <div class="color-circle" :style="{ background: true ? 'gray' : 'aliceblue' }"></div>
-                          {{ select_color_type }}
-                        </template>
-                        <div class="customization-tabs">
-                          <b-tabs>
-                            <b-tab v-for="(product_color, productColorIndex) in product_colors" :key="`product_color_${productColorIndex}_${product_color.type}_type`">
-                              <template slot="title">
-                                {{product_color.name}}
-                              </template>
-                              <div class="color-holder">
-                                <div class="color-container">
-                                  <div class="color-box" v-for="(color, colorIndex) in product_color.colors" :style="{background: color.value}"
-                                       :key="`product_color_${productColorIndex}_${product_color.type}_type_color_${colorIndex}`" :title="color.name"
-                                        @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)"></div>
+                      <template v-for="(select_color_type, selectColorTypeIndex) in ['Fill Color', 'Outline Color']">
+                        <b-tab :key="`select_color_type_${selectColorTypeIndex}`">
+                          <template slot="title">
+                            <div class="color-circle" :style="{ background: selectColorTypeIndex == 0 ? product_custom_text.items[productCustomTextItemIndex].color : product_custom_text.items[productCustomTextItemIndex].outline_color }"></div>
+                            {{ select_color_type }}
+                          </template>
+                          <div class="customization-tabs">
+                            <b-tabs>
+                              <b-tab v-for="(product_color, productColorIndex) in product_colors" :key="`product_color_${productColorIndex}_${product_color.type}_type`">
+                                <template slot="title">
+                                  {{product_color.name}}
+                                </template>
+                                <div class="color-holder">
+                                  <div class="color-container">
+                                    <div class="color-box" v-for="(color, colorIndex) in product_color.colors" :style="{background: color.value}"
+                                        :key="`product_color_${productColorIndex}_${product_color.type}_type_color_${colorIndex}`" :title="color.name"
+                                          @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)"></div>
+                                  </div>
                                 </div>
-                              </div>
-                            </b-tab>
-                          </b-tabs>
-                        </div>
-                      </b-tab>
+                              </b-tab>
+                            </b-tabs>
+                          </div>
+                        </b-tab>
+                      </template>
                     </b-tabs>
                   </div>
 

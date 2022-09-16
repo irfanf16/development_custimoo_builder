@@ -84,7 +84,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import UploadLogo from "@/components/UploadLogo.vue"
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
@@ -156,7 +156,6 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   get customLogos(): [Record<any, any>] {
-    //return this.$store.getters.getCustomLogos()
      return  getCustomLogos(true, true);
   }
 
