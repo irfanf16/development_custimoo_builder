@@ -40,27 +40,34 @@
           <template v-if="isCustomerAuthenticated">
             <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product'">
 <!--              <button class="btn btn-secondary fw-bold w-100" @click="generateSVG" >Generate SVG</button>-->
-              <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCartMixin(products_fonts)" :disabled="canvasImage.scene == null">
+              <template v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+                <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCartMixin(products_fonts)" :disabled="canvasImage.scene == null">
 
-                <template v-if="getProductEditInfoObject.editing">
-                  <template v-if="getProductEditInfoObject.type == 'cart_product'">
-                    Update Cart
+                  <template v-if="getProductEditInfoObject.editing">
+                    <template v-if="getProductEditInfoObject.type == 'cart_product'">
+                      Update Cart
+                    </template>
+                    <template v-else>
+                      Update Item
+                    </template>
                   </template>
                   <template v-else>
-                    Update Item
+                    Add to Cart
                   </template>
-                </template>
-                <template v-else>
-                  Add to Cart
-                </template>
-              </button>
-              <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
-                <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-              </button>
+                </button>
+                <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
+                  <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                </button>
+
+              </template>
+
+
             </template>
           </template>
           <template v-else>
-            <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"   class="btn btn-secondary fw-bold w-100">Add to Cart</button>
+            <template v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+              <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"   class="btn btn-secondary fw-bold w-100">Add to Cart</button>
+            </template>
           </template>
 
 
@@ -233,6 +240,10 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
   get customLogoObjects(): Record<any, any>[] {
     return compact(this.$store.getters.customLogoObjects);
+  }
+
+  get customerPermissions(){
+    return this.$store.getters.getCustomerPermissions
   }
 
   public setActionBeforeLogin(type: string) {

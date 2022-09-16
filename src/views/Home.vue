@@ -111,7 +111,7 @@
                         </template>
                       </div>
                     </li>
-                    <li class="position-relative" v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')">
+                    <li class="position-relative" v-if="isCustomerAuthenticated && ((company.platform == 'self' && customerPermissions.includes('place-order')) || company.platform == 'cdnExceptLogin')">
                       <a  class="icon mr-0" @click="openCartModal">
                         <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                       </a>
@@ -255,19 +255,23 @@
                     <template v-else-if="isCustomerAuthenticated">
                       <template v-if="!getProductEditInfoObject.editing">
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                          <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
-                            Add to Cart
-                          </b-button>
-                          <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                            <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-                          </b-button>
-                        </template>
+                          <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                              Add to Cart
+                            </b-button>
+                            <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
+                              <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                            </b-button>
+                          </template>
+                         </template>
                       </template>
 
                     </template>
                     <template v-else>
-                      <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
-                    </template>
+                      <template v-if="company.platform !== 'self'">
+                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                      </template>
+                     </template>
                   </template>
 
                   <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
@@ -897,6 +901,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   get cartLoading(): Record<any, any>{
     return this.$store.getters.getCartLoading;
+  }
+  get customerPermissions(){
+    return this.$store.getters.getCustomerPermissions
   }
   public dropdownStyle = { } as any
   public down = false

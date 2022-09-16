@@ -5817,6 +5817,10 @@ $fontSize: 0.5;
     }
 }
 
+.customization-tabs .customization-text-area .text-color-holder.customization-tabs.no-outline > .tabs > div > .nav.nav-tabs > .nav-item:nth-child(2){
+    display: none;
+}
+
 .show_hide_text.customization-tabs{
     max-width: 100%;
 
