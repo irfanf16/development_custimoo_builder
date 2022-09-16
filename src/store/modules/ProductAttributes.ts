@@ -1,8 +1,10 @@
 import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
-import { rosterDefaultItem, setRetrievedProductsCustomTexts,getRosterDetailDefaultObject, initCustomLogos, setCustomLogo,
-  getLogoSettings, setLogoSettings, getProductLogoSetting, logData } from '@/helpers/Helpers'
+import {
+  rosterDefaultItem, setRetrievedProductsCustomTexts, getRosterDetailDefaultObject, initCustomLogos, setCustomLogo,
+  getLogoSettings, setLogoSettings, getProductLogoSetting, logData, lastActiveProductDefaultObject
+} from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
 const ProductAttributes:Module<any, any> = {
@@ -887,6 +889,10 @@ const ProductAttributes:Module<any, any> = {
         }
         state.last_active_product_data = Object.assign({}, state.last_active_product_data, updated_payload);
       }
+    },
+    RESET_LAST_ACTIVE_DATA(state: Record<any, any>)
+    {
+      state.last_active_product_data = lastActiveProductDefaultObject()
     },
     SET_EDITING_ROSTER_PLAYER_INDEX(state:Record<any, any>, payload){
       state.editing_roster_player_index = payload;

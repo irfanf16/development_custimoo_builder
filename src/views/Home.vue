@@ -1310,7 +1310,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const ok = await this.ref['reset-changes'].showConfirm()
 
     if (ok) {
-      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', lastActiveProductDefaultObject())
+      this.$store.commit('RESET_LAST_ACTIVE_DATA')
       await self.exitFromEditMode()
       // if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
       //   await this.$store.dispatch('setEditCart', {key:'cartId',value:0});

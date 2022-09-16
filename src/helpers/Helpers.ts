@@ -2,7 +2,7 @@ import Store from '../store'
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {default as $} from "jquery";
-import Axios, {AxiosError} from "axios";
+import {AxiosError} from "axios";
 import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
