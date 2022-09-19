@@ -74,12 +74,12 @@
                             :anchor-el="$refs['share'+i+''+ind][0]"
                             :on-close="hidePopper"
                           >
-                            <aside id="popper-content" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                            <aside id="popper-content" v-click-outside="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
                               <div class="share-holder">
                                 <h3>Copy link and Share</h3>
                                 <div class="share-form">
                                   <b-form inline>
-                                    <b-form-input :ref="'copylink_product_'+i +''+ind"
+                                    <b-form-input @mouseenter="markText" :ref="'copylink_product_'+i +''+ind"
                                                   :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
                                     ></b-form-input>
@@ -191,12 +191,12 @@
                               :anchor-el="$refs['share-collection'+index][0]"
                               :on-close="hidePopper"
                               class="share-tooltip">
-                              <aside :id="'popper-content'+index" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                              <aside :id="'popper-content'+index" v-click-outside="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
                                 <div class="share-holder">
                                   <h3>Copy link and Share</h3>
                                   <div class="share-form">
                                     <b-form inline>
-                                      <b-form-input :ref="'copylink_'+index"
+                                      <b-form-input :ref="'copylink_'+index" @mouseenter="markText"
                                                     :value="collection.shared_url !== 'undefined'   || collection.shared_url != null ?  collection.shared_url : ''"
                                       ></b-form-input>
                                       <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
@@ -303,6 +303,7 @@
 </template>
 
 <script lang="ts">
+import ClickOutside from 'vue-click-outside'
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue'
@@ -333,6 +334,9 @@ import ModalAction from "@/mixins/ModalAction";
     ContactModal,
     Popper,
     draggable
+  },
+  directives: {
+    ClickOutside
   },
   mounted() {
     let href: any = location.href;
@@ -377,6 +381,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
         // console.log('The ' + mutation.attributeName + ' attribute was modified.');
       }
     }
+  }
+
+  public markText($event:Record<any, any>) {
+    $event.target.select()
   }
 
   private get tabIndex() {
@@ -618,6 +626,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
   public hidePopper(){
     this.$store.commit('setPopper', '')
+  }
+  public alertt(){
+    alert('setPopper')
   }
 
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
