@@ -116,8 +116,6 @@ export default class ColorAccordion extends Vue {
     }else{
       this.selectType(this.selectTypeIndex-1, false)
     }
-    
-    // this.selectType(1, false)
   }
 
   get svgGroups() {
