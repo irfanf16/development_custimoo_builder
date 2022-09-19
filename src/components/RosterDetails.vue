@@ -7,9 +7,9 @@
           <b-form-select class="mt-1" v-model="selected_locker_roster" @change="changeRoster($event)" text-field="product_name"  value-field="id" :options="lockerRosters"></b-form-select>
         </template>
       </div>
-      <div class="d-flex gap-1" v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails.length > 0">
+      <div class="ml-auto" :class="{'mr-2': !!(selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails.length > 0)}">
         <a v-if="productModels.length > 0 && Object.prototype.hasOwnProperty.call(productModels[modelIndex],'image_url') && productModels[modelIndex].image_url" class="btn btn-secondary fs-3 btn-sm"
-                  title="Size Chart"
+                  title="Size Guide"
            :href="`${storage_url}${productModels[modelIndex].image_url}`"
            target="_blank"
         >
@@ -25,7 +25,11 @@
               -149 -159 -330 -340 l-330 -330 -518 518 -517 517 1855 1855 c1020 1020 1857 1855 1860 1855 3 0 237 -232 520 -515z"/>
             </g>
           </svg>
+
+          <span class="ml-1" style="font-size: smaller">Size Guide</span>
         </a>
+      </div>
+      <div class="d-flex gap-1" v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails.length > 0">
         <b-button @click="updateRosterPlayerNameFormat('capitalized')" class="btn btn-secondary fs-3 btn-sm"
           title="Capitalize">
           <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" vie wBox="0 0 16 16">
