@@ -34,7 +34,7 @@
                           <template v-else>Save to locker room</template>
                         </b-button>
                       </template>
-                      <template v-else-if="undoItems.length > 0 || redoitems.length > 0">
+                      <template>
                         <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                       </template>
 
