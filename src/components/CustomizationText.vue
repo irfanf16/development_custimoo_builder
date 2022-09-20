@@ -26,14 +26,14 @@
         </button>
       </div>
       <b-collapse accordion="my-accordion" :key="`accordion-${selectedProductId+customTextIndex}`" :id="`accordion-${customTextIndex}`"  :ref="`accordion-${customTextIndex}`" role="tabpanel">
-        <div class="font-type-area">
-          <div class="fade-right w-100 py-2">
-            <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList ">
-              <div v-for="(product_font, product_font_index) in product_fonts" :key="`product_font_${product_font_index}`"
-                   @click="handleCustomTextFontChange(customTextIndex,  product_font.value)"
-                   :style="{ fontSize: '20px',  fontFamily: product_font.value}"
-                   style="white-space: nowrap" @mouseenter="setLeft"
-                   :class="{ 'pr-3': product_font_index + 1 == product_fonts.length }" role="button">
+          <div class="font-type-area">
+            <div class="fade-right w-100 py-2">
+              <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList ">
+                <div v-for="(product_font, product_font_index) in product_fonts" :key="`product_font_${product_font_index}`"
+                     @click="handleCustomTextFontChange(customTextIndex,  product_font.value)"
+                     :style="{ fontSize: '20px',  fontFamily: product_font.value}"
+                     style="white-space: nowrap" @mouseenter="setLeft"
+                     :class="{ 'pr-3': product_font_index + 1 == product_fonts.length }" role="button">
                   <div class="font_tooltip">{{product_custom_text.value ? product_font.label : ''}}</div>
                   <span :key="`product_custom_text_${customTextIndex}_font-${product_font_index}`">
                     {{product_custom_text.value ? product_custom_text.value : product_font.value}}
@@ -52,7 +52,7 @@
                   <template slot="title">
                     <span @click="($event)=>$event.stopPropagation()">
                       <b-form-checkbox v-model="product_custom_text.items[productCustomTextItemIndex].selected" :name="`custom_text_child_${productCustomTextItemIndex}_checkbox`"
-                      :key="`custom_text_child_${productCustomTextItemIndex}_checkbox`" @change="handleCustomTextCheckboxChange($event, customTextIndex)">
+                      :key="`custom_text_child_${productCustomTextItemIndex}_checkbox`" @change="handleCustomTextCheckboxChange($event, customTextIndex, productCustomTextItemIndex)">
                       </b-form-checkbox>
                     </span>
                     {{product_custom_text_item.label}}
@@ -186,8 +186,13 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   get lockerColors() {
     return this.$store.getters.getLockerColors
   }
+
   get product_custom_texts() {
     return this.$store.getters.productCustomTexts(this.selectedProductId)
+  }
+
+  get all_products_custom_texts() {
+    return this.$store.getters.productCustomTexts()
   }
 
   /*
@@ -209,9 +214,16 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
       let self:Record<any, any> = this;
       let updated_custom_text = this.product_custom_texts[custom_text_index]
       updated_custom_text.value = updatedVal;
-      self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: {value: updatedVal}})
-      updated_custom_text.following_product_ids.forEach((following_product_id: number) => {
-        self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: following_product_id, value: {value: updatedVal}})
+      let product_ids = [updated_custom_text.product_id, ...updated_custom_text.following_product_ids]
+      product_ids.forEach((product_id) => {
+        self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: product_id, value: {value: updatedVal}})
+        /*
+        * For commit {SET_LAST_ACTIVE_PRODUCT_CUSTOM_TEXTS} the custom text is being passed by reference so any change in custom text will also be reflected in
+        * state.last_active_product_data
+        * */
+        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+          product_custom_texts: {[product_id]: this.all_products_custom_texts[product_id]}
+        });
       })
       self.$eventBus.$emit("customTextUpdated", {
         emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: updated_custom_text
@@ -223,9 +235,20 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
     }, 300)
   }
 
-  handleCustomTextCheckboxChange(updatedVal: string, custom_text_index: number) {
+  handleCustomTextCheckboxChange(updatedVal: string, custom_text_index: number, custom_text_item_index: number) {
     let self:Record<any, any> = this;
-    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+    let updated_custom_text = this.product_custom_texts[custom_text_index]
+    let updated_custom_text_product_id = updated_custom_text.product_id
+    let product_ids = [updated_custom_text_product_id, ...updated_custom_text.following_product_ids]
+    product_ids.forEach((product_id) => {
+      const product_custom_text_item = this.all_products_custom_texts[product_id][custom_text_index].items[custom_text_item_index]
+      if(product_custom_text_item) {
+        product_custom_text_item.selected = updatedVal
+        this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, product_id: product_id,
+          value: {value: this.all_products_custom_texts[updated_custom_text_product_id][custom_text_index].value, items: this.all_products_custom_texts[product_id][custom_text_index].items}
+        })
+      }
+    })
     self.$eventBus.$emit("customTextUpdated", {
       emitter: "checkbox", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
     });

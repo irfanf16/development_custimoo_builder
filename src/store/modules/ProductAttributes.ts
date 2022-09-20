@@ -1,10 +1,12 @@
 import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
-import { rosterDefaultItem, setRetrievedProductsCustomTexts,getRosterDetailDefaultObject, initCustomLogos, setCustomLogo,
-  getLogoSettings, setLogoSettings, getProductLogoSetting, logData } from '@/helpers/Helpers'
+import {
+  rosterDefaultItem, setRetrievedProductsCustomTexts, getRosterDetailDefaultObject, initCustomLogos, setCustomLogo,
+  getLogoSettings, setLogoSettings, getProductLogoSetting, logData, lastActiveProductDefaultObject
+} from '@/helpers/Helpers'
 import product from "@/store/modules/product";
-import {isEmpty} from "lodash";
+import {isEmpty, findIndex} from "lodash";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
@@ -710,7 +712,7 @@ const ProductAttributes:Module<any, any> = {
     },
     RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
       state.product_custom_texts = {}
-      setRetrievedProductsCustomTexts(state.products)
+      setRetrievedProductsCustomTexts(state.products, true)
     },
     RESET_CUSTOM_LOGOS: (state: Record<any, any>) => {
       state.logoTabIndex = 0;
@@ -874,10 +876,23 @@ const ProductAttributes:Module<any, any> = {
     SET_LAST_ACTIVE_PRODUCT_DATA(state:Record<any, any>, payload)
     {
       const updated_payload: Record<any, any> = {};
-      for (const [payload_key, payload_value] of Object.entries(payload)) {
-        updated_payload[payload_key] = payload_value
+      /*
+      * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
+      * reflected in state.last_active_product_data.product_custom_texts
+      * */
+      if('product_custom_texts' in payload) {
+        state.last_active_product_data.product_custom_texts = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
       }
-      state.last_active_product_data = Object.assign({}, state.last_active_product_data, updated_payload);
+      else {
+        for (const [payload_key, payload_value] of Object.entries(payload)) {
+          updated_payload[payload_key] = payload_value
+        }
+        state.last_active_product_data = Object.assign({}, state.last_active_product_data, updated_payload);
+      }
+    },
+    RESET_LAST_ACTIVE_DATA(state: Record<any, any>)
+    {
+      state.last_active_product_data = lastActiveProductDefaultObject()
     },
     SET_EDITING_ROSTER_PLAYER_INDEX(state:Record<any, any>, payload){
       state.editing_roster_player_index = payload;

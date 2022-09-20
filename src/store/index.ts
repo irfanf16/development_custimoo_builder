@@ -25,7 +25,7 @@ export default new Vuex.Store({
       'ProductAttributes.selectedIndex',
       'ProductAttributes.selectedPrdId',
       'ProductAttributes.customLogos',
-      'ProductAttributes.product_custom_texts',
+      // 'ProductAttributes.product_custom_texts',
       'ProductAttributes.defaultColors',
       'ProductAttributes.groupColors',
       'ProductAttributes.selectedDesignId',
