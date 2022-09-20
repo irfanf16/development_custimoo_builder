@@ -6,7 +6,7 @@
         <span v-if="mobileScreen" class="mt-1 toggleArrow" :class="showItems ? 'opened' : ''"><BIconChevronDown /></span>
       </h2>
 
-      <div class="select-items" :class="[showItems ? 'opened' : '']">
+      <div class="select-items" :class="{'opened': showItems, 'isMobile':mobileScreen}">
         <div class="d-flex align-items-center" v-if="getProductEditInfoObject.editing==false || (getProductEditInfoObject.editing===true && getProductEditInfoObject.locker_product_info !== null) ">
           <div class="fade-right w-100 py-2" >
             <div class="overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList ">
@@ -310,6 +310,10 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     overflow: hidden;
     transition: all 0.2s ease;
     overflow-y: auto;
+
+    &.isMobile{
+      max-height: 0;
+    }
 
     &.opened{
       max-height: 500px;
