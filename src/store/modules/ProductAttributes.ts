@@ -850,7 +850,7 @@ const ProductAttributes:Module<any, any> = {
       }
       state.canvasImage.scene = payload.scene
     },
-    zSET_HIDE_SAVE_LOCKER_BUTTON(state:Record<any, any>, payload){
+    SET_HIDE_SAVE_LOCKER_BUTTON(state:Record<any, any>, payload){
       state.hideSaveLockerButton = payload
     },
     SET_REVERT_ROSTER_BOOL(state:Record<any, any>, payload){

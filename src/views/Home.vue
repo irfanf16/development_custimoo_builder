@@ -29,9 +29,13 @@
                         <b-button :key="'lockerRoom'" v-if="lockers.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                       </template>
                       <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
-                        <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
-                          <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'">Update to locker room</template>
-                          <template v-else>Save to locker room</template>
+                        <b-button :key="'updateLockerProduct'" variant="outline-secondary"
+                                  v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && hideSaveLockerButton == false"
+                                  @click="getLockers">
+                          Update to locker room
+                        </b-button>
+                        <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers(false, true)">
+                          Save to locker room
                         </b-button>
                       </template>
                       <template v-else>
@@ -1073,11 +1077,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.retrieveProducts();
   }
 
-  public async getLockers(share_url = false){
+  public async getLockers(share_url = false, show_add_to_locker_modal = false){
     let self:Record<any, any> = this;
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
-    if (!this.getProductEditInfoObject.editing){
+    if (show_add_to_locker_modal){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
       return
     }
@@ -1085,9 +1089,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
-    // if (this.$store.getters.getEditDesignId != currentDesign[0].id || this.$store.getters.getEditStyleId != this.selectedProduct.productstyles[this.styleIndex].id){
-    //   this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
-    // }
     let main_scene = this.ref.mainScene[0];
     main_scene.frontCanvas.discardActiveObject().renderAll();
     main_scene.backCanvas.discardActiveObject().renderAll();
@@ -1128,9 +1129,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         let toast_type = "ERROR"
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
-        this.exitFromEditMode();
-        let query_params = await self.setQueryParams()
-        self.retrieveProducts(query_params)
+        this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true)
+        // this.exitFromEditMode();
+        // let query_params = await self.setQueryParams()
+        // self.retrieveProducts(query_params)
       }).catch(async errorResponse => {
         handleResponseException(errorResponse)
         self.exitFromEditMode();
