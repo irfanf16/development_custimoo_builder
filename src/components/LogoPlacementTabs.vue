@@ -1,6 +1,9 @@
 <template>
   <div v-if="selectedProduct">
-    <b-tabs>
+    <div class="text-right px-1 pt-1" :class="{'rotateArrow': !expandLogoButtons}">
+      <b-icon-chevron-down class="cursor-pointer" @click="()=>expandLogoButtons = !expandLogoButtons" style="font-size: larger; transition: 0.3s ease all;" />
+    </div>
+    <b-tabs :class="{'collapseButtons': expandLogoButtons}">
       <b-tab v-for="(logo_tab, ltIdx) in customLogos" :key="ltIdx" :active="tabIndex === ltIdx" @click="changeTab(ltIdx)">
         <template #title>
           <span>{{ ltIdx == 0 ? 'Team Logo' : 'logo ' + ltIdx }}</span>
@@ -127,7 +130,7 @@ export default class LogoPlacementTabs extends Vue {
 
   public ref = this.$refs as Record<any, any>
   public numberOfLogos = 1
-  public showFileInput  = true
+  public expandLogoButtons  = true
 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public selected = 'front'
@@ -410,7 +413,6 @@ export default class LogoPlacementTabs extends Vue {
 </script>
 
 <style lang="scss" scoped>
-
 .tabs-logo-container{
   @media only screen and (min-width: 992px){
     //padding: 0 0 150px;
@@ -545,5 +547,9 @@ export default class LogoPlacementTabs extends Vue {
   width: 100%;
 }
 
-
+.rotateArrow {
+  svg{
+    transform: rotate(-180deg);
+  }
+}
 </style>

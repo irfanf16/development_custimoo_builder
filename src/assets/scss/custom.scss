@@ -5817,6 +5817,26 @@ $fontSize: 0.5;
     }
 }
 
+.collapseButtons{
+    &>div{
+        .nav.nav-tabs{
+            display: flex;
+            flex-wrap: nowrap;
+            overflow: hidden;
+            overflow-x: auto;
+            padding-bottom: 0.7rem;
+
+            @extend .theme-scroll-h;
+
+            li{
+                a{
+                    white-space: nowrap;
+                }
+            }
+        }
+    }
+}
+
 .customization-tabs .customization-text-area .text-color-holder.customization-tabs.no-outline > .tabs > div > .nav.nav-tabs > .nav-item:nth-child(2){
     display: none;
 }
