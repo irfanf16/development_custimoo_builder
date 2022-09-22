@@ -7,6 +7,8 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
+import {Side} from "three";
+import {parseInt} from "lodash";
 
 const getLogoSettingsObject = () => {
   return {
@@ -440,7 +442,7 @@ const pathInfo = (file_path: string, ) => {
 
 const getActiveProductData = (products_fonts: Record<any, any>) => {
   return new Promise((resolve) => {
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       const scene_ref = Store.getters.getCanvasImage.scene
       if (!(scene_ref && scene_ref.mounted)) {
         console.log('not reslove')
@@ -461,46 +463,51 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
           quantity: roster_detail.quantity,
           name: {
             label: '',
+            placement:'',
             value: roster_detail.text,
             font_family: '',
             items: [] as Record<any, any>[]
           },
           number: {
             label: '',
+            placement:'',
             value: roster_detail.number,
             font_family: '',
             items: [] as Record<any, any>[]
           }
         }
-        for(let text_index = 0; text_index < productCustomTexts.length; text_index++) {
-          const custom_text = productCustomTexts[text_index]
-          const common_object = {
-            label: '',
-            value: '',
-            font_family: '',
-            items: [] as Record<any, any>[]
-          }
-          const font = products_fonts[custom_text.font_family]
-          let path: Record<any, any> = {}
-          let text_for_test_char = '';
-          if(custom_text.is_first_name) {
-            text_for_test_char = roster_detail.text
-            path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : {}
-          } else if(custom_text.is_first_number) {
-            text_for_test_char = roster_detail.number
-            path = roster_detail.number? font.opentype_font.getPath(roster_detail.number) : {}
-          } else if(roster_index == 0) {
-            text_for_test_char = custom_text.value
-            path = custom_text.value? font.opentype_font.getPath(custom_text.value) : {}
-          }
-          if(Object.prototype.hasOwnProperty.call(custom_text, "items")){
-            for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
+        if(productCustomTexts){
+          for(let text_index = 0; text_index < productCustomTexts.length; text_index++) {
+            const custom_text = productCustomTexts[text_index]
+            const common_object = {
+              label: '',
+              placement:'',
+              value: '',
+              font_family: '',
+              items: [] as Record<any, any>[]
+            }
+            const font = products_fonts[custom_text.font_family]
+            let path: Record<any, any> = {}
+            let text_for_test_char = '';
+            if(custom_text.is_first_name) {
+              text_for_test_char = roster_detail.text
+              path = roster_detail.text? font.opentype_font.getPath(roster_detail.text) : {}
+            } else if(custom_text.is_first_number) {
+              text_for_test_char = roster_detail.number
+              path = roster_detail.number? font.opentype_font.getPath(roster_detail.number) : {}
+            } else if(roster_index == 0) {
+              text_for_test_char = custom_text.value
+              path = custom_text.value? font.opentype_font.getPath(custom_text.value) : {}
+            }
+            if(Object.prototype.hasOwnProperty.call(custom_text, "items")){
+              for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
 
-              const custom_text_item = custom_text.items[items_index]
-              if(custom_text_item.selected){
+                const custom_text_item = custom_text.items[items_index]
+                if(custom_text_item.selected){
 
                   const text_item_object = {
                     label: custom_text_item.label,
+                    placement: custom_text_item.placement,
                     width: '',
                     height: '',
                     unit: '',
@@ -509,7 +516,12 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     svg_height:'',
                     outline_color:'',
                     outline_color_pantone:'',
-                    outline_width:0
+                    original_height:0,
+                    original_width:0,
+                    outline_width:0,
+                    rotation:0,
+                    scaleX:0,
+                    scaleY:0,
                   }
 
                   if (Object.keys(path).length) {
@@ -523,11 +535,11 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     text_color_info['name'] = custom_text_item.color_pantone
                     text_color_info['pantone'] = custom_text_item.color_pantone
 
+
                     path.fill = custom_text_item.color
                     path.stroke = custom_text_item.outline_color
                     path.strokeWidth = parseInt(custom_text_item.outline_width)
-                    path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
-
+                    // path.scale = custom_text_item.scaleX / selected_product.measurement_ratio + ' ' + custom_text_item.scaleY / selected_product.measurement_ratio
 
                     const boundingBox = path.getBoundingBox()
                     boundingBox.y1 = Math.abs(boundingBox.y1)
@@ -565,8 +577,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       'viewBox="0 0 ' + width + ' ' + height + '"> \n' + dom_svg.outerHTML + '\n</svg>'
 
 
-                    const converted_width = unitConversion(width * custom_text_item.scaleX * selected_product.measurement_ratio)
-                    const converted_height = unitConversion(height * custom_text_item.scaleY * selected_product.measurement_ratio)
+                    const converted_width = unitConversion((width * custom_text_item.scaleX) / selected_product.measurement_ratio)
+                    const converted_height = unitConversion((height * custom_text_item.scaleY )/ selected_product.measurement_ratio)
 
                     text_item_object.width = converted_width.value;
                     text_item_object.height = converted_height.value;
@@ -576,18 +588,26 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     text_item_object.outline_color = custom_text_item.outline_color;
                     text_item_object.outline_color_pantone = custom_text_item.outline_color_pantone;
                     text_item_object.outline_width = parseInt(custom_text_item.outline_width);
+                    text_item_object.original_height = (height * custom_text_item.scaleY) / selected_product.measurement_ratio;
+                    text_item_object.original_width = (width * custom_text_item.scaleX) / selected_product.measurement_ratio;
+                    text_item_object.rotation = custom_text_item.rotation;
+                    text_item_object.scaleX = custom_text_item.scaleX / selected_product.measurement_ratio;
+                    text_item_object.scaleY = custom_text_item.scaleY / selected_product.measurement_ratio;
                   }
 
                   if (custom_text.is_first_name) {
                     text_object.name.label = custom_text.label
+                    text_object.name.placement = custom_text.placement
                     text_object.name.font_family = custom_text.font_family
                     text_object.name.items.push(text_item_object)
                   } else if (custom_text.is_first_number) {
                     text_object.number.label = custom_text.label
+                    text_object.number.placement = custom_text.placement
                     text_object.number.font_family = custom_text.font_family
                     text_object.number.items.push(text_item_object)
                   } else if (roster_index == 0) {
                     common_object.label = custom_text.label
+                    common_object.placement = custom_text.placement
                     common_object.value = custom_text.value
                     common_object.font_family = custom_text.font_family
                     common_object.items.push(text_item_object)
@@ -596,11 +616,13 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       Vue.set(common, common.length, common_object)
                     }
                   }
+                }
               }
             }
-          }
 
+          }
         }
+
         Vue.set(roster_texts, roster_index, text_object)
       }
 
@@ -658,6 +680,9 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
           }
         }
       }
+      const svg_content = await fetchUrlContent(post_data.production_url);
+      const production_file = await parseSvgStringFile(svg_content,post_data);
+      post_data.svg_content = production_file
 
       clearInterval(interval)
       resolve(post_data)
@@ -983,6 +1008,50 @@ const parseFactoryProduct = async (factory_product : Record<any, any>) => {
   return factory_product;
 }
 
+const parseRosterDetailFromFactoryProduct = (factory_product:Record<any,any>) => {
+
+  const temp_array: Record<any,any>[] = [];
+  const roster_details :Record<any,any>[] = [];
+  if(Object.prototype.hasOwnProperty.call(factory_product,'product_custom_text_objects')){
+    if(Object.prototype.hasOwnProperty.call(factory_product.product_custom_text_objects,'roster')){
+      Object.entries(factory_product.product_custom_text_objects.roster).forEach(([rosterIndex, roster_item]) => {
+        if(Object.prototype.hasOwnProperty.call(roster_item,'name') && (roster_item as Record<any, any>).name.items.length > 0 && Object.prototype.hasOwnProperty.call(roster_item,'number') && (roster_item as Record<any, any>).number.items.length > 0){
+          (roster_item as Record<any, any>).name.items.forEach((item:Record<any,any>,index:number)=>{
+            const name_svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.indexOf("</svg>"));
+            temp_array[parseInt(rosterIndex)] = {name:name_svg};
+          });
+          (roster_item as Record<any, any>).number.items.forEach((item:Record<any,any>,index:number)=>{
+            const number_svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.indexOf("</svg>"));
+            roster_details[parseInt(rosterIndex)] = {number:number_svg, name: temp_array[parseInt(rosterIndex)].name, size: (roster_item as Record<any, any>).size, quantity: (roster_item as Record<any, any>).quantity};
+          })
+        }
+        else if(Object.prototype.hasOwnProperty.call(roster_item,'name') && (roster_item as Record<any, any>).name.items.length > 0){
+          (roster_item as Record<any, any>).name.items.forEach((item:Record<any,any>,index:number)=>{
+            const name_svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.indexOf("</svg>"));
+            roster_details[parseInt(rosterIndex)] = {number:null, name: name_svg, size: (roster_item as Record<any, any>).size, quantity: (roster_item as Record<any, any>).quantity}
+          })
+        }
+        else if(Object.prototype.hasOwnProperty.call(roster_item,'number') && (roster_item as Record<any, any>).number.items.length > 0){
+          (roster_item as Record<any, any>).number.items.forEach((item:Record<any,any>,index:number)=>{
+            const number_svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.indexOf("</svg>"));
+            roster_details[parseInt(rosterIndex)] = {number:number_svg, name: null, size: (roster_item as Record<any, any>).size, quantity: (roster_item as Record<any, any>).quantity}
+          })
+        }
+      });
+    }
+    if(Object.prototype.hasOwnProperty.call(factory_product.product_custom_text_objects,'common') && factory_product.product_custom_text_objects.common.length > 0){
+      const index_for_common:number = roster_details.length;
+      factory_product.product_custom_text_objects.common.forEach((common_item:Record<any,any>,commonIndex:number) => {
+        common_item.items.forEach((item:Record<any,any>,index:number)=>{
+          const name_svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.indexOf("</svg>"));
+          roster_details[index_for_common + commonIndex] = {number:null, name: name_svg, size: null, quantity: null}
+        })
+      });
+    }
+  }
+  return roster_details;
+}
+
 const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any>) => {
   factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
     $(svg_doc).find(`[id][fill]`).each  (function(doc_item) {
@@ -1097,7 +1166,127 @@ const getSVGPattern = (values:Record<any,any>,measurement_ratio:number) => {
         `
 }
 
-const getLogoPattern = async (values:Record<any,any>,measurement_ratio:string) => {
+const getSVGPatternNew = (roster_details:Record<any,any>,production_file_info:Record<any, any>) => {
+  const width = production_file_info.width.includes('px')?production_file_info.width.replace('px',''):8000 ; const height = production_file_info.height.includes('px')?production_file_info.height.replace('px',''):5000;
+  return `
+                <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${height + 500})" style="font-weight: bold;">
+                      <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                          <tspan x="0" y="0">Name </tspan>
+                      </text>
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="${1000}" y="0">Number </tspan>
+                    </text>
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="${2000}" y="0">Size </tspan>
+                    </text>
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        <tspan x="${3000}" y="0">Quantity </tspan>
+                    </text>
+                </g>
+        ${roster_details.map((roster_item:Record<any,any>,index:number) => {
+    return `
+                <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${height + 500})">
+                ${roster_item.name !== null?
+      `<g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
+                      ${roster_item.name}
+                   </g>`
+      :
+      `<g transform="matrix(1 0 0 1 0 ${500 + index * 1000})">
+                   </g>`
+    }
+                ${roster_item.number !== null ?
+      `<g transform="matrix(1 0 0 1 500 ${500 + index * 1000})" >
+                        ${roster_item.number}
+                    </g>`
+      :
+      `<g transform="matrix(1 0 0 1 500 ${500 + index * 1000})">
+                   </g>`
+    }
+                ${roster_item.size !== null ?
+      `<g transform="matrix(1 0 0 1 1250 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                           ${roster_item.size}
+                    </text>
+                </g>`
+      :
+      `<g transform="matrix(1 0 0 1 1250 ${500 + index * 1000})"></g>`
+    }
+                ${roster_item.quantity !== null ?
+      `<g transform="matrix(1 0 0 1 2500 ${500 + index * 1000})">
+                    <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
+                        ${roster_item.quantity}
+                    </text>
+                </g>`
+      :
+      `<g transform="matrix(1 0 0 1 2500 ${500 + index * 1000})">
+                 </g>`
+    }
+                ${svg_pattern_last_value_y = ((500 + index * 1000) + height + 500)}
+                </g>`
+
+  })
+  }
+        `
+}
+
+const getSVGPatternGulzar = (roster_details:Record<any,any>) => {
+  const svg_pattern = `
+<svg class="front" viewBox="0 0 376 244" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <foreignObject width="100%" height="50px" y="0">
+        <xhtml:body xmlns="http://www.w3.org/1999/xhtml">
+            <xhtml:table width="100%">
+                <xhtml:tr>
+                    <xhtml:th>
+                        <xhtml:div style="height:20px">
+                        Name
+                        </xhtml:div>
+                    </xhtml:th>
+                    <xhtml:td>
+                        <xhtml:div style="height:20px">
+                          Number
+                        </xhtml:div>
+                    </xhtml:td>
+                    <xhtml:td>
+                        <xhtml:div style="height:20px">
+                          Size
+                        </xhtml:div>
+                    </xhtml:td>
+                    <xhtml:td>
+                        <xhtml:div style="height:20px">
+                          Quantity
+                        </xhtml:div>
+                    </xhtml:td>
+                </xhtml:tr>
+                 ${roster_details.map((roster_item:Record<any,any>,index:number) => {
+                   return `<xhtml:tr>
+                        <xhtml:td>
+                            <xhtml:div style="height:20px">
+                                ${roster_item.name !== null?roster_item.name: ''}
+                            </xhtml:div>
+                        </xhtml:td>
+                        <xhtml:td>
+                            <xhtml:div style="height:20px">
+                                ${roster_item.number !== null?roster_item.number: ''}
+                            </xhtml:div>
+                        </xhtml:td>
+                        <xhtml:td>
+                            <xhtml:div style="height:20px">
+                                ${roster_item.size !== null?roster_item.size: ''}
+                            </xhtml:div>
+                        </xhtml:td>
+                        <xhtml:td>
+                            <xhtml:div style="height:20px">
+                                ${roster_item.quantity !== null?roster_item.quantity: ''}
+                            </xhtml:div>
+                        </xhtml:td>
+                   </xhtml:tr>`
+                })
+  }
+                 </xhtml:table></xhtml:body></foreignObject></svg>`;
+    return svg_pattern;
+}
+
+const getLogoPattern = async (values:Record<any,any>, measurement_ratio:string) => {
   let svg_group_el = `
         <g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${svg_pattern_last_value_y + 500})" style="font-weight: bold;">
                     <text xml:space="preserve" font-family="gibson-bold-webfont" font-size="95.78" font-style="bold" paint-order="stroke">
@@ -1163,14 +1352,19 @@ const getLogoPattern = async (values:Record<any,any>,measurement_ratio:string) =
   return svg_group_el;
 }
 
-const parseSvgString = async (svg_string:string, factory_product_content: Record<any,any>) => {
+const parseSvgString = async (svg_string:string, factory_product: Record<any,any>) => {
   if(svg_string.substring(0, svg_string.lastIndexOf("</g>")) !== '') {
     let production_content = "";
-
     svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
+    const svg_doc = await getDocFromString(svg_string);
+    const production_file_info:Record<any, any> = {
+      width: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("width"),
+      height: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("height")
+    }
 
-    const factory_product:Record<any,any> = await parseFactoryProduct(factory_product_content);
-    svg_string += `${getSVGPattern(factory_product.roster_detail,factory_product.measurement_ratio)}\n`
+    // const factory_product:Record<any,any> = await parseFactoryProduct(factory_product_content);
+    const roster_details = parseRosterDetailFromFactoryProduct(factory_product);
+    svg_string += `${getSVGPatternNew(roster_details,production_file_info)}\n`
 
     if((factory_product.custom_logos.length >= 1)){
       const custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
@@ -1182,11 +1376,6 @@ const parseSvgString = async (svg_string:string, factory_product_content: Record
       }
     }
     svg_string += `\n</g>\n</svg>`;
-    const svg_doc = await getDocFromString(svg_string);
-    const production_file_info:Record<any, any> = {
-      width: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("width"),
-      height: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("height")
-    }
     const scaled_file_info : Record<any,any> = {
       width : parseFloat(production_file_info.width),
       height : logo_pattern_last_value_y?logo_pattern_last_value_y:svg_pattern_last_value_y,
@@ -1204,7 +1393,7 @@ const parseSvgString = async (svg_string:string, factory_product_content: Record
       $(svg_doc as SVGTextElement|Document).find("svg").eq(0).prepend(font_style)
     }
     //Add Fonts to SVgs End
-
+    // console.log('');
     //Add Front and Back Images Shown on SVG Start
     //Back Image
     const group_back_image_tag = getGroupImageTag(factory_product,production_file_info,'back_image');
@@ -1213,7 +1402,6 @@ const parseSvgString = async (svg_string:string, factory_product_content: Record
     const group_front_image_tag = getGroupImageTag(factory_product,production_file_info,'front_image');
     $(svg_doc as SVGTextElement|Document).find("g").eq(0).prepend(group_front_image_tag)
     //Add Front and Back Images Side wise to svg End
-
     $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr({"width": (scaled_file_info.width * 2) + 'px', height: scaled_file_info.height + 'px'});
     const view_box = (svg_doc as SVGTextElement|Document)?.querySelector('svg')?.getAttribute('viewBox');
     const view_box_dimensions = view_box?.split(" ");
@@ -1224,6 +1412,378 @@ const parseSvgString = async (svg_string:string, factory_product_content: Record
   }
   else{
     return null;
+  }
+}
+
+const parseSvgStringFile = async (svg_string:string, factory_product: Record<any,any>) => {
+  if(svg_string.substring(0, svg_string.lastIndexOf("</g>")) !== '') {
+    let production_content = "";
+    svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
+    const svg_doc_initial = await getDocFromString(svg_string);
+    const production_file_initial_dimension:Record<any, any> = {
+      width: $(svg_doc_initial as SVGTextElement|Document).find("svg").eq(0).attr("width"),
+      height: $(svg_doc_initial as SVGTextElement|Document).find("svg").eq(0).attr("height")
+    }
+
+    let logo_max_width = 0 ;
+    if((factory_product.custom_logos.length >= 1)){
+      const custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
+        return (custom_logo.url !== "")
+      })
+      if(custom_logos_without_base64.length > 0){
+        const custom_logos = await Store.dispatch('converturlToBase64',{custom_logos:custom_logos_without_base64});
+        const payload = getLogoSVG(custom_logos.data.custom_logos,factory_product.measurement_ratio,production_file_initial_dimension);
+        logo_max_width = payload.width;
+        svg_string += `${payload.svg_string}`
+      }
+    }
+
+    const numbers_array:Record<any,any>[] = getSVGNumberArraysFromRoster(factory_product);
+    const svg_numbers_payload = getSVGNumbers(numbers_array,logo_max_width,production_file_initial_dimension);
+    svg_string += `${svg_numbers_payload.svg_string}`;
+    const numbers_width = svg_numbers_payload.width?svg_numbers_payload.width + 500:0;
+    const logo_max_width_and_number_max_width = logo_max_width + numbers_width;
+
+    const names_array:Record<any,any>[] = getSVGNameArraysFromRoster(factory_product);
+    const svg_names_payload = getSVGNames(names_array,production_file_initial_dimension,logo_max_width_and_number_max_width);
+
+
+    svg_string += `${svg_names_payload.svg_string}`;
+    const names_height = svg_names_payload.height;
+    const names_width = svg_names_payload.width;
+
+    const name_logo_number_max_width = logo_max_width + numbers_width + names_width;
+
+    const common_array:Record<any,any> [] = getSVGCommonArraysFromRoster(factory_product);
+    const svg_common_payload = getSVGCommonItems(common_array,production_file_initial_dimension,name_logo_number_max_width);
+    const common_width = svg_common_payload.width;
+    const common_height = svg_common_payload.height;
+
+    svg_string += `${svg_common_payload.svg_string}`;
+
+    svg_string += `\n</g>\n</svg>`;
+
+    // console.log( getSVGNumbers(numbers_array));
+
+    // const factory_product:Record<any,any> = await parseFactoryProduct(factory_product_content);
+
+    const svg_doc = await getDocFromString(svg_string);
+    const production_file_info:Record<any, any> = {
+      width: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("width"),
+      height: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("height")
+    }
+
+    //Applying Color on SVG Start
+    applyColorToSVG(factory_product,svg_doc as SVGTextElement|Document);
+    //Applying Color on SVG End
+
+    //Back Image
+    const group_back_image_tag = getGroupImageTag(factory_product,production_file_info,'back_image');
+    $(svg_doc as SVGTextElement|Document).find("g").eq(0).prepend(group_back_image_tag);
+
+    //Front Image
+    const group_front_image_tag = getGroupImageTag(factory_product,production_file_info,'front_image');
+    $(svg_doc as SVGTextElement|Document).find("g").eq(0).prepend(group_front_image_tag)
+    //Add Front and Back Images Side wise to svg End
+    const production_height = production_file_info.height.replace('px','')?parseFloat(production_file_info.height.replace('px','')):6000;
+    const production_width = production_file_info.width.replace('px','')?parseFloat(production_file_info.width.replace('px','')):8000;
+    const view_box = (svg_doc as SVGTextElement|Document)?.querySelector('svg')?.getAttribute('viewBox');
+
+    const view_box_dimensions = view_box?.split(" ");
+
+    // @ts-ignore
+
+    const svg_height = calculateSVGHeight(production_height,logo_max_width,svg_numbers_payload.height,names_height,common_height);
+    const svg_width = calculateSVGWidth(production_width,logo_max_width,numbers_width,names_width,common_width)
+
+    $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr({"width": svg_width + 'px', height: svg_height + 'px'});
+    // @ts-ignore
+    (svg_doc as SVGTextElement|Document)?.querySelector('svg')?.setAttribute('viewBox',`${view_box_dimensions[0]} ${view_box_dimensions[1]} ${svg_width} ${svg_height}`);
+    production_content = await serializer(svg_doc as SVGTextElement|Document);
+    console.log('Production Content');
+    console.log(production_content);
+    return production_content;
+  }
+  else{
+    return null;
+  }
+}
+
+const calculateSVGHeight = (production_file_height:number,logo_max_height:number,number_max_height:number,name_max_height:number,common_height:number) => {
+  if(production_file_height && logo_max_height && number_max_height && name_max_height){
+     return production_file_height + number_max_height + 1000;
+  }
+  else if (production_file_height && logo_max_height && number_max_height){
+    return production_file_height + number_max_height + 1000;
+  }
+  else if (production_file_height && logo_max_height && name_max_height || production_file_height && logo_max_height && name_max_height && common_height){
+    if(name_max_height > logo_max_height && name_max_height > common_height){
+      return production_file_height + (name_max_height * 3);
+    }
+    else if(common_height > logo_max_height && common_height > name_max_height){
+      return production_file_height + (name_max_height * 3);
+    }
+    else{
+      return production_file_height + (logo_max_height * 3);
+    }
+  }
+  else if (production_file_height && name_max_height || production_file_height && name_max_height && common_height){
+    if(name_max_height > common_height){
+      return production_file_height + (name_max_height * 3);
+    }
+    else{
+      return production_file_height + (common_height * 3);
+    }
+
+  }
+  else if (production_file_height && logo_max_height || production_file_height && logo_max_height && common_height){
+    return production_file_height + (logo_max_height * 2);
+  }
+  else if (production_file_height || production_file_height && common_height){
+    if(production_file_height && common_height){
+      return production_file_height + common_height +  1000
+    }else{
+      return production_file_height + 1000
+    }
+
+  }
+}
+const calculateSVGWidth = (production_width:number,logo_max_width:number,numbers_width:number,names_width:number,common_width:number) => {
+  const max_width = logo_max_width + numbers_width + names_width + common_width + 500 ;
+  const production_file_scaled_width = production_width * 2 ;
+  return max_width > production_file_scaled_width ? max_width : production_file_scaled_width;
+}
+
+const getSVGNumberArraysFromRoster = (factory_product:Record<any,any>) => {
+  const labels:Record<any,any>[] = [];
+  if(Object.prototype.hasOwnProperty.call(factory_product,'product_custom_text_objects') && factory_product.product_custom_text_objects){
+    if(Object.prototype.hasOwnProperty.call(factory_product.product_custom_text_objects,'roster') && factory_product.product_custom_text_objects.roster){
+      Object.entries(factory_product.product_custom_text_objects.roster).forEach(([rosterIndex, roster_item]) => {
+        if(Object.prototype.hasOwnProperty.call(roster_item,'number') && (roster_item as Record<any, any>).number){
+          if(Object.prototype.hasOwnProperty.call((roster_item as Record<any, any>).number,'items') && (roster_item as Record<any, any>).number.items.length > 0){
+            (roster_item as Record<any, any>).number.items.forEach((item:Record<any,any>) => {
+              if(labels[item.label] && labels[item.label].length > 0){
+                labels[item.label].push(item);
+              }
+              else{
+                labels[item.label] = [];
+                labels[item.label].push(item);
+              }
+            })
+          }
+        }
+      });
+    }
+  }
+  return labels;
+}
+
+
+const getSVGNameArraysFromRoster = (factory_product:Record<any,any>) => {
+  const labels:Record<any,any>[] = [];
+  if(Object.prototype.hasOwnProperty.call(factory_product,'product_custom_text_objects') && factory_product.product_custom_text_objects){
+    if(Object.prototype.hasOwnProperty.call(factory_product.product_custom_text_objects,'roster') && factory_product.product_custom_text_objects.roster){
+      Object.entries(factory_product.product_custom_text_objects.roster).forEach(([rosterIndex, roster_item]) => {
+        if(Object.prototype.hasOwnProperty.call(roster_item,'name') && (roster_item as Record<any, any>).name){
+          if(Object.prototype.hasOwnProperty.call((roster_item as Record<any, any>).name,'items') && (roster_item as Record<any, any>).name.items.length > 0){
+            (roster_item as Record<any, any>).name.items.forEach((item:Record<any,any>) => {
+              if(labels[item.label] && labels[item.label].length > 0){
+                labels[item.label].push(item);
+              }
+              else{
+                labels[item.label] = [];
+                labels[item.label].push(item);
+              }
+            })
+          }
+        }
+      });
+    }
+  }
+  return labels;
+}
+
+const getSVGCommonArraysFromRoster = (factory_product:Record<any,any>) => {
+  const labels:Record<any,any>[] = [];
+  if(Object.prototype.hasOwnProperty.call(factory_product,'product_custom_text_objects') && factory_product.product_custom_text_objects){
+    if(Object.prototype.hasOwnProperty.call(factory_product.product_custom_text_objects,'common') && factory_product.product_custom_text_objects.common){
+      Object.entries(factory_product.product_custom_text_objects.common).forEach(([commonIndex, common_item]) => {
+          if(Object.prototype.hasOwnProperty.call((common_item as Record<any, any>),'items') && (common_item as Record<any, any>).items.length > 0){
+            (common_item as Record<any, any>).items.forEach((item:Record<any,any>) => {
+              if(labels[item.label] && labels[item.label].length > 0){
+                labels[item.label].push(item);
+              }
+              else{
+                labels[item.label] = [];
+                labels[item.label].push(item);
+              }
+            })
+          }
+      });
+    }
+  }
+  return labels;
+}
+
+const getSVGNumbers = (numbers_array:Record<any,any>[],logo_width:number,production_file_dimension:Record<any,any>) => {
+  // let svg_string = '<?xml version="1.0" encoding="utf-8"?>\n' +
+  //   '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+  //   'viewBox="0 0 ' + 2000 + ' ' + 2000 + '"> \n';
+  const height_of_production_file = production_file_dimension.height? production_file_dimension.height.replace('px',''):6000;
+  let height = 0 ;
+  let width = 0 ;
+  let svg_string = `<g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 ${logo_width?logo_width + 500: 0} ${height_of_production_file})">`;
+  let main_index = 0;
+  const height_array_for_sort:Record<any,any> = [];
+  let original_width = 0 ;
+  Object.entries(numbers_array).forEach(([key, value]) => {
+      height = 0 ;
+      height_array_for_sort[key] = 0;
+      value.forEach((item:Record<any,any>,index:number) => {
+        height_array_for_sort[key] += parseFloat(item.original_height) + 500;
+
+        const svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.lastIndexOf("</svg>"));
+        svg_string +=`
+                     <g transform="matrix(${item.scaleX} 0 0 ${item.scaleY} ${width} ${height})">
+                        <g style="transform: rotate(0)">${svg}</g>
+                     </g>
+                `
+          original_width = parseFloat(item.original_width);
+          height += parseFloat(item.original_height) + 500;
+      })
+    width += original_width + 500;
+    main_index += 1;
+    })
+    let max_height = 0
+    Object.entries(height_array_for_sort).forEach(([key, value]) => {
+      if(parseFloat(value) > max_height){
+        max_height = parseFloat(value);
+      }
+    });
+
+  svg_string += `</g>`
+
+  return {
+    svg_string:svg_string,
+    width:width,
+    height:max_height,
+  };
+}
+
+const getSVGNames = (names_array:Record<any,any>[],production_file_dimension:Record<any,any>,number_svg_width:number) => {
+  // let svg_string = '<?xml version="1.0" encoding="utf-8"?>\n' +
+  //   '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+  //   'viewBox="0 0 ' + 2000 + ' ' + 2000 + '"> \n';
+  const height_of_production_file = production_file_dimension.height? production_file_dimension.height.replace('px',''):6000;
+  let height = 0 ;
+  let width = 0 ;
+  let original_width = 0;
+  let svg_string = `<g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 ${number_svg_width} ${height_of_production_file})">`;
+  Object.entries(names_array).forEach(([key, value]) => {
+    height = 0;
+    value.forEach((item:Record<any,any>,index:number) => {
+      const svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.lastIndexOf("</svg>"));
+      svg_string +=`
+                     <g transform="matrix(${item.scaleX} 0 0 ${item.scaleY} ${width} ${height})">
+                        <g style="transform: rotate(${item.rotation})">${svg}</g>
+                     </g>
+                `;
+      original_width = parseFloat(item.original_width);
+      height += parseFloat(item.original_height) + 500;
+    })
+    width += original_width + 500;
+  })
+
+  svg_string += `</g>`
+
+  return {
+    svg_string:svg_string,
+    height:height,
+    width: width
+  };
+}
+
+const getSVGCommonItems = (common_array:Record<any,any>[],production_file_dimension:Record<any,any>,names_svg_width:number) => {
+  // let svg_string = '<?xml version="1.0" encoding="utf-8"?>\n' +
+  //   '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+  //   'viewBox="0 0 ' + 2000 + ' ' + 2000 + '"> \n';
+  const height_of_production_file = production_file_dimension.height? production_file_dimension.height.replace('px',''):6000;
+  let height = 0 ;
+  let width = 0 ;
+  let original_width = 0;
+  let svg_string = `<g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 ${names_svg_width} ${height_of_production_file})">`;
+  Object.entries(common_array).forEach(([key, value]) => {
+    value.forEach((item:Record<any,any>,index:number) => {
+      const svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.lastIndexOf("</svg>"));
+      svg_string +=`
+                     <g transform="matrix(${item.scaleX} 0 0 ${item.scaleY} ${width} ${height})">
+                        <g style="transform: rotate(${item.rotation})">${svg}</g>
+                     </g>
+                `;
+      original_width = parseFloat(item.original_width);
+      height += parseFloat(item.original_height) + 500;
+    })
+  })
+  width += original_width + 500;
+
+  svg_string += `</g>`
+
+  return {
+    svg_string:svg_string,
+    height:height,
+    width: width
+  };
+}
+
+
+
+const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string,production_file_dimension:Record<any,any>) => {
+  const height_of_production_file = production_file_dimension.height? production_file_dimension.height.replace('px',''):6000;
+  let svg_string = `<g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${height_of_production_file})">`;
+  let width = 0;
+  custom_logos.forEach((custom_logo:Record<any,any>, index:number) => {
+    const original_url = Object.prototype.hasOwnProperty.call(custom_logo,'original_png') && custom_logo.original_png;
+    const updated_url = original_url?custom_logo.original_url:custom_logo.url;
+    const has_base64 = Object.prototype.hasOwnProperty.call(custom_logo,'base_64')?true:false;
+    if(updated_url){
+      if(has_base64){
+        svg_string +=`
+                     <g transform="matrix(1 0 0 1 ${width} 1000)">
+                        <g style="transform: rotate(${custom_logo.rotation})">
+                            <image xlink:href="${custom_logo.base_64}" height="${(custom_logo.actualHeight * custom_logo.scaleY)/parseFloat(measurement_ratio)}px" width="${(custom_logo.actualWidth * custom_logo.scaleX)/parseFloat(measurement_ratio)}px"/>
+                        </g>
+                     </g>
+                `
+      }
+      else{
+        svg_string +=`
+                     <g transform="matrix(1 0 0 1 ${width} 1000)">
+                        <g style="transform: rotate(${custom_logo.rotation})">
+                            <image xlink:href="${process.env.VUE_APP_STORAGE_URL}${updated_url}" height="${(custom_logo.actualHeight * custom_logo.scaleY)/parseFloat(measurement_ratio)}px" width="${(custom_logo.actualWidth * custom_logo.scaleX)/parseFloat(measurement_ratio)}px"/>
+                        </g>
+                     </g>
+                `
+      }
+    }
+      if(Object.prototype.hasOwnProperty.call(custom_logo,'actualWidth')){
+        width += ((custom_logo.actualWidth * custom_logo.scaleX)/parseFloat(measurement_ratio)) + 500;
+      }
+      else{
+        width += 0;
+      }
+  });
+
+  svg_string += `</g>`
+
+  return {svg_string:svg_string,width:width};
+}
+
+const heightConvertionPx = (payload:Record<any,any>) =>{
+  switch(payload.value){
+    case "in":
+      return payload.height * 2.54 * 37.7952755906;
+    case "cm":
+      return payload.height * 37.7952755906;
   }
 }
 
@@ -1300,5 +1860,5 @@ export {
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
   getUploadedLogoObject, initCustomLogos, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, parseSvgString,fetchUrlContent,
-  unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData
+  unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,getSVGNumberArraysFromRoster,getSVGNumbers,getSVGNames,getSVGNameArraysFromRoster,getLogoSVG,parseSvgStringFile
 };
