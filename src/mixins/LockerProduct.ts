@@ -32,7 +32,6 @@ export class LockerProducts extends Vue {
 
       http.get(url).then(async (response: Record<any, any>) => {
         let active_product_detail = response.data.editing_product_detail;
-        console.log('active_product_detail', active_product_detail)
         //todo need to confirm this logic. I think it's have no effect
         if(active_product_detail.product_roster_detail) {
           self.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })

@@ -59,3 +59,23 @@ export class ProductFonts extends Vue {
     })
   }
 }
+
+@Component
+export class HideUpdateLockerButton extends Vue {
+  public async hideLockerProductUpdateButton(hide_update_btn = undefined) {
+    if(hide_update_btn != undefined) {
+      this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', hide_update_btn);
+    }
+    else {
+      const product_edit_info_obj = this.$store.getters.getProductEditInfoObject
+      const hide_locker_update_btn = this.$store.getters.getHideSaveLockerButton
+      if(product_edit_info_obj.type == 'locker_product' && hide_locker_update_btn == true) {
+        this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+      }
+      else {
+        if(hide_locker_update_btn == false)
+          this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
+      }
+    }
+  }
+}

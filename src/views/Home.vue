@@ -27,19 +27,18 @@
 <!--                    <template>-->
                       <template v-if="isCustomerAuthenticated">
                         <b-button :key="'lockerRoom'" v-if="lockers.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
-                      </template>
-                      <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
-                        <b-button :key="'updateLockerProduct'" variant="outline-secondary"
-                                  v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && hideSaveLockerButton == false"
-                                  @click="getLockers">
-                          Update to locker room
-                        </b-button>
-                        <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers(false, true)">
-                          Save to locker room
-                        </b-button>
-                      </template>
-                      <template v-else>
-                        <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                        <template v-if="getProductEditInfoObject.type == 'locker_product' && hideSaveLockerButton == false">
+                          <b-button :key="'updateLockerProduct'" variant="outline-secondary"
+                                    @click="getLockers">
+                            Save
+                          </b-button>
+                          <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers(false, true)">
+                            {{getProductEditInfoObject.type == 'locker_product' ? 'Save As' : 'Save to locker room'}}
+                          </b-button>
+                        </template>
+                        <template v-else>
+                          <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                        </template>
                       </template>
 
                       <template>
@@ -392,6 +391,7 @@ import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import { findIndex } from 'lodash'
 import opentype from 'opentype.js'
+import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -482,7 +482,8 @@ Vue.filter('formatDate', function(value:string) {
   // }
 })
 
-export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, ProductsQueryParamsMixin, exitEditMode, cartModalData) {
+export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
+  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton) {
   public products_fonts: Record<any, any> = []
   public logData = logData;
   public tabIndex = 0
@@ -865,7 +866,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let editProductInfo = this.getProductEditInfoObject;
     if(hidebtn && editProductInfo.editing && editProductInfo.type=='locker_product'){
       if(undo.length > 0 || redo.length > 0){
-        this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false)
+        this.hideLockerProductUpdateButton()
       }
     }
     return hidebtn
@@ -1129,7 +1130,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         let toast_type = "ERROR"
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
-        this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true)
+        this.hideLockerProductUpdateButton(true)
         // this.exitFromEditMode();
         // let query_params = await self.setQueryParams()
         // self.retrieveProducts(query_params)
@@ -1321,6 +1322,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if (ok) {
       this.$store.commit('RESET_LAST_ACTIVE_DATA')
       await self.exitFromEditMode()
+      this.hideLockerProductUpdateButton()
       // if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
       //   await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
       //   await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});

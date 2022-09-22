@@ -174,6 +174,7 @@ import ErrorMessages from '@/mixins/ErrorMessages';
 import {cartModalData} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import { rosterDefaultItem } from "@/helpers/Helpers";
+import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 
 
 @Component<RosterDetails>({
@@ -184,7 +185,7 @@ import { rosterDefaultItem } from "@/helpers/Helpers";
     this.fontsList()
   },
 })
-export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData) {
+export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData, HideUpdateLockerButton) {
   /* component props starts */
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: false}) lockerRosters: Record<any, any>[]
@@ -369,7 +370,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   }
 
   public close() {
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+    this.hideLockerProductUpdateButton()
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
     let self = this;
     let collection_view = self.$store.getters.getCollectionView;

@@ -139,7 +139,7 @@
 import { Component, Mixins, Prop, Watch, Vue } from 'vue-property-decorator'
 import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
-import { ProductColors, ProductFonts } from "@/mixins/SelectedProductMixin";
+import {HideUpdateLockerButton, ProductColors, ProductFonts} from "@/mixins/SelectedProductMixin";
 import {find, filter} from "lodash";
 
 
@@ -162,7 +162,7 @@ import {find, filter} from "lodash";
   }
 })
 
-export default class CustomizationText extends Mixins(ProductColors, ProductFonts) {
+export default class CustomizationText extends Mixins(ProductColors, ProductFonts, HideUpdateLockerButton) {
   /* component data properties goes here */
   public product_fonts: Record<any, any>[] = []
   public product_colors: Record<any, any>[] = []
@@ -209,7 +209,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   public handle_text_change_timer!: number
   handleCustomTextInputChange(updatedVal: string, custom_text_index: number) {
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+   this.hideLockerProductUpdateButton()
     clearTimeout (this.handle_text_change_timer);
     this.handle_text_change_timer = setTimeout(() => {
       let self:Record<any, any> = this;
@@ -238,7 +238,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   handleCustomTextCheckboxChange(updatedVal: string, custom_text_index: number, custom_text_item_index: number) {
     let self:Record<any, any> = this;
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+   this.hideLockerProductUpdateButton()
     let updated_custom_text = this.product_custom_texts[custom_text_index]
     let updated_custom_text_product_id = updated_custom_text.product_id
     let product_ids = [updated_custom_text_product_id, ...updated_custom_text.following_product_ids]
@@ -258,7 +258,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   customTextColorUpdated( custom_text_index: number, custom_text_item_index: number, color: Record<any, any>, type: string) {
     let self:Record<any, any> = this;
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+   this.hideLockerProductUpdateButton()
     if(type == "Fill Color") {
       self.product_custom_texts[custom_text_index].items[custom_text_item_index].color = color.value;
       self.product_custom_texts[custom_text_index].items[custom_text_item_index].color_pantone = color.name;
@@ -275,7 +275,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   handleCustomTextOutlineUpdate( outline_value: number, custom_text_index: number, custom_text_item_index: number) {
     let self:Record<any, any> = this;
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+   this.hideLockerProductUpdateButton()
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_width = outline_value;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextUpdated", {
@@ -285,7 +285,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   handleCustomTextPlacementUpdate( placement: number, custom_text_index: number, custom_text_item_index: number) {
     let self:Record<any, any> = this;
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+   this.hideLockerProductUpdateButton()
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].placement = placement;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextUpdated", {
@@ -294,7 +294,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   }
   handleCustomTextFontChange(custom_text_index: number, selected_font: string) {
     let self:Record<any, any> = this;
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+   this.hideLockerProductUpdateButton()
     self.product_custom_texts[custom_text_index].font_family = selected_font;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextUpdated", {
@@ -304,7 +304,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   addCustomText() {
     let self: Record<any, any> = this;
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+   this.hideLockerProductUpdateButton()
     let custom_text = find(self.product_custom_texts, ['is_first_name', true]);
     if(custom_text == undefined) {
       custom_text = find(self.product_custom_texts, ['is_first_number', true]);
@@ -316,7 +316,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   resetCustomTextObject(custom_text: Record<any, any>) {
     let self: Record<any, any> = this;
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+   this.hideLockerProductUpdateButton()
     let product_first_font = self.selectedProduct.namefonts.length > 0 ? self.selectedProduct.namefonts[0] : null;
     if(product_first_font) {
       self.default_font_obj = product_first_font.json_data.length > 0 ? product_first_font.json_data[0] : null;
@@ -351,7 +351,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   //todo when removed custom text then that should also be removed from customizer
   removeCustomText(custom_text_index: number) {
     let self: Record<any, any> = this;
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+   this.hideLockerProductUpdateButton()
     self.$store.commit('REMOVE_CUSTOM_TEXT', custom_text_index)
     self.$eventBus.$emit("customTextRemoved", custom_text_index);
   }

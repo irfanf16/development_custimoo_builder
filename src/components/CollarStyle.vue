@@ -49,15 +49,16 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Prop, Vue, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import moment from "moment";
 import {findIndex} from "lodash";
+import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
     @Component<CollarStyle>({
 
     })
 
-    export default class CollarStyle extends Vue {
+    export default class CollarStyle extends Mixins(HideUpdateLockerButton) {
       private storageUrl = process.env.VUE_APP_STORAGE_URL
       private viewPrices = false
       private items = [
@@ -111,7 +112,7 @@ import {findIndex} from "lodash";
               Vue.set(item, 'design_show', 0)
             }
           })
-          this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+          this.hideLockerProductUpdateButton(true)
           if (!designFound){
             if(!this.selectedProduct.productstyles[i].productdesigns.filter((design: Record<any, any>) => design.design_show).length) {
               this.selectedProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{
