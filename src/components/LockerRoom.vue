@@ -38,8 +38,8 @@
 
                             <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                             <template v-if="room.active_tab">
-                              <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
-                              <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${product.product_url}?q=${product.random_string}`" :class="product.product_url+'tesss' ? '' : 'placeholder'" alt="">
+                              <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                              <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
                             </template>
 
                           </div>
@@ -166,7 +166,7 @@
                           <div class="convas_container" :key="collection_product_index"
                                v-for="(collection_product,collection_product_index) in collection.collection_products">
                             <template v-if="collection_product_index < 3">
-                              <img :src="collection_product.product_locker_room.product_url"
+                              <img :src="storageUrl+collection_product.product_locker_room.product_url"
                                    :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'"
                                    alt="">
                             </template>

@@ -910,6 +910,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get customerPermissions(){
     return this.$store.getters.getCustomerPermissions
   }
+  get is_safari(): boolean {
+    return this.$store.getters.getIsSafari
+  }
   public dropdownStyle = { } as any
   public down = false
   public notificationsDropDown(){
@@ -934,10 +937,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             let fontNameParam = font.path.split('/').reverse()
             fontNameParam = fontNameParam[0].split('.')
             const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-            let url =`${process.env.VUE_APP_STORAGE_URL}${font.path}`
-            if(process.env.NODE_ENV != 'development') {
-                url += `?num=${getRandom()}`
-            }
+            const url = this.storageUrl + font.path + '?nocache=' + (this.is_safari? getRandom(3) : '11')
+
             if(!this.products_fonts[fontNameParam[0]]) {
               const font_object = await this.loadFont(url)
               if(font_object) {
