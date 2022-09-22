@@ -72,9 +72,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
 
   public loadIt($event:Record<any, any>) {
     $event.stopPropagation()
-
-    console.dir($event);
-
+    
     let designHt = 10
     if(designHt <= $event.target.scrollTop){
       this.loadDesigns = true

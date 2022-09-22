@@ -39,7 +39,7 @@
         </b-nav-item>
         <b-nav-item  v-if="selectedProduct.is_custom_color_allowed" @click="selectType(null, true)">Others</b-nav-item>
       </b-nav>
-      <div class="color-holder">
+      <div class="color-holder" ref="color-holder2">
         <div class="color-container">
           <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
             <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
