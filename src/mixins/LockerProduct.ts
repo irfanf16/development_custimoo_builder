@@ -233,6 +233,13 @@ export class handleMainProducts extends Vue {
 
       //If we are editing locker product then set the locker product data and return
       if(self.is_shared_product  || product_edit_info_object.type == "locker_product") {
+       if(self.is_shared_product) {
+         if(editing_product_detail.product_roster_detail) {
+           self.$store.dispatch('setProductsRosters', {product_id: editing_product_detail.product_id, roster_data: editing_product_detail.product_roster_detail })
+         } else {
+           this.$store.dispatch("setProductsRosters");
+         }
+       }
         //if editing product detail not found then probably that locker product has been deleted or not found for some reason
         if(editing_product_detail) {
           await self.setLockerProductData(editing_product_detail)
