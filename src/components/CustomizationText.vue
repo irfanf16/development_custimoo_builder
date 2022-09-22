@@ -75,7 +75,7 @@
                                 <template slot="title">
                                   {{product_color.name}}
                                 </template>
-                                <div class="color-holder">
+                                <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">
                                     <div class="color-box" v-for="(color, colorIndex) in product_color.colors" :style="{background: color.value}"
                                         :key="`product_color_${productColorIndex}_${product_color.type}_type_color_${colorIndex}`" :title="color.name"
@@ -150,6 +150,7 @@ import {find, filter} from "lodash";
   },
   async mounted() {
     let self: Record<any, any> = this;
+    
     await self.productFonts()
     self.product_colors = await self.productColors()
   },
@@ -170,6 +171,9 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   /* component props goes here */
 
+  public bindScroll($event:Record<any, any>){
+    $event.stopPropagation()
+  }
 
   /* component getters/computed properties goes here */
 

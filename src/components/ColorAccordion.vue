@@ -17,7 +17,7 @@
             <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
             <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
-          <div class="color-holder">
+          <div class="color-holder" ref="ColorAccordion">
             <div class="color-container">
               <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
@@ -66,6 +66,13 @@ import {getSelectedProductPantones} from "@/helpers/Helpers";
     }
   },
   mounted(){
+    // this.$refs['ColorAccordion'] && (this.$refs['ColorAccordion'] as Record<any, any>).forEach((item:any, index:number)=>{
+    //   console.log('item', item);
+    //   item.addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});
+    //   item.addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});
+    //   item.addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()});
+    // });
+    
     setTimeout(() => {
     this.selectType(this.selectTypeIndex)
     }, 300)
