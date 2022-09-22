@@ -2,7 +2,7 @@ import Store from '../store'
 import rgbHex from "rgb-hex";
 import {getClosestColor} from "@/pantoneColor";
 import {default as $} from "jquery";
-import Axios, {AxiosError} from "axios";
+import {AxiosError} from "axios";
 import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
@@ -863,12 +863,13 @@ const getPermissions = async () => {
   }
 }
 
-const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[]) => {
-  const product_texts = Store.getters.getCustomTexts(true)
+const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[], reset=false) => {
+  const last_active_product_custom_texts = Store.getters.getLastActiveProductData['product_custom_texts']
   const retrieved_products_custom_texts = retrieved_products.map((retrieved_product: Record<any, any>) => {
-    if(retrieved_product.product_texts && !(product_texts[retrieved_product.id] && product_texts[retrieved_product.id].map((product_text: Record<any, any>) => product_text.value).length)) {
-      return JSON.parse(JSON.stringify(retrieved_product.product_texts)) //remove two-way binding for reset function
-    }
+    if(reset)
+      return retrieved_product.product_texts
+    const product_id = retrieved_product.id;
+    return last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
   })
   Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
 }

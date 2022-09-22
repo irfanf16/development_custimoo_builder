@@ -145,21 +145,27 @@ import {find} from "lodash";
       function handleFabricCustomTextRemoved(target: Record<any, any>) {
         let custom_text_index = target.custom_text_index;
         let custom_text_item_index = target.custom_text_item_index
-        let all_products_custom_texts  = JSON.parse(JSON.stringify(self.allProductsCustomTexts))
-        let product_custom_texts: Record<any, any> = all_products_custom_texts[self.selectedProductId];
-        let removed_custom_text = product_custom_texts[custom_text_index]
-        removed_custom_text.items[custom_text_item_index].selected = false
-        /*
-        * check if there is any active item if not then remove the value of custom text
-        * */
-        let custom_text_active_item = find(removed_custom_text.items, ['selected', true])
-        if(custom_text_active_item == undefined ) {
-          removed_custom_text.value = '';
-        }
-
-        self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: removed_custom_text})
+        const selected_product_id = self.selectedProductId
+        let product_ids = [selected_product_id, ...self.allProductsCustomTexts[self.selectedProductId][custom_text_index].following_product_ids]
+        product_ids.forEach((product_id) => {
+          console.log('self.allProductsCustomTexts', product_id, custom_text_index, self.allProductsCustomTexts)
+          const removed_custom_text = self.allProductsCustomTexts[product_id][custom_text_index];
+          if(removed_custom_text) {
+            const removed_custom_text_items = removed_custom_text.items;
+            if(removed_custom_text_items[custom_text_item_index]) {
+              removed_custom_text_items[custom_text_item_index].selected = false
+              //check if there is any active item if not then remove the value of custom text
+              let custom_text_active_item = find(removed_custom_text_items, ['selected', true])
+              if(custom_text_active_item == undefined ) {
+                removed_custom_text.value = '';
+              }
+            }
+            self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: product_id, value: removed_custom_text})
+          }
+        })
         self.$eventBus.$emit("customTextUpdated", {
-          emitter: "checkbox", custom_text_index:custom_text_index, custom_text_item_index: null, value: removed_custom_text
+          emitter: "checkbox", custom_text_index:custom_text_index, custom_text_item_index: null,
+          value: self.allProductsCustomTexts[selected_product_id][custom_text_index]
         });
       }
 
@@ -1818,7 +1824,6 @@ export default class Scene extends Vue {
 
   public async addTextsNew(custom_text_info: Record<any, any>) {
     const self: Record<any, any> = this
-    this.allProductsCustomTexts[this.product_id]?.[custom_text_info.custom_text_index];
     await this.syncCustomTextsWithCustomTextsObjects()
     if(custom_text_info.emitter == 'add_button') {
       /* in case of add button we just need to execute method syncCustomTextsWithCustomTextsObjects() that's why returning here  */
@@ -1827,7 +1832,8 @@ export default class Scene extends Vue {
     let fabric_control_visibility = { tl: false, bl: false, tr: true, br: true, ml: false, mb: false, mr: false, mt: false, mtr: false }
     const custom_text_index = custom_text_info.custom_text_index;
     self.product_custom_texts[custom_text_index] = custom_text_info.value;
-    let custom_text = self.product_custom_texts[custom_text_index];
+    // let custom_text = self.product_custom_texts[custom_text_index];
+    let custom_text = this.allProductsCustomTexts[this.product_id][custom_text_index];
     let add_custom_text = await this.isCustomTextAllowed(custom_text_index);
     if(add_custom_text) {
       let render_front_canvas = false;
@@ -1836,7 +1842,7 @@ export default class Scene extends Vue {
        * delete existing texts first and re render them
        * */
       if (self.product_custom_text_objects[custom_text_index]) {
-        await self.deleteExistingTextsFromCanvas(custom_text_index, false)
+        await this.deleteExistingTextsFromCanvas(custom_text_index, false)
       }
 
       if (custom_text.value) {
@@ -1944,7 +1950,7 @@ export default class Scene extends Vue {
               fontFamily: custom_text_item.font_family,
               fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
               fill: custom_text_item.color,
-              stroke: custom_text.outLineColor,
+              stroke: custom_text_item.outline_color,
               strokeWidth: parseInt(custom_text_item.outline_width),
               paintFirst: 'stroke',
               lockScalingFlip: true,

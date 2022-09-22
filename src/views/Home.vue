@@ -29,12 +29,16 @@
                         <b-button :key="'lockerRoom'" v-if="lockers.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                       </template>
                       <template v-if="isCustomerAuthenticated && !hideSaveLockerButton">
-                        <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers">
-                          <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'">Update to locker room</template>
-                          <template v-else>Save to locker room</template>
+                        <b-button :key="'updateLockerProduct'" variant="outline-secondary"
+                                  v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && hideSaveLockerButton == false"
+                                  @click="getLockers">
+                          Update to locker room
+                        </b-button>
+                        <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers(false, true)">
+                          Save to locker room
                         </b-button>
                       </template>
-                      <template v-else-if="undoItems.length > 0 || redoitems.length > 0">
+                      <template v-else>
                         <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                       </template>
 
@@ -93,7 +97,7 @@
 
                     </li>
                     <li><a>
-                      <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']"/>
+                      <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']" title="Reset to default"/>
                     </a></li>
                     <li v-if="isCustomerAuthenticated">
                       <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
@@ -929,7 +933,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             let fontNameParam = font.path.split('/').reverse()
             fontNameParam = fontNameParam[0].split('.')
             const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-            const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}?num=${getRandom()}`
+            let url =`${process.env.VUE_APP_STORAGE_URL}${font.path}`
+            if(process.env.NODE_ENV != 'development') {
+                url += `?num=${getRandom()}`
+            }
             if(!this.products_fonts[fontNameParam[0]]) {
               const font_object = await this.loadFont(url)
               if(font_object) {
@@ -1070,11 +1077,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.retrieveProducts();
   }
 
-  public async getLockers(share_url = false){
+  public async getLockers(share_url = false, show_add_to_locker_modal = false){
     let self:Record<any, any> = this;
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
-    if (!this.getProductEditInfoObject.editing){
+    if (show_add_to_locker_modal){
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
       return
     }
@@ -1082,9 +1089,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
-    // if (this.$store.getters.getEditDesignId != currentDesign[0].id || this.$store.getters.getEditStyleId != this.selectedProduct.productstyles[this.styleIndex].id){
-    //   this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0})
-    // }
     let main_scene = this.ref.mainScene[0];
     main_scene.frontCanvas.discardActiveObject().renderAll();
     main_scene.backCanvas.discardActiveObject().renderAll();
@@ -1125,9 +1129,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         let toast_type = "ERROR"
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
-        this.exitFromEditMode();
-        let query_params = await self.setQueryParams()
-        self.retrieveProducts(query_params)
+        this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true)
+        // this.exitFromEditMode();
+        // let query_params = await self.setQueryParams()
+        // self.retrieveProducts(query_params)
       }).catch(async errorResponse => {
         handleResponseException(errorResponse)
         self.exitFromEditMode();
@@ -1314,11 +1319,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const ok = await this.ref['reset-changes'].showConfirm()
 
     if (ok) {
-      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-        design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
-        page_no: 1, customized: true, personalized: false, custom_texts: [], custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
-        roster_detail: [],
-      })
+      this.$store.commit('RESET_LAST_ACTIVE_DATA')
       await self.exitFromEditMode()
       // if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
       //   await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
