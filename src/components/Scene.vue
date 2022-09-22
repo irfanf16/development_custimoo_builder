@@ -21,8 +21,9 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
+import { getRandom, getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
 import {find} from "lodash";
+import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 
 @Component<Scene>({
   async mounted() {
@@ -190,7 +191,7 @@ import {find} from "lodash";
   }
 })
 
-export default class Scene extends Vue {
+export default class Scene extends Mixins(HideUpdateLockerButton) {
   @Prop({ required: true }) readonly front!: Record<string, unknown>;
   @Prop({ required: false }) readonly back!: Record<string, unknown>;
   @Prop({ required: false }) readonly backTextureUrl!: string;
@@ -904,6 +905,7 @@ export default class Scene extends Vue {
         }
         this.drawLines = false
         this.addToOtherSide(e.target, side)
+        this.hideLockerProductUpdateButton()
       })
 
       let ctx = canvas.getSelectionContext()
@@ -1541,7 +1543,7 @@ export default class Scene extends Vue {
 
   public async addModel(modelUrl: string, side: string) {
     return new Promise((resolve, reject) => {
-      fabric.Image.fromURL(modelUrl + '?nocache=1', async (img: any) => {
+      fabric.Image.fromURL(modelUrl + '?nocache=2', async (img: any) => {
         if(img.width > img.height) {
           img.scaleToWidth(this.canvasWidth - 10)
         } else {
@@ -1601,7 +1603,7 @@ export default class Scene extends Vue {
           resolve('done')
         })
       } else {
-        fabric.Image.fromURL(textureUrl + '?nocache=1', async (img: any) => {
+        fabric.Image.fromURL(textureUrl + '?nocache=2', async (img: any) => {
           if(img.width > img.height) {
             img.scaleToWidth(this.canvasWidth - 10)
           } else {
@@ -1645,7 +1647,7 @@ export default class Scene extends Vue {
       }
       logo.haveControls = Boolean(logo.haveControls)
       let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
-      fabric.Image.fromURL(logoUrl + '?nocache=' + Math.random().toString(36).slice(2, -1), async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
+      fabric.Image.fromURL(logoUrl + '?nocache=' + getRandom(2), async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
         img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
         img.set({
           left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,

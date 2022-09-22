@@ -27,13 +27,13 @@
 <!--                    <template>-->
                       <template v-if="isCustomerAuthenticated">
                         <b-button :key="'lockerRoom'" v-if="lockers.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
-                        <template v-if="getProductEditInfoObject.type == 'locker_product' && hideSaveLockerButton == false">
-                          <b-button :key="'updateLockerProduct'" variant="outline-secondary"
+                        <template v-if="getProductEditInfoObject.type == 'locker_product'">
+                          <b-button :key="'updateLockerProduct'" variant="outline-secondary" v-if="hideSaveLockerButton == false"
                                     @click="getLockers">
                             Save
                           </b-button>
                           <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers(false, true)">
-                            {{getProductEditInfoObject.type == 'locker_product' ? 'Save As' : 'Save to locker room'}}
+                           Save As
                           </b-button>
                         </template>
                         <template v-else>
