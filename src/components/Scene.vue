@@ -466,7 +466,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
       })
       otherSideObject.scaleX = item.scaleX * multiplyBy
       otherSideObject.scaleY = item.scaleY * multiplyBy
-      otherSideObject.rotate(item.rotation as number)
+      otherSideObject.rotate(-item.rotation as number)
     }
 
     object.setCoords()
@@ -1404,7 +1404,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           }
           otherSideObjects[addIndex].scaleX = target.scaleX
           otherSideObjects[addIndex].scaleY = target.scaleY
-          otherSideObjects[addIndex].angle = - target.angle
+          otherSideObjects[addIndex].angle = -target.angle
 
           if (side == 'back') {
             this.frontCanvas.renderAll()
@@ -1419,9 +1419,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             objectAdd.flipX = true
             objectAdd.flipY = true
           }
-          objectAdd.angle = - objectAdd.angle
           objectAdd.left = addLeft
           objectAdd.top = addTop
+          objectAdd.angle = -objectAdd.angle
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
