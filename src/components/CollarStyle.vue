@@ -1,5 +1,5 @@
 <template>
-    <b-tabs :class="{'have-scroll': productModels.length > 5}">
+    <b-tabs :class="{'have-scroll': productModels && productModels.length > 5, 'only-style': productModels && productModels.length == 1}">
         <b-tab v-for="(model, index)  in productModels" :key="index" @click="selectModelStyle(index)">
             <template #title>
               <span v-html="model.model_name.replaceAll(' ', '<br>')"></span>
@@ -10,7 +10,7 @@
                     <h3>{{ model.model_name }}</h3>
                     <div v-html="model.product_model_description"></div>
                 </div>
-              <div v-if="selectedProduct.productstyles.length > 1 && company.platform == 'wordpress'" class="choose-collar mb-3">
+              <div v-if="false && selectedProduct.productstyles.length > 1 && company.platform == 'wordpress'" class="choose-collar mb-3">
                 <h2 class="fw-bold mb-2 fz-18 d-flex justify-content-between">
                   <span>Price from 350DK</span>
                   <span class="cursor-pointer theme-color text-underline" @click="()=>viewPrices = true" v-if="!viewPrices"><span class="fs-2">View all prices</span></span>

@@ -1187,6 +1187,17 @@ button {
             max-width: inherit;
         }
 
+        .only-style{
+            &>div{
+                padding: 0 !important;
+                margin: 0 !important;
+
+                .nav-tabs{
+                    display: none;
+                }
+            }
+        }
+
         .nav-tabs {
             padding: 0;
             border: none;
@@ -1227,6 +1238,10 @@ button {
                 justify-content: center;
                 color: #000;
                 margin-bottom: 10px;
+
+                &:only-child{
+                    display: none;
+                }
 
                 &:hover {
                     background: none;
