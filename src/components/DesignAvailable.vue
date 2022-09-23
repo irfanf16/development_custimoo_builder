@@ -1,13 +1,13 @@
 <template>
   <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
-    <template v-if="selectedProduct.productstyles[selected_style_index]">
-      <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[selected_style_index].productdesigns" :key="design.id">
+    <template v-if="selectedProduct.productstyles[styleIndex]">
+      <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id">
         <a @click="changeDesign(index); showPreview()" v-if="index < 12 || loadDesigns">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
-                 :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[selected_style_index].front? storageUrl+selectedProduct.productstyles[selected_style_index].front.file_thumbnail_url : ''}"
+                 :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_thumbnail_url : ''}"
                  :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
                  :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
-                 :logos="selectedProduct.productstyles[selected_style_index].logo"
+                 :logos="selectedProduct.productstyles[styleIndex].logo"
                  :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                  :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)"
                  :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
@@ -28,10 +28,6 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
     Scene
   },
   mounted() {
-    if(this.selectedProduct.productstyles[this.getLastActiveProductData.style_index]) {
-      this.selected_style_index = this.getLastActiveProductData.style_index
-    }
-
     (this.$refs['designs'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
     (this.$refs['designs'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{this.loadIt($event)});
     (this.$refs['designs'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{this.loadIt($event)});
@@ -48,7 +44,6 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   @Prop() activeTab!: number;
-  public selected_style_index = 0;
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   get manageComponents(): Record<any, any> {
@@ -72,7 +67,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
 
   public loadIt($event:Record<any, any>) {
     $event.stopPropagation()
-    
+
     let designHt = 10
     if(designHt <= $event.target.scrollTop){
       this.loadDesigns = true
@@ -84,12 +79,13 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
   public changeDesign(index: number) {
     let self: Record<any, any> = this;
     this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {
-      design_index: index, design_id: this.selectedProduct.productstyles[self.selected_style_index].productdesigns[index].id
+      design_index: index, design_id: this.selectedProduct.productstyles[this.styleIndex].productdesigns[index].id
     })
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     this.$store.dispatch('setActiveTab', -1)
     this.$store.commit('SET_SUFFLE', false)
-    this.selectedProduct.productstyles[self.selected_style_index].productdesigns.forEach((design: any, key: number) => {
+    console.log(self.styleIndex, ' style index design index ', index)
+    this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {
         Vue.set(design, 'design_show', 1)
         this.$store.dispatch('setSelectedProductDesignID',design.id);
