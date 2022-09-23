@@ -66,7 +66,7 @@
                         </a>
                       </div>
                     </div>
-                    <img class="w-100" :src="product.product_url" alt="">
+                    <img class="w-100" :src="storageUrl+product.product_url" alt="">
                   </div>
                 </div>
                 <div class="d-none d-lg-block product-description text-center">
@@ -112,6 +112,7 @@ import ModalAction from "@/mixins/ModalAction";
           this.tabIndex = 0
         }
       }
+      private storageUrl = process.env.VUE_APP_STORAGE_URL
       public showLoader = false
       private baseUrl = location.host+"/#/"
       public room_id = this.lockers.length? this.lockers[0].id : 0

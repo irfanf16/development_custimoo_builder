@@ -32,13 +32,16 @@
                                     @click="getLockers">
                             Save
                           </b-button>
-                          <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers(false, true)">
+                          <b-button :key="'savetolocker'" variant="outline-secondary" @click="getLockers(false, true)">
                            Save As
                           </b-button>
                         </template>
                         <template v-else>
-                          <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                          <b-button @click="getLockers(false, true)" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                         </template>
+                      </template>
+                      <template v-else>
+                        <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
                       </template>
 
                       <template>
