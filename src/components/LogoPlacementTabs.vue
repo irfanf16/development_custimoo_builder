@@ -1,9 +1,13 @@
 <template>
   <div v-if="selectedProduct">
-    <div class="text-right px-1 pt-1" :class="{'rotateArrow': !expandLogoButtons}">
+    <div class="d-flex align-items-center justify-content-between px-1 pt-1" :class="{'rotateArrow': !expandLogoButtons}">
+      <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
+        <BIconPlus />
+      </b-button>
+
       <b-icon-chevron-down class="cursor-pointer" @click="()=>expandLogoButtons = !expandLogoButtons" style="font-size: larger; transition: 0.3s ease all;" />
     </div>
-    <b-tabs :class="{'collapseButtons': expandLogoButtons}">
+    <b-tabs :class="{'collapseButtons': expandLogoButtons}" ref="collapseButtons">
       <b-tab v-for="(logo_tab, ltIdx) in customLogos" :key="ltIdx" :active="tabIndex === ltIdx" @click="changeTab(ltIdx)">
         <template #title>
           <span>{{ ltIdx == 0 ? 'Team Logo' : 'logo ' + ltIdx }}</span>
@@ -77,7 +81,7 @@
         </div>
         <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
       </b-tab>
-      <template #tabs-end>
+      <template #tabs-end v-if="!expandLogoButtons">
         <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
           <BIconPlus />
         </b-button>
@@ -106,6 +110,7 @@ import { setLogoSettings, getCustomLogos,} from "../helpers/Helpers"
 
   },
   async mounted() {
+    
     this.$root.$on('changeLogoTabIndex', (index:number) => {
       // here you need to use the arrow function
       this.tabIndex = index;
@@ -521,6 +526,13 @@ export default class LogoPlacementTabs extends Vue {
     }
   }
 }
+
+.customization-tabs{
+  .tabs-logo-container{
+    padding-bottom: 0;
+  }
+}
+
 .nav-tabs {
   .nav-item {
     .nav-link {

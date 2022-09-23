@@ -7,7 +7,7 @@
           <span class="color">
             <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
             <span class="color-pantone-name">{{ svgElement.pantone }}<span style="text-transform: uppercase; display: block">{{ svgElement.name }}</span><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
-          </span>   
+          </span>
           <span class="accordion-icon"></span>
         </b-button>
       </b-card-header>
@@ -72,7 +72,7 @@ import {getSelectedProductPantones} from "@/helpers/Helpers";
     //   item.addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});
     //   item.addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()});
     // });
-    
+
     setTimeout(() => {
     this.selectType(this.selectTypeIndex)
     }, 300)
