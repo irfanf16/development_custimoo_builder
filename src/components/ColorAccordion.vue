@@ -1,13 +1,13 @@
 <template>
-  <div class="accordion" role="tablist">
+  <div class="accordion color-accordion" role="tablist">
     <b-card no-body v-for="(svgElement, index) in svgGroups" :key="index">
       <b-card-header header-tag="header" class="p-0" role="tab">
-        <b-button block v-b-toggle="'accordion-'+(index+1)" class="p-3" @click="showColor(index)">
+        <b-button block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index)">
           <span class="text">{{ svgElement.id | capitalize }}</span>
           <span class="color">
             <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
             <span class="color-pantone-name">{{ svgElement.pantone }}<span style="text-transform: uppercase; display: block">{{ svgElement.name }}</span><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
-          </span>   
+          </span>
           <span class="accordion-icon"></span>
         </b-button>
       </b-card-header>
@@ -72,7 +72,7 @@ import {getSelectedProductPantones} from "@/helpers/Helpers";
     //   item.addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});
     //   item.addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()});
     // });
-    
+
     setTimeout(() => {
     this.selectType(this.selectTypeIndex)
     }, 300)
