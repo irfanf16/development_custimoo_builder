@@ -234,6 +234,16 @@ import ModalAction from "@/mixins/ModalAction";
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
           if (res.status == 201){
+            let is_customized = this.$store.getters.getCustomized
+            let is_personalized = this.$store.getters.getPersonalized
+
+            this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
+              editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
+              locker_product_info: { product_id: locker.product_id, locker_product_id: res.data.data.product_locker_id, style_id: locker.style_id,
+                design_id: locker.design_id},
+              cart_product_info: null, order_product_info: null
+            })
+
             if (this.rosterUrl){
               this.$root.$emit('rostershared', res.data.data.roster_shared_url)
             }

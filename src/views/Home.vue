@@ -37,11 +37,11 @@
                           </b-button>
                         </template>
                         <template v-else>
-                          <b-button @click="getLockers(false, true)" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                          <b-button @click="getLockers(false, true)" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save As</b-button>
                         </template>
                       </template>
                       <template v-else>
-                        <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                        <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save As</b-button>
                       </template>
 
                       <template>
@@ -974,7 +974,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
-      console.log('in open locker room')
       this.getLockerRoomProducts(null)
       this.showVModal('locker-modal')
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
