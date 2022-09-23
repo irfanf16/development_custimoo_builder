@@ -242,9 +242,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     // self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id: null});
     if(retrieve_products) {
       await resetLastActiveProductData()
-      console.log("before new val", eval(prd_type))
       eval(`${prd_type}=${new_val}`)
-      console.log("after new val", eval(prd_type))
       await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
       //exit from edit mode
       await this.exitFromEditMode()

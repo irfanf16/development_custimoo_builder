@@ -2,7 +2,7 @@
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
-        <div class="myscroll">
+        <div class="myscroll" ref="myscroll">
           <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
@@ -142,6 +142,10 @@ import RecentLogos from "@/components/RecentLogos.vue";
     UploadLogo,
   },
   mounted() {
+    (this.$refs['myscroll'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});
+    (this.$refs['myscroll'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});
+    (this.$refs['myscroll'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()});
+
     this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
     this.fontsColorsManipulation()

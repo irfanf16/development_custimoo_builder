@@ -13,7 +13,7 @@
     </div>
     <div id="color-picker" v-if="colorPickerActive">
       <transition name="list">
-        <div class="color-holder">
+        <div class="color-holder" ref="color-holder">
           <div class="color-header">
             <h3>{{ defaultColors[selectColorIndex].name }}</h3>
             <a @click="colorPickerActive = false" class="close">
@@ -56,7 +56,12 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
         this.colorPickerActive = false
       }
     })
-  }
+  },
+  mounted() {
+    // (this.$refs['color-holder'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});
+    // (this.$refs['color-holder'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});
+    // (this.$refs['color-holder'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()});
+  },
 })
 
 export default class ChooseColor extends Vue {

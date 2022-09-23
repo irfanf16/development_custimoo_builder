@@ -21,8 +21,9 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
+import { getRandom, getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
 import {find} from "lodash";
+import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 
 @Component<Scene>({
   async mounted() {
@@ -190,7 +191,7 @@ import {find} from "lodash";
   }
 })
 
-export default class Scene extends Vue {
+export default class Scene extends Mixins(HideUpdateLockerButton) {
   @Prop({ required: true }) readonly front!: Record<string, unknown>;
   @Prop({ required: false }) readonly back!: Record<string, unknown>;
   @Prop({ required: false }) readonly backTextureUrl!: string;
@@ -286,7 +287,6 @@ export default class Scene extends Vue {
     return this.$store.getters.getGroupColors
   }
 
-
   get productEditInfoObject(): Record<any, any> {
     return this.$store.getters.getProductEditInfoObject
   }
@@ -305,6 +305,10 @@ export default class Scene extends Vue {
 
   get allProductsCustomTexts(): Record<any, any> {
     return this.$store.getters.productCustomTexts()
+  }
+
+  get is_safari(): boolean {
+    return this.$store.getters.getIsSafari
   }
 
   @Watch('customLogos', {
@@ -904,6 +908,7 @@ export default class Scene extends Vue {
         }
         this.drawLines = false
         this.addToOtherSide(e.target, side)
+        this.hideLockerProductUpdateButton()
       })
 
       let ctx = canvas.getSelectionContext()
@@ -1262,18 +1267,19 @@ export default class Scene extends Vue {
     this.showDimensions(e, dimText)
   }
 
-  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string): Record<any, any> {
+  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string, max_call = 600): Record<any, any> {
     let pointXCompare = pointX + (width * scaleX / 4)
     if(moveTo == 'left') {
       pointXCompare = pointX - (width * scaleX / 4)
     }
-    if(canvas.isTargetTransparent(model, pointXCompare, pointY)) {
+    max_call--
+    if(canvas.isTargetTransparent(model, pointXCompare, pointY) && max_call > 0) { // add a max call condition to avoid unlimited recursive calls and max_call value 600 as the max canvas size
       if(moveTo == 'left') {
         pointX = pointX - 1
       } else {
         pointX = pointX + 1
       }
-      return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo)
+      return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo, max_call)
     } else {
       return {left: pointX, top: pointY}
     }
@@ -1541,7 +1547,7 @@ export default class Scene extends Vue {
 
   public async addModel(modelUrl: string, side: string) {
     return new Promise((resolve, reject) => {
-      fabric.Image.fromURL(modelUrl + '?nocache=1', async (img: any) => {
+      fabric.Image.fromURL(modelUrl + '?nocache=2', async (img: any) => {
         if(img.width > img.height) {
           img.scaleToWidth(this.canvasWidth - 10)
         } else {
@@ -1601,7 +1607,7 @@ export default class Scene extends Vue {
           resolve('done')
         })
       } else {
-        fabric.Image.fromURL(textureUrl + '?nocache=1', async (img: any) => {
+        fabric.Image.fromURL(textureUrl + '?nocache=2', async (img: any) => {
           if(img.width > img.height) {
             img.scaleToWidth(this.canvasWidth - 10)
           } else {
@@ -1644,8 +1650,8 @@ export default class Scene extends Vue {
         this.customLogoObjects[logoIndex as number] = true
       }
       logo.haveControls = Boolean(logo.haveControls)
-      let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
-      fabric.Image.fromURL(logoUrl + '?nocache=' + Math.random().toString(36).slice(2, -1), async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
+      let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari? getRandom(3) : '11')
+      fabric.Image.fromURL(logoUrl, async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
         img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
         img.set({
           left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,

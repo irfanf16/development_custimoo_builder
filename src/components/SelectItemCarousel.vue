@@ -26,6 +26,7 @@ import SlitherSlider from 'slither-slider';
 import Scene from '@/components/Scene.vue'
 import {http} from "@/httpCommon";
 import {handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
+import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 
 Vue.use(SlitherSlider)
 
@@ -40,7 +41,7 @@ Vue.use(SlitherSlider)
 })
 
 
-export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode) {
+export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode, HideUpdateLockerButton) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
@@ -74,7 +75,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);
     this.$store.dispatch("getModels", this.products[index].product_id);
     this.$store.dispatch('setColorSectionVisibility')
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false)
+    this.hideLockerProductUpdateButton()
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0,});
     (this.$parent.$parent as Record<any, any>).adjustTotalTabs()
     let design_index = null;

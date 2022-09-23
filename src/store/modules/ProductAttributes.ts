@@ -94,7 +94,7 @@ const ProductAttributes:Module<any, any> = {
       cartItemId: ''
     },
     revertRosterBool:false,
-    hideSaveLockerButton: false,
+    hideSaveLockerButton: true,
     product_custom_texts: {},
     //could be locker_product, cart_product, order_product
     product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null},

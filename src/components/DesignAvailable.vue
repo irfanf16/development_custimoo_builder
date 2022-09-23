@@ -19,8 +19,9 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Prop, Vue, Mixins} from 'vue-property-decorator'
 import Scene from '@/components/Scene.vue'
+import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 
 @Component<DesignAvailable>({
   components: {
@@ -42,7 +43,7 @@ import Scene from '@/components/Scene.vue'
   }
 })
 
-export default class DesignAvailable extends Vue {
+export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
@@ -72,8 +73,6 @@ export default class DesignAvailable extends Vue {
   public loadIt($event:Record<any, any>) {
     $event.stopPropagation()
     
-    console.dir($event);
-    
     let designHt = 10
     if(designHt <= $event.target.scrollTop){
       this.loadDesigns = true
@@ -98,7 +97,7 @@ export default class DesignAvailable extends Vue {
         Vue.set(design, 'design_show', 0)
       }
     })
-    this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+    this.hideLockerProductUpdateButton()
   }
 
   public showPreview() {

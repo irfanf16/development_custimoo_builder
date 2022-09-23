@@ -4,6 +4,7 @@ import { Module } from "vuex";
 const mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 const Main:Module<any, any> = {
   state: {
+    isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
     manageComponents: {
       mobileScreen: mobileScreen,
       CustomizationPreview: !mobileScreen,
@@ -56,6 +57,9 @@ const Main:Module<any, any> = {
     },
     getPopperID : state => {
       return state.popperID
+    },
+    getIsSafari: state => {
+      return state.isSafari
     }
   },
   actions: {
