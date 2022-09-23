@@ -524,7 +524,9 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     text_color_info['pantone'] = custom_text_item.color_pantone
 
                     path.fill = custom_text_item.color
-                    path.stroke = custom_text_item.outline_color
+                    if(parseInt(custom_text_item.outline_width) > 0){
+                      path.stroke = custom_text_item.outline_color
+                    }
                     path.strokeWidth = parseInt(custom_text_item.outline_width)
                     path.scale = custom_text_item.scaleX + ' ' + custom_text_item.scaleY
 
