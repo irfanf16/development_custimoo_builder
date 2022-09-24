@@ -232,8 +232,11 @@ import ModalAction from "@/mixins/ModalAction";
             product_roster_detail: this.productRosterDetail,
             svgcolors: distinct
           }
-         let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
-          if (res.status == 201){
+         let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker).catch(errorResponse => {
+           this.showLoader = false
+           this.showError(errorResponse);
+         });
+          if (res && res.status == 201){
             let is_customized = this.$store.getters.getCustomized
             let is_personalized = this.$store.getters.getPersonalized
 
@@ -261,11 +264,12 @@ import ModalAction from "@/mixins/ModalAction";
                 }
               }
           }else{
-            this.showLoader = false
-            this.showError(res);
+            //as the exception has been caught above so here we just need to return if there is any error in api response
+            return
           }
         }else{
           this.showError("please login first");
+          return
         }
           this.$store.commit('setActiveLockerProduct', (this.productData.length - 1));
           if(this.$store.getters.getIsShareDesign){
