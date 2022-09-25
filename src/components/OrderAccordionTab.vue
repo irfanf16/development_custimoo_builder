@@ -36,9 +36,9 @@
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in product_roster_detail">
-              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key, roster)">
+              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="handleRosterItemFocus(key)">
                 <span v-if="checkIndex('name') != -1" class="name">{{ roster.text }}</span>
-                <span v-if="checkIndex('number') != -1">{{ roster.number }}</span>
+                <span v-if="checkIndex('number') != -1" >{{ roster.number }}</span>
 
                 <span>{{ roster.size }}</span>
                 <span>{{ roster.quantity }}</span>
@@ -128,6 +128,7 @@
               </div>
               <template v-for="(text, index) in customTexts">
                 <div :key="index" v-if="text.text" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
+                  <span class="name">FAISAL</span>
                   <span class="name">{{ text.name_of_placement }}</span>
                   <span>{{ unit_conversion(text.originalWidth)  + ' x ' + unit_conversion(text.originalHeight) }}</span>
                 </div>
@@ -141,12 +142,13 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import { findIndex } from 'lodash'
 import { unitConversion } from '@/helpers/Helpers'
+import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
 
 @Component<OrderAccordionTab>({})
-export default class OrderAccordionTab extends Vue {
+export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
   private activeRow = 0
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
@@ -193,14 +195,6 @@ export default class OrderAccordionTab extends Vue {
     return this.$store.getters.getSelectedModelIndex;
   }
 
-  public updateText (index:number, roster:Record<any, any>) {
-      this.activeRow = index;
-      this.$store.dispatch('updateCustomTextAttribute', { index: 0, on_all: true, attribute: 'text', value: roster.text })
-      this.$store.dispatch('updateCustomTextAttribute', { index: 1, on_all: true, attribute: 'text', value: roster.number })
-
-      console.log('roster', roster);
-
-  }
 
   public checkIndex(text_type: string) {
     return findIndex(this.customTexts, { type: text_type })

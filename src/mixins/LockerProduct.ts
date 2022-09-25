@@ -816,6 +816,53 @@ export class exitEditMode extends Vue {
 }
 
 @Component
+export class RosterDetailsGlobal extends Mixins(){
+
+  public active_roster_index: number = 0;
+
+  get productRoster(): Record<any, any>[] {
+    return this.$store.getters.getSelectedProductRoster()
+  }
+
+  get customText(): Record<any, any>[] {
+    return this.$store.getters.getCustomTexts();
+  }
+
+  get custom_name_index() : number {
+    return findIndex(this.customText, { type: 'name' })
+  }
+
+  get custom_number_index() : number {
+    return findIndex(this.customText, { type: 'number' })
+  }
+
+  public handleRosterItemFocus(roster_index: number) {
+
+    let self: Record<any, any> = this;
+    this.active_roster_index = roster_index;
+    let product_custom_texts = this.$store.getters.selectedProductCustomTexts();
+    let active_roster = this.productRoster[roster_index]
+
+    if(this.custom_number_index >= 0) {
+      let custom_number_text = product_custom_texts[this.custom_number_index]
+      custom_number_text.value = active_roster.number
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:self.custom_number_index, value: custom_number_text
+      });
+    }
+
+
+    if(this.custom_name_index >= 0) {
+      let custom_name_text = product_custom_texts[this.custom_name_index]
+      custom_name_text.value = active_roster.text
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:self.custom_name_index, value: custom_name_text
+      });
+    }
+  }
+}
+
+@Component
 export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitEditMode) {
   get total(): number {
     let sum = 0;
@@ -1008,5 +1055,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     })
   }
 }
+
+
 
 
