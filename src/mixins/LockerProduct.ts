@@ -818,7 +818,9 @@ export class exitEditMode extends Vue {
 @Component
 export class RosterDetailsGlobal extends Mixins(){
 
-  public active_roster_index: number = 0;
+  get active_roster_index():number{
+    return this.$store.getters.getActiveRosterIndex;
+  }
 
   get productRoster(): Record<any, any>[] {
     return this.$store.getters.getSelectedProductRoster()
@@ -839,7 +841,7 @@ export class RosterDetailsGlobal extends Mixins(){
   public handleRosterItemFocus(roster_index: number) {
 
     let self: Record<any, any> = this;
-    this.active_roster_index = roster_index;
+    this.$store.dispatch('setActiveRosterIndex',roster_index);
     let product_custom_texts = this.$store.getters.selectedProductCustomTexts();
     let active_roster = this.productRoster[roster_index]
 
