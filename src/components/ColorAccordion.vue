@@ -17,7 +17,7 @@
             <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
             <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
-          <div class="color-holder" ref="ColorAccordion">
+          <div class="color-holder" style="padding-top: 5px;" ref="ColorAccordion">
             <div class="color-container">
               <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
@@ -37,6 +37,9 @@
               <template v-else v-for="(color, index) in productColor">
                 <div v-if="color.value"  class="color-box"  @click="setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index">
+                  <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
+                          <BIconCheck />
+                        </span>
                 </div>
               </template>
             </div>

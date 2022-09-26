@@ -5033,7 +5033,7 @@ $fontSize: 0.5;
         background: #c80b0b;
         color: #fff;
         right: 0px;
-        top: 0px;
+        top: -5px;
         border-radius: 99px;
         cursor: pointer;
         opacity: 0;
@@ -5053,7 +5053,7 @@ $fontSize: 0.5;
         background: #219F84;
         color: #fff;
         right: 0px;
-        top: 0px;
+        top: -5px;
         border-radius: 99px;
         cursor: pointer;
         opacity: 0;
@@ -5786,6 +5786,7 @@ $fontSize: 0.5;
 
 .pulse-animation{
     position: relative;
+    overflow: hidden;
 
     &:after,&:before{
         content: "";

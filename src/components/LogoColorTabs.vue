@@ -1,11 +1,11 @@
 <template>
-  <div class="accordion" role="tablist">
+  <div class="accordion mt-1" role="tablist">
     <b-card-body style="padding: 0 !important;">
           <b-nav class="d-flex align-items-center theme-scroll-h flex-nowrap pb-2" style="overflow-y: auto">
             <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
             <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(0, true)">Others</b-nav-item>
           </b-nav>
-          <div class="color-holder">
+          <div class="color-holder" style="margin-top: -10px; padding-top: 10px;">
             <div class="color-container">
               <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
@@ -25,6 +25,9 @@
               <template v-else v-for="(color, index) in productColor">
                 <div v-if="color.value"  class="color-box"  @click="setColor(color)"
                      :title="color.name" :style="{background: color.value}" :key="index">
+                  <span v-if="imageColor && imageColor.hex == color.value" class="selected" style="z-index: 100; opacity: 1">
+                          <BIconCheck />
+                        </span>
                 </div>
               </template>
             </div>
@@ -76,6 +79,7 @@ export default class LogoColorTabs extends Vue {
   @Prop({required: true}) productColors!: any
   @Prop({required: true}) swatchcolor!: any
   @Prop({required: false}) swatchPantone!: any
+  @Prop({required: false}) imageColor!: any
   @Prop({default: false}) showOtherTab!: boolean
 
   public color= this.swatchcolor
