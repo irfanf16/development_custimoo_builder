@@ -1087,8 +1087,7 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     // @ts-ignore
     (svg_doc as SVGTextElement|Document)?.querySelector('svg')?.setAttribute('viewBox',`${view_box_dimensions[0]} ${view_box_dimensions[1]} ${svg_width} ${svg_height}`);
     production_content = await serializer(svg_doc as SVGTextElement|Document);
-    console.log('Production Content');
-    console.log(production_content);
+
     return production_content;
   }
   else{
