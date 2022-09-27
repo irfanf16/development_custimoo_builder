@@ -340,6 +340,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   // -------- Order Status Constants
   public FACTORYREVIEW = "submitted_for_factory_review"
   public ORDERAPPROVE = "order_approve"
+  public ORDERCANCEL = "order_cancel"
   public FACTORYAPPROVED = "factory_approved"
   public FACTORYREJECTED = "factory_rejected"
   public CUSTOMERREVIEW = "submitted_for_customer_review"
@@ -351,6 +352,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public status_icons:Record<any, any> = {
     submitted_for_factory_review: 'submitted_for_factory_review',
     factory_approved: 'factory_approved',
+    order_cancel: 'order_cancel',
     factory_rejected: 'factory_rejected',
     submitted_for_customer_review: 'submitted_for_customer_review',
     customer_approved: 'customer_approved',
