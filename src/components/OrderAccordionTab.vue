@@ -36,7 +36,7 @@
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in product_roster_detail">
-              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="handleRosterItemFocus(key)">
+              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': active_roster_index === key}" @click="handleRosterItemFocus(key)">
                 <span v-if="checkIndex('name') != -1" class="name">{{ roster.text }}</span>
                 <span v-if="checkIndex('number') != -1" >{{ roster.number }}</span>
 
