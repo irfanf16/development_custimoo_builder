@@ -166,7 +166,7 @@
                           <div class="convas_container" :key="collection_product_index"
                                v-for="(collection_product,collection_product_index) in collection.collection_products">
                             <template v-if="collection_product_index < 3">
-                              <img :src="storageUrl+collection_product.product_locker_room.product_url"
+                              <img :src="storageUrl+collection_product.product_locker_room.product_url+'?q='+collection_product.product_locker_room.random_string"
                                    :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'"
                                    alt="">
                             </template>
