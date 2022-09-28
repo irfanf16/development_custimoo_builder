@@ -420,6 +420,7 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
 const CustimooOrderFlowStatuses : Record<any, any> = {
   submitted_for_factory_review: 'Submitted for Factory Review',
   order_approve: 'Marked to Factory',
+  order_cancel: 'Order Cancelled',
   factory_approved: 'Factory Approved',
   factory_rejected: 'Factory Rejected',
   submitted_for_customer_review: 'Submitted for Customer Review',
@@ -631,16 +632,15 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const getCanvasImage = Store.getters.getCanvasImage
       const style_index = Store.getters.getCurrentStyleIndex;
       const product_style = selected_product.productstyles[style_index];
-      const lockerEditStatus = Store.getters.getEditStatus;
+      const productEditInfo = Store.getters.getProductEditInfoObject;
       let product_name = selected_product.product_name
       //selected_design will always return array having single object
       const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
 
       let design_name = selected_design.design_name;
-      if(lockerEditStatus){
-        const lockerEditProductName = Store.getters.getEditProductName;
-        if(lockerEditProductName)
-          design_name = lockerEditProductName
+      if(productEditInfo.editing && productEditInfo.type == 'locker_product'){
+        const lockerEditProduct = productEditInfo.locker_product_info;
+          design_name = lockerEditProduct.locker_product_name
       }
       product_name = `${product_name} - ${design_name}`;
       const product_models = Store.getters.getProductModels;
@@ -748,6 +748,10 @@ const activityStatus = {
   order_approve: {
     title: "Marked to Factory",
     message: "Order is forwarded to factory.",
+  },
+  order_cancel: {
+    title: "Order Cancelled",
+    message: "Your order has been cancelled.",
   },
   factory_approved: {
     title: "Artwork Approved",
