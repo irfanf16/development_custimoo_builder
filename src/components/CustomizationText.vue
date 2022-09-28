@@ -15,7 +15,7 @@
       <div :key="`main-${selectedProductId+customTextIndex}`" class="d-flex">
         <b-form-input :key="`text-${selectedProductId+customTextIndex}`" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here" :value="product_custom_text.value"
                       @input="handleCustomTextInputChange($event, customTextIndex)"></b-form-input>
-        <button v-b-toggle="`accordion-${customTextIndex}`"
+        <button v-b-toggle="`text-accordion-${customTextIndex}`"
                 class="d-flex align-items-center btn btn-secondary light">
           <span class="minus d-flex align-items-center">
             <BIconDash class="minus" /> Collapse
@@ -25,7 +25,7 @@
           </span>
         </button>
       </div>
-      <b-collapse accordion="my-accordion" :key="`accordion-${selectedProductId+customTextIndex}`" :id="`accordion-${customTextIndex}`"  :ref="`accordion-${customTextIndex}`" role="tabpanel">
+      <b-collapse accordion="my-accordion" :visible="false" :key="`accordion-${selectedProductId+customTextIndex}`" :id="`text-accordion-${customTextIndex}`"  :ref="`text-accordion-${customTextIndex}`" role="tabpanel">
           <div class="font-type-area">
             <div class="fade-right w-100 py-2">
               <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList ">
@@ -213,7 +213,13 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   public handle_text_change_timer!: number
   handleCustomTextInputChange(updatedVal: string, custom_text_index: number) {
-   this.hideLockerProductUpdateButton()
+    if(updatedVal){
+      (this.$refs[`text-accordion-${custom_text_index}`] as Record<any, any>)[0].show = true;
+    }else{
+      (this.$refs[`text-accordion-${custom_text_index}`] as Record<any, any>)[0].show = false;
+    }
+
+    this.hideLockerProductUpdateButton()
     clearTimeout (this.handle_text_change_timer);
     this.handle_text_change_timer = setTimeout(() => {
       let self:Record<any, any> = this;
