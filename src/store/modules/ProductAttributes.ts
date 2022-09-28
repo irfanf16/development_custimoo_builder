@@ -102,7 +102,8 @@ const ProductAttributes:Module<any, any> = {
     editing_roster_player_index: 0,
     selectedCategories:[],
     products_next_page_no: null, //null value mean has no more pages,
-    products_rosters:{}
+    products_rosters:{},
+    active_roster_index:0,
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -978,6 +979,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_SHOW_LOADER(state:Record<any,any>,payload){
       state.showLoader = payload;
+    },
+    SET_ACTIVE_ROSTER_INDEX(state:Record<any,any>,index){
+      state.active_roster_index = index;
     }
   },
   getters: {
@@ -1210,6 +1214,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getShowLoader(state:Record<any,any>){
       return state.showLoader;
+    },
+    getActiveRosterIndex(state:Record<any,any>){
+      return state.active_roster_index;
     }
   },
   actions: {
@@ -1524,6 +1531,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setShowLoader({commit},payload){
       commit("SET_SHOW_LOADER",payload);
+    },
+    setActiveRosterIndex({commit},index){
+      commit("SET_ACTIVE_ROSTER_INDEX",index);
     }
   }
 }

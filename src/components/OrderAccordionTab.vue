@@ -36,7 +36,7 @@
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in product_roster_detail">
-              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="handleRosterItemFocus(key)">
+              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': active_roster_index === key}" @click="handleRosterItemFocus(key)">
                 <span v-if="checkIndex('name') != -1" class="name">{{ roster.text }}</span>
                 <span v-if="checkIndex('number') != -1" >{{ roster.number }}</span>
 
@@ -60,11 +60,11 @@
             <div class="order-collar-style d-flex flex-wrap align-items-center text-left"
                  v-for="(model, index)  in productModels" :key="index">
               <div class="image-holder"
-                   v-if="model.model_styles.includes(selectedProduct.productstyles[styleIndex].id)">
+                   v-if="selectedProduct.productstyles[styleIndex] && model.model_styles.includes(selectedProduct.productstyles[styleIndex].id)">
                 <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front.file_url " alt="Collar"/>
               </div>
               <div class="collar-details">
-                <strong>{{selectedProduct.productstyles[styleIndex].name }}</strong>
+                <strong v-if="selectedProduct.productstyles[styleIndex]">{{selectedProduct.productstyles[styleIndex].name }}</strong>
                 <div class="d-flex flex-wrap align-items-center" v-for="(item, i) in selectedProduct.addons" :key="i">
                   <div class="category mr-3">{{ item.addon.name }}</div>
                   <div class="price">+${{ item.addon.price }}</div>

@@ -1086,6 +1086,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
     if (show_add_to_locker_modal){
+      const scene_ref = this.$store.getters.getCanvasImage.scene
+      if(scene_ref) {
+        scene_ref.frontCanvas.discardActiveObject().renderAll()
+        scene_ref.backCanvas.discardActiveObject().renderAll()
+      }
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
       return
     }
