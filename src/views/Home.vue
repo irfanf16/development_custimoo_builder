@@ -257,9 +257,9 @@
                     <b-button :key="'editRoster'" v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
                       Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
                     </b-button>
-
                     <template v-else-if="isCustomerAuthenticated">
-                      <template v-if="!getProductEditInfoObject.editing">
+
+                      <template v-if="getProductEditInfoObject.editing">
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
                             <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
@@ -275,7 +275,7 @@
                     </template>
                     <template v-else>
                       <template v-if="company.platform !== 'self'">
-                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                       </template>
                      </template>
                   </template>

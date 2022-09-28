@@ -600,7 +600,9 @@ const ProductAttributes:Module<any, any> = {
       const products = state.products
       products.forEach((product: Record<any, any>) => {
         if(product.id == payload.product_id) {
-          Vue.set(state.customLogos, product.id, locker_logos)
+          setTimeout(() => {
+            Vue.set(state.customLogos, product.id, locker_logos) // only set time out solve locker room edit logo issue goes on default position sometime.
+          }, 1000)
         }
         else {
           const logo_setting = getLogoSettings(0,false, product.id)
@@ -715,11 +717,11 @@ const ProductAttributes:Module<any, any> = {
       state.product_custom_texts = {}
       setRetrievedProductsCustomTexts(state.products, true)
     },
-    RESET_CUSTOM_LOGOS: (state: Record<any, any>) => {
+    RESET_CUSTOM_LOGOS: async (state: Record<any, any>) => {
       state.logoTabIndex = 0;
       state.customLogoObjects = [];
       state.customLogos = {};
-      initCustomLogos(state.products)
+      await initCustomLogos(state.products)
     },
     RESET_ALL_COLORS: (state: Record<any, any>) => {
       state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]

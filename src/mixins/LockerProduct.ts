@@ -20,9 +20,10 @@ export class LockerProducts extends Vue {
     let is_personalized = this.$store.getters.getPersonalized
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
+    let locker_product_name = room_product.product_name
     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
       editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
-      locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id},
+      locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name},
       cart_product_info: null, order_product_info: null
     })
 

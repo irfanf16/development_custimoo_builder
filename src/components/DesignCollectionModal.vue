@@ -49,11 +49,11 @@
 
           <div class="mt-3 respCanvas">
             <div><img
-              :src="collectionItem.product_locker_room.front_url"
+              :src="storageUrl+collectionItem.product_locker_room.front_url+'?q='+collectionItem.product_locker_room.random_string"
               :class="collectionItem.product_locker_room.front_url ? '' : 'placeholder'"
               alt=""></div>
             <div><img
-              :src="collectionItem.product_locker_room.back_url"
+              :src="storageUrl+collectionItem.product_locker_room.back_url+'?q='+collectionItem.product_locker_room.random_string"
               :class="collectionItem.product_locker_room.back_url ? '' : 'placeholder'"
               alt=""></div>
           </div>

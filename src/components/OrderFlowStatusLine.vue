@@ -25,6 +25,7 @@
 <script>
 const FACTORYREVIEW = "submitted_for_factory_review"
 const ORDERAPPROVE = "order_approve"
+const ORDERCANCEL = "order_cancel"
 const FACTORYAPPROVED = "factory_approved"
 const FACTORYREJECTED = "factory_rejected"
 const CUSTOMERREVIEW = "submitted_for_customer_review"
@@ -45,6 +46,7 @@ export default {
     return {
       FACTORYREVIEW: FACTORYREVIEW,
       ORDERAPPROVE: ORDERAPPROVE,
+      ORDERCANCEL: ORDERCANCEL,
       FACTORYAPPROVED: FACTORYAPPROVED,
       FACTORYREJECTED: FACTORYREJECTED,
       CUSTOMERREVIEW: CUSTOMERREVIEW,
@@ -65,7 +67,7 @@ export default {
   methods: {
     setStatuses() {
      this.resetStatuses();
-      if(this.item_status == FACTORYREVIEW || this.item_status ==  ORDERAPPROVE){
+      if(this.item_status == FACTORYREVIEW || this.item_status ==  ORDERAPPROVE || this.item_status == ORDERCANCEL){
         this.order_created = true
       }else if(this.item_status == FACTORYAPPROVED){
         this.order_created = true
