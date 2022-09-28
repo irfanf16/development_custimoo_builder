@@ -692,7 +692,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
   })
 }
 
-const initCustomLogos = (retrieved_products: Record<any, any>) => {
+const initCustomLogos = async(retrieved_products: Record<any, any>) => {
   retrieved_products.forEach((product: Record<any, any>) => {
     if(product.is_logo_allowed) {
       const custom_logos = Store.getters.getCustomLogos(product.id)
