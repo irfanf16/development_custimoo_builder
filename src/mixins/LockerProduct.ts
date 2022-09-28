@@ -1,9 +1,10 @@
 /* eslint-disable */
 import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
-import { getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
-         setRetrievedProductsCustomTexts, resetLastActiveProductData
-       } from '@/helpers/Helpers'
+import {
+  getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
+  setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject
+} from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 
@@ -205,11 +206,11 @@ export class handleMainProducts extends Vue {
               return product_design.design_show
             })
             design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
-            let set_last_active_product_data = { design_index: design_index, design_id: design_id, product_index: 0, product_id:  product_id,
-              search_products: self.search_products, style_index: 0, style_id: retrieved_products[0].productstyles[0].id,
-              page_no: 1, customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized, custom_texts: [], custom_logos: [],
-              default_colors: [], group_colors: [],
+            let last_active_obj_updated_values = { design_index: design_index, design_id: design_id, product_id:  product_id,
+              search_products: self.search_products, style_id: retrieved_products[0].productstyles[0].id,
+              customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized
             }
+            let set_last_active_product_data = lastActiveProductDefaultObject(last_active_obj_updated_values)
             self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
           }
         }
@@ -263,7 +264,7 @@ export class handleMainProducts extends Vue {
       let selected_product = this.$store.getters.getSelectedProduct;
       initCustomLogos(retrieved_products)
       this.$store.dispatch("setProductsRosters");
-
+      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {products_rosters: this.$store.getters.getProductRosters('all')})
       let customLogos = this.$store.getters.getCustomLogoObject
       for (const product of retrieved_products) {
         if(!customLogos[product.id]) {
@@ -793,7 +794,6 @@ export class ProductsQueryParamsMixin extends Vue {
           }
         }
         else {
-          console.log("Getting query params from last active product", self.getLastActiveProductData)
           query_params = [
             `customized=${self.getLastActiveProductData.customized}`, `personalized=${self.getLastActiveProductData.personalized}`
           ];
@@ -843,7 +843,7 @@ export class RosterDetailsGlobal extends Mixins(){
   }
 
   get productRoster(): Record<any, any>[] {
-    return this.$store.getters.getSelectedProductRoster()
+    return this.$store.getters.getProductRosters()
   }
 
   get customText(): Record<any, any>[] {
@@ -942,7 +942,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           ecom_form_data.append('product_name', (cart_product as Record<any, any>).product_name);
         }
 
-        let roster_detail = await this.$store.getters.getSelectedProductRoster()
+        let roster_detail = await this.$store.getters.getProductRosters()
 
         let total_quantity = 0;
         for(let i=0; i < roster_detail.length;  i++){

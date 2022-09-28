@@ -261,7 +261,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   }
 
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getSelectedProductRoster()
+    return this.$store.getters.getProductRosters()
   }
 
   get company() {

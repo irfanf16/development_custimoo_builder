@@ -150,7 +150,7 @@ import {find, filter} from "lodash";
   },
   async mounted() {
     let self: Record<any, any> = this;
-    
+
     await self.productFonts()
     self.product_colors = await self.productColors()
   },
@@ -226,9 +226,9 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
         * For commit {SET_LAST_ACTIVE_PRODUCT_CUSTOM_TEXTS} the custom text is being passed by reference so any change in custom text will also be reflected in
         * state.last_active_product_data
         * */
-        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-          product_custom_texts: {[product_id]: this.all_products_custom_texts[product_id]}
-        });
+        // this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+        //   product_custom_texts: {[product_id]: this.all_products_custom_texts[product_id]}
+        // });
       })
       self.$eventBus.$emit("customTextUpdated", {
         emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: updated_custom_text

@@ -8,7 +8,7 @@ import Vue from "vue";
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
 import {Side} from "three";
-import {parseInt} from "lodash";
+import {keys, parseInt} from "lodash";
 
 const getLogoSettingsObject = () => {
   return {
@@ -450,7 +450,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       }
       const selected_product = Store.getters.getSelectedProduct;
       const productCustomTexts = Store.getters.productCustomTexts(selected_product.id)
-      const roster_details = Store.getters.getSelectedProductRoster()
+      const roster_details = Store.getters.getProductRosters()
       const roster_texts : Record<any, any> = {}
       const common : Record<any, any>[] = []
 
@@ -670,7 +670,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         pdf_file: null,
         production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
         // front_design:front_design,
-        product_roster_detail: Store.getters.getSelectedProductRoster(),
+        product_roster_detail: Store.getters.getProductRosters(),
         style_id: product_style.id,
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
@@ -865,6 +865,19 @@ const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[],
     return last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
   })
   Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
+  /*
+  * For commit {SET_LAST_ACTIVE_PRODUCT_CUSTOM_TEXTS} the custom text is being passed by reference so any change in custom text will also be reflected in
+  * state.last_active_product_data
+   */
+  retrieved_products_custom_texts.forEach((product_custom_texts: Record<any, any>[]) => {
+    const product_id = product_custom_texts && product_custom_texts.length > 0 ? product_custom_texts[0].product_id : null;
+    if(product_id) {
+      Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+        product_custom_texts: {[product_id]: product_custom_texts}
+      });
+    }
+  })
+
 }
 
 const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
@@ -1411,12 +1424,13 @@ const authenticateUser = async (token: string) => {
   Store.commit('SET_RECENT_LOGOS')
 }
 
-const lastActiveProductDefaultObject = () => {
-  return {
+const lastActiveProductDefaultObject = (keys_default_values = {}) => {
+  const default_obj = {
     category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
     page_no: 1, customized: true, personalized: false, product_custom_texts: {}, custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
-    roster_detail: []
+    roster_detail: [], products_rosters: {}
   }
+  return {...default_obj, ...keys_default_values}
 }
 
 const resetLastActiveProductData = async () => {

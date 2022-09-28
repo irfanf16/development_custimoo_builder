@@ -165,7 +165,7 @@ import ModalAction from "@/mixins/ModalAction";
         return this.$store.getters.getProductModels;
       }
       get productRosterDetail(): [Record<any, any>] {
-        return this.$store.getters.getSelectedProductRoster()
+        return this.$store.getters.getProductRosters()
       }
       get mainProductType():string{
         let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
