@@ -167,11 +167,15 @@ export class handleMainProducts extends Vue {
       else {
        // console.log('not editing mode');
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;
+        console.log('last_active_prod_data', last_active_prod_data)
         if(editing_product_detail ) {
+          console.log('editing_product_detail')
           product_index = response_data.active_product_index;
         }
         else {
+          console.log('else')
           if(last_active_prod_data.product_id) {
+            console.log('last_active_prod_data.product_id')
             product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
               return retrieved_product.id == last_active_prod_data.product_id
             })
@@ -190,6 +194,7 @@ export class handleMainProducts extends Vue {
             this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
           }
           else {
+            console.log('last_active_prod_data.product_id else')
             let {sync_id, customizer_preview, update_cart} = self.$route.query
             if(sync_id) {
               product_index = retrieved_products.findIndex((retrieved_product: Record<any, any>) => {
@@ -899,7 +904,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   }
 
   public async addToCartMixin(product_fonts: Record<any, any>[]) {
-    
+
     let self: Record<any, any> = this;
     try {
 
