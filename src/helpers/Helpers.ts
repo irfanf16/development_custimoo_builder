@@ -590,8 +590,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       'viewBox="0 0 ' + width + ' ' + height + '"> \n' + dom_svg.outerHTML + '\n</svg>'
 
 
-                    const converted_width = unitConversion((width * custom_text_item.scaleX) / selected_product.measurement_ratio)
-                    const converted_height = unitConversion((height * custom_text_item.scaleY )/ selected_product.measurement_ratio)
+                    const converted_width = unitConversion((width * custom_text_item.scaleX) * selected_product.measurement_ratio)
+                    const converted_height = unitConversion((height * custom_text_item.scaleY ) * selected_product.measurement_ratio)
 
                     text_item_object.width = converted_width.value;
                     text_item_object.height = converted_height.value;

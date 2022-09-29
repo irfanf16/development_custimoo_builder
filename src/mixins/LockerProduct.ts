@@ -899,7 +899,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   }
 
   public async addToCartMixin(product_fonts: Record<any, any>[]) {
-    console.log('global cart function')
+    
     let self: Record<any, any> = this;
     try {
 
