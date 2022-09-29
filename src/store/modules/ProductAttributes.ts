@@ -884,23 +884,27 @@ const ProductAttributes:Module<any, any> = {
     SET_LAST_ACTIVE_PRODUCT_DATA(state:Record<any, any>, payload)
     {
       const updated_payload: Record<any, any> = {};
-      const last_active_obj_def_obj = lastActiveProductDefaultObject()
-      if(Object.keys(state.last_active_product_data).length != Object.keys(last_active_obj_def_obj).length) {
-        state.last_active_product_data = last_active_obj_def_obj
-      }
       /*
       * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
       * reflected in state.last_active_product_data.product_custom_texts
       * */
-      if('product_custom_texts' in payload) {
-        state.last_active_product_data.product_custom_texts = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
-      }
-      else {
+      // if('product_custom_textsddddd' in payload) {
+      //   state.last_active_product_data.product_custom_texts = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
+      // }
+      // else {
         for (const [payload_key, payload_value] of Object.entries(payload)) {
-          updated_payload[payload_key] = payload_value
+          /*
+          * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
+          * reflected in state.last_active_product_data.product_custom_texts
+          * */
+          if(payload_key == 'product_custom_texts') {
+            updated_payload[payload_key] = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
+          } else {
+            updated_payload[payload_key] = payload_value
+          }
         }
         state.last_active_product_data = Object.assign({}, state.last_active_product_data, updated_payload);
-      }
+      // }
     },
     RESET_LAST_ACTIVE_DATA(state: Record<any, any>)
     {
