@@ -162,7 +162,7 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
   }
 
   get product_roster_detail(): [Record<any, any>] {
-    return this.$store.getters.getSelectedProductRoster()
+    return this.$store.getters.getProductRosters()
   }
   get getCustomTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts(this.selectedProduct)
