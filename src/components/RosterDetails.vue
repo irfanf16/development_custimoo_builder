@@ -171,7 +171,7 @@
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import {find, findIndex, map} from 'lodash';
 import ErrorMessages from '@/mixins/ErrorMessages';
-import {cartModalData} from "@/mixins/LockerProduct";
+import {cartModalData, RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import { rosterDefaultItem } from "@/helpers/Helpers";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
@@ -185,7 +185,7 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
     this.fontsList()
   },
 })
-export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData, HideUpdateLockerButton) {
+export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData, HideUpdateLockerButton,RosterDetailsGlobal) {
   /* component props starts */
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: false}) lockerRosters: Record<any, any>[]
@@ -215,7 +215,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public selected = this.productSizes[0]
   public secondColor!: Record<any, any>
   public selected_locker_roster = null
-  public active_roster_index = 0
 
   /* component computed props starts */
 
@@ -262,24 +261,13 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   }
 
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getSelectedProductRoster()
+    return this.$store.getters.getProductRosters()
   }
 
   get company() {
     return this.$store.getters.getCompany
   }
 
-  get customText(): Record<any, any>[] {
-    return this.$store.getters.getCustomTexts();
-  }
-
-  get custom_name_index() : number {
-    return findIndex(this.customText, { type: 'name' })
-  }
-
-  get custom_number_index() : number {
-    return findIndex(this.customText, { type: 'number' })
-  }
 
   get eyeIndex(): number {
     return this.$store.getters.getEyeIndex;
@@ -289,9 +277,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getCanvasImage
   }
 
-  get productRoster(): Record<any, any>[] {
-    return this.$store.getters.getSelectedProductRoster()
-  }
 
   get isLoading(): Record<any, any>[] {
     return this.$store.getters.getCartLoading;
@@ -325,7 +310,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public changeRoster(locker_roster_id:any){
     let self: Record<any, any> = this;
     if(locker_roster_id) {
-      this.active_roster_index = 0
+      this.$store.dispatch('setActiveRosterIndex',0);
       let selected_roster = find(this.lockerRosters, ["id", locker_roster_id])
       selected_roster = JSON.parse(JSON.stringify(selected_roster))
       let roster_items = selected_roster ? selected_roster.product_roster_detail : null;
@@ -476,30 +461,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
       });
     }
 
-  }
-
-  public handleRosterItemFocus(roster_index: number) {
-    let self: Record<any, any> = this;
-    this.active_roster_index = roster_index;
-    let product_custom_texts = this.$store.getters.selectedProductCustomTexts();
-    let active_roster = this.productRoster[roster_index]
-
-    if(this.custom_number_index >= 0) {
-      let custom_number_text = product_custom_texts[this.custom_number_index]
-      custom_number_text.value = active_roster.number
-      self.$eventBus.$emit("customTextUpdated", {
-        emitter: "input", custom_text_index:self.custom_number_index, value: custom_number_text
-      });
-    }
-
-
-    if(this.custom_name_index >= 0) {
-      let custom_name_text = product_custom_texts[this.custom_name_index]
-      custom_name_text.value = active_roster.text
-      self.$eventBus.$emit("customTextUpdated", {
-        emitter: "input", custom_text_index:self.custom_name_index, value: custom_name_text
-      });
-    }
   }
 
 }

@@ -32,13 +32,16 @@
                                     @click="getLockers">
                             Save
                           </b-button>
-                          <b-button :key="'savetolocker'" variant="outline-secondary"  @click="getLockers(false, true)">
+                          <b-button :key="'savetolocker'" variant="outline-secondary" @click="getLockers(false, true)">
                            Save As
                           </b-button>
                         </template>
                         <template v-else>
-                          <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save to locker room</b-button>
+                          <b-button @click="getLockers(false, true)" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save As</b-button>
                         </template>
+                      </template>
+                      <template v-else>
+                        <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save As</b-button>
                       </template>
 
                       <template>
@@ -254,9 +257,9 @@
                     <b-button :key="'editRoster'" v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
                       Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
                     </b-button>
-
                     <template v-else-if="isCustomerAuthenticated">
-                      <template v-if="!getProductEditInfoObject.editing">
+
+                      <template v-if="getProductEditInfoObject.editing">
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
                             <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
@@ -272,7 +275,7 @@
                     </template>
                     <template v-else>
                       <template v-if="company.platform !== 'self'">
-                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"  class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                       </template>
                      </template>
                   </template>
@@ -876,7 +879,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return  this.$store.getters.getCurrentStyleIndex;
   }
   get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getSelectedProductRoster()
+    return this.$store.getters.getProductRosters()
   }
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
@@ -971,7 +974,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public actionAfterLogin() {
     if(this.actionBeforeLogin == 'lockerRoom') {
-      console.log('in open locker room')
       this.getLockerRoomProducts(null)
       this.showVModal('locker-modal')
     } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
@@ -1084,6 +1086,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
     if (show_add_to_locker_modal){
+      const scene_ref = this.$store.getters.getCanvasImage.scene
+      if(scene_ref) {
+        scene_ref.frontCanvas.discardActiveObject().renderAll()
+        scene_ref.backCanvas.discardActiveObject().renderAll()
+      }
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
       return
     }
@@ -1322,7 +1329,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if (ok) {
       this.$store.commit('RESET_LAST_ACTIVE_DATA')
-      await self.exitFromEditMode()
+      await this.exitFromEditMode()
       this.hideLockerProductUpdateButton()
       // if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
       //   await this.$store.dispatch('setEditCart', {key:'cartId',value:0});

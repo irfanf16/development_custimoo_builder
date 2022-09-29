@@ -72,10 +72,10 @@ export class HideUpdateLockerButton extends Vue {
       if(product_edit_info_obj.type == 'locker_product' && hide_locker_update_btn == true) {
         this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
       }
-      else {
-        if(hide_locker_update_btn == false)
-          this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
-      }
+      // else {
+      //   if(hide_locker_update_btn == false)
+      //     this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
+      // }
     }
   }
 }

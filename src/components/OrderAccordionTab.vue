@@ -36,9 +36,9 @@
               <span>Qty</span>
             </div>
             <template v-for="(roster, key) in product_roster_detail">
-              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': activeRow === key}" @click="updateText(key, roster)">
+              <div :key="key" class="roster-row cursor-pointer d-flex align-items-center justify-content-between" :class="{'activeRow': active_roster_index === key}" @click="handleRosterItemFocus(key)">
                 <span v-if="checkIndex('name') != -1" class="name">{{ roster.text }}</span>
-                <span v-if="checkIndex('number') != -1">{{ roster.number }}</span>
+                <span v-if="checkIndex('number') != -1" >{{ roster.number }}</span>
 
                 <span>{{ roster.size }}</span>
                 <span>{{ roster.quantity }}</span>
@@ -60,11 +60,11 @@
             <div class="order-collar-style d-flex flex-wrap align-items-center text-left"
                  v-for="(model, index)  in productModels" :key="index">
               <div class="image-holder"
-                   v-if="model.model_styles.includes(selectedProduct.productstyles[styleIndex].id)">
+                   v-if="selectedProduct.productstyles[styleIndex] && model.model_styles.includes(selectedProduct.productstyles[styleIndex].id)">
                 <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front.file_url " alt="Collar"/>
               </div>
               <div class="collar-details">
-                <strong>{{selectedProduct.productstyles[styleIndex].name }}</strong>
+                <strong v-if="selectedProduct.productstyles[styleIndex]">{{selectedProduct.productstyles[styleIndex].name }}</strong>
                 <div class="d-flex flex-wrap align-items-center" v-for="(item, i) in selectedProduct.addons" :key="i">
                   <div class="category mr-3">{{ item.addon.name }}</div>
                   <div class="price">+${{ item.addon.price }}</div>
@@ -128,6 +128,7 @@
               </div>
               <template v-for="(text, index) in customTexts">
                 <div :key="index" v-if="text.text" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
+                  <span class="name">FAISAL</span>
                   <span class="name">{{ text.name_of_placement }}</span>
                   <span>{{ unit_conversion(text.originalWidth)  + ' x ' + unit_conversion(text.originalHeight) }}</span>
                 </div>
@@ -141,12 +142,13 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import { findIndex } from 'lodash'
 import { unitConversion } from '@/helpers/Helpers'
+import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
 
 @Component<OrderAccordionTab>({})
-export default class OrderAccordionTab extends Vue {
+export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
   private activeRow = 0
   private storageUrl = process.env.VUE_APP_STORAGE_URL
 
@@ -160,7 +162,7 @@ export default class OrderAccordionTab extends Vue {
   }
 
   get product_roster_detail(): [Record<any, any>] {
-    return this.$store.getters.getSelectedProductRoster()
+    return this.$store.getters.getProductRosters()
   }
   get getCustomTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts(this.selectedProduct)
@@ -193,14 +195,6 @@ export default class OrderAccordionTab extends Vue {
     return this.$store.getters.getSelectedModelIndex;
   }
 
-  public updateText (index:number, roster:Record<any, any>) {
-      this.activeRow = index;
-      this.$store.dispatch('updateCustomTextAttribute', { index: 0, on_all: true, attribute: 'text', value: roster.text })
-      this.$store.dispatch('updateCustomTextAttribute', { index: 1, on_all: true, attribute: 'text', value: roster.number })
-
-      console.log('roster', roster);
-
-  }
 
   public checkIndex(text_type: string) {
     return findIndex(this.customTexts, { type: text_type })

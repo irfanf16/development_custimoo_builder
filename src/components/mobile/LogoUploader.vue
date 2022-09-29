@@ -46,7 +46,7 @@
               </div>
             </h4>
             <div class="mb-lg-3 w-100">
-              <div class="color-holder">
+              <div class="color-holder" style="margin-top: -10px; padding-top: 10px;">
                 <div class="color-container">
                   <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
                        @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name"

@@ -104,7 +104,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
 import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
@@ -114,6 +114,7 @@ import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 import RecentLogos from "@/components/RecentLogos.vue";
+import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
 
 @Component<CustomizationTabs>({
   components: {
@@ -137,7 +138,7 @@ import RecentLogos from "@/components/RecentLogos.vue";
     this.fontsList()
   },
 })
-export default class CustomizationTabs extends Vue {
+export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) isColorShuffled!: boolean
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
@@ -254,7 +255,7 @@ export default class CustomizationTabs extends Vue {
   lockerColorsChanged(newval:any, old:any) {
     this.productColorsManipulation()
   }
-  
+
   @Watch('logoColors', {
     deep: true
   })
@@ -305,7 +306,9 @@ export default class CustomizationTabs extends Vue {
   }
 
   public setHideTab(index: string, value: boolean) {
-    this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
+    if(this.previous_tab === '' || this.previous_tab === 'teamHide'){
+      this.handleRosterItemFocus(0);
+    }
     this.$store.dispatch('setHideTab', {index: index, value: value})
     this.previous_tab = index;
   }

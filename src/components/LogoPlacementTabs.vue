@@ -1,9 +1,13 @@
 <template>
   <div v-if="selectedProduct">
-    <div class="text-right px-1 pt-1" :class="{'rotateArrow': !expandLogoButtons}">
+    <div class="d-flex align-items-center justify-content-between px-1 pt-1" :class="{'rotateArrow': !expandLogoButtons}">
+      <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
+        <BIconPlus />
+      </b-button>
+
       <b-icon-chevron-down class="cursor-pointer" @click="()=>expandLogoButtons = !expandLogoButtons" style="font-size: larger; transition: 0.3s ease all;" />
     </div>
-    <b-tabs :class="{'collapseButtons': expandLogoButtons}">
+    <b-tabs :class="{'collapseButtons': expandLogoButtons}" ref="collapseButtons">
       <b-tab v-for="(logo_tab, ltIdx) in customLogos" :key="ltIdx" :active="tabIndex === ltIdx" @click="changeTab(ltIdx)">
         <template #title>
           <span>{{ ltIdx == 0 ? 'Team Logo' : 'logo ' + ltIdx }}</span>
@@ -34,7 +38,7 @@
             <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url && selectedProduct.product_type == 'customized'">
               <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
               <div class="mb-lg-3 w-100">
-                <div class="color-holder">
+                <div class="color-holder" style="margin-top: -10px; padding-top: 10px;">
                   <div class="color-container">
                     <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
                          @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name"
@@ -52,32 +56,35 @@
                           <BIconCheck />
                         </span>
                     </div>
+
+                    <div class="d-flex w-100 align-items-center justify-content-center gap-1">
+                      <b-button @click="useLogoColors()" class="use-btn flex-shrink-1" :class="{'pulse-animation': !usingColorLogos && !isClicked}" style="white-space: nowrap; max-width: 200px" v-if="imageColors.length > 1">
+                        <template v-if="usingColorLogos"> Use Original Colors</template>
+                        <template v-else> Use Logo Colors</template>
+                      </b-button>
+                      <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors($event)" :class="{'invisible': !(imageColors.length > 1 && usingColorLogos), 'pulse-animation': isColorShuffled}"
+                                variant="secondary">Shuffle
+                      </b-button>
+                      <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
+                        <font-awesome-icon :icon="['fas', 'redo-alt']"/>
+                      </b-button>
+                    </div>
+
                     <LogoColorTabs v-if="showLogoColors" @setSwatchColor="setSwatchColor"
                                    :swatchPantone="defSwatchPantone"
                                    :swatchcolor="defSwatchColor"
                                    :productColors="productColors"
+                                   :imageColor="imageColors[selectedSwatchIndex]"
                                    :showSVGS="Boolean(showSVGs)" :defSwatchColor.sync="defSwatchColor"
                     />
                   </div>
-                </div>
-                <div class="d-flex align-items-center justify-content-center gap-1">
-                  <b-button @click="useLogoColors()" class="use-btn flex-shrink-1" :class="{'pulse-animation': !usingColorLogos && !isClicked}" style="white-space: nowrap; max-width: 200px" v-if="imageColors.length > 1">
-                    <template v-if="usingColorLogos"> Use Original Colors</template>
-                    <template v-else> Use Logo Colors</template>
-                  </b-button>
-                  <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors($event)" :class="{'invisible': !(imageColors.length > 1 && usingColorLogos), 'pulse-animation': isColorShuffled}"
-                            variant="secondary">Shuffle
-                  </b-button>
-                  <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
-                    <font-awesome-icon :icon="['fas', 'redo-alt']"/>
-                  </b-button>
                 </div>
               </div>
             </div>
         </div>
         <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
       </b-tab>
-      <template #tabs-end>
+      <template #tabs-end v-if="!expandLogoButtons">
         <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
           <BIconPlus />
         </b-button>
@@ -106,6 +113,7 @@ import { setLogoSettings, getCustomLogos,} from "../helpers/Helpers"
 
   },
   async mounted() {
+
     this.$root.$on('changeLogoTabIndex', (index:number) => {
       // here you need to use the arrow function
       this.tabIndex = index;
@@ -521,6 +529,13 @@ export default class LogoPlacementTabs extends Vue {
     }
   }
 }
+
+.customization-tabs{
+  .tabs-logo-container{
+    padding-bottom: 0;
+  }
+}
+
 .nav-tabs {
   .nav-item {
     .nav-link {

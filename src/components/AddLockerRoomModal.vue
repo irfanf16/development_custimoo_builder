@@ -66,7 +66,7 @@
                         </a>
                       </div>
                     </div>
-                    <img class="w-100" :src="product.product_url" alt="">
+                    <img class="w-100" :src="storageUrl+product.product_url" alt="">
                   </div>
                 </div>
                 <div class="d-none d-lg-block product-description text-center">
@@ -112,6 +112,7 @@ import ModalAction from "@/mixins/ModalAction";
           this.tabIndex = 0
         }
       }
+      private storageUrl = process.env.VUE_APP_STORAGE_URL
       public showLoader = false
       private baseUrl = location.host+"/#/"
       public room_id = this.lockers.length? this.lockers[0].id : 0
@@ -164,7 +165,7 @@ import ModalAction from "@/mixins/ModalAction";
         return this.$store.getters.getProductModels;
       }
       get productRosterDetail(): [Record<any, any>] {
-        return this.$store.getters.getSelectedProductRoster()
+        return this.$store.getters.getProductRosters()
       }
       get mainProductType():string{
         let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
@@ -231,8 +232,21 @@ import ModalAction from "@/mixins/ModalAction";
             product_roster_detail: this.productRosterDetail,
             svgcolors: distinct
           }
-         let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker);
-          if (res.status == 201){
+         let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker).catch(errorResponse => {
+           this.showLoader = false
+           this.showError(errorResponse);
+         });
+          if (res && res.status == 201){
+            let is_customized = this.$store.getters.getCustomized
+            let is_personalized = this.$store.getters.getPersonalized
+
+            this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
+              editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
+              locker_product_info: { product_id: locker.product_id, locker_product_id: res.data.data.product_locker_id, style_id: locker.style_id,
+                design_id: locker.design_id},
+              cart_product_info: null, order_product_info: null
+            })
+
             if (this.rosterUrl){
               this.$root.$emit('rostershared', res.data.data.roster_shared_url)
             }
@@ -250,11 +264,12 @@ import ModalAction from "@/mixins/ModalAction";
                 }
               }
           }else{
-            this.showLoader = false
-            this.showError(res);
+            //as the exception has been caught above so here we just need to return if there is any error in api response
+            return
           }
         }else{
           this.showError("please login first");
+          return
         }
           this.$store.commit('setActiveLockerProduct', (this.productData.length - 1));
           if(this.$store.getters.getIsShareDesign){

@@ -1,9 +1,10 @@
 /* eslint-disable */
 import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
-import { getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
-         setRetrievedProductsCustomTexts, resetLastActiveProductData
-       } from '@/helpers/Helpers'
+import {
+  getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
+  setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject
+} from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 
@@ -19,9 +20,10 @@ export class LockerProducts extends Vue {
     let is_personalized = this.$store.getters.getPersonalized
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
+    let locker_product_name = room_product.product_name
     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
       editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
-      locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id},
+      locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name},
       cart_product_info: null, order_product_info: null
     })
 
@@ -205,11 +207,11 @@ export class handleMainProducts extends Vue {
               return product_design.design_show
             })
             design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
-            let set_last_active_product_data = { design_index: design_index, design_id: design_id, product_index: 0, product_id:  product_id,
-              search_products: self.search_products, style_index: 0, style_id: retrieved_products[0].productstyles[0].id,
-              page_no: 1, customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized, custom_texts: [], custom_logos: [],
-              default_colors: [], group_colors: [],
+            let last_active_obj_updated_values = { design_index: design_index, design_id: design_id, product_id:  product_id,
+              search_products: self.search_products, style_id: retrieved_products[0].productstyles[0].id,
+              customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized
             }
+            let set_last_active_product_data = lastActiveProductDefaultObject(last_active_obj_updated_values)
             self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
           }
         }
@@ -263,7 +265,7 @@ export class handleMainProducts extends Vue {
       let selected_product = this.$store.getters.getSelectedProduct;
       initCustomLogos(retrieved_products)
       this.$store.dispatch("setProductsRosters");
-
+      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {products_rosters: this.$store.getters.getProductRosters('all')})
       let customLogos = this.$store.getters.getCustomLogoObject
       for (const product of retrieved_products) {
         if(!customLogos[product.id]) {
@@ -516,6 +518,11 @@ export class handleMainProducts extends Vue {
       product_id:factory_product.product_id
     }
     this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { value: factory_product.product_custom_texts })
+    factory_product.product_custom_texts.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
+      });
+    })
 
     await this.$store.dispatch('overRideDefaultColors', factory_product.defaultcolors);
     await this.$store.dispatch('overRideGroupColors', factory_product.groupcolors);
@@ -577,16 +584,26 @@ export class handleMainProducts extends Vue {
       await this.$store.dispatch('setCustomObj', active_product_detail.product_id)
     }
 
-    // await this.$store.commit('RESET_CUSTOM_TEXTS')
+    await this.$store.commit('RESET_CUSTOM_TEXTS')
     await this.$store.commit('RESET_CUSTOM_LOGOS')
     await this.$store.commit('RESET_ALL_COLORS')
 
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', active_product_detail);
     if(active_product_detail.text.length == 0) {
       await this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: selected_product.product_texts});
+      selected_product.product_texts.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
+        self.$eventBus.$emit("customTextUpdated", {
+          emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
+        });
+      })
     }
     else {
       this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: active_product_detail.text});
+      active_product_detail.text.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
+        self.$eventBus.$emit("customTextUpdated", {
+          emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
+        });
+      })
     }
     await this.$store.dispatch('overRideDefaultColors', JSON.parse(active_product_detail.defaultcolors));
     await this.$store.dispatch('overRideGroupColors', JSON.parse(active_product_detail.groupcolors));
@@ -660,6 +677,11 @@ export class handleMainProducts extends Vue {
     }
     await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
     this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { value: cart_item_product.product_custom_texts })
+    cart_item_product.product_custom_texts.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
+      });
+    })
 
     await this.$store.dispatch('overRideDefaultColors', cart_item_product.defaultcolors);
     await this.$store.dispatch('overRideGroupColors', cart_item_product.groupcolors);
@@ -773,7 +795,6 @@ export class ProductsQueryParamsMixin extends Vue {
           }
         }
         else {
-          console.log("Getting query params from last active product", self.getLastActiveProductData)
           query_params = [
             `customized=${self.getLastActiveProductData.customized}`, `personalized=${self.getLastActiveProductData.personalized}`
           ];
@@ -812,6 +833,55 @@ export class exitEditMode extends Vue {
   public async exitFromEditMode() {
     this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null
     })
+  }
+}
+
+@Component
+export class RosterDetailsGlobal extends Mixins(){
+
+  get active_roster_index():number{
+    return this.$store.getters.getActiveRosterIndex;
+  }
+
+  get productRoster(): Record<any, any>[] {
+    return this.$store.getters.getProductRosters()
+  }
+
+  get customText(): Record<any, any>[] {
+    return this.$store.getters.getCustomTexts();
+  }
+
+  get custom_name_index() : number {
+    return findIndex(this.customText, { type: 'name' })
+  }
+
+  get custom_number_index() : number {
+    return findIndex(this.customText, { type: 'number' })
+  }
+
+  public handleRosterItemFocus(roster_index: number) {
+
+    let self: Record<any, any> = this;
+    this.$store.dispatch('setActiveRosterIndex',roster_index);
+    let product_custom_texts = this.$store.getters.selectedProductCustomTexts();
+    let active_roster = this.productRoster[roster_index]
+
+    if(this.custom_number_index >= 0) {
+      let custom_number_text = product_custom_texts[this.custom_number_index]
+      custom_number_text.value = active_roster.number
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:self.custom_number_index, value: custom_number_text
+      });
+    }
+
+
+    if(this.custom_name_index >= 0) {
+      let custom_name_text = product_custom_texts[this.custom_name_index]
+      custom_name_text.value = active_roster.text
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:self.custom_name_index, value: custom_name_text
+      });
+    }
   }
 }
 
@@ -873,7 +943,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           ecom_form_data.append('product_name', (cart_product as Record<any, any>).product_name);
         }
 
-        let roster_detail = await this.$store.getters.getSelectedProductRoster()
+        let roster_detail = await this.$store.getters.getProductRosters()
 
         let total_quantity = 0;
         for(let i=0; i < roster_detail.length;  i++){
@@ -1008,5 +1078,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     })
   }
 }
+
+
 
 

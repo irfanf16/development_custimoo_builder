@@ -102,7 +102,8 @@ const ProductAttributes:Module<any, any> = {
     editing_roster_player_index: 0,
     selectedCategories:[],
     products_next_page_no: null, //null value mean has no more pages,
-    products_rosters:{}
+    products_rosters:{},
+    active_roster_index:0,
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -599,7 +600,9 @@ const ProductAttributes:Module<any, any> = {
       const products = state.products
       products.forEach((product: Record<any, any>) => {
         if(product.id == payload.product_id) {
-          Vue.set(state.customLogos, product.id, locker_logos)
+          setTimeout(() => {
+            Vue.set(state.customLogos, product.id, locker_logos) // only set time out solve locker room edit logo issue goes on default position sometime.
+          }, 1000)
         }
         else {
           const logo_setting = getLogoSettings(0,false, product.id)
@@ -696,8 +699,10 @@ const ProductAttributes:Module<any, any> = {
 
       state.selectedIndex = 0;
       state.styleIndex = 0 ;
+      let style_id = null ;
       const select_product = state.products[state.selectedIndex];
       if(select_product) {
+        style_id = select_product.productstyles.length > 0 ? select_product.productstyles[state.selectedIndex] : null
         state.selectedPrdId = select_product.id
 
         select_product.productstyles[state.styleIndex].productdesigns.forEach((item: Record<any, any>) => {
@@ -708,17 +713,20 @@ const ProductAttributes:Module<any, any> = {
             Vue.set(item, 'design_show', 0)
           }
         })
+        const last_active_product_data = {
+          product_id: state.selectedPrdId, design_id: state.selectedDesignId, style_id: style_id }
+        state.last_active_product_data = {...state.last_active_product_data, ...last_active_product_data}
       }
     },
     RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
       state.product_custom_texts = {}
       setRetrievedProductsCustomTexts(state.products, true)
     },
-    RESET_CUSTOM_LOGOS: (state: Record<any, any>) => {
+    RESET_CUSTOM_LOGOS: async (state: Record<any, any>) => {
       state.logoTabIndex = 0;
       state.customLogoObjects = [];
       state.customLogos = {};
-      initCustomLogos(state.products)
+      await initCustomLogos(state.products)
     },
     RESET_ALL_COLORS: (state: Record<any, any>) => {
       state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]
@@ -876,6 +884,10 @@ const ProductAttributes:Module<any, any> = {
     SET_LAST_ACTIVE_PRODUCT_DATA(state:Record<any, any>, payload)
     {
       const updated_payload: Record<any, any> = {};
+      const last_active_obj_def_obj = lastActiveProductDefaultObject()
+      if(Object.keys(state.last_active_product_data).length != Object.keys(last_active_obj_def_obj).length) {
+        state.last_active_product_data = last_active_obj_def_obj
+      }
       /*
       * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
       * reflected in state.last_active_product_data.product_custom_texts
@@ -961,11 +973,16 @@ const ProductAttributes:Module<any, any> = {
       } else {
         const products_rosters: Record<any, any> = {}
         if(state.products.length > 0) {
+          const last_products_rosters = state.last_active_product_data.products_rosters
           const default_roster_item = rosterDefaultItem()
           state.products.forEach((product: Record<any, any>) => {
-            const product_first_size_name = product.sizes.length > 0 ? product.sizes[0].json_data[0].name : '';
-            const roster_item = Object.assign(default_roster_item, {size: product_first_size_name,  code: product_first_size_name})
-            products_rosters[product.id] = [roster_item]
+            if(last_products_rosters && last_products_rosters[product.id]) {
+              products_rosters[product.id] = last_products_rosters[product.id]
+            } else {
+              const product_first_size_name = product.sizes.length > 0 ? product.sizes[0].json_data[0].name : '';
+              const roster_item = Object.assign(default_roster_item, {size: product_first_size_name,  code: product_first_size_name})
+              products_rosters[product.id] = [roster_item]
+            }
           })
           state.products_rosters = products_rosters;
         } else {
@@ -978,6 +995,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_SHOW_LOADER(state:Record<any,any>,payload){
       state.showLoader = payload;
+    },
+    SET_ACTIVE_ROSTER_INDEX(state:Record<any,any>,index){
+      state.active_roster_index = index;
     }
   },
   getters: {
@@ -1134,10 +1154,14 @@ const ProductAttributes:Module<any, any> = {
       }
       return state.rosterDetails[prd_id]
     },
-    getSelectedProductRoster: state => (roster_index = -1) => {
+    getProductRosters: state => (product_id = state.selectedPrdId, roster_index = -1) => {
+      if(product_id == null)
+        product_id = state.selectedPrdId
+      if(product_id == 'all')
+        return state.products_rosters
       if(roster_index >= 0)
-        return state.products_rosters[state.selectedPrdId][roster_index]
-      return state.products_rosters[state.selectedPrdId]
+        return state.products_rosters[product_id][roster_index]
+      return state.products_rosters[product_id]
     },
     getAllRosterDetails: state  => {
       return state.rosterDetails
@@ -1210,6 +1234,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getShowLoader(state:Record<any,any>){
       return state.showLoader;
+    },
+    getActiveRosterIndex(state:Record<any,any>){
+      return state.active_roster_index;
     }
   },
   actions: {
@@ -1524,6 +1551,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setShowLoader({commit},payload){
       commit("SET_SHOW_LOADER",payload);
+    },
+    setActiveRosterIndex({commit},index){
+      commit("SET_ACTIVE_ROSTER_INDEX",index);
     }
   }
 }

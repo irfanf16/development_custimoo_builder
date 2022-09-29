@@ -1,13 +1,13 @@
 <template>
-  <div class="accordion" role="tablist">
+  <div class="accordion color-accordion" role="tablist">
     <b-card no-body v-for="(svgElement, index) in svgGroups" :key="index">
       <b-card-header header-tag="header" class="p-0" role="tab">
-        <b-button block v-b-toggle="'accordion-'+(index+1)" class="p-3" @click="showColor(index)">
+        <b-button block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index)">
           <span class="text">{{ svgElement.id | capitalize }}</span>
           <span class="color">
             <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
             <span class="color-pantone-name">{{ svgElement.pantone }}<span style="text-transform: uppercase; display: block">{{ svgElement.name }}</span><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
-          </span>   
+          </span>
           <span class="accordion-icon"></span>
         </b-button>
       </b-card-header>
@@ -17,7 +17,7 @@
             <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
             <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)">Others</b-nav-item>
           </b-nav>
-          <div class="color-holder" ref="ColorAccordion">
+          <div class="color-holder" style="padding-top: 5px;" ref="ColorAccordion">
             <div class="color-container">
               <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
@@ -37,6 +37,9 @@
               <template v-else v-for="(color, index) in productColor">
                 <div v-if="color.value"  class="color-box"  @click="setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index">
+                  <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
+                          <BIconCheck />
+                        </span>
                 </div>
               </template>
             </div>
@@ -72,7 +75,7 @@ import {getSelectedProductPantones} from "@/helpers/Helpers";
     //   item.addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});
     //   item.addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()});
     // });
-    
+
     setTimeout(() => {
     this.selectType(this.selectTypeIndex)
     }, 300)
