@@ -586,7 +586,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     dom_svg.setAttribute('transform', 'translate(-1 ' + transform_height + ')')
 
                     const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
-                      '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+                      '<svg stroke-location="outside" style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
                       'viewBox="0 0 ' + width + ' ' + height + '"> \n' + dom_svg.outerHTML + '\n</svg>'
 
 

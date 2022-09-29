@@ -1329,7 +1329,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if (ok) {
       this.$store.commit('RESET_LAST_ACTIVE_DATA')
-      await self.exitFromEditMode()
+      await this.exitFromEditMode()
       this.hideLockerProductUpdateButton()
       // if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
       //   await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
