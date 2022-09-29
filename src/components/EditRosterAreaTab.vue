@@ -317,7 +317,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
 
   handleRosterModalBeforeClose() {
     let self:Record<any, any>  = this;
-    let first_roster_item = this.$store.getters.getSelectedProductRoster(0);
+    let first_roster_item = this.$store.getters.getProductRosters(this.selectedProduct.id,0);
     if(this.custom_name_index >= 0) {
       let custom_text_of_type_name = this.customText[this.custom_name_index];
       custom_text_of_type_name.value = first_roster_item.text

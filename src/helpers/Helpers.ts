@@ -8,7 +8,7 @@ import Vue from "vue";
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
 import {Side} from "three";
-import {parseInt} from "lodash";
+import {keys, parseInt} from "lodash";
 
 const getLogoSettingsObject = () => {
   return {
@@ -430,6 +430,7 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
 const CustimooOrderFlowStatuses : Record<any, any> = {
   submitted_for_factory_review: 'Submitted for Factory Review',
   order_approve: 'Marked to Factory',
+  order_cancel: 'Order Cancelled',
   factory_approved: 'Factory Approved',
   factory_rejected: 'Factory Rejected',
   submitted_for_customer_review: 'Submitted for Customer Review',
@@ -460,7 +461,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       }
       const selected_product = Store.getters.getSelectedProduct;
       const productCustomTexts = Store.getters.productCustomTexts(selected_product.id)
-      const roster_details = Store.getters.getSelectedProductRoster()
+      const roster_details = Store.getters.getProductRosters()
       const roster_texts : Record<any, any> = {}
       const common : Record<any, any>[] = []
 
@@ -641,16 +642,15 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const getCanvasImage = Store.getters.getCanvasImage
       const style_index = Store.getters.getCurrentStyleIndex;
       const product_style = selected_product.productstyles[style_index];
-      const lockerEditStatus = Store.getters.getEditStatus;
+      const productEditInfo = Store.getters.getProductEditInfoObject;
       let product_name = selected_product.product_name
       //selected_design will always return array having single object
       const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
 
       let design_name = selected_design.design_name;
-      if(lockerEditStatus){
-        const lockerEditProductName = Store.getters.getEditProductName;
-        if(lockerEditProductName)
-          design_name = lockerEditProductName
+      if(productEditInfo.editing && productEditInfo.type == 'locker_product'){
+        const lockerEditProduct = productEditInfo.locker_product_info;
+          design_name = lockerEditProduct.locker_product_name
       }
       product_name = `${product_name} - ${design_name}`;
       const product_models = Store.getters.getProductModels;
@@ -680,7 +680,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         pdf_file: null,
         production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
         // front_design:front_design,
-        product_roster_detail: Store.getters.getSelectedProductRoster(),
+        product_roster_detail: Store.getters.getProductRosters(),
         style_id: product_style.id,
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
@@ -702,7 +702,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
   })
 }
 
-const initCustomLogos = (retrieved_products: Record<any, any>) => {
+const initCustomLogos = async(retrieved_products: Record<any, any>) => {
   retrieved_products.forEach((product: Record<any, any>) => {
     if(product.is_logo_allowed) {
       const custom_logos = Store.getters.getCustomLogos(product.id)
@@ -782,6 +782,10 @@ const activityStatus = {
   order_approve: {
     title: "Marked to Factory",
     message: "Order is forwarded to factory.",
+  },
+  order_cancel: {
+    title: "Order Cancelled",
+    message: "Your order has been cancelled.",
   },
   factory_approved: {
     title: "Artwork Approved",
@@ -899,6 +903,19 @@ const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[],
     return last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
   })
   Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
+  /*
+  * For commit {SET_LAST_ACTIVE_PRODUCT_CUSTOM_TEXTS} the custom text is being passed by reference so any change in custom text will also be reflected in
+  * state.last_active_product_data
+   */
+  retrieved_products_custom_texts.forEach((product_custom_texts: Record<any, any>[]) => {
+    const product_id = product_custom_texts && product_custom_texts.length > 0 ? product_custom_texts[0].product_id : null;
+    if(product_id) {
+      Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+        product_custom_texts: {[product_id]: product_custom_texts}
+      });
+    }
+  })
+
 }
 
 const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
@@ -1445,12 +1462,13 @@ const authenticateUser = async (token: string) => {
   Store.commit('SET_RECENT_LOGOS')
 }
 
-const lastActiveProductDefaultObject = () => {
-  return {
+const lastActiveProductDefaultObject = (keys_default_values = {}) => {
+  const default_obj = {
     category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
     page_no: 1, customized: true, personalized: false, product_custom_texts: {}, custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
-    roster_detail: []
+    roster_detail: [], products_rosters: {}
   }
+  return {...default_obj, ...keys_default_values}
 }
 
 const resetLastActiveProductData = async () => {
