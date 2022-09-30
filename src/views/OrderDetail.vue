@@ -131,9 +131,11 @@
                               <img :key="`activity_comment_file_${activity_comment_file_index}`"
                                    :src="`${storage_url}${activity_comment_file.url}`" :alt="`${activity_comment_file.name}`" width="100">
                             </template>
-                            <template v-if="activity_comment_file.extension.toLowerCase() == 'pdf'">
-                              <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="activity_comment_file.file_preview" download target="_blank">
-                                <img src="/img/images/pdf-placeholer.png" alt="">
+
+                            <template v-if="['pdf', 'ai', 'eps', 'svg'].includes(activity_comment_file.extension.toLowerCase())">
+                              <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="`${storage_url}${activity_comment_file.url}`" :download="activity_comment_file.name" target="_blank">
+                                <img width="50" height="50" src="/img/images/file.png" :alt="activity_comment_file.name">
+                                <span>{{activity_comment_file.name}}.{{activity_comment_file.extension}}</span>
                               </a>
                             </template>
                           </template>
