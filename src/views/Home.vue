@@ -426,12 +426,14 @@ Vue.filter('formatDate', function(value:string) {
 
   async mounted() {
     let self: Record<any, any> = this;
+    console.log('mounted')
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     /*
     * if last_active_product_default_obj keys length is not equal to the store property getLastActiveProductData then it means
     * we need to initialize the last_active_product_data property of store. This will only triggers once
     * */
     if(Object.keys(last_active_product_default_obj).length !== Object.keys(this.$store.getters.getLastActiveProductData).length) {
+      console.log('inside')
       this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', lastActiveProductDefaultObject())
     }
     await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
