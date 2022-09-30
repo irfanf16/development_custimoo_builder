@@ -1268,8 +1268,11 @@ const ProductAttributes:Module<any, any> = {
     setProductType({commit}, payload) {
       commit('SET_PRODUCT_TYPE', payload)
     },
-    async setCategories({commit}){
-      const url = '/product/categories'
+    async setCategories({commit}, payload){
+      let url = '/product/categories'
+      if(payload && 'query_params' in payload) {
+        url += `?${payload.query_params}`
+      }
       const response = await http.get(url).catch((e: any) => {
         console.error('error while getting categories',e)
       });

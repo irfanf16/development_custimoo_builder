@@ -465,8 +465,11 @@ Vue.filter('formatDate', function(value:string) {
     if(sync_id) {
       await resetLastActiveProductData()
     }
-
-    await this.$store.dispatch('setCategories')
+    const is_customized = this.$store.getters.getCustomized
+    const is_personalized = this.$store.getters.getPersonalized
+    await this.$store.dispatch('setCategories', {
+      query_params: `customized=${is_customized}&personalized=${is_personalized}`
+    })
     let query_params = await this.setQueryParams()
     await this.retrieveProducts(query_params)
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
