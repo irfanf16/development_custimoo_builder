@@ -750,7 +750,7 @@ const activityStatus = {
     message: "Order is forwarded to factory.",
   },
   order_cancel: {
-    title: "Order Cancelled",
+    title: "Cancelled",
     message: "Your order has been cancelled.",
   },
   factory_approved: {

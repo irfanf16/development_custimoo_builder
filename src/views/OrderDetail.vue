@@ -287,15 +287,17 @@ import {getCompany} from "@/helpers/Helpers";
       this.order_id = this.$route.params.order_id;
     }
     comment_id = this.$route.query.comment_id;
-    await self.getOrderDetail();
-    if(comment_id) {
-      let timer = setInterval(function() {
-        self.goToMessage(Number(comment_id))
-        if( document.getElementById(`comment-${comment_id}-box`)) {
-          clearInterval(timer)
-        }
-      }, 2000)
-    }
+     if(this.isCustomerAuthenticated){
+       await self.getOrderDetail();
+       if(comment_id) {
+         let timer = setInterval(function() {
+           self.goToMessage(Number(comment_id))
+           if( document.getElementById(`comment-${comment_id}-box`)) {
+             clearInterval(timer)
+           }
+         }, 2000)
+       }
+     }
 
   },
   components: {
@@ -388,7 +390,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   get company():string{
     return this.$store.getters.getCompany
   }
-
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
 
 
   async getOrderDetail() {

@@ -486,11 +486,25 @@ Vue.filter('formatDate', function(value:string) {
       if(show_cart){
         this.showVModal('cart-modal');
       }
+      this.prevRoute = null
+    }else{
+
+      if(this.prevRoute && this.prevRoute.name == 'OrderDetail'){
+        setTimeout( () => {
+         this.gotoLogin();
+        },5000)
+       }
 
     }
+
     if(this.$route.query.tabIdx){
       this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
     }
+  },
+  async beforeRouteEnter(to, from, next) {
+    next(vm => {
+      vm.prevRoute = from
+     })
   }
   //  destroyed() {
   //   this.$store.dispatch("updateOrderItemProducts", null);
@@ -500,6 +514,7 @@ Vue.filter('formatDate', function(value:string) {
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
   ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton) {
   public products_fonts: Record<any, any> = []
+  public prevRoute = null;
   public logData = logData;
   public tabIndex = 0
   // private products: any[] = []
@@ -985,6 +1000,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public actionAfterLogin() {
+    if(this.prevRoute.name == 'OrderDetail'){
+      this.$router.push(this.prevRoute.fullPath)
+    }
     if(this.actionBeforeLogin == 'lockerRoom') {
       this.getLockerRoomProducts(null)
       this.showVModal('locker-modal')
