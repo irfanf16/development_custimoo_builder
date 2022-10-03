@@ -21,12 +21,15 @@
             <div class="color-container">
               <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
-                  <label class="mb-2" for="inline-form-input-pantone-color">Pantone: (TCX Colors)</label>
+                  <label for="inline-form-input-pantone-color" v-if="getColorType === 'cmyk'">CMYK (x,x,x,x)</label>
+                  <label for="inline-form-input-pantone-color" v-else-if="getColorType === 'pantone-coated'">Pantone: (xxx c)</label>
+                  <label class="mb-2" for="inline-form-input-pantone-color" v-else>Pantone: (TCX xx-xxxx)</label>
                   <b-form-input
                     v-model="svgGroups[selectAccordionIndex].pantone"
                     class="mb-2 mr-sm-2 mb-sm-0"
                     placeholder="XX-XXXX"
                     @input="changePantoneColor"
+                    :disabled="getColorType === 'cmyk'"
                   ></b-form-input>
                   <div class="pantone-message">
                     {{ pantoneMessage }}
@@ -54,7 +57,7 @@
 import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
-import {getClosestColor, pantones, getColorEncoding} from '@/pantoneColor'
+import {getClosestColor, pantonesTcx, getColorEncoding} from '@/pantoneColor'
 import {getSelectedProductPantones} from "@/helpers/Helpers";
 
 @Component<ColorAccordion>({

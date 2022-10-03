@@ -41,7 +41,7 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 import {getSelectedProductPantones} from "@/helpers/Helpers";
 
-import {getClosestColor, pantones, getColorEncoding} from '@/pantoneColor'
+import {getClosestColor, pantonesTcx, getColorEncoding} from '@/pantoneColor'
 
 @Component<TextColorTabs>({
   components: {
