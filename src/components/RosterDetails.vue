@@ -81,7 +81,7 @@
         <div class="roster-row mb-2" :key="`roster_item_${productRosterItemIndex}`">
           <div class="align-left">
             <template v-if="allowNameAndNumbers">
-              <div class="hide-show">
+              <div class="hide-show" v-if="selectedProduct.preview_custom_texts">
                 <a v-if="custom_name_index != -1 || custom_number_index != -1" @click="handleRosterItemFocus(productRosterItemIndex)">
                   <font-awesome-icon :icon="['fas', productRosterItemIndex == active_roster_index ? 'eye' : 'eye-slash']" />
                 </a>
