@@ -89,7 +89,7 @@
                       </modal>
                     </template>
                   </div>
-
+<div>{{mainTotalTabs}}</div>
                   <ul class="preview-header-icons">
                     <li class="d-flex flex-wrap align-items-center">
                       <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
@@ -426,7 +426,7 @@ Vue.filter('formatDate', function(value:string) {
 
   async mounted() {
     let self: Record<any, any> = this;
-    console.log('mounted')
+    await this.adjustTotalTabs();
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     /*
     * if last_active_product_default_obj keys length is not equal to the store property getLastActiveProductData then it means
@@ -630,11 +630,38 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private adjustTotalTabs() {
     this.mainTotalTabs = 3
 
+    console.log('asd', this.selectedProduct)
+
+    // is_cap_letter_available
+    //   :
+    //   0
+    // is_custom_color_allowed
+    //   :
+    //   1
+    // is_logo_allowed
+    //   :
+    //   0
+    // allow_extra_text
+    //   :
+    //   1
+    // allow_fixed_logo
+    //   :
+    //   0
+    // allow_name_number
+    //   :
+    //   1
+    // allowed_logos_count
+    //   :
+    //   0
     if(!this.selectedProduct.is_logo_allowed){
       this.mainTotalTabs = (this.mainTotalTabs - 1)
     }
 
     if(!this.selectedProduct.allow_name_number){
+      this.mainTotalTabs = (this.mainTotalTabs - 1)
+    }
+
+    if(this.selectedProduct.product_type === 'personalized'){
       this.mainTotalTabs = (this.mainTotalTabs - 1)
     }
   }

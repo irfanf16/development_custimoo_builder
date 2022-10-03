@@ -129,7 +129,7 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 
-router.afterEach((to, from, failure) => {
+router.afterEach((to, from) => {
   const jwtToken = localStorage.getItem('jwtToken')
   if(!jwtToken){
     if(to.name == 'OrderDetail'){
