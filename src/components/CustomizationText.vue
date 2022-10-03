@@ -60,9 +60,8 @@
 
                 <!-- Tabs content starts -->
 
-                  <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
                   <div v-if="product_custom_text" class="text-color-holder customization-tabs" :class="{'no-outline': product_custom_text.items[productCustomTextItemIndex].outline_width == 0}">
-                    <b-tabs content-class="mt-3">
+                    <b-tabs content-class="mt-0" @change="setOutlineWidth" class="color-types" v-model="activeColorTabIndex">
                       <template v-for="(select_color_type, selectColorTypeIndex) in ['Fill Color', 'Outline Color']">
                         <b-tab :key="`select_color_type_${selectColorTypeIndex}`">
                           <template slot="title">
@@ -70,10 +69,37 @@
                             {{ select_color_type }}
                           </template>
                           <div class="customization-tabs">
+                            <div class="outline-slider-area d-flex justify-content-between pt-2">
+                              <template v-if="product_custom_text_item.outline_enabled">
+                                <div class="mr-sm-2 mb-sm-0" v-show="activeColorTabIndex == 1">
+                                  <label class="mt-1" :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`">
+                                    Outline Width:
+
+                                    <span class="font-weight-bolder">{{ product_custom_text_item.outline_width }}px</span>
+                                  </label>
+                                  <b-form-input class="mt-2" type="range" min="0" max="10" step="1"
+                                                :value="product_custom_text_item.outline_width"
+                                                :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
+                                                :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
+                                                :id="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
+                                                :ref="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
+                                                @change="handleCustomTextOutlineUpdate($event, customTextIndex, productCustomTextItemIndex)"></b-form-input>
+                                </div>
+                              </template>
+                              <div>
+                                <label :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`">Placement</label>
+                                <b-form-select :style="{ fontSize: '14px', height: '35px', outline: 'none', boxShadow: 'none' }" :value="product_custom_text_item.placement"
+                                               :options="['Front', 'Back']" :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
+                                               :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
+                                               @change="handleCustomTextPlacementUpdate($event, customTextIndex, productCustomTextItemIndex)"
+                                ></b-form-select>
+                              </div>
+                            </div>
+
                             <b-tabs>
                               <b-tab v-for="(product_color, productColorIndex) in product_colors" :key="`product_color_${productColorIndex}_${product_color.type}_type`">
-                                <template slot="title">
-                                  {{product_color.name}}
+                                <template #title>
+                                  {{product_color.name | capitalize}}
                                 </template>
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">
@@ -83,6 +109,10 @@
                                   </div>
                                 </div>
                               </b-tab>
+                              <template #tabs-end>
+                                <b-nav-item>Others</b-nav-item>
+                                <!--                                  <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)"></b-nav-item>-->
+                              </template>
                             </b-tabs>
                           </div>
                         </b-tab>
@@ -90,29 +120,6 @@
                     </b-tabs>
                   </div>
 
-                  <div class="outline-slider-area d-flex justify-content-between pt-4">
-                    <template v-if="product_custom_text_item.outline_enabled">
-                      <div class="mr-sm-2 mb-sm-0">
-                        <label :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`">
-                          Outline Width
-                        </label>
-                        <b-form-input class="mt-2" id="range-2" type="range" min="0" max="10" step="1"
-                                      :value="product_custom_text_item.outline_width"
-                                      :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
-                                      :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
-                                      @change="handleCustomTextOutlineUpdate($event, customTextIndex, productCustomTextItemIndex)"></b-form-input>
-                        <div class="mt-2">Outline Size: {{ product_custom_text_item.outline_width }}px</div>
-                      </div>
-                    </template>
-                    <div>
-                      <label :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`">Placement</label>
-                      <b-form-select :style="{ fontSize: '18px', height: '44px' }" :value="product_custom_text_item.placement"
-                                     :options="['Front', 'Back']" :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
-                                     :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
-                                     @change="handleCustomTextPlacementUpdate($event, customTextIndex, productCustomTextItemIndex)"
-                      ></b-form-select>
-                    </div>
-                  </div>
 
 
                 <!-- Tabs content ends -->
@@ -167,6 +174,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   /* component data properties goes here */
   public product_fonts: Record<any, any>[] = []
   public product_colors: Record<any, any>[] = []
+  private activeColorTabIndex = 0;
   public default_font_obj = ''
 
   /* component props goes here */

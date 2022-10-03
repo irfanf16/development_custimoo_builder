@@ -617,7 +617,7 @@ button {
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            padding: 0.3rem 1.25rem 1rem;
+            padding: 0.3rem 1.25rem 0.3rem;
 
             &:focus {
                 box-shadow: none;
@@ -694,11 +694,13 @@ button {
 
                 .color-pantone-name {
                     //max-width: 80px;
-                    display: block;
+                    display: flex;
+                    flex-wrap: wrap;
+                    column-gap: 5px;
 
                     span{
-                        display: block;
-                        width: 100%;
+                        display: inline-block;
+                        width: auto;
                         word-break: break-all;
                         word-wrap: break-word;
                     }
@@ -983,14 +985,14 @@ button {
     .tabs-logo-container{
         .logo-placement-area {
             @media (min-width: 786px) {
-                padding-bottom: 15px;
+                padding-bottom: 10px;
             }
         }
     }
 
     .logo-placement-area {
         @media (min-width: 786px) {
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
 
         h4 {
@@ -5625,6 +5627,31 @@ $fontSize: 0.5;
     }
 }
 
+.color-types {
+    &>div:first-child{
+        .nav.nav-tabs{
+            padding-bottom: 0.5rem;
+
+            li{
+                &:first-child{
+                    display: inline-flex;
+                    align-items: center;
+                    column-gap: 5px;
+
+                    &:before{
+                        content: "Select Color";
+                        display: inline-block;
+                        font-weight: bold;
+                    }
+                }
+                a{
+                    padding: 3px 13px;
+                }
+            }
+        }
+    }
+}
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -5875,6 +5902,7 @@ $fontSize: 0.5;
             overflow-x: auto;
             gap: 5px;
             padding-bottom: 0.7rem;
+            padding-top: 0.3rem;
 
             @extend .theme-scroll-h;
 
@@ -5888,6 +5916,19 @@ $fontSize: 0.5;
 }
 
 .customization-tabs .customization-text-area .text-color-holder.customization-tabs.no-outline > .tabs > div > .nav.nav-tabs > .nav-item:nth-child(2){
+    //display: none;
+
+    a{
+        //background: #ccc;
+        opacity: 0.5;
+
+        &:hover{
+            opacity: 1;
+        }
+    }
+}
+
+.customization-tabs .customization-text-area .text-color-holder.customization-tabs.no-outline .outline-slider-area > div:first-child{
     display: none;
 }
 
