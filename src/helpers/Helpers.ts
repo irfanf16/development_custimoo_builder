@@ -420,7 +420,7 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
 const CustimooOrderFlowStatuses : Record<any, any> = {
   submitted_for_factory_review: 'Submitted for Factory Review',
   order_approve: 'Marked to Factory',
-  order_cancel: 'Order Cancelled',
+  order_cancel: 'Cancelled',
   factory_approved: 'Factory Approved',
   factory_rejected: 'Factory Rejected',
   submitted_for_customer_review: 'Submitted for Customer Review',
@@ -576,12 +576,12 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     dom_svg.setAttribute('transform', 'translate(-1 ' + transform_height + ')')
 
                     const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
-                      '<svg style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+                      '<svg stroke-location="outside" style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
                       'viewBox="0 0 ' + width + ' ' + height + '"> \n' + dom_svg.outerHTML + '\n</svg>'
 
 
-                    const converted_width = unitConversion((width * custom_text_item.scaleX) / selected_product.measurement_ratio)
-                    const converted_height = unitConversion((height * custom_text_item.scaleY )/ selected_product.measurement_ratio)
+                    const converted_width = unitConversion((width * custom_text_item.scaleX) * selected_product.measurement_ratio)
+                    const converted_height = unitConversion((height * custom_text_item.scaleY ) * selected_product.measurement_ratio)
 
                     text_item_object.width = converted_width.value;
                     text_item_object.height = converted_height.value;
@@ -750,7 +750,7 @@ const activityStatus = {
     message: "Order is forwarded to factory.",
   },
   order_cancel: {
-    title: "Order Cancelled",
+    title: "Cancelled",
     message: "Your order has been cancelled.",
   },
   factory_approved: {

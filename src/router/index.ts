@@ -96,6 +96,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+
   const app_version = localStorage.getItem('app_version')
   if(app_version != process.env.VUE_APP_VERSION) {
     localStorage.setItem('app_version', process.env.VUE_APP_VERSION)
@@ -103,6 +104,7 @@ router.beforeEach(async (to, from, next) => {
     location.reload()
   }
   const jwtToken = localStorage.getItem('jwtToken')
+
   if (!store.getters.getCustomer && jwtToken){
     const customer = await store.dispatch('getCustomerFromToken', jwtToken)
     if (customer){
@@ -113,6 +115,7 @@ router.beforeEach(async (to, from, next) => {
       await store.commit('SET_CUSTOMER', payload)
     }
   }
+
   // remove ! sign from url that cause to customizer not load on page refresh mainly on evolution
   let lastUrl = location.href;
   new MutationObserver(() => {
@@ -124,6 +127,16 @@ router.beforeEach(async (to, from, next) => {
   }).observe(document, {subtree: true, childList: true});
 
   next()
+})
+
+router.afterEach((to, from, failure) => {
+  const jwtToken = localStorage.getItem('jwtToken')
+  if(!jwtToken){
+    if(to.name == 'OrderDetail'){
+      router.push('/')
+    }
+  }
+
 })
 
 export default router

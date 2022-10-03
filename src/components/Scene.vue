@@ -299,6 +299,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     return this.$store.getters.getSelectedProductId
   }
 
+  get selectedProduct(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct
+  }
+
   get productCustomTexts(): Record<any, any>[] {
     return this.$store.getters.productCustomTexts(this.product_id)
   }
@@ -1828,6 +1832,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   }
 
   public async addTextsNew(custom_text_info: Record<any, any>, from_load = false) {
+    if(!this.selectedProduct.preview_custom_texts)
+      return false
     if(this.mounted || from_load) {
       const self: Record<any, any> = this
       await this.syncCustomTextsWithCustomTextsObjects()

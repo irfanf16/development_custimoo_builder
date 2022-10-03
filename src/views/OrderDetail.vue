@@ -131,9 +131,11 @@
                               <img :key="`activity_comment_file_${activity_comment_file_index}`"
                                    :src="`${storage_url}${activity_comment_file.url}`" :alt="`${activity_comment_file.name}`" width="100">
                             </template>
-                            <template v-if="activity_comment_file.extension.toLowerCase() == 'pdf'">
-                              <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="activity_comment_file.file_preview" download target="_blank">
-                                <img src="/img/images/pdf-placeholer.png" alt="">
+
+                            <template v-if="['pdf', 'ai', 'eps', 'svg'].includes(activity_comment_file.extension.toLowerCase())">
+                              <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="`${storage_url}${activity_comment_file.url}`" :download="activity_comment_file.name" target="_blank">
+                                <img width="50" height="50" src="/img/images/file.png" :alt="activity_comment_file.name">
+                                <span>{{activity_comment_file.name}}.{{activity_comment_file.extension}}</span>
                               </a>
                             </template>
                           </template>
@@ -285,15 +287,17 @@ import {getCompany} from "@/helpers/Helpers";
       this.order_id = this.$route.params.order_id;
     }
     comment_id = this.$route.query.comment_id;
-    await self.getOrderDetail();
-    if(comment_id) {
-      let timer = setInterval(function() {
-        self.goToMessage(Number(comment_id))
-        if( document.getElementById(`comment-${comment_id}-box`)) {
-          clearInterval(timer)
-        }
-      }, 2000)
-    }
+     if(this.isCustomerAuthenticated){
+       await self.getOrderDetail();
+       if(comment_id) {
+         let timer = setInterval(function() {
+           self.goToMessage(Number(comment_id))
+           if( document.getElementById(`comment-${comment_id}-box`)) {
+             clearInterval(timer)
+           }
+         }, 2000)
+       }
+     }
 
   },
   components: {
@@ -386,7 +390,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   get company():string{
     return this.$store.getters.getCompany
   }
-
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
 
 
   async getOrderDetail() {
