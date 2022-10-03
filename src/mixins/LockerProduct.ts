@@ -815,6 +815,11 @@ export class ProductsQueryParamsMixin extends Vue {
               self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: 0, category_id: category.id})
             }
           }
+          if(self.$route.query.product_share_link){
+            query_params = [
+              `customized=${false}`, `personalized=${false}`,`active_product_id=${self.$route.query.product_id}`, 'paginate=false','active_product_type=product_share_link'
+            ];
+          }
         }
       }
     }
