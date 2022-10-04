@@ -52,7 +52,7 @@
               </div>
             </div>
           </b-tab>
-          <b-tab v-if="selectedProduct.allow_name_number">
+          <b-tab v-if="selectedProduct.allow_name_number && selectedProduct.preview_custom_texts">
             <button @click="setHideTab('textHide', !hideTab.textHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('textHide', true)" >

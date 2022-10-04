@@ -8,9 +8,10 @@
             <template v-if="['jpg', 'jpeg', 'png'].includes(parent_object_file.extension.toLowerCase())">
               <img :src="`${storage_url}${parent_object_file.url}`" :alt="parent_object_file.url">
             </template>
-            <template v-if="parent_object_file.extension.toLowerCase() == 'pdf'">
-              <a :href="`${storage_url}${parent_object_file.url}`" target="_blank" download="">
-                <img src="/img/images/pdf-placeholer.png" :alt="parent_object_file.name">
+           <template v-if="['pdf', 'ai', 'eps', 'svg'].includes(parent_object_file.extension.toLowerCase())">
+              <a :href="`${storage_url}${parent_object_file.url}`" target="_blank" :download="parent_object_file.name">
+                <img width="50" height="50" src="/img/images/file.png" :alt="parent_object_file.name">
+                <span>{{parent_object_file.name}}.{{parent_object_file.extension}}</span>
               </a>
             </template>
           </div>
@@ -41,8 +42,9 @@
           <template v-if="['jpg', 'jpeg', 'png'].includes(comment_file.extension.toLowerCase())">
             <img :src="comment_file.file_preview" alt="">
           </template>
-          <template v-if="comment_file.extension.toLowerCase() == 'pdf'">
-            <img src="/img/images/pdf-placeholer.png" alt="" @click="previewPdf(comment_file)">
+          <template v-if="['pdf', 'ai', 'eps', 'svg'].includes(comment_file.extension.toLowerCase())">
+            <img src="/img/images/file.png" alt="" @click="previewPdf(comment_file)">
+            <span>{{comment_file.name}}</span>
           </template>
         </div>
       </div>
@@ -140,7 +142,7 @@ export default class AddUpdateComment extends  Mixins(ErrorMessages) {
   async uploadFiles(event: Record<any, any>) {
     let self = this;
     let uploaded_files = event.target.files;
-    let allowed_file_types = ["jpg", "jpeg", "pdf", 'png']
+    let allowed_file_types = ["jpg", "jpeg", "pdf", 'png', 'ai', 'eps', 'svg']
     let rejected_files = [];
     for (let uploaded_file of uploaded_files) {
       let file_name = uploaded_file.name;

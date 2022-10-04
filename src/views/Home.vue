@@ -426,13 +426,16 @@ Vue.filter('formatDate', function(value:string) {
 
   async mounted() {
     let self: Record<any, any> = this;
+    await this.adjustTotalTabs();
     const last_active_product_default_obj = lastActiveProductDefaultObject()
+    let last_active_product_obj = this.$store.getters.getLastActiveProductData
     /*
     * if last_active_product_default_obj keys length is not equal to the store property getLastActiveProductData then it means
     * we need to initialize the last_active_product_data property of store. This will only triggers once
     * */
-    if(Object.keys(last_active_product_default_obj).length !== Object.keys(this.$store.getters.getLastActiveProductData).length) {
-      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', lastActiveProductDefaultObject())
+    if(Object.keys(last_active_product_default_obj).length !== Object.keys(last_active_product_obj).length) {
+      last_active_product_obj = last_active_product_default_obj
+      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', last_active_product_default_obj)
     }
     await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
       await this.initProductsFonts(products, resolve)
@@ -463,8 +466,9 @@ Vue.filter('formatDate', function(value:string) {
     if(sync_id) {
       await resetLastActiveProductData()
     }
-
-    await this.$store.dispatch('setCategories')
+    await this.$store.dispatch('setCategories', {
+      query_params: `customized=${last_active_product_obj.customized}&personalized=${last_active_product_obj.personalized}`
+    })
     let query_params = await this.setQueryParams()
     await this.retrieveProducts(query_params)
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
@@ -481,11 +485,25 @@ Vue.filter('formatDate', function(value:string) {
       if(show_cart){
         this.showVModal('cart-modal');
       }
+      this.prevRoute = null
+    }else{
+
+      if(this.prevRoute && this.prevRoute.name == 'OrderDetail'){
+        setTimeout( () => {
+         this.gotoLogin();
+        },5000)
+       }
 
     }
+
     if(this.$route.query.tabIdx){
       this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
     }
+  },
+  async beforeRouteEnter(to, from, next) {
+    next(vm => {
+      vm.prevRoute = from
+     })
   }
   //  destroyed() {
   //   this.$store.dispatch("updateOrderItemProducts", null);
@@ -495,6 +513,7 @@ Vue.filter('formatDate', function(value:string) {
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
   ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton) {
   public products_fonts: Record<any, any> = []
+  public prevRoute = null;
   public logData = logData;
   public tabIndex = 0
   // private products: any[] = []
@@ -615,6 +634,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
 
     if(!this.selectedProduct.allow_name_number){
+      this.mainTotalTabs = (this.mainTotalTabs - 1)
+    }
+
+    if(this.selectedProduct.product_type === 'personalized'){
       this.mainTotalTabs = (this.mainTotalTabs - 1)
     }
   }
@@ -980,6 +1003,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public actionAfterLogin() {
+    if(this.prevRoute.name == 'OrderDetail'){
+      this.$router.push(this.prevRoute.fullPath)
+    }
     if(this.actionBeforeLogin == 'lockerRoom') {
       this.getLockerRoomProducts(null)
       this.showVModal('locker-modal')

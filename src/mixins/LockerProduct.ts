@@ -166,6 +166,7 @@ export class handleMainProducts extends Vue {
       }
       else {
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;
+        console.log('last_active_prod_data', last_active_prod_data)
         if(editing_product_detail ) {
           product_index = response_data.active_product_index;
         }
@@ -206,7 +207,13 @@ export class handleMainProducts extends Vue {
               return product_design.design_show
             })
             design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
-            let last_active_obj_updated_values = { design_index: design_index, design_id: design_id, product_id:  product_id,
+            let category_index = 0
+            let category_id = null
+            if(last_active_prod_data.category_id) {
+              category_index = last_active_prod_data.category_index
+              category_id = last_active_prod_data.category_id
+            }
+            let last_active_obj_updated_values = {category_index: category_index, category_id: category_id, design_index: design_index, design_id: design_id, product_id:  product_id,
               search_products: self.search_products, style_id: retrieved_products[0].productstyles[0].id,
               customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized
             }

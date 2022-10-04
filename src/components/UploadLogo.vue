@@ -1,5 +1,5 @@
 <template>
-  <div style="padding-bottom: 10px" class="upload-logo-opener" v-if="customLogos">
+  <div style="padding-bottom: 10px" class="upload-logo-opener" :class="{'no-logo': !!(customLogos[customLogoIndex] && customLogos[customLogoIndex].url)}" v-if="customLogos">
     <div class="logo-option-area mb-3 mt-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
       <div class="w-100 text-left position-relative logo-edit-btn-updated">
         <div class="d-sm-block d-lg-block continue-btn-holder pt-1" style="padding: 0">
