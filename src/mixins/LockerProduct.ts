@@ -236,7 +236,9 @@ export class handleMainProducts extends Vue {
       await setRetrievedProductsCustomTexts(retrieved_products)
       this.$store.commit('CHANGE_STYLE_INDEX', style_index);
       await this.$store.dispatch("getModels", retrieved_products[product_index].id);
-      this.$root.$emit('sliderEvent', product_index);
+      self.$root.$emit('sliderEvent', product_index);
+
+
 
 
       //If we are editing locker product then set the locker product data and return

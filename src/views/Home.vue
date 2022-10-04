@@ -428,6 +428,10 @@ Vue.filter('formatDate', function(value:string) {
     let self: Record<any, any> = this;
     await this.adjustTotalTabs();
     const last_active_product_default_obj = lastActiveProductDefaultObject()
+    if(self.$route.query.product_share_link){
+      self.$store.commit('RESET_LAST_ACTIVE_DATA')
+      await self.exitFromEditMode()
+    }
     /*
     * if last_active_product_default_obj keys length is not equal to the store property getLastActiveProductData then it means
     * we need to initialize the last_active_product_data property of store. This will only triggers once
