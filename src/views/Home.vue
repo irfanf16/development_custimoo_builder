@@ -89,7 +89,7 @@
                       </modal>
                     </template>
                   </div>
-                  
+
                   <ul class="preview-header-icons">
                     <li class="d-flex flex-wrap align-items-center">
                       <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
