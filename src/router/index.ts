@@ -103,7 +103,15 @@ router.beforeEach(async (to, from, next) => {
     location.reload()
     return
   }
-  const jwtToken = localStorage.getItem('jwtToken')
+
+  let jwtToken = localStorage.getItem('jwtToken')
+  if(!jwtToken){
+    const adminToken = localStorage.getItem('adminToken');
+    if(adminToken){
+      localStorage.setItem('jwtToken',adminToken);
+      jwtToken = localStorage.getItem('jwtToken');
+    }
+  }
 
   if (!store.getters.getCustomer && jwtToken){
     const customer = await store.dispatch('getCustomerFromToken', jwtToken)

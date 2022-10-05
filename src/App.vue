@@ -48,6 +48,7 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
     const token = this.$router.currentRoute.query.token as string
     if (token){
       localStorage.setItem('jwtToken', token)
+      localStorage.setItem('adminToken', token)
       await authenticateUser(token)
       await this.$store.dispatch('resetStore')
       await this.$router.push({name: 'Home'})
