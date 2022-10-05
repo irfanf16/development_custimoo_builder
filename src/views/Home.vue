@@ -1362,6 +1362,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if (ok) {
       this.$store.commit('RESET_LAST_ACTIVE_DATA')
+      await this.$store.dispatch('setCategories', {
+        query_params: `customized=1&personalized=0`
+      })
       await this.exitFromEditMode()
       this.hideLockerProductUpdateButton()
       // if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
@@ -1371,15 +1374,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       //
       // }
       this.updateOrderItemProducts = null;
-      this.$store.dispatch('resetStore')
-      self.$eventBus.$emit('resetTextsCanvas')
-      this.$store.dispatch('setTabMain',{value: 0});
+      await this.$store.dispatch('resetStore')
+      await self.$eventBus.$emit('resetTextsCanvas')
+      await this.$store.dispatch('setTabMain',{value: 0});
       (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
-      this.$store.dispatch('SET_LOGO_COLORS', [])
-      this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
-      this.$store.dispatch("setProductsRosters")
-      // await this.retrieveProducts()
-      //todo need to call retrieveProducts only in edit mode
+      await this.$store.dispatch('SET_LOGO_COLORS', [])
+      await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+      await this.$store.dispatch("setProductsRosters")
+      await this.retrieveProducts()
     }
 
     if(this.mobileScreen){

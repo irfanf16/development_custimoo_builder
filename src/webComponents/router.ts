@@ -41,6 +41,14 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  const vue_app_version = await localStorage.getItem('vue_app_version')
+  if(vue_app_version != process.env.VUE_APP_VERSION) {
+    await localStorage.setItem('vue_app_version', process.env.VUE_APP_VERSION)
+    await localStorage.removeItem('custimo')
+    await store.dispatch('resetStore')
+    return
+  }
+
   const jwtToken = localStorage.getItem('jwtToken')
   if (!store.getters.getCustomer && jwtToken){
     const customer = await store.dispatch('getCustomerFromToken', jwtToken)
