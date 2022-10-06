@@ -1211,7 +1211,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   }
 
 
-  public objectScaling(e: Record<any, any>, side: string) {
+  public objectScaling(e: Record<any, any>, side: string) { // bound object to do not move out from product
     let texture = this.frontTexture
     let canvas = this.frontCanvas
     if (side == 'back') {
@@ -1279,8 +1279,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     if(canvas.isTargetTransparent(model, pointXCompare, pointY) && max_call > 0) { // add a max call condition to avoid unlimited recursive calls and max_call value 600 as the max canvas size
       if(moveTo == 'left') {
         pointX = pointX - 1
-      } else {
+      } else if(moveTo == 'right') {
         pointX = pointX + 1
+      } else if(moveTo == 'top') {
+        pointY = pointY - 1
+      } else {
+        pointY = pointY + 1
       }
       return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo, max_call)
     } else {
@@ -1354,7 +1358,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
 
       let checkPointY = centerPoint.y
       if(actualNearTo == 'top') {
-        checkPointY = centerPoint.y - 8
+        checkPointY = target.top - (target.height * target.scaleY / 2)
       }
 
       let otherSideObjects = this.otherSideLogos
@@ -1367,7 +1371,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         const model_start = (texture.left - ((texture.width * texture.scaleX) / 2)) - 1
         const model_end = (texture.left + ((texture.width * texture.scaleX) / 2)) + 1
         const width = target.width * target.scaleX;
-        if (moreToWords == 'left') {
+        if(actualNearTo == 'top') {
+          const direction = this.targetNonTransparent(canvas, texture, centerPoint.x, centerPoint.y - target.height, 0, 1, 'bottom')
+          addLeft = this.canvasWidth - target.left
+          addTop = direction.top - checkPointY
+        } else if (moreToWords == 'left') {
           const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')
           const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, checkPointY, 0, 1, 'left')
           const outside = direction.left - checkPointX
