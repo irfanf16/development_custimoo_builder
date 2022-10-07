@@ -14,7 +14,7 @@
 
       <div :key="`main-${selectedProductId+customTextIndex}`" class="d-flex">
         <b-form-input :key="`text-${selectedProductId+customTextIndex}`" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here" :value="product_custom_text.value"
-                      @input="handleCustomTextInputChange($event, customTextIndex)" @focusin="expandTextCustomizer(customTextIndex)" @focusout="collapseTextCustomizer($event, customTextIndex)"></b-form-input>
+                      @input="handleCustomTextInputChange($event, customTextIndex)" @focusin="expandTextCustomizer(customTextIndex)"></b-form-input>
         <button v-b-toggle="`text-accordion-${customTextIndex}`"
                 class="d-flex align-items-center btn btn-secondary light">
           <span class="minus d-flex align-items-center">
