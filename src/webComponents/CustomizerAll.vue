@@ -168,8 +168,11 @@ export default {
     }
 
     const token = this.$router.currentRoute.query.token
+    console.log('All Token')
+    console.log(token);
     if (token){
       localStorage.setItem('jwtToken', token)
+      localStorage.setItem('adminToken', token)
       await authenticateUser(token)
       await this.$store.dispatch('resetStore')
       await this.$router.push({name: 'Home'})

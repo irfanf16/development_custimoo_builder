@@ -164,6 +164,8 @@ export default {
     }
 
     const token = this.$router.currentRoute.query.token
+    console.log('Hockey Token')
+    console.log(token);
     if (token){
       localStorage.setItem('jwtToken', token)
       localStorage.setItem('adminToken', token)
