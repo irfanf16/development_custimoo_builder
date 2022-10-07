@@ -163,16 +163,9 @@ export default {
       shadowRoot.appendChild(faStyles)
     }
 
-    const params = new URLSearchParams(window.location.search)
-    console.log('params')
-    console.log(params);
-
     // const token = this.$router.currentRoute.query.token
-    const token = window.location.href.split('=')[1]
+    const token = this.getParameterByName('token')
     console.log('Hockey Token')
-    console.log(this.$router);
-    console.log(this.$router.currentRoute);
-    console.log(this.$route);
     console.log(token);
     if (token){
       localStorage.setItem('jwtToken', token)
@@ -196,6 +189,14 @@ export default {
     })
   },
   methods:{
+    getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[[\]]/g, '\\$&');
+        let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
   }
 }
 
