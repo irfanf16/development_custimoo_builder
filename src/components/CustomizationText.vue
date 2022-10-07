@@ -113,19 +113,22 @@
                                   </div>
                                 </div>
                               </b-tab>
-<!--                              <b-tab>-->
-<!--                                <template #title>-->
-<!--                                  Other-->
-<!--                                </template>-->
-<!--                                <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">-->
-<!--                                  <div class="color-container">-->
-<!--                                    <color-picker @changeColor="changeColor" ref="colorPicker" theme="light" :color="swatchcolor" :colors-history="false" :colors-default="[]" :key="swatchPantone"/>-->
-<!--                                  </div>-->
-<!--                                </div>-->
-<!--                              </b-tab>-->
+                              <b-tab>
+                                <template #title>
+                                  Other
+                                </template>
+                                <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
+                                  <div class="color-container">
+                                    <color-picker @changeColor="changeColor($event, customTextIndex, productCustomTextItemIndex, select_color_type)"
+                                      theme="light" :colors-default="[]"
+                                      :color="selectColorTypeIndex == 0 ? product_custom_text_item.color : product_custom_text_item.outline_color"
+                                      :sucker-hide="true"/>
+                                  </div>
+                                </div>
+                              </b-tab>
 <!--                              <template #tabs-end>-->
 <!--                                <b-nav-item>Others</b-nav-item>-->
-<!--                                &lt;!&ndash;                                  <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)"></b-nav-item>&ndash;&gt;-->
+<!--                                <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)"></b-nav-item>-->
 <!--                              </template>-->
                             </b-tabs>
                           </div>
@@ -161,12 +164,16 @@ import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
 import {HideUpdateLockerButton, ProductColors, ProductFonts} from "@/mixins/SelectedProductMixin";
 import {find, filter} from "lodash";
+import colorPicker from '@caohenghu/vue-colorpicker';
+import {getSelectedProductPantones} from "@/helpers/Helpers";
+import {getClosestColor} from "@/pantoneColor";
 
 
 @Component<CustomizationText>({
   components: {
     TextColorTabs,
-    ColorTabs
+    ColorTabs,
+    colorPicker
   },
   async mounted() {
     let self: Record<any, any> = this;
@@ -212,6 +219,10 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
     return this.$store.getters.getLockerColors
   }
 
+  get getColorType(): string {
+    return this.$store.getters.getColorType;
+  }
+
   get product_custom_texts(): Record<any, any>[] {
     return this.$store.getters.productCustomTexts(this.selectedProductId)
   }
@@ -223,6 +234,13 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   /*
   * methods starts
   * */
+
+  public changeColor($event:Record<any, any>, customTextIndex:number, productCustomTextItemIndex:number, select_color_type:string) {
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantoneColor = getClosestColor($event.hex,selectProductPantonesList, 'pantone-coated');
+    let color = {value: pantoneColor.hex, position: '1', name: pantoneColor.pantone}
+    this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)
+  }
 
   public handleTextOutline(custom_text_index:number, custom_text_item_index:Record<any, any>) {
     let self: Record<any, any> = this;
