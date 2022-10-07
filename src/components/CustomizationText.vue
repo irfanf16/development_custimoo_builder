@@ -69,7 +69,7 @@
                             <div class="color-circle" :style="{ background: selectColorTypeIndex == 0 ? product_custom_text.items[productCustomTextItemIndex].color : product_custom_text.items[productCustomTextItemIndex].outline_color }"></div>
                             {{ select_color_type }}
                           </template>
-                          <div class="customization-tabs"> {{customTextColorIndex}}
+                          <div class="customization-tabs">
                             <div class="outline-slider-area d-flex justify-content-between pt-2">
                               <template v-if="product_custom_text_item.outline_enabled">
                                 <div class="mr-sm-2 mb-sm-0" v-show="customTextColorIndex[customTextIndex] == 1">
@@ -221,9 +221,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   * */
 
   public handleTextOutline(updateIndex:number, custom_text_item:Record<any, any>) {
-    console.log('custom_text_item.outline_width', custom_text_item.outline_width)
     if(updateIndex == 1 && custom_text_item.outline_width !== 0){
-      console.log('working')
       custom_text_item.outline_width = 3;
     }
   }
