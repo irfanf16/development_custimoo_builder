@@ -45,7 +45,7 @@
         </div>
         <div >
           <div class="customization-tabs show_hide_text">
-            <b-tabs content-class="mt-3" align="center">
+            <b-tabs content-class="mt-3" align="center" @input="resetCustomTextColorIndex(product_custom_text)">
               <template v-for="(product_custom_text_item, productCustomTextItemIndex) in product_custom_text.items">
                 <b-tab v-model="product_custom_text.active_item_index" :key="`custom_${product_custom_text.type}_${customTextIndex}_children_${productCustomTextItemIndex}`">
                 <!-- Tabs title slot -->
@@ -60,22 +60,25 @@
 
                 <!-- Tabs content starts -->
 
-                  <div v-if="product_custom_text" class="text-color-holder customization-tabs" :class="{'no-outline': product_custom_text.items[productCustomTextItemIndex].outline_width == 0}">
-<!--                    <b-tabs content-class="mt-0" @change="setOutlineWidth" class="color-types" v-model="activeColorTabIndex">-->
-                    <b-tabs ref="colors-tab" @myevent="product_custom_text.items[productCustomTextItemIndex].outline_width == 0 && handleCustomTextOutlineUpdate(3, customTextIndex, productCustomTextItemIndex)" content-class="mt-0" class="color-types" v-model="activeColorTabIndex">
+                  <div v-if="product_custom_text" class="text-color-holder customization-tabs"
+                       :class="{'no-outline': product_custom_text_item.outline_width == 0}">
+                    <b-tabs content-class="mt-0" class="color-types" v-model="product_custom_text_item.color_tab_index"
+                            @input="handleTextOutline(customTextIndex, productCustomTextItemIndex)">
                       <template v-for="(select_color_type, selectColorTypeIndex) in ['Fill Color', 'Outline Color']">
                         <b-tab :key="`select_color_type_${selectColorTypeIndex}`">
                           <template slot="title">
-                            <div class="color-circle" :style="{ background: selectColorTypeIndex == 0 ? product_custom_text.items[productCustomTextItemIndex].color : product_custom_text.items[productCustomTextItemIndex].outline_color }"></div>
+                            <div class="color-circle" :style="{ background: selectColorTypeIndex == 0 ?
+                             product_custom_text_item.color :
+                             product_custom_text_item.outline_color }"
+                            ></div>
                             {{ select_color_type }}
                           </template>
                           <div class="customization-tabs">
                             <div class="outline-slider-area d-flex justify-content-between pt-2">
                               <template v-if="product_custom_text_item.outline_enabled">
-                                <div class="mr-sm-2 mb-sm-0" v-show="activeColorTabIndex == 1">
+                                <div class="mr-sm-2 mb-sm-0" v-show="product_custom_text_item.color_tab_index == 1">
                                   <label class="mt-1" :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`">
                                     Outline Width:
-
                                     <span class="font-weight-bolder">{{ product_custom_text_item.outline_width }}px</span>
                                   </label>
                                   <b-form-input class="mt-2" type="range" min="0" max="10" step="1"
@@ -110,10 +113,20 @@
                                   </div>
                                 </div>
                               </b-tab>
-                              <template #tabs-end>
-                                <b-nav-item>Others</b-nav-item>
-                                <!--                                  <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)"></b-nav-item>-->
-                              </template>
+<!--                              <b-tab>-->
+<!--                                <template #title>-->
+<!--                                  Other-->
+<!--                                </template>-->
+<!--                                <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">-->
+<!--                                  <div class="color-container">-->
+<!--                                    <color-picker @changeColor="changeColor" ref="colorPicker" theme="light" :color="swatchcolor" :colors-history="false" :colors-default="[]" :key="swatchPantone"/>-->
+<!--                                  </div>-->
+<!--                                </div>-->
+<!--                              </b-tab>-->
+<!--                              <template #tabs-end>-->
+<!--                                <b-nav-item>Others</b-nav-item>-->
+<!--                                &lt;!&ndash;                                  <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)"></b-nav-item>&ndash;&gt;-->
+<!--                              </template>-->
                             </b-tabs>
                           </div>
                         </b-tab>
@@ -129,7 +142,6 @@
               </template>
             </b-tabs>
           </div>
-
         </div>
       </b-collapse>
     </div>
@@ -144,7 +156,7 @@
 
 <script lang="ts">
 
-import { Component, Mixins, Prop, Watch, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Vue } from 'vue-property-decorator'
 import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
 import {HideUpdateLockerButton, ProductColors, ProductFonts} from "@/mixins/SelectedProductMixin";
@@ -175,19 +187,10 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   /* component data properties goes here */
   public product_fonts: Record<any, any>[] = []
   public product_colors: Record<any, any>[] = []
-  private activeColorTabIndex = 0;
   public default_font_obj = ''
+  public customTextColorIndex: Record<any, any>[] = []
 
-  @Watch('activeColorTabIndex')
-
-  activeColorTabIndexChanged(){
-    if(this.activeColorTabIndex){
-      // (this.$refs['colors-tab'] as Record<any, any>)[0].$emit('myevent');
-    }
-  }
-
-
-  /* component props goes here */
+  /* component props ends here */
 
   public bindScroll($event:Record<any, any>){
     $event.stopPropagation()
@@ -209,7 +212,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
     return this.$store.getters.getLockerColors
   }
 
-  get product_custom_texts() {
+  get product_custom_texts(): Record<any, any>[] {
     return this.$store.getters.productCustomTexts(this.selectedProductId)
   }
 
@@ -221,10 +224,25 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   * methods starts
   * */
 
+  public handleTextOutline(custom_text_index:number, custom_text_item_index:Record<any, any>) {
+    let self: Record<any, any> = this;
+    let custom_text_item = this.product_custom_texts[custom_text_index].items[custom_text_item_index]
+    if(custom_text_item.color_tab_index == 1 && custom_text_item.outline_width == 0){
+      custom_text_item.outline_width = 3;
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "outline_width", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index,
+        value: self.product_custom_texts[custom_text_index]
+      });
+    }
+  }
+
+  public resetCustomTextColorIndex(product_custom_text: Record<any, any>) {
+    product_custom_text.items.forEach((custom_text_item: Record<any, any>) => {
+      custom_text_item.color_tab_index = 0
+    })
+  }
+
   public setLeft($event:Record<any, any>){
-    // console.log('eventX', $event.pageX);
-    // console.log('eventY', $event.pageY);
-    // console.log('event', $event.target.children[0]);
     $event.target.children[0].style.top = $event.pageY+"px"
     $event.target.children[0].style.left = $event.pageX+"px"
   }
