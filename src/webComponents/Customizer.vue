@@ -165,6 +165,9 @@ export default {
 
     const token = this.$router.currentRoute.query.token
     console.log('Hockey Token')
+    console.log(this.$router);
+    console.log(this.$router.currentRoute);
+    console.log(this.$route);
     console.log(token);
     if (token){
       localStorage.setItem('jwtToken', token)
