@@ -163,7 +163,12 @@ export default {
       shadowRoot.appendChild(faStyles)
     }
 
-    const token = this.$router.currentRoute.query.token
+    const params = new URLSearchParams(window.location.search)
+    console.log('params')
+    console.log(params);
+
+    // const token = this.$router.currentRoute.query.token
+    const token = window.location.href.split('=')[1]
     console.log('Hockey Token')
     console.log(this.$router);
     console.log(this.$router.currentRoute);
