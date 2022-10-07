@@ -396,7 +396,7 @@ export default class LogoPlacementTabs extends Vue {
       finalColor.color_text = colors.json_data
       this.productColors = this.productColors.concat(finalColor)
     })
-    this.productColors = this.productColors.concat(this.lockerColors)
+    //this.productColors = this.productColors.concat(this.lockerColors)
   }
 
 
