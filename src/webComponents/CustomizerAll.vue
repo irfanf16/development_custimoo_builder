@@ -167,9 +167,8 @@ export default {
       shadowRoot.appendChild(faStyles)
     }
 
-    const token = this.$router.currentRoute.query.token
-    console.log('All Token')
-    console.log(token);
+    // const token = this.$router.currentRoute.query.token
+    const token = this.getParameterByName('token')
     if (token){
       localStorage.setItem('jwtToken', token)
       localStorage.setItem('adminToken', token)
@@ -192,7 +191,14 @@ export default {
     })
   },
   methods:{
-
+    getParameterByName(name, url = window.location.href) {
+      name = name.replace(/[[\]]/g, '\\$&');
+      let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
   }
 }
 </script>
