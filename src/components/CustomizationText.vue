@@ -171,8 +171,8 @@ import {find, filter} from "lodash";
   async mounted() {
     let self: Record<any, any> = this;
 
-    await self.productFonts()
-    self.product_colors = await self.productColors()
+    await this.productFonts()
+    self.product_colors = await this.productColors('file_colors')
   },
   filters: {
     capitalize: (value: string) => {
