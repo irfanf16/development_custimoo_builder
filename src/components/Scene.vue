@@ -122,7 +122,7 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
         let target = transform.target;
         let canvas = target.canvas;
         if ('custom_text_index' in target) {
-        handleFabricCustomTextRemoved(target)
+          handleFabricCustomTextRemoved(target)
         }
         else {
           let logo = setLogoSettings(target.logoIndex);
@@ -149,15 +149,18 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
         const selected_product_id = self.selectedProductId
         let product_ids = [selected_product_id, ...self.allProductsCustomTexts[self.selectedProductId][custom_text_index].following_product_ids]
         product_ids.forEach((product_id) => {
-          console.log('self.allProductsCustomTexts', product_id, custom_text_index, self.allProductsCustomTexts)
           const removed_custom_text = self.allProductsCustomTexts[product_id][custom_text_index];
           if(removed_custom_text) {
             const removed_custom_text_items = removed_custom_text.items;
             if(removed_custom_text_items[custom_text_item_index]) {
-              removed_custom_text_items[custom_text_item_index].selected = false
-              //check if there is any active item if not then remove the value of custom text
-              let custom_text_active_item = find(removed_custom_text_items, ['selected', true])
-              if(custom_text_active_item == undefined ) {
+              if(removed_custom_text.items.length > 1) {
+                removed_custom_text_items[custom_text_item_index].selected = false
+                //check if there is any active item if not then remove the value of custom text
+                let custom_text_active_item = find(removed_custom_text_items, ['selected', true])
+                if(custom_text_active_item == undefined ) {
+                  removed_custom_text.value = '';
+                }
+              } else {
                 removed_custom_text.value = '';
               }
             }
@@ -1862,9 +1865,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
          * delete existing texts first and re render them
          * */
         if (self.product_custom_text_objects[custom_text_index]) {
+          console.log('in delete')
           await this.deleteExistingTextsFromCanvas(custom_text_index, false)
         }
-
+        if(this.mainPreview) {
+          console.log(custom_text_info)
+        }
         if (custom_text.value) {
           custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
             let fabric_text: fabric.Text | fabric.Group
@@ -1940,6 +1946,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
                     })
                   } else if (custom_text_item.placement == 'Back' && self.backCanvas) {
                     self.backCanvas.add(fabric_text)
+                    fabric_text.bringToFront()
                     render_back_canvas = true
                     fabric_text.on('selected', (e: Record<any, any>) => {
                       this.showDimensions(e, self.dimTextBack)
@@ -1951,7 +1958,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
                     })
                   }
                   this.frontCanvas.renderAll()
-                  this.frontCanvas.renderAll()
+                  if(this.back) {
+                    this.backCanvas.renderAll()
+                    setTimeout(() => {
+                      this.backCanvas.renderAll()
+                    }, 2000)
+                  }
                   this.addToOtherSide(fabric_text, custom_text_item.placement, true)
                 })
               }
@@ -1970,8 +1982,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
                 fontFamily: custom_text_item.font_family,
                 fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
                 fill: custom_text_item.color,
-                stroke: custom_text_item.outline_color,
-                strokeWidth: parseInt(custom_text_item.outline_width),
                 paintFirst: 'stroke',
                 lockScalingFlip: true,
                 padding: 15,
