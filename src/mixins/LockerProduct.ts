@@ -236,7 +236,9 @@ export class handleMainProducts extends Vue {
       await setRetrievedProductsCustomTexts(retrieved_products)
       this.$store.commit('CHANGE_STYLE_INDEX', style_index);
       await this.$store.dispatch("getModels", retrieved_products[product_index].id);
-      this.$root.$emit('sliderEvent', product_index);
+      self.$root.$emit('sliderEvent', product_index);
+
+
 
 
       //If we are editing locker product then set the locker product data and return
@@ -814,6 +816,11 @@ export class ProductsQueryParamsMixin extends Vue {
               query_params.push(`category_id=${category.id}`)
               self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: 0, category_id: category.id})
             }
+          }
+          if(self.$route.query.product_share_link){
+            query_params = [
+              `customized=${false}`, `personalized=${false}`,`active_product_id=${self.$route.query.product_id}`, 'paginate=false','active_product_type=product_share_link'
+            ];
           }
         }
       }
