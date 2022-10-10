@@ -119,6 +119,34 @@
                                 </template>
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">
+                                    <div>
+                                      <div class="px-2">
+                                        Pantone
+                                      </div>
+                                      <div class="p-2" v-if="selectColorTypeIndex==0">
+                                        <b-form-input
+                                          @focusin="($event)=>$event.target.select()"
+                                          :value="product_custom_text_item.color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.color_pantone"
+                                          class="mb-2 mr-sm-2 mb-sm-0"
+                                          placeholder="XX-XXXX"
+                                          @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Fill Color')"
+                                          :disabled="getColorType === 'cmyk'"
+                                        ></b-form-input>
+                                      </div>
+                                      <div v-else class="p-2">
+                                        <b-form-input
+                                          @focusin="($event)=>$event.target.select()"
+                                          :value="product_custom_text_item.outline_color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.outline_color_pantone"
+                                          class="mb-2 mr-sm-2 mb-sm-0"
+                                          placeholder="XX-XXXX"
+                                          @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Outline Color')"
+                                          :disabled="getColorType === 'cmyk'"
+                                        ></b-form-input>
+                                      </div>
+                                      <div v-if="pantoneMessage" class="pantone-message p-2 text-danger">
+                                        {{ pantoneMessage }}
+                                      </div>
+                                    </div>
                                     <color-picker @changeColor="changeColor($event, customTextIndex, productCustomTextItemIndex, select_color_type)"
                                       theme="light" :colors-default="[]"
                                       :color="selectColorTypeIndex == 0 ? product_custom_text_item.color : product_custom_text_item.outline_color"
@@ -166,7 +194,7 @@ import {HideUpdateLockerButton, ProductColors, ProductFonts} from "@/mixins/Sele
 import {find, filter} from "lodash";
 import colorPicker from '@caohenghu/vue-colorpicker';
 import {getSelectedProductPantones} from "@/helpers/Helpers";
-import {getClosestColor} from "@/pantoneColor";
+import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 
 
 @Component<CustomizationText>({
@@ -195,6 +223,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   public product_fonts: Record<any, any>[] = []
   public product_colors: Record<any, any>[] = []
   public default_font_obj = ''
+  public pantoneMessage = ''
   public customTextColorIndex: Record<any, any>[] = []
 
   /* component props ends here */
@@ -235,14 +264,44 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   * methods starts
   * */
 
+  public extractExactCode(code:string) {
+    let pantone_coated = null;
+    if(this.getColorType === 'pantone-coated'){
+      let regex_numbers = /^[0-9]+/g;
+      let regex_alphabets = /[a-zA-Z]+/g;
+      let numbers = regex_numbers.exec(code);
+      let alphabets = regex_alphabets.exec(code);
+      if(numbers && numbers[0] && alphabets && alphabets[0]){
+        pantone_coated = numbers[0] + ' ' + alphabets[0].toUpperCase();
+      }
+    }
+    return pantone_coated;
+  }
+
+  public changePantoneColor($event: string, customTextIndex: number, productCustomTextItemIndex: number, select_color_type: string) {
+    let color_code = this.extractExactCode($event)?this.extractExactCode($event):(select_color_type=='Fill Color' ? this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].color : this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].outline_color);
+    let pantoneColor = getColorEncoding(color_code,this.getColorType);
+    // console.log('color_code', color_code)
+    // console.log('pantoneColor', pantoneColor)
+    if (pantoneColor) {
+      let color = {value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.name}
+      console.log('color', color)
+      this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)
+      this.pantoneMessage = ''
+    }
+    else {
+      this.pantoneMessage = 'The color is not in the list.'
+    }
+  }
+
   public changeColor($event:Record<any, any>, customTextIndex:number, productCustomTextItemIndex:number, select_color_type:string) {
     const selectProductPantonesList = getSelectedProductPantones()
-    let pantoneColor = getClosestColor($event.hex,selectProductPantonesList, 'pantone-coated');
+    let pantoneColor = getClosestColor($event.hex,selectProductPantonesList, this.getColorType);
     let color = {value: pantoneColor.hex, position: '1', name: pantoneColor.pantone}
     this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)
   }
 
-  public handleTextOutline(custom_text_index:number, custom_text_item_index:Record<any, any>) {
+  public handleTextOutline(custom_text_index:number, custom_text_item_index:number) {
     let self: Record<any, any> = this;
     let custom_text_item = this.product_custom_texts[custom_text_index].items[custom_text_item_index]
     if(custom_text_item.color_tab_index == 1 && custom_text_item.outline_width == 0){

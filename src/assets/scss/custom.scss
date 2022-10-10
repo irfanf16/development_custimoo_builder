@@ -1155,7 +1155,7 @@ button {
             }
 
             .color-holder {
-                max-height: 0;
+                //max-height: 0;
                 transition: none;
                 margin: 0;
 
@@ -5978,6 +5978,14 @@ $fontSize: 0.5;
             @media only screen and (min-width: 992px){
                 margin: 0;
                 max-width: 100%;
+            }
+        }
+
+        .color-type{
+            display: none;
+
+            &+div{
+                display: none;
             }
         }
     }

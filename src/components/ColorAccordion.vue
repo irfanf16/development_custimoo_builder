@@ -25,6 +25,7 @@
                   <label for="inline-form-input-pantone-color" v-else-if="getColorType === 'pantone-coated'">Pantone: (xxx c)</label>
                   <label class="mb-2" for="inline-form-input-pantone-color" v-else>Pantone: (TCX xx-xxxx)</label>
                   <b-form-input
+                    @focusin="($event)=>$event.target.select()"
                     v-model="svgGroups[selectAccordionIndex].pantone"
                     class="mb-2 mr-sm-2 mb-sm-0"
                     placeholder="XX-XXXX"
@@ -198,6 +199,7 @@ export default class ColorAccordion extends Vue {
       this.pantoneMessage = 'Color Not in List.'
     }
   }
+
   public extractExactCode(code:string) {
     let pantone_coated = null;
     if(this.getColorType === 'pantone-coated'){
