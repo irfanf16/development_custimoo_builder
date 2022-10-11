@@ -133,6 +133,7 @@
                                           :disabled="getColorType === 'cmyk'"
                                         ></b-form-input>
                                       </div>
+
                                       <div v-else class="p-2">
                                         <b-form-input
                                           @focusin="($event)=>$event.target.select()"
@@ -148,9 +149,9 @@
                                       </div>
                                     </div>
                                     <color-picker @changeColor="changeColor($event, customTextIndex, productCustomTextItemIndex, select_color_type)"
-                                      theme="light" :colors-default="[]"
+                                      theme="light" :colors-default="[]" :key="selectColorTypeIndex == 0 ? product_custom_text_item.color : product_custom_text_item.outline_color"
                                       :color="selectColorTypeIndex == 0 ? product_custom_text_item.color : product_custom_text_item.outline_color"
-                                      :sucker-hide="true"/>
+                                      :sucker-hide="true" :ref="`text-color-picker${customTextIndex}${productCustomTextItemIndex}`"/>
                                   </div>
                                 </div>
                               </b-tab>
@@ -279,14 +280,16 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   }
 
   public changePantoneColor($event: string, customTextIndex: number, productCustomTextItemIndex: number, select_color_type: string) {
-    let color_code = this.extractExactCode($event)?this.extractExactCode($event):(select_color_type=='Fill Color' ? this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].color : this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].outline_color);
+    let fill_type = select_color_type=='Fill Color' ? 0 : 1;
+    let color_code = this.extractExactCode($event)?this.extractExactCode($event):(fill_type==0 ? this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].color : this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].outline_color);
     let pantoneColor = getColorEncoding(color_code,this.getColorType);
-    // console.log('color_code', color_code)
+    const color_picker = this.$refs[`text-color-picker${customTextIndex}${productCustomTextItemIndex}`] as Record<any, any>;
+    // console.log('color_code', )
     // console.log('pantoneColor', pantoneColor)
     if (pantoneColor) {
       let color = {value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.name}
-      console.log('color', color)
-      this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)
+      this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type);
+      console.log(color_picker[fill_type].$forceUpdate());
       this.pantoneMessage = ''
     }
     else {
