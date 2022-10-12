@@ -120,32 +120,36 @@
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">
                                     <div>
-                                      <div class="px-2">
-                                        Pantone
-                                      </div>
-                                      <div class="p-2" v-if="selectColorTypeIndex==0">
-                                        <b-form-input
-                                          @focusin="($event)=>$event.target.select()"
-                                          :value="product_custom_text_item.color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.color_pantone"
-                                          class="mb-2 mr-sm-2 mb-sm-0"
-                                          placeholder="XX-XXXX"
-                                          @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Fill Color')"
-                                          :disabled="getColorType === 'cmyk'"
-                                        ></b-form-input>
-                                      </div>
+                                      <div class="d-flex align-items-start">
+                                        <div class="mt-3">
+                                          Pantone (xxx c):
+                                        </div>
+                                        <div class="p-2">
+                                          <div v-if="selectColorTypeIndex==0">
+                                            <b-form-input
+                                              @focusin="($event)=>$event.target.select()"
+                                              :value="product_custom_text_item.color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.color_pantone"
+                                              class="mb-2 mr-sm-2 mb-sm-0"
+                                              placeholder="XX-XXXX"
+                                              @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Fill Color')"
+                                              :disabled="getColorType === 'cmyk'"
+                                            ></b-form-input>
+                                          </div>
 
-                                      <div v-else class="p-2">
-                                        <b-form-input
-                                          @focusin="($event)=>$event.target.select()"
-                                          :value="product_custom_text_item.outline_color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.outline_color_pantone"
-                                          class="mb-2 mr-sm-2 mb-sm-0"
-                                          placeholder="XX-XXXX"
-                                          @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Outline Color')"
-                                          :disabled="getColorType === 'cmyk'"
-                                        ></b-form-input>
-                                      </div>
-                                      <div v-if="pantoneMessage" class="pantone-message p-2 text-danger">
-                                        {{ pantoneMessage }}
+                                          <div v-else>
+                                            <b-form-input
+                                              @focusin="($event)=>$event.target.select()"
+                                              :value="product_custom_text_item.outline_color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.outline_color_pantone"
+                                              class="mb-2 mr-sm-2 mb-sm-0"
+                                              placeholder="XX-XXXX"
+                                              @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Outline Color')"
+                                              :disabled="getColorType === 'cmyk'"
+                                            ></b-form-input>
+                                          </div>
+                                          <div v-if="pantoneMessage" class="pantone-message p-2 text-danger">
+                                            {{ pantoneMessage }}
+                                          </div>
+                                        </div>
                                       </div>
                                     </div>
                                     <color-picker @changeColor="changeColor($event, customTextIndex, productCustomTextItemIndex, select_color_type)"
