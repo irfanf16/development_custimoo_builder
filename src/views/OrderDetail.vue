@@ -220,7 +220,7 @@
 
           <div v-for="(actFile, fileInd) in activity_items.activity_item_data[activity_navigation_index].files" :key="`actfile-${fileInd}`">
             <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`" :key="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
-            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`" :src="`${actFile.file}?nocache=`+Math.floor(Math.random() * 100)" alt="" class="w-100" style="max-height: 500px">
+            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`" :src="`${actFile.file}`" alt="" class="w-100" style="max-height: 500px" crossorigin="anonymous">
           </div>
 
 
@@ -459,7 +459,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       actObj.factory_product_id = actItem.factory_product_id;
       for(let actfile of actItem.activity_files){
         let fileObj:Record<any,any> = {};
-         fileObj.file = `${this.storage_url}${actfile.url}`;
+         fileObj.file = `${this.storage_url}${actfile.url}?nocache=${Math.random()}`;
         fileObj.file_type = null;
         actObj.files.push(fileObj);
       }
