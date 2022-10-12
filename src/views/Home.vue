@@ -429,6 +429,10 @@ Vue.filter('formatDate', function(value:string) {
     await this.adjustTotalTabs();
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
+    if(self.$route.query.product_share_link){
+      self.$store.commit('RESET_LAST_ACTIVE_DATA')
+      await self.exitFromEditMode()
+    }
     /*
     * if last_active_product_default_obj keys length is not equal to the store property getLastActiveProductData then it means
     * we need to initialize the last_active_product_data property of store. This will only triggers once
@@ -1362,6 +1366,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if (ok) {
       this.$store.commit('RESET_LAST_ACTIVE_DATA')
+      await this.$store.dispatch('setCategories', {
+        query_params: `customized=1&personalized=0`
+      })
       await this.exitFromEditMode()
       this.hideLockerProductUpdateButton()
       // if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
@@ -1371,15 +1378,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       //
       // }
       this.updateOrderItemProducts = null;
-      this.$store.dispatch('resetStore')
-      self.$eventBus.$emit('resetTextsCanvas')
-      this.$store.dispatch('setTabMain',{value: 0});
+      await this.$store.dispatch('resetStore')
+      await self.$eventBus.$emit('resetTextsCanvas')
+      await this.$store.dispatch('setTabMain',{value: 0});
       (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
-      this.$store.dispatch('SET_LOGO_COLORS', [])
-      this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
-      this.$store.dispatch("setProductsRosters")
-      // await this.retrieveProducts()
-      //todo need to call retrieveProducts only in edit mode
+      await this.$store.dispatch('SET_LOGO_COLORS', [])
+      await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+      await this.$store.dispatch("setProductsRosters")
+      await this.retrieveProducts()
     }
 
     if(this.mobileScreen){

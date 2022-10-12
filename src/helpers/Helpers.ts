@@ -9,6 +9,7 @@ import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
 import {Side} from "three";
 import {keys, parseInt} from "lodash";
+import store from "@/store";
 
 const getLogoSettingsObject = () => {
   return {
@@ -1476,13 +1477,63 @@ const resetLastActiveProductData = async () => {
   Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_product_default_object)
 }
 
+const persistToken =  (to:Record<any,any>, from:Record<any,any>) => {
+  let jwtToken = localStorage.getItem('jwtToken')
+  if(to.query && to.query.token && jwtToken){
+    if(jwtToken === to.query.token){
+      const adminToken = localStorage.getItem('adminToken');
+      if(adminToken){
+        localStorage.setItem('jwtToken',adminToken);
+        jwtToken = localStorage.getItem('jwtToken');
+      }
+    }
+    else{
+      jwtToken = to.query.token;
+      if(jwtToken){
+        localStorage.setItem('jwtToken',jwtToken);
+        localStorage.setItem('adminToken',jwtToken);
+      }
+    }
+  }
+  else if(!jwtToken){
+    const adminToken = localStorage.getItem('adminToken');
+    if(adminToken){
+      localStorage.setItem('jwtToken',adminToken);
+      jwtToken = localStorage.getItem('jwtToken');
+    }
+  }
+  return jwtToken;
+}
+
+const fetchCustomer = async (jwtToken:string) => {
+  if (!Store.getters.getCustomer && jwtToken){
+    const customer = await Store.dispatch('getCustomerFromToken', jwtToken)
+    if (customer){
+      const payload = {
+        access_token: jwtToken,
+        user: customer
+      }
+      await Store.commit('SET_CUSTOMER', payload)
+    }
+  }
+}
+const setVueVersion = async () => {
+  const vue_app_version = await localStorage.getItem('vue_app_version')
+  if(vue_app_version != process.env.VUE_APP_VERSION) {
+    await localStorage.setItem('vue_app_version', process.env.VUE_APP_VERSION)
+    await Store.dispatch('resetStore')
+    location.reload()
+    return
+  }
+}
 //Functions related to SVG parsing end
 export {
-  getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
-  sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType,
-  getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos, getSelectedProductPantones,
-  setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent, unitConversion, rosterDefaultItem, authenticateUser,
-  lastActiveProductDefaultObject, resetLastActiveProductData, getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames,
-  getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile, initCustomLogos1, rosterDetailsInit,
+  getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
+  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException,
+  logData, pathInfo, CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64,
+  getFileExtensionType, getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos,
+  getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent, unitConversion,
+  rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData, getSVGNumberArraysFromRoster,
+  getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile, persistToken,fetchCustomer,
+  setVueVersion, initCustomLogos1, rosterDetailsInit,
 };

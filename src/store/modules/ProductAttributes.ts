@@ -666,6 +666,8 @@ const ProductAttributes:Module<any, any> = {
 
     },
     async RESET_STORE(state: Record<any, any>){
+      state.customized = true
+      state.personalized = false
       state.undoItems = []
       state.redoItems = []
       state.edit_locker_product = []
@@ -695,28 +697,10 @@ const ProductAttributes:Module<any, any> = {
         cartItemId: ''
       }
 
-      // state.products_rosters = {}
+      state.products_rosters = {}
 
       state.selectedIndex = 0;
       state.styleIndex = 0 ;
-      let style_id = null ;
-      const select_product = state.products[state.selectedIndex];
-      if(select_product) {
-        style_id = select_product.productstyles.length > 0 ? select_product.productstyles[state.selectedIndex] : null
-        state.selectedPrdId = select_product.id
-
-        select_product.productstyles[state.styleIndex].productdesigns.forEach((item: Record<any, any>) => {
-          if (item.is_default) {
-            Vue.set(item, 'design_show', 1)
-            state.selectedDesignId = item.id
-          } else {
-            Vue.set(item, 'design_show', 0)
-          }
-        })
-        const last_active_product_data = {
-          product_id: state.selectedPrdId, design_id: state.selectedDesignId, style_id: style_id }
-        state.last_active_product_data = {...state.last_active_product_data, ...last_active_product_data}
-      }
     },
     RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
       state.product_custom_texts = {}

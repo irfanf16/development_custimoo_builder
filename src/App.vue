@@ -44,10 +44,11 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
   },
   async mounted() {
     await getCompany();
-
-    const token = this.$router.currentRoute.query.token as string
+    // const token = this.$router.currentRoute.query.token as string
+    const token = this.getParameterByName('token');
     if (token){
       localStorage.setItem('jwtToken', token)
+      localStorage.setItem('adminToken', token)
       await authenticateUser(token)
       await this.$store.dispatch('resetStore')
       await this.$router.push({name: 'Home'})
@@ -96,6 +97,15 @@ export default class App extends Mixins(LockerProducts,ErrorMessages) {
       link.click();
       this.showToast('Pdf file created','SUCCESS')
     })
+  }
+
+  public getParameterByName(name:string, url = window.location.href) {
+    name = name.replace(/[[\]]/g, '\\$&');
+    let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+      results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 
 }
