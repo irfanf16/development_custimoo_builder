@@ -9,7 +9,7 @@
       </span>
     </div>
 
-    <div class="theme-scroll" style="height: calc(100% - 65px); overflow-y: auto; padding-bottom: 20px">
+    <div class="theme-scroll" style="height: calc(100vh - 300px); overflow-y: auto; padding-bottom: 20px">
       <div class="loader relative" v-if="viewLoader || cartLoading"><img src="../../src/assets/images/loading.gif" /></div>
       <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
         <thead class="bg-light">
