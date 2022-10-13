@@ -212,7 +212,10 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
     let self: Record<any, any> = this;
 
     await this.productFonts()
-    self.product_colors = await this.productColors('file_colors')
+    self.product_colors = await this.productColors('file_colors');
+    // await self.product_colors.push(self.logoColors)
+
+    await this.logoColors && console.log('product_custom_texts', this.logoColors);
   },
   filters: {
     capitalize: (value: string) => {
