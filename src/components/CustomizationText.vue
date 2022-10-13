@@ -115,6 +115,18 @@
                               </b-tab>
                               <b-tab>
                                 <template #title>
+                                  Team logo colors
+                                </template>
+                                <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
+                                  <div class="color-container">
+                                    <div class="color-box" v-for="(color, colorIndex) in logoColors" :style="{background: color.hex}"
+                                        :key="`text_color_${colorIndex}${color.pantone}`" :title="color.name"
+                                          @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, {name: color.name, value: color.hex, position: '1'}, select_color_type)"></div>
+                                  </div>
+                                </div>
+                              </b-tab>
+                              <b-tab>
+                                <template #title>
                                   Other
                                 </template>
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
@@ -213,7 +225,6 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 
     await this.productFonts()
     self.product_colors = await this.productColors('file_colors');
-    // await self.product_colors.push(self.logoColors)
 
     await this.logoColors && console.log('product_custom_texts', this.logoColors);
   },

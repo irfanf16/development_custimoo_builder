@@ -1,12 +1,8 @@
-import {Component, Vue} from "vue-property-decorator";
-import {forEach} from "lodash";
+import {Component, Vue, Watch} from "vue-property-decorator";
 
 @Component
 export class ProductColors extends Vue {
   // type expect comma separated values. So in case we want to merge locker colors and logo colors. the the type=locker_colors,logo_colors
-  get logoColors(): [] {
-    return this.$store.getters.getLogosColors
-  }
 
   public async productColors(color_types="file_colors,locker_colors") {
     const self: Record<any, any> = this;
@@ -43,13 +39,7 @@ export class ProductColors extends Vue {
           console.info(`Un known color type (${get_color_type})`)
       }
     })
-    const logo_colors_array:Record<any, any>[] = []
-    this.logoColors.forEach((item:Record<any, any>)=>{
-      const logo_colors_object = {name: item.pantone, position: '1', value: item.hex}
-      logo_colors_array.push(logo_colors_object);
-    })
-    const team_logo_colors = this.logoColors && this.logoColors.length && {id: '999', name: 'Team Logo Colors', type: 'team_logo_colors', selected_color_index: null, colors: logo_colors_array}
-    product_color_files.push(team_logo_colors);
+    
     return product_color_files;
   }
 }
