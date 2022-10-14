@@ -193,7 +193,8 @@ export class handleMainProducts extends Vue {
             let {sync_id, customizer_preview, update_cart} = self.$route.query
             if(sync_id) {
               product_index = retrieved_products.findIndex((retrieved_product: Record<any, any>) => {
-                return retrieved_product.sync_id === sync_id;
+                if(retrieved_product.ecommerceproduct.length > 0)
+                    return retrieved_product.ecommerceproduct[0].sync_id === sync_id;
               });
               product_index = product_index >=0 ? product_index : 0
               product_id = retrieved_products[product_index].id
