@@ -5447,7 +5447,6 @@ $fontSize: 0.5;
 
 .vm--modal {
     margin-top: 80px;
-    max-height: calc(100vh - 230px);
 
     @media (max-width: 768px) {
         margin: 0 auto !important;
@@ -5474,6 +5473,12 @@ $fontSize: 0.5;
             border: 1px solid #dee2e6;
             background: #fff;
         }
+    }
+}
+
+.cart-modal{
+    .vm--modal{
+        max-height: calc(100vh - 230px);
     }
 }
 
