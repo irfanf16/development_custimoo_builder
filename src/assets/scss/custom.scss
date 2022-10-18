@@ -5661,12 +5661,12 @@ $fontSize: 0.5;
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        top: 25px;
+        transform: translateY(25px);
     }
 
     to {
         opacity: 1;
-        top: 0px;
+        transform: translateY(0px);
     }
 }
 

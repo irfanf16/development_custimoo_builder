@@ -99,15 +99,16 @@
               </div>
             </template>
             <div class="shirt-size" :class="{ 'no-name-number': !(custom_name_index != -1 || custom_number_index != -1)}">
-              <b-form-select @change="handleRosterUpdate($event, 'size', productRosterItemIndex)" :value="product_roster_item.size_index">
+              <b-form-select @focus="handleRosterItemFocus(productRosterItemIndex)" @change="handleRosterUpdate($event, 'size', productRosterItemIndex)" :value="product_roster_item.size_index" ref="size-select">
                 <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
                   {{ productSize.text }}</b-form-select-option>
               </b-form-select>
+              <div class="tooltip guide">Press enter to view the options</div>
             </div>
           </div>
           <div class="align-right">
             <div class="qty">
-              <b-form-input class="text-center" placeholder="0" @input="handleRosterUpdate($event, 'quantity', productRosterItemIndex)"
+              <b-form-input @keydown.tab.stop="addRosterItemOnTab" @focus="handleRosterItemFocus(productRosterItemIndex)" class="text-center" placeholder="0" @input="handleRosterUpdate($event, 'quantity', productRosterItemIndex)"
                             :value="product_roster_item.quantity"></b-form-input>
             </div>
             <div class="remove" v-if="productRosterItemIndex > 0 && active_roster_index != productRosterItemIndex">
@@ -125,7 +126,7 @@
       <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem">Add Player</button>
       <button v-if="!isLoading" class="btn btn-secondary w-auto fw-bold" @click="close">
         <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'">Update Item</template>
-        <template v-else>OK</template>
+        <template v-else>Save</template>
       </button>
       <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $root.$children[0].$children[2].cancelCart()">
         Cancel
@@ -183,6 +184,7 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
   mounted() {
     this.fontsColorsManipulation()
     this.fontsList()
+    // this.bindFocusEvent('size-select')
   },
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData, HideUpdateLockerButton,RosterDetailsGlobal) {
@@ -292,11 +294,23 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     this.$emit('addPlayer', this.rosterDetails.length);
   }
 
+  // private bindFocusEvent(ref:string){
+  //   const select = this.$refs[ref] as Record<any, any>;
+  //   select.forEach((el:Record<any, any>,i:number)=>{
+  //     el.$el.addEventListener('focus', (e:Record<any, any>)=>{
+  //       e.target.dispatchEvent(new KeyboardEvent('keypress', {'key': 'enter'}))
+  //     })
+  //   })
+  // }
+
   public addRosterItem() {
     let self: Record<any, any> = this;
     let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.productRoster[0])));
     roster_items = [...this.productRoster, roster_items];
     self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
+    // setTimeout(()=>{
+    //   this.bindFocusEvent('size-select')
+    // },100)
   }
 
   public resetRosterItem(roster_item: Record<any, any>) {
@@ -305,6 +319,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return Object.assign(roster_item, {
       text: '',  number: '',  size_index: 0,  size: first_size,  code: first_size, quantity: 1, information: ''
     })
+  }
+
+  public addRosterItemOnTab($event:Record<any, any>) {
+    (this.active_roster_index + 1 == this.productRoster.length) && !$event.shiftKey && this.addRosterItem();
   }
 
   public changeRoster(locker_roster_id:any){
@@ -538,6 +556,48 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
       &:hover {
         color: #fff;
+      }
+    }
+  }
+}
+
+.shirt-size{
+  .tooltip.guide{
+    display: none;
+    background: #333;
+    color: white;
+    padding: 7px 10px;
+    border-radius: 7px;
+    white-space: nowrap;
+    margin-top: 10px;
+    animation: fadeInUp 0.2s ease;
+
+    &:before{
+      display: block;
+      position: absolute;
+      content: "";
+      height: 0;
+      width: 0;
+      border-color: transparent transparent #333;
+      border-style: solid;
+      border-width: 7px;
+      top: -14px;
+      left: 30%;
+    }
+  }
+
+  select {
+    &:focus{
+      &+.tooltip.guide{
+        display: block;
+        opacity: 1;
+      }
+    }
+
+    &:hover{
+      &+.tooltip.guide{
+        display: none;
+        opacity: 0;
       }
     }
   }
