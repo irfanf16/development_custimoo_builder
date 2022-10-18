@@ -515,7 +515,7 @@ button {
     }
 
     .nav-tabs {
-        justify-content: space-between;
+        justify-content: center;
         border: 1px solid #EDF2F6;
         padding: 1rem;
         position: fixed;
@@ -1155,7 +1155,7 @@ button {
             }
 
             .color-holder {
-                max-height: 0;
+                //max-height: 0;
                 transition: none;
                 margin: 0;
 
@@ -5476,6 +5476,12 @@ $fontSize: 0.5;
     }
 }
 
+.cart-modal{
+    .vm--modal{
+        max-height: calc(100vh - 230px);
+    }
+}
+
 .order-wrapper {
     .tabs {
         margin-top: 1rem;
@@ -5928,10 +5934,6 @@ $fontSize: 0.5;
     }
 }
 
-.customization-tabs .customization-text-area .text-color-holder.customization-tabs.no-outline .outline-slider-area > div:first-child{
-    display: none;
-}
-
 .show_hide_text.customization-tabs{
     max-width: 100%;
 
@@ -5982,6 +5984,14 @@ $fontSize: 0.5;
             @media only screen and (min-width: 992px){
                 margin: 0;
                 max-width: 100%;
+            }
+        }
+
+        .color-type{
+            display: none;
+
+            &+div{
+                display: none;
             }
         }
     }

@@ -3,7 +3,7 @@
     <div class="loader" v-if="searchLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: number_of_slides, adaptiveHeight: false, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
       <template v-for="(product, index) in products">
-        <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
+        <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id" v-if="product.productstyles[0] && Object.prototype.hasOwnProperty.call(product.productstyles[0],'productdesigns')">
           <template v-for="design in product.productstyles[0].productdesigns">
             <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
               <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="product.measurement_ratio"
@@ -139,6 +139,11 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
       product_slide_no = product_index / this.number_of_slides;
       if(!Number.isInteger(product_slide_no)) {
         product_slide_no = Math.floor(product_slide_no);
+      }
+      else{
+        if(product_slide_no !== 0){
+          product_slide_no = product_slide_no - 1;
+        }
       }
     }
     this.setSliderIndex(product_slide_no)

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import store from '@/store'
+import {persistToken,fetchCustomer,setVueVersion} from "@/helpers/Helpers";
 
 const Home = ()=> import('../views/Home.vue')
 const Addresses = ()=> import('../views/Addresses.vue')
@@ -96,25 +97,11 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  const vue_app_version = await localStorage.getItem('vue_app_version')
-  if(vue_app_version != process.env.VUE_APP_VERSION) {
-    await localStorage.setItem('vue_app_version', process.env.VUE_APP_VERSION)
-    await store.dispatch('resetStore')
-    location.reload()
-    return
-  }
-  const jwtToken = localStorage.getItem('jwtToken')
 
-  if (!store.getters.getCustomer && jwtToken){
-    const customer = await store.dispatch('getCustomerFromToken', jwtToken)
-    if (customer){
-      const payload = {
-        access_token: jwtToken,
-        user: customer
-      }
-      await store.commit('SET_CUSTOMER', payload)
-    }
-  }
+  await setVueVersion();
+  const jwtToken:string|null = persistToken(to,from);
+  await fetchCustomer(jwtToken as string);
+
 
   // remove ! sign from url that cause to customizer not load on page refresh mainly on evolution
   let lastUrl = location.href;
