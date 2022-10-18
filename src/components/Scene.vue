@@ -205,7 +205,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   @Prop({ required: false }) readonly carousel !: string
   @Prop({ required: false, default: () => { return [] } }) readonly productNamesSetting !: [Record<any, any>]
   @Prop({ required: false, default: false }) readonly logoAllowed !: boolean
-  @Prop({ required: false, default: false }) readonly preSetData !: boolean
   @Prop({ required: false, default: true }) readonly multipleLogo !: boolean
   @Prop({ required: false }) readonly logosLimit !: number
   @Prop({ required: false }) readonly productColors !: [Record<string, any>];
@@ -849,28 +848,26 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           }
 
           if (this.logos.length) {
-            this.logos.forEach((logo: Record<any, any>, index: number) => {
+            this.logos.forEach((logo: Record<any, any>) => {
+              if (logo && logo.url) {
+                this.addSvgLogos(logo)
+              }
+            })
+          }
+          let logos: Record<any, any>[] = []
+          if (this.customLogos && this.logoAllowed) {
+            let customLogos = JSON.parse(JSON.stringify(this.customLogos))
+            if (this.logosLimit) {
+              customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
+            }
+            logos = logos.concat(customLogos) as [Record<any, any>]
+          }
+          if (logos.length) {
+            logos.forEach((logo: Record<any, any>, index: number) => {
               if (logo && logo.url) {
                 this.addLogos(logo, index)
               }
             })
-          }
-          if (!this.preSetData) {
-            let logos: Record<any, any>[] = []
-            if (this.customLogos && this.logoAllowed) {
-              let customLogos = JSON.parse(JSON.stringify(this.customLogos))
-              if (this.logosLimit) {
-                customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
-              }
-              logos = logos.concat(customLogos) as [Record<any, any>]
-            }
-            if (logos.length) {
-              logos.forEach((logo: Record<any, any>, index: number) => {
-                if (logo && logo.url) {
-                  this.addLogos(logo, index)
-                }
-              })
-            }
           }
 
           if(this.productCustomTexts) {
@@ -1301,7 +1298,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
       let addIndex
       if (target.type == 'text') {
         addIndex = target.custom_text_index + '' + target.custom_text_item_index
-      } else {
+      } else if(target.type == 'logo') {
         addIndex = target.logoIndex
       }
 
@@ -1428,7 +1425,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
-          otherSideObjects[addIndex] = objectAdd
+          if(addIndex != undefined) {
+            otherSideObjects[addIndex] = objectAdd
+          }
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)
             if (this.productType == 'customized') {
@@ -1636,6 +1635,42 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     })
   }
 
+  public addSvgLogos(logo: Record<any, any>) {
+    if (logo.side == 'front' || (logo.side == 'back' && this.back)) {
+      let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari? getRandom(3) : '11')
+      fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
+        options.crossOrigin = 'Anonymous'
+        const img = fabric.util.groupSVGElements(objects) as fabric.Group
+        img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
+        img.set({
+          left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
+          top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
+          angle: logo.rotation< 0? 360 - logo.rotation : logo.rotation  as number,
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          lockMovementX: true,
+          lockMovementY: true,
+          globalCompositeOperation: 'source-atop',
+        })
+
+        let model = this.frontModel
+        let canvas = this.frontCanvas
+        if (logo.side == 'back') {
+          canvas = this.backCanvas
+          model = this.backModel
+        }
+
+        canvas.add(img)
+        if (this.productType == 'customized') {
+          model.bringToFront()
+        }
+        canvas.renderAll()
+        this.addToOtherSide(img, logo.side)
+      })
+    }
+  }
+
   public addLogos(logo: Record<any, any>, logoIndex: null | number = null) {
     if ('logoIndex' in logo) {
       logoIndex = logo.logoIndex
@@ -1669,7 +1704,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           globalCompositeOperation: 'source-atop',
           lockScalingFlip: true,
           padding: 15,
-          cornerSize: 30
+          cornerSize: 30,
+          type: "logo",
         })
 
         if (logo.scaleX && logo.scaleY) {
