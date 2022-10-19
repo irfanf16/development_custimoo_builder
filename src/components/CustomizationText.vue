@@ -14,7 +14,7 @@
 
       <div :key="`main-${selectedProductId+customTextIndex}`" class="d-flex">
         <b-form-input :key="`text-${selectedProductId+customTextIndex}`" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here" :value="product_custom_text.value"
-                      @input="handleCustomTextInputChange($event, customTextIndex)"></b-form-input>
+                      @input="handleCustomTextInputChange($event, customTextIndex)" @focusin="expandTextCustomizer(customTextIndex)"></b-form-input>
         <button v-b-toggle="`text-accordion-${customTextIndex}`"
                 class="d-flex align-items-center btn btn-secondary light">
           <span class="minus d-flex align-items-center">
@@ -25,7 +25,7 @@
           </span>
         </button>
       </div>
-      <b-collapse accordion="my-accordion" :visible="false" :key="`accordion-${selectedProductId+customTextIndex}`" :id="`text-accordion-${customTextIndex}`"  :ref="`text-accordion-${customTextIndex}`" role="tabpanel">
+      <b-collapse accordion="my-accordion" :visible="false" :key="`accordion-${selectedProductId+customTextIndex}`" :id="`text-accordion-${customTextIndex}`" :ref="`text-accordion-${customTextIndex}`" role="tabpanel">
           <div class="font-type-area">
             <div class="fade-right w-100 py-2">
               <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList ">
@@ -45,7 +45,7 @@
         </div>
         <div >
           <div class="customization-tabs show_hide_text">
-            <b-tabs content-class="mt-3" align="center">
+            <b-tabs content-class="mt-3" align="center" @input="resetCustomTextColorIndex(product_custom_text)">
               <template v-for="(product_custom_text_item, productCustomTextItemIndex) in product_custom_text.items">
                 <b-tab v-model="product_custom_text.active_item_index" :key="`custom_${product_custom_text.type}_${customTextIndex}_children_${productCustomTextItemIndex}`">
                 <!-- Tabs title slot -->
@@ -60,20 +60,50 @@
 
                 <!-- Tabs content starts -->
 
-                  <h4 class="mt-3 mb-2 fz-16">Select Color</h4>
-                  <div v-if="product_custom_text" class="text-color-holder customization-tabs" :class="{'no-outline': product_custom_text.items[productCustomTextItemIndex].outline_width == 0}">
-                    <b-tabs content-class="mt-3">
+                  <div v-if="product_custom_text" class="text-color-holder customization-tabs"
+                       :class="{'no-outline': product_custom_text_item.outline_width == 0}">
+                    <b-tabs content-class="mt-0" class="color-types" v-model="product_custom_text_item.color_tab_index"
+                            @input="handleTextOutline(customTextIndex, productCustomTextItemIndex)">
                       <template v-for="(select_color_type, selectColorTypeIndex) in ['Fill Color', 'Outline Color']">
                         <b-tab :key="`select_color_type_${selectColorTypeIndex}`">
                           <template slot="title">
-                            <div class="color-circle" :style="{ background: selectColorTypeIndex == 0 ? product_custom_text.items[productCustomTextItemIndex].color : product_custom_text.items[productCustomTextItemIndex].outline_color }"></div>
+                            <div class="color-circle" :style="{ background: selectColorTypeIndex == 0 ?
+                             product_custom_text_item.color :
+                             product_custom_text_item.outline_color }"
+                            ></div>
                             {{ select_color_type }}
                           </template>
                           <div class="customization-tabs">
+                            <div class="outline-slider-area d-flex justify-content-between pt-2">
+                              <template v-if="product_custom_text_item.outline_enabled">
+                                <div class="mr-sm-2 mb-sm-0" v-show="product_custom_text_item.color_tab_index == 1">
+                                  <label class="mt-1" :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`">
+                                    Outline Width:
+                                    <span class="font-weight-bolder">{{ product_custom_text_item.outline_width }}px</span>
+                                  </label>
+                                  <b-form-input class="mt-2" type="range" min="0" max="10" step="1"
+                                                :value="product_custom_text_item.outline_width"
+                                                :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
+                                                :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
+                                                :id="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
+                                                :ref="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
+                                                @change="handleCustomTextOutlineUpdate($event, customTextIndex, productCustomTextItemIndex)"></b-form-input>
+                                </div>
+                              </template>
+                              <div>
+                                <label :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`">Placement</label>
+                                <b-form-select :style="{ fontSize: '14px', height: '35px', outline: 'none', boxShadow: 'none' }" :value="product_custom_text_item.placement"
+                                               :options="['Front', 'Back']" :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
+                                               :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
+                                               @change="handleCustomTextPlacementUpdate($event, customTextIndex, productCustomTextItemIndex)"
+                                ></b-form-select>
+                              </div>
+                            </div>
+
                             <b-tabs>
                               <b-tab v-for="(product_color, productColorIndex) in product_colors" :key="`product_color_${productColorIndex}_${product_color.type}_type`">
-                                <template slot="title">
-                                  {{product_color.name}}
+                                <template #title>
+                                  {{product_color.name | capitalize}}
                                 </template>
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">
@@ -83,6 +113,68 @@
                                   </div>
                                 </div>
                               </b-tab>
+                              <b-tab>
+                                <template #title>
+                                  Team logo colors
+                                </template>
+                                <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
+                                  <div class="color-container">
+                                    <div class="color-box" v-for="(color, colorIndex) in logoColors" :style="{background: color.hex}"
+                                        :key="`text_color_${colorIndex}${color.pantone}`" :title="color.name"
+                                          @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, {name: color.name, value: color.hex, position: '1'}, select_color_type)"></div>
+                                  </div>
+                                </div>
+                              </b-tab>
+                              <b-tab>
+                                <template #title>
+                                  Other
+                                </template>
+                                <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
+                                  <div class="color-container">
+                                    <div>
+                                      <div class="d-flex align-items-start">
+                                        <div class="mt-3">
+                                          Pantone (xxx c):
+                                        </div>
+                                        <div class="p-2">
+                                          <div v-if="selectColorTypeIndex==0">
+                                            <b-form-input
+                                              @focusin="($event)=>$event.target.select()"
+                                              :value="product_custom_text_item.color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.color_pantone"
+                                              class="mb-2 mr-sm-2 mb-sm-0"
+                                              placeholder="XX-XXXX"
+                                              @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Fill Color')"
+                                              :disabled="getColorType === 'cmyk'"
+                                            ></b-form-input>
+                                          </div>
+
+                                          <div v-else>
+                                            <b-form-input
+                                              @focusin="($event)=>$event.target.select()"
+                                              :value="product_custom_text_item.outline_color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.outline_color_pantone"
+                                              class="mb-2 mr-sm-2 mb-sm-0"
+                                              placeholder="XX-XXXX"
+                                              @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Outline Color')"
+                                              :disabled="getColorType === 'cmyk'"
+                                            ></b-form-input>
+                                          </div>
+                                          <div v-if="pantoneMessage" class="pantone-message p-2 text-danger">
+                                            {{ pantoneMessage }}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <color-picker @changeColor="changeColor($event, customTextIndex, productCustomTextItemIndex, select_color_type)"
+                                      theme="light" :colors-default="[]" :key="selectColorTypeIndex == 0 ? product_custom_text_item.color : product_custom_text_item.outline_color"
+                                      :color="selectColorTypeIndex == 0 ? product_custom_text_item.color : product_custom_text_item.outline_color"
+                                      :sucker-hide="true" :ref="`text-color-picker${customTextIndex}${productCustomTextItemIndex}`"/>
+                                  </div>
+                                </div>
+                              </b-tab>
+<!--                              <template #tabs-end>-->
+<!--                                <b-nav-item>Others</b-nav-item>-->
+<!--                                <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)"></b-nav-item>-->
+<!--                              </template>-->
                             </b-tabs>
                           </div>
                         </b-tab>
@@ -90,29 +182,6 @@
                     </b-tabs>
                   </div>
 
-                  <div class="outline-slider-area d-flex justify-content-between pt-4">
-                    <template v-if="product_custom_text_item.outline_enabled">
-                      <div class="mr-sm-2 mb-sm-0">
-                        <label :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`">
-                          Outline Width
-                        </label>
-                        <b-form-input class="mt-2" id="range-2" type="range" min="0" max="10" step="1"
-                                      :value="product_custom_text_item.outline_width"
-                                      :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
-                                      :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
-                                      @change="handleCustomTextOutlineUpdate($event, customTextIndex, productCustomTextItemIndex)"></b-form-input>
-                        <div class="mt-2">Outline Size: {{ product_custom_text_item.outline_width }}px</div>
-                      </div>
-                    </template>
-                    <div>
-                      <label :for="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`">Placement</label>
-                      <b-form-select :style="{ fontSize: '18px', height: '44px' }" :value="product_custom_text_item.placement"
-                                     :options="['Front', 'Back']" :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
-                                     :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_placement`"
-                                     @change="handleCustomTextPlacementUpdate($event, customTextIndex, productCustomTextItemIndex)"
-                      ></b-form-select>
-                    </div>
-                  </div>
 
 
                 <!-- Tabs content ends -->
@@ -121,7 +190,6 @@
               </template>
             </b-tabs>
           </div>
-
         </div>
       </b-collapse>
     </div>
@@ -136,23 +204,29 @@
 
 <script lang="ts">
 
-import { Component, Mixins, Prop, Watch, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Vue } from 'vue-property-decorator'
 import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
 import {HideUpdateLockerButton, ProductColors, ProductFonts} from "@/mixins/SelectedProductMixin";
 import {find, filter} from "lodash";
+import colorPicker from '@caohenghu/vue-colorpicker';
+import {getSelectedProductPantones} from "@/helpers/Helpers";
+import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 
 
 @Component<CustomizationText>({
   components: {
     TextColorTabs,
-    ColorTabs
+    ColorTabs,
+    colorPicker
   },
   async mounted() {
     let self: Record<any, any> = this;
 
-    await self.productFonts()
-    self.product_colors = await self.productColors()
+    await this.productFonts()
+    self.product_colors = await this.productColors('file_colors');
+
+    await this.logoColors && console.log('product_custom_texts', this.logoColors);
   },
   filters: {
     capitalize: (value: string) => {
@@ -168,8 +242,10 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   public product_fonts: Record<any, any>[] = []
   public product_colors: Record<any, any>[] = []
   public default_font_obj = ''
+  public pantoneMessage = ''
+  public customTextColorIndex: Record<any, any>[] = []
 
-  /* component props goes here */
+  /* component props ends here */
 
   public bindScroll($event:Record<any, any>){
     $event.stopPropagation()
@@ -191,7 +267,11 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
     return this.$store.getters.getLockerColors
   }
 
-  get product_custom_texts() {
+  get getColorType(): string {
+    return this.$store.getters.getColorType;
+  }
+
+  get product_custom_texts(): Record<any, any>[] {
     return this.$store.getters.productCustomTexts(this.selectedProductId)
   }
 
@@ -203,22 +283,86 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   * methods starts
   * */
 
+  public extractExactCode(code:string) {
+    let pantone_coated = null;
+    if(this.getColorType === 'pantone-coated'){
+      let regex_numbers = /^[0-9]+/g;
+      let regex_alphabets = /[a-zA-Z]+/g;
+      let numbers = regex_numbers.exec(code);
+      let alphabets = regex_alphabets.exec(code);
+      if(numbers && numbers[0] && alphabets && alphabets[0]){
+        pantone_coated = numbers[0] + ' ' + alphabets[0].toUpperCase();
+      }
+    }
+    return pantone_coated;
+  }
+
+  public changePantoneColor($event: string, customTextIndex: number, productCustomTextItemIndex: number, select_color_type: string) {
+    let fill_type = select_color_type=='Fill Color' ? 0 : 1;
+    let color_code = this.extractExactCode($event)?this.extractExactCode($event):(fill_type==0 ? this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].color : this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].outline_color);
+    let pantoneColor = getColorEncoding(color_code,this.getColorType);
+    const color_picker = this.$refs[`text-color-picker${customTextIndex}${productCustomTextItemIndex}`] as Record<any, any>;
+    // console.log('color_code', )
+    // console.log('pantoneColor', pantoneColor)
+    if (pantoneColor) {
+      let color = {value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.name}
+      this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type);
+      console.log(color_picker[fill_type].$forceUpdate());
+      this.pantoneMessage = ''
+    }
+    else {
+      this.pantoneMessage = 'The color is not in the list.'
+    }
+  }
+
+  public changeColor($event:Record<any, any>, customTextIndex:number, productCustomTextItemIndex:number, select_color_type:string) {
+    const selectProductPantonesList = getSelectedProductPantones()
+    let pantoneColor = getClosestColor($event.hex,selectProductPantonesList, this.getColorType);
+    let color = {value: pantoneColor.hex, position: '1', name: pantoneColor.pantone}
+    this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)
+  }
+
+  public handleTextOutline(custom_text_index:number, custom_text_item_index:number) {
+    let self: Record<any, any> = this;
+    let custom_text_item = this.product_custom_texts[custom_text_index].items[custom_text_item_index]
+    if(custom_text_item.color_tab_index == 1 && custom_text_item.outline_width == 0){
+      custom_text_item.outline_width = 3;
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "outline_width", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index,
+        value: self.product_custom_texts[custom_text_index]
+      });
+    }
+  }
+
+  public resetCustomTextColorIndex(product_custom_text: Record<any, any>) {
+    product_custom_text.items.forEach((custom_text_item: Record<any, any>) => {
+      custom_text_item.color_tab_index = 0
+    })
+  }
+
   public setLeft($event:Record<any, any>){
-    // console.log('eventX', $event.pageX);
-    // console.log('eventY', $event.pageY);
-    // console.log('event', $event.target.children[0]);
     $event.target.children[0].style.top = $event.pageY+"px"
     $event.target.children[0].style.left = $event.pageX+"px"
   }
 
   public handle_text_change_timer!: number
-  handleCustomTextInputChange(updatedVal: string, custom_text_index: number) {
-    if(updatedVal){
-      (this.$refs[`text-accordion-${custom_text_index}`] as Record<any, any>)[0].show = true;
+
+  private expandTextCustomizer(custom_text_index: number){
+    (this.$refs[`text-accordion-${custom_text_index}`] as Record<any, any>)[0].show = true;
+  }
+
+  private collapseTextCustomizer(updatedVal: Record<any, any>, custom_text_index: number){
+    let val = updatedVal.target.value
+    if(val){
+      return
     }else{
       (this.$refs[`text-accordion-${custom_text_index}`] as Record<any, any>)[0].show = false;
     }
+  }
 
+
+
+  handleCustomTextInputChange(updatedVal: string, custom_text_index: number) {
     this.hideLockerProductUpdateButton()
     clearTimeout (this.handle_text_change_timer);
     this.handle_text_change_timer = setTimeout(() => {
@@ -284,7 +428,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   }
 
   handleCustomTextOutlineUpdate( outline_value: number, custom_text_index: number, custom_text_item_index: number) {
-    let self:Record<any, any> = this;
+   let self:Record<any, any> = this;
    this.hideLockerProductUpdateButton()
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_width = outline_value;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})

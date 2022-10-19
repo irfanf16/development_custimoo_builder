@@ -165,8 +165,8 @@ export class handleMainProducts extends Vue {
         ({product_index, style_index, design_id, active_index} = await self.handleEditMode(retrieved_products));
       }
       else {
-       // console.log('not editing mode');
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;
+        console.log('last_active_prod_data', last_active_prod_data)
         if(editing_product_detail ) {
           product_index = response_data.active_product_index;
         }
@@ -193,7 +193,8 @@ export class handleMainProducts extends Vue {
             let {sync_id, customizer_preview, update_cart} = self.$route.query
             if(sync_id) {
               product_index = retrieved_products.findIndex((retrieved_product: Record<any, any>) => {
-                return retrieved_product.sync_id === sync_id;
+                if(retrieved_product.ecommerceproduct.length > 0)
+                    return retrieved_product.ecommerceproduct[0].sync_id === sync_id;
               });
               product_index = product_index >=0 ? product_index : 0
               product_id = retrieved_products[product_index].id
@@ -207,7 +208,13 @@ export class handleMainProducts extends Vue {
               return product_design.design_show
             })
             design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
-            let last_active_obj_updated_values = { design_index: design_index, design_id: design_id, product_id:  product_id,
+            let category_index = 0
+            let category_id = null
+            if(last_active_prod_data.category_id) {
+              category_index = last_active_prod_data.category_index
+              category_id = last_active_prod_data.category_id
+            }
+            let last_active_obj_updated_values = {category_index: category_index, category_id: category_id, design_index: design_index, design_id: design_id, product_id:  product_id,
               search_products: self.search_products, style_id: retrieved_products[0].productstyles[0].id,
               customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized
             }
@@ -230,7 +237,9 @@ export class handleMainProducts extends Vue {
       await setRetrievedProductsCustomTexts(retrieved_products)
       this.$store.commit('CHANGE_STYLE_INDEX', style_index);
       await this.$store.dispatch("getModels", retrieved_products[product_index].id);
-      this.$root.$emit('sliderEvent', product_index);
+      self.$root.$emit('sliderEvent', product_index);
+
+
 
 
       //If we are editing locker product then set the locker product data and return
@@ -648,7 +657,6 @@ export class handleMainProducts extends Vue {
   }
 
   public async setCartProductData(retrieved_products: Record<any, any>[]) {
-    //console.log("setting cart product data")
     let self: Record<any, any> = this;
     await this.$store.commit('RESET_CUSTOM_TEXTS')
     await this.$store.commit('RESET_CUSTOM_LOGOS')
@@ -658,7 +666,6 @@ export class handleMainProducts extends Vue {
     let retrieved_cart_product = retrieved_products[0];
     this.$store.dispatch("getModels", retrieved_cart_product.product_id);
     let selectedIndex = retrieved_cart_product.productstyles.findIndex((productstyle: Record<any, any>) => productstyle.id === cart_item_product.style_id);
-    //console.log('style indx', selectedIndex, cart_item_product.style_id, retrieved_cart_product.productstyles)
     if(selectedIndex < 0) {
       console.log("Style not found while editing cart product")
     }
@@ -725,7 +732,6 @@ export class ProductsQueryParamsMixin extends Vue {
     let {sync_id, customizer_preview, update_cart} = self.$route.query
     let query_params: string[] = [];
     if(sync_id) {
-     // console.log('inside sync id')
       query_params.push(`sync_id=${sync_id}`, 'paginate=false')
       if(update_cart) {
         query_params.push(`active_product_type=cart_product`, 'paginate=false')
@@ -755,9 +761,7 @@ export class ProductsQueryParamsMixin extends Vue {
           })
         }
         if(self.getProductEditInfoObject.editing) {
-          console.log("inside editing", self.getProductEditInfoObject.editing)
           if(self.getProductEditInfoObject.type == "locker_product") {
-            console.log("inside editing locker_product")
             query_params = [
               `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
               `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
@@ -766,7 +770,6 @@ export class ProductsQueryParamsMixin extends Vue {
             ];
           }
           else if(self.getProductEditInfoObject.type == "cart_product") {
-            console.log("inside editing cart_product")
             query_params = [
               `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
               `active_product_id=${self.getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`,
@@ -774,7 +777,6 @@ export class ProductsQueryParamsMixin extends Vue {
             ];
           }
           else if(self.getProductEditInfoObject.type == "order_product") {
-            console.log("inside editing order_product")
             let order_product_info = self.getProductEditInfoObject.order_product_info
             query_params = [
               `customized=${true}`, `personalized=${true}`, `order_item_id=${self.$route.query.order_item_id}`,  'paginate=false'
@@ -815,6 +817,11 @@ export class ProductsQueryParamsMixin extends Vue {
               query_params.push(`category_id=${category.id}`)
               self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: 0, category_id: category.id})
             }
+          }
+          if(self.$route.query.product_share_link){
+            query_params = [
+              `customized=${false}`, `personalized=${false}`,`active_product_id=${self.$route.query.product_id}`, 'paginate=false','active_product_type=product_share_link'
+            ];
           }
         }
       }
@@ -899,7 +906,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   }
 
   public async addToCartMixin(product_fonts: Record<any, any>[]) {
-    
+
     let self: Record<any, any> = this;
     try {
 
@@ -973,9 +980,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       if(santacart){
         self.$store.dispatch('setCartLoading',true);
         http.post(url, post_data).then(async (res: any) => {
-          console.log("response", res.data.success)
           if (res.data.success == true){
-            console.log("response if", res.data.success, cart_edit_mode)
             let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
             let api_res:Record<any, any> = res.data.result
             self.$store.dispatch('addToCart',api_res.items)

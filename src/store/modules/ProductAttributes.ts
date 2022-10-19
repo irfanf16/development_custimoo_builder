@@ -666,6 +666,8 @@ const ProductAttributes:Module<any, any> = {
 
     },
     async RESET_STORE(state: Record<any, any>){
+      state.customized = true
+      state.personalized = false
       state.undoItems = []
       state.redoItems = []
       state.edit_locker_product = []
@@ -695,28 +697,10 @@ const ProductAttributes:Module<any, any> = {
         cartItemId: ''
       }
 
-      // state.products_rosters = {}
+      state.products_rosters = {}
 
       state.selectedIndex = 0;
       state.styleIndex = 0 ;
-      let style_id = null ;
-      const select_product = state.products[state.selectedIndex];
-      if(select_product) {
-        style_id = select_product.productstyles.length > 0 ? select_product.productstyles[state.selectedIndex] : null
-        state.selectedPrdId = select_product.id
-
-        select_product.productstyles[state.styleIndex].productdesigns.forEach((item: Record<any, any>) => {
-          if (item.is_default) {
-            Vue.set(item, 'design_show', 1)
-            state.selectedDesignId = item.id
-          } else {
-            Vue.set(item, 'design_show', 0)
-          }
-        })
-        const last_active_product_data = {
-          product_id: state.selectedPrdId, design_id: state.selectedDesignId, style_id: style_id }
-        state.last_active_product_data = {...state.last_active_product_data, ...last_active_product_data}
-      }
     },
     RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
       state.product_custom_texts = {}
@@ -884,23 +868,27 @@ const ProductAttributes:Module<any, any> = {
     SET_LAST_ACTIVE_PRODUCT_DATA(state:Record<any, any>, payload)
     {
       const updated_payload: Record<any, any> = {};
-      const last_active_obj_def_obj = lastActiveProductDefaultObject()
-      if(Object.keys(state.last_active_product_data).length != Object.keys(last_active_obj_def_obj).length) {
-        state.last_active_product_data = last_active_obj_def_obj
-      }
       /*
       * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
       * reflected in state.last_active_product_data.product_custom_texts
       * */
-      if('product_custom_texts' in payload) {
-        state.last_active_product_data.product_custom_texts = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
-      }
-      else {
+      // if('product_custom_textsddddd' in payload) {
+      //   state.last_active_product_data.product_custom_texts = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
+      // }
+      // else {
         for (const [payload_key, payload_value] of Object.entries(payload)) {
-          updated_payload[payload_key] = payload_value
+          /*
+          * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
+          * reflected in state.last_active_product_data.product_custom_texts
+          * */
+          if(payload_key == 'product_custom_texts') {
+            updated_payload[payload_key] = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
+          } else {
+            updated_payload[payload_key] = payload_value
+          }
         }
         state.last_active_product_data = Object.assign({}, state.last_active_product_data, updated_payload);
-      }
+      // }
     },
     RESET_LAST_ACTIVE_DATA(state: Record<any, any>)
     {
@@ -1264,8 +1252,11 @@ const ProductAttributes:Module<any, any> = {
     setProductType({commit}, payload) {
       commit('SET_PRODUCT_TYPE', payload)
     },
-    async setCategories({commit}){
-      const url = '/product/categories'
+    async setCategories({commit}, payload){
+      let url = '/product/categories'
+      if(payload && 'query_params' in payload) {
+        url += `?${payload.query_params}`
+      }
       const response = await http.get(url).catch((e: any) => {
         console.error('error while getting categories',e)
       });

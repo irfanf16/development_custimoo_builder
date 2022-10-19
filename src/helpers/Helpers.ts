@@ -9,6 +9,7 @@ import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
 import {Side} from "three";
 import {keys, parseInt} from "lodash";
+import store from "@/store";
 
 const getLogoSettingsObject = () => {
   return {
@@ -420,7 +421,7 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
 const CustimooOrderFlowStatuses : Record<any, any> = {
   submitted_for_factory_review: 'Submitted for Factory Review',
   order_approve: 'Marked to Factory',
-  order_cancel: 'Order Cancelled',
+  order_cancel: 'Cancelled',
   factory_approved: 'Factory Approved',
   factory_rejected: 'Factory Rejected',
   submitted_for_customer_review: 'Submitted for Customer Review',
@@ -663,8 +664,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         model_id: product_models[selected_model_index].id,
         model_name: product_models[selected_model_index].model_name,
         product_id: selected_product.product_id,
-        ecommerce_post_id: selected_product.ecommerce_product_id,
-        sync_id: selected_product.sync_id,
+        ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
+        sync_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].sync_id:'',
         product_type: selected_product.product_type,
         product_name: product_name,
         pdf_file: null,
@@ -750,7 +751,7 @@ const activityStatus = {
     message: "Order is forwarded to factory.",
   },
   order_cancel: {
-    title: "Order Cancelled",
+    title: "Cancelled",
     message: "Your order has been cancelled.",
   },
   factory_approved: {
@@ -1442,11 +1443,61 @@ const resetLastActiveProductData = async () => {
   Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_product_default_object)
 }
 
+const persistToken =  (to:Record<any,any>, from:Record<any,any>) => {
+  let jwtToken = localStorage.getItem('jwtToken')
+  if(to.query && to.query.token && jwtToken){
+    if(jwtToken === to.query.token){
+      const adminToken = localStorage.getItem('adminToken');
+      if(adminToken){
+        localStorage.setItem('jwtToken',adminToken);
+        jwtToken = localStorage.getItem('jwtToken');
+      }
+    }
+    else{
+      jwtToken = to.query.token;
+      if(jwtToken){
+        localStorage.setItem('jwtToken',jwtToken);
+        localStorage.setItem('adminToken',jwtToken);
+      }
+    }
+  }
+  else if(!jwtToken){
+    const adminToken = localStorage.getItem('adminToken');
+    if(adminToken){
+      localStorage.setItem('jwtToken',adminToken);
+      jwtToken = localStorage.getItem('jwtToken');
+    }
+  }
+  return jwtToken;
+}
+
+const fetchCustomer = async (jwtToken:string) => {
+  if (!Store.getters.getCustomer && jwtToken){
+    const customer = await Store.dispatch('getCustomerFromToken', jwtToken)
+    if (customer){
+      const payload = {
+        access_token: jwtToken,
+        user: customer
+      }
+      await Store.commit('SET_CUSTOMER', payload)
+    }
+  }
+}
+const setVueVersion = async () => {
+  const vue_app_version = await localStorage.getItem('vue_app_version')
+  if(vue_app_version != process.env.VUE_APP_VERSION) {
+    await localStorage.setItem('vue_app_version', process.env.VUE_APP_VERSION)
+    await Store.dispatch('resetStore')
+    location.reload()
+    return
+  }
+}
 //Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
   processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
   getUploadedLogoObject, initCustomLogos, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor,fetchUrlContent,
-  unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,getSVGNumberArraysFromRoster,getSVGNumbers,getSVGNames,getSVGNameArraysFromRoster,getLogoSVG,parseSvgStringFile
+  unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,getSVGNumberArraysFromRoster,getSVGNumbers,getSVGNames,getSVGNameArraysFromRoster,getLogoSVG,parseSvgStringFile,
+  persistToken,fetchCustomer,setVueVersion
 };

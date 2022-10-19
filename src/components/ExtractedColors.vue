@@ -1,6 +1,6 @@
 <template>
     <div class="logo-placement-area extracted-color-area">
-    <h4 class="mb-3 mb-md-3 mb-lg-4">Color Extracted from Logo</h4>
+    <h4 class="mb-2">Color Extracted from Logo</h4>
     <div class="logo-placement-holder mb-lg-3">
         <div class="logo-holder">
           <div class="color-extract-container">

@@ -9,18 +9,24 @@
             <div class="color-container">
               <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
-                  <label for="inline-form-input-pantone-color">Pantone: (TCX Colors)</label>
-                  <b-form-input
-                    v-model="pantoneColorVal"
-                    class="mb-2 mr-sm-2 mb-sm-0"
-                    placeholder="XX-XXXX"
-                    @input="changePantoneColor" readonly
-                  ></b-form-input>
-                  <div class="pantone-message">
-                    {{ pantoneMessage }}
+                  <div class="d-flex align-items-start gap-2">
+                    <label for="inline-form-input-pantone-color" style="margin-top: 5px">Pantone: (TCX Colors)</label>
+                    <div>
+                      <div>
+                        <b-form-input
+                          v-model="pantoneColorVal"
+                          class="mb-2 mr-sm-2 mb-sm-0"
+                          placeholder="XX-XXXX"
+                          @input="changePantoneColor($event, swatchcolor)"
+                        ></b-form-input>
+                      </div>
+                      <div class="pantone-message py-2 px-1 text-danger">
+                        {{ pantoneMessage }}
+                      </div>
+                    </div>
                   </div>
                 </b-form>
-                <color-picker @changeColor="changeColor" ref="colorPicker" theme="light" :color="swatchcolor" :colors-history="false" :colors-default="[]" :key="swatchPantone"/>
+                <color-picker @changeColor="changeColor" ref="colorPicker" theme="light" :color="swatchcolor" :colors-history="false" :colors-default="[]" :key="swatchcolor"/>
               </div>
               <template v-else v-for="(color, index) in productColor">
                 <div v-if="color.value"  class="color-box"  @click="setColor(color)"
@@ -169,6 +175,20 @@ export default class LogoColorTabs extends Vue {
     this.$emit('setSwatchColor',color)
   }
 
+  public extractExactCode(code:string) {
+    let pantone_coated = null;
+    if(this.getColorType === 'pantone-coated'){
+      let regex_numbers = /^[0-9]+/g;
+      let regex_alphabets = /[a-zA-Z]+/g;
+      let numbers = regex_numbers.exec(code);
+      let alphabets = regex_alphabets.exec(code);
+      if(numbers && numbers[0] && alphabets && alphabets[0]){
+        pantone_coated = numbers[0] + ' ' + alphabets[0].toUpperCase();
+      }
+    }
+    return pantone_coated;
+  }
+
   public changeColor(color: Record<any, any>) {
     const selectProductPantonesList = getSelectedProductPantones()
     let pantoneColor = getClosestColor(color.hex,selectProductPantonesList,this.getColorType) // this is other tab of logo tab
@@ -176,15 +196,18 @@ export default class LogoColorTabs extends Vue {
     this.pantoneColorVal = pantoneColor.pantone
   }
 
-  public changePantoneColor() {
-    let pantoneColor = getColorEncoding(this.pantoneColorVal,this.getColorType);
+  public changePantoneColor($event:string, color: string) {
+    let pantone_code = this.extractExactCode($event)
+    let pantone_color = pantone_code ? this.extractExactCode(pantone_code) : color
+    let pantoneColor = pantone_color && getColorEncoding(pantone_color,this.getColorType);
+    // console.log('pantone_color', pantoneColor)
     if (pantoneColor) {
       this.setSwatchColor({hex: pantoneColor.hex.toUpperCase(), name: pantoneColor.name, pantone: pantoneColor.pantone })
       this.$emit('update:defSwatchColor',  pantoneColor.hex)
       this.pantoneMessage = ''
     }
     else {
-      this.pantoneMessage = 'Color Not in List.'
+      this.pantoneMessage = 'Color is not in the list.'
     }
   }
 

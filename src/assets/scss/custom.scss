@@ -515,7 +515,7 @@ button {
     }
 
     .nav-tabs {
-        justify-content: space-between;
+        justify-content: center;
         border: 1px solid #EDF2F6;
         padding: 1rem;
         position: fixed;
@@ -617,7 +617,7 @@ button {
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            padding: 0.3rem 1.25rem 1rem;
+            padding: 0.3rem 1.25rem 0.3rem;
 
             &:focus {
                 box-shadow: none;
@@ -694,11 +694,13 @@ button {
 
                 .color-pantone-name {
                     //max-width: 80px;
-                    display: block;
+                    display: flex;
+                    flex-wrap: wrap;
+                    column-gap: 5px;
 
                     span{
-                        display: block;
-                        width: 100%;
+                        display: inline-block;
+                        width: auto;
                         word-break: break-all;
                         word-wrap: break-word;
                     }
@@ -983,14 +985,14 @@ button {
     .tabs-logo-container{
         .logo-placement-area {
             @media (min-width: 786px) {
-                padding-bottom: 15px;
+                padding-bottom: 10px;
             }
         }
     }
 
     .logo-placement-area {
         @media (min-width: 786px) {
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
 
         h4 {
@@ -1153,7 +1155,7 @@ button {
             }
 
             .color-holder {
-                max-height: 0;
+                //max-height: 0;
                 transition: none;
                 margin: 0;
 
@@ -5474,6 +5476,12 @@ $fontSize: 0.5;
     }
 }
 
+.cart-modal{
+    .vm--modal{
+        max-height: calc(100vh - 230px);
+    }
+}
+
 .order-wrapper {
     .tabs {
         margin-top: 1rem;
@@ -5619,6 +5627,31 @@ $fontSize: 0.5;
 
                 svg {
                     margin-right: 5px;
+                }
+            }
+        }
+    }
+}
+
+.color-types {
+    &>div:first-child{
+        .nav.nav-tabs{
+            padding-bottom: 0.5rem;
+
+            li{
+                &:first-child{
+                    display: inline-flex;
+                    align-items: center;
+                    column-gap: 5px;
+
+                    &:before{
+                        content: "Select Color";
+                        display: inline-block;
+                        font-weight: bold;
+                    }
+                }
+                a{
+                    padding: 3px 13px;
                 }
             }
         }
@@ -5875,6 +5908,7 @@ $fontSize: 0.5;
             overflow-x: auto;
             gap: 5px;
             padding-bottom: 0.7rem;
+            padding-top: 0.3rem;
 
             @extend .theme-scroll-h;
 
@@ -5888,7 +5922,16 @@ $fontSize: 0.5;
 }
 
 .customization-tabs .customization-text-area .text-color-holder.customization-tabs.no-outline > .tabs > div > .nav.nav-tabs > .nav-item:nth-child(2){
-    display: none;
+    //display: none;
+
+    a{
+        //background: #ccc;
+        opacity: 0.5;
+
+        &:hover{
+            opacity: 1;
+        }
+    }
 }
 
 .show_hide_text.customization-tabs{
@@ -5941,6 +5984,14 @@ $fontSize: 0.5;
             @media only screen and (min-width: 992px){
                 margin: 0;
                 max-width: 100%;
+            }
+        }
+
+        .color-type{
+            display: none;
+
+            &+div{
+                display: none;
             }
         }
     }

@@ -36,12 +36,12 @@
               </div>
             </div>
             <div class="logo-placement-area extracted-color-area" v-if="ltIdx ==0 && customLogos[0].url && selectedProduct.product_type == 'customized'">
-              <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
-              <div class="mb-lg-3 w-100">
+              <h4 class="mb-2">Color Extracted from Logo</h4>
+              <div class="mb-0">
                 <div class="color-holder" style="margin-top: -10px; padding-top: 10px;">
                   <div class="color-container">
                     <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
-                         @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name"
+                         @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name == 'pantone' ? imageColor.pantone + ' ' + (imageColor.name[0].toUpperCase() + imageColor.name.slice(1)) : imageColor.name"
                          :class="{'active-swatch' : icIdx==selectedSwatchIndex, 'noColor': !imageColor.hex}"
                          :style="{background: imageColor.hex ? imageColor.hex : '#fff'}" :key="icIdx">
                       <template v-if="imageColor.hex">
@@ -118,7 +118,14 @@ import { setLogoSettings, getCustomLogos,} from "../helpers/Helpers"
       // here you need to use the arrow function
       this.tabIndex = index;
     })
-  }
+  },
+  filters: {
+    capitalize: (value: string) => {
+      if (!value) return ''
+      value = value.toString()
+      return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+    }
+  },
 })
 export default class LogoPlacementTabs extends Vue {
   @Prop({required: true}) numberOfLogosAllowed!: number
@@ -233,6 +240,7 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public async addTab(index: number) {
+    let nav = (this.$refs['collapseButtons'] as Record<any, any>).$refs['nav'];
     let new_tab_index = this.customLogos.length;
     let logo = setLogoSettings(new_tab_index);
     logo.adding_tab = true
@@ -241,7 +249,9 @@ export default class LogoPlacementTabs extends Vue {
     }
     await this.$store.dispatch('setCustomLogos', payload)
     this.tabIndex = this.customLogos.length - 1
-    console.log("tabidex", this.tabIndex)
+    setTimeout(()=>{
+      nav.scrollTo(nav.scrollWidth, 0);
+    }, 100)
   }
 
   public removeLogoTab(index: number){
@@ -386,7 +396,7 @@ export default class LogoPlacementTabs extends Vue {
       finalColor.color_text = colors.json_data
       this.productColors = this.productColors.concat(finalColor)
     })
-    this.productColors = this.productColors.concat(this.lockerColors)
+    //this.productColors = this.productColors.concat(this.lockerColors)
   }
 
 

@@ -1,6 +1,6 @@
 <template>
   <modal :minWidth="1000" :scrollable="true" :height="'auto'" :minHeight="600" :resizable="true" :adaptive="true"
-    name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl" modal-class="modal-fullscreen2"
+    name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl" class="cart-modal" modal-class="modal-fullscreen2"
     content-class="lockerroom-modal" @closed="customer_reference_no = null" @before-open="getAddresses">
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Cart</span>
@@ -9,7 +9,7 @@
       </span>
     </div>
 
-    <div class="theme-scroll" style="height: calc(100% - 65px); overflow-y: auto; padding-bottom: 20px">
+    <div class="theme-scroll" style="height: calc(100vh - 300px); overflow-y: auto; padding-bottom: 20px">
       <div class="loader relative" v-if="viewLoader || cartLoading"><img src="../../src/assets/images/loading.gif" /></div>
       <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
         <thead class="bg-light">

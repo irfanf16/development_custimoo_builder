@@ -118,7 +118,7 @@ const getColorEncoding = (inputEncoding: string,colorType= 'pantone') => {
         return inputEncoding == color.pantone
       });
       break;
-    case 'pantone':
+    case 'pantone-tcx':
       colorEncoding = pantonesTcx.find((color, index) => {
         return inputEncoding == color.pantone
       });

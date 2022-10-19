@@ -131,9 +131,11 @@
                               <img :key="`activity_comment_file_${activity_comment_file_index}`"
                                    :src="`${storage_url}${activity_comment_file.url}`" :alt="`${activity_comment_file.name}`" width="100">
                             </template>
-                            <template v-if="activity_comment_file.extension.toLowerCase() == 'pdf'">
-                              <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="activity_comment_file.file_preview" download target="_blank">
-                                <img src="/img/images/pdf-placeholer.png" alt="">
+
+                            <template v-if="['pdf', 'ai', 'eps', 'svg'].includes(activity_comment_file.extension.toLowerCase())">
+                              <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="`${storage_url}${activity_comment_file.url}`" :download="activity_comment_file.name" target="_blank">
+                                <img width="50" height="50" src="/img/images/file.png" :alt="activity_comment_file.name">
+                                <span>{{activity_comment_file.name}}.{{activity_comment_file.extension}}</span>
                               </a>
                             </template>
                           </template>
@@ -218,7 +220,7 @@
 
           <div v-for="(actFile, fileInd) in activity_items.activity_item_data[activity_navigation_index].files" :key="`actfile-${fileInd}`">
             <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`" :key="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
-            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`" :src="`${actFile.file}?nocache=`+Math.floor(Math.random() * 100)" alt="" class="w-100" style="max-height: 500px">
+            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`" :src="`${actFile.file}`" alt="" class="w-100" style="max-height: 500px" crossorigin="anonymous">
           </div>
 
 
@@ -285,15 +287,17 @@ import {getCompany} from "@/helpers/Helpers";
       this.order_id = this.$route.params.order_id;
     }
     comment_id = this.$route.query.comment_id;
-    await self.getOrderDetail();
-    if(comment_id) {
-      let timer = setInterval(function() {
-        self.goToMessage(Number(comment_id))
-        if( document.getElementById(`comment-${comment_id}-box`)) {
-          clearInterval(timer)
-        }
-      }, 2000)
-    }
+     if(this.isCustomerAuthenticated){
+       await self.getOrderDetail();
+       if(comment_id) {
+         let timer = setInterval(function() {
+           self.goToMessage(Number(comment_id))
+           if( document.getElementById(`comment-${comment_id}-box`)) {
+             clearInterval(timer)
+           }
+         }, 2000)
+       }
+     }
 
   },
   components: {
@@ -386,7 +390,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   get company():string{
     return this.$store.getters.getCompany
   }
-
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
 
 
   async getOrderDetail() {
@@ -453,7 +459,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       actObj.factory_product_id = actItem.factory_product_id;
       for(let actfile of actItem.activity_files){
         let fileObj:Record<any,any> = {};
-         fileObj.file = `${this.storage_url}${actfile.url}`;
+         fileObj.file = `${this.storage_url}${actfile.url}?nocache=${Math.random()}`;
         fileObj.file_type = null;
         actObj.files.push(fileObj);
       }

@@ -1,8 +1,9 @@
-import {Component, Vue} from "vue-property-decorator";
+import {Component, Vue, Watch} from "vue-property-decorator";
 
 @Component
 export class ProductColors extends Vue {
   // type expect comma separated values. So in case we want to merge locker colors and logo colors. the the type=locker_colors,logo_colors
+
   public async productColors(color_types="file_colors,locker_colors") {
     const self: Record<any, any> = this;
     const product_color_files: Record<any, any> = [];
@@ -38,6 +39,7 @@ export class ProductColors extends Vue {
           console.info(`Un known color type (${get_color_type})`)
       }
     })
+    
     return product_color_files;
   }
 }

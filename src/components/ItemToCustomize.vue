@@ -238,6 +238,13 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         retrieve_products = true;
       }
     }
+    if(prd_type == "customized")
+      customized = new_val
+    if(prd_type == "personalized")
+      personalized = new_val
+    await this.$store.dispatch('setCategories', {
+      query_params: `customized=${customized}&personalized=${personalized}`
+    })
 
     // self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id: null});
     if(retrieve_products) {
