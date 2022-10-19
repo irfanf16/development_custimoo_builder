@@ -105,7 +105,7 @@ export default class ColorTabs extends Mixins(ModalAction) {
   }
 
   get getColorType(){
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   public showColor(index: number) {

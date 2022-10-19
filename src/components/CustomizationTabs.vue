@@ -24,7 +24,7 @@
                 <span class="icon-holder">
                   <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
                 </span>
-                Logo
+                Logo1
               </a>
             </template>
             <div class="logo-placement-tabs">

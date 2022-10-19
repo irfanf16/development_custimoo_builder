@@ -20,7 +20,7 @@
         </b-form-checkbox>
       </div>
       <div class="upload-logo-buttons justify-content-center d-flex gap-1">
-        <button class="btn btn-secondary light text-center justify-content-center p-2" @click="$modal.hide('logo-disclaimer-modal')">Cancel</button>
+        <button class="btn btn-secondary light text-center justify-content-center p-2" @click="$emit('hide-disclaimer-modal')">Cancel</button>
         <button class="btn btn-secondary text-center justify-content-center p-2"
                 style="background: #219F84; color: #fff"
                 @click="$emit('disclaimer-accepted', !dont_show_again)"
@@ -34,31 +34,22 @@
 
 <script lang="ts">
 
-import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
+import {Component, Mixins} from 'vue-property-decorator'
+import ModalAction from "@/mixins/ModalAction";
 
 @Component<LogoDisclaimerModal>({
-  components: {},
-  mounted() {
-    const logo_disclaimer_info = localStorage.getItem("logoDisclaimerInfo")
-    if(logo_disclaimer_info) {
-      this.logoDisclaimerInfo = JSON.parse(logo_disclaimer_info)
-    }
- }
+
 })
-export default class LogoDisclaimerModal extends Mixins() {
+export default class LogoDisclaimerModal extends Mixins(ModalAction) {
+  /*
+  * data props starts
+  * */
+
   public dont_show_again = true
 
-  public uploadLogoBtn() {
-    if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
-      localStorage.setItem('logo_modal_status', 'false')
-      this.open_modal = false
-      this.hideModal();
-    }
-
-    if(this.ref.fileInput) {
-      this.ref.fileInput.click()
-    }
-  }
+  /*
+  * data props ends
+  * */
 
 }
 

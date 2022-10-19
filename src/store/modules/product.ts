@@ -1,6 +1,7 @@
 import { Module } from "vuex";
 import {http} from "@/httpCommon";
 import {Vue} from "vue-property-decorator";
+import {logoColorInfoDefaultObject} from "@/helpers/Helpers";
 const Product:Module<any, any> = {
   state:{
     Product_Models:[],
@@ -19,8 +20,18 @@ const Product:Module<any, any> = {
     },
     update_order_item_products: null,
     product_locker_id:0,
-    setting:{},
-    color_type:'product_color',
+    general_settings:{
+      color_type: 'pantone-tcx'
+    },
+    logo_colors_info: {
+      /*
+      * while adding/removing property make  sure to add/remove property in helpers method logoColorInfoDefaultObject()
+      * */
+      using_logo_colors: false,
+      is_shuffled: false,
+      extracted_colors: [],
+      colors: []
+    }
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -59,11 +70,13 @@ const Product:Module<any, any> = {
     getProductLockerId(state:Record<any,any>){
       return state.product_locker_id;
     },
-    getSetting(state:Record<any,any>){
-      return state.setting
+    getSetting: state => (setting_key: string) => {
+      return state.general_settings[setting_key]
     },
-    getColorType(state:Record<any,any>){
-      return state.color_type;
+    getLogoColorsInfo: state => (info_for: string|null = null) => {
+      if(info_for)
+        return state.logo_colors_info[info_for]
+      return state.logo_colors_info
     }
   },
   mutations:{
@@ -135,12 +148,17 @@ const Product:Module<any, any> = {
     SET_PRODUCT_LOCKER_ID(state:Record<any,any>,id){
       state.product_locker_id = id;
     },
-    SET_SETTING(state:Record<any,any>,setting){
-      state.setting = setting;
+    SET_SETTING(state:Record<any,any>, setting){
+      state.general_settings = { ...state.general_settings, ...setting };
     },
-    SET_COLOR_TYPE(state:Record<any,any>,color_type){
-      state.color_type = color_type;
-    }
+    SET_LOGO_COLORS_INFO(state:Record<any,any>, payload: Record<any, any>) {
+      if('reset' in payload) {
+        state.logo_colors_info = logoColorInfoDefaultObject()
+      }
+      else {
+        state.logo_colors_info = {...state.logo_colors_info, ...payload.data}
+      }
+    },
   },
   actions: {
     async getModels({commit}, paylod:number){
@@ -320,26 +338,6 @@ const Product:Module<any, any> = {
     },
     async updateMainProductsInfo({commit}, payload){
       commit('UPDATE_MAIN_PRODUCTS_INFO', payload)
-    },
-    async fetchGeneralSettings({commit}, type){
-      const res =  await http.get(`/get-configuration/${type}`).then((res) => {
-        if(res.data.status_code === 200){
-          commit('SET_SETTING', res.data.result)
-        }
-        return res
-      });
-    },
-    async setColorType({commit},type){
-      return new Promise((resolve,reject) => {
-         http.get(`/get-configuration/${type}`).then((res) => {
-          if(res.data.status_code === 200){
-            commit('SET_COLOR_TYPE', res.data.result);
-          }
-          resolve(res);
-        }).catch(e => {
-          reject(e);
-         })
-      });
     }
 
   }

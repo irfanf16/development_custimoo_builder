@@ -270,7 +270,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   }
 
   get getColorType() : string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   get customLogos(): [Record<any, any>] {

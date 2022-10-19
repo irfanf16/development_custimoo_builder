@@ -145,7 +145,7 @@ export default class ColorAccordion extends Vue {
     return this.$store.getters.getSelectedProduct
   }
   get getColorType(): string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   public selectType(index: number, showOther = false) {

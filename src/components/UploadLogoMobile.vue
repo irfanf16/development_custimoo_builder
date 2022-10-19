@@ -210,7 +210,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   }
 
   get getColorType(): string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
 /*  get manageComponents(): [] {

@@ -85,7 +85,7 @@ export default class TextColorTabs extends Vue {
     return this.$store.getters.getSelectedProduct
   }
   get getColorType(): string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   public showColor(index: number) {

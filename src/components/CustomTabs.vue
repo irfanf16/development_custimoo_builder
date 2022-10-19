@@ -515,7 +515,7 @@ export default class CustomTabs extends Mixins(cartModalData) {
     return this.$store.getters.getGroupColors
   }
   get getColorType(){
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
   // public showColor(index: number) {
   //   this.selectAccordionIndex = index

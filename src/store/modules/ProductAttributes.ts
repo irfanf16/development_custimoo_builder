@@ -2,8 +2,17 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import {
-  rosterDefaultItem, setRetrievedProductsCustomTexts, getRosterDetailDefaultObject, initCustomLogos, setCustomLogo,
-  getLogoSettings, setLogoSettings, getProductLogoSetting, logData, lastActiveProductDefaultObject
+  rosterDefaultItem,
+  setRetrievedProductsCustomTexts,
+  getRosterDetailDefaultObject,
+  initCustomLogos,
+  setCustomLogo,
+  getLogoSettings,
+  setLogoSettings,
+  getProductLogoSetting,
+  logData,
+  lastActiveProductDefaultObject,
+  recentLogoDefaultObject
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
@@ -255,22 +264,53 @@ const ProductAttributes:Module<any, any> = {
          }
        }
     },
-    SET_CUSTOM_LOGOS(state: Record<any, any>,payload = []) {
-      if('product_id' in payload) {
-        Vue.set(state.customLogos, payload.product_id, payload.custom_logos)
-      } else {
-        Vue.set(state.customLogos, state.selectedPrdId, payload)
+    SET_PRODUCT_CUSTOM_LOGOS(state: Record<any, any>, payload: Record<any, any> ) {
+      if('append' in payload) {
+        state.customLogos = {...state.customLogos, ...payload.data}
+      }
+      else {
+        const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
+        const custom_logo_index = payload.logo_index
+        let product_custom_logos = state.customLogos[product_id]
+        if(custom_logo_index >= 0) {
+          let product_custom_logo = product_custom_logos[custom_logo_index]
+          product_custom_logo = {...product_custom_logo, ...payload.data}
+        }
+        else {
+          product_custom_logos = payload.data
+        }
       }
     },
-    SET_RECENT_LOGOS(state: Record<any, any>,payload = []) {
-      if(payload.length > 0) {
-        state.recentLogos = []
-        state.recentLogos = payload
+    SET_CUSTOM_LOGOS(state: Record<any, any>,payload = []) {
+      const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
+      const logo_index = payload.logo_index
+      if(logo_index >= 0) {
+        Vue.set(state.customLogos[product_id], logo_index, {...state.customLogos[product_id], ...payload.custom_logos})
+      }
+      else {
+        Vue.set(state.customLogos, product_id, payload.custom_logos)
+      }
+    },
+    SET_RECENT_LOGOS(state: Record<any, any>, payload: Record<any, any>) {
+      if(payload) {
+        // payload action can have = {prepend, append, assign}
+        const action = payload.action ? payload.action : 'prepend'
+        payload.data = payload.data.constructor.name == 'Object' ? [ payload.data ] : payload.data
+        switch (action) {
+          case 'prepend':
+            state.recentLogos = [ ...payload.data, ...state.recentLogos ]
+            break;
+          case 'append':
+            state.recentLogos = [ ...state.recentLogos, ...payload.data ]
+            break;
+          default:
+            state.recentLogos = payload.data
+        }
       }
       else {
         http.get('logos/recent').then((res) => {
           state.recentLogos = []
-          state.recentLogos = res.data.data
+          state.recentLogos = recentLogoDefaultObject(res.data.data)
         }).catch((e) => {
           console.log('e',e)
         })
@@ -1054,6 +1094,7 @@ const ProductAttributes:Module<any, any> = {
       return state.showColorsLogoEditor
     },
     getLockerTabsIndex: state => {
+
       return state.lockerTabsIndex
     },
     getColorsFromRecent: state => {
@@ -1086,6 +1127,9 @@ const ProductAttributes:Module<any, any> = {
     getHideColorSection: state => {
       return state.hideColorSection
     },
+    getProduct: (state) => (product_id:number = state.selectedPrdId) => {
+      return state.products.find((product: Record<any, any>) => product.id == product_id)
+    },
     getProducts: (state: any) => state.products,
     getSelectedIndex: (state: any) => state.selectedIndex,
     getSelectedProduct: (state => {
@@ -1102,12 +1146,18 @@ const ProductAttributes:Module<any, any> = {
     getSelectedCategories: state => {
       return state.selectedCategories
     },
-
-    getCustomLogos: state => (prd_id = state.selectedPrdId) => {
-      if(!state.customLogos[prd_id]) {
-        return []
-      }
-      return state.customLogos[prd_id]
+    /*
+    * product_id could be number or string. If product_id = 'all' it will return all products logos and return type will be object.
+    * If it's number then it will return custom logos against product id and return type will be array
+    * @return [Object | array]
+    * */
+    getCustomLogos: state => (product_id = state.selectedPrdId, logo_index = -1) => {
+      product_id = product_id == null ? state.selectedPrdId : product_id
+      if(product_id == 'all')
+        return state.customLogos
+      if(logo_index >= 0)
+        return state.customLogos[product_id][logo_index]
+      return state.customLogos[product_id]
     },
     getCustomLogoObject: state => {
     return state.customLogos

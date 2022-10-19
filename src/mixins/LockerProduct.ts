@@ -2,8 +2,8 @@
 import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
 import { getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
-  setRetrievedProductsCustomTexts, resetLastActiveProductData,
-  fontsColorsManipulation, fontsList, initCustomLogos1, rosterDetailsInit, fetchUrlContent, lastActiveProductDefaultObject
+  setRetrievedProductsCustomTexts, resetLastActiveProductData, fontsColorsManipulation, fontsList,
+  rosterDetailsInit, fetchUrlContent, lastActiveProductDefaultObject, initCustomLogosNew
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -271,7 +271,8 @@ export class handleMainProducts extends Vue {
       }
 
       let selected_product = this.$store.getters.getSelectedProduct;
-      initCustomLogos(retrieved_products)
+     // initCustomLogos(retrieved_products)
+      initCustomLogosNew(retrieved_products)
       this.$store.dispatch("setProductsRosters");
       this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {products_rosters: this.$store.getters.getProductRosters('all')})
       let customLogos = this.$store.getters.getCustomLogoObject

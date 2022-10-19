@@ -1,56 +1,63 @@
 <template>
   <div>
     <b-tabs>
-      <b-tab v-for="(product_logo, productLogoIndex) in 1" :key="productLogoIndex">
+      <b-tab v-for="(custom_logo, customLogoIndex) in customLogos" :active="custom_logo_tab_index == customLogoIndex"
+             :key="`custom_logo_${customLogoIndex}`" @click="custom_logo_tab_index = customLogoIndex">
         <template #title>
-          <span>{{ productLogoIndex == 0 ? 'Team Logo' : 'logo ' + productLogoIndex }}</span>
-          <template v-if="productLogoIndex > 0">
-            <span class="remove-logo">
+          <span>{{ customLogoIndex == 0 ? 'Team Logo' : 'logo ' + customLogoIndex }}</span>
+          <template v-if="customLogoIndex > 0">
+            <span class="remove-logo" @click="removeLogoTab(customLogoIndex)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
             </span>
           </template>
         </template>
         <div class="tabs-logo-container">
           <div class="logo-placement-area mb-3 mb-lg-4 pt-2">
-<!--            <div class="logo-placement-holder mb-lg-3" :class="logo_tab.url ? 'hasLogo': 'noLogo'">-->
-            <div class="logo-placement-holder mb-lg-3 noLogo">
+            <div class="logo-placement-holder mb-lg-3" :class="custom_logo.url ? 'hasLogo': 'noLogo'">
               <div class="logo-holder">
-                <LogoUploader custom-logo-index="productLogoIndex"></LogoUploader>
-                <span slot="upload_text">Click to upload logo or drag a file here</span>
+                <LogoUploader :customLogoIndex="customLogoIndex" :customLogo="custom_logo">
+                  <span slot="upload_text">Click to upload logo or drag a file here</span>
+                </LogoUploader>
               </div>
-<!--              <div class="logo-placemet-content" v-if="logo_tab.url">-->
-              <div class="logo-placemet-content" v-if="false">
+              <div class="logo-placemet-content" v-if="custom_logo.url">
                 <h4>Logo Placement</h4>
-                <b-form-select
-                               :options="['Front', 'Back']"></b-form-select>
+                <b-form-select :value="custom_logo.side" :options="['front', 'back']" @change="handleLogoPlacementChange($event, custom_logo)"></b-form-select>
               </div>
             </div>
           </div>
+          <logo-extracted-colors :custom-logo="custom_logo" v-if="logoColors.length > 0 && customLogoIndex == 0" />
         </div>
-
       </b-tab>
+      <recent-logos-new :custom-logo-index="custom_logo_tab_index" :custom-logo="customLogos[custom_logo_tab_index]"/>
+      <template #tabs-end>
+        <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count"
+          @click="addLogoTab">
+          <BIconPlus />
+        </b-button>
+      </template>
     </b-tabs>
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
-import LogoUploader from "@/components/Logo/LogoUploader"
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import LogoUploader from "@/components/Logo/LogoUploader.vue"
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
 import LogoColorTabs from "@/components/LogoColorTabs.vue"
-import RecentLogos from "@/components/RecentLogos.vue";
-import { setLogoSettings, getCustomLogos,} from "@/helpers/Helpers"
+import RecentLogosNew from "@/components/RecentLogosNew.vue";
+import LogoExtractedColors from "@/components/Logo/LogoExtractedColors.vue";
+import { getLogoSettingsObject } from "@/helpers/Helpers"
 
 
 @Component<LogoPlacementTab>({
   components: {
-    RecentLogos,
+    RecentLogosNew,
     LogoUploader,
     SaveLogoModal,
     SaveColorModal,
-    LogoColorTabs
-
+    LogoColorTabs,
+    LogoExtractedColors
   },
   async mounted() {
     this.$root.$on('changeLogoTabIndex', (index:number) => {
@@ -62,7 +69,9 @@ import { setLogoSettings, getCustomLogos,} from "@/helpers/Helpers"
 export default class LogoPlacementTab extends Vue {
   // @Prop({required: true}) numberOfLogosAllowed!: number
   // @Prop({required: true}) isColorShuffled!: boolean
-  private isClicked = false
+  /*
+  * props starts
+  * */
   @Prop({required: false, default: () => { return [{
       url: '',
       width: 200,
@@ -75,6 +84,14 @@ export default class LogoPlacementTab extends Vue {
       customLogo: true
     }]}}) logosSetting!: [Record<any, any>]
 
+  /*
+  * props ends
+  * */
+
+  /*
+  * data props starts
+  * */
+
   public ref = this.$refs as Record<any, any>
   public numberOfLogos = 1
   public showFileInput  = true
@@ -86,239 +103,74 @@ export default class LogoPlacementTab extends Vue {
     {value: 'front', text: 'Front'},
     {value: 'back', text: 'Back'}
   ]
-  public previousImageColors = []
   public logoColorUsed = false
-  public allowed_logos = 1000
   public allowedLogosLimit = 1000
   public productColors: any[] = []
-  public productPantones: any[] = []
   public showSVGs = false
   public showLogoColors = false
   public selectedSwatchIndex = -1
   public defSwatchColor = '#ffffff'
   public defSwatchPantone = '11-0601'
+  public custom_logo_tab_index = 0
+
+  /*
+  * data props ends
+  * */
 
 
+  /*
+  * computed props starts
+  * */
 
-
-  get imageColors(): any[] {
-    return this.$store.getters.getLogosColors
+  get selectedProduct(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct
   }
 
-  get customLogos(): [Record<any, any>] {
-    //return this.$store.getters.getCustomLogos()
-     return  getCustomLogos(true, true);
+  get lockerColors(){
+    return this.$store.getters.getLockerColors
   }
 
-  get manageComponents(): [] {
-    return this.$store.getters.getManageComponents
-  }
-  get isCustomerAuthenticated(): boolean {
-    return this.$store.getters.isCustomerAuthenticated
+  get customLogos() {
+    return this.$store.getters.getCustomLogos();
   }
 
-  get hideColorSection() {
-    return this.$store.getters.getHideColorSection
-  }
-  get initialExtractedColors(){
-    return this.$store.getters.getinitialExtractedColors
+  get logoColors() {
+    return this.$store.getters.getLogoColorsInfo('colors')
   }
 
-  get defaultColors (): [Record<any, any>] {
-    return this.$store.getters.getDefaultColors
-  }
+  /*
+  * computed props ends
+  * */
 
-  get usingColorLogos (): [Record<any, any>] {
-    return this.$store.getters.getUsingColorLogos
-  }
+  /*
+  * methods starts
+  * */
 
   public changeTab (index: number) {
     this.$store.dispatch('setLogoTab', index)
   }
 
-  public async initFirstLogoTab (index: number) {
-    if (this.$store.getters.getCustomLogos().length < 1) {
-      if (this.numberOfLogos < this.allowedLogosLimit) {
-        let logoSetting: Record<any, any>
-        if (this.logosSetting[index]) {
-          logoSetting = this.logosSetting[index] as Record<any, any>
-        } else {
-          logoSetting = {
-            width: 200,
-            x_axis: 150,
-            y_axis: 190,
-            rotation: 0,
-            haveControls: true,
-            side: 'front'
-          }
-        }
-        let logo = {
-          id: null,
-          url: '',
-          width: logoSetting.width,
-          height: logoSetting.height,
-          x_axis: logoSetting.x_axis,
-          y_axis: logoSetting.y_axis,
-          rotation: logoSetting.rotation as number,
-          haveControls: Boolean(!logoSetting.is_locked),
-          side: logoSetting.side,
-          customLogo: true
-        }
-        // this.showFileInput = false;
-        await this.$store.dispatch('setCustomLogos', logo)
-        this.tabIndex = this.customLogos.length - 1
-        this.$store.dispatch('setLogoTab', this.tabIndex)
-      }
-    }
+  public addLogoTab() {
+    const new_logo_index = this.customLogos.length
+    //check if logo setting at given index exists then get that else get logo default object
+    let logo_setting_at_index = this.selectedProduct.logos_setting[new_logo_index] ? this.selectedProduct.logos_setting[new_logo_index] : {}
+    logo_setting_at_index = {...logo_setting_at_index, ...getLogoSettingsObject()}
+    logo_setting_at_index.logo_index = new_logo_index
+    this.customLogos.push(logo_setting_at_index)
+    this.custom_logo_tab_index = new_logo_index
   }
 
-  public async addTab(index: number) {
-    let new_tab_index = this.customLogos.length;
-    let logo = setLogoSettings(new_tab_index);
-    logo.adding_tab = true
-    const payload = {
-      custom_logo: logo
-    }
-    await this.$store.dispatch('setCustomLogos', payload)
-    this.tabIndex = this.customLogos.length - 1
-    console.log("tabidex", this.tabIndex)
-  }
-
-  public removeLogoTab(index: number){
-    let payload = {
-      index: index
-    }
-    let logo = setLogoSettings(index);
-    logo.logoIndex = index;
-    this.$store.commit('customLogos', logo)
-    setTimeout(() => {
-      this.$store.dispatch('deleteCustomLogoTab', payload)
-    }, 500)
-    this.tabIndex = this.tabIndex - 1;
-  }
-
-  public deleteLogo(index: number) {
-    let payload = {
-      index: index
-    }
-    this.$store.dispatch('deleteCustomLogo', payload)
-  }
-
-  public async changeSide(index: number, event:string) {
-    await this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.customLogos)), action: 'customLogos' })
-    const payload = {
-      index: index,
-      attribute: 'side',
-      value: event
-    }
-    await this.$store.dispatch('updateCustomLogoAttribute', payload)
-  }
-
-  async  useLogoColors() {
-    this.isClicked = true
-    this.logoColorUsed = true
-    if(this.usingColorLogos) {
-     /*this.$store.commit('SET_LOGO_COLORS', [])*/
-      for (let i = 0; i < 4; i++) {
-        this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
-      }
-    } else {
-
-
-      if (this.imageColors.length ==0 && this.initialExtractedColors.length){
-        this.$store.commit('SET_LOGO_COLORS', this.initialExtractedColors)
-      }
-      this.$store.dispatch('setGroupColors', {})
-      this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
-      for (let i = 0; i < 4; i++) {
-        if(this.imageColors[i]) {
-          this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone, name: this.imageColors[i].name})
-        } else {
-          this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
-        }
-      }
-    }
-    this.$store.commit("UPDATE_USING_COLOR_LOGOS", !this.usingColorLogos);
-
-  }
-
-
-  shuffleLogoColors(e:Record<any, any>) {
-    this.$emit('setColorShuffled', false)
-    if(this.imageColors && this.imageColors.length > 1) {
-      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
-    /*  let empty_logo_indexes: any = [];*/
-      let imageColors = JSON.parse(JSON.stringify(this.imageColors))
-
-      let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
-        if (currentIndex !== 1) return previousValue;
-
-        array.sort(() => Math.random() - 0.5)
-        return array;
-      }
-
-      if (!this.checkColorOccurence(imageColors)){
-        while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
-          imageColors.reduce(shuffle)
-        }
-      }
-
-      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
-      this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
-      imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-        this.$store.dispatch('setDefaultColor', {
-          index: index,
-          color: imageColor.hex,
-          pantone: imageColor.pantone,
-          name: imageColor.name
-        })
-      })
-    }
-  }
- public  checkColorOccurence(data:Record<any, any>){
-    let x = 0
-    let current = data[0].hex
-    let matched = true
-    for (x; x < data.length; x++){
-      if (JSON.stringify(current) == JSON.stringify(data[x].hex)){
-        current = data[x].hex
-        matched = true
-      }else{
-        matched = false
-        break
-      }
-    }
-    return matched
-  }
-
-  public async rollbackPreviousColors () {
-    this.initialExtractedColors.forEach((defaultColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
+  public removeLogoTab(logo_index: number) {
+    this.customLogos.splice(logo_index, 1)
+    this.customLogos.forEach((custom_logo: Record<any, any>, customLogoIndex) => {
+      custom_logo.logo_index = customLogoIndex
     })
-    let initial_colors = JSON.parse(JSON.stringify(this.initialExtractedColors));
-    await this.$store.dispatch("SET_LOGO_COLORS", initial_colors);
-    this.previousImageColors = []
   }
 
-  public async callRooms(){
-    if(this.isCustomerAuthenticated){
-      await this.$store.dispatch('GET_LOCKER_PRODUCTS');
-    }
+  public handleLogoPlacementChange(updated_value: string, custom_logo: Record<any, any>) {
+    custom_logo.side = updated_value
   }
 
-  public toggleLogoBackground(index: number){
-    this.$store.dispatch('toggleLogoBackgroud', index)
-  }
-
-  get selectedProduct(): Record<any, any> {
-    return this.$store.getters.getSelectedProduct
-  }
-  get lockerColors(){
-    return this.$store.getters.getLockerColors
-  }
-  get logoColors(): [] {
-    return this.$store.getters.getLogosColors
-  }
   public getColors() {
     this.productColors = []
     this.selectedProduct.colors.forEach((colors: any, key: number) => {
@@ -329,33 +181,13 @@ export default class LogoPlacementTab extends Vue {
     this.productColors = this.productColors.concat(this.lockerColors)
   }
 
-
-
-  public selectLogoColor(index: number, imageColor: Record<any, any>){
-    if(index==this.selectedSwatchIndex) {
-      this.showLogoColors = false;
-      this.selectedSwatchIndex = -1;
-    } else {
-      this.selectedSwatchIndex = index
-      this.defSwatchColor = imageColor.hex
-      this.defSwatchPantone = imageColor.pantone
-      this.getColors();
-      this.showLogoColors = true
-    }
+  public handleCustomLogoTabInputEvent(selected_tab_index: number) {
+    this.custom_logo_tab_index = selected_tab_index
   }
 
-  public setSwatchColor(color: Record<any, any>) {
-    let payload = {color_info : color , index : this.selectedSwatchIndex}
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
-    this.$store.dispatch('setDefaultColor', { index: this.selectedSwatchIndex, color: color.hex, pantone: color.pantone, name: color.name })
-    this.$store.commit('SET_LOGO_COLOR', payload)
-  }
-
-  public deleteLogoColor(index: number) {
-    this.imageColors[index].hex = null
-    this.imageColors[index].name = null
-    this.imageColors[index].pantone = null
-  }
+  /*
+  * methods ends
+  * */
 
 }
 </script>

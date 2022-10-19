@@ -34,7 +34,10 @@ const getLogoSettingsObject = () => {
     is_smart_transparent: null,
     url: null,
     haveControls: true,
-    logo_colors: []
+    logo_original_colors: [],
+    logo_colors: [],
+    is_recent_logo: false,
+    logo_index: 0
   }
 }
 
@@ -177,7 +180,7 @@ const fileToBase64 =  (file: any) => {
 
 }
 
-const processColorsCustom = (colors: []) => {
+const processColorsCustom = (colors: [], logos_count=4) => {
   const imageColors: any[] = []
   const uniqueColors: string[] = []
   colors.forEach((color: number[]) => {
@@ -189,39 +192,58 @@ const processColorsCustom = (colors: []) => {
   const deletedCount = uniqueColors.length - 4
   uniqueColors.splice(4, deletedCount)
   const selectProductPantonesList = getSelectedProductPantones()
-  const color_type = Store.getters.getColorType;
+  const color_type = Store.getters.getSetting('color_type');
   uniqueColors.forEach((color: string) => {
     const pantoneColor = getClosestColor(color, selectProductPantonesList,color_type);
-    //const pantoneColor = getClosestColor(color);
     imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
   })
+  while(imageColors.length < logos_count ) {
+    imageColors.push({hex: null, pantone: null, name: null})
+  }
   return imageColors;
 
 }
 
-const getSelectedProductPantones = (product_id: null|number = null) => {
-  const productPantones: Record<any, any>[] = []
-  let selectedProduct = Store.getters.getSelectedProduct;
-  if(product_id){
-    const search_product = getProductById(product_id);
-    if(search_product)
-      selectedProduct = search_product;
-  }
+// const getSelectedProductPantones = (product_id: null|number = null) => {
+//   const productPantones: Record<any, any>[] = []
+//   let selectedProduct = Store.getters.getSelectedProduct;
+//   if(product_id){
+//     const search_product = getProductById(product_id);
+//     if(search_product)
+//       selectedProduct = search_product;
+//   }
+//
+//     selectedProduct.colors.forEach((product_colors: any, key: number) => {
+//     if(key == 0){
+//       const colors = product_colors.json_data
+//       colors.forEach((color: any) => {
+//         //let pantone = color.name
+//         let pantone = ''
+//         if(color.pantone){
+//           pantone = color.pantone
+//         }
+//         productPantones.push({pantone : pantone, name: color.name, hex: color.value});
+//       })
+//     }
+//   })
+//   return productPantones;
+// }
 
-    selectedProduct.colors.forEach((product_colors: any, key: number) => {
-    if(key == 0){
-      const colors = product_colors.json_data
-      colors.forEach((color: any) => {
-        //let pantone = color.name
-        let pantone = ''
-        if(color.pantone){
-          pantone = color.pantone
-        }
-        productPantones.push({pantone : pantone, name: color.name, hex: color.value});
-      })
-    }
-  })
-  return productPantones;
+const getSelectedProductPantones = (product_id: null|number = null) => {
+  const product_pantones: Record<any, any>[] = []
+  const product = product_id ? Store.getters.getProduct(product_id) : Store.getters.getProduct()
+  if(product) {
+    product.colors.forEach((product_colors: any, key: number) => {
+      if(key == 0){
+        const colors = product_colors.json_data
+        colors.forEach((color: any) => {
+          const pantone = color.pantone ? color.pantone : ''
+          product_pantones.push({pantone : pantone, name: color.name, hex: color.value});
+        })
+      }
+    })
+  }
+  return product_pantones;
 }
 
 const getProductById = (product_id: number) => {
@@ -302,7 +324,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
 
   let image_colors = [];
   if(logo.logo_colors != null) {
-    image_colors = processColorsCustom(JSON.parse(logo.logo_colors))
+    image_colors = processColorsCustom(logo.logo_colors)
     let image_color_count = image_colors.length;
     while(image_color_count < 4 ) {
       image_colors.push({hex: null, pantone: null, name: null});
@@ -735,7 +757,7 @@ const initCustomLogos = async(retrieved_products: Record<any, any>) => {
   })
 }
 
-const initCustomLogos1 = (retrieved_products: Record<any, any>) => {
+const initCustomLogosNew = (retrieved_products: Record<any, any>) => {
   const custom_logos_by_products: Record<any, any> = {}
   retrieved_products.forEach((product: Record<any, any>) => {
     if(product.is_logo_allowed) {
@@ -748,7 +770,7 @@ const initCustomLogos1 = (retrieved_products: Record<any, any>) => {
       custom_logos_by_products[product.id] = [first_logo_setting]
     }
   })
-  console.log('custom_logos_by_products', custom_logos_by_products)
+  Store.commit('SET_PRODUCT_CUSTOM_LOGOS', { 'append': true, data: custom_logos_by_products})
 }
 
 const rosterDetailsInit = (retrieved_products: Record<any, any>) => {
@@ -1410,7 +1432,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
 }
 
 const unitConversion = (value:number) => {
-  const setting = Store.getters.getSetting
+  const setting = Store.getters.getSetting('measurement_unit')
   switch( setting.conversion_operator ) {
     case 'multiply':
       return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
@@ -1526,14 +1548,51 @@ const setVueVersion = async () => {
     return
   }
 }
-//Functions related to SVG parsing end
+
+const getProductColors = (product_id = null, append_locker_colors = true ) => {
+  let product_colors: Record<any, any>[] = []
+  product_id = product_id ? product_id : Store.getters.getSelectedProductId
+  const product_obj = Store.getters.getProduct(product_id)
+  if(product_obj) {
+    product_obj.colors.forEach((colors: any, key: number) => {
+      const final_color = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
+      final_color.color_text = colors.json_data
+      product_colors = product_colors.concat(final_color)
+    })
+    if(append_locker_colors) {
+      product_colors = product_colors.concat(Store.getters.getLockerColors)
+    }
+  }
+  return product_colors
+}
+
+const logoColorInfoDefaultObject = () => {
+  return { using_logo_colors: false,  is_shuffled: false,  extracted_colors: [],  colors: [] }
+}
+
+const recentLogoDefaultObject = (default_values: Record<any, any> | Record<any, any>[] = {}): Record<any, any> | Record<any, any>[] => {
+  const default_object = {
+    id: null, browser_key: null, company_id: null, logo_colors: [], logo_name: null, logo_url: null, original_logo_url: null,
+    original_png: null, product_id: null, recent_delete: false, smart_transparent_logo_url: null,
+    transparent_logo_url: null
+  }
+  if(default_values.constructor.name == 'Object') {
+    return {...default_object, ...default_values}
+  }
+  else {
+    return default_values.map((default_values_object: Record<any, any>) => {
+      return {...default_object, ...default_values_object}
+    })
+  }
+}
+
 export {
-  getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
-  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException,
-  logData, pathInfo, CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64,
-  getFileExtensionType, getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos,
-  getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent, unitConversion,
-  rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData, getSVGNumberArraysFromRoster,
-  getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile, persistToken,fetchCustomer,
-  setVueVersion, initCustomLogos1, rosterDetailsInit,
+  getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
+  sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType,
+  getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos, getSelectedProductPantones,
+  setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent, unitConversion, rosterDefaultItem, authenticateUser,
+  lastActiveProductDefaultObject, resetLastActiveProductData, getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames,
+  getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile, persistToken, fetchCustomer, setVueVersion, rosterDetailsInit,
+  initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject
 };

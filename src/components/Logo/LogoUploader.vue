@@ -1,10 +1,11 @@
 <template>
-  <div style="padding-bottom: 10px" class="upload-logo-opener" v-if="customLogos">
+  <div style="padding-bottom: 10px" class="upload-logo-opener">
+    <logo-editor :custom-logo-index="customLogoIndex" :custom-logo="customLogo" />
     <div class="btn btn-secondary modal-handler" >
-      <div class="upload-box position-relative" :class="{'pulse-animation': true}">
+      <div class="upload-box position-relative" :class="{'pulse-animation': !customLogo.url}" :style="{overflow: customLogo.url ? 'visible' : 'hidden'}">
         <div class="loader relative" v-if="showLoader"><img src="../../../src/assets/images/loading.gif" /></div>
-        <div class="uploaded-logo-holder" v-if="'name' != 'name'">
-          <img :src="storageUrl+customLogos[customLogoIndex].url+'?nocache=1'" width="100%"/>
+        <div class="uploaded-logo-holder" v-if="customLogo.url">
+          <img :src="`${storageUrl}${customLogo.url}?nocache=1`" width="100%"/>
         </div>
         <div v-else>
           <div class="icon-holder">
@@ -12,25 +13,22 @@
           </div>
           <slot name="upload_text">Upload Logo</slot>
         </div>
-        <div class="remove-img">
-          <a>
+        <div class="remove-img" v-if="customLogo.url">
+          <a @click="removeLogo">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <input  :style="{display: 'block'}"
+        <input  :style="{display: customLogo.url ? 'none':  'block'}"
                 type="file"
                 name="logos" ref="logoUploadInput"
-                @change="uploadLogo"
-                @click="onClickUpload"
-                @drop="onDragUpload"
+                @change="handleInputChange"
+                @click="handleInputOnClick"
+                @drop="handleInputOnDrag($event)"
                 class="fileLoader"
                 accept="image/*,application/postscript,application/pdf">
       </div>
     </div>
-    <b-button v-if="mobileScreen" style="position:absolute; left: 0; top: -38px; width: auto" @click="openLogoEditor"  class="logo-editor-button" variant="secondary">
-      <b-icon-pencil fl /> Edit Logo
-    </b-button>
-    <LogoDisclaimerModal @disclaimer-accepted="handleDisclaimerAction"/>
+    <LogoDisclaimerModal @disclaimer-accepted="handleDisclaimerAction" @hide-disclaimer-modal="handleDisclaimerModalHideEvent"/>
 
   </div>
 </template>
@@ -39,21 +37,15 @@
 
 import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon"
-import {getClosestColor} from '@/pantoneColor'
-import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import $ from "jquery";
-import {
-  getSelectedProductPantones,
-  getUploadedLogoObject, processColorsCustom,
-  setLogoSettings
-} from '@/helpers/Helpers'
+import {getLogoSettingsObject, processColorsCustom, recentLogoDefaultObject} from '@/helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
+import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
 
 @Component<LogoUploader>({
-  components: {LogoEditorModal, LogoDisclaimerModal},
+  components: { LogoEditorModal, LogoDisclaimerModal, LogoEditor },
   mounted() {
     const logo_disclaimer_info = localStorage.getItem("logoDisclaimerInfo")
     if(logo_disclaimer_info) {
@@ -62,94 +54,53 @@ import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
  }
 })
 export default class LogoUploader extends Mixins(ErrorMessages, ModalAction) {
-  public status = 'accepted'
-  public open_modal!: boolean
-  public mounted!: boolean
-  public colors: any = [];
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
-  public ref = this.$refs as Record<any, any>
-  public imageColors: any[] = []
-  public showLoader = false;
-  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-  public fileObject: Record<any, any> = {}
-  public uploadType = 'click'
-  public logoDisclaimerInfo = {
-    accepted: false, show_again: true, user_id: null
-  }
-  public handlingDisclaimerAction = false
-  public logo_allowed_extensions = ['jpg','gif','png','jpeg','pdf','eps','ai']
+
+  /*
+  * props starts here
+  * */
 
   @Prop({ required: true }) customLogoIndex!: number
+  @Prop({ required: true }) customLogo!: Record<any, any>
+
+  /*
+  * props ends here
+  * */
+
+  /*
+  * data props starts here
+  * */
+
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
+  public showLoader = false;
+  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  public logoDisclaimerInfo = { accepted: false, show_again: true, user_id: null }
+  public handlingDisclaimerAction = false
+  public logo_allowed_extensions = ['jpg','gif','png','jpeg','pdf','eps','ai']
+  public logo_file: File | null = null
+
+  /*
+  * data props ends here
+  * */
+
+  /*
+  * computed props starts
+  * */
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
 
-  private hideAll(){
-    this.$store.dispatch('setActiveTab', -1);
-    $(".sideNav li a").removeClass('active')
+  get recentLogos() {
+    return this.$store.getters.getRecentLogos
   }
 
-  @Watch('customLogos', {
-    deep: true
-  })
-  customLogosChanged(newVal: [Record<any, any>]) {
-    if (this.customLogos[0] && !this.customLogos[0].url) {
-      let inputRef = this.$refs.fileInput as Record<any, any>
-      inputRef.value = null;
-    }
-    if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
-      this.getLogoColors()
-    }
-  }
+  /*
+  * computed props ends
+  * */
 
-  public uploadLogoBtn() {
-    if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
-      localStorage.setItem('logo_modal_status', 'false')
-      this.open_modal = false
-      this.hideModal();
-    }
-
-    if(this.ref.fileInput) {
-      this.ref.fileInput.click()
-    }
-  }
-
-  public uploadLogoDraged() {
-    if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
-      localStorage.setItem('logo_modal_status', 'false')
-      this.open_modal = false
-      this.hideModal();
-    }
-
-    this.processLogoImage();
-
-  }
-  public openLogoEditor() {
-    //set logo id and default image of logo
-    this.$store.dispatch('editLogo',{key: 'id', value:this.customLogos[this.customLogoIndex].id, api_call:false})
-    this.$store.dispatch('editLogo',{key: 'image', value: this.customLogos[this.customLogoIndex].url, api_call:false})
-    this.$store.dispatch('editLogo',{key: 'originalImage', value:this.customLogos[this.customLogoIndex].original_logo, api_call:false})
-    this.$store.dispatch('toggleLogoCheck', {type: 'color', val:false})
-    this.$store.dispatch('toggleLogoCheck', {type: 'background', val:false})
-    this.showVModal('logo-modal')
-  }
-
-  public showModal() {
-    this.showVModal('upload-logo-disclaimer')
-  }
-
-  public hideModal() {
-    this.hideVModal('upload-logo-disclaimer')
-  }
-
-  get customLogos(): Record<any, any>[] {
-    return this.$store.getters.getCustomLogos()
-  }
-
-  get logoUrl(): Record<any, any>[] {
-    return this.$store.getters.getLogoUrl
-  }
+  /*
+  * methods starts
+  * */
 
   showLogoDisclaimer() {
     let show_disclaimer = this.logoDisclaimerInfo.accepted ? false : true;
@@ -162,20 +113,59 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction) {
     return show_disclaimer
   }
 
-  public onClickUpload(e: Event){
-    this.uploadType = 'click';
+  public handleInputOnClick(e: Event){
     /*
     * if manually triggered click event then do nothing. like in case of method handleDisclaimerAction() we are manually triggering click  event.
     * In that case do nothing
     * */
     if(this.handlingDisclaimerAction) {
-      return false;
+      return false
     } else {
-      let show_disclaimer = this.showLogoDisclaimer()
-      if(show_disclaimer) {
+      if(this.showLogoDisclaimer()) {
         e.preventDefault()
+        return false
       }
     }
+  }
+
+  public handleInputChange(e: Event) {
+    const target = e.target as HTMLInputElement
+    let logo_file = target.files && target.files.length ? target.files[0] : null
+    if(logo_file) {
+      if(this.validateLogoFile(logo_file)) {
+        this.uploadLogo(logo_file)
+      } else {
+        target.value = '';
+        console.log('files', target.files)
+      }
+    }
+  }
+
+  public handleInputOnDrag(e: any) {
+    // this.logo_file have file then it means user have accepted logo disclaimer so now simply upload file to server
+    if(this.logo_file) {
+      this.uploadLogo(this.logo_file)
+      return false
+    } else {
+      const target = e.target as HTMLInputElement
+      let logo_file = e.dataTransfer.files[0]
+      if(this.validateLogoFile(logo_file)) {
+        if(this.showLogoDisclaimer()) {
+          e.preventDefault()
+          // if logo disclaimer is shown then save uploaded file to public property (logo_file). When user accept the disclaimer then upload file to server
+          this.logo_file = e.dataTransfer.files[0]
+        } else {
+          this.uploadLogo(logo_file)
+        }
+      } else {
+        target.value = '';
+      }
+    }
+  }
+
+  public handleDisclaimerModalHideEvent() {
+    this.$modal.hide('logo-disclaimer-modal')
+    this.logo_file = null
   }
 
   public handleDisclaimerAction(show_disclaimer_again: boolean) {
@@ -184,25 +174,13 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction) {
     this.logoDisclaimerInfo.show_again = show_disclaimer_again
     localStorage.setItem('logoDisclaimerInfo', JSON.stringify(this.logoDisclaimerInfo));
     this.$modal.hide('logo-disclaimer-modal')
-    this.manuallyShowFileUploader = false
-    this.$refs.logoUploadInput.click()
-    this.handlingDisclaimerAction = false
-  }
-
-  public onDragUpload(e: any) {
-    e.preventDefault()
-    this.fileObject = e.dataTransfer.files[0];
-    this.uploadType = 'drag';
-    if ((localStorage.getItem('logo_modal_status') == null)) {
-      this.showModal()
-    }else{
-      this.processLogoImage();
+    if(this.logo_file) {
+      this.uploadLogo(this.logo_file)
+    } else {
+      let input_element = this.$refs.logoUploadInput as HTMLInputElement
+      input_element.click()
     }
-  }
-
-  public uploadLogoImage(e: any) {
-    this.fileObject = e.target.files[0];
-    this.processLogoImage();
+    this.handlingDisclaimerAction = false
   }
 
   public validateLogoFile(logo_file: File) {
@@ -214,156 +192,64 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction) {
     return is_allowed;
   }
 
-  public uploadLogo(e: Event) {
-    const target = e.target as HTMLInputElement
-    let logo_file = target.files && target.files.length ? target.files[0] : null
-    if(logo_file) {
-      if(this.validateLogoFile(logo_file)) {
-        console.log('validate')
-      } else {
-        target.value = '';
-        console.log('files', target.files)
-      }
-    }
-  }
-
-
-
-
-
-  public  processLogoImage() {
-    let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
-    custom_logo.logoIndex = this.customLogoIndex;
-    let img = this.fileObject
-    let file_extension = img.name.toLowerCase();
-    if (!this.hasExtension(file_extension, ['.jpg','.gif','.png','jpeg','pdf','eps','ai'])) {
-      this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','Error');
-      return false;
-    }
-
-    let fd = new FormData()
-    let header = {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    }
-    fd.append('file', img as Blob)
-    fd.append('product_id', this.selectedProduct.product_id)
+  public uploadLogo(logo_file: File) {
+    let self: Record<any, any> = this;
+    let form_data = new FormData()
+    form_data.append('file', logo_file)
+    form_data.append('product_id', this.selectedProduct.product_id)
     this.showLoader = true;
-      http.post('/customer/upload/logo', fd, header)
-      .then(async resp => {
-        this.colors = resp.data.colors;
-        const inputRef = this.$refs.fileInput as Record<any, any>
-        inputRef.value = null;
-        custom_logo.original_logo = resp.data.file.logo_url;
-        custom_logo.transparent_logo = resp.data.file.transparent_logo_url;
-        custom_logo.smart_transparent_logo = resp.data.file.smart_transparent_logo_url;
-        custom_logo.original_logo_url = resp.data.file.original_logo_url;
-        custom_logo.is_smart_transparent = false;
-        custom_logo.url = resp.data.file.logo_url;
-        custom_logo.id = resp.data.file.id;
-        custom_logo.upload = true
-        let logo_colors = processColorsCustom(this.colors)
-        custom_logo.logo_colors = logo_colors
-        let customObj = await getUploadedLogoObject(resp.data.file)
-        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
-        this.$store.commit('SET_COLORS_FROM_RECENT',false)
-        custom_logo.adding_tab = false
-        let payload = {
-          customObj : customObj,
-          custom_logo: custom_logo
-        }
-        this.$store.commit('customLogos', payload)
-        this.hideModal()
-        await this.getLogoColors()
-        this.$store.commit('SET_RECENT_LOGOS');
-        this.showLoader = false;
-
+    http.post('/customer/upload/logo', form_data).then(async resp => {
+      //empty logo_file when file is uploaded
+      this.logo_file = null
+      let response_data = resp.data
+      if(response_data.success) {
+        let logo_data = response_data.result.customer_logo
         if(this.customLogoIndex == 0) {
-          //update team logo url in all product logos
-          this.$store.dispatch('setTeamLogoUrl', payload)
+          let logo_colors = processColorsCustom(logo_data.logo_colors)
+          this.$store.commit('SET_LOGO_COLORS_INFO', {
+            data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
+          })
         }
-      })
+        this.customLogo.transparent_logo = logo_data.transparent_logo_url;
+        this.customLogo.smart_transparent_logo = logo_data.smart_transparent_logo_url;
+        this.customLogo.original_logo_url = logo_data.original_logo_url;
+        this.customLogo.is_smart_transparent = false;
+        this.customLogo.url = logo_data.logo_url;
+        this.customLogo.id = logo_data.id;
+        this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject(logo_data)})
+        self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
+      } else {
+        this.showError(response_data.message);
+        return false
+      }
+      const inputRef = this.$refs.logoUploadInput as Record<any, any>
+      inputRef.value = null;
+      this.showLoader = false;
+    })
       .catch((error: any) => {
-        console.log(error)
+        const inputRef = this.$refs.logoUploadInput as Record<any, any>
+        inputRef.value = null;
         this.showLoader = false;
         this.showError(error);
       })
   }
 
-  public hasExtension(fileName : string, exts: any) : boolean {
-    return (new RegExp('(' + exts.join('|').replace(/\./g, '\\.') + ')$')).test(fileName);
-  }
-
-  public getLogoColors() {
-      if (this.customLogos.length) {
-      if (this.customLogos[0] && this.customLogos[0].url) {
-        this.$store.dispatch("SET_LOGO_URL", {logoUrl: this.customLogos[0].url})
-        if (this.colors.length){
-          this.processColors(this.colors)
-        }
-      }
+  public removeLogo() {
+    //check if logo setting at given index exists then get that else get logo default object
+    let logo_setting_at_index = this.selectedProduct.logos_setting[this.customLogoIndex] ? this.selectedProduct.logos_setting[this.customLogoIndex] : {}
+    logo_setting_at_index = {...logo_setting_at_index, ...getLogoSettingsObject()}
+    /*
+    * As we can not directly assign customLogo value because it is prop coming from parent component.
+    * So here we loop through it's properties to update values
+    * */
+    for (const [logo_object_key, logo_object_value] of Object.entries(logo_setting_at_index)) {
+      this.customLogo[logo_object_key] = logo_object_value
     }
   }
 
-  async processColors(colors: []) {
-    this.imageColors = []
-    let uniqueColors: string[] = []
-    colors.forEach((color: number[]) => {
-      const hex = rgbHex(color[0], color[1], color[2])
-      if ((!uniqueColors.includes(hex))) {
-        uniqueColors.push(hex)
-      }
-    })
-    let deletedCount = uniqueColors.length - 4
-    uniqueColors.splice(4, deletedCount)
-    const selectProductPantonesList = getSelectedProductPantones()
-    uniqueColors.forEach((color: string) => {
-
-      let pantoneColor = getClosestColor(color, selectProductPantonesList)
-      //console.log(JSON.parse(JSON.stringify(pantoneColor)))
-      this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
-    })
-    let add_extra_colors = 4 - uniqueColors.length;
-    if(uniqueColors.length < 4) {
-      while(add_extra_colors > 0 ) {
-        this.imageColors.push({hex: null, pantone: null, name: null})
-        --add_extra_colors;
-      }
-    }
-    //only set logo colors if index is 0
-    if(this.customLogoIndex == 0) {
-      await this.$store.dispatch("SET_LOGO_COLORS", this.imageColors);
-      await this.$store.dispatch("initialLogoColors", JSON.stringify(this.imageColors));
-    }
-  }
-
-
-  public deleteLogo() {
-    let inputRef = this.$refs.fileInput as Record<any, any>
-    inputRef.value = null;
-    let logo = setLogoSettings(this.customLogoIndex);
-    logo.logoIndex = this.customLogoIndex;
-    logo.removeLogo = true
-    let payload = {
-      custom_logo : logo
-    }
-    this.$store.commit('customLogos', payload)
-    this.$store.commit('SET_LOGO_COLORS', []);
-    this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
-  }
-
-  public toggleLogoBackground(type:string,val:boolean) {
-    let payload = {index:this.customLogoIndex,type,val}
-    if(this.customLogos[this.customLogoIndex]){
-      this.$store.dispatch('toggleLogoBackgroud', payload)
-    }
-  }
-
-  public updateLogoFromLogoEditor(colors = []) {
-    this.colors = colors
-    this.getLogoColors()
-  }
+  /*
+  * methods ends
+  * */
 }
 
 </script>

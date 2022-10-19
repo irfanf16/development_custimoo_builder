@@ -104,7 +104,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
         logo.logo_colors = await this.fetchLogoColors(logo.id)
       }
 
-      let colors = processColorsCustom(JSON.parse(logo.logo_colors))
+      let colors = processColorsCustom(logo.logo_colors)
       this.$store.commit('SET_LOGO_COLORS', colors);
 
       this.$store.commit('SET_COLORS_FROM_RECENT',true)
