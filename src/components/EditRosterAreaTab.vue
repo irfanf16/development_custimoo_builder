@@ -25,6 +25,10 @@
           <RosterDetails :productSizes="sizeOptions" ref="rostermodal" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts" />
           <div class="roster-preview-area">
             <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts" />
+            <div class="d-flex py-2 fs-3 justify-content-end">
+              <div>Total:</div>
+              <div class="ml-4 font-weight-bolder">{{ rosterTotal }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -87,6 +91,8 @@ import {AxiosError, AxiosResponse} from "axios";
     if (this.isCustomerAuthenticated) {
       await this.getLockerProductsRosters()
     }
+
+    await this.setRosterTotal(this.productRosters)
   }
 })
 
@@ -99,6 +105,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   public fileData: Record<any, any>[] = []
   public products_roster: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
+  public rosterTotal = 0
   private screenWidth = (window.screen.availWidth - 100)
   public shareRoster(){
     this.ref['order-details'].getLockers();
@@ -127,6 +134,10 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
 
   get customer():Record<any, any>{
     return  this.$store.getters.getCustomer
+  }
+
+  get productRosters(): [Record<any, any>]{
+    return this.$store.getters.getProductRosters(this.selectedProduct.id)
   }
 
   get selectedProduct(): Record<any, any> {
@@ -194,6 +205,19 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
       let sizes = {value: size.name, text: size.name}
       this.sizeOptions = this.sizeOptions.concat([sizes])
     })
+  }
+
+  @Watch('productRosters')
+  productRostersChanged(){
+    this.setRosterTotal(this.productRosters)
+  }
+
+  public setRosterTotal(roster:Record<any, any>[]){
+    let total = 0;
+    roster.forEach((item:Record<any, any>, index:number)=>{
+      total += +item.quantity
+    })
+    this.rosterTotal = total;
   }
 
   public changeProduct(designsIndex: number) {

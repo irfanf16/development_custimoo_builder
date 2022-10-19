@@ -32,11 +32,11 @@
                     @input="changePantoneColor"
                     :disabled="getColorType === 'cmyk'"
                   ></b-form-input>
-                  <div class="pantone-message">
+                  <div class="pantone-message p-1 text-danger">
                     {{ pantoneMessage }}
                   </div>
                 </b-form>
-                <color-picker @changeColor="changeColor" theme="light" :color="svgElement.color" :sucker-hide="true" />
+                <color-picker @changeColor="changeColor" theme="light" :key="svgElement.color" :color="svgElement.color" :sucker-hide="true" />
               </div>
               <template v-else v-for="(color, index) in productColor">
                 <div v-if="color.value"  class="color-box"  @click="setColor(color)"
@@ -196,7 +196,7 @@ export default class ColorAccordion extends Vue {
       this.pantoneMessage = ''
     }
     else {
-      this.pantoneMessage = 'Color Not in List.'
+      this.pantoneMessage = 'Color is not in the list.'
     }
   }
 

@@ -515,7 +515,7 @@ button {
     }
 
     .nav-tabs {
-        justify-content: space-between;
+        justify-content: center;
         border: 1px solid #EDF2F6;
         padding: 1rem;
         position: fixed;
@@ -5476,6 +5476,12 @@ $fontSize: 0.5;
     }
 }
 
+.cart-modal{
+    .vm--modal{
+        max-height: calc(100vh - 230px);
+    }
+}
+
 .order-wrapper {
     .tabs {
         margin-top: 1rem;
@@ -5655,12 +5661,12 @@ $fontSize: 0.5;
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        top: 25px;
+        transform: translateY(25px);
     }
 
     to {
         opacity: 1;
-        top: 0px;
+        transform: translateY(0px);
     }
 }
 
