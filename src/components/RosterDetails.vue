@@ -2,9 +2,18 @@
   <div class="roster-section">
     <div class="d-flex align-items-center justify-content-between bg-light p-2">
       <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '19px 0 0 0' : '0 0 0 37px'}">
-        <template v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && lockerRosters && lockerRosters.length">
-          <label for="">Select roster from product</label>
-          <b-form-select class="mt-1" v-model="selected_locker_roster" @change="changeRoster($event)" text-field="product_name"  value-field="id" :options="lockerRosters"></b-form-select>
+        <template v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && lockers && lockers.length">
+          <label>Select Locker</label>
+          <b-form-select class="mt-1" v-model="selected_locker" @change="handleLockerUpdate($event)" :options="lockers"
+                         text-field="room_name" value-field="products"
+          ></b-form-select>
+        <template v-if="locker_rosters.length > 0">
+          <label>Select roster from product1</label>
+          <b-form-select class="mt-1" v-model="selected_locker_roster" @change="changeRoster($event)"
+                         text-field="product_name" value-field="id" :options="locker_rosters"></b-form-select>
+        </template>
+          <!--          <label>Select roster from product1</label>
+          <b-form-select class="mt-1" v-model="selected_locker_roster" @change="changeRoster($event)" text-field="product_name"  value-field="id" :options="lockerRosters"></b-form-select>-->
         </template>
       </div>
       <div class="ml-auto" :class="{'mr-2': !!(selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails && rosterDetails.length > 0)}">
@@ -184,14 +193,13 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
   mounted() {
     this.fontsColorsManipulation()
     this.fontsList()
-    // this.bindFocusEvent('size-select')
   },
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData, HideUpdateLockerButton,RosterDetailsGlobal) {
   /* component props starts */
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
-  @Prop({required: false}) lockerRosters: Record<any, any>[]
   @Prop({ required: true }) productSizes!: any
+  @Prop({ required: false }) lockers!: Record<any, any>[]
 
   /* component data properties starts */
   public currentIcon = 'eye-slash'
@@ -217,6 +225,8 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public selected = this.productSizes[0]
   public secondColor!: Record<any, any>
   public selected_locker_roster = null
+  public selected_locker = null
+  public locker_rosters: Record<any, any>[] = []
 
   /* component computed props starts */
 
@@ -294,23 +304,11 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     this.$emit('addPlayer', this.rosterDetails.length);
   }
 
-  // private bindFocusEvent(ref:string){
-  //   const select = this.$refs[ref] as Record<any, any>;
-  //   select.forEach((el:Record<any, any>,i:number)=>{
-  //     el.$el.addEventListener('focus', (e:Record<any, any>)=>{
-  //       e.target.dispatchEvent(new KeyboardEvent('keypress', {'key': 'enter'}))
-  //     })
-  //   })
-  // }
-
   public addRosterItem() {
     let self: Record<any, any> = this;
     let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.productRoster[0])));
     roster_items = [...this.productRoster, roster_items];
     self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
-    // setTimeout(()=>{
-    //   this.bindFocusEvent('size-select')
-    // },100)
   }
 
   public resetRosterItem(roster_item: Record<any, any>) {
@@ -329,7 +327,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     let self: Record<any, any> = this;
     if(locker_roster_id) {
       this.$store.dispatch('setActiveRosterIndex',0);
-      let selected_roster = find(this.lockerRosters, ["id", locker_roster_id])
+      let selected_roster = find(this.locker_rosters, ["id", locker_roster_id])
       selected_roster = JSON.parse(JSON.stringify(selected_roster))
       let roster_items = selected_roster ? selected_roster.product_roster_detail : null;
       roster_items = roster_items.map((roster_item: Record<any, any>) => {
@@ -479,6 +477,15 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
       });
     }
 
+  }
+
+  public handleLockerUpdate(updated_val: Record<any, any>[]) {
+    this.selected_locker_roster = null
+    if(updated_val) {
+      this.locker_rosters = updated_val
+    } else {
+      this.locker_rosters = []
+    }
   }
 
 }
