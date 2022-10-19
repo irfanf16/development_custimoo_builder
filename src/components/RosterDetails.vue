@@ -11,9 +11,12 @@
               ></b-form-select>
             </div>
             <div v-if="locker_rosters.length > 0">
-              <label>Select roster from product1</label>
-              <b-form-select class="mt-1" v-model="selected_locker_roster" @change="changeRoster($event)"
-                             text-field="product_name" value-field="id" :options="locker_rosters"></b-form-select>
+              <label>Select locker product</label>
+              <div class="d-flex gap-1 align-items-end">
+                <b-form-select class="mt-1" v-model="selected_locker_roster" @change="changeRoster($event)"
+                               text-field="product_name" value-field="id" :options="locker_rosters"></b-form-select>
+                <b-button class="flex-shrink-1 w-auto" title="Undo"> <BIconReplyFill /> </b-button>
+              </div>
             </div>
           </div>
           <!--          <label>Select roster from product1</label>
