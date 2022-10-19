@@ -1,21 +1,24 @@
 <template>
   <div class="roster-section">
     <div class="d-flex align-items-center justify-content-between bg-light p-2">
-      <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '19px 0 0 0' : '0 0 0 37px'}">
-        <template v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && lockers && lockers.length">
-          <label>Select Locker</label>
-          <b-form-select class="mt-1" v-model="selected_locker" @change="handleLockerUpdate($event)" :options="lockers"
-                         text-field="room_name" value-field="products"
-          ></b-form-select>
-        <template v-if="locker_rosters.length > 0">
-          <label>Select roster from product1</label>
-          <b-form-select class="mt-1" v-model="selected_locker_roster" @change="changeRoster($event)"
-                         text-field="product_name" value-field="id" :options="locker_rosters"></b-form-select>
-        </template>
+      <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '0 0 0 0' : '0 0 0 37px'}">
+
+          <div class="d-flex gap-2" v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && lockers && lockers.length">
+            <div>
+              <label>Select Locker</label>
+              <b-form-select class="mt-1" v-model="selected_locker" @change="handleLockerUpdate($event)" :options="lockers"
+                             text-field="room_name" value-field="products"
+              ></b-form-select>
+            </div>
+            <div v-if="locker_rosters.length > 0">
+              <label>Select roster from product1</label>
+              <b-form-select class="mt-1" v-model="selected_locker_roster" @change="changeRoster($event)"
+                             text-field="product_name" value-field="id" :options="locker_rosters"></b-form-select>
+            </div>
+          </div>
           <!--          <label>Select roster from product1</label>
           <b-form-select class="mt-1" v-model="selected_locker_roster" @change="changeRoster($event)" text-field="product_name"  value-field="id" :options="lockerRosters"></b-form-select>-->
-        </template>
-      </div>
+        </div>
       <div class="ml-auto" :class="{'mr-2': !!(selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails && rosterDetails.length > 0)}">
         <a v-if="productModels.length > 0 && Object.prototype.hasOwnProperty.call(productModels[modelIndex],'image_url') && productModels[modelIndex].image_url" class="btn btn-secondary fs-3 btn-sm"
                   title="Size Guide"
