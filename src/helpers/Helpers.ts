@@ -664,8 +664,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         model_id: product_models[selected_model_index].id,
         model_name: product_models[selected_model_index].model_name,
         product_id: selected_product.product_id,
-        ecommerce_post_id: selected_product.ecommerce_product_id,
-        sync_id: selected_product.sync_id,
+        ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
+        sync_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].sync_id:'',
         product_type: selected_product.product_type,
         product_name: product_name,
         pdf_file: null,
@@ -867,7 +867,7 @@ const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[],
     if(reset)
       return retrieved_product.product_texts
     const product_id = retrieved_product.id;
-    return last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
+    return last_active_product_custom_texts && last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
   })
   Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
   /*
