@@ -867,7 +867,7 @@ const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[],
     if(reset)
       return retrieved_product.product_texts
     const product_id = retrieved_product.id;
-    return last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
+    return last_active_product_custom_texts && last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
   })
   Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
   /*
