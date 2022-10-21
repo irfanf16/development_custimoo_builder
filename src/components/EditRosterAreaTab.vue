@@ -249,7 +249,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
 
   public setRosterTotal(roster:Record<any, any>[]){
     let total = 0;
-    roster.forEach((item:Record<any, any>, index:number)=>{
+    roster && roster.forEach((item:Record<any, any>, index:number)=>{
       total += +item.quantity
     })
     this.rosterTotal = total;
