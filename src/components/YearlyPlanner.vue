@@ -285,7 +285,7 @@ YearlyPlanner extends Mixins(ErrorMessages) {
         this.allEvents = this.allEvents.filter((event:Record<any, any>) => event.id != event_id)
         this.viewLoader = false
         this.allEventsLoader = false
-        this.showToast(res.data.message,'SUCCESS')
+        this.showToast(res.data.message,'success')
       }
     }
     catch (e:any) {

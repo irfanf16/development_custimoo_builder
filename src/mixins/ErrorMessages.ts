@@ -4,10 +4,13 @@ import VsToast from '@vuesimple/vs-toast';
 
 @Component
 export default class ErrorMessages extends Vue{
+  /*
+  * title= {success, warning, error, info, secondary}
+  * */
   public showToast(message:string, title:string):void{
     VsToast.show({
       title: message,
-      variant: title == 'SUCCESS' ? 'success' : 'error',
+      variant: title,
       timeout: 5000,
       position: "bottom-left"
     });
@@ -67,5 +70,4 @@ export default class ErrorMessages extends Vue{
        });
      })
    }
-
 }

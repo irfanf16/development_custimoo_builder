@@ -236,7 +236,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     let img = this.fileObject
     let file_extension = img.name.toLowerCase();
     if (!this.hasExtension(file_extension, ['.jpg','.gif','.png','jpeg','pdf','eps','ai'])) {
-      this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','Error');
+      this.showToast('The file must be a file of type: jpg, jpeg, png, pdf, eps, ai.','error');
       return false;
     }
 

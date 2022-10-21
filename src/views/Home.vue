@@ -1080,7 +1080,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         if(this.cartItems && !this.cartItems.length){
           this.ref['cartModal'].hide();
         }
-        this.showToast(response.data.message, 'SUCCESS')
+        this.showToast(response.data.message, 'success')
       }).catch((e:any)=>{
         console.log(e);
         this.showError(e);
@@ -1172,7 +1172,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showLoader = true
       await http.post('updatelockerproduct', locker).then(async (successResponse) => {
         let response_data = successResponse.data;
-        let toast_type = "ERROR"
+        let toast_type = "error"
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
         this.hideLockerProductUpdateButton(true)
@@ -1238,9 +1238,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     testingCodeToCopy.select()
     try {
       document.execCommand('copy');
-      this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
+      this.showToast('Shareable link was copied to your clipboard.', 'success');
     } catch (err) {
-      this.showToast('Oops, unable to copy', 'ERROR');
+      this.showToast('Oops, unable to copy', 'error');
     }
   }
 

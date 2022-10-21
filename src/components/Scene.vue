@@ -1901,7 +1901,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
          * delete existing texts first and re render them
          * */
         if (self.product_custom_text_objects[custom_text_index]) {
-          console.log('in delete')
           await this.deleteExistingTextsFromCanvas(custom_text_index, false)
         }
         if(this.mainPreview) {

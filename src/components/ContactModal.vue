@@ -120,7 +120,7 @@ export default class ContactModal extends Mixins(ErrorMessages) {
     await http.post("save/contact", {'email': this.email, room_id: this.room_id}).then((res: any) => {
       this.viewLoader = false
       if (res.status == 201){
-        this.showToast('Your contact saved successfully.', 'SUCCESS');
+        this.showToast('Your contact saved successfully.', 'success');
         let payload = {'index':this.room_index, 'attribute':'contacts', value: res.data.data}
         this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
         this.email = '';
@@ -143,7 +143,7 @@ export default class ContactModal extends Mixins(ErrorMessages) {
       {contact_id, room_id: this.room_id, _method:'DELETE'}).then((res: any) => {
       this.viewLoader = false
       if (res.status == 201){
-        this.showToast('Your contact deleted successfully.', 'SUCCESS');
+        this.showToast('Your contact deleted successfully.', 'success');
         let payload = {'index':this.room_index, 'attribute':'contacts', value: res.data.data}
         this.$store.commit('SET_LOCKER_ATTRIBUTE',payload)
 

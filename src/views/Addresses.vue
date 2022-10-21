@@ -133,7 +133,7 @@ export default class Addresses extends Mixins(ErrorMessages) {
       const url = `addresses/${address.id}`
       http.delete(url).then(async (response: Record<any, any>) => {
         this.getAddressDetails();
-        this.showToast(response.data.message, 'SUCCESS')
+        this.showToast(response.data.message, 'success')
       }).catch((e: any) => {
         //console.log(e);
         this.showError(e);

@@ -301,7 +301,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
       res = await this.$store.dispatch('updateNewCollection', formData);
     }
     if (res.status) {
-      this.showToast(res.message, 'SUCCESS')
+      this.showToast(res.message, 'success')
       const payload = {"attribute": "locker_products", "value": []};
       this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
       this.hideVModal('collection-modal')
@@ -355,7 +355,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     this.showLoader = false;
     if (res.status) {
       this.openLockerModel(false);
-      this.showToast(res.message, 'SUCCESS')
+      this.showToast(res.message, 'success')
       const payload = {"attribute": "locker_products", "value": []};
       this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
       this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})

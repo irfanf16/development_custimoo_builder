@@ -94,7 +94,7 @@ export default class SelectYear extends Mixins(ErrorMessages) {
       await this.$store.dispatch('setYear',this.selectedYear)
       await this.$store.dispatch('getLockerEvents',this.room_id)
       this.viewLoader = false
-      this.showToast('Events copied successfully.', 'SUCCESS');
+      this.showToast('Events copied successfully.', 'success');
       this.hideModal()
       this.selectedYear = null;
     } catch (e) {

@@ -319,7 +319,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
         await http.post(ecom_url, ecom_form_data).then((res: any) => {
           if (!res.data.status) {
             santacart = false
-            this.showToast(res.data.message, 'ERROR')
+            this.showToast(res.data.message, 'error')
           } else {
             ecommerce_cart_id = res.data.ecommerce_cart_id
           }
@@ -511,7 +511,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     try {
       document.execCommand('copy');
       this.closeCopyUrl();
-      this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
+      this.showToast('Shareable link was copied to your clipboard.', 'success');
     } catch (err) {
       alert('Oops, unable to copy');
     }

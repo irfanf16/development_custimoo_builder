@@ -89,7 +89,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
       public async deleteRoom(id:number, index:number){
         let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
         if (res == true){
-          this.showToast('room deleted', 'SUCCESS')
+          this.showToast('room deleted', 'success')
         }else{
           this.showError(res);
         }
