@@ -7,9 +7,7 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
-import {Side} from "three";
-import {keys, parseInt} from "lodash";
-import store from "@/store";
+import {parseInt} from "lodash";
 
 const getLogoSettingsObject = () => {
   return {

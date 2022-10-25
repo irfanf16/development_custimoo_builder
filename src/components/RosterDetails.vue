@@ -1,12 +1,32 @@
 <template>
   <div class="roster-section">
     <div class="d-flex align-items-center justify-content-between bg-light p-2">
-      <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '19px 0 0 0' : '0 0 0 37px'}">
-        <template v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && lockerRosters && lockerRosters.length">
-          <label for="">Select roster from product</label>
-          <b-form-select class="mt-1" v-model="selected_locker_roster" @change="changeRoster($event)" text-field="product_name"  value-field="id" :options="lockerRosters"></b-form-select>
-        </template>
-      </div>
+      <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '0 0 0 0' : '0 0 0 37px'}">
+
+          <div class="d-flex gap-2" v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1)
+               && lockers && lockers.length">
+            <div>
+              <label>Select Locker</label>
+              <b-form-select class="mt-1" v-model="selected_locker" @change="handleLockerUpdate($event)" :options="lockers"
+                             text-field="room_name" value-field="products"
+              ></b-form-select>
+            </div>
+            <div v-if="locker_rosters.length > 0">
+              <label>Select locker product</label>
+              <div class="d-flex gap-1 align-items-end">
+                <select class="form-control mt-1 custom-select" @change="handleLockerProductChange" :key="selected_locker_roster">
+                  <option :value="null">Please Select Locker Product</option>
+                  <template v-for="(locker_roster) in locker_rosters">
+                      <option :value="locker_roster.id" :key="locker_roster.id" :selected="locker_roster.id == selected_locker_roster">
+                        {{locker_roster.product_name}}
+                      </option>
+                  </template>
+                </select>
+                <b-button class="flex-shrink-1 w-auto" title="Undo" v-if="show_undo_roster_btn" @click="loadLastRoster"> <BIconReplyFill /> </b-button>
+              </div>
+            </div>
+          </div>
+        </div>
       <div class="ml-auto" :class="{'mr-2': !!(selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails && rosterDetails.length > 0)}">
         <a v-if="productModels.length > 0 && Object.prototype.hasOwnProperty.call(productModels[modelIndex],'image_url') && productModels[modelIndex].image_url" class="btn btn-secondary fs-3 btn-sm"
                   title="Size Guide"
@@ -68,7 +88,10 @@
           <template v-if="selectedProduct.allow_name_number">
             <div class="hide-show"></div>
             <div v-if="custom_name_index != -1" class="roster-name">Name</div>
-            <div v-if="custom_number_index != -1" :style="{maxWidth: custom_name_index == -1 && '70%', flexBasis: custom_name_index == -1 && '70%'}" class="shirt-no">No</div>
+            <div v-if="custom_number_index != -1" class="shirt-no" :style="{maxWidth: custom_name_index == -1 && '70%',
+                 flexBasis: custom_name_index == -1 && '70%'}">
+              No
+            </div>
           </template>
           <div class="shirt-size" :class="{ 'no-name-number': !(custom_name_index != -1 || custom_number_index != -1) }">Size</div>
         </div>
@@ -91,7 +114,9 @@
                               @focus="handleRosterItemFocus(productRosterItemIndex)"
                 ></b-form-input>
               </div>
-              <div v-if="custom_number_index != -1" :style="{maxWidth: custom_name_index == -1 && '70%', flexBasis: custom_name_index == -1 && '70%'}" class="shirt-no">
+              <div v-if="custom_number_index != -1"  class="shirt-no" :style="{maxWidth: custom_name_index == -1 && '70%',
+                    flexBasis: custom_name_index == -1 && '70%'}"
+              >
                 <b-form-input class="text-center" :value="product_roster_item.number"
                               @input="handleRosterUpdate($event, 'number', productRosterItemIndex)"
                               @focus="handleRosterItemFocus(productRosterItemIndex)"
@@ -99,7 +124,10 @@
               </div>
             </template>
             <div class="shirt-size" :class="{ 'no-name-number': !(custom_name_index != -1 || custom_number_index != -1)}">
-              <b-form-select @focus="handleRosterItemFocus(productRosterItemIndex)" @change="handleRosterUpdate($event, 'size', productRosterItemIndex)" :value="product_roster_item.size_index" ref="size-select">
+              <b-form-select @focus="handleRosterItemFocus(productRosterItemIndex)"
+                             @change="handleRosterUpdate($event, 'size', productRosterItemIndex)"
+                             :value="product_roster_item.size_index" ref="size-select"
+              >
                 <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
                   {{ productSize.text }}</b-form-select-option>
               </b-form-select>
@@ -108,11 +136,13 @@
           </div>
           <div class="align-right">
             <div class="qty">
-              <b-form-input @keydown.tab.stop="addRosterItemOnTab" @focus="handleRosterItemFocus(productRosterItemIndex)" class="text-center" placeholder="0" @input="handleRosterUpdate($event, 'quantity', productRosterItemIndex)"
-                            :value="product_roster_item.quantity"></b-form-input>
+              <b-form-input @keydown.tab.stop="addRosterItemOnTab" @focus="handleRosterItemFocus(productRosterItemIndex)"
+                            class="text-center" placeholder="0" :value="product_roster_item.quantity"
+                            @input="handleRosterUpdate($event, 'quantity', productRosterItemIndex)"
+              />
             </div>
             <div class="remove" v-if="productRosterItemIndex > 0 && active_roster_index != productRosterItemIndex">
-              <a @click="$store.commit('REMOVE_ROSTER_ITEM', productRosterItemIndex)">
+              <a @click="removeRosterItem(productRosterItemIndex)">
                 <font-awesome-icon :icon="['fas', 'trash-alt']" />
               </a>
             </div>
@@ -126,7 +156,7 @@
       <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem">Add Player</button>
       <button v-if="!isLoading" class="btn btn-secondary w-auto fw-bold" @click="close">
         <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'">Update Item</template>
-        <template v-else>Save</template>
+        <template v-else>Close Roster</template>
       </button>
       <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $root.$children[0].$children[2].cancelCart()">
         Cancel
@@ -184,16 +214,24 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
   mounted() {
     this.fontsColorsManipulation()
     this.fontsList()
-    // this.bindFocusEvent('size-select')
   },
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData, HideUpdateLockerButton,RosterDetailsGlobal) {
-  /* component props starts */
-  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
-  @Prop({required: false}) lockerRosters: Record<any, any>[]
-  @Prop({ required: true }) productSizes!: any
+  /*
+  * component props starts
+  * */
 
-  /* component data properties starts */
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
+  @Prop({ required: true }) productSizes!: any
+  @Prop({ required: false }) lockers!: Record<any, any>[]
+
+  /*
+  * component props starts
+  * */
+
+  /*
+  *  component data properties starts
+  * */
   public currentIcon = 'eye-slash'
   private screenWidth = (window.screen.availWidth - 100)
   private storage_url = process.env.VUE_APP_STORAGE_URL
@@ -217,24 +255,38 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public selected = this.productSizes[0]
   public secondColor!: Record<any, any>
   public selected_locker_roster = null
+  public selected_locker = null
+  public locker_rosters: Record<any, any>[] = []
+  public roster_previous_state: Record<any, any>[] = []
+  public show_roster_change_warning = false
+  public show_undo_roster_btn = false
+
+  /*
+  *  component data properties ends
+  * */
 
   /* component computed props starts */
 
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
+
   get getCartLoading(): boolean {
     return this.$store.getters.getCartLoading;
   }
+
   get getCollectionView():boolean{
     return this.$store.getters.getCollectionView;
   }
+
   get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject;
   }
+
   get productModels() {
     return this.$store.getters.getProductModels;
   }
+
   get modelIndex(): Record<any,any>{
     return this.$store.getters.getSelectedModelIndex;
   }
@@ -270,7 +322,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getCompany
   }
 
-
   get eyeIndex(): number {
     return this.$store.getters.getEyeIndex;
   }
@@ -278,7 +329,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   get canvasImage() {
     return this.$store.getters.getCanvasImage
   }
-
 
   get isLoading(): Record<any, any>[] {
     return this.$store.getters.getCartLoading;
@@ -288,29 +338,29 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getCustomerPermissions
   }
 
-  /* component methods starts */
+  /*
+  * computed props ends
+  * */
+
+  /*
+  * component methods starts
+  * */
 
   public addPlayer(obj: Record<any, any>) {
     this.$emit('addPlayer', this.rosterDetails.length);
   }
 
-  // private bindFocusEvent(ref:string){
-  //   const select = this.$refs[ref] as Record<any, any>;
-  //   select.forEach((el:Record<any, any>,i:number)=>{
-  //     el.$el.addEventListener('focus', (e:Record<any, any>)=>{
-  //       e.target.dispatchEvent(new KeyboardEvent('keypress', {'key': 'enter'}))
-  //     })
-  //   })
-  // }
-
   public addRosterItem() {
     let self: Record<any, any> = this;
+    this.show_roster_change_warning = true
     let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.productRoster[0])));
     roster_items = [...this.productRoster, roster_items];
     self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
-    // setTimeout(()=>{
-    //   this.bindFocusEvent('size-select')
-    // },100)
+  }
+
+  public removeRosterItem(roster_item_index: number) {
+    this.show_roster_change_warning = true
+    this.$store.commit('REMOVE_ROSTER_ITEM', roster_item_index)
   }
 
   public resetRosterItem(roster_item: Record<any, any>) {
@@ -325,27 +375,71 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     (this.active_roster_index + 1 == this.productRoster.length) && !$event.shiftKey && this.addRosterItem();
   }
 
-  public changeRoster(locker_roster_id:any){
-    let self: Record<any, any> = this;
-    if(locker_roster_id) {
-      this.$store.dispatch('setActiveRosterIndex',0);
-      let selected_roster = find(this.lockerRosters, ["id", locker_roster_id])
-      selected_roster = JSON.parse(JSON.stringify(selected_roster))
-      let roster_items = selected_roster ? selected_roster.product_roster_detail : null;
-      roster_items = roster_items.map((roster_item: Record<any, any>) => {
-        let size_index = findIndex(self.productSizes, ["value", roster_item.size])
-        let roster_size = roster_item.size;
-        if(size_index === -1 ) {
-          size_index = 0
-          roster_size = this.productSizes[0].text
-        }
-        return Object.assign(roster_item, {code: roster_size, size_index: size_index})
-      })
-      self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
-      let first_roster_item = roster_items[0]
-      self.syncRosterWithCustomText("name", first_roster_item.text)
-      self.syncRosterWithCustomText("number", first_roster_item.number)
+  public handleLockerProductChange(locker_product_id: any) {
+    locker_product_id = locker_product_id.target.value
+    if(locker_product_id) {
+      locker_product_id = parseInt(locker_product_id);
+      if(this.show_roster_change_warning) {
+        this.$swal.fire({
+          title: 'Are you sure?',
+          text: "By changing product any changes made on roster will be lost",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, change it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.show_roster_change_warning = false
+            this.show_undo_roster_btn = true
+            this.roster_previous_state = JSON.parse(JSON.stringify(this.productRoster))
+            this.selected_locker_roster = locker_product_id
+            this.selectLockerProductRoster()
+          }
+          else {
+            let last_selected_roster = this.selected_locker_roster
+            this.selected_locker_roster = null
+            /*
+            * timout is necessary as when we this.selected_locker_roster = null in above line. And without settimout set it's value
+            * then vuejs does not detect changes and won't re render select dropdown
+            * */
+            setTimeout(() => {
+              this.selected_locker_roster = last_selected_roster
+            }, 10)
+          }
+        });
+      }
+      else {
+        this.selected_locker_roster = locker_product_id
+        this.roster_previous_state = JSON.parse(JSON.stringify(this.productRoster))
+        this.show_undo_roster_btn = true
+        this.selectLockerProductRoster()
+      }
     }
+    else {
+      this.selected_locker_roster = null
+    }
+  }
+
+  public selectLockerProductRoster(){
+    let self: Record<any, any> = this;
+    this.$store.dispatch('setActiveRosterIndex',0);
+    let selected_roster = this.locker_rosters && find(this.locker_rosters, ["id", this.selected_locker_roster])
+    selected_roster = JSON.parse(JSON.stringify(selected_roster))
+    let roster_items = selected_roster ? selected_roster.product_roster_detail : null;
+    roster_items = roster_items.map((roster_item: Record<any, any>) => {
+      let size_index = findIndex(self.productSizes, ["value", roster_item.size])
+      let roster_size = roster_item.size;
+      if(size_index === -1 ) {
+        size_index = 0
+        roster_size = this.productSizes[0].text
+      }
+      return Object.assign(roster_item, {code: roster_size, size_index: size_index})
+    })
+    self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
+    let first_roster_item = roster_items[0]
+    self.syncRosterWithCustomText("name", first_roster_item.text)
+    self.syncRosterWithCustomText("number", first_roster_item.number)
   }
 
   public removeIndex(ind: number) {
@@ -375,14 +469,14 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public close() {
     this.hideLockerProductUpdateButton()
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
-    let self = this;
+    let self: Record<any, any> = this;
     let collection_view = self.$store.getters.getCollectionView;
 
     setTimeout(async () =>{
       if(self.getProductEditInfoObject.editing && self.getProductEditInfoObject.type == 'cart_product'){
      // if(this.editCart.cartId && this.editCart.cartItemId){
 
-        await self.addToCartMixin(self.products_fonts);
+        await self.addToCartMixin(this.products_fonts);
         this.hideVModal('rostermodal')
         if(collection_view){
           this.$root.$emit('closeCollectionView');
@@ -415,14 +509,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     })
   }
 
-  public updateRosterSize(selected_size_index: number, roster: Record<any, any>) {
-    let selected_size = this.productSizes[selected_size_index];
-    if (selected_size) {
-      roster.size = selected_size.name
-      roster.code = selected_size.name
-    }
-  }
-
   public editRosterPlayer(index: number) {
     this.$store.commit('CHANGE_EYE_INDEX', index)
     this.$store.commit('SET_EDITING_ROSTER_PLAYER_INDEX', index)
@@ -446,6 +532,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   public async handleRosterUpdate(updated_val:string, type: string, roster_index: number) {
     const self: Record<any, any> = this;
+    this.show_roster_change_warning = true
     let roster_updated_key = type == 'name' ? 'text' : type;
     let product_id = self.selectedProduct.id;
     let roster_data = {
@@ -480,6 +567,27 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     }
 
   }
+
+  public handleLockerUpdate(updated_val: Record<any, any>[]) {
+    this.selected_locker_roster = null
+    if(updated_val) {
+      this.locker_rosters = updated_val
+    } else {
+      this.locker_rosters = []
+    }
+  }
+
+  public loadLastRoster() {
+    this.$store.commit('SET_PRODUCTS_ROSTERS', {product_id: this.selectedProduct.id, roster_data: this.roster_previous_state})
+    this.show_undo_roster_btn = false
+    this.locker_rosters = []
+    this.selected_locker_roster = null
+    this.selected_locker = null
+  }
+
+  /*
+  * methods ends
+  * */
 
 }
 </script>

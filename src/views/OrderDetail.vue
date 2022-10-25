@@ -550,7 +550,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
     if(direction == 'next'){
       if(activityObj.action == null){
-        this.showToast('Please accept or reject designs before navigate');
+        this.showToast('Please accept or reject designs before navigate', 'error');
       }else{
         let limit = this.activity_items.activity_item_data.length;
         if((this.activity_navigation_index+1) < limit){

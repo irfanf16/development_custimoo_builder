@@ -22,7 +22,7 @@
       </div>
       <div class="modal-body">
         <div class="d-flex flex-wrap justify-content-between">
-          <RosterDetails :productSizes="sizeOptions" ref="rostermodal" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts" />
+          <RosterDetails :productSizes="sizeOptions" ref="rostermodal" :lockers="lockers" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts" />
           <div class="roster-preview-area">
             <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts" />
             <div class="d-flex py-2 fs-3 justify-content-end">
@@ -57,7 +57,7 @@
     </modal>
 
     <div class="d-lg-none">
-      <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" :products_fonts="products_fonts" :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
+      <RosterDetails @setActionBeforeLogin="setActionBeforeLogin" :products_fonts="products_fonts" :lockers="lockers" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
       <OrderDetailsTab :products_fonts="products_fonts" @open-add-to-locker="openAddToLocker" ref="order-details" />
@@ -97,22 +97,33 @@ import {AxiosError, AxiosResponse} from "axios";
 })
 
 export default class EditRosterAreaTab extends Mixins(ModalAction) {
+  /*
+  * data props starts
+  * */
+
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) productSizes!: any
+
+  /*
+  * props ends
+  * */
+
+  /*
+  * data props starts
+  * */
+
   private products: any[] = []
   public designsIndex = 0
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
-  public products_roster: Record<any, any>[] = []
+  public lockers: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
   public rosterTotal = 0
   private screenWidth = (window.screen.availWidth - 100)
-  public shareRoster(){
-    this.ref['order-details'].getLockers();
-  }
-  private setActionBeforeLogin(val:string){
-    this.$emit('setActionBeforeLogin', val)
-  }
+
+  /*
+  * data props ends
+  * */
 
   /* getters/computed props starts */
 
@@ -170,15 +181,49 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
 
   /* getters/computed props ends */
 
+  /*
+* watcher starts
+* */
+
+  @Watch('productSizes')
+  productSizeChanged(){
+    this.setProductSizes();
+  }
+
+  @Watch('productRosters')
+  productRostersChanged(){
+    this.setRosterTotal(this.productRosters)
+  }
+
+  /*
+  * watcher ends
+  * */
+
+
+  /*
+  * methods starts
+  * */
+
+  public shareRoster(){
+    this.ref['order-details'].getLockers();
+  }
+
+  private setActionBeforeLogin(val:string){
+    this.$emit('setActionBeforeLogin', val)
+  }
+
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
   }
+
   public async show(){
     this.showVModal('rostermodal')
   }
+
   public hide(){
     this.hideVModal('rostermodal')
   }
+
   public close(){
     const self = this;
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
@@ -194,11 +239,6 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     this.$store.dispatch('setRosterDetails', { pid : product.id, index: index, roster: payload })
   }
 
-  @Watch('productSizes')
-  productSizeChanged(){
-    this.setProductSizes();
-  }
-
   public setProductSizes() {
     this.sizeOptions = [];
     this.productSizes.forEach((size: any, key: number) => {
@@ -207,14 +247,9 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     })
   }
 
-  @Watch('productRosters')
-  productRostersChanged(){
-    this.setRosterTotal(this.productRosters)
-  }
-
   public setRosterTotal(roster:Record<any, any>[]){
     let total = 0;
-    roster.forEach((item:Record<any, any>, index:number)=>{
+    roster && roster.forEach((item:Record<any, any>, index:number)=>{
       total += +item.quantity
     })
     this.rosterTotal = total;
@@ -328,13 +363,13 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   }
 
   public async getLockerProductsRosters() {
-    let response: any = await http.get("products/roster").catch((errorResponse: AxiosError) => {
+    let response: any = await http.get("lockers_with_rosters").catch((errorResponse: AxiosError) => {
       handleResponseException(errorResponse)
     })
     if(response) {
       let response_data: Record<any, any> = response.data;
       if (response_data.success) {
-        this.products_roster = response_data.result.rosters
+        this.lockers = response_data.result.lockers
       }
     }
   }
@@ -360,6 +395,10 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     }
   }
 
+
+  /*
+  * methods ends
+  * */
 
 }
 
