@@ -85,7 +85,7 @@ export default class ProductionScene extends Vue {
     self.svgGroups.forEach((svg_group_item:Record<any, any>) => {
       $(svg_doc).find(`[id][fill]`).each(function(doc_item) {
         let doc_elem_id = $(this).attr("id");
-        if(doc_elem_id) {
+        if(doc_elem_id && svg_group_item.id) {
           doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
           if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
             $(this).attr("fill", svg_group_item.color);

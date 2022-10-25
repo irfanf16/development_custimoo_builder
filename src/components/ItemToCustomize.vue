@@ -101,7 +101,7 @@
       <span style="font-size: 16px">Designs Available</span>
     </h2>
     <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
-      <DesignAvailable :key="this.selectedProduct.productstyles[styleIndex].id" :products_fonts="products_fonts" />
+      <DesignAvailable :key="this.selectedProduct.productstyles[styleIndex]? this.selectedProduct.productstyles[styleIndex].id : ''" :products_fonts="products_fonts" />
     </div>
   </div>
 </template>
