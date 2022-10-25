@@ -1514,6 +1514,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
             const width = e.target.width * e.target.scaleX;
             const height = e.target.height * e.target.scaleY;
+            const converted_width = unitConversion((width * this.measurementRatio));
+            const converted_height = unitConversion((height * this.measurementRatio));
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'scaleX',
@@ -1522,7 +1524,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'originalWidth',
-              value: Math.floor(width * this.measurementRatio)
+              value:converted_width.value,
             })
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
@@ -1532,7 +1534,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'originalHeight',
-              value: Math.floor(height * this.measurementRatio)
+              value:converted_height.value
             })
           } else if (e.action == 'rotate') {
             let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
@@ -1759,15 +1761,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
 
         if (logo.customLogo) {
           if (this.mainPreview) {
-            const width = (img.width * img.scaleX * this.measurementRatio).toFixed(1)
-            const height = (img.height * img.scaleY * this.measurementRatio).toFixed(1)
+            const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
+            const converted_height = unitConversion(img.height * img.scaleY * this.measurementRatio)
             await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
               index: logoIndex,
               data: {
                 actualWidth: img.width,
                 actualHeight: img.height,
-                originalWidth: width,
-                originalHeight: height,
+                originalWidth: converted_width.value,
+                originalHeight: converted_height.value,
                 scaleX: img.scaleX,
                 scaleY: img.scaleY,
               }
