@@ -796,6 +796,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
 
   public loadScene(ImageData: Record<any, any>, side: string) {
     return new Promise((resolve) => {
+      this.svg_groups_ready = false
       this.mounted = false
       let element = this.$refs.front as HTMLCanvasElement
       if (side === 'back') {
