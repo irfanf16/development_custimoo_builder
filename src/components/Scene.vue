@@ -248,6 +248,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   })
   public dimTextBack!: fabric.Text
   public showLoader = true
+  public svg_groups_ready = false
   public otherSideLogos: any[] = []
   public otherSideTexts: any[] = []
   public logoIndex = 0
@@ -423,7 +424,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     deep: true
   })
   defaultColorsChanged(newVal: [Record<any, any>]) {
-    if (this.productType == 'customized' && this.mounted) {
+    if (this.productType == 'customized' && this.svg_groups_ready) {
       let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       if (defaultColors.length) {
         this.changeDefaultColors(defaultColors)
@@ -443,7 +444,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     deep: true, immediate: false
   })
   groupColorsChanged(newVal: Record<any, any>) {
-    if (this.productType == 'customized' && this.mounted) {
+    if (this.productType == 'customized' && this.svg_groups_ready) {
       this.changeGroupColor(newVal)
       if(this.productEditInfoObject && this.productEditInfoObject.editing == false) {
         this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "group_colors": this.groupColors})
@@ -780,6 +781,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         await this.changeGroupColor(this.groupColors)
       }
     }
+    this.svg_groups_ready = true
     this.showLoader = false
   }
 
@@ -894,7 +896,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             }, 500)
           }
           this.mounted = true
-          this.showLoader = false
         }
         resolve('done')
       })
