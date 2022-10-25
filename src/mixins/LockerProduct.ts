@@ -162,7 +162,7 @@ export class handleMainProducts extends Vue {
       * */
       let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
       if(is_editing) {
-        ({product_index, style_index, design_id, active_index} = await self.handleEditMode(retrieved_products));
+        ({product_index, style_index, design_id, active_index} = await this.handleEditMode(retrieved_products));
       }
       else {
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;

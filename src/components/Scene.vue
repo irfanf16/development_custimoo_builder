@@ -1903,9 +1903,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         if (self.product_custom_text_objects[custom_text_index]) {
           await this.deleteExistingTextsFromCanvas(custom_text_index, false)
         }
-        if(this.mainPreview) {
-          console.log(custom_text_info)
-        }
         if (custom_text.value) {
           custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
             let fabric_text: fabric.Text | fabric.Group
