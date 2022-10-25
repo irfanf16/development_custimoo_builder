@@ -524,6 +524,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     rotation:0,
                     scaleX:0,
                     scaleY:0,
+                    width_px:0,
+                    height_px:0,
                   }
 
                   if (Object.keys(path).length) {
@@ -597,6 +599,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     text_item_object.rotation = custom_text_item.rotation;
                     text_item_object.scaleX = custom_text_item.scaleX / selected_product.measurement_ratio;
                     text_item_object.scaleY = custom_text_item.scaleY / selected_product.measurement_ratio;
+                    text_item_object.width_px = width;
+                    text_item_object.height_px = height;
                   }
 
                   if (custom_text.is_first_name) {
@@ -1246,8 +1250,10 @@ const getSVGNumbers = (numbers_array:Record<any,any>[], logo_width:number, produ
         height_array_for_sort[key] += parseFloat(item.original_height) + 500;
 
         const svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.lastIndexOf("</svg>"));
+        const scaleX =  transformUnit(item.width_px,item.width)? transformUnit(item.width_px,item.width):1;
+        const scaleY =  transformUnit(item.height_px,item.height)?transformUnit(item.height_px,item.height):1;
         svg_string +=`
-                     <g transform="matrix(${item.scaleX} 0 0 ${item.scaleY} ${width} ${height})">
+                     <g transform="matrix(${scaleX} 0 0 ${scaleY} ${width} ${height})">
                         <g style="transform: rotate(0)">${svg}</g>
                      </g>
                 `
@@ -1283,8 +1289,10 @@ const getSVGNames = (names_array:Record<any,any>[], production_file_dimension:Re
     height = 0;
     value.forEach((item:Record<any,any>,index:number) => {
       const svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.lastIndexOf("</svg>"));
+      const scaleX =  transformUnit(item.width_px,item.width)? transformUnit(item.width_px,item.width):1;
+      const scaleY =  transformUnit(item.height_px,item.height)?transformUnit(item.height_px,item.height):1;
       svg_string +=`
-                     <g transform="matrix(${item.scaleX} 0 0 ${item.scaleY} ${width} ${height})">
+                     <g transform="matrix(${scaleX} 0 0 ${scaleY} ${width} ${height})">
                         <g style="transform: rotate(${item.rotation})">${svg}</g>
                      </g>
                 `;
@@ -1312,8 +1320,10 @@ const getSVGCommonItems = (common_array:Record<any,any>[], production_file_dimen
   Object.entries(common_array).forEach(([key, value]) => {
     value.forEach((item:Record<any,any>,index:number) => {
       const svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.lastIndexOf("</svg>"));
+      const scaleX =  transformUnit(item.width_px,item.width)? transformUnit(item.width_px,item.width):1;
+      const scaleY =  transformUnit(item.height_px,item.height)?transformUnit(item.height_px,item.height):1;
       svg_string +=`
-                     <g transform="matrix(${item.scaleX} 0 0 ${item.scaleY} ${width} ${height})">
+                     <g transform="matrix(${scaleX} 0 0 ${scaleY} ${width} ${height})">
                         <g style="transform: rotate(${item.rotation})">${svg}</g>
                      </g>
                 `;
@@ -1338,6 +1348,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
   const height_of_production_file = production_file_dimension.height? production_file_dimension.height.replace('px',''):6000;
   let svg_string = `<g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${height_of_production_file})">`;
   let width = 0;
+  const setting = Store.getters.getSetting
   custom_logos.forEach((custom_logo:Record<any,any>, index:number) => {
     const original_url = Object.prototype.hasOwnProperty.call(custom_logo,'original_png') && custom_logo.original_png;
     const updated_url = original_url?custom_logo.original_url:custom_logo.url;
@@ -1347,7 +1358,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
         svg_string +=`
                      <g transform="matrix(1 0 0 1 ${width} 1000)">
                         <g style="transform: rotate(${custom_logo.rotation})">
-                            <image xlink:href="${custom_logo.base_64}" height="${(custom_logo.actualHeight * custom_logo.scaleY)/parseFloat(measurement_ratio)}px" width="${(custom_logo.actualWidth * custom_logo.scaleX)/parseFloat(measurement_ratio)}px"/>
+                            <image xlink:href="${custom_logo.base_64}" height="${custom_logo.originalHeight}${setting.unit}" width="${custom_logo.originalWidth}${setting.unit}"/>
                         </g>
                      </g>
                 `
@@ -1356,7 +1367,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
         svg_string +=`
                      <g transform="matrix(1 0 0 1 ${width} 1000)">
                         <g style="transform: rotate(${custom_logo.rotation})">
-                            <image xlink:href="${process.env.VUE_APP_STORAGE_URL}${updated_url}" height="${(custom_logo.actualHeight * custom_logo.scaleY)/parseFloat(measurement_ratio)}px" width="${(custom_logo.actualWidth * custom_logo.scaleX)/parseFloat(measurement_ratio)}px"/>
+                            <image xlink:href="${process.env.VUE_APP_STORAGE_URL}${updated_url}" height="${custom_logo.originalHeight}${setting.unit}" width="${custom_logo.originalWidth}${setting.unit}"/>
                         </g>
                      </g>
                 `
@@ -1387,6 +1398,31 @@ const unitConversion = (value:number) => {
     default: {
       const value_string = value ? value.toString() : '';
       return {value: parseFloat(value_string).toFixed(1), unit: setting.unit}
+    }
+  }
+}
+
+const transformUnit = (dimension_px:number,unit_value:string) => {
+    const setting = Store.getters.getSetting
+    const PIXEL_IN_INCH = 72;
+    const CM_IN_INCH = 2.54;
+    const dimension_unit = parseFloat(unit_value);
+  switch( setting.conversion_operator ) {
+    case 'multiply':
+    {
+      const conversion_from_px = dimension_px/PIXEL_IN_INCH;
+      const conversion_from_cm = dimension_unit/CM_IN_INCH;
+      return (conversion_from_cm / conversion_from_px).toFixed(2);
+      break;
+    }
+    case 'divide':
+    {
+      const conversion_from_px = dimension_px/PIXEL_IN_INCH;
+      return (dimension_unit / conversion_from_px).toFixed(2);
+      break;
+    }
+    default: {
+      return null
     }
   }
 }
