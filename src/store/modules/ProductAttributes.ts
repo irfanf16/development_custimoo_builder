@@ -467,6 +467,7 @@ const ProductAttributes:Module<any, any> = {
           const logo_default_setting = product.logos_setting[0] ? JSON.parse(JSON.stringify(product.logos_setting[0])) : getLogoSettingsObject()
           logo_default_setting.id = null
           logo_default_setting.logoIndex = 0
+          logo_default_setting.customLogo = 1
           Vue.set(state.customLogos[product.id], 0, logo_default_setting)
         }
       })
