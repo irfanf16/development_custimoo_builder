@@ -600,13 +600,13 @@ const ProductAttributes:Module<any, any> = {
       const products = state.products
       products.forEach((product: Record<any, any>) => {
         if(product.id == payload.product_id) {
-          setTimeout(() => {
-            Vue.set(state.customLogos, product.id, locker_logos) // only set time out solve locker room edit logo issue goes on default position sometime.
-          }, 1000)
+          Vue.set(state.customLogos, product.id, locker_logos)
         }
         else {
           const logo_setting = getLogoSettings(0,false, product.id)
           const final_logo = {...locker_logos[0], ...logo_setting}
+          delete final_logo.scaleX
+          delete final_logo.scaleY
           Vue.set(state.customLogos, product.id,[final_logo])
         }
       })
