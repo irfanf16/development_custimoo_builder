@@ -696,13 +696,14 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 }
 
 const initCustomLogos = async(retrieved_products: Record<any, any>) => {
+  const team_logo = await getTeamLogo()
   retrieved_products.forEach((product: Record<any, any>) => {
     if(product.is_logo_allowed) {
       const custom_logos = Store.getters.getCustomLogos(product.id)
       if (!custom_logos || !(custom_logos && custom_logos.length)) {
         if(product.logos_setting.length) {
           const logoSetting = product.logos_setting[0]
-          const logo = {
+          let logo = {
             id: null,
             product_id: null,
             product_style_id: null,
@@ -717,9 +718,15 @@ const initCustomLogos = async(retrieved_products: Record<any, any>) => {
             customLogo: true,
             is_locked: logoSetting.is_locker,
           }
+          if(team_logo) {
+            logo = {...logo, ...team_logo}
+          }
           Store.commit('customLogo', {index: 0, logo: logo, prd_id: product.id})
         } else { // if logo is allowed but there is no setting for logo in product the add default logo object to show team logo
-          const logo = getLogoSettingsObject()
+          let logo = getLogoSettingsObject()
+          if(team_logo) {
+            logo = {...logo, ...team_logo}
+          }
           Store.commit('customLogo', {index: 0, logo: logo, prd_id: product.id})
         }
       }
@@ -1526,6 +1533,34 @@ const setVueVersion = async () => {
     return
   }
 }
+
+const getTeamLogo = () => {
+  const custom_logos_by_products = Store.getters.getCustomLogoObject
+  let team_logo = null
+  for(const product_id in custom_logos_by_products) {
+    console.log('heysss', Math.random())
+    if(custom_logos_by_products[product_id][0].original_logo) {
+      team_logo = custom_logos_by_products[product_id][0]
+      break
+    }
+  }
+  if(team_logo) {
+    return {
+      "id": team_logo.id,
+      "url": team_logo.url,
+      "original_logo": team_logo.original_logo ,
+      "transparent_logo": team_logo.transparent_logo ,
+      "smart_transparent_logo": team_logo.smart_transparent_logo ,
+      "is_smart_transparent": team_logo.is_smart_transparent ,
+      "is_transparent": team_logo.is_transparent
+    }
+  } else {
+    return team_logo
+  }
+
+
+}
+
 //Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
@@ -1533,5 +1568,5 @@ export {
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
   getUploadedLogoObject, initCustomLogos, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor,fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,getSVGNumberArraysFromRoster,getSVGNumbers,getSVGNames,getSVGNameArraysFromRoster,getLogoSVG,parseSvgStringFile,
-  persistToken,fetchCustomer,setVueVersion
+  persistToken,fetchCustomer,setVueVersion, getTeamLogo
 };

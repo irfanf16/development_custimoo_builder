@@ -3,7 +3,7 @@ import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
 import {
   getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
-  setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject
+  setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject, getTeamLogo
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
