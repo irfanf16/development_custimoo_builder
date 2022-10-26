@@ -1538,8 +1538,7 @@ const getTeamLogo = () => {
   const custom_logos_by_products = Store.getters.getCustomLogoObject
   let team_logo = null
   for(const product_id in custom_logos_by_products) {
-    console.log('heysss', Math.random())
-    if(custom_logos_by_products[product_id][0].original_logo) {
+    if(custom_logos_by_products[product_id][0] && custom_logos_by_products[product_id][0].original_logo) {
       team_logo = custom_logos_by_products[product_id][0]
       break
     }
