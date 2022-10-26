@@ -468,6 +468,7 @@ const ProductAttributes:Module<any, any> = {
           logo_default_setting.id = null
           logo_default_setting.logoIndex = 0
           logo_default_setting.customLogo = 1
+          logo_default_setting.haveControls = 1
           Vue.set(state.customLogos[product.id], 0, logo_default_setting)
         }
       })
