@@ -2,8 +2,17 @@ import {http} from "@/httpCommon";
 import { Module } from "vuex";
 import {Vue} from "vue-property-decorator";
 import {
-  rosterDefaultItem, setRetrievedProductsCustomTexts, getRosterDetailDefaultObject, initCustomLogos, setCustomLogo,
-  getLogoSettings, setLogoSettings, getProductLogoSetting, logData, lastActiveProductDefaultObject
+  rosterDefaultItem,
+  setRetrievedProductsCustomTexts,
+  getRosterDetailDefaultObject,
+  initCustomLogos,
+  setCustomLogo,
+  getLogoSettings,
+  setLogoSettings,
+  getProductLogoSetting,
+  logData,
+  lastActiveProductDefaultObject,
+  getLogoSettingsObject
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
@@ -226,7 +235,6 @@ const ProductAttributes:Module<any, any> = {
              if(settings && settings.logos_follows_product){
              const ids = settings.following_product_ids
              if(ids.length){
-               console.log("in ids")
                ids.forEach(async (new_item:number)=>{
                  if (state.selectedPrdId != new_item) {
                    let removeLogo = false
@@ -243,7 +251,6 @@ const ProductAttributes:Module<any, any> = {
                        Vue.set(state.customLogos[new_item], newCustomLogo.logoIndex, {...logo_settings})
                      }
                    } else {
-                     console.log("uploading")
                      await setCustomLogo(customLogo.customObj, newCustomLogo.logoIndex, new_item)
                    }
                  }
@@ -453,6 +460,16 @@ const ProductAttributes:Module<any, any> = {
         logo_ = {...logo_, ...logo.customObj}
         Vue.set(state.customLogos[product_id],0, logo_)
       });
+    },
+    REMOVE_TEAM_LOGO(state: Record<any, any>) {
+      state.products.forEach((product: Record<any, any>) => {
+        if(state.customLogos[product.id]) {
+          const logo_default_setting = product.logos_setting[0] ? JSON.parse(JSON.stringify(product.logos_setting[0])) : getLogoSettingsObject()
+          logo_default_setting.id = null
+          logo_default_setting.logoIndex = 0
+          Vue.set(state.customLogos[product.id], 0, logo_default_setting)
+        }
+      })
     },
     async customTexts(state: Record<any, any>, customText: Record<any, any>) {
      if(customText){

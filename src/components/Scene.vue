@@ -138,6 +138,9 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
           self.$store.commit('customLogos', payload)
           self.$store.commit('SET_LOGO_COLORS', []);
           self.$store.commit('SET_INITIAL_LOGO_COLORS', []);
+          if(logo.logoIndex == 0) {
+            self.$store.commit('REMOVE_TEAM_LOGO')
+          }
         }
         canvas.remove(target);
         canvas.requestRenderAll();
