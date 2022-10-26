@@ -685,9 +685,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     toCopy.select()
     try {
       document.execCommand('copy');
-      this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
+      this.showToast('Shareable link was copied to your clipboard.', 'success');
     } catch (err) {
-      this.showToast('Oops, unable to copy.', 'ERROR');
+      this.showToast('Oops, unable to copy.', 'error');
     }
   }
 
@@ -697,7 +697,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     toCopy.select()
     try {
       document.execCommand('copy');
-      this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
+      this.showToast('Shareable link was copied to your clipboard.', 'success');
     } catch (err) {
       alert('Oops, unable to copy');
     }
@@ -709,7 +709,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id: id});
       if (res == true) {
         this.$store.commit('SET_RECENT_LOGOS')
-        this.showToast('Product Deleted', 'SUCCESS')
+        this.showToast('Product Deleted', 'success')
       } else {
         this.showError(res)
       }
@@ -721,7 +721,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       const ok = await this.ref['reset-confirm-modal'].showConfirm()
       if (ok) {
         let res = await this.$store.dispatch('deleteCollection', {id: id, index: index});
-        this.showToast(res.data.message, 'SUCCESS');
+        this.showToast(res.data.message, 'success');
       }
     } catch (e) {
       this.showError(e);
@@ -732,7 +732,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     if (confirm('You are going to delete associated product')) {
       let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
       if (res == true) {
-        this.showToast('room deleted', 'SUCCESS')
+        this.showToast('room deleted', 'success')
         if(this.getLockerProducts.length > 0){
           this.tabIndex = 0;
           let payload = {index:this.tabIndex, attribute: 'active_tab', value:true}
@@ -965,7 +965,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     let res = await this.$store.dispatch('createYearlyPlanner', payload)
     this.viewLoader = false
     if (res.status == 201){
-     this.showToast('Yearly planner has been created successfully for this locker.', 'SUCCESS');
+     this.showToast('Yearly planner has been created successfully for this locker.', 'success');
     }else{
       this.showError(res)
     }
@@ -981,7 +981,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       if (res.status == 201) {
         this.yearly_planner_template_id = null
         await this.getLockerEvents(locker_room_id)
-        this.showToast('Yearly planner has been created successfully with events for this locker.', 'SUCCESS');
+        this.showToast('Yearly planner has been created successfully with events for this locker.', 'success');
       } else {
         this.showError(res)
       }
@@ -998,7 +998,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
         this.viewLoader = false
         this.$store.commit('SET_LOCKER_ATTRIBUTE', {index: payload.index, attribute:'have_yearly_planner', value:0 })
         this.$store.dispatch('getLockerEvents',locker_room_id)
-        this.showToast('Yearly planner has been deleted successfully for this locker.', 'SUCCESS');
+        this.showToast('Yearly planner has been deleted successfully for this locker.', 'success');
       }
     }
     catch (e) {
@@ -1019,7 +1019,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       link.download = 'calender_file.ics'
       link.click()
       this.viewLoader = false
-      this.showToast('Ics File created successfully', 'SUCCESS');
+      this.showToast('Ics File created successfully', 'success');
     }
     catch (e) {
       if(e.response)

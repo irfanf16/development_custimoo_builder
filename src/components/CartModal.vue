@@ -190,14 +190,14 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let payload = {}
     payload['customer_reference_no'] = this.customer_reference_no
     if (!this.customer_reference_no) {
-      this.showToast('Please provide customer reference number.', 'ERROR');
+      this.showToast('Please provide customer reference number.', 'error');
       return false;
     }
 
     if (this.shipping_address) {
       payload['address_id'] = this.shipping_address.id
     } else {
-      this.showToast('Please select shipping address.', 'ERROR');
+      this.showToast('Please select shipping address.', 'error');
       return false;
     }
 
@@ -205,8 +205,8 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     http.post('order', payload).then((res: Record<any, any>) => {
       if (res.data.success) {
         this.$store.dispatch('addToCart', [])
-        this.showToast(res.data.message, 'SUCCESS');
-        this.showToast('Your pdf is generating', 'SUCCESS');
+        this.showToast(res.data.message, 'success');
+        this.showToast('Your pdf is generating', 'success');
         this.viewLoader = false;
         // this.hideVModal('cart-modal')
         this.$router.push('/thank-you')

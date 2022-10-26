@@ -53,13 +53,13 @@
        <template v-else>
          <div class="px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0" >
            <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                   @click="changeProductType(!$store.getters.getCustomized, 'customized')">
+                   @click="changeProductType(true, 'customized')">
              <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
              Customized
            </button>
 
            <button style="white-space: nowrap" type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                   @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
+                   @click="changeProductType(true, 'personalized')">
              <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
              Stock
            </button>
@@ -101,7 +101,7 @@
       <span style="font-size: 16px">Designs Available</span>
     </h2>
     <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
-      <DesignAvailable :key="this.selectedProduct.productstyles[styleIndex].id" :products_fonts="products_fonts" />
+      <DesignAvailable :key="this.selectedProduct.productstyles[styleIndex]? this.selectedProduct.productstyles[styleIndex].id : ''" :products_fonts="products_fonts" />
     </div>
   </div>
 </template>
@@ -136,7 +136,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
     if(!ecommerce_update_id && this.categories.length) {
       // this.$store.commit('SET_SELECTED_CATEGORIES', this.categories[0].id) // as this is on mounted so don't need to send get product call again
     }
-    this.search = this.search_products
+    this.search = this.search_products;
   }
 })
 
@@ -219,45 +219,71 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
   public async changeProductType(new_val:boolean, prd_type:string) {
     let self:Record<string, any> = this;
-    let customized = self.$store.getters.getCustomized
-    let personalized = self.$store.getters.getPersonalized
+    let customized = this.$store.getters.getCustomized
+    let personalized = this.$store.getters.getPersonalized
     const itemCarousel = this.$refs['itemsCarousel'] as Record<any, any>
     let retrieve_products = false;
-    if(new_val == false) {
-      if(prd_type == "customized" && personalized) {
-        retrieve_products = true;
+
+    let check = ()=>{
+      if(prd_type == "customized"){
+        customized = new_val
+        personalized = false
       }
-      if(prd_type == "personalized" && customized) {
-        retrieve_products = true;
-      }
-    } else {
-      if(prd_type == "customized" && !customized) {
-        retrieve_products = true;
-      }
-      if(prd_type == "personalized" && !personalized) {
-        retrieve_products = true;
+
+      if(prd_type == "personalized"){
+        personalized = new_val
+        customized = false
       }
     }
-    if(prd_type == "customized")
-      customized = new_val
-    if(prd_type == "personalized")
-      personalized = new_val
-    await this.$store.dispatch('setCategories', {
-      query_params: `customized=${customized}&personalized=${personalized}`
-    })
+
+    if(prd_type == 'customized' && customized == false){
+      retrieve_products = true
+      check()
+      await this.$store.dispatch('setCategories', {
+        query_params: `customized=${customized}&personalized=${personalized}`
+      })
+    } else if(prd_type == 'personalized' && personalized == false){
+      retrieve_products = true
+      check()
+      await this.$store.dispatch('setCategories', {
+        query_params: `customized=${customized}&personalized=${personalized}`
+      })
+    }
+    // if(new_val == false) {
+    //   if(prd_type == "customized" && personalized) {
+    //     retrieve_products = true;
+    //   }
+    //   if(prd_type == "personalized" && customized) {
+    //     retrieve_products = true;
+    //   }
+    // } else {
+    //   if(prd_type == "customized" && !customized) {
+    //     retrieve_products = true;
+    //   }
+    //   if(prd_type == "personalized" && !personalized) {
+    //     retrieve_products = true;
+    //   }
+    // }
 
     // self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id: null});
     if(retrieve_products) {
       await resetLastActiveProductData()
-      eval(`${prd_type}=${new_val}`)
-      await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
+      // eval(`${prd_type}=${new_val}`)
+      await this.$store.dispatch('setProductType', {prd_type: 'customized', value: customized});
+      await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: personalized});
+      // if(prd_type == "customized")
+      //   await this.$store.dispatch('setProductType', {prd_type: 'customized', value: customized});
+      //   await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: personalized});
+      // if(prd_type == "personalized")
+      //   await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
+      //   await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
       //exit from edit mode
       await this.exitFromEditMode()
 
       //self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
       //let query_params = await this.setQueryParams()
-      this.$emit('retrieveProducts')
-      itemCarousel.setSliderIndex();
+      await this.$emit('retrieveProducts')
+      await itemCarousel.setSliderIndex();
     }
   }
 

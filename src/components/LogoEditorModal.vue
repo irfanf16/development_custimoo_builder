@@ -187,7 +187,7 @@ export default class LogoEditorModal extends Mixins(ErrorMessages, ModalAction) 
           //update team logo url in all product logos
           this.$store.dispatch('setTeamLogoUrl', payload)
         }
-        this.showToast('Logo Applied', 'SUCCESS')
+        this.showToast('Logo Applied', 'success')
         this.showLoader = false
         this.hideVModal('logo-modal')
       }).catch((e) => {

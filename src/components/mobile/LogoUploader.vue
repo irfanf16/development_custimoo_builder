@@ -8,14 +8,6 @@
             <span class="close" @click="removeLogoTab(ltIdx)"><BIconX /></span>
           </div>
         </template>
-<!--        <template #title>-->
-<!--          {{ customText.side ? customText.side : 'text' | capitalize}} {{ customText.type | capitalize }}-->
-<!--        </template>-->
-
-<!--        <div v-if="productColors[activeCollection]" class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">-->
-<!--          <div class="color_circle" :key="index" v-for="(color, index) in productColors[activeCollection].color_text" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>-->
-<!--        </div>-->
-
         <div class="logo-uploader-main">
           <div class="tabs-logo-container">
             <div class="logo-placement-area mb-3 mb-lg-4 pt-0">

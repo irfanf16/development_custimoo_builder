@@ -214,7 +214,7 @@
           await this.$store.dispatch('getLockerRoomColors')
           await this.$store.dispatch('getNotifications')
           await  getPermissions()
-          this.showToast(res.data.message, 'SUCCESS')
+          this.showToast(res.data.message, 'success')
           for (let key in this.form) {
             Vue.set(this.form, key, '')
           }

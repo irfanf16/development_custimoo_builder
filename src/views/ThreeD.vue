@@ -682,7 +682,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       let res = await this.$store.dispatch('overRideLockerProduct', locker)
       if (res.status == 201){
         this.showLoader = false
-        this.showToast(res.data.message, 'SUCCESS')
+        this.showToast(res.data.message, 'success')
       }else{
         this.showError(res)
         this.showLoader = false
