@@ -552,7 +552,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     this.unHideColorGrouping()
   }
 
-  public async changeDefaultColors(defaultColors: [Record<any, any>]): void {
+  public async changeDefaultColors(defaultColors: [Record<any, any>]) {
     let appliedDefaultColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {

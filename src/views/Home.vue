@@ -259,11 +259,11 @@
                     </b-button>
                     <template v-else-if="isCustomerAuthenticated">
 
-                      <template v-if="getProductEditInfoObject.editing">
+                      <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
                             <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
-                              Add to Cart
+                              {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
                             <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
                               <img width="20" height="20" src="../../src/assets/images/loading.gif" />
