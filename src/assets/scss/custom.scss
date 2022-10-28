@@ -1705,7 +1705,7 @@ button {
         }
 
         @media only screen and (min-width: 1600px) {
-            gap: 2.2%;
+            gap: 10px;
         }
 
         .color-box {
@@ -1715,6 +1715,7 @@ button {
             border-radius: 50%;
             border: 1px solid #EFF2F4;
             position: relative;
+            cursor: pointer;
 
             @media only screen and (min-width: 1024px) {
                 width: 32px;
@@ -5596,6 +5597,33 @@ $fontSize: 0.5;
 
 .text-underline {
     text-decoration: underline;
+}
+
+.all_colors {
+    ul.nav {
+        @extend .theme-scroll-h;
+
+        flex-wrap: nowrap;
+        overflow-x: auto;
+
+        li{
+            a.nav-link{
+                padding: 10px 7px;
+                transition: none !important;
+                &:hover{
+                    color: $theme-color;
+                    font-weight: bolder;
+                }
+            }
+
+            &.color-tab-active{
+                a.nav-link{
+                    color: $theme-color;
+                    font-weight: bolder;
+                }
+            }
+        }
+    }
 }
 
 .custom-popper.popper-vue {
