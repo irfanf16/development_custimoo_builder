@@ -1391,7 +1391,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           const direction = this.targetNonTransparent(canvas, texture, target.left+ width, target.top, 0, 1, 'left')
           const directionFromRight = this.targetNonTransparent(canvas, texture, model_start, centerPoint.y, 0, 1, 'right')
           const outside = checkPointX - direction.left
-          const modelSpaceRight = directionFromRight.left - (width / 2) + 3
+          const modelSpaceRight = directionFromRight.left - (width / 2) - 3
           addLeft = modelSpaceRight + outside
           addTop = target.top
         }
