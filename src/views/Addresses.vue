@@ -142,7 +142,7 @@ export default class Addresses extends Mixins(ErrorMessages) {
     }
   }
   async actionAfterAddressSave() {
-    if (this.$route.query && this.$route.query.cart == 1) {
+    if (this.$route.query && Number(this.$route.query.cart) == 1) {
       this.$store.commit('SHOW_CART_MODAL', true);
       this.$router.push({ name: 'Home' })
     }

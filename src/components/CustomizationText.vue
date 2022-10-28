@@ -284,7 +284,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   * */
 
   public extractExactCode(code:string) {
-    let pantone_coated = null;
+    let pantone_coated: string|null = null;
     if(this.getColorType === 'pantone-coated'){
       let regex_numbers = /^[0-9]+/g;
       let regex_alphabets = /[a-zA-Z]+/g;

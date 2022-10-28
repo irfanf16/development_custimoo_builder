@@ -384,7 +384,7 @@ import {
   getActiveProductData,
   getPermissions,
   handleResponseException,
-  parseSvgString,
+  parseSvgStringFile,
   fetchUrlContent,
   getRandom, resetLastActiveProductData, lastActiveProductDefaultObject
 } from '@/helpers/Helpers'
@@ -505,7 +505,7 @@ Vue.filter('formatDate', function(value:string) {
     }
   },
   async beforeRouteEnter(to, from, next) {
-    next(vm => {
+    next((vm:Record<any, any>) => {
       vm.prevRoute = from
      })
   }
@@ -516,11 +516,10 @@ Vue.filter('formatDate', function(value:string) {
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
   ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton) {
-  public products_fonts: Record<any, any> = []
-  public prevRoute = null;
+  public products_fonts: Record<any, any>[] = []
+  public prevRoute:Record<any, any> = {};
   public logData = logData;
   public tabIndex = 0
-  // private products: any[] = []
   private nextPageUrl !: string
   public hasProducts = true
   public category_id !: string
@@ -883,9 +882,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get redoitems():Record<any, any>{
     return this.$store.getters.getRedoItems
   }
-  get products():[Record<any, any>]{
-    return this.$store.getters.getProducts
-  }
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
@@ -1007,7 +1003,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public actionAfterLogin() {
-    if(this.prevRoute.name == 'OrderDetail'){
+    if(this.prevRoute!.name == 'OrderDetail'){
       this.$router.push(this.prevRoute.fullPath)
     }
     if(this.actionBeforeLogin == 'lockerRoom') {
@@ -1465,7 +1461,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async loadOrderItemProduct(action: string) {
     let self = this;
-    let updated_product = await getActiveProductData(this.products_fonts);
+    let updated_product = await getActiveProductData(this.products_fonts) as Record<any, any>;
     if(updated_product == null) {
       return false;
     }
@@ -1491,14 +1487,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async UpdateOrderProducts() {
     let self = this;
-    let updated_product:Record<any,any> = await getActiveProductData(this.products_fonts);
+    let updated_product:Record<any,any> = await getActiveProductData(this.products_fonts) as Record<any, any>;
     if(updated_product == null) {
       return false;
     }
     if(updated_product){
       if(Object.prototype.hasOwnProperty.call(updated_product,'production_url') && updated_product?.production_url){
         let content:string = await fetchUrlContent(updated_product?.production_url);
-        let production_content = await parseSvgString(content,updated_product as Record<any,any>);
+        let production_content = await parseSvgStringFile(content,updated_product as Record<any,any>);
         updated_product.svg_content = production_content;
       }
     }else{

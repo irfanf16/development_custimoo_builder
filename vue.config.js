@@ -1,12 +1,14 @@
 const path = require("path");
 
 module.exports = {
+  lintOnSave: false,
   configureWebpack: {
     output: {
       filename: 'js/[name].[hash].js',
       chunkFilename: 'js/[name].[hash].js',
     },
     resolve: {
+      extensions: ['*', '.js', '.vue', '.json'],
       alias: {
         '@assets': path.resolve(__dirname, 'src/assets'),
 

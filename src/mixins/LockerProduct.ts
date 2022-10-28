@@ -52,11 +52,11 @@ export class LockerProducts extends Vue {
 
   get getLockerProducts() {
     let main_product_id = this.$store.getters.getEditProductId;
-    let locker_products = this.$store.getters.getLockerProducts;
+    let locker_products:Record<any, any> = this.$store.getters.getLockerProducts;
     let locker_products_count = locker_products.length
     locker_products = locker_products.map((item: Record<any, any>, lpIdx: number) => {
       //locker_pull_groups contains the locker group names where products can be moved. This array is make sure user can not drop product to same locker.
-      let locker_pull_groups = [];
+      let locker_pull_groups:Record<any, any> = [];
       for (let i = 0; i < locker_products_count; i++) {
         if (lpIdx != i) {
           locker_pull_groups.push(`locker-${i}`);
@@ -153,7 +153,7 @@ export class handleMainProducts extends Vue {
       let product_index = 0;
       let selected_style = null;
       let style_index = 0;
-      let design_id = 0;
+      let design_id = null;
       let editing_product_detail = response_data.editing_product_detail
       let active_index = 0;
       /*
@@ -358,7 +358,7 @@ export class handleMainProducts extends Vue {
     let design_id = null;
     let edit_type = product_edit_info_object.type;
     let validated = false;
-    let message = null
+    let message: string = ''
     if(product_edit_info_object.editing) {
       switch (edit_type) {
         case "locker_product":
@@ -544,13 +544,13 @@ export class handleMainProducts extends Vue {
       }
     });
     //set logo colors
-    let logo_colors = []
+    let logo_colors:Record<any, any> = []
     if(!factory_product.colors && factory_product.custom_logos) {
       //fetch from server
       let logos = factory_product.custom_logos
       if(logos.length > 0) {
         let color_str:any = await this.fetchLogoColors(logos[0].id);
-        let image_colors = processColorsCustom(JSON.parse(color_str))
+        let image_colors:Record<any, any> = processColorsCustom(JSON.parse(color_str))
         let image_color_count = image_colors.length;
         while(image_color_count < 4 ) {
           image_colors.push({hex: null, pantone: null, name: null});
@@ -628,13 +628,13 @@ export class handleMainProducts extends Vue {
     });
 
     //set logo colors
-    let logo_colors = []
+    let logo_colors:Record<any, any> = []
     if(!active_product_detail.colors && active_product_detail.custom_logos) {
       //fetch from server
       let logos = JSON.parse(active_product_detail.custom_logos)
       if(logos.length > 0) {
         let color_str:any = await this.fetchLogoColors(logos[0].id);
-        let image_colors = processColorsCustom(JSON.parse(color_str))
+        let image_colors:Record<any, any> = processColorsCustom(JSON.parse(color_str))
         let image_color_count = image_colors.length;
         while(image_color_count < 4 ) {
           image_colors.push({hex: null, pantone: null, name: null});
@@ -701,7 +701,7 @@ export class handleMainProducts extends Vue {
       }
     });
     //set logo colors
-    let logo_colors = []
+    let logo_colors:Record<any, any> = []
     if (!cart_item_product.colors && cart_item_product.custom_logos) {
       //fetch from server
       let logos = cart_item_product.custom_logos
