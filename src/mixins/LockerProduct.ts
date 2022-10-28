@@ -151,7 +151,6 @@ export class handleMainProducts extends Vue {
       }
       let product_id = null;
       let product_index = 0;
-      let selected_style = null;
       let style_index = 0;
       let design_id = null;
       let editing_product_detail = response_data.editing_product_detail
@@ -166,7 +165,6 @@ export class handleMainProducts extends Vue {
       }
       else {
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;
-        console.log('last_active_prod_data', last_active_prod_data)
         if(editing_product_detail ) {
           product_index = response_data.active_product_index;
         }
@@ -232,15 +230,12 @@ export class handleMainProducts extends Vue {
         }
       })
 
+      this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+      await this.$store.dispatch("getModels", retrieved_products[product_index].id);
       await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
       await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index});
       await setRetrievedProductsCustomTexts(retrieved_products)
-      this.$store.commit('CHANGE_STYLE_INDEX', style_index);
-      await this.$store.dispatch("getModels", retrieved_products[product_index].id);
       self.$root.$emit('sliderEvent', product_index);
-
-
-
 
       //If we are editing locker product then set the locker product data and return
       if(self.is_shared_product  || product_edit_info_object.type == "locker_product") {
