@@ -974,6 +974,35 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         }
         this.showDimensions(e, dimText)
       });
+
+      canvas.on('selection:created', (e: Record<any, any>) => {
+        if(e.target.type == 'logo'){
+          this.$store.dispatch('setTabMain',{value:0})
+        }else if(e.target.type == 'text'){
+          this.$store.dispatch('setTabMain',{value:2})
+          this.$emit('setCustomTextIndex', e.target.text_index)
+        }
+
+        if(e.target.side == 'Back'){
+          this.frontCanvas.discardActiveObject().renderAll();
+        }else{
+          this.backCanvas.discardActiveObject().renderAll();
+        }
+      });
+      canvas.on('selection:updated', (e: Record<any, any>) => {
+        if(e.target.type == 'logo'){
+          this.$store.dispatch('setTabMain',{value:0})
+        }else if(e.target.type == 'text'){
+          this.$store.dispatch('setTabMain',{value:2})
+          this.$emit('setCustomTextIndex', e.target.text_index)
+        }
+
+        if(e.target.side == 'Back'){
+          this.frontCanvas.discardActiveObject().renderAll();
+        }else{
+          this.backCanvas.discardActiveObject().renderAll();
+        }
+      });
     })
   }
 

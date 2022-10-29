@@ -13,7 +13,7 @@
       </h2>
 
       <div :key="`main-${selectedProductId+customTextIndex}`" class="d-flex">
-        <b-form-input :key="`text-${selectedProductId+customTextIndex}`" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here" :value="product_custom_text.value"
+        <b-form-input :ref="`text-customize-${customTextIndex}`" :key="`text-${selectedProductId+customTextIndex}`" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here" :value="product_custom_text.value"
                       @input="handleCustomTextInputChange($event, customTextIndex)" @focusin="expandTextCustomizer(customTextIndex)"></b-form-input>
         <button v-b-toggle="`text-accordion-${customTextIndex}`"
                 class="d-flex align-items-center btn btn-secondary light">
@@ -204,7 +204,7 @@
 
 <script lang="ts">
 
-import { Component, Mixins, Vue } from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
 import {HideUpdateLockerButton, ProductColors, ProductFonts} from "@/mixins/SelectedProductMixin";
@@ -238,6 +238,7 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 })
 
 export default class CustomizationText extends Mixins(ProductColors, ProductFonts, HideUpdateLockerButton) {
+  @Prop({required: true}) customTextIndex!: number
   /* component data properties goes here */
   public product_fonts: Record<any, any>[] = []
   public product_colors: Record<any, any>[] = []
@@ -282,6 +283,12 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   /*
   * methods starts
   * */
+
+  @Watch('customTextIndex')
+  customTextIndexChanged(){
+    const activeTextField = this.customTextIndex > -1 && this.$refs[`text-customize-${this.customTextIndex}`] as Record<any, any>;
+    activeTextField[0].focus();
+  }
 
   public extractExactCode(code:string) {
     let pantone_coated: string|null = null;
