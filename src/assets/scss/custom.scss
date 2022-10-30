@@ -591,7 +591,9 @@ button {
                 position: absolute;
                 top: -7px;
                 font-size: 10px;
-                left: 11px;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
 
                 &:before{
                     content: "";
