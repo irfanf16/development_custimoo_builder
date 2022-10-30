@@ -585,6 +585,36 @@ button {
                     font-size: 20px;
                 }
             }
+
+            .warning{
+                color: #FFC658;
+                position: absolute;
+                top: -7px;
+                font-size: 10px;
+                left: 11px;
+
+                &:before{
+                    content: "";
+                    display: block;
+                    height: 0.8em;
+                    width: 0.6em;
+                    position: absolute;
+                    z-index: 2;
+                    background: white;
+                    left: 0;
+                    top: 2px;
+                    bottom: 0;
+                    right: 0;
+                    border-radius: 100px;
+                    margin: auto;
+                }
+
+
+                svg{
+                    position: relative;
+                    z-index: 3;
+                }
+            }
         }
     }
 

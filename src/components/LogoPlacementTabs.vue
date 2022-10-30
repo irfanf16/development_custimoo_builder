@@ -1,21 +1,28 @@
 <template>
   <div v-if="selectedProduct">
     <div class="d-flex align-items-center justify-content-between px-1 pt-1" :class="{'rotateArrow': !expandLogoButtons}">
-      <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
+      <b-button class="light ml-1" v-if="(selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count)"
+                :style="{visibility: expandLogoButtons ? 'visible':'hidden'}" @click="addTab">
         <BIconPlus />
       </b-button>
 
       <b-icon-chevron-down class="cursor-pointer" @click="()=>expandLogoButtons = !expandLogoButtons" style="font-size: larger; transition: 0.3s ease all;" />
     </div>
+
     <b-tabs :class="{'collapseButtons': expandLogoButtons}" ref="collapseButtons">
       <b-tab v-for="(logo_tab, ltIdx) in customLogos" :key="ltIdx" :active="tabIndex === ltIdx" @click="changeTab(ltIdx)">
         <template #title>
-          <span>{{ ltIdx == 0 ? 'Team Logo' : 'logo ' + ltIdx }}</span>
-          <template v-if="ltIdx > 0">
-            <span class="remove-logo" @click="removeLogoTab(ltIdx)">
-              <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+          <span>
+            <span v-if="!logo_tab.url" class="warning">
+              <b-icon-exclamation-triangle-fill />
             </span>
-          </template>
+            <span>{{ ltIdx == 0 ? 'Team Logo' : 'logo ' + ltIdx }}</span>
+            <template v-if="ltIdx > 0">
+              <span class="remove-logo" @click="removeLogoTab(ltIdx)">
+                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+              </span>
+            </template>
+          </span>
         </template>
 
         <div class="tabs-logo-container">
@@ -197,6 +204,10 @@ export default class LogoPlacementTabs extends Vue {
 
   get usingColorLogos (): [Record<any, any>] {
     return this.$store.getters.getUsingColorLogos
+  }
+
+  get activeLogoTabIndex (): number {
+    return this.$store.getters.getActiveLogoIndex
   }
 
   public changeTab (index: number) {
