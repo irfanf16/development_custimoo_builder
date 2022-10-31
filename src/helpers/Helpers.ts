@@ -1044,7 +1044,7 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     let logo_max_width = 0 ;
     if((factory_product.custom_logos.length >= 1)){
       const custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
-        return (custom_logo.url !== "")
+        return (Object.prototype.hasOwnProperty.call(custom_logo,'url') && custom_logo.url !== "" && custom_logo.url !== null)
       })
       if(custom_logos_without_base64.length > 0){
         const custom_logos = await Store.dispatch('converturlToBase64',{custom_logos:custom_logos_without_base64});
