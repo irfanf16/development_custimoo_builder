@@ -424,7 +424,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
         if(this.cartItems && !this.cartItems.length){
           this.ref['cartModal'].hide();
         }
-        this.showToast(response.data.message, 'SUCCESS')
+        this.showToast(response.data.message, 'success')
       }).catch((e:any)=>{
         this.showError(e);
         this.ref['cartModal'].hide();

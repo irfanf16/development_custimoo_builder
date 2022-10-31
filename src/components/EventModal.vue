@@ -498,7 +498,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
         })
         this.hideEventModal()
       } else {
-        this.showToast('No collection found in locker.', 'Error')
+        this.showToast('No collection found in locker.', 'error')
         this.event_data.event_type = null;
       }
 
@@ -706,7 +706,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
       }
 
     } else {
-      this.showToast('Event not found', 'Error')
+      this.showToast('Event not found', 'error')
     }
     this.viewLoader = false
 
@@ -764,7 +764,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
 
       this.viewLoader = false
       if (res.status == 200) {
-        this.showToast(res.data.message, 'SUCCESS')
+        this.showToast(res.data.message, 'success')
         await this.$store.dispatch('getLockerEvents', selected_locker.id)
         this.resetEventModal()
         this.hideEventModal()
@@ -817,7 +817,7 @@ export default class EventModal extends Mixins(ErrorMessages) {
         this.resetEventModal()
         this.hideEventModal()
         this.viewLoader = false
-        this.showToast(res.data.message, 'SUCCESS')
+        this.showToast(res.data.message, 'success')
       }
     } catch(e:any) {
       console.log('e', e)

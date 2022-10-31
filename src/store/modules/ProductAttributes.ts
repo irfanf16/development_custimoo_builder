@@ -12,7 +12,8 @@ import {
   getProductLogoSetting,
   logData,
   lastActiveProductDefaultObject,
-  recentLogoDefaultObject
+  recentLogoDefaultObject,
+  getLogoSettingsObject
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
@@ -235,7 +236,6 @@ const ProductAttributes:Module<any, any> = {
              if(settings && settings.logos_follows_product){
              const ids = settings.following_product_ids
              if(ids.length){
-               console.log("in ids")
                ids.forEach(async (new_item:number)=>{
                  if (state.selectedPrdId != new_item) {
                    let removeLogo = false
@@ -252,7 +252,6 @@ const ProductAttributes:Module<any, any> = {
                        Vue.set(state.customLogos[new_item], newCustomLogo.logoIndex, {...logo_settings})
                      }
                    } else {
-                     console.log("uploading")
                      await setCustomLogo(customLogo.customObj, newCustomLogo.logoIndex, new_item)
                    }
                  }
@@ -494,6 +493,18 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.customLogos[product_id],0, logo_)
       });
     },
+    REMOVE_TEAM_LOGO(state: Record<any, any>) {
+      state.products.forEach((product: Record<any, any>) => {
+        if(state.customLogos[product.id]) {
+          const logo_default_setting = product.logos_setting[0] ? JSON.parse(JSON.stringify(product.logos_setting[0])) : getLogoSettingsObject()
+          logo_default_setting.id = null
+          logo_default_setting.logoIndex = 0
+          logo_default_setting.customLogo = 1
+          logo_default_setting.haveControls = 1
+          Vue.set(state.customLogos[product.id], 0, logo_default_setting)
+        }
+      })
+    },
     async customTexts(state: Record<any, any>, customText: Record<any, any>) {
      if(customText){
         if(!state.customTexts[customText.prd_id]) {
@@ -640,13 +651,13 @@ const ProductAttributes:Module<any, any> = {
       const products = state.products
       products.forEach((product: Record<any, any>) => {
         if(product.id == payload.product_id) {
-          setTimeout(() => {
-            Vue.set(state.customLogos, product.id, locker_logos) // only set time out solve locker room edit logo issue goes on default position sometime.
-          }, 1000)
+          Vue.set(state.customLogos, product.id, locker_logos)
         }
         else {
           const logo_setting = getLogoSettings(0,false, product.id)
           const final_logo = {...locker_logos[0], ...logo_setting}
+          delete final_logo.scaleX
+          delete final_logo.scaleY
           Vue.set(state.customLogos, product.id,[final_logo])
         }
       })

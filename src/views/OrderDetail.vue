@@ -19,7 +19,9 @@
 
           <div class="order-activities">
             <template v-for="(item_status_activity, item_status_activity_index) in order_item.status_activities">
-              <div v-if="(item_status_activity.status != ORDERCOMPLETED && item_status_activity.status != ORDERAPPROVE )" class="activity-status" :class="status_icons[item_status_activity.status]" :key="`item_status_activity_${item_status_activity_index}`">
+              <div v-if="(item_status_activity.status != ORDERCOMPLETED && item_status_activity.status != ORDERAPPROVE )"
+                   class="activity-status" :class="status_icons[item_status_activity.status]"
+                   :key="`item_status_activity_${item_status_activity_index}`">
                 <div  class="activity-status" :key="`item_status_activity_${item_status_activity_index}`">
                 <ActivityStatusIcons :activity_status="item_status_activity.status" />
 
@@ -41,8 +43,10 @@
                   <div class="images-grid p-2 d-flex gap-1 w-100">
                     <div class="d-flex align-items-stretch flex-wrap gap-1">
                       <div class="feedback-block" :key="activity_itm_ind" v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
-                        <div class="feedback-images" v-if="activity_item.activity_files">
-                          <img :key="activity_file_index" v-for="(activity_file, activity_file_index) in activity_item.activity_files" :src="`${storage_url}${activity_file.url}`" alt="">
+                        <div class="feedback-images" v-if="activity_item.activity_files"
+                             @click="enlargeActivityFiles(activity_item.activity_files)" style="cursor:pointer;">
+                          <img :key="activity_file_index" v-for="(activity_file, activity_file_index) in activity_item.activity_files"
+                               :src="`${storage_url}${activity_file.url}`" alt="">
                         </div>
                         <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_itm_ind == 0 && order_item.tracking_no)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
                         <template v-else>
@@ -254,6 +258,13 @@
 
 
     </modal>
+
+    <modal name="enlarged-activity-files-modal" @closed="enlarged_activity_files = []" :resizable="true">
+      <template v-for="(enlarged_activity_file, enlargedActivityFileIndex) in enlarged_activity_files">
+        <img :src="`${storage_url}${enlarged_activity_file.url}`" :key="`enlarged_activity_file_${enlargedActivityFileIndex}`">
+      </template>
+
+    </modal>
   </div>
 </template>
 
@@ -384,6 +395,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public markerActive = false
 
   public auth_customer = this.$store.getters.getCustomer
+  public enlarged_activity_files: Record<any, any>[] = []
 
   //data props ends
 
@@ -550,7 +562,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
     if(direction == 'next'){
       if(activityObj.action == null){
-        this.showToast('Please accept or reject designs before navigate');
+        this.showToast('Please accept or reject designs before navigate', 'error');
       }else{
         let limit = this.activity_items.activity_item_data.length;
         if((this.activity_navigation_index+1) < limit){
@@ -631,6 +643,11 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       this.showMarkerArea(0);
       this.showMarkerArea(1);
     }, 2000)
+  }
+
+  enlargeActivityFiles(activity_files: Record<any, any>[]) {
+    this.enlarged_activity_files = activity_files
+    this.$modal.show('enlarged-activity-files-modal')
   }
 
 

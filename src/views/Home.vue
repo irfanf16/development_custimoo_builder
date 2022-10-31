@@ -259,11 +259,11 @@
                     </b-button>
                     <template v-else-if="isCustomerAuthenticated">
 
-                      <template v-if="getProductEditInfoObject.editing">
+                      <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
                             <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
-                              Add to Cart
+                              {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
                             <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
                               <img width="20" height="20" src="../../src/assets/images/loading.gif" />
@@ -1081,7 +1081,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         if(this.cartItems && !this.cartItems.length){
           this.ref['cartModal'].hide();
         }
-        this.showToast(response.data.message, 'SUCCESS')
+        this.showToast(response.data.message, 'success')
       }).catch((e:any)=>{
         console.log(e);
         this.showError(e);
@@ -1173,7 +1173,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showLoader = true
       await http.post('updatelockerproduct', locker).then(async (successResponse) => {
         let response_data = successResponse.data;
-        let toast_type = "ERROR"
+        let toast_type = "error"
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
         this.hideLockerProductUpdateButton(true)
@@ -1239,9 +1239,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     testingCodeToCopy.select()
     try {
       document.execCommand('copy');
-      this.showToast('Shareable link was copied to your clipboard.', 'SUCCESS');
+      this.showToast('Shareable link was copied to your clipboard.', 'success');
     } catch (err) {
-      this.showToast('Oops, unable to copy', 'ERROR');
+      this.showToast('Oops, unable to copy', 'error');
     }
   }
 

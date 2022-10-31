@@ -77,7 +77,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
   public async deleteRecentLogo(recentLogo:any) {
     try {
       const resp = await http.delete(`recent/logos/delete/${recentLogo.id}`);
-      this.showToast(resp.data.message,'SUCCESS')
+      this.showToast(resp.data.message,'success')
       this.$store.commit('SET_RECENT_LOGOS')
     }
     catch (e){

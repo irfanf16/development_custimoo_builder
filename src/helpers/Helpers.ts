@@ -7,9 +7,7 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
-import {Side} from "three";
-import {keys, parseInt} from "lodash";
-import store from "@/store";
+import {parseInt} from "lodash";
 
 const getLogoSettingsObject = () => {
   return {
@@ -556,6 +554,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     rotation:0,
                     scaleX:0,
                     scaleY:0,
+                    width_px:0,
+                    height_px:0,
                   }
 
                   if (Object.keys(path).length) {
@@ -629,6 +629,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     text_item_object.rotation = custom_text_item.rotation;
                     text_item_object.scaleX = custom_text_item.scaleX / selected_product.measurement_ratio;
                     text_item_object.scaleY = custom_text_item.scaleY / selected_product.measurement_ratio;
+                    text_item_object.width_px = width;
+                    text_item_object.height_px = height;
                   }
 
                   if (custom_text.is_first_name) {
@@ -696,8 +698,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         model_id: product_models[selected_model_index].id,
         model_name: product_models[selected_model_index].model_name,
         product_id: selected_product.product_id,
-        ecommerce_post_id: selected_product.ecommerce_product_id,
-        sync_id: selected_product.sync_id,
+        ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
+        sync_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].sync_id:'',
         product_type: selected_product.product_type,
         product_name: product_name,
         pdf_file: null,
@@ -726,13 +728,14 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 }
 
 const initCustomLogos = async(retrieved_products: Record<any, any>) => {
+  const team_logo = await getTeamLogo()
   retrieved_products.forEach((product: Record<any, any>) => {
     if(product.is_logo_allowed) {
       const custom_logos = Store.getters.getCustomLogos(product.id)
       if (!custom_logos || !(custom_logos && custom_logos.length)) {
         if(product.logos_setting.length) {
           const logoSetting = product.logos_setting[0]
-          const logo = {
+          let logo = {
             id: null,
             product_id: null,
             product_style_id: null,
@@ -747,9 +750,15 @@ const initCustomLogos = async(retrieved_products: Record<any, any>) => {
             customLogo: true,
             is_locked: logoSetting.is_locker,
           }
+          if(team_logo) {
+            logo = {...logo, ...team_logo}
+          }
           Store.commit('customLogo', {index: 0, logo: logo, prd_id: product.id})
         } else { // if logo is allowed but there is no setting for logo in product the add default logo object to show team logo
-          const logo = getLogoSettingsObject()
+          let logo = getLogoSettingsObject()
+          if(team_logo) {
+            logo = {...logo, ...team_logo}
+          }
           Store.commit('customLogo', {index: 0, logo: logo, prd_id: product.id})
         }
       }
@@ -923,7 +932,7 @@ const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[],
     if(reset)
       return retrieved_product.product_texts
     const product_id = retrieved_product.id;
-    return last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
+    return last_active_product_custom_texts && last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
   })
   Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
   /*
@@ -969,9 +978,6 @@ const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
   }
   return response_obj;
 }
-
-//Functions related to SVG parsing start
-
 
 const INCH_TO_CENTIMETER = 2.54;
 
@@ -1302,8 +1308,10 @@ const getSVGNumbers = (numbers_array:Record<any,any>[], logo_width:number, produ
         height_array_for_sort[key] += parseFloat(item.original_height) + 500;
 
         const svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.lastIndexOf("</svg>"));
+        const scaleX =  transformUnit(item.width_px,item.width)? transformUnit(item.width_px,item.width):1;
+        const scaleY =  transformUnit(item.height_px,item.height)?transformUnit(item.height_px,item.height):1;
         svg_string +=`
-                     <g transform="matrix(${item.scaleX} 0 0 ${item.scaleY} ${width} ${height})">
+                     <g transform="matrix(${scaleX} 0 0 ${scaleY} ${width} ${height})">
                         <g style="transform: rotate(0)">${svg}</g>
                      </g>
                 `
@@ -1339,8 +1347,10 @@ const getSVGNames = (names_array:Record<any,any>[], production_file_dimension:Re
     height = 0;
     value.forEach((item:Record<any,any>,index:number) => {
       const svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.lastIndexOf("</svg>"));
+      const scaleX =  transformUnit(item.width_px,item.width)? transformUnit(item.width_px,item.width):1;
+      const scaleY =  transformUnit(item.height_px,item.height)?transformUnit(item.height_px,item.height):1;
       svg_string +=`
-                     <g transform="matrix(${item.scaleX} 0 0 ${item.scaleY} ${width} ${height})">
+                     <g transform="matrix(${scaleX} 0 0 ${scaleY} ${width} ${height})">
                         <g style="transform: rotate(${item.rotation})">${svg}</g>
                      </g>
                 `;
@@ -1368,8 +1378,10 @@ const getSVGCommonItems = (common_array:Record<any,any>[], production_file_dimen
   Object.entries(common_array).forEach(([key, value]) => {
     value.forEach((item:Record<any,any>,index:number) => {
       const svg = item.svg.substring(item.svg.indexOf("<path"),item.svg.lastIndexOf("</svg>"));
+      const scaleX =  transformUnit(item.width_px,item.width)? transformUnit(item.width_px,item.width):1;
+      const scaleY =  transformUnit(item.height_px,item.height)?transformUnit(item.height_px,item.height):1;
       svg_string +=`
-                     <g transform="matrix(${item.scaleX} 0 0 ${item.scaleY} ${width} ${height})">
+                     <g transform="matrix(${scaleX} 0 0 ${scaleY} ${width} ${height})">
                         <g style="transform: rotate(${item.rotation})">${svg}</g>
                      </g>
                 `;
@@ -1394,6 +1406,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
   const height_of_production_file = production_file_dimension.height? production_file_dimension.height.replace('px',''):6000;
   let svg_string = `<g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${height_of_production_file})">`;
   let width = 0;
+  const setting = Store.getters.getSetting
   custom_logos.forEach((custom_logo:Record<any,any>, index:number) => {
     const original_url = Object.prototype.hasOwnProperty.call(custom_logo,'original_png') && custom_logo.original_png;
     const updated_url = original_url?custom_logo.original_url:custom_logo.url;
@@ -1403,7 +1416,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
         svg_string +=`
                      <g transform="matrix(1 0 0 1 ${width} 1000)">
                         <g style="transform: rotate(${custom_logo.rotation})">
-                            <image xlink:href="${custom_logo.base_64}" height="${(custom_logo.actualHeight * custom_logo.scaleY)/parseFloat(measurement_ratio)}px" width="${(custom_logo.actualWidth * custom_logo.scaleX)/parseFloat(measurement_ratio)}px"/>
+                            <image xlink:href="${custom_logo.base_64}" height="${custom_logo.originalHeight}${setting.unit}" width="${custom_logo.originalWidth}${setting.unit}"/>
                         </g>
                      </g>
                 `
@@ -1412,7 +1425,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
         svg_string +=`
                      <g transform="matrix(1 0 0 1 ${width} 1000)">
                         <g style="transform: rotate(${custom_logo.rotation})">
-                            <image xlink:href="${process.env.VUE_APP_STORAGE_URL}${updated_url}" height="${(custom_logo.actualHeight * custom_logo.scaleY)/parseFloat(measurement_ratio)}px" width="${(custom_logo.actualWidth * custom_logo.scaleX)/parseFloat(measurement_ratio)}px"/>
+                            <image xlink:href="${process.env.VUE_APP_STORAGE_URL}${updated_url}" height="${custom_logo.originalHeight}${setting.unit}" width="${custom_logo.originalWidth}${setting.unit}"/>
                         </g>
                      </g>
                 `
@@ -1443,6 +1456,31 @@ const unitConversion = (value:number) => {
     default: {
       const value_string = value ? value.toString() : '';
       return {value: parseFloat(value_string).toFixed(1), unit: setting.unit}
+    }
+  }
+}
+
+const transformUnit = (dimension_px:number,unit_value:string) => {
+    const setting = Store.getters.getSetting
+    const PIXEL_IN_INCH = 72;
+    const CM_IN_INCH = 2.54;
+    const dimension_unit = parseFloat(unit_value);
+  switch( setting.conversion_operator ) {
+    case 'multiply':
+    {
+      const conversion_from_px = dimension_px/PIXEL_IN_INCH;
+      const conversion_from_cm = dimension_unit/CM_IN_INCH;
+      return (conversion_from_cm / conversion_from_px).toFixed(2);
+      break;
+    }
+    case 'divide':
+    {
+      const conversion_from_px = dimension_px/PIXEL_IN_INCH;
+      return (dimension_unit / conversion_from_px).toFixed(2);
+      break;
+    }
+    default: {
+      return null
     }
   }
 }
@@ -1583,6 +1621,30 @@ const recentLogoDefaultObject = (default_values: Record<any, any> | Record<any, 
     return default_values.map((default_values_object: Record<any, any>) => {
       return {...default_object, ...default_values_object}
     })
+  }
+}
+
+const getTeamLogo = () => {
+  const custom_logos_by_products = Store.getters.getCustomLogoObject
+  let team_logo = null
+  for(const product_id in custom_logos_by_products) {
+    if(custom_logos_by_products[product_id][0] && custom_logos_by_products[product_id][0].original_logo) {
+      team_logo = custom_logos_by_products[product_id][0]
+      break
+    }
+  }
+  if(team_logo) {
+    return {
+      "id": team_logo.id,
+      "url": team_logo.url,
+      "original_logo": team_logo.original_logo ,
+      "transparent_logo": team_logo.transparent_logo ,
+      "smart_transparent_logo": team_logo.smart_transparent_logo ,
+      "is_smart_transparent": team_logo.is_smart_transparent ,
+      "is_transparent": team_logo.is_transparent
+    }
+  } else {
+    return team_logo
   }
 }
 

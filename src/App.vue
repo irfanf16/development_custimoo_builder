@@ -99,7 +99,7 @@ export default class App extends Mixins(LockerProducts,ErrorMessages) {
       link.href = window.URL.createObjectURL(blob)
       link.download = 'order_design.pdf';
       link.click();
-      this.showToast('Pdf file created','SUCCESS')
+      this.showToast('Pdf file created','success')
     })
   }
 

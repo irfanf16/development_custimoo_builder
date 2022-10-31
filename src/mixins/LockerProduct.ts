@@ -1,9 +1,11 @@
 /* eslint-disable */
 import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
-import { getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
-  setRetrievedProductsCustomTexts, resetLastActiveProductData, fontsColorsManipulation, fontsList,
-  rosterDetailsInit, fetchUrlContent, lastActiveProductDefaultObject, initCustomLogosNew
+
+import {
+  getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
+  setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject,
+  initCustomLogosNew
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -151,7 +153,6 @@ export class handleMainProducts extends Vue {
       }
       let product_id = null;
       let product_index = 0;
-      let selected_style = null;
       let style_index = 0;
       let design_id = 0;
       let editing_product_detail = response_data.editing_product_detail
@@ -162,11 +163,10 @@ export class handleMainProducts extends Vue {
       * */
       let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
       if(is_editing) {
-        ({product_index, style_index, design_id, active_index} = await self.handleEditMode(retrieved_products));
+        ({product_index, style_index, design_id, active_index} = await this.handleEditMode(retrieved_products));
       }
       else {
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;
-        console.log('last_active_prod_data', last_active_prod_data)
         if(editing_product_detail ) {
           product_index = response_data.active_product_index;
         }
@@ -193,7 +193,8 @@ export class handleMainProducts extends Vue {
             let {sync_id, customizer_preview, update_cart} = self.$route.query
             if(sync_id) {
               product_index = retrieved_products.findIndex((retrieved_product: Record<any, any>) => {
-                return retrieved_product.sync_id === sync_id;
+                if(retrieved_product.ecommerceproduct.length > 0)
+                    return retrieved_product.ecommerceproduct[0].sync_id === sync_id;
               });
               product_index = product_index >=0 ? product_index : 0
               product_id = retrieved_products[product_index].id
@@ -231,15 +232,12 @@ export class handleMainProducts extends Vue {
         }
       })
 
+      this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+      await this.$store.dispatch("getModels", retrieved_products[product_index].id);
       await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
       await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index});
       await setRetrievedProductsCustomTexts(retrieved_products)
-      this.$store.commit('CHANGE_STYLE_INDEX', style_index);
-      await this.$store.dispatch("getModels", retrieved_products[product_index].id);
       self.$root.$emit('sliderEvent', product_index);
-
-
-
 
       //If we are editing locker product then set the locker product data and return
       if(self.is_shared_product  || product_edit_info_object.type == "locker_product") {

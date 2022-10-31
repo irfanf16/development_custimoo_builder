@@ -138,6 +138,9 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
           self.$store.commit('customLogos', payload)
           self.$store.commit('SET_LOGO_COLORS', []);
           self.$store.commit('SET_INITIAL_LOGO_COLORS', []);
+          if(logo.logoIndex == 0) {
+            self.$store.commit('REMOVE_TEAM_LOGO')
+          }
         }
         canvas.remove(target);
         canvas.requestRenderAll();
@@ -208,7 +211,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   @Prop({ required: false }) readonly carousel !: string
   @Prop({ required: false, default: () => { return [] } }) readonly productNamesSetting !: [Record<any, any>]
   @Prop({ required: false, default: false }) readonly logoAllowed !: boolean
-  @Prop({ required: false, default: false }) readonly preSetData !: boolean
   @Prop({ required: false, default: true }) readonly multipleLogo !: boolean
   @Prop({ required: false }) readonly logosLimit !: number
   @Prop({ required: false }) readonly productColors !: [Record<string, any>];
@@ -249,6 +251,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   })
   public dimTextBack!: fabric.Text
   public showLoader = true
+  public svg_groups_ready = false
   public otherSideLogos: any[] = []
   public otherSideTexts: any[] = []
   public logoIndex = 0
@@ -424,7 +427,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     deep: true
   })
   defaultColorsChanged(newVal: [Record<any, any>]) {
-    if (this.productType == 'customized' && this.mounted) {
+    if (this.productType == 'customized' && this.svg_groups_ready) {
       let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       if (defaultColors.length) {
         this.changeDefaultColors(defaultColors)
@@ -444,7 +447,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     deep: true, immediate: false
   })
   groupColorsChanged(newVal: Record<any, any>) {
-    if (this.productType == 'customized' && this.mounted) {
+    if (this.productType == 'customized' && this.svg_groups_ready) {
       this.changeGroupColor(newVal)
       if(this.productEditInfoObject && this.productEditInfoObject.editing == false) {
         this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "group_colors": this.groupColors})
@@ -549,7 +552,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     this.unHideColorGrouping()
   }
 
-  public async changeDefaultColors(defaultColors: [Record<any, any>]): void {
+  public async changeDefaultColors(defaultColors: [Record<any, any>]) {
     let appliedDefaultColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
@@ -781,6 +784,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         await this.changeGroupColor(this.groupColors)
       }
     }
+    this.svg_groups_ready = true
     this.showLoader = false
   }
 
@@ -795,6 +799,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
 
   public loadScene(ImageData: Record<any, any>, side: string) {
     return new Promise((resolve) => {
+      this.svg_groups_ready = false
       this.mounted = false
       let element = this.$refs.front as HTMLCanvasElement
       if (side === 'back') {
@@ -852,28 +857,26 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           }
 
           if (this.logos.length) {
-            this.logos.forEach((logo: Record<any, any>, index: number) => {
+            this.logos.forEach((logo: Record<any, any>) => {
+              if (logo && logo.url) {
+                this.addSvgLogos(logo)
+              }
+            })
+          }
+          let logos: Record<any, any>[] = []
+          if (this.customLogos && this.logoAllowed) {
+            let customLogos = JSON.parse(JSON.stringify(this.customLogos))
+            if (this.logosLimit) {
+              customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
+            }
+            logos = logos.concat(customLogos) as [Record<any, any>]
+          }
+          if (logos.length) {
+            logos.forEach((logo: Record<any, any>, index: number) => {
               if (logo && logo.url) {
                 this.addLogos(logo, index)
               }
             })
-          }
-          if (!this.preSetData) {
-            let logos: Record<any, any>[] = []
-            if (this.customLogos && this.logoAllowed) {
-              let customLogos = JSON.parse(JSON.stringify(this.customLogos))
-              if (this.logosLimit) {
-                customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
-              }
-              logos = logos.concat(customLogos) as [Record<any, any>]
-            }
-            if (logos.length) {
-              logos.forEach((logo: Record<any, any>, index: number) => {
-                if (logo && logo.url) {
-                  this.addLogos(logo, index)
-                }
-              })
-            }
           }
 
           if(this.productCustomTexts) {
@@ -897,7 +900,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             }, 500)
           }
           this.mounted = true
-          this.showLoader = false
         }
         resolve('done')
       })
@@ -1308,7 +1310,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
       let addIndex
       if (target.type == 'text') {
         addIndex = target.custom_text_index + '' + target.custom_text_item_index
-      } else {
+      } else if(target.type == 'logo') {
         addIndex = target.logoIndex
       }
 
@@ -1389,7 +1391,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           const direction = this.targetNonTransparent(canvas, texture, target.left+ width, target.top, 0, 1, 'left')
           const directionFromRight = this.targetNonTransparent(canvas, texture, model_start, centerPoint.y, 0, 1, 'right')
           const outside = checkPointX - direction.left
-          const modelSpaceRight = directionFromRight.left - (width / 2) + 3
+          const modelSpaceRight = directionFromRight.left - (width / 2) - 3
           addLeft = modelSpaceRight + outside
           addTop = target.top
         }
@@ -1439,7 +1441,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
-          otherSideObjects[addIndex] = objectAdd
+          if(addIndex != undefined) {
+            otherSideObjects[addIndex] = objectAdd
+          }
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)
             if (this.productType == 'customized') {
@@ -1515,6 +1519,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
             const width = e.target.width * e.target.scaleX;
             const height = e.target.height * e.target.scaleY;
+            const converted_width = unitConversion((width * this.measurementRatio));
+            const converted_height = unitConversion((height * this.measurementRatio));
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'scaleX',
@@ -1523,7 +1529,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'originalWidth',
-              value: Math.floor(width * this.measurementRatio)
+              value:converted_width.value,
             })
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
@@ -1533,7 +1539,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             self.$store.dispatch('updateCustomLogoAttribute', {
               index: index,
               attribute: 'originalHeight',
-              value: Math.floor(height * this.measurementRatio)
+              value:converted_height.value
             })
           } else if (e.action == 'rotate') {
             let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
@@ -1647,6 +1653,42 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     })
   }
 
+  public addSvgLogos(logo: Record<any, any>) {
+    if (logo.side == 'front' || (logo.side == 'back' && this.back)) {
+      let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari? getRandom(3) : '11')
+      fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
+        options.crossOrigin = 'Anonymous'
+        const img = fabric.util.groupSVGElements(objects) as fabric.Group
+        img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
+        img.set({
+          left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
+          top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
+          angle: logo.rotation< 0? 360 - logo.rotation : logo.rotation  as number,
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          lockMovementX: true,
+          lockMovementY: true,
+          globalCompositeOperation: 'source-atop',
+        })
+
+        let model = this.frontModel
+        let canvas = this.frontCanvas
+        if (logo.side == 'back') {
+          canvas = this.backCanvas
+          model = this.backModel
+        }
+
+        canvas.add(img)
+        if (this.productType == 'customized') {
+          model.bringToFront()
+        }
+        canvas.renderAll()
+        this.addToOtherSide(img, logo.side)
+      })
+    }
+  }
+
   public addLogos(logo: Record<any, any>, logoIndex: null | number = null) {
     if ('logoIndex' in logo) {
       logoIndex = logo.logoIndex
@@ -1680,7 +1722,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           globalCompositeOperation: 'source-atop',
           lockScalingFlip: true,
           padding: 15,
-          cornerSize: 30
+          cornerSize: 30,
+          type: "logo",
         })
 
         if (logo.scaleX && logo.scaleY) {
@@ -1723,15 +1766,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
 
         if (logo.customLogo) {
           if (this.mainPreview) {
-            const width = (img.width * img.scaleX * this.measurementRatio).toFixed(1)
-            const height = (img.height * img.scaleY * this.measurementRatio).toFixed(1)
+            const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
+            const converted_height = unitConversion(img.height * img.scaleY * this.measurementRatio)
             await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
               index: logoIndex,
               data: {
                 actualWidth: img.width,
                 actualHeight: img.height,
-                originalWidth: width,
-                originalHeight: height,
+                originalWidth: converted_width.value,
+                originalHeight: converted_height.value,
                 scaleX: img.scaleX,
                 scaleY: img.scaleY,
               }
@@ -1865,11 +1908,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
          * delete existing texts first and re render them
          * */
         if (self.product_custom_text_objects[custom_text_index]) {
-          console.log('in delete')
           await this.deleteExistingTextsFromCanvas(custom_text_index, false)
-        }
-        if(this.mainPreview) {
-          console.log(custom_text_info)
         }
         if (custom_text.value) {
           custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
@@ -1877,7 +1916,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             if (this.mainPreview) {
               const font = this.products_fonts[custom_text.font_family]
               if (font) {
-                const path = font.opentype_font.getPath(custom_text.value)
+                const path = font.opentype_font.getPath(custom_text.value, 0, 0, 72, {features: { liga: true, rlig: true }})
 
                 let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
                   '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'

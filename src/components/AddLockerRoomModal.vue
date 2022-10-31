@@ -250,7 +250,7 @@ import ModalAction from "@/mixins/ModalAction";
             if (this.rosterUrl){
               this.$root.$emit('rostershared', res.data.data.roster_shared_url)
             }
-              this.showToast('Design saved successfully', 'SUCCESS')
+              this.showToast('Design saved successfully', 'success')
               this.product_name = ''
               this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
               if(this.close_on_add) {
@@ -329,7 +329,7 @@ import ModalAction from "@/mixins/ModalAction";
         if (confirm('You are going to delete associated product')){
           let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
           if (res == true){
-            this.showToast('room deleted', 'SUCCESS')
+            this.showToast('room deleted', 'success')
             this.tabIndex = 0
             if (this.lockers[0]){
               this.room_id = this.lockers[0].id
@@ -354,7 +354,7 @@ import ModalAction from "@/mixins/ModalAction";
         if (ok) {
           let res = await this.$store.dispatch('deleteRoomProduct', {room_index: room_index, product_index: ind, id:id});
           if (res == true){
-            this.showToast('Product Deleted', 'SUCCESS')
+            this.showToast('Product Deleted', 'success')
           }else{
             this.showError(res)
           }
