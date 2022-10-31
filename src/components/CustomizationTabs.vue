@@ -63,20 +63,20 @@
               </a>
             </template>
             <div class="d-none d-lg-block">
-                <CustomizationText />
+                <CustomizationText :customTextIndex="customTextIndex" />
             </div>
-            <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
-              <b-tabs>
-                <b-tab>
-                  <template #title>
-                    Player Name
-                  </template>
-                  <div>
-                    <CustomizationText />
-                  </div>
-                </b-tab>
-              </b-tabs>
-            </div>
+<!--            <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">-->
+<!--              <b-tabs>-->
+<!--                <b-tab>-->
+<!--                  <template #title>-->
+<!--                    Player Name-->
+<!--                  </template>-->
+<!--                  <div>-->
+<!--                    <CustomizationText :customTextIndex="customTextIndex" />-->
+<!--                  </div>-->
+<!--                </b-tab>-->
+<!--              </b-tabs>-->
+<!--            </div>-->
           </b-tab>
           <b-tab>
             <button @click="setHideTab('styleHide', !hideTab.styleHide)" class="tab-close-btn d-lg-none"></button>
@@ -156,6 +156,7 @@ import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
 export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) isColorShuffled!: boolean
+  @Prop({required: true}) customTextIndex!: number
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
   public text_add_count = 0

@@ -552,7 +552,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     this.unHideColorGrouping()
   }
 
-  public async changeDefaultColors(defaultColors: [Record<any, any>]) {
+  public async changeDefaultColors(defaultColors: [Record<any, any>]): Promise<void> {
     let appliedDefaultColors: string[] = []
     let useColorIndex = 0
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
@@ -663,7 +663,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
               }
             }
             if (!Object.keys(changeColor).length) {
-              let pantone_product_id = null;
+              let pantone_product_id = 0;
               if(this.product_id){
                 pantone_product_id = this.product_id;
               }
@@ -727,7 +727,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           if (item.fill.includes('rgb')) {
             item.fill = rgbHex(item.fill).includes('#')?rgbHex(item.fill): '#' + rgbHex(item.fill);
           }
-          let pantone_product_id = null;
+          let pantone_product_id = 0;
           if(this.product_id){
             pantone_product_id = this.product_id;
           }
@@ -753,7 +753,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
               item.fill = rgbHex(item.fill).includes('#')?rgbHex(item.fill): '#' + rgbHex(item.fill);
             }
 
-            let pantone_product_id = null;
+            let pantone_product_id = 0;
             if(this.product_id){
               pantone_product_id = this.product_id;
             }
@@ -816,13 +816,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
       let model: any
       let promises = []
       if (this.productType == 'customized') {
-        promises.push(this.addModel(ImageData.modelUrl, side))
+        promises.push(this.addModel(ImageData.modelUrl, side) as never)
       }
 
-      promises.push(this.addTexture(ImageData.textureUrl, side, ImageData.file_extension))
+      promises.push(this.addTexture(ImageData.textureUrl, side, ImageData.file_extension) as never)
 
       if (this.backTextureUrl && side == 'front') {
-        promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension))
+        promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
       }
 
       const self: Record<any, any> = this
@@ -973,6 +973,35 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           dimText = this.dimTextBack
         }
         this.showDimensions(e, dimText)
+      });
+
+      canvas.on('selection:created', (e: Record<any, any>) => {
+        if(e.target.type == 'logo'){
+          this.$store.dispatch('setTabMain',{value:0})
+        }else if(e.target.type == 'text'){
+          this.$store.dispatch('setTabMain',{value:2})
+          this.$emit('setCustomTextIndex', e.target.text_index)
+        }
+
+        if(e.target.side == 'Back'){
+          this.frontCanvas.discardActiveObject().renderAll();
+        }else{
+          this.backCanvas.discardActiveObject().renderAll();
+        }
+      });
+      canvas.on('selection:updated', (e: Record<any, any>) => {
+        if(e.target.type == 'logo'){
+          this.$store.dispatch('setTabMain',{value:0})
+        }else if(e.target.type == 'text'){
+          this.$store.dispatch('setTabMain',{value:2})
+          this.$emit('setCustomTextIndex', e.target.text_index)
+        }
+
+        if(e.target.side == 'Back'){
+          this.frontCanvas.discardActiveObject().renderAll();
+        }else{
+          this.backCanvas.discardActiveObject().renderAll();
+        }
       });
     })
   }
@@ -1598,7 +1627,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
           options.crossOrigin = 'Anonymous'
           const img = fabric.util.groupSVGElements(objects) as fabric.Group
-          if(img.width > img.height) {
+          if(img.width! > img.height!) {
             img.scaleToWidth(this.canvasWidth - 10)
           } else {
             img.scaleToHeight(this.canvasHeight - 10)
@@ -1912,7 +1941,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         }
         if (custom_text.value) {
           custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
-            let fabric_text: fabric.Text | fabric.Group
+            let fabric_text: fabric.Text | fabric.Group | Record<any, any>
             if (this.mainPreview) {
               const font = this.products_fonts[custom_text.font_family]
               if (font) {
@@ -1924,7 +1953,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
                 textSvg += '\n</svg>'
 
                 fabric.loadSVGFromString(textSvg, (objects: any) => {
-                  fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group
+                  fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group | Record<any, any>
                   fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
                   fabric_text.set({
                     left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
@@ -2033,7 +2062,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
                 side: custom_text_item.placement,
                 text_index: custom_text_index,
                 manually_added: custom_text.manually_added
-              })
+              } as Record<any, any>)
               fabric_text.scaleToHeight(custom_text_item.height as number)
               if (custom_text_item.scaleX && custom_text_item.scaleY) {
                 fabric_text.scaleX = custom_text_item.scaleX
@@ -2078,7 +2107,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     let difference = custom_texts_count - this.product_custom_text_objects.length
     if(difference > 0) {
       for(let i=1; i <= difference; i++) {
-        this.product_custom_text_objects.push(null)
+        this.product_custom_text_objects.push(null as never)
       }
     }
   }

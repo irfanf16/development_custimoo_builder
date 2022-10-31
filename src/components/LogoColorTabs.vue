@@ -176,7 +176,7 @@ export default class LogoColorTabs extends Vue {
   }
 
   public extractExactCode(code:string) {
-    let pantone_coated = null;
+    let pantone_coated = '';
     if(this.getColorType === 'pantone-coated'){
       let regex_numbers = /^[0-9]+/g;
       let regex_alphabets = /[a-zA-Z]+/g;

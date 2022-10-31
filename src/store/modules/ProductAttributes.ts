@@ -458,10 +458,10 @@ const ProductAttributes:Module<any, any> = {
       state.styleIndex = payload;
     },
     SET_CUSTOM_OBJ(state:  Record<any, any>, prd_id:number){
-      const arr = []
+      const arr:Record<any, any> = []
       const default_setting = setLogoSettings(0)
       const prod_logo_setting = getLogoSettings(0,false, prd_id)
-      const logo_setting = {...default_setting,...prod_logo_setting}
+      const logo_setting:Record<any, any> = {...default_setting,...prod_logo_setting}
       arr.push(logo_setting)
       Vue.set(state.customLogos, prd_id, arr)
 

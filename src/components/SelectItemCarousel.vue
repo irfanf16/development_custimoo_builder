@@ -77,8 +77,8 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     this.$store.dispatch('setColorSectionVisibility')
     this.hideLockerProductUpdateButton()
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0,});
-    (this.$parent.$parent as Record<any, any>).adjustTotalTabs()
-    let design_index = null;
+    (this.$parent!.$parent as Record<any, any>).adjustTotalTabs()
+    let design_index = 0;
     let selected_product_design = this.selectedProduct.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>, product_design_index: number) => {
       if(product_design.design_show === 1) {
         design_index = product_design_index;

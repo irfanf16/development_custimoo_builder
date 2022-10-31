@@ -282,7 +282,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
         custom_logo.id = resp.data.file.id;
         custom_logo.upload = true
         let customObj = getUploadedLogoObject(resp.data.file)
-        let getLogos = []
+        let getLogos:Record<any, any> = []
         if (this.customLogos.length > 1){
           getLogos = this.customLogos.slice(0, -1)
         }else{

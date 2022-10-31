@@ -301,7 +301,7 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
 
 const getReminderOptions = () => {
 
-  const optionArray = [];
+  const optionArray:Record<any, any> = [];
   optionArray[0] = {value: null, text: 'Choose an option'}
   optionArray[1] = {value: 1440, text: '1 day before'}
   optionArray[2] = {value: 4320, text: '3 days before'}
@@ -320,7 +320,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
   const is_transparent = false;
   logo_url = original_logo;
 
-  let image_colors = [];
+  let image_colors:Record<any, any>[] = [];
   if(logo.logo_colors != null) {
     image_colors = processColorsCustom(logo.logo_colors)
     let image_color_count = image_colors.length;
@@ -425,7 +425,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
 }
 
 const handleResponseException = (errorResponse: AxiosError | TypeError) => {
-  let message = null
+  let message:string|undefined = ''
   if("isAxiosError" in errorResponse) {
     // errorResponse.response.data object have keys { exception, file, line, message, trace }
     message = errorResponse.response?.data?.message;
@@ -959,7 +959,7 @@ const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
       order_product_info: { order_item_id:  null, activity_id: null, order_products: null}
     }
   }
-  let response_obj = null;
+  let response_obj:Record<any, any> = {};
   switch (type) {
     case "filters":
       response_obj = { customized: true, personalized: false, search_products: '' }
@@ -1097,7 +1097,7 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     let logo_max_width = 0 ;
     if((factory_product.custom_logos.length >= 1)){
       const custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
-        return (custom_logo.url !== "")
+        return (Object.prototype.hasOwnProperty.call(custom_logo,'url') && custom_logo.url !== "" && custom_logo.url !== null)
       })
       if(custom_logos_without_base64.length > 0){
         const custom_logos = await Store.dispatch('converturlToBase64',{custom_logos:custom_logos_without_base64});
@@ -1626,7 +1626,7 @@ const recentLogoDefaultObject = (default_values: Record<any, any> | Record<any, 
 
 const getTeamLogo = () => {
   const custom_logos_by_products = Store.getters.getCustomLogoObject
-  let team_logo = null
+  let team_logo:Record<any, any> = {}
   for(const product_id in custom_logos_by_products) {
     if(custom_logos_by_products[product_id][0] && custom_logos_by_products[product_id][0].original_logo) {
       team_logo = custom_logos_by_products[product_id][0]

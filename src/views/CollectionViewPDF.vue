@@ -199,7 +199,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   public products_fonts: Record<any, any> = []
   public showLoader = false
   public storageUrl = process.env.VUE_APP_STORAGE_URL
-  public collection = null;
+  public collection:Record<any, any> = [];
   public ref = this.$refs as Record<any, any>
   private mainTotalTabs = 0
   public products_roster: Record<any, any>[] = []
@@ -207,10 +207,10 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   private screenWidth = (window.screen.availWidth - 100);
   public designsIndex = 0
   public selectedItemIndex: number|null  = null;
-  public room_products = [];
+  public room_products:Record<any, any> = [];
   public room_product_index = 0;
   public current_product = {};
-  public current_index = null;
+  public current_index = 0;
 
   public show_roster = false;
 
@@ -343,7 +343,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   public hide(){
     this.hideVModal('rostermodal')
     this.selectedItemIndex = null;
-    this.current_index = null;
+    this.current_index = 0;
   }
 
   public close(){
@@ -351,7 +351,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
     self.$modal.hide('rostermodal')
     this.selectedItemIndex = null;
-    this.current_index = null;
+    this.current_index = 0;
   }
 
   public setProductSizes() {
@@ -380,7 +380,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
     http.get(`/collection/${collection_file_name}/view`).then(async (response: any) => {
         this.collection = response.data.result.collection
         this.showLoader = false
-        this.room_products = await this.getRoomProducts();
+        this.room_products = await this.getRoomProducts() as Record<any, any>;
       })
       .catch((e: any) => {
         this.showLoader = false

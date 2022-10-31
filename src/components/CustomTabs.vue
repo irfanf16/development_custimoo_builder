@@ -166,7 +166,7 @@ import ModalAction from "@/mixins/ModalAction";
 })
 
 export default class CustomTabs extends Mixins(cartModalData) {
-  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>[]
   @Prop() activeTab!: number
   @Prop() sideTabIndex!: number
   @Prop() maximized!: boolean

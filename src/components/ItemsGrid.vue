@@ -23,7 +23,7 @@
 <script lang="ts">
 
 import Scene from '@/components/Scene.vue'
-import HorizontalScroll from "@/components/mobile/animations/HorizontalScroll";
+import HorizontalScroll from '@/components/mobile/animations/HorizontalScroll.vue';
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component<ItemsGrid>({

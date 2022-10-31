@@ -8,7 +8,8 @@
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
                                @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
-                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" :products_fonts="products_fonts" />
+                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
+                               :products_fonts="products_fonts" :customTextIndex="customTextIndex" />
             <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
                         @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" :products_fonts="products_fonts" />
           </b-col>
@@ -220,13 +221,13 @@
                                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                                  :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
+                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
                                  :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
 
                           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
                                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
+                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
                                  :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
                         </div>
                       </template>
@@ -384,7 +385,7 @@ import {
   getActiveProductData,
   getPermissions,
   handleResponseException,
-  parseSvgString,
+  parseSvgStringFile,
   fetchUrlContent,
   getRandom, resetLastActiveProductData, lastActiveProductDefaultObject
 } from '@/helpers/Helpers'
@@ -506,7 +507,7 @@ Vue.filter('formatDate', function(value:string) {
     }
   },
   async beforeRouteEnter(to, from, next) {
-    next(vm => {
+    next((vm:Record<any, any>) => {
       vm.prevRoute = from
      })
   }
@@ -517,11 +518,10 @@ Vue.filter('formatDate', function(value:string) {
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
   ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton) {
-  public products_fonts: Record<any, any> = []
-  public prevRoute = null;
+  public products_fonts: Record<any, any>[] = []
+  public prevRoute:Record<any, any> = {};
   public logData = logData;
   public tabIndex = 0
-  // private products: any[] = []
   private nextPageUrl !: string
   public hasProducts = true
   public category_id !: string
@@ -556,6 +556,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private product: Record<any, any> = {}
   private frontPreview = ''
   private backPreview = ''
+  private customTextIndex = -1
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
       <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
@@ -654,6 +655,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }else{
       this.isFront = false
     }
+  }
+
+  private setCustomTextIndex(customTextIndex: number){
+    this.customTextIndex = customTextIndex;
   }
 
   private maximizeTab(ind:number, maximize:boolean){
@@ -884,9 +889,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get redoitems():Record<any, any>{
     return this.$store.getters.getRedoItems
   }
-  get products():[Record<any, any>]{
-    return this.$store.getters.getProducts
-  }
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
@@ -1008,7 +1010,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public actionAfterLogin() {
-    if(this.prevRoute.name == 'OrderDetail'){
+    if(this.prevRoute!.name == 'OrderDetail'){
       this.$router.push(this.prevRoute.fullPath)
     }
     if(this.actionBeforeLogin == 'lockerRoom') {
@@ -1466,7 +1468,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async loadOrderItemProduct(action: string) {
     let self = this;
-    let updated_product = await getActiveProductData(this.products_fonts);
+    let updated_product = await getActiveProductData(this.products_fonts) as Record<any, any>;
     if(updated_product == null) {
       return false;
     }
@@ -1492,14 +1494,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async UpdateOrderProducts() {
     let self = this;
-    let updated_product:Record<any,any> = await getActiveProductData(this.products_fonts);
+    let updated_product:Record<any,any> = await getActiveProductData(this.products_fonts) as Record<any, any>;
     if(updated_product == null) {
       return false;
     }
     if(updated_product){
       if(Object.prototype.hasOwnProperty.call(updated_product,'production_url') && updated_product?.production_url){
         let content:string = await fetchUrlContent(updated_product?.production_url);
-        let production_content = await parseSvgString(content,updated_product as Record<any,any>);
+        let production_content = await parseSvgStringFile(content,updated_product as Record<any,any>);
         updated_product.svg_content = production_content;
       }
     }else{
