@@ -39,7 +39,7 @@ export class ProductColors extends Vue {
           console.info(`Un known color type (${get_color_type})`)
       }
     })
-    
+
     return product_color_files;
   }
 }
@@ -64,7 +64,7 @@ export class ProductFonts extends Vue {
 
 @Component
 export class HideUpdateLockerButton extends Vue {
-  public async hideLockerProductUpdateButton(hide_update_btn = undefined) {
+  public async hideLockerProductUpdateButton(hide_update_btn: boolean|undefined = undefined) {
     if(hide_update_btn != undefined) {
       this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', hide_update_btn);
     }

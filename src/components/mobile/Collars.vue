@@ -101,7 +101,7 @@ export default class Collars extends Vue {
     }
   }
   public changeStyleIndex(i: number) {
-    (this.$parent.$parent as Record<any, any>).isFront = true
+    (this.$parent!.$parent as Record<any, any>).isFront = true
 
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show

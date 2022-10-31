@@ -199,8 +199,8 @@ import SelectYear from "@/components/SelectYear.vue";
     reminderTime: (reminder: Record<any, any>) => {
       if(reminder) {
         let options = getReminderOptions()
-        let text =  options.find((x:Record<any, any>) => x.value === reminder.before_time)
-        return text ? text.text : 'none'
+        let text:Record<any, any>|undefined =  options.find((x:Record<any, any>) => x.value === reminder.before_time)
+        return text ? text!.text : 'none'
       }
       return 'none'
     }

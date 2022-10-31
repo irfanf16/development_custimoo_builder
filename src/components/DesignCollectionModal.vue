@@ -149,7 +149,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
 
     let prod_ids: number[] = [];
     collectionItems.collection_products.forEach(function (item: Record<any, any>) {
-      let prevItem = [];
+      let prevItem: Record<any, any> = [];
       prevItem = collecItemById[item.product_locker_room_id]
 
       if(prevItem){

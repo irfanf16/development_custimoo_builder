@@ -59,7 +59,7 @@ export default class ProductionScene extends Vue {
   public async setProductionSvgUrl(selected_product: Record<any, any>) {
     let self = this;
     let product_style = selected_product.productstyles[self.productStyleIndex];
-    let product_style_active_design = [];
+    let product_style_active_design:Record<any, any> = [];
     if(product_style) {
       product_style_active_design = product_style.productdesigns.filter((product_design:Record<any, any>) => {
         return product_design.design_show;
@@ -68,7 +68,7 @@ export default class ProductionScene extends Vue {
     if(product_style_active_design.length > 0) {
       product_style_active_design = product_style_active_design[0]
     } else {
-      product_style_active_design = null;
+      product_style_active_design = [];
     }
     if(product_style_active_design && product_style_active_design.production_design) {
       self.production_file_obj.url = `${self.storage_url}${product_style_active_design.production_design.file_url}.svg`;

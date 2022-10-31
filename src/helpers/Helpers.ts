@@ -269,7 +269,7 @@ const  fontsColorsManipulation = (selectedProduct:any) => {
 
 const getReminderOptions = () => {
 
-  const optionArray = [];
+  const optionArray:Record<any, any> = [];
   optionArray[0] = {value: null, text: 'Choose an option'}
   optionArray[1] = {value: 1440, text: '1 day before'}
   optionArray[2] = {value: 4320, text: '3 days before'}
@@ -288,7 +288,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
   const is_transparent = false;
   logo_url = original_logo;
 
-  let image_colors = [];
+  let image_colors:Record<any, any>[] = [];
   if(logo.logo_colors != null) {
     image_colors = processColorsCustom(JSON.parse(logo.logo_colors))
     let image_color_count = image_colors.length;
@@ -393,7 +393,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
 }
 
 const handleResponseException = (errorResponse: AxiosError | TypeError) => {
-  let message = null
+  let message:string|undefined = ''
   if("isAxiosError" in errorResponse) {
     // errorResponse.response.data object have keys { exception, file, line, message, trace }
     message = errorResponse.response?.data?.message;
@@ -903,7 +903,7 @@ const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
       order_product_info: { order_item_id:  null, activity_id: null, order_products: null}
     }
   }
-  let response_obj = null;
+  let response_obj:Record<any, any> = {};
   switch (type) {
     case "filters":
       response_obj = { customized: true, personalized: false, search_products: '' }
@@ -1536,7 +1536,7 @@ const setVueVersion = async () => {
 
 const getTeamLogo = () => {
   const custom_logos_by_products = Store.getters.getCustomLogoObject
-  let team_logo = null
+  let team_logo:Record<any, any> = {}
   for(const product_id in custom_logos_by_products) {
     if(custom_logos_by_products[product_id][0] && custom_logos_by_products[product_id][0].original_logo) {
       team_logo = custom_logos_by_products[product_id][0]

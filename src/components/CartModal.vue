@@ -134,7 +134,7 @@ import ModalAction from "@/mixins/ModalAction";
     // this.getColors()
     if (this.isCustomerAuthenticated){
       let ecommerce_update_id = this.$route.query.update_item;
-      let santa_cart_id = this.$route.query.update_cart;
+      let santa_cart_id = String(this.$route.query.update_cart);
 
       if(ecommerce_update_id){
         let cart_items = await this.$store.getters.getCartItems;
