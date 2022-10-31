@@ -4,6 +4,13 @@
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
+        <template>
+          <div class="locale-changer">
+            <select v-model="$i18n.locale">
+              <option v-for="(lang, i) in $i18n.availableLocales" :key="`Lang${i}`" :value="lang">{{ lang }}</option>
+            </select>
+          </div>
+        </template>
         <template v-if="selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
@@ -24,6 +31,7 @@
               <div class="customization-preview-process w-100">
                 <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                   <div class="buttons-preview text-left">
+                    <h2>{{ $t('minimum_order_message' , {min_products_count: 10}) }}</h2>
                     <template v-if="getProductEditInfoObject.editing == false || getProductEditInfoObject.type == 'locker_product'">
 <!--                    <template>-->
                       <template v-if="isCustomerAuthenticated">
@@ -34,7 +42,7 @@
                             Save
                           </b-button>
                           <b-button :key="'savetolocker'" variant="outline-secondary" @click="getLockers(false, true)">
-                           Save As
+                            Save As
                           </b-button>
                         </template>
                         <template v-else>
@@ -517,6 +525,7 @@ Vue.filter('formatDate', function(value:string) {
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
   ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton) {
+  public langs = ['en','dk'];
   public products_fonts: Record<any, any>[] = []
   public prevRoute:Record<any, any> = {};
   public logData = logData;
