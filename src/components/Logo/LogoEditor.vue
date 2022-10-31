@@ -222,14 +222,14 @@ export default class LogoEditor extends Mixins(ErrorMessages, ModalAction) {
 
   public useLogo() {
     this.showLoader = true
-    let custom_logo = JSON.parse(JSON.stringify(this.customLogos[this.customLogoIndex]));
+    let custom_logo = JSON.parse(JSON.stringify(this.customLogo[this.customLogoIndex]));
     let data = new FormData();
     data.append("logo_id", custom_logo.id);
     data.append("logo", this.$store.getters.getLogoEditor.image);
     data.append("product_id", this.$store.getters.getSelectedProduct.id);
     http.post('/customer/update/logo', data)
       .then(async resp => {
-        this.colors = resp.data.colors;
+        const colors = resp.data.colors;
         custom_logo.original_logo = resp.data.file.logo_url;
         custom_logo.transparent_logo = resp.data.file.transparent_logo_url;
         custom_logo.smart_transparent_logo = resp.data.file.smart_transparent_logo_url;
@@ -245,7 +245,7 @@ export default class LogoEditor extends Mixins(ErrorMessages, ModalAction) {
           custom_logo: custom_logo
         }
         this.$store.commit('customLogos', payload)
-        this.$emit('updateLogoFromLogoEditor', this.colors)
+        this.$emit('updateLogoFromLogoEditor', colors)
         this.$store.commit('SET_RECENT_LOGOS');
 
 
