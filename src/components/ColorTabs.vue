@@ -38,7 +38,7 @@
           <b-nav-item v-bind:class="{ 'color-tab-active' : index == selectTypeIndex && !othersActive}" v-for="(colorType, index) in productColors" :key="'color-item-'+index" @click="selectType(index)">
             {{ colorType.name | capitalize}}
           </b-nav-item>
-          <b-nav-item v-bind:class="{ 'color-tab-active' : othersActive}" v-if="selectedProduct.is_custom_color_allowed" @click="selectType(null, true)">Others</b-nav-item>
+          <b-nav-item class="mr-4" v-bind:class="{ 'color-tab-active' : othersActive}" v-if="selectedProduct.is_custom_color_allowed" @click="selectType(null, true)">Others</b-nav-item>
         </b-nav>
       </div>
 
