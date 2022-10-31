@@ -24,14 +24,6 @@ module.exports = {
     "no-explicit-any": 0,
     "no-var": 0,
     "no-mixed-spaces-and-tabs": 0,
-    "@typescript-eslint/ban-ts-comment": 0,
-    "import/extensions": ["error", "always", {
-      "js": "never",
-      "mjs": "never",
-      "jsx": "never",
-      "ts": "never",
-      "tsx": "never",
-      "vue": "never"
-    }]
+    "@typescript-eslint/ban-ts-comment": 0
   }
 }

@@ -1,7 +1,6 @@
 const path = require("path");
 
 module.exports = {
-  lintOnSave: false,
   configureWebpack: {
     output: {
       filename: 'js/[name].[hash].js',
