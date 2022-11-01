@@ -191,7 +191,7 @@ export class handleMainProducts extends Vue {
             })
             this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
             await this.$store.dispatch('setProductsRosters', {
-              product_id: last_active_prod_data.product_id, name: 'shahziab', roster_data: last_active_prod_data.product_roster_detail
+              product_id: last_active_prod_data.product_id, roster_data: last_active_prod_data.product_roster_detail
             })
           }
           else {
