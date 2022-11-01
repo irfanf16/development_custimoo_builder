@@ -9,7 +9,7 @@
             <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
                                @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
                                :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
-                               :products_fonts="products_fonts" :customTextIndex="customTextIndex" />
+                               :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
             <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
                         @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" :products_fonts="products_fonts" />
           </b-col>
@@ -1039,7 +1039,18 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if(this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress'){
       this.showVModal('cart-modal')
     }
+  }
 
+  get addedToCart() {
+    return this.$store.getters.getAddedToCart
+  }
+
+  @Watch('addedToCart')
+  addedToCartChanged(newVal:boolean) {
+    this.addToCartAnimation()
+  }
+
+  private addToCartAnimation(){
     this.genImages()
     const canvasFront = this.ref['mainScene'][0].$refs['front']
     const canvasBack = this.ref['mainScene'][0].$refs['back']
@@ -1051,18 +1062,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.ref['backImg'].width = canvasBack.clientWidth
     }, 100)
 
-  }
-
-  get addedToCart() {
-    return this.$store.getters.getAddedToCart
-  }
-
-  @Watch('addedToCart')
-  addedToCartChanged(newVal:boolean) {
-    this.ref['cartAnim'].classList.add('cart-animation')
+    this.ref['cartAnim'] && this.ref['cartAnim'].classList.add('cart-animation')
 
     setTimeout(()=>{
-      this.ref['cartAnim'].classList.remove('cart-animation')
+      this.ref['cartAnim'] && this.ref['cartAnim'].classList.remove('cart-animation')
       this.$store.dispatch('addedToCart', false)
     }, 300)
   }
