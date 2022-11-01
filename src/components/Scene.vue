@@ -31,6 +31,7 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
     self.$eventBus.$on("customTextUpdated", this.addTextsNew)
     self.$eventBus.$on("customTextRemoved", self.deleteExistingTextsFromCanvas)
     self.$eventBus.$on("resetTextsCanvas", self.resetTextsFromCanvas)
+    self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogos)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -321,9 +322,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     return this.$store.getters.getIsSafari
   }
 
-  @Watch('customLogos', {
-    deep: true
-  })
+  // @Watch('customLogos', {
+  //   deep: true
+  // })
   customLogosChanged(newVal: [Record<any, any>]) {
     if (this.mounted && this.logoAllowed) {
       const self = this
@@ -407,9 +408,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
               }
 
               if (this.logosLimit && this.customLogoObjects.filter((item: Record<any, any>) => item).length < this.logosLimit - backLogosCount) {
-                this.addLogos(logo, index)
+                this.addLogos(logo)
               } else if (!this.logosLimit) {
-                this.addLogos(logo, index)
+                this.addLogos(logo)
               }
             }
           }
@@ -872,9 +873,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             logos = logos.concat(customLogos) as [Record<any, any>]
           }
           if (logos.length) {
-            logos.forEach((logo: Record<any, any>, index: number) => {
+            logos.forEach((logo: Record<any, any>) => {
               if (logo && logo.url) {
-                this.addLogos(logo, index)
+                this.addLogos(logo, true)
               }
             })
           }
@@ -1718,87 +1719,77 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     }
   }
 
-  public addLogos(logo: Record<any, any>, logoIndex: null | number = null) {
-    if ('logoIndex' in logo) {
-      logoIndex = logo.logoIndex
-    } else {
-      this.$store.dispatch('updateCustomLogoWithoutTrigger', {
-        index: logoIndex,
-        data: {
-          logoIndex: logoIndex,
-        }
-      })
-    }
-
-    if ((logo.side == 'front' || (logo.side == 'back' && this.back)) && (this.multipleLogo || (!this.multipleLogo && logoIndex as number == 0)) && !this.customLogoObjects[logoIndex as number]) {
-      if (logo.customLogo) {
-        this.customLogoObjects[logoIndex as number] = true
-      }
-      logo.haveControls = Boolean(logo.haveControls)
-      let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari? getRandom(3) : '11')
-      fabric.Image.fromURL(logoUrl, async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
-        img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
-        img.set({
-          left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
-          top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
-          angle: logo.rotation< 0? 360 - logo.rotation : logo.rotation  as number,
-          centeredScaling: true,
-          selectable: this.canvasSelection,
-          //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
-          hasControls: logo.haveControls,
-          hasBorders: false,
-          evented: logo.haveControls,
-          globalCompositeOperation: 'source-atop',
-          lockScalingFlip: true,
-          padding: 15,
-          cornerSize: 30,
-          type: "logo",
-        })
-
-        if (logo.scaleX && logo.scaleY) {
-          img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX
-          img.scaleY = this.canvasHeight / this.mainCanvasHeight * logo.scaleY
-        }
-
-        let model = this.frontModel
-        let canvas = this.frontCanvas
-        let dimText = this.dimTextFront
-        if (logo.side == 'back') {
-          canvas = this.backCanvas
-          model = this.backModel
-          dimText = this.dimTextBack
-        }
-
-        img.setControlsVisibility({
-          tl: false,
-          bl: false,
-          tr: true,
-          br: true,
-          ml: false,
-          mb: false,
-          mr: false,
-          mt: false,
-          mtr: false
-        })
-
-        Object.assign(img, {
-          logoIndex: logoIndex,
-          side: logo.side
-        })
-        canvas.add(img)
-        if (this.productType == 'customized') {
-          model.bringToFront()
-        }
-        canvas.renderAll()
-
-        this.addToOtherSide(img, logo.side)
-
+  public addLogos(logo: Record<any, any>, from_load = false) {
+    console.log(logo)
+    if(this.mounted || from_load) {
+      if ((logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.customLogoObjects[logo.logo_index as number]) {
         if (logo.customLogo) {
+          this.customLogoObjects[logo.logo_index as number] = true
+        }
+        logo.haveControls = Boolean(logo.haveControls)
+        let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari ? getRandom(3) : '11')
+        fabric.Image.fromURL(logoUrl, async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
+          img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
+          img.set({
+            left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
+            top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
+            angle: logo.rotation < 0 ? 360 - logo.rotation : logo.rotation as number,
+            centeredScaling: true,
+            selectable: this.canvasSelection,
+            //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
+            hasControls: logo.haveControls,
+            hasBorders: false,
+            evented: logo.haveControls,
+            globalCompositeOperation: 'source-atop',
+            lockScalingFlip: true,
+            padding: 15,
+            cornerSize: 30,
+            type: "logo",
+          })
+
+          if (logo.scaleX && logo.scaleY) {
+            img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX
+            img.scaleY = this.canvasHeight / this.mainCanvasHeight * logo.scaleY
+          }
+
+          let model = this.frontModel
+          let canvas = this.frontCanvas
+          let dimText = this.dimTextFront
+          if (logo.side == 'back') {
+            canvas = this.backCanvas
+            model = this.backModel
+            dimText = this.dimTextBack
+          }
+
+          img.setControlsVisibility({
+            tl: false,
+            bl: false,
+            tr: true,
+            br: true,
+            ml: false,
+            mb: false,
+            mr: false,
+            mt: false,
+            mtr: false
+          })
+
+          Object.assign(img, {
+            logoIndex: logo.logo_index,
+            side: logo.side
+          })
+          canvas.add(img)
+          if (this.productType == 'customized') {
+            model.bringToFront()
+          }
+          canvas.renderAll()
+
+          this.addToOtherSide(img, logo.side)
+
           if (this.mainPreview) {
             const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
             const converted_height = unitConversion(img.height * img.scaleY * this.measurementRatio)
             await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
-              index: logoIndex,
+              index: logo.logo_index,
               data: {
                 actualWidth: img.width,
                 actualHeight: img.height,
@@ -1809,28 +1800,26 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
               }
             })
           }
-          this.customLogoObjects[logoIndex as number] = img
+          this.customLogoObjects[logo.logo_index as number] = img
           if (this.mainPreview) {
             await this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {
-              index: logoIndex,
+              index: logo.logo_index,
               data: img,
               scene: this
             });
           }
-        } else {
-          this.logoObjects.push(img)
-        }
 
-        img.on('selected', (e: Record<any, any>) => {
-          this.$root.$emit('changeLogoTabIndex', logoIndex);
-          this.showDimensions(e, dimText)
-        })
-        canvas.on('selection:cleared', () => {
-          dimText.set({
-            visible: false
+          img.on('selected', (e: Record<any, any>) => {
+            this.$root.$emit('changeLogoTabIndex', logo.logo_index);
+            this.showDimensions(e, dimText)
           })
-        })
-      }, { crossOrigin: 'Anonymous' })
+          canvas.on('selection:cleared', () => {
+            dimText.set({
+              visible: false
+            })
+          })
+        }, { crossOrigin: 'Anonymous' })
+      }
     }
   }
 

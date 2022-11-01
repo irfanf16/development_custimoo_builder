@@ -217,6 +217,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction) {
         this.customLogo.url = logo_data.logo_url;
         this.customLogo.id = logo_data.id;
         this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject(logo_data)})
+        console.log(this.customLogo, 'hereeeeeeeeeeeeeeeeeee')
         self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
       } else {
         this.showError(response_data.message);
