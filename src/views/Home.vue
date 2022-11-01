@@ -928,6 +928,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getCompany
   }
 
+  get isCollectionView(): boolean {
+    return this.$store.getters.getCollectionView;
+  }
+
   get cartItems() {
     return this.$store.getters.getCartItems
   }
@@ -1419,7 +1423,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     await self.exitFromEditMode();
     let query_params = await this.setQueryParams()
     await this.retrieveProducts(query_params);
-    await this.showVModal('cart-modal')
+
+    if(this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress'){
+      await this.showVModal('cart-modal')
+    }else if(!this.isCollectionView){
+      window.location.href = this.company.company_domain + '/cart'
+    }
   }
 
   public async retrieveProducts(query_params: string[] = []) {
