@@ -501,7 +501,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.group = val;
   }
 
-  get products(): [Record<any, any>] {
+  get all_products(): [Record<any, any>] {
     return this.$store.getters.getProducts
   }
   get customLogos():[Record<any, any>] {

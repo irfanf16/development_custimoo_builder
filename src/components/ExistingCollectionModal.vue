@@ -27,7 +27,7 @@ import {Component, Mixins, Vue} from 'vue-property-decorator'
 
       get getCollections(){
         let collections =  this.$store.getters.getCollections;
-        let optionArray = [];
+        let optionArray: Record<any, any>[] = [];
 
         if(collections.length > 0){
           optionArray.push({ value: null, text: 'Please select an option' })

@@ -27,7 +27,7 @@ const Event:Module<any, any> = {
       return state.locker_events
     },
     emailTemplateOptions(state:Record<any, any>){
-      const optionArray = [];
+      const optionArray:Record<any, any> = [];
       optionArray[0] = {value: null, text: 'Select an email template'}
       state.emailTemplates.map(function (obj:Record<any, any>, index:number){
         optionArray.push({value: index, text: obj.title});
@@ -35,7 +35,7 @@ const Event:Module<any, any> = {
       return optionArray;
     },
     yearlyPlannerTemplateOptions(state:Record<any, any>){
-      const optionArray = [];
+      const optionArray:Record<any, any> = [];
       optionArray[0] = {value: null, text: 'Create yearly planner from template'}
       const state_arr = JSON.parse(JSON.stringify(state.yearlyPlannerTemplates))
       state_arr.map(function (obj:Record<any, any>, index:number){
