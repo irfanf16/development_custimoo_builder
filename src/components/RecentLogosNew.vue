@@ -130,6 +130,8 @@ export default class RecentLogosNew extends Mixins(ErrorMessages,LockerProducts)
     this.customLogo.url = recent_logo.logo_url;
     this.customLogo.id = recent_logo.id;
     this.customLogo.is_recent_logo = true;
+    let self: Record<any, any> = this;
+    self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
   }
 
   /*

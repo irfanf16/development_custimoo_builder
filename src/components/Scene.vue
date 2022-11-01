@@ -233,7 +233,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   private backTexture !: any
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private logoObjects: any[] = []
-  private customLogoObjects: any[] = []
+  private custom_logo_objects: any[] = []
   private customTextObjects: any[] = []
   private mounted = false
   private frontModel: any
@@ -255,7 +255,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   public dimTextBack!: fabric.Text
   public showLoader = true
   public svg_groups_ready = false
-  public otherSideLogos: any[] = []
+  public other_side_logos: any[] = []
   public otherSideTexts: any[] = []
   public logoIndex = 0
   public textIndex = 0
@@ -330,58 +330,58 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   customLogosChanged(newVal: [Record<any, any>]) {
     if (this.mounted && this.logoAllowed) {
       const self = this
-      if (this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
-        this.customLogoObjects.forEach((item: Record<any, any>, index: number) => {
+      if (this.custom_logo_objects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
+        this.custom_logo_objects.forEach((item: Record<any, any>, index: number) => {
           if (item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '' || this.customLogos[item.logoIndex].url == null)) {
-            this.frontCanvas.remove(this.customLogoObjects[item.logoIndex])
+            this.frontCanvas.remove(this.custom_logo_objects[item.logoIndex])
             if (this.backCanvas) {
-              this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
+              this.backCanvas.remove(this.custom_logo_objects[item.logoIndex])
             }
-            this.customLogoObjects[item.logoIndex] = null
-            if (this.otherSideLogos[item.logoIndex]) {
-              this.frontCanvas.remove(this.otherSideLogos[item.logoIndex])
+            this.custom_logo_objects[item.logoIndex] = null
+            if (this.other_side_logos[item.logoIndex]) {
+              this.frontCanvas.remove(this.other_side_logos[item.logoIndex])
               if (this.backCanvas) {
-                this.backCanvas.remove(this.otherSideLogos[item.logoIndex])
+                this.backCanvas.remove(this.other_side_logos[item.logoIndex])
               }
-              this.otherSideLogos[item.logoIndex] = null
+              this.other_side_logos[item.logoIndex] = null
             }
           }
         })
       }
       newVal.forEach((logo: Record<any, any>, index: number) => {
         let logoUrl = logo ? encodeURI((this.storageUrl + logo.url).trim()) : ''
-        if (logo && ((this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && this.customLogoObjects[logo.logoIndex]._element.src.split("?")[0] != logoUrl))) {
-          self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
+        if (logo && ((this.custom_logo_objects[logo.logoIndex] && this.custom_logo_objects[logo.logoIndex]._element && logo.side != this.custom_logo_objects[logo.logoIndex].side) || (this.custom_logo_objects[logo.logoIndex] && this.custom_logo_objects[logo.logoIndex]._element && !logo.url) || (this.custom_logo_objects[logo.logoIndex] && this.custom_logo_objects[logo.logoIndex]._element && this.custom_logo_objects[logo.logoIndex]._element.src.split("?")[0] != logoUrl))) {
+          self.frontCanvas.remove(this.custom_logo_objects[logo.logoIndex])
           if (self.backCanvas) {
-            self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
+            self.backCanvas.remove(this.custom_logo_objects[logo.logoIndex])
           }
-          this.customLogoObjects[logo.logoIndex] = null
+          this.custom_logo_objects[logo.logoIndex] = null
           if (this.mainPreview) {
             this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", { index: logo.logoIndex, data: null, scene: this });
           }
-          if (this.otherSideLogos[index]) {
-            this.frontCanvas.remove(this.otherSideLogos[index])
+          if (this.other_side_logos[index]) {
+            this.frontCanvas.remove(this.other_side_logos[index])
             if (this.backCanvas) {
-              this.backCanvas.remove(this.otherSideLogos[index])
+              this.backCanvas.remove(this.other_side_logos[index])
             }
-            this.otherSideLogos[index] = null
+            this.other_side_logos[index] = null
           }
         } else {
-          if (!logo && this.customLogoObjects[index]) {
-            this.frontCanvas.remove(this.customLogoObjects[index])
+          if (!logo && this.custom_logo_objects[index]) {
+            this.frontCanvas.remove(this.custom_logo_objects[index])
             if (this.backCanvas) {
-              this.backCanvas.remove(this.customLogoObjects[index])
+              this.backCanvas.remove(this.custom_logo_objects[index])
             }
-            this.customLogoObjects[index] = null
+            this.custom_logo_objects[index] = null
             if (this.mainPreview) {
               this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", { index: index, data: null, scene: this });
             }
-            if (this.otherSideLogos[index]) {
-              this.frontCanvas.remove(this.otherSideLogos[index])
+            if (this.other_side_logos[index]) {
+              this.frontCanvas.remove(this.other_side_logos[index])
               if (this.backCanvas) {
-                this.backCanvas.remove(this.otherSideLogos[index])
+                this.backCanvas.remove(this.other_side_logos[index])
               }
-              this.otherSideLogos[index] = null
+              this.other_side_logos[index] = null
             }
           }
         }
@@ -391,9 +391,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         if (logo) {
           if ((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
             let addLogo = true
-            if (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element) {
-              const logoObject = this.customLogoObjects[logo.logoIndex]
-              const otherSideObject = this.otherSideLogos[logo.logoIndex]
+            if (this.custom_logo_objects[logo.logoIndex] && this.custom_logo_objects[logo.logoIndex]._element) {
+              const logoObject = this.custom_logo_objects[logo.logoIndex]
+              const otherSideObject = this.other_side_logos[logo.logoIndex]
 
               if (logo.haveControls) {
                 this.eventAction(logo, logoObject, otherSideObject)
@@ -409,7 +409,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
                 }).length
               }
 
-              if (this.logosLimit && this.customLogoObjects.filter((item: Record<any, any>) => item).length < this.logosLimit - backLogosCount) {
+              if (this.logosLimit && this.custom_logo_objects.filter((item: Record<any, any>) => item).length < this.logosLimit - backLogosCount) {
                 this.addLogos(logo)
               } else if (!this.logosLimit) {
                 this.addLogos(logo)
@@ -1343,11 +1343,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         canvas = this.backCanvas
       }
 
-      let addIndex
+      let add_index
       if (target.type == 'text') {
-        addIndex = target.custom_text_index + '' + target.custom_text_item_index
+        add_index = target.custom_text_index + '' + target.custom_text_item_index
       } else if(target.type == 'logo') {
-        addIndex = target.logoIndex
+        add_index = target.logo_index
       }
 
       const modelBoundingRect = texture.getBoundingRect()
@@ -1402,7 +1402,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         checkPointY = target.top - (target.height * target.scaleY / 2)
       }
 
-      let otherSideObjects = this.otherSideLogos
+      let otherSideObjects = this.other_side_logos
       if (target.custom_text_index) {
         otherSideObjects = this.otherSideTexts
       }
@@ -1433,30 +1433,30 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         }
 
         if(clone_again) {
-          if (otherSideObjects[addIndex]) {
+          if (otherSideObjects[add_index]) {
             if (side == 'back') {
-              this.frontCanvas.remove(otherSideObjects[addIndex])
+              this.frontCanvas.remove(otherSideObjects[add_index])
             } else {
               if (this.back) {
-                this.backCanvas.remove(otherSideObjects[addIndex])
+                this.backCanvas.remove(otherSideObjects[add_index])
               }
             }
-            delete otherSideObjects[addIndex]
+            delete otherSideObjects[add_index]
           }
         }
-        if (otherSideObjects[addIndex]) {
-          otherSideObjects[addIndex].left = addLeft
-          otherSideObjects[addIndex].top = addTop
+        if (otherSideObjects[add_index]) {
+          otherSideObjects[add_index].left = addLeft
+          otherSideObjects[add_index].top = addTop
           if(actualNearTo == 'top') {
-            otherSideObjects[addIndex].flipX = true
-            otherSideObjects[addIndex].flipY = true
+            otherSideObjects[add_index].flipX = true
+            otherSideObjects[add_index].flipY = true
           } else {
-            otherSideObjects[addIndex].flipX = false
-            otherSideObjects[addIndex].flipY = false
+            otherSideObjects[add_index].flipX = false
+            otherSideObjects[add_index].flipY = false
           }
-          otherSideObjects[addIndex].scaleX = target.scaleX
-          otherSideObjects[addIndex].scaleY = target.scaleY
-          otherSideObjects[addIndex].angle = -target.angle
+          otherSideObjects[add_index].scaleX = target.scaleX
+          otherSideObjects[add_index].scaleY = target.scaleY
+          otherSideObjects[add_index].angle = -target.angle
 
           if (side == 'back') {
             this.frontCanvas.renderAll()
@@ -1477,8 +1477,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
-          if(addIndex != undefined) {
-            otherSideObjects[addIndex] = objectAdd
+          if(add_index != undefined) {
+            otherSideObjects[add_index] = objectAdd
           }
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)
@@ -1495,15 +1495,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           }
         }
       } else {
-        if (otherSideObjects[addIndex]) {
+        if (otherSideObjects[add_index]) {
           if (side == 'back') {
-            this.frontCanvas.remove(otherSideObjects[addIndex])
+            this.frontCanvas.remove(otherSideObjects[add_index])
           } else {
             if (this.back) {
-              this.backCanvas.remove(otherSideObjects[addIndex])
+              this.backCanvas.remove(otherSideObjects[add_index])
             }
           }
-          delete otherSideObjects[addIndex]
+          delete otherSideObjects[add_index]
         }
       }
     }
@@ -1726,11 +1726,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   }
 
   public addLogos(logo: Record<any, any>, from_load = false) {
-    console.log(logo)
     if(this.mounted || from_load) {
-      if ((logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.customLogoObjects[logo.logo_index as number]) {
+      if(this.custom_logo_objects[logo.logo_index as number]) {
+        this.deleteExistingLogosFromCanvas(logo.logo_index)
+      }
+      if ((logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.custom_logo_objects[logo.logo_index as number]) {
         if (logo.customLogo) {
-          this.customLogoObjects[logo.logo_index as number] = true
+          this.custom_logo_objects[logo.logo_index as number] = true
         }
         logo.haveControls = Boolean(logo.haveControls)
         let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari ? getRandom(3) : '11')
@@ -1745,7 +1747,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
             hasControls: logo.haveControls,
             hasBorders: false,
-            evented: logo.haveControls,
+            evented: true,
             globalCompositeOperation: 'source-atop',
             lockScalingFlip: true,
             padding: 15,
@@ -1780,7 +1782,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           })
 
           Object.assign(img, {
-            logoIndex: logo.logo_index,
+            logo_index: logo.logo_index,
             side: logo.side
           })
           canvas.add(img)
@@ -1806,7 +1808,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
               }
             })
           }
-          this.customLogoObjects[logo.logo_index as number] = img
+          this.custom_logo_objects[logo.logo_index as number] = img
           if (this.mainPreview) {
             await this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {
               index: logo.logo_index,
@@ -1827,6 +1829,26 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         }, { crossOrigin: 'Anonymous' })
       }
     }
+  }
+
+  public async deleteExistingLogosFromCanvas(custom_logo_index:  number) {
+    const custom_logo = this.custom_logo_objects[custom_logo_index]
+    if(custom_logo) {
+      this.frontCanvas.remove(custom_logo)
+      if(this.back) {
+        this.backCanvas.remove(custom_logo)
+      }
+      const other_side_logo = this.other_side_logos[custom_logo_index]
+      if(other_side_logo) {
+        this.frontCanvas.remove(other_side_logo)
+        if(this.back) {
+          this.backCanvas.remove(other_side_logo)
+        }
+        delete this.other_side_logos[custom_logo_index]
+      }
+    }
+
+    delete this.custom_logo_objects[custom_logo_index]
   }
 
   public showDimensions(e: any, dimText: Record<any, any>) {
