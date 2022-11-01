@@ -7,7 +7,7 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
-import {parseInt} from "lodash";
+import {parseInt, findIndex} from "lodash";
 
 const getLogoSettingsObject = () => {
   return {
@@ -1556,8 +1556,63 @@ const getTeamLogo = () => {
   } else {
     return team_logo
   }
+}
 
-
+const getSelectedProductData = (selected_product_custom_texts = true) => {
+  const selected_product = Store.getters.getSelectedProduct;
+  const style_index = Store.getters.getCurrentStyleIndex;
+  const productCustomTexts = selected_product_custom_texts ? Store.getters.productCustomTexts(selected_product.id) : Store.getters.productCustomTexts()
+  const getCanvasImage = Store.getters.getCanvasImage
+  const product_style = selected_product.productstyles[style_index];
+  const design_index = findIndex(product_style.productdesigns, (design: Record<any, any>) => design.design_show == 1)
+  const selected_design = product_style.productdesigns[design_index]
+  const product_models = Store.getters.getProductModels;
+  const selected_model_index = Store.getters.getSelectedModelIndex;
+  const categories = Store.getters.getCategories
+  let category_id = null
+  let category_index = 0
+  if(categories.length > 0) {
+    const selected_categories = Store.getters.getSelectedCategories
+    category_id = selected_categories[0] ? selected_categories[0] : null
+    if(category_id) {
+      category_index = findIndex(categories, ['id', category_id])
+      if(category_index == -1) {
+        category_index = 0
+      }
+    }
+  }
+  return {
+    back_image: getCanvasImage.ref_back?.toDataURL("image/png"),
+    front_image: getCanvasImage.ref_front.toDataURL("image/png"),
+    custom_logos: Store.getters.getCustomLogos(),
+    measurement_ratio: selected_product.measurement_ratio,
+    custom_logo_svgs: [],
+    product_custom_texts: productCustomTexts,
+    colors: Store.getters.getLogosColors,
+    default_colors: Store.getters.getDefaultColors,
+    group_colors: Store.getters.getGroupColors,
+    design_index: design_index,
+    design_id: selected_design.id,
+    logo_colors: Store.getters.getLogosColors,
+    model_id: product_models[selected_model_index].id,
+    model_name: product_models[selected_model_index].model_name,
+    product_id: selected_product.product_id,
+    ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
+    sync_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].sync_id:'',
+    product_type: selected_product.product_type,
+    product_name: selected_product.product_name,
+    pdf_file: null,
+    production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
+    product_roster_detail: Store.getters.getProductRosters(),
+    style_id: product_style.id,
+    style_index: style_index,
+    svg_groups: Store.getters.getSvgGroups,
+    ecommerce_cart_id:null,
+    category_index: category_index,
+    category_id: category_id,
+    customized: Store.getters.getCustomized,
+    personalized: Store.getters.getPersonalized
+  }
 }
 
 //Functions related to SVG parsing end
@@ -1567,5 +1622,5 @@ export {
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
   getUploadedLogoObject, initCustomLogos, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor,fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,getSVGNumberArraysFromRoster,getSVGNumbers,getSVGNames,getSVGNameArraysFromRoster,getLogoSVG,parseSvgStringFile,
-  persistToken,fetchCustomer,setVueVersion, getTeamLogo
+  persistToken,fetchCustomer,setVueVersion, getTeamLogo, getSelectedProductData
 };
