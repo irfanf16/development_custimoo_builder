@@ -24,7 +24,7 @@
         <div class="d-flex flex-wrap justify-content-between">
           <RosterDetails :productSizes="sizeOptions" ref="rostermodal" @addToCartAnimation="()=>this.$emit('addToCartAnimation')" :lockers="lockers" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts" />
           <div class="roster-preview-area">
-            <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts" />
+            <CustomizationPreview :fromRosterModal="true" :designs="products[designsIndex]" :products_fonts="products_fonts" />
             <div class="d-flex py-2 fs-3 justify-content-end">
               <div>Total:</div>
               <div class="ml-4 font-weight-bolder">{{ rosterTotal }}</div>
