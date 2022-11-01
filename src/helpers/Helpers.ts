@@ -1617,10 +1617,12 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
 
 //Functions related to SVG parsing end
 export {
-  getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64,
-  processColorsCustom,sortTextsArray,fontsColorsManipulation,fontsList,getReminderOptions,setCustomLogo, handleResponseException, logData, pathInfo,
-  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64, getFileExtensionType, getProductLogoSetting, getCompany, getPermissions,
-  getUploadedLogoObject, initCustomLogos, getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor,fetchUrlContent,
-  unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,getSVGNumberArraysFromRoster,getSVGNumbers,getSVGNames,getSVGNameArraysFromRoster,getLogoSVG,parseSvgStringFile,
-  persistToken,fetchCustomer,setVueVersion, getTeamLogo, getSelectedProductData
+  getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
+  sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
+  CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64,
+  getFileExtensionType, getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos,
+  getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,
+  unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
+  getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
+  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData
 };
