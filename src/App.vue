@@ -43,7 +43,6 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
     Navbar
   },
   async mounted() {
-    await getCompany();
     // const token = this.$router.currentRoute.query.token as string
     const token = this.getParameterByName('token');
     if (token){
