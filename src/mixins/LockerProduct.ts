@@ -916,7 +916,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
     let self: Record<any, any> = this;
     try {
-
+      self.$store.dispatch('addedToCart', false)
       self.$store.dispatch('setCartLoading',true);
       let collection_view = self.$store.getters.getCollectionView;
       let cart_product = await getActiveProductData(product_fonts);
@@ -994,7 +994,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             // self.$store.dispatch('setEditCart', {key:'cartId',value:0});
             // self.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
             await self.exitFromEditMode()
-            self.showToast(res.data.message, 'SUCCESS');
+            self.showToast(res.data.message, 'success');
             self.$store.dispatch('addedToCart', true)
             if(platform === 'wordpress'){
               let update_cart_id_data = new FormData();

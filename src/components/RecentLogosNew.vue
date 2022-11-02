@@ -117,6 +117,7 @@ export default class RecentLogosNew extends Mixins(ErrorMessages,LockerProducts,
   }
 
   public async setRecentLogo(recent_logo: Record<any, any>) {
+    let self: Record<any, any> = this;
     if(this.customLogoIndex == 0) {
       let logo_colors = processColorsCustom(recent_logo.logo_colors)
       this.customLogo.logo_colors = logo_colors
@@ -134,6 +135,7 @@ export default class RecentLogosNew extends Mixins(ErrorMessages,LockerProducts,
     if(this.customLogoIndex == 0) {
       this.addRemoveTeamLogoOnAllProducts('add', this.customLogo)
     }
+    self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
   }
 
   /*
