@@ -31,6 +31,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts} from "@/mixins/LockerProduct";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {processColorsCustom, setCustomLogo} from "../helpers/Helpers"
+import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 
 @Component<RecentLogosNew>({
   components: {
@@ -42,7 +43,7 @@ import {processColorsCustom, setCustomLogo} from "../helpers/Helpers"
 })
 
 
-export default class RecentLogosNew extends Mixins(ErrorMessages,LockerProducts) {
+export default class RecentLogosNew extends Mixins(ErrorMessages,LockerProducts, CustomLogosMixin) {
 
   /*
   * props starts
@@ -130,6 +131,9 @@ export default class RecentLogosNew extends Mixins(ErrorMessages,LockerProducts)
     this.customLogo.url = recent_logo.logo_url;
     this.customLogo.id = recent_logo.id;
     this.customLogo.is_recent_logo = true;
+    if(this.customLogoIndex == 0) {
+      this.addRemoveTeamLogoOnAllProducts('add', this.customLogo)
+    }
   }
 
   /*

@@ -43,6 +43,7 @@ import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
+import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 
 @Component<LogoUploader>({
   components: { LogoEditorModal, LogoDisclaimerModal, LogoEditor },
@@ -53,7 +54,7 @@ import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
     }
  }
 })
-export default class LogoUploader extends Mixins(ErrorMessages, ModalAction) {
+export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, CustomLogosMixin) {
 
   /*
   * props starts here
@@ -209,13 +210,15 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction) {
           this.$store.commit('SET_LOGO_COLORS_INFO', {
             data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
           })
+          this.addRemoveTeamLogoOnAllProducts('add', logo_data)
+        } else {
+          this.customLogo.transparent_logo = logo_data.transparent_logo_url;
+          this.customLogo.smart_transparent_logo = logo_data.smart_transparent_logo_url;
+          this.customLogo.original_logo_url = logo_data.original_logo_url;
+          this.customLogo.is_smart_transparent = false;
+          this.customLogo.url = logo_data.logo_url;
+          this.customLogo.id = logo_data.id;
         }
-        this.customLogo.transparent_logo = logo_data.transparent_logo_url;
-        this.customLogo.smart_transparent_logo = logo_data.smart_transparent_logo_url;
-        this.customLogo.original_logo_url = logo_data.original_logo_url;
-        this.customLogo.is_smart_transparent = false;
-        this.customLogo.url = logo_data.logo_url;
-        this.customLogo.id = logo_data.id;
         this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject(logo_data)})
         self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
       } else {
@@ -235,6 +238,9 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction) {
   }
 
   public removeLogo() {
+    if(this.customLogoIndex == 0) {
+      this.addRemoveTeamLogoOnAllProducts('remove')
+    }
     //check if logo setting at given index exists then get that else get logo default object
     let logo_setting_at_index = this.selectedProduct.logos_setting[this.customLogoIndex] ? this.selectedProduct.logos_setting[this.customLogoIndex] : {}
     logo_setting_at_index = {...logo_setting_at_index, ...getLogoSettingsObject()}

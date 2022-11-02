@@ -496,11 +496,10 @@ const ProductAttributes:Module<any, any> = {
     REMOVE_TEAM_LOGO(state: Record<any, any>) {
       state.products.forEach((product: Record<any, any>) => {
         if(state.customLogos[product.id]) {
-          const logo_default_setting = product.logos_setting[0] ? JSON.parse(JSON.stringify(product.logos_setting[0])) : getLogoSettingsObject()
-          logo_default_setting.id = null
-          logo_default_setting.logoIndex = 0
-          logo_default_setting.customLogo = 1
-          logo_default_setting.haveControls = 1
+          let logo_default_setting: Record<any, any> = getLogoSettingsObject()
+          if(product.logos_setting[0]) {
+            logo_default_setting = {...logo_default_setting, ...product.logos_setting[0]}
+          }
           Vue.set(state.customLogos[product.id], 0, logo_default_setting)
         }
       })

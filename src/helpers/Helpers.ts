@@ -7,7 +7,7 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
-import {parseInt, findIndex} from "lodash";
+import {parseInt, findIndex, first} from "lodash";
 
 const getLogoSettingsObject = () => {
   return {
@@ -766,20 +766,34 @@ const initCustomLogos = async(retrieved_products: Record<any, any>) => {
   })
 }
 
-const initCustomLogosNew = (retrieved_products: Record<any, any>) => {
+const initCustomLogosNew = async (retrieved_products: Record<any, any>) => {
+  const team_logo = await getTeamLogo()
   const custom_logos_by_products: Record<any, any> = {}
   retrieved_products.forEach((product: Record<any, any>) => {
     if(product.is_logo_allowed) {
+      const product_existing_custom_logos = Store.getters.getCustomLogos(product.id)
+      /*
+      * check if product custom logos already exists in persistent state then no need to load custom logos for that product
+      * and continue to next iteration
+      * */
+      if(product_existing_custom_logos && product_existing_custom_logos.length > 0) {
+        return false
+      }
       let first_logo_setting = getLogoSettingsObject();
       if(product.logos_setting.length) {
         delete product.logos_setting.created_at
         delete product.logos_setting.updated_at
         first_logo_setting = { ...first_logo_setting, ...product.logos_setting[0], ...{id: null} }
       }
+      if(team_logo) {
+        first_logo_setting = {...first_logo_setting, ...team_logo}
+      }
       custom_logos_by_products[product.id] = [first_logo_setting]
     }
   })
-  Store.commit('SET_PRODUCT_CUSTOM_LOGOS', { 'append': true, data: custom_logos_by_products})
+  if(Object.keys(custom_logos_by_products).length > 0) {
+    Store.commit('SET_PRODUCT_CUSTOM_LOGOS', { 'append': true, data: custom_logos_by_products})
+  }
 }
 
 const rosterDetailsInit = (retrieved_products: Record<any, any>) => {
