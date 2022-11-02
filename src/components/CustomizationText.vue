@@ -225,8 +225,6 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 
     await this.productFonts()
     self.product_colors = await this.productColors('file_colors');
-
-    await this.logoColors && console.log('product_custom_texts', this.logoColors);
   },
   filters: {
     capitalize: (value: string) => {
