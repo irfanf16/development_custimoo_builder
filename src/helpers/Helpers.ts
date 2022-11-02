@@ -32,7 +32,6 @@ const getLogoSettingsObject = () => {
     is_smart_transparent: null,
     url: null,
     haveControls: true,
-    logo_original_colors: [],
     logo_colors: [],
     is_recent_logo: false,
     logo_index: 0
