@@ -896,6 +896,8 @@ const ProductAttributes:Module<any, any> = {
       // }
       // else {
         for (const [payload_key, payload_value] of Object.entries(payload)) {
+          console.log('payload_key', payload_key)
+          console.log('payload_value', payload_value)
           /*
           * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
           * reflected in state.last_active_product_data.product_custom_texts

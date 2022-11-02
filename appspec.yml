@@ -1,0 +1,11 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/kitbuilder-autodeployment/public_html/
+hooks:
+    BeforeInstall:  
+    - location: /permissions.sh
+      timeout: 600
+    AfterInstall:
+    - location: /ownership.sh
