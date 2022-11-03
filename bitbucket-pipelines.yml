@@ -8,6 +8,7 @@ pipelines:
         script:
           - apt-get update
           - apt-get install -y zip
+          - npm cache clean --force
           - npm install 
           - npm run build
           - zip -r application.zip .
