@@ -1,16 +1,16 @@
-image: node:12.5.0
+image: node:16.13.1
 pipelines:
   branches:
     master:
     - step:
-        # caches:
-        #   - node
+        caches:
+          - node
         script:
           - apt-get update
-          - apt-get install -y zip g++ libcairo2-dev libjpeg62-turbo-dev libpango1.0-dev libgif-dev build-essential
-          - npm install --global node-gyp
-          - npm install 
-          - npm run build
+          - apt-get install -y zip
+          # - npm install --global node-gyp
+          # - npm install 
+          # - npm run build
           - zip -r application.zip .
           - pipe: atlassian/aws-code-deploy:0.5.3
             variables:
