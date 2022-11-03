@@ -1,4 +1,4 @@
-image: node:12.5.0
+image: node:16.13.1
 pipelines:
   branches:
     master:
@@ -9,7 +9,7 @@ pipelines:
           - apt-get update
           - apt-get install -y zip
           - npm install 
-          # - npm run build
+          - npm run build
           - zip -r application.zip .
           - pipe: atlassian/aws-code-deploy:0.5.3
             variables:
