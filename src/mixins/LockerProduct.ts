@@ -190,9 +190,7 @@ export class handleMainProducts extends Vue {
               product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos
             })
             this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
-            await this.$store.dispatch('setProductsRosters', {
-              product_id: last_active_prod_data.product_id, roster_data: last_active_prod_data.product_roster_detail
-            })
+            await this.$store.dispatch('setProductsRosters')
           }
           else {
             let {sync_id, customizer_preview, update_cart} = self.$route.query

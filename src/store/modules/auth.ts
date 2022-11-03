@@ -21,7 +21,6 @@ const Auth:Module<any, any> = {
   mutations:{
     SET_CUSTOMER(state:Record<any, any>, payload){
       localStorage.setItem('jwtToken', payload.access_token)
-      localStorage.setItem('adminToken', payload.access_token)
       if(payload && payload.user){
         localStorage.setItem('customer', JSON.stringify(payload.user))
       }
