@@ -117,7 +117,7 @@
                         </template>
                       </div>
                     </li>
-                    <li class="position-relative" v-if="isCustomerAuthenticated && ((company.platform == 'self' && customerPermissions.includes('place-order')) || company.platform == 'cdnExceptLogin')">
+                    <li class="position-relative" v-if="isCustomerAuthenticated">
                       <a  class="icon mr-0" @click="openCartModal">
                         <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                       </a>
@@ -471,7 +471,7 @@ Vue.filter('formatDate', function(value:string) {
       await resetLastActiveProductData()
     }
     await this.$store.dispatch('setCategories', {
-      query_params: `customized=${last_active_product_obj.customized}&personalized=${last_active_product_obj.personalized}`
+      query_params: `customized=${last_active_product_obj.customized}&personalized=${last_active_product_obj.personalized}&private=${last_active_product_obj.private_product}`
     })
     let query_params = await this.setQueryParams()
     await this.retrieveProducts(query_params)
@@ -1367,7 +1367,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if (ok) {
       this.$store.commit('RESET_LAST_ACTIVE_DATA')
       await this.$store.dispatch('setCategories', {
-        query_params: `customized=1&personalized=0`
+        query_params: `customized=1&personalized=0&private=0`
       })
       await this.exitFromEditMode()
       this.hideLockerProductUpdateButton()
@@ -1421,7 +1421,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async retrieveProducts(query_params: string[] = []) {
     let self = this;
-    let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
+    let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&private=${this.$store.getters.getPrivateProduct}`;
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
 
     query_params.forEach((query_param: string) => {

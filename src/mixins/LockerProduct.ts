@@ -130,6 +130,7 @@ export class handleMainProducts extends Vue {
       this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
     }
     await this.$store.dispatch('setStockCount',response.data.stock_count);
+    await this.$store.dispatch('setPrivateProductCount',response.data.private_product_count);
 
     const prms = new Promise((resolve) => {
       self.$eventBus.$emit('initProductsFonts', retrieved_products, resolve)
@@ -141,6 +142,7 @@ export class handleMainProducts extends Vue {
       }
       await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
       await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
+      await this.$store.dispatch('setPrivateProduct', response.data.private_product);
       let update_order_product = response_data.update_order_products_data;
       if(product_edit_info_object.type == 'order_product' && update_order_product) {
         let order_products = Object.assign({}, product_edit_info_object.order_product_info, {order_products: update_order_product})
@@ -214,7 +216,7 @@ export class handleMainProducts extends Vue {
             }
             let last_active_obj_updated_values = {category_index: category_index, category_id: category_id, design_index: design_index, design_id: design_id, product_id:  product_id,
               search_products: self.search_products, style_id: retrieved_products[0].productstyles[0].id,
-              customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized
+              customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized,private_product:this.$store.getters.getPrivateProduct
             }
             let set_last_active_product_data = lastActiveProductDefaultObject(last_active_obj_updated_values)
             self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
@@ -482,7 +484,7 @@ export class handleMainProducts extends Vue {
     let last_active_prod_data = self.$store.getters.getLastActiveProductData;
     last_active_prod_data.customized = this.$store.getters.getCustomized;
     last_active_prod_data.personalized = this.$store.getters.getPersonalized;
-    last_active_prod_data.personalized = this.$store.getters.getPersonalized;
+    last_active_prod_data.private_product = this.$store.getters.getPrivateProduct;
     last_active_prod_data.page_no = current_page;
     /*
     * As handleMainProduct is being used as mixin. So the search_products data attribute may not exists in some components that's why this check is added
@@ -793,7 +795,8 @@ export class ProductsQueryParamsMixin extends Vue {
         }
         else {
           query_params = [
-            `customized=${self.getLastActiveProductData.customized}`, `personalized=${self.getLastActiveProductData.personalized}`
+            `customized=${self.getLastActiveProductData.customized}`, `personalized=${self.getLastActiveProductData.personalized}`,
+            `private=${self.getLastActiveProductData.private_product}`
           ];
           if(self.getLastActiveProductData.product_id) {
             query_params.push(`active_product_id=${self.getLastActiveProductData.product_id}`, 'paginate=false')
@@ -812,11 +815,6 @@ export class ProductsQueryParamsMixin extends Vue {
               query_params.push(`category_id=${category.id}`)
               self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: 0, category_id: category.id})
             }
-          }
-          if(self.$route.query.product_share_link){
-            query_params = [
-              `customized=${false}`, `personalized=${false}`,`active_product_id=${self.$route.query.product_id}`, 'paginate=false','active_product_type=product_share_link'
-            ];
           }
         }
       }
@@ -1053,7 +1051,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     let search_loader = this.$store.getters.getSearchLoader;
     let show_loader = this.$store.getters.getShowLoader;
 
-    let url = `/list/products?customized=${get_last_active_product_data.customized}&personalized=${get_last_active_product_data.personalized}`;
+    let url = `/list/products?customized=${get_last_active_product_data.customized}&personalized=${get_last_active_product_data.personalized}&private=${get_last_active_product_data.private_product}`;
     if(get_last_active_product_data.search_products) {
       url +=` &title=${get_last_active_product_data.search_products}`
     }

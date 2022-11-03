@@ -19,6 +19,7 @@ import {isEmpty, findIndex} from "lodash";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
+    private_product_count:0,
     searchLoader: false,
     showLoader:true,
     lockerActiveTabIndex:0,
@@ -56,6 +57,7 @@ const ProductAttributes:Module<any, any> = {
     hideColorSection : false,
     customized: true,
     personalized: false,
+    private_product:false,
     editStatus: false,
     editProductId: 0,
     editDesignId: 0,
@@ -190,6 +192,9 @@ const ProductAttributes:Module<any, any> = {
     SET_STOCK_COUNT(state:Record<any,any>, payload:number){
       state.stock_count = payload;
     },
+    SET_PRIVATE_PRODUCT_COUNT(state:Record<any,any>, payload:number){
+      state.private_product_count = payload;
+    },
     SET_SEARCH_LOADER(state: Record<any, any>, payload: boolean){
       state.searchLoader = payload;
     },
@@ -203,6 +208,9 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state, 'personalized', payload.value)
       else
         Vue.set(state, 'customized', payload.value)*/
+    },
+    SET_PRIVATE_PRODUCT(state:Record<any,any>, payload:Record<any,any>){
+      state.private_product = payload
     },
     // SET_EDIT_CART(state: Record<any, any>, payload: Record<any, any>){
     //   Vue.set(state.editCart,payload.key,payload.value)
@@ -687,6 +695,7 @@ const ProductAttributes:Module<any, any> = {
     async RESET_STORE(state: Record<any, any>){
       state.customized = true
       state.personalized = false
+      state.private_product = false
       state.undoItems = []
       state.redoItems = []
       state.edit_locker_product = []
@@ -1194,6 +1203,9 @@ const ProductAttributes:Module<any, any> = {
     getPersonalized: state => {
       return state.personalized
     },
+    getPrivateProduct: state => {
+      return state.private_product;
+    },
     getSelectedCollectionProducts(state:Record<any, any>){
       return state.selectedCollectionProducts.locker_products
     },
@@ -1220,6 +1232,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getStockCount(state:Record<any,any>){
       return state.stock_count;
+    },
+    getPrivateProductCount(state:Record<any,any>){
+      return state.private_product_count;
     },
     getHideSaveLockerButton(state:Record<any,any>){
       return state.hideSaveLockerButton;
@@ -1270,6 +1285,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setProductType({commit}, payload) {
       commit('SET_PRODUCT_TYPE', payload)
+    },
+    setPrivateProduct({commit},payload){
+      commit('SET_PRIVATE_PRODUCT',payload);
     },
     async setCategories({commit}, payload){
       let url = '/product/categories'
@@ -1349,6 +1367,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setStockCount({commit},payload){
       commit('SET_STOCK_COUNT',payload);
+    },
+    setPrivateProductCount({commit},payload){
+      commit('SET_PRIVATE_PRODUCT_COUNT',payload);
     },
     updateRosterDetailAttribute({commit}, payload){
       commit('rosterDetailAttribute', payload)

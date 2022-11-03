@@ -35,6 +35,11 @@
             <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
             Stock
           </button>
+          <button v-if="PrivateProductCount" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                  @click="changeProductType(!$store.getters.getPrivateProduct, 'private_product')">
+            <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
+            Private
+          </button>
         </div>
         <ItemsGrid :showItems="showItems" :products_fonts="products_fonts" />
       </div>
@@ -62,6 +67,11 @@
                    @click="changeProductType(true, 'personalized')">
              <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
              Stock
+           </button>
+           <button v-if="PrivateProductCount" style="white-space: nowrap" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                   @click="changeProductType(true, 'private_product')">
+             <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
+             Private
            </button>
          </div>
 
@@ -221,6 +231,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     let self:Record<string, any> = this;
     let customized = this.$store.getters.getCustomized
     let personalized = this.$store.getters.getPersonalized
+    let private_product = this.$store.getters.getPrivateProduct
     const itemCarousel = this.$refs['itemsCarousel'] as Record<any, any>
     let retrieve_products = false;
 
@@ -228,25 +239,39 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       if(prd_type == "customized"){
         customized = new_val
         personalized = false
+        private_product = false
       }
 
       if(prd_type == "personalized"){
         personalized = new_val
         customized = false
+        private_product = false
+      }
+
+      if(prd_type == "private_product"){
+        personalized = false
+        customized = false
+        private_product = new_val;
       }
     }
-
     if(prd_type == 'customized' && customized == false){
       retrieve_products = true
       check()
       await this.$store.dispatch('setCategories', {
-        query_params: `customized=${customized}&personalized=${personalized}`
+        query_params: `customized=${customized}&personalized=${personalized}&private=${private_product}`
       })
     } else if(prd_type == 'personalized' && personalized == false){
       retrieve_products = true
       check()
       await this.$store.dispatch('setCategories', {
-        query_params: `customized=${customized}&personalized=${personalized}`
+        query_params: `customized=${customized}&personalized=${personalized}&private=${private_product}`
+      })
+    }
+    else if(prd_type == 'private_product' && private_product == false){
+      retrieve_products = true
+      check()
+      await this.$store.dispatch('setCategories', {
+        query_params: `customized=${customized}&personalized=${personalized}&private=${private_product}`
       })
     }
     // if(new_val == false) {
@@ -271,6 +296,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       // eval(`${prd_type}=${new_val}`)
       await this.$store.dispatch('setProductType', {prd_type: 'customized', value: customized});
       await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: personalized});
+      await this.$store.dispatch('setPrivateProduct', private_product);
       // if(prd_type == "customized")
       //   await this.$store.dispatch('setProductType', {prd_type: 'customized', value: customized});
       //   await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: personalized});
@@ -305,12 +331,19 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     return this.$store.getters.getPersonalized
   }
 
+  get getPrivateProduct(): boolean {
+    return this.$store.getters.getPrivateProduct
+  }
+
   get getCustomized(): boolean {
     return this.$store.getters.getCustomized
   }
 
   get StockCount():number{
     return this.$store.getters.getStockCount
+  }
+  get PrivateProductCount():number{
+    return this.$store.getters.getPrivateProductCount
   }
 
   get getProductEditInfoObject() {
