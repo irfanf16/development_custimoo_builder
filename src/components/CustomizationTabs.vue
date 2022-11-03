@@ -50,20 +50,20 @@
               </a>
             </template>
             <div class="d-none d-lg-block">
-                <CustomizationText />
+                <CustomizationText :customTextIndex="customTextIndex" />
             </div>
-            <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">
-              <b-tabs>
-                <b-tab>
-                  <template #title>
-                    Player Name
-                  </template>
-                  <div>
-                    <CustomizationText />
-                  </div>
-                </b-tab>
-              </b-tabs>
-            </div>
+<!--            <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">-->
+<!--              <b-tabs>-->
+<!--                <b-tab>-->
+<!--                  <template #title>-->
+<!--                    Player Name-->
+<!--                  </template>-->
+<!--                  <div>-->
+<!--                    <CustomizationText :customTextIndex="customTextIndex" />-->
+<!--                  </div>-->
+<!--                </b-tab>-->
+<!--              </b-tabs>-->
+<!--            </div>-->
           </b-tab>
           <b-tab>
             <button @click="setHideTab('styleHide', !hideTab.styleHide)" class="tab-close-btn d-lg-none"></button>
@@ -93,7 +93,7 @@
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</h2>
               <EditRosterAreaTab @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="openAddToLocker"
-                                 :productSizes="productSizes" ref="edit-roster-area-tab" :products_fonts="products_fonts" />
+                                 :productSizes="productSizes" ref="edit-roster-area-tab" :products_fonts="products_fonts" @addToCartAnimation="()=>this.$emit('addToCartAnimation')" />
             </div>
           </b-tab>
         </div>
@@ -141,6 +141,7 @@ import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
 export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) isColorShuffled!: boolean
+  @Prop({required: true}) customTextIndex!: number
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
   public text_add_count = 0

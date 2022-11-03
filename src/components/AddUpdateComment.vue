@@ -143,7 +143,7 @@ export default class AddUpdateComment extends  Mixins(ErrorMessages) {
     let self = this;
     let uploaded_files = event.target.files;
     let allowed_file_types = ["jpg", "jpeg", "pdf", 'png', 'ai', 'eps', 'svg']
-    let rejected_files = [];
+    let rejected_files: string [] = [];
     for (let uploaded_file of uploaded_files) {
       let file_name = uploaded_file.name;
       let file_extension = file_name.substring(file_name.lastIndexOf('.') + 1).toLowerCase();

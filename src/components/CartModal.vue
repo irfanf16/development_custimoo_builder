@@ -32,8 +32,13 @@
           <template v-for="(cart_item, cart_item_index) in cartItems">
             <tr :key="factory_product.id" v-for="(factory_product, factory_product_index) in cart_item.factory_products">
               <td>
-                <a style="cursor:pointer;color:blue;text-decoration: underline"
-                  @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name }}</a>
+                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
+                  <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
+                </template>
+                <template v-else="">
+                  <a style="cursor:pointer;color:blue;text-decoration: underline"
+                     @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name }}</a>
+                </template>
               </td>
               <td>
                 <div class="d-inline-flex gap-1">
@@ -44,14 +49,28 @@
                 </div>
               </td>
               <td>
-                <a style="font-weight: bold; cursor:pointer; color:blue;text-decoration: underline" @click="editCartItem(cart_item_index, factory_product_index, false)">
-                  {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
-                </a>
+                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
+                  <span title="Editing This Product" style="cursor:pointer;">
+                    {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
+                  </span>
+                </template>
+                <template v-else="">
+                  <a style="font-weight: bold; cursor:pointer; color:blue;text-decoration: underline" @click="editCartItem(cart_item_index, factory_product_index, false)">
+                    {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
+                  </a>
+                </template>
+
               </td>
-              <td class="cursor-pointer"> <a data-title="Delete Event"
-                  @click="deleteConfirm(cart_item, factory_product)">
-                  <font-awesome-icon :icon="['fas', 'trash-alt']" />
-                </a></td>
+              <td class="cursor-pointer">
+                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
+                  Editing
+                </template>
+                <template v-else="">
+                  <a data-title="Delete Event" @click="deleteConfirm(cart_item, factory_product)">
+                    <font-awesome-icon :icon="['fas', 'trash-alt']" />
+                  </a>
+                </template>
+              </td>
             </tr>
           </template>
         </tbody>
@@ -112,7 +131,13 @@
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import { getReminderOptions, processColorsCustom } from "@/helpers/Helpers";
+import {
+  getActiveProductData,
+  getReminderOptions,
+  getSelectedProductData,
+  lastActiveProductDefaultObject,
+  processColorsCustom
+} from "@/helpers/Helpers";
 import { LockerProducts, handleMainProducts } from "@/mixins/LockerProduct";
 import { findIndex } from "lodash";
 import ModalAction from "@/mixins/ModalAction";
@@ -134,7 +159,7 @@ import ModalAction from "@/mixins/ModalAction";
     // this.getColors()
     if (this.isCustomerAuthenticated){
       let ecommerce_update_id = this.$route.query.update_item;
-      let santa_cart_id = this.$route.query.update_cart;
+      let santa_cart_id = String(this.$route.query.update_cart);
 
       if(ecommerce_update_id){
         let cart_items = await this.$store.getters.getCartItems;
@@ -185,6 +210,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
   get customerPermissions(){
     return this.$store.getters.getCustomerPermissions
+  }
+  get editingCartProductInfo() {
+    return this.$store.getters.getProductEditInfoObject['cart_product_info']
   }
   public createOrder() {
     let payload = {}
@@ -238,9 +266,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
   public async editCartItem(cart_item_index: number, factory_product_index: number, edit=true) {
     let self = this;
+    await this.setLastActiveProductData()
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index]
-    console.log('cart_item_product', cart_item_product)
     let cart_product_type = cart_item_product.product_type
     let is_customized = false;
     let is_personalized = false;
@@ -278,6 +306,12 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       await this.$store.dispatch('setTabMain', {value: (this.mainTotalTabs + 1)})
       this.showVModal('rostermodal');
     }
+  }
+
+  public async setLastActiveProductData() {
+    let active_product_data = getSelectedProductData(false)
+    let last_active_product_object = lastActiveProductDefaultObject(active_product_data)
+    this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', last_active_product_object)
   }
 
   public deleteConfirm(cart_item: Record<any, any>, factory_product: Record<any, any>) {

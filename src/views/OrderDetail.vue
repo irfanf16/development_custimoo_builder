@@ -259,11 +259,36 @@
 
     </modal>
 
-    <modal name="enlarged-activity-files-modal" @closed="enlarged_activity_files = []" :resizable="true">
-      <template v-for="(enlarged_activity_file, enlargedActivityFileIndex) in enlarged_activity_files">
-        <img :src="`${storage_url}${enlarged_activity_file.url}`" :key="`enlarged_activity_file_${enlargedActivityFileIndex}`">
-      </template>
+    <modal :adaptive="true"
+           height="auto"
+           :minWidth="1300"
+           :scrollable="true"
+           name="enlarged-activity-files-modal" ref="enlarged-activity-files-modal" @closed="enlarged_activity_files = []" :hide-footer="true">
 
+      <div class="modal-header fs-4 d-flex justify-content-between p-3">
+        <div class="font-weight-bold pl-1">
+          Preview Images
+        </div>
+
+        <span class="modal-close cursor-pointer" @click="$modal.hide('product-preview')">
+              <BIconX />
+            </span>
+      </div>
+
+      <div class="px-3 pt-3 d-flex justify-content-center">
+        <div class="badge badge-light fs-2 p-2 text-muted"> <b-icon-search class="text-info"></b-icon-search> Please hover over the images to zoom!</div>
+      </div>
+      <div class="d-flex w-100 justify-content-center gap-1 py-4 px-3">
+        <template v-for="(enlarged_activity_file, enlargedActivityFileIndex) in enlarged_activity_files">
+          <zoom-on-hover :img-normal="`${storage_url}${enlarged_activity_file.url}`" :img-zoom="`${storage_url}${enlarged_activity_file.url}`" :key="`enlarged_activity_file_${enlargedActivityFileIndex}`" :scale="1.5"></zoom-on-hover>
+        </template>
+        <!--        <a :href="this.front_preview" target="_blank" :download="`${order.order_no}-front-preview`"> front image </a>-->
+        <!--        <a :href="this.back_preview" target="_blank" :download="`${order.order_no}-back-preview`"> back image </a>-->
+      </div>
+
+      <div class="px-3 pb-3 d-flex justify-content-center">
+        <button class="btn btn-dark text-white">Download Preview Images</button>
+      </div>
     </modal>
   </div>
 </template>
@@ -399,7 +424,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   //data props ends
 
-  get company():string{
+  get company():Record<any, any>{
     return this.$store.getters.getCompany
   }
   get isCustomerAuthenticated(): boolean {
@@ -614,7 +639,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   updateOrderProducts(order_item_id: number, order_item_status_activity: number) {
-    let self = this;
+    let self:Record<any, any> = this;
     if(this.company.platform == "wordpress") {
       let query_string = `update_order_product=true&order_item_id=${order_item_id}&activity_id=${order_item_status_activity}`
       window.location.href = `${this.company.company_domain}/customizer/#/?${query_string}`;

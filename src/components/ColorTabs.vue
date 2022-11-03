@@ -10,13 +10,13 @@
       </template>
       <div>
         <b-card-body>
-          <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
-            <b-nav-item v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
+          <b-nav class="d-flex justify-content-start align-items-center">
+            <b-nav-item v-bind:class="{ 'color-tab-active' : index == selectTypeIndex && !othersActive}" v-for="(colorType, index) in productColors" :key="'color-item-'+index" @click="selectType(index)">
               {{ colorType.name | capitalize}}
             </b-nav-item>
-            <b-nav-item  v-if="selectedProduct.is_custom_color_allowed" @click="selectType(null, true)">Others</b-nav-item>
+            <b-nav-item v-bind:class="{ 'color-tab-active' : index == selectTypeIndex && !othersActive}" v-if="selectedProduct.is_custom_color_allowed" @click="selectType(null, true)">Others</b-nav-item>
           </b-nav>
-          <div class="color-holder">
+          <div class="color-holder mt-2">
             <div class="color-container">
               <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
                 <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
@@ -33,13 +33,16 @@
 
   <div v-else>
     <b-card-body>
-      <b-nav class="d-flex flex-wrap justify-content-between align-items-center">
-        <b-nav-item v-bind:class="{ 'color-tab-active' : index == selectTypeIndex && !othersActive}" v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">
-          {{ colorType.name | capitalize}}
-        </b-nav-item>
-        <b-nav-item  v-if="selectedProduct.is_custom_color_allowed" @click="selectType(null, true)">Others</b-nav-item>
-      </b-nav>
-      <div class="color-holder" ref="color-holder2">
+      <div class="fade-right">
+        <b-nav class="d-flex justify-content-start align-items-center">
+          <b-nav-item v-bind:class="{ 'color-tab-active' : index == selectTypeIndex && !othersActive}" v-for="(colorType, index) in productColors" :key="'color-item-'+index" @click="selectType(index)">
+            {{ colorType.name | capitalize}}
+          </b-nav-item>
+          <b-nav-item class="mr-4" v-bind:class="{ 'color-tab-active' : othersActive}" v-if="selectedProduct.is_custom_color_allowed" @click="selectType(null, true)">Others</b-nav-item>
+        </b-nav>
+      </div>
+
+      <div class="color-holder mt-2" ref="color-holder2">
         <div class="color-container">
           <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
             <color-picker @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
@@ -122,8 +125,7 @@ export default class ColorTabs extends Mixins(ModalAction) {
       this.othersActive = false;
     }
 
-    if(index)
-      this.selectTypeIndex = index
+    this.selectTypeIndex = index
 
     this.showOther = showOther
     if(!showOther)
