@@ -292,10 +292,8 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   }
 
   private async addToCart() {
-    if(!this.checkMinimumOrderQtyBYDesign())
-      this.showToast("Qyantity must be grater", "error");
     if (!this.rosterDetails.some(el => el.quantity == 0)) {
-      return false;
+      //return false;
       this.hideVModal('rostermodal')
       this.showToast("Adding to cart", "info")
       await this.addToCartMixin(this.products_fonts as Record<any, any>[]);

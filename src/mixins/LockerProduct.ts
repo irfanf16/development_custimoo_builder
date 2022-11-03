@@ -920,13 +920,17 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       this.$store.getters.getProductRosters().forEach((item:Record<any, any>) => {
         roster_item_sum += parseInt(item.quantity);
       })
-      if(roster_item_sum < prod_models[selected_model_index].minimum_order_quantity)
+      if(roster_item_sum < prod_models[selected_model_index].minimum_order_quantity){
+        this.showToast(`${this.$t('minimum_order_message', {min_products_count: prod_models[selected_model_index].minimum_order_quantity})}`, "error");
         return false;
+      }
     }
     return true;
   }
 
   public async addToCartMixin(product_fonts: Record<any, any>[]) {
+    if(!this.checkMinimumOrderQtyBYDesign())
+      return;
 
     let self: Record<any, any> = this;
     try {
