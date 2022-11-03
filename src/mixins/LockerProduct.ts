@@ -909,6 +909,25 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     return sum;
   }
 
+  public checkMinimumOrderQtyBYDesign(){
+    // check is the sum of roster items(collectively) is greater than sku's 'minimum order quantity'
+    let prod_models = this.$store.getters.getProductModels;
+    let selected_model_index = this.$store.getters.getSelectedModelIndex;
+    if(
+      prod_models.length > 0 && Object.prototype.hasOwnProperty.call(prod_models[selected_model_index],'minimum_order_quantity_type') &&
+      prod_models[selected_model_index].minimum_order_quantity_type === "by_design" && prod_models[selected_model_index].minimum_order_quantity != null &&
+      prod_models[selected_model_index].minimum_order_quantity > 0
+    ){
+      let roster_item_sum = 0;
+      this.$store.getters.getProductRosters().forEach((item:Record<any, any>) => {
+        roster_item_sum += parseInt(item.quantity);
+      })
+      if(roster_item_sum < prod_models[selected_model_index].minimum_order_quantity)
+        return false;
+    }
+    return true;
+  }
+
   public async addToCartMixin(product_fonts: Record<any, any>[]) {
 
     let self: Record<any, any> = this;
