@@ -7,12 +7,8 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
-<<<<<<< HEAD
-import {parseInt, findIndex, first} from "lodash";
-=======
 import {parseInt, findIndex} from "lodash";
 import {Canvas} from "fabric/fabric-impl";
->>>>>>> master
 
 const getLogoSettingsObject = () => {
   return {
