@@ -7,6 +7,7 @@ import {
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
+import ModalAction from "@/mixins/ModalAction";
 
 @Component
 export class LockerProducts extends Vue {
@@ -895,7 +896,7 @@ export class RosterDetailsGlobal extends Mixins(){
 }
 
 @Component
-export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitEditMode) {
+export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitEditMode,ModalAction) {
   get total(): number {
     let sum = 0;
     let roster_details = this.$store.getters.getRosterDetails()
@@ -931,7 +932,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   public async addToCartMixin(product_fonts: Record<any, any>[]) {
     if(!this.checkMinimumOrderQtyBYDesign())
       return;
-
+    this.hideVModal('rostermodal');
     let self: Record<any, any> = this;
     try {
       self.$store.dispatch('addedToCart', false)

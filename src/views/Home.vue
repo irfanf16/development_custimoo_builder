@@ -24,7 +24,6 @@
               <div class="customization-preview-process w-100">
                 <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                   <div class="buttons-preview text-left">
-                    <h2>{{ $t('minimum_order_message' , {min_products_count: 10}) }}</h2>
                     <template v-if="getProductEditInfoObject.editing == false || getProductEditInfoObject.type == 'locker_product'">
 <!--                    <template>-->
                       <template v-if="isCustomerAuthenticated">
