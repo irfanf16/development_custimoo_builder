@@ -29,4 +29,3 @@ src/assets/css/custom.css.map
 env.development
 .env.development
 .env.staging
-.env.staging.wcOrderDetail
