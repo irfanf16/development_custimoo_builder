@@ -986,7 +986,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             this.$emit('setCustomTextIndex', e.target.text_index)
           }
 
-          if(e.target.side == 'Back'){
+          if(e.target.side == 'back' || e.target.side == 'Back'){
             this.frontCanvas.discardActiveObject().renderAll();
           }else{
             this.backCanvas.discardActiveObject().renderAll();
