@@ -1,6 +1,16 @@
 <template>
   <div>
-    <b-tabs>
+    <div class="d-flex align-items-center justify-content-between px-1 pt-1" :class="{'rotateArrow': !expand_logos}">
+      <b-button class="light ml-1" v-if="(selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count)"
+                :style="{visibility: expand_logos ? 'visible':'hidden'}" @click="addLogoTab">
+        <BIconPlus />
+      </b-button>
+
+      <b-icon-chevron-down class="cursor-pointer" @click="expand_logos = !expand_logos" style="font-size: larger; transition: 0.3s ease all;" />
+    </div>
+
+
+    <b-tabs :class="{'collapseButtons': expand_logos}" >
       <b-tab v-for="(custom_logo, customLogoIndex) in customLogos" :active="custom_logo_tab_index == customLogoIndex"
              :key="`custom_logo_${customLogoIndex}`" @click="custom_logo_tab_index = customLogoIndex">
         <template #title>
@@ -29,7 +39,7 @@
         </div>
       </b-tab>
       <recent-logos-new :custom-logo-index="custom_logo_tab_index" :custom-logo="customLogos[custom_logo_tab_index]"/>
-      <template #tabs-end>
+      <template #tabs-end v-if="!expand_logos">
         <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count"
           @click="addLogoTab">
           <BIconPlus />
@@ -112,6 +122,7 @@ export default class LogoPlacementTab extends Vue {
   public defSwatchColor = '#ffffff'
   public defSwatchPantone = '11-0601'
   public custom_logo_tab_index = 0
+  public expand_logos = true
 
   /*
   * data props ends

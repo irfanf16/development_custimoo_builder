@@ -1448,7 +1448,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     })
     url = url_obj.pathname + url_obj.search;
-    //console.log('urls', url)
 
     http.get(url).then(async (response: Record<any, any>) => {
       if(response.data.products.data.length > 0 ){
