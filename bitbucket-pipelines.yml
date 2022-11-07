@@ -1,4 +1,4 @@
-image: node:12.22.12
+image: node:16.13.1
 pipelines:
   branches:
     master:
@@ -8,7 +8,9 @@ pipelines:
         script:
           - apt-get update
           - apt-get install -y zip
-          - npm install 
+          - rm -rf node_modules
+          # - npm install --global node-gyp
+          # - npm install 
           # - npm run build
           - zip -r application.zip .
           - pipe: atlassian/aws-code-deploy:0.5.3

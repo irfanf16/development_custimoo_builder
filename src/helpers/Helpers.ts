@@ -8,6 +8,7 @@ import Vue from "vue";
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
 import {parseInt, findIndex} from "lodash";
+import {Canvas} from "fabric/fabric-impl";
 
 const getLogoSettingsObject = () => {
   return {
@@ -650,8 +651,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const selected_model_index = Store.getters.getSelectedModelIndex;
       scene_ref.frontCanvas.discardActiveObject().renderAll()
       scene_ref.backCanvas.discardActiveObject().renderAll()
+      const back_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
+      const front_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
       const post_data: Record<any, any> = {
-        back_image: getCanvasImage.ref_back?.toDataURL("image/png"),
+        back_image: back_image,
         custom_logos: Store.getters.getCustomLogos(),
         measurement_ratio: selected_product.measurement_ratio,
         custom_logo_svgs: [],
@@ -660,7 +663,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         colors: Store.getters.getLogosColors,
         design_id: selected_design.id,
         defaultcolors: Store.getters.getDefaultColors,
-        front_image: getCanvasImage.ref_front.toDataURL("image/png"),
+        front_image: front_image,
         groupcolors: Store.getters.getGroupColors,
         logo_colors: Store.getters.getLogosColors,
         model_id: product_models[selected_model_index].id,
@@ -1616,6 +1619,23 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
   }
 }
 
+const getImageFromCanvas = (canvas:Canvas, options={}) => {
+  const canvas_options = {...{original_width: 600, original_height: 600, original_zoom: 1, image_type: 'image/png', width: 1200, height: 1200, zoom: 2}, ...options}
+  if(canvas) {
+    canvas.setHeight(canvas_options.height)
+    canvas.setWidth(canvas_options.width)
+    canvas.setZoom(canvas_options.zoom)
+    // @ts-ignore
+    const base64_image = canvas.toDataURL(canvas_options.image_type)
+    canvas.setHeight(canvas_options.original_height)
+    canvas.setWidth(canvas_options.original_width)
+    canvas.setZoom(canvas_options.original_zoom)
+    return base64_image
+  } else {
+    console.error('Unable to get canvas image for canvas', canvas)
+  }
+}
+
 //Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -1625,5 +1645,5 @@ export {
   getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
-  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData
+  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, getImageFromCanvas
 };
