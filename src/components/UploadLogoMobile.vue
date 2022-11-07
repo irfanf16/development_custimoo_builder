@@ -1,20 +1,8 @@
 <template>
-<!--  <div class="upload-logo-opener">-->
-<!--    <span class="close" @click="hideAll"><BIconX /></span>-->
-
-<!--    <div class="logo-option-area mb-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">-->
-<!--      <b-form-checkbox  v-model="customLogos[customLogoIndex].is_transparent" @change="toggleLogoBackground">-->
-<!--        Remove Logo Background-->
-<!--      </b-form-checkbox>-->
 
   <div style="padding-bottom: 10px" class="upload-logo-opener" v-if="customLogos">
 
     <div class="logo-option-area mb-3 mt-3" v-if="customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-
-<!--      <b-form-group label="Individual radios" v-slot="{ ariaDescribedby }">
-        <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="A">Remove Logo Background</b-form-radio>
-        <b-form-radio @change="changeLogoBackground" v-model="customLogos[customLogoIndex].logo_background" :aria-describedby="ariaDescribedby" name="logo-background" value="B">Remove Smart Logo Background</b-form-radio>
-      </b-form-group>-->
 
       <div class="w-100 text-left position-relative logo-edit-btn-updated">
         <div class="d-sm-block d-lg-block continue-btn-holder pt-1" style="padding: 0">

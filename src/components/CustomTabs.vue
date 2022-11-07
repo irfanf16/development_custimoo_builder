@@ -161,7 +161,6 @@ import ModalAction from "@/mixins/ModalAction";
     this.fontsList()
     let tabIndex = this.selectedProduct.is_logo_allowed ? 0 : 1
     this.switchTabs(tabIndex)
-    console.log('this', this)
   }
 })
 
