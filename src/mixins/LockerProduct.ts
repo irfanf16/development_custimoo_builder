@@ -728,6 +728,7 @@ export class handleMainProducts extends Vue {
       logo_colors = cart_item_product.colors
     }
     await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
+    this.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
   }
 
 }
