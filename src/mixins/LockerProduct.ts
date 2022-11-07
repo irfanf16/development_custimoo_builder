@@ -14,20 +14,22 @@ export class LockerProducts extends Vue {
   public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="") {
     let self: Record<any, any> = this;
     self.search_products = ''
-    this.$store.commit('setActiveLockerProduct', ind)
+    let is_private:Boolean = room_product.is_private?true:false;
+    this.$store.commit('setActiveLockerProduct', ind);
+    this.$store.dispatch('setPrivateProduct',is_private);
     await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
-    let is_customized = this.$store.getters.getCustomized
-    let is_personalized = this.$store.getters.getPersonalized
+    let is_customized = is_private? false :this.$store.getters.getCustomized
+    let is_personalized = is_private? false :this.$store.getters.getPersonalized
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
     let locker_product_name = room_product.product_name
     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-      editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
+      editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: '', private_product: is_private },
       locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name},
       cart_product_info: null, order_product_info: null
     })
 
-    let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
+    let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
     if(share_url) {
       url += `?share_url=${share_url}`;
     }
@@ -98,7 +100,8 @@ export class LockerProducts extends Vue {
     let self: Record<any, any> = this;
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
-    let url = `list/products?active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1`;
+    let is_private:Boolean = room_product.is_private?true:false;
+    let url = `list/products?&private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1`;
 
     await http.get(url).then(async (response: Record<any, any>) => {
       let active_product_detail = response.data.editing_product_detail;
@@ -304,6 +307,7 @@ export class handleMainProducts extends Vue {
       await this.$store.dispatch('setStockCount',response.data.stock_count);
       await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
       await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
+      await this.$store.dispatch('setPrivateProduct', response.data.private_product);
 
       let product_index = 0;
       let style_index = 0;
