@@ -132,7 +132,9 @@ export default class RecentLogosNew extends Mixins(ErrorMessages,LockerProducts,
     this.customLogo.url = recent_logo.logo_url;
     this.customLogo.id = recent_logo.id;
     this.customLogo.is_recent_logo = true;
+    this.customLogo.is_team_logo = false
     if(this.customLogoIndex == 0) {
+      this.customLogo.is_team_logo = true
       this.addRemoveTeamLogoOnAllProducts('add', this.customLogo)
     }
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)

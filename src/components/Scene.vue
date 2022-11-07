@@ -1726,7 +1726,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   }
 
   public addLogos(logo: Record<any, any>, from_load = false) {
-    if(this.mounted || from_load) {
+    if((this.mounted || from_load)) {
       if(this.custom_logo_objects[logo.logo_index as number]) {
         this.deleteExistingLogosFromCanvas(logo.logo_index)
       }
