@@ -772,6 +772,7 @@ export class ProductsQueryParamsMixin extends Vue {
           if(self.getProductEditInfoObject.type == "locker_product") {
             query_params = [
               `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
+              `private=${self.getProductEditInfoObject.filters.private_product?true:false}`,
               `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
               `active_product_child_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
               `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
@@ -780,6 +781,7 @@ export class ProductsQueryParamsMixin extends Vue {
           else if(self.getProductEditInfoObject.type == "cart_product") {
             query_params = [
               `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
+              `personalized=${self.getProductEditInfoObject.filters.private_product}`,
               `active_product_id=${self.getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`,
               `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
             ];
@@ -832,6 +834,7 @@ export class ProductsQueryParamsMixin extends Vue {
     }
     await this.$store.dispatch('setProductType', { prd_type: "customized", value: self.getLastActiveProductData.customized });
     await this.$store.dispatch('setProductType', { prd_type: "personalized", value: self.getLastActiveProductData.personalized });
+    await this.$store.dispatch('setPrivateProduct', self.getLastActiveProductData.personalized);
     return query_params
   }
 }

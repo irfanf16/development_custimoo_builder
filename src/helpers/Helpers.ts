@@ -675,6 +675,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         // front_design:front_design,
         product_roster_detail: Store.getters.getProductRosters(),
         style_id: product_style.id,
+        is_private: selected_product.is_private?true:false,
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
       }

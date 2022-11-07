@@ -278,7 +278,8 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     if(is_private){
       await this.$store.dispatch('setProductType', { prd_type: "customized", value: false });
       await this.$store.dispatch('setProductType', { prd_type: "personalized", value: false });
-      is_customized = true
+      await this.$store.dispatch('setPrivateProduct', is_private);
+      is_customized = false
       is_personalized = false
     }
     else if(cart_product_type == "customized") {
@@ -308,7 +309,11 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       await (this as Record<any, any>).handleMainProducts(response);
 
     })
-    await this.$store.dispatch('setProductType', { prd_type: cart_item_product.product_type, value: true });
+    if(!is_private){
+      await this.$store.dispatch('setProductType', { prd_type: cart_item_product.product_type, value: true });
+    }else{
+      this.$store.dispatch('setPrivateProduct', is_private);
+    }
     this.hideVModal('cart-modal')
     if (!edit) {
       await this.$store.dispatch('setTabMain', {value: (this.mainTotalTabs + 1)})

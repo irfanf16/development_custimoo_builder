@@ -35,7 +35,7 @@
             <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
             Stock
           </button>
-          <button v-if="PrivateProductCount" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
+          <button v-if="isCustomerAuthenticated && PrivateProductCount" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
                   @click="changeProductType(!$store.getters.getPrivateProduct, 'private_product')">
             <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
             Private
@@ -51,7 +51,7 @@
           <div class="px-1 d-flex align-items-center checkbox_buttons gap-2">
             <button style="white-space: nowrap" type="button" class="btn btn-secondary active">
               <span><b-icon icon="check-circle-fill"></b-icon></span>
-              {{ $store.getters.getCustomized ? "Customized" : "Stock" }}
+              {{ $store.getters.getPrivateProduct ? "Private" : ( $store.getters.getCustomized? "Customized":"Stock") }}
             </button>
           </div>
         </template>
@@ -68,7 +68,7 @@
              <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
              Stock
            </button>
-           <button v-if="PrivateProductCount" style="white-space: nowrap" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
+           <button v-if="isCustomerAuthenticated && PrivateProductCount" style="white-space: nowrap" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
                    @click="changeProductType(true, 'private_product')">
              <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
              Private
@@ -195,6 +195,10 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
+  }
+
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
   }
 
   get styleIndex():number{
