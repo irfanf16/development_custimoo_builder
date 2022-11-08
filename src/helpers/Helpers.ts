@@ -668,6 +668,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         logo_colors: Store.getters.getLogosColors,
         model_id: product_models[selected_model_index].id,
         model_name: product_models[selected_model_index].model_name,
+        minimum_order_quantity: product_models[selected_model_index].minimum_order_quantity,
+        minimum_order_quantity_type: product_models[selected_model_index].minimum_order_quantity_type,
         product_id: selected_product.product_id,
         ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
         sync_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].sync_id:'',

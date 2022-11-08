@@ -111,6 +111,30 @@
         </div>
 
         <div class="align-self-start">
+          <template v-for="(cart_item, cart_item_index) in cartItems">
+            <tr :key="factory_product.id" v-for="(factory_product, factory_product_index) in cart_item.factory_products">
+              <td>
+                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
+                  <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
+                </template>
+                <template v-else="">
+                  <a style="cursor:pointer;color:blue;text-decoration: underline"
+                     @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name }}</a>
+                </template>
+              </td>
+              <td>
+                <template v-if="typeof factory_product.roster_product_count == 'undefined'">
+                  <span>Satisfy By Design Limit</span>
+                </template>
+                <template v-else-if="factory_product.roster_product_count >= factory_product.minimum_order_quantity">
+                  <span>Satisfy By Cart Limit</span>
+                </template>
+                <template v-else>
+                  <span style="color: indianred">Add more items to finalise</span>
+                </template>
+              </td>
+            </tr>
+          </template>
           <div class="fs-2 font-weight-bold ">Team Name / order reference</div>
           <div class="mt-1">
             <b-form-input class="form-input" placeholder="Team Name / order reference" type="text" name="customer_reference_no"
@@ -196,9 +220,29 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public shipping_address: Record<any, any> | null = null
 
   get cartItems() {
-    return this.$store.getters.getCartItems
-  }
+    let cItems = this.$store.getters.getCartItems;
+    cItems.forEach((item:Record<any, any>) => {
+      item.factory_products.forEach((product:Record<any, any>) => {
+        if(product.minimum_order_quantity_type === 'by_cart' && product.minimum_order_quantity != null && product.minimum_order_quantity > 0) {
+          let product_count = 0;
+          item.factory_products.forEach((nestProduct:Record<any, any>) => {
+            if(product.product_id == nestProduct.product_id){
+              product_count += parseInt(nestProduct.product_roster_detail[0].quantity);
+            }
+          });
+          product.roster_product_count = product_count;
+        }
+      });
+    });
 
+    console.log(cItems);
+  //  console.log(product_counts);
+
+    return cItems;
+  }
+  get getProductSkus(){
+    return this.$store.getters.getProductsSkus;
+  }
   get company(){
     return this.$store.getters.getCompany;
   }
