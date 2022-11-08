@@ -38,7 +38,7 @@
           <logo-extracted-colors :custom-logo="custom_logo" v-if="logoColors.length > 0 && customLogoIndex == 0" />
         </div>
       </b-tab>
-      <recent-logos-new :custom-logo-index="custom_logo_tab_index" :custom-logo="customLogos[custom_logo_tab_index]"/>
+      <recent-logos :custom-logo-index="custom_logo_tab_index" :custom-logo="customLogos[custom_logo_tab_index]"/>
       <template #tabs-end v-if="!expand_logos">
         <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count"
           @click="addLogoTab">
@@ -52,21 +52,15 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import LogoUploader from "@/components/Logo/LogoUploader.vue"
-import SaveLogoModal from "@/components/SaveLogoModal.vue"
-import SaveColorModal from "@/components/SaveColorModal.vue"
-import LogoColorTabs from "@/components/LogoColorTabs.vue"
-import RecentLogosNew from "@/components/RecentLogosNew.vue";
+import RecentLogos from "@/components/Logo/RecentLogos.vue";
 import LogoExtractedColors from "@/components/Logo/LogoExtractedColors.vue";
 import { getLogoSettingsObject } from "@/helpers/Helpers"
 
 
 @Component<LogoPlacementTab>({
   components: {
-    RecentLogosNew,
+    RecentLogos,
     LogoUploader,
-    SaveLogoModal,
-    SaveColorModal,
-    LogoColorTabs,
     LogoExtractedColors
   },
   async mounted() {

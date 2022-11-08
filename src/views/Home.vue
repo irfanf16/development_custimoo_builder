@@ -364,7 +364,7 @@ import ItemToCustomize from '@/components/ItemToCustomize.vue'
 import ChooseInterest from '@/components/ChooseInterest.vue'
 import CustomizationTabs from '@/components/CustomizationTabs.vue'
 import SaveColorModal from "@/components/SaveColorModal.vue"
-import UploadLogo from '@/components/UploadLogo.vue'
+// import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import ExtractedColors from '@/components/ExtractedColors.vue'
@@ -390,7 +390,8 @@ import {
   getRandom, resetLastActiveProductData, lastActiveProductDefaultObject
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
-import LogoUploader from "@/components/mobile/LogoUploader.vue";
+// import LogoUploader from "@/components/mobile/LogoUploader.vue";
+import LogoUploader from "@/components/Logo/LogoUploader";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import { findIndex } from 'lodash'
@@ -416,7 +417,7 @@ Vue.filter('formatDate', function(value:string) {
     ItemToCustomize,
     ChooseInterest,
     CustomizationTabs,
-    UploadLogo,
+    // UploadLogo,
     LockerRoomModal,
     AddLockerRoomModal,
     SaveColorModal,

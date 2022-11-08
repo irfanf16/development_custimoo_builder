@@ -3,7 +3,7 @@
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
         <div class="myscroll" ref="myscroll">
-          <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
+<!--          <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
@@ -17,14 +17,14 @@
               <LogoPlacementTabs @setColorShuffled="(val) => $emit('setColorShuffled', val)" :isColorShuffled="isColorShuffled" v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
                                  :logosSetting="selectedProduct.logos_setting"/>
             </div>
-          </b-tab>
-          <b-tab>
+          </b-tab>-->
+          <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <template #title>
               <a>
                 <span class="icon-holder">
                   <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
                 </span>
-                Logo1
+                Logo
               </a>
             </template>
             <div class="logo-placement-tabs">
@@ -119,12 +119,12 @@
 <script lang="ts">
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
-import LogoPlacementTabs from './LogoPlacementTabs.vue'
+// import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import LogoPlacementTab from '@/components/Logo/LogoPlacementTab.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
-import UploadLogo from '@/components/UploadLogo.vue'
+// import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 import RecentLogos from "@/components/RecentLogos.vue";
@@ -134,13 +134,13 @@ import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
   components: {
     RecentLogos,
     ColorAccordion,
-    LogoPlacementTabs,
+    // LogoPlacementTabs,
     LogoPlacementTab,
     CustomizationText,
     CollarStyle,
     EditRosterAreaTab,
     ColorTabs,
-    UploadLogo,
+    // UploadLogo,
   },
   mounted() {
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});

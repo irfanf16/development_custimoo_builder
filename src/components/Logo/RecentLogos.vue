@@ -18,7 +18,7 @@
 
     </div>
     <confirm-modal popup_icon="info" message="This logo cannot be deleted as it is using in one of your locker product" cancel_text="" confirm_text="" name="delete-logo-ref" ref="delete-logo-ref"></confirm-modal>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader" v-if="showLoader"><img src="@/assets/images/loading.gif" /></div>
   </div>
 
 </template>
@@ -30,10 +30,10 @@ import {http} from "@/httpCommon"
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts} from "@/mixins/LockerProduct";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import {processColorsCustom, setCustomLogo} from "../helpers/Helpers"
+import {processColorsCustom, setCustomLogo} from "@/helpers/Helpers"
 import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 
-@Component<RecentLogosNew>({
+@Component<RecentLogos>({
   components: {
     ConfirmModal
   },
@@ -43,7 +43,7 @@ import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 })
 
 
-export default class RecentLogosNew extends Mixins(ErrorMessages,LockerProducts, CustomLogosMixin) {
+export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, CustomLogosMixin) {
 
   /*
   * props starts

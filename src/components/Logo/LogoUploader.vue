@@ -39,14 +39,13 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon"
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {getLogoSettingsObject, processColorsCustom, recentLogoDefaultObject} from '@/helpers/Helpers'
-import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
 import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 
 @Component<LogoUploader>({
-  components: { LogoEditorModal, LogoDisclaimerModal, LogoEditor },
+  components: { LogoDisclaimerModal, LogoEditor },
   mounted() {
     const logo_disclaimer_info = localStorage.getItem("logoDisclaimerInfo")
     if(logo_disclaimer_info) {

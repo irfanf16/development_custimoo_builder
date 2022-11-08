@@ -12,7 +12,6 @@ export default class CustomLogosMixin extends Vue{
       for(const product_id in custom_logos) {
         if(custom_logos[product_id][0]) {
           custom_logos[product_id][0] = {...custom_logos[product_id][0], ...team_logo_obj}
-          console.log('custom_logo[0]', custom_logos[product_id][0])
         }
       }
     } else {
