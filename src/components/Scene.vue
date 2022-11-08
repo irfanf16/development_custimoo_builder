@@ -886,7 +886,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           }
           if (logos.length) {
             logos.forEach((logo: Record<any, any>) => {
-              if (logo && logo.url && logo.logo_index != undefined) {
+              if (logo && logo.url) {
                 this.addLogos(logo, true)
               }
             })
