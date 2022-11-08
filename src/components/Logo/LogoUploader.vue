@@ -205,12 +205,14 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
       if(response_data.success) {
         let logo_data = response_data.result.customer_logo
         if(this.customLogoIndex == 0) {
+          logo_data.is_team_logo = true
           let logo_colors = processColorsCustom(logo_data.logo_colors)
           this.$store.commit('SET_LOGO_COLORS_INFO', {
             data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
           })
           this.addRemoveTeamLogoOnAllProducts('add', logo_data)
         } else {
+          this.customLogo.is_team_logo = false
           this.customLogo.transparent_logo = logo_data.transparent_logo_url;
           this.customLogo.smart_transparent_logo = logo_data.smart_transparent_logo_url;
           this.customLogo.original_logo_url = logo_data.original_logo_url;
