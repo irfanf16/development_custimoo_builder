@@ -195,6 +195,16 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
         }
       })
     }
+    if(!this.mainPreview && this.selectedProductId == this.product_id) {
+      self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
+        const logo = this.custom_logos[logo_index]
+        if(logo && this.custom_logo_objects[logo_index]) {
+          const logoObject = this.custom_logo_objects[logo_index]
+          const otherSideObject = this.other_side_logos[logo_index]
+          this.eventAction(logo, logoObject, otherSideObject)
+        }
+      })
+    }
   }
 })
 
@@ -279,7 +289,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     return this.$store.getters.getSetting('color_type');
   }
 
-  get customLogos(): [Record<any, any>] {
+  get custom_logos(): [Record<any, any>] {
     let product_id = this.product_id ? this.product_id : this.selectedProductId
     return this.$store.getters.getCustomLogos(product_id)
   }
@@ -330,9 +340,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   customLogosChanged(newVal: [Record<any, any>]) {
     if (this.mounted && this.logoAllowed) {
       const self = this
-      if (this.custom_logo_objects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
+      if (this.custom_logo_objects.length != this.custom_logos.filter((logo: Record<any, any>) => logo && logo.url).length) {
         this.custom_logo_objects.forEach((item: Record<any, any>, index: number) => {
-          if (item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '' || this.customLogos[item.logoIndex].url == null)) {
+          if (item && (!this.custom_logos[item.logoIndex] || this.custom_logos[item.logoIndex].url == '' || this.custom_logos[item.logoIndex].url == null)) {
             this.frontCanvas.remove(this.custom_logo_objects[item.logoIndex])
             if (this.backCanvas) {
               this.backCanvas.remove(this.custom_logo_objects[item.logoIndex])
@@ -404,7 +414,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             if (addLogo && logo.url) {
               let backLogosCount = 0
               if (!this.backCanvas) {
-                backLogosCount = this.customLogos.filter((item: Record<any, any>) => {
+                backLogosCount = this.custom_logos.filter((item: Record<any, any>) => {
                   return item && item.side == 'back'
                 }).length
               }
@@ -422,7 +432,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
         this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
       }
-      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "custom_logos": this.customLogos})
+      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "custom_logos": this.custom_logos})
     }
   }
 
@@ -867,16 +877,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             })
           }
           let logos: Record<any, any>[] = []
-          if (this.customLogos && this.logoAllowed) {
-            let customLogos = JSON.parse(JSON.stringify(this.customLogos))
+          if (this.custom_logos && this.logoAllowed) {
+            let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
             if (this.logosLimit) {
-              customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
+              custom_logos = this.custom_logos.slice(0, this.logosLimit) as [Record<any, any>]
             }
-            logos = logos.concat(customLogos) as [Record<any, any>]
+            logos = logos.concat(custom_logos) as [Record<any, any>]
           }
           if (logos.length) {
             logos.forEach((logo: Record<any, any>) => {
-              if (logo && logo.url) {
+              if (logo && logo.url && logo.logo_index != undefined) {
                 this.addLogos(logo, true)
               }
             })
@@ -911,7 +921,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         if(fabric_object.get("type") == "text") {
           this.handleCustomTextModifiedEvent(e.target)
         } else {
-          this.objectMove(e, side)
+          this.handleCustomLogoModifiedEvent(e.target)
         }
         let objects = canvas.getObjects('line');
         for (let i in objects) {
@@ -1532,73 +1542,67 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   }
 
   public objectMove(e: any, side: string) {
+    const logo_index = e.target.logo_index
     const self = this;
-    this.customLogos.forEach((logo, index) => {
-      if (logo) {
-        let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
-        if (logoUrl == e.target._element.src.split("?")[0] && logo.logoIndex == e.target.logoIndex) {
-          if (e.action == 'drag') {
-            let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'x_axis',
-              value: e.target.left
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'y_axis',
-              value: e.target.top
-            })
-          } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-            let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-            const width = e.target.width * e.target.scaleX;
-            const height = e.target.height * e.target.scaleY;
-            const converted_width = unitConversion((width * this.measurementRatio));
-            const converted_height = unitConversion((height * this.measurementRatio));
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'scaleX',
-              value: e.target.scaleX
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'originalWidth',
-              value:converted_width.value,
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'scaleY',
-              value: e.target.scaleY
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'originalHeight',
-              value:converted_height.value
-            })
-          } else if (e.action == 'rotate') {
-            let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'rotation',
-              value: e.target.angle
-            })
-          }
-          self.$store.dispatch('updateCustomLogoAttribute', {
-            index: index,
-            attribute: 'action',
-            value: e.action
-          })
-          let dimText = this.dimTextFront
-          if (e.target.side == 'back' || e.target.side == 'Back') {
-            dimText = this.dimTextBack
-          }
-          this.showDimensions(e, dimText)
-        }
-      }
+    if (e.action == 'drag') {
+      let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
+      self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
+      self.$store.dispatch('updateCustomLogoAttribute', {
+        index: logo_index,
+        attribute: 'x_axis',
+        value: e.target.left
+      })
+      self.$store.dispatch('updateCustomLogoAttribute', {
+        index: logo_index,
+        attribute: 'y_axis',
+        value: e.target.top
+      })
+    } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
+      let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
+      self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
+      const width = e.target.width * e.target.scaleX;
+      const height = e.target.height * e.target.scaleY;
+      const converted_width = unitConversion((width * this.measurementRatio));
+      const converted_height = unitConversion((height * this.measurementRatio));
+      self.$store.dispatch('updateCustomLogoAttribute', {
+        index: logo_index,
+        attribute: 'scaleX',
+        value: e.target.scaleX
+      })
+      self.$store.dispatch('updateCustomLogoAttribute', {
+        index: logo_index,
+        attribute: 'originalWidth',
+        value:converted_width.value,
+      })
+      self.$store.dispatch('updateCustomLogoAttribute', {
+        index: logo_index,
+        attribute: 'scaleY',
+        value: e.target.scaleY
+      })
+      self.$store.dispatch('updateCustomLogoAttribute', {
+        index: logo_index,
+        attribute: 'originalHeight',
+        value:converted_height.value
+      })
+    } else if (e.action == 'rotate') {
+      let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
+      self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
+      self.$store.dispatch('updateCustomLogoAttribute', {
+        index: logo_index,
+        attribute: 'rotation',
+        value: e.target.angle
+      })
+    }
+    self.$store.dispatch('updateCustomLogoAttribute', {
+      index: logo_index,
+      attribute: 'action',
+      value: e.action
     })
+    let dimText = this.dimTextFront
+    if (e.target.side == 'back' || e.target.side == 'Back') {
+      dimText = this.dimTextBack
+    }
+    this.showDimensions(e, dimText)
   }
 
   public async addModel(modelUrl: string, side: string) {
@@ -1726,7 +1730,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   }
 
   public addLogos(logo: Record<any, any>, from_load = false) {
-    if((this.mounted || from_load)) {
+    if(logo.logo_index == 0 && logo.product_id != this.product_id) {
+      logo = this.custom_logos[logo.logo_index]
+    }
+    if(logo.product_id == this.product_id && (this.mounted || from_load)) {
       if(this.custom_logo_objects[logo.logo_index as number]) {
         this.deleteExistingLogosFromCanvas(logo.logo_index)
       }
@@ -2146,6 +2153,25 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height.value;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
+  }
+
+  public handleCustomLogoModifiedEvent(fabric_object: Record<any, any>) {
+    let self: Record<any, any> = this;
+    const logo_index =  fabric_object.get("logo_index");
+    if(this.custom_logos[logo_index]) {
+      this.custom_logos[logo_index].x_axis = fabric_object.get("left");
+      this.custom_logos[logo_index].y_axis = fabric_object.get("top");
+      this.custom_logos[logo_index].rotation = fabric_object.get("angle");
+      this.custom_logos[logo_index].scaleX = fabric_object.get("scaleX");
+      this.custom_logos[logo_index].scaleY = fabric_object.get("scaleY");
+      const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
+      const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
+      const converted_width = unitConversion(width)
+      const converted_height = unitConversion(height)
+      this.custom_logos[logo_index].originalWidth = converted_width.value;
+      this.custom_logos[logo_index].originalHeight = converted_height.value;
+    }
+    self.$eventBus.$emit("customLogoStoreUpdated", logo_index);
   }
 
   public setShowSmall(side: string): void {

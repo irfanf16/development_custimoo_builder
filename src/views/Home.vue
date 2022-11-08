@@ -323,27 +323,30 @@
           <div class="mobile-reset" v-if="mobileScreen && (undoItems.length > 0 || redoitems.length > 0)">
             <b-button @click="resetStore" variant="secondary" class="p-1"><b-icon-arrow-clockwise /></b-button>
           </div>
+
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
             <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll"
                              :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
-            <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
-              <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
-              <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
+<!--            mobile view code-->
+<!--            <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">-->
+<!--              <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>-->
+<!--              <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>-->
 
-              <div>
-                <LogoUploader @switchTabs="switchTabs" @ @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
-              </div>
-            </div>
-            <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">
-              <span class="fs-3 font-weight-bold d-inline-flex pb-1">Logo Uploader</span>
-              <span @click="switchTabs(0, true)" class="maximizer close">
-              <svg height="1em" width="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                   viewBox="0 0 16 16">
-                <polygon points="0,11.8 0,0 11.8,0 "/>
-                <polygon points="16,4.3 16,16 4.3,16 "/>
-              </svg>
-            </span>
-            </div>
+<!--              <div>-->
+<!--                <LogoUploader @switchTabs="switchTabs" @ @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">-->
+<!--              <span class="fs-3 font-weight-bold d-inline-flex pb-1">Logo Uploader</span>-->
+<!--              <span @click="switchTabs(0, true)" class="maximizer close">-->
+<!--              <svg height="1em" width="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"-->
+<!--                   viewBox="0 0 16 16">-->
+<!--                <polygon points="0,11.8 0,0 11.8,0 "/>-->
+<!--                <polygon points="16,4.3 16,16 4.3,16 "/>-->
+<!--              </svg>-->
+<!--            </span>-->
+<!--            </div>-->
+<!--            mobile view code end-->
           </b-col>
         </template>
       </b-row>
@@ -391,7 +394,7 @@ import {
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/mobile/LogoUploader.vue";
-import LogoUploader from "@/components/Logo/LogoUploader";
+// import LogoUploader from "@/components/Logo/LogoUploader";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import { findIndex } from 'lodash'
@@ -407,7 +410,6 @@ Vue.filter('formatDate', function(value:string) {
 @Component<Home>({
   components: {
     Popper,
-    LogoUploader,
     CartModal,
     CustomTabs,
     ConfirmModal,

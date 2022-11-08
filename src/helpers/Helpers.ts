@@ -739,7 +739,7 @@ const initCustomLogos = async(retrieved_products: Record<any, any>) => {
           const logoSetting = product.logos_setting[0]
           let logo = {
             id: null,
-            product_id: null,
+            product_id: product.id,
             product_style_id: null,
             url: '',
             width: logoSetting.width,
@@ -758,6 +758,7 @@ const initCustomLogos = async(retrieved_products: Record<any, any>) => {
           Store.commit('customLogo', {index: 0, logo: logo, prd_id: product.id})
         } else { // if logo is allowed but there is no setting for logo in product the add default logo object to show team logo
           let logo = getLogoSettingsObject()
+          logo.product_id = product.id
           if(team_logo) {
             logo = {...logo, ...team_logo}
           }
