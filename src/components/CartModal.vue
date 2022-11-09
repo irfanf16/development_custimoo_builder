@@ -134,15 +134,12 @@
                   <td>
                       <span>{{ factory_product.minimum_order_quantity }}</span>
                   </td>
-                  <td>
-                    <template v-if="typeof factory_product.roster_product_count == 'undefined'">
-                      <span>{{ factory_product.roster_product_count }}</span>
-                    </template>
-                    <template v-else-if="factory_product.roster_product_count >= factory_product.minimum_order_quantity">
+                  <td :class="{highlightMOQ: (factory_product.roster_product_count < factory_product.minimum_order_quantity)}">
+                    <template v-if="factory_product.roster_product_count >= factory_product.minimum_order_quantity">
                       <span>{{ factory_product.roster_product_count }}</span>
                     </template>
                     <template v-else>
-                      <span style="color: indianred">{{ factory_product.roster_product_count }}</span>
+                      <span>{{ factory_product.roster_product_count }}</span>
                     </template>
                   </td>
                 </tr>
@@ -237,28 +234,23 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   get cartItems() {
     let cItems = this.$store.getters.getCartItems;
     cItems.forEach((item:Record<any, any>) => {
-      let singleProductContainer:Record<any, any> = [];
-      item.factory_products.forEach((product:Record<any, any>) => {
-        if(product.minimum_order_quantity_type === 'by_cart' && product.minimum_order_quantity != null && product.minimum_order_quantity > 0) {
-          let product_count = 0;
-          item.factory_products.forEach((nestProduct:Record<any, any>) => {
-            if(product.product_id == nestProduct.product_id){
-              product_count += parseInt(nestProduct.product_roster_detail[0].quantity);
-            }
-          });
-          if(singleProductContainer.includes(product.product_id)){
-            product.show_in_summary = false;
-          }else{
-            singleProductContainer.push(product.product_id);
-            product.show_in_summary = true;
+    let singleProductContainer:Record<any, any> = [];
+    item.factory_products.forEach((product:Record<any, any>) => {
+        let product_count = 0;
+        item.factory_products.forEach((nestProduct:Record<any, any>) => {
+          if(product.product_id == nestProduct.product_id){
+            product_count += parseInt(nestProduct.product_roster_detail[0].quantity);
           }
-          product.roster_product_count = product_count;
+        });
+        if(singleProductContainer.includes(product.product_id)){
+          product.show_in_summary = false;
+        }else{
+          singleProductContainer.push(product.product_id);
+          product.show_in_summary = true;
         }
+        product.roster_product_count = product_count;
       });
     });
-
-    console.log(cItems);
-  //  console.log(product_counts);
 
     return cItems;
   }
@@ -294,8 +286,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       this.showToast('Order product sum is not meeting the MOQ criteria.', 'error');
       return false;
     }
-
-    console.log(12121);
     return false;
     let payload = {}
     payload['customer_reference_no'] = this.customer_reference_no
@@ -405,6 +395,10 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 </script>
 
 <style lang="scss" scoped>
+.highlightMOQ{
+  background: #FF4500;
+  color: #ffffff;
+}
 .loader {
   &.relative {
     position: absolute;
