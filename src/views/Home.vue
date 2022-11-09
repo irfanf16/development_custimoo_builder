@@ -1384,12 +1384,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       })
       await this.exitFromEditMode()
       this.hideLockerProductUpdateButton()
-      // if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
-      //   await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
-      //   await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
-      //   this.$store.commit('CHANGE_EDIT_STATUS',{status:false})
-      //
-      // }
       this.updateOrderItemProducts = null;
       await this.$store.dispatch('resetStore')
       await self.$eventBus.$emit('resetTextsCanvas')

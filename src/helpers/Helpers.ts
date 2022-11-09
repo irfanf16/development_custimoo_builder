@@ -772,9 +772,10 @@ const initCustomLogos = async(retrieved_products: Record<any, any>) => {
 const initCustomLogosNew = async (retrieved_products: Record<any, any>) => {
   const team_logo = await getTeamLogo()
   const custom_logos_by_products: Record<any, any> = {}
+  const existing_custom_logos = Store.getters.getCustomLogos('all')
   retrieved_products.forEach((product: Record<any, any>) => {
     if(product.is_logo_allowed) {
-      const product_existing_custom_logos = Store.getters.getCustomLogos(product.id)
+      const product_existing_custom_logos = existing_custom_logos ? existing_custom_logos[product.id] : null
       /*
       * check if product custom logos already exists in persistent state then no need to load custom logos for that product
       * and continue to next iteration
