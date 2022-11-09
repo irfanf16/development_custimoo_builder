@@ -38,7 +38,9 @@
           <logo-extracted-colors :custom-logo="custom_logo" v-if="logoColors.length > 0 && customLogoIndex == 0" />
         </div>
       </b-tab>
-      <recent-logos :custom-logo-index="custom_logo_tab_index" :custom-logo="customLogos[custom_logo_tab_index]"/>
+      <template v-if="customLogos && customLogos.length > 0">
+        <recent-logos :custom-logo-index="custom_logo_tab_index" :custom-logo="customLogos[custom_logo_tab_index]"/>
+      </template>
       <template #tabs-end v-if="!expand_logos">
         <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count"
           @click="addLogoTab">

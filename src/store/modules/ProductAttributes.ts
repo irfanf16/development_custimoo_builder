@@ -5,7 +5,7 @@ import {
   rosterDefaultItem,
   setRetrievedProductsCustomTexts,
   getRosterDetailDefaultObject,
-  initCustomLogos,
+  initCustomLogosNew,
   setCustomLogo,
   getLogoSettings,
   setLogoSettings,
@@ -760,7 +760,7 @@ const ProductAttributes:Module<any, any> = {
       state.logoTabIndex = 0;
       state.customLogoObjects = [];
       state.customLogos = {};
-      await initCustomLogos(state.products)
+      await initCustomLogosNew(state.products)
     },
     RESET_ALL_COLORS: (state: Record<any, any>) => {
       state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]

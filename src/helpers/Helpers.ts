@@ -791,6 +791,7 @@ const initCustomLogosNew = async (retrieved_products: Record<any, any>) => {
       if(team_logo) {
         first_logo_setting = {...first_logo_setting, ...team_logo}
       }
+      first_logo_setting.product_id = product.id
       custom_logos_by_products[product.id] = [first_logo_setting]
     }
   })

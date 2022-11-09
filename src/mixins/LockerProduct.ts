@@ -3,7 +3,7 @@ import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
 
 import {
-  getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
+  getActiveProductData, getRandom, handleResponseException, processColorsCustom,
   setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject,
   initCustomLogosNew
 } from '@/helpers/Helpers'
@@ -330,7 +330,7 @@ export class handleMainProducts extends Vue {
 
       await self.setLockerProductData(editing_product_detail)
       let selected_product = this.$store.getters.getSelectedProduct;
-      initCustomLogos(retrieved_products)
+      initCustomLogosNew(retrieved_products)
       this.$store.dispatch('setProductsRosters')
       let customLogos = this.$store.getters.getCustomLogoObject
       for (const product of retrieved_products) {
