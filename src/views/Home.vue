@@ -118,7 +118,7 @@
                         </template>
                       </div>
                     </li>
-                    <li class="position-relative" v-if="isCustomerAuthenticated">
+                    <li class="position-relative" v-if="isCustomerAuthenticated && ((company.platform == 'self' && customerPermissions.includes('place-order')) || company.platform == 'cdnExceptLogin')">
                       <a  class="icon mr-0" @click="openCartModal">
                         <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                       </a>

@@ -273,33 +273,37 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let is_customized = false;
     let is_personalized = false;
     let is_private = cart_item_product.is_private?true:false;
+    cart_product_type = is_private? "private":cart_product_type;
 
     //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
-    if(is_private){
-      await this.$store.dispatch('setProductType', { prd_type: "customized", value: false });
-      await this.$store.dispatch('setProductType', { prd_type: "personalized", value: false });
-      await this.$store.dispatch('setPrivateProduct', is_private);
-      is_customized = false
-      is_personalized = false
+    switch(cart_product_type) {
+      case "private":
+        is_private = true;
+        is_customized = false;
+        is_personalized = false;
+        break;
+      case "customized":
+        is_private = false;
+        is_customized = true;
+        is_personalized = false;
+        break;
+      case "personalized":
+        is_private = false;
+        is_customized = false;
+        is_personalized = true;
     }
-    else if(cart_product_type == "customized") {
-      await this.$store.dispatch('setProductType', { prd_type: "customized", value: true });
-      await this.$store.dispatch('setProductType', { prd_type: "personalized", value: false });
-      is_customized = true
-      is_personalized = false
-    } else if(cart_product_type == "personalized") {
-      await this.$store.dispatch('setProductType', { prd_type: "customized", value: false });
-      await this.$store.dispatch('setProductType', { prd_type: "personalized", value: true });
-      is_customized = false
-      is_personalized = true
-    }
+
+    await this.$store.dispatch('setProductType', { prd_type: "customized", value: is_customized });
+    await this.$store.dispatch('setProductType', { prd_type: "personalized", value: is_private });
+    await this.$store.dispatch('setPrivateProduct', is_private);
+
     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
       editing: true,  type: "cart_product", filters: {customized: is_customized, personalized: is_personalized, search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
         cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product
       },
       order_product_info: null
     })
-    self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: cart_item_product.product_roster_detail })
+    self.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
 
     //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
     this.$root.$emit('rostershared', '')
