@@ -1,5 +1,6 @@
 {
   "en": {
-    "minimum_order_messagesss": "Default To complete order you need to book minimum {min_products_count} products"
+    "minimum_order_roster_message": "Product quantity must be equal or greater than {min_products_count} to add to cart.",
+    "minimum_order_cart_message": "Order products sum is not meeting the MOQ criteria."
   }
 }

@@ -234,7 +234,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   get cartItems() {
     let cItems = this.$store.getters.getCartItems;
     cItems.forEach((item:Record<any, any>) => {
-    let singleProductContainer:Record<any, any> = [];
+    let uniqueProductContainer:Record<any, any> = [];
     item.factory_products.forEach((product:Record<any, any>) => {
         let product_count = 0;
         item.factory_products.forEach((nestProduct:Record<any, any>) => {
@@ -242,10 +242,10 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
             product_count += parseInt(nestProduct.product_roster_detail[0].quantity);
           }
         });
-        if(singleProductContainer.includes(product.product_id)){
+        if(uniqueProductContainer.includes(product.product_id)){
           product.show_in_summary = false;
         }else{
-          singleProductContainer.push(product.product_id);
+          uniqueProductContainer.push(product.product_id);
           product.show_in_summary = true;
         }
         product.roster_product_count = product_count;
@@ -283,10 +283,10 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
   public createOrder() {
     if(!this.can_finalize_order){
-      this.showToast('Order product sum is not meeting the MOQ criteria.', 'error');
+      this.showToast(`${this.$t('minimum_order_cart_message')}`, "error");
       return false;
     }
-    return false;
+
     let payload = {}
     payload['customer_reference_no'] = this.customer_reference_no
     if (!this.customer_reference_no) {
