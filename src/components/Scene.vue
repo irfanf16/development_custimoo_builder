@@ -29,9 +29,11 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
   async mounted() {
     let self: Record<any, any> = this;
     self.$eventBus.$on("customTextUpdated", this.addTextsNew)
-    self.$eventBus.$on("customTextRemoved", self.deleteExistingTextsFromCanvas)
-    self.$eventBus.$on("resetTextsCanvas", self.resetTextsFromCanvas)
+    self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
+    self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
     self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogos)
+    self.$eventBus.$on("customTextRemoved", this.deleteExistingLogosFromCanvas)
+    self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -1838,24 +1840,48 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     }
   }
 
-  public async deleteExistingLogosFromCanvas(custom_logo_index:  number) {
-    const custom_logo = this.custom_logo_objects[custom_logo_index]
-    if(custom_logo) {
-      this.frontCanvas.remove(custom_logo)
-      if(this.back) {
-        this.backCanvas.remove(custom_logo)
-      }
-      const other_side_logo = this.other_side_logos[custom_logo_index]
-      if(other_side_logo) {
-        this.frontCanvas.remove(other_side_logo)
-        if(this.back) {
-          this.backCanvas.remove(other_side_logo)
+  public async resetLogosFromCanvas() {
+    if(this.custom_logo_objects) {
+      for (let objectIndex = 0; objectIndex < this.custom_logo_objects.length; objectIndex++) {
+        const custom_logo = this.custom_logo_objects[objectIndex]
+        if(custom_logo) {
+          this.frontCanvas.remove(custom_logo)
+          if(this.back) {
+            this.backCanvas.remove(custom_logo)
+          }
+          const otherSideLogo = this.other_side_logos[objectIndex]
+          if(otherSideLogo) {
+            this.frontCanvas.remove(otherSideLogo)
+            if(this.back) {
+              this.backCanvas.remove(otherSideLogo)
+            }
+          }
         }
-        delete this.other_side_logos[custom_logo_index]
       }
+      this.custom_logo_objects = []
     }
+  }
 
-    delete this.custom_logo_objects[custom_logo_index]
+  public async deleteExistingLogosFromCanvas(custom_logo_index:  number) {
+    if(custom_logo_index == 0 || this.custom_logos[custom_logo_index] && this.custom_logos[custom_logo_index].product_id == this.product_id) {
+      const custom_logo = this.custom_logo_objects[custom_logo_index]
+      if (custom_logo) {
+        this.frontCanvas.remove(custom_logo)
+        if (this.back) {
+          this.backCanvas.remove(custom_logo)
+        }
+        const other_side_logo = this.other_side_logos[custom_logo_index]
+        if (other_side_logo) {
+          this.frontCanvas.remove(other_side_logo)
+          if (this.back) {
+            this.backCanvas.remove(other_side_logo)
+          }
+          this.other_side_logos.splice(custom_logo_index, 1)
+        }
+      }
+
+      this.custom_logo_objects.splice(custom_logo_index, 1)
+    }
   }
 
   public showDimensions(e: any, dimText: Record<any, any>) {
