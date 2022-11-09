@@ -111,31 +111,45 @@
         </div>
 
         <div class="align-self-start">
-          <template v-for="(cart_item, cart_item_index) in cartItems">
-            <tr :key="factory_product.id" v-for="(factory_product, factory_product_index) in cart_item.factory_products">
-              <td>
-                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
-                  <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
-                </template>
-                <template v-else="">
-                  <a style="cursor:pointer;color:blue;text-decoration: underline"
-                     @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name }}</a>
-                </template>
-              </td>
-              <td>
-                <template v-if="typeof factory_product.roster_product_count == 'undefined'">
-                  <span>Satisfy By Design Limit</span>
-                </template>
-                <template v-else-if="factory_product.roster_product_count >= factory_product.minimum_order_quantity">
-                  <span>Satisfy By Cart Limit</span>
-                </template>
-                <template v-else>
-                  <span style="color: indianred">Add more items to finalise</span>
-                </template>
-              </td>
-            </tr>
-          </template>
-          <div class="fs-2 font-weight-bold ">Team Name / order reference</div>
+          <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
+            <thead class="bg-light">
+              <tr>
+                <th class="font-weight-bold">
+                  Product Name
+                </th>
+                <th class="font-weight-bold">
+                  MOQ
+                </th>
+                <th class="font-weight-bold">
+                  Total
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="(cart_item) in cartItems">
+                <tr :key="factory_product.id" v-for="(factory_product) in filterCartItemsForMOQSummary(cart_item.factory_products)">
+                  <td>
+                      <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.model_name }}</span>
+                  </td>
+                  <td>
+                      <span>{{ factory_product.minimum_order_quantity }}</span>
+                  </td>
+                  <td>
+                    <template v-if="typeof factory_product.roster_product_count == 'undefined'">
+                      <span>{{ factory_product.roster_product_count }}</span>
+                    </template>
+                    <template v-else-if="factory_product.roster_product_count >= factory_product.minimum_order_quantity">
+                      <span>{{ factory_product.roster_product_count }}</span>
+                    </template>
+                    <template v-else>
+                      <span style="color: indianred">{{ factory_product.roster_product_count }}</span>
+                    </template>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+          <div class="fs-2 font-weight-bold mt-3">Team Name / order reference</div>
           <div class="mt-1">
             <b-form-input class="form-input" placeholder="Team Name / order reference" type="text" name="customer_reference_no"
               v-model="customer_reference_no" />
@@ -218,10 +232,12 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public customer_reference_no = ""
   public shipping_address: Record<any, any> | null = null
+  public can_finalize_order = true;
 
   get cartItems() {
     let cItems = this.$store.getters.getCartItems;
     cItems.forEach((item:Record<any, any>) => {
+      let singleProductContainer:Record<any, any> = [];
       item.factory_products.forEach((product:Record<any, any>) => {
         if(product.minimum_order_quantity_type === 'by_cart' && product.minimum_order_quantity != null && product.minimum_order_quantity > 0) {
           let product_count = 0;
@@ -230,6 +246,12 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
               product_count += parseInt(nestProduct.product_roster_detail[0].quantity);
             }
           });
+          if(singleProductContainer.includes(product.product_id)){
+            product.show_in_summary = false;
+          }else{
+            singleProductContainer.push(product.product_id);
+            product.show_in_summary = true;
+          }
           product.roster_product_count = product_count;
         }
       });
@@ -258,7 +280,23 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   get editingCartProductInfo() {
     return this.$store.getters.getProductEditInfoObject['cart_product_info']
   }
+
+  public filterCartItemsForMOQSummary(cartItems:Record<any, any>){
+    this.can_finalize_order = true;
+    return cartItems.filter(item =>{
+      if(typeof item.roster_product_count !== 'undefined' && item.roster_product_count < item.minimum_order_quantity)
+        this.can_finalize_order = false;
+      return typeof item.show_in_summary !== 'undefined' && item.show_in_summary === true;
+    });
+  }
   public createOrder() {
+    if(!this.can_finalize_order){
+      this.showToast('Order product sum is not meeting the MOQ criteria.', 'error');
+      return false;
+    }
+
+    console.log(12121);
+    return false;
     let payload = {}
     payload['customer_reference_no'] = this.customer_reference_no
     if (!this.customer_reference_no) {
