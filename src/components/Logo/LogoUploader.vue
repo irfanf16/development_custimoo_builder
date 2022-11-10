@@ -239,6 +239,8 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
   }
 
   public removeLogo() {
+    const self: Record<any, any> = this;
+    self.$eventBus.$emit("customTextRemoved", this.customLogoIndex)
     if(this.customLogoIndex == 0) {
       this.addRemoveTeamLogoOnAllProducts('remove')
     }

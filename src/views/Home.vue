@@ -1387,6 +1387,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.updateOrderItemProducts = null;
       await this.$store.dispatch('resetStore')
       await self.$eventBus.$emit('resetTextsCanvas')
+      await self.$eventBus.$emit('resetLogosCanvas')
       await this.$store.dispatch('setTabMain',{value: 0});
       (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
       await this.$store.dispatch('SET_LOGO_COLORS', [])
