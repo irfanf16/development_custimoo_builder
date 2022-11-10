@@ -1633,7 +1633,7 @@ const getTeamLogo = () => {
       break
     }
   }
-  if(team_logo) {
+  if(Object.keys(team_logo).length > 0) {
     return {
       "id": team_logo.id,
       "url": team_logo.url,
