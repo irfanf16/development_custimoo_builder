@@ -168,6 +168,8 @@ export default class LogoPlacementTab extends Vue {
   }
 
   public removeLogoTab(logo_index: number) {
+    const self: Record<any, any> = this;
+    self.$eventBus.$emit("customLogoRemoved", logo_index)
     this.customLogos.splice(logo_index, 1)
     this.customLogos.forEach((custom_logo: Record<any, any>, customLogoIndex) => {
       custom_logo.logo_index = customLogoIndex
@@ -176,6 +178,8 @@ export default class LogoPlacementTab extends Vue {
 
   public handleLogoPlacementChange(updated_value: string, custom_logo: Record<any, any>) {
     custom_logo.side = updated_value
+    let self: Record<any, any> = this;
+    self.$eventBus.$emit('handleCustomLogoUpdatedEvent', custom_logo)
   }
 
   public getColors() {
