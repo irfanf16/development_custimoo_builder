@@ -266,6 +266,8 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public removeLogoTab(index: number){
+    const self: Record<any, any> = this;
+    self.$eventBus.$emit("customLogoRemoved", index)
     let payload = {
       index: index
     }

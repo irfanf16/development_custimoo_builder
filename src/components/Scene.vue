@@ -32,7 +32,7 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
     self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
     self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
     self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogos)
-    self.$eventBus.$on("customTextRemoved", this.deleteExistingLogosFromCanvas)
+    self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogosFromCanvas)
     self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
