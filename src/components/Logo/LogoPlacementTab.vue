@@ -178,6 +178,8 @@ export default class LogoPlacementTab extends Vue {
 
   public handleLogoPlacementChange(updated_value: string, custom_logo: Record<any, any>) {
     custom_logo.side = updated_value
+    let self: Record<any, any> = this;
+    self.$eventBus.$emit('handleCustomLogoUpdatedEvent', custom_logo)
   }
 
   public getColors() {
