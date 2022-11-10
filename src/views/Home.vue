@@ -73,6 +73,11 @@
                           </aside>
                         </Popper>
                       </template>
+                      <template >
+                        <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate Pdf</b-button>
+                        <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
+
+                      </template>
                     </template>
                     <template v-if="getProductEditInfoObject.type == 'order_product'">
                       <b-button @click="loadOrderItemProduct('previous')" variant="outline-secondary"
@@ -514,7 +519,7 @@ Vue.filter('formatDate', function(value:string) {
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
   ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton) {
   public products_fonts: Record<any, any>[] = []
-  public prevRoute:Record<any, any> = {};
+  public prevRoute: Record<any, any> = {};
   public logData = logData;
   public tabIndex = 0
   private nextPageUrl !: string
@@ -530,6 +535,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public mounted = false
   public productUpdated = false
+  public pdf_generation_loading = false
   public previousImageColors = []
   public logoColorUsed = false
   public showModal = false
@@ -580,19 +586,19 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   ]
   public is_shared_product = false;
 
-  private setRosterOpen(val:boolean) {
+  private setRosterOpen(val: boolean) {
     this.isRosterOpened = val
   }
 
   private genImages(isClose = false) {
     const canvasFront = this.ref['mainScene'][0].$refs['front']
     const canvasBack = this.ref['mainScene'][0].$refs['back']
-    const imgFront    = canvasFront.toDataURL('image/png')
-    const imgBack    = canvasBack.toDataURL('image/png')
-    if(isClose){
+    const imgFront = canvasFront.toDataURL('image/png')
+    const imgBack = canvasBack.toDataURL('image/png')
+    if (isClose) {
       this.frontPreview = ''
       this.backPreview = ''
-    }else{
+    } else {
       this.frontPreview = imgFront
       this.backPreview = imgBack
     }
@@ -606,75 +612,79 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getLastActiveProductData;
   }
 
+  get settings(){
+    return this.$store.getters.getSetting;
+  }
 
 
-  private get lockerIndex (){
+  private get lockerIndex() {
     return this.$store.getters.getLockerTabsIndex
   }
 
-  get usingColorLogos() : [Record<any, any>] {
+  get usingColorLogos(): [Record<any, any>] {
     return this.$store.getters.getUsingColorLogos;
   }
-  get productLockerId():number{
+
+  get productLockerId(): number {
     return this.$store.getters.getProductLockerId;
   }
 
-  private get lockerProductIndex (){
+  private get lockerProductIndex() {
     return this.$store.getters.getActiveLockerProduct
   }
 
-  private updateOtherTab(value:boolean){
+  private updateOtherTab(value: boolean) {
     this.showOtherTab = value
   }
 
   private adjustTotalTabs() {
     this.mainTotalTabs = 3
 
-    if(!this.selectedProduct.is_logo_allowed){
+    if (!this.selectedProduct.is_logo_allowed) {
       this.mainTotalTabs = (this.mainTotalTabs - 1)
     }
 
-    if(!this.selectedProduct.allow_name_number){
+    if (!this.selectedProduct.allow_name_number) {
       this.mainTotalTabs = (this.mainTotalTabs - 1)
     }
 
-    if(this.selectedProduct.product_type === 'personalized'){
+    if (this.selectedProduct.product_type === 'personalized') {
       this.mainTotalTabs = (this.mainTotalTabs - 1)
     }
   }
 
-  private swapSide(textIndex: number){
+  private swapSide(textIndex: number) {
     let side = this.customTexts[textIndex].side
-    if(side ==='front'){
+    if (side === 'front') {
       this.isFront = true
-    }else{
+    } else {
       this.isFront = false
     }
   }
 
-  private setCustomTextIndex(customTextIndex: number){
+  private setCustomTextIndex(customTextIndex: number) {
     this.customTextIndex = customTextIndex;
   }
 
-  private maximizeTab(ind:number, maximize:boolean){
+  private maximizeTab(ind: number, maximize: boolean) {
     this.switchTabs(ind, false)
     this.maximized = maximize
   }
 
-  private navigateTabs(side: string){
+  private navigateTabs(side: string) {
     let index = 0;
-    if(side === 'prev'){
+    if (side === 'prev') {
       index = this.activeTab - 1
-      if(!this.selectedProduct.is_logo_allowed && index === 0){
+      if (!this.selectedProduct.is_logo_allowed && index === 0) {
         index = -1
         this.showDesign()
       }
-      if(!this.selectedProduct.allow_name_number && index === 2) {
+      if (!this.selectedProduct.allow_name_number && index === 2) {
         index = 1
       }
     }
 
-    if(side === 'next') {
+    if (side === 'next') {
       index = this.activeTab + 1
       if (!this.selectedProduct.is_logo_allowed && index === 0) {
         index = 1
@@ -687,39 +697,38 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.switchTabs(index, false)
   }
 
-  private switchTabs (ind:number, isHome:boolean){
+  private switchTabs(ind: number, isHome: boolean) {
     this.maximized = true
 
     let self = this;
     let customizer_tabs;
-    if(ind >= 0){
+    if (ind >= 0) {
       this.sideTabIndex = ind
     }
 
-    if(isHome){
+    if (isHome) {
       this.hideOtherTab()
       self.$store.dispatch('setActiveTab', ind);
-    }
-    else {
-     // console.log(ind, isHome)
+    } else {
+      // console.log(ind, isHome)
 
       this.hideOtherTab()
-      if($(".sideNav li a").length){
+      if ($(".sideNav li a").length) {
         customizer_tabs = $(".sideNav li a")
         customizer_tabs.removeClass('active')
-        if(ind >= 0){
+        if (ind >= 0) {
           customizer_tabs.eq(ind).addClass('active')
         }
         self.$store.dispatch('setActiveTab', ind);
-      }else{
-        let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
+      } else {
+        let shadow_dom = (this.$root as Record<any, any>).$options.shadowRoot;
         customizer_tabs = shadow_dom.querySelectorAll('.sideNav li a')
 
-        for(let i=0; i<customizer_tabs.length; i++){
+        for (let i = 0; i < customizer_tabs.length; i++) {
           console.log(customizer_tabs[i].classList)
-          if(i === ind && ind >= 0){
+          if (i === ind && ind >= 0) {
             customizer_tabs[i].classList.add('active')
-          }else{
+          } else {
             customizer_tabs[i].classList.remove('active')
           }
         }
@@ -728,7 +737,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  public get activeTab () {
+  public get activeTab() {
     return this.$store.getters.getActiveTab
   }
 
@@ -739,15 +748,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('SET_RECENT_LOGOS')
   }
 
-  get notifications(){
+  get notifications() {
     return this.$store.getters.getNotifications
   }
+
   // get editCart(): Record<any, any> {
   //   return this.$store.getters.getEditCart
   // }
   get canvasImage() {
     return this.$store.getters.getCanvasImage
   }
+
   get lastRouteName() {
     let returnVal = '';
 
@@ -762,11 +773,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return returnVal;
   }
 
-  get notificationsCounter(){
+  get notificationsCounter() {
     let unread_notification_counter = 0
-    if (this.$store.getters.getNotifications.length){
-      this.$store.getters.getNotifications.forEach((notification:Record<any, any>) => {
-        if (notification.read_at === '' || notification.read_at === null){
+    if (this.$store.getters.getNotifications.length) {
+      this.$store.getters.getNotifications.forEach((notification: Record<any, any>) => {
+        if (notification.read_at === '' || notification.read_at === null) {
           unread_notification_counter += 1
         }
       })
@@ -777,33 +788,34 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get canvasReady() {
     return this.$store.getters.getCanvasReady
   }
-  get customTextObjects(){
+
+  get customTextObjects() {
     return this.$store.getters.customTextObjects;
   }
 
   @Watch('canvasReady')
-  canvasReadyChanged(newValL: [Record<any, any>]){
-    if(this.isCustomerAuthenticated && newValL && this.actionBeforeLogin) {
+  canvasReadyChanged(newValL: [Record<any, any>]) {
+    if (this.isCustomerAuthenticated && newValL && this.actionBeforeLogin) {
       this.actionAfterLogin()
     }
   }
 
   @Watch('revertRosterBool')
-  revertRosterBoolChanged(){
-    this.$store.commit('SET_REVERT_ROSTER_BOOL',false)
+  revertRosterBoolChanged() {
+    this.$store.commit('SET_REVERT_ROSTER_BOOL', false)
     this.$store.commit('CHANGE_EYE_INDEX', 0)
     this.$store.commit('SET_EDITING_ROSTER_PLAYER_INDEX', 0)
   }
 
-  get cartItemsCount(){
+  get cartItemsCount() {
     return this.$store.getters.getCartItemsCount
   }
 
-  get revertRosterBool(){
+  get revertRosterBool() {
     return this.$store.getters.getRevertRosterBool;
   }
 
-  public showConfirm(){
+  public showConfirm() {
     this.ref['reset-modal'].showConfirm()
   }
 
@@ -815,8 +827,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.isCustomerAuthenticated
   }
 
-  get customer():Record<any, any>{
-    return  this.$store.getters.getCustomer
+  get customer(): Record<any, any> {
+    return this.$store.getters.getCustomer
   }
 
   get categories(): [] {
@@ -831,41 +843,42 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getCustomLogos()
   }
 
-  get editProductStatus():boolean{
-    return  this.$store.getters.getEditStatus
+  get editProductStatus(): boolean {
+    return this.$store.getters.getEditStatus
   }
 
-  get mainProductType():string{
-    let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
-    return selected_product.back_design ?  "front_back" : "front";
+  get mainProductType(): string {
+    let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
+    return selected_product.back_design ? "front_back" : "front";
   }
 
-  public showCollectionModal = () =>{
+  public showCollectionModal = () => {
     this.ref['collectionModal'].showCollectionModal()
   }
-  public editCollectionModal = () =>{
+  public editCollectionModal = () => {
     this.ref['collectionModal'].editCollectionModal()
   }
-  public openCartModal = () =>{
-    if(this.cartItemsCount > 0) {
+  public openCartModal = () => {
+    if (this.cartItemsCount > 0) {
       this.showVModal('cart-modal')
     }
   }
 
-  public getPath(){
+  public getPath() {
     let url = ''
     url = this.$route.path
-    if (url.charAt(0) === '/'){
+    if (url.charAt(0) === '/') {
       url = url.substring(1)
     }
     return url
   }
+
   @Watch('customLogos', {
     deep: true
   })
-  async customLogosChanged(newValL: [Record<any, any>]){
-    try{
-      if (this.getUrlParams()){
+  async customLogosChanged(newValL: [Record<any, any>]) {
+    try {
+      if (this.getUrlParams()) {
         let query = this.getPath()
         let param = {
           case: 'custom_logos',
@@ -874,23 +887,28 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         }
         let res = await this.$store.dispatch('updateSharedProduct', param)
       }
-    }catch (error){
+    } catch (error) {
       console.log(error)
     }
   }
-  get undoItems():Record<any, any>{
+
+  get undoItems(): Record<any, any> {
     return this.$store.getters.getUndoItems
   }
-  get redoitems():Record<any, any>{
+
+  get redoitems(): Record<any, any> {
     return this.$store.getters.getRedoItems
   }
-  get selectedProduct(): Record<any, any>{
+
+  get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-  get selectedProductIndex(): number{
+
+  get selectedProductIndex(): number {
     return this.$store.getters.getSelectedIndex
   }
-  get hideSaveLockerButton():boolean{
+
+  get hideSaveLockerButton(): boolean {
     return this.$store.getters.getHideSaveLockerButton;
   }
 
@@ -899,27 +917,31 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let redo = this.$store.getters.getRedoItems;
     let hidebtn = this.$store.getters.getHideSaveLockerButton;
     let editProductInfo = this.getProductEditInfoObject;
-    if(hidebtn && editProductInfo.editing && editProductInfo.type=='locker_product'){
-      if(undo.length > 0 || redo.length > 0){
+    if (hidebtn && editProductInfo.editing && editProductInfo.type == 'locker_product') {
+      if (undo.length > 0 || redo.length > 0) {
         this.hideLockerProductUpdateButton()
       }
     }
     return hidebtn
   }
 
-  get styleIndex():number{
-    return  this.$store.getters.getCurrentStyleIndex;
+  get styleIndex(): number {
+    return this.$store.getters.getCurrentStyleIndex;
   }
+
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getProductRosters()
   }
+
   get imageColors(): any[] {
     return this.$store.getters.getLogosColors
   }
+
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
-  get company(): Record<any, any>{
+
+  get company(): Record<any, any> {
     return this.$store.getters.getCompany
   }
 
@@ -930,61 +952,69 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get cartItems() {
     return this.$store.getters.getCartItems
   }
+
   get actionBeforeLogin(): string {
     return this.$store.getters.getActionBeforeLogin
   }
-  get editStatus():boolean{
-    return  this.$store.getters.getEditStatus
+
+  get editStatus(): boolean {
+    return this.$store.getters.getEditStatus
   }
-  public getUrlParams(){
-    if (this.$route.params.product && this.$route.params.name && this.productUpdated){
+
+  public getUrlParams() {
+    if (this.$route.params.product && this.$route.params.name && this.productUpdated) {
       return true
-    }else{
-      return  false
+    } else {
+      return false
     }
   }
-  get cartLoading(): Record<any, any>{
+
+  get cartLoading(): Record<any, any> {
     return this.$store.getters.getCartLoading;
   }
-  get customerPermissions(){
+
+  get customerPermissions() {
     return this.$store.getters.getCustomerPermissions
   }
+
   get is_safari(): boolean {
     return this.$store.getters.getIsSafari
   }
-  public dropdownStyle = { } as any
+
+  public dropdownStyle = {} as any
   public down = false
-  public notificationsDropDown(){
-    if(this.down){
+
+  public notificationsDropDown() {
+    if (this.down) {
       this.dropdownStyle = {'height': '0px', 'opacity': '0'}
       this.down = false;
-    }else{
-      this.dropdownStyle = {'height' : 'auto', 'opacity': '1'}
+    } else {
+      this.dropdownStyle = {'height': 'auto', 'opacity': '1'}
       this.down = true;
     }
   }
 
   public async initProductsFonts(products: Record<any, any>[], resolve: any) {
-    for(let product_index = 0; product_index < products.length; product_index++) {
+    for (let product_index = 0; product_index < products.length; product_index++) {
       const product = products[product_index]
       const productFonts = product.namefonts;
-      if (productFonts.length){
+      if (productFonts.length) {
         const item = productFonts[0].json_data
-        if(item) {
-          for(let i = 0; i < item.length; i++) {
+        if (item) {
+          for (let i = 0; i < item.length; i++) {
             const font = item[i]
             let fontNameParam = font.path.split('/').reverse()
             fontNameParam = fontNameParam[0].split('.')
             const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-            const url = this.storageUrl + font.path + '?nocache=' + (this.is_safari? getRandom(3) : '11')
+            const url = this.storageUrl + font.path + '?nocache=' + (this.is_safari ? getRandom(3) : '11')
 
-            if(!this.products_fonts[fontNameParam[0]]) {
+            if (!this.products_fonts[fontNameParam[0]]) {
               const font_object = await this.loadFont(url)
-              if(font_object) {
+              if (font_object) {
                 const final_font = {
                   value: fontNameParam[0] as string,
                   text: fontName as string,
-                  url:`${process.env.VUE_APP_STORAGE_URL}${font.path}`,
+                  url: `${process.env.VUE_APP_STORAGE_URL}${font.path}`,
                   opentype_font: font_object
                 }
                 Vue.set(this.products_fonts, fontNameParam[0], final_font)
@@ -996,10 +1026,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       resolve('done')
     }
   }
+
   public loadFont(url: string) {
     return new Promise((resolve) => {
       opentype.load(url, (err: Record<any, any>, font_object: Record<any, any>) => {
-        if(!err) {
+        if (!err) {
           resolve(font_object);
         } else {
           resolve('')
@@ -1009,28 +1040,29 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public actionAfterLogin() {
-    if(this.prevRoute!.name == 'OrderDetail'){
+    if (this.prevRoute!.name == 'OrderDetail') {
       this.$router.push(this.prevRoute.fullPath)
     }
-    if(this.actionBeforeLogin == 'lockerRoom') {
+    if (this.actionBeforeLogin == 'lockerRoom') {
       this.getLockerRoomProducts(null)
       this.showVModal('locker-modal')
-    } else if(this.actionBeforeLogin == 'saveToLockerRoom') {
+    } else if (this.actionBeforeLogin == 'saveToLockerRoom') {
       this.getLockers()
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
-    } else if(this.actionBeforeLogin == 'summary') {
+    } else if (this.actionBeforeLogin == 'summary') {
       this.buyNow()
-    } else if(this.actionBeforeLogin == 'addToCart') {
+    } else if (this.actionBeforeLogin == 'addToCart') {
       this.isRosterOpened = true;
       this.addToCart()
-    } else if(this.actionBeforeLogin == 'shareDesign') {
+    } else if (this.actionBeforeLogin == 'shareDesign') {
       this.shareDesign()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
+
   private async addToCart() {
     await this.addToCartMixin(this.products_fonts);
-    if(this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress'){
+    if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress') {
       this.showVModal('cart-modal')
     }
   }
@@ -1040,11 +1072,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   @Watch('addedToCart')
-  addedToCartChanged(newVal:boolean) {
+  addedToCartChanged(newVal: boolean) {
     this.addToCartAnimation()
   }
 
-  private addToCartAnimation(){
+  private addToCartAnimation() {
     this.genImages()
     const canvasFront = this.ref['mainScene'][0].$refs['front']
     const canvasBack = this.ref['mainScene'][0].$refs['back']
@@ -1058,7 +1090,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     this.ref['cartAnim'] && this.ref['cartAnim'].classList.add('cart-animation')
 
-    setTimeout(()=>{
+    setTimeout(() => {
       this.ref['cartAnim'] && this.ref['cartAnim'].classList.remove('cart-animation')
       this.$store.dispatch('addedToCart', false)
     }, 300)
@@ -1067,7 +1099,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   getFillColors() {
     const url = '/product/colors?default_color=1'
     http.get(url).then((response: any) => {
-      if(response.data.length) {
+      if (response.data.length) {
         this.colors = JSON.parse(response.data.json_data)
       }
     }).catch((e: any) => {
@@ -1076,17 +1108,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
 
-  async deleteCartItem(item:Record<any,any>){
+  async deleteCartItem(item: Record<any, any>) {
     const response = await this.ref['delete-cart-item'].showConfirm();
-    if(response){
+    if (response) {
       const url = `carts/cart-items/${item.cart_item.id}/factory_product/${item.factory_product.id}`
-      http.delete(url).then(async (response:Record<any,any>) => {
+      http.delete(url).then(async (response: Record<any, any>) => {
         await this.$store.dispatch('getCartServer', {});
-        if(this.cartItems && !this.cartItems.length){
+        if (this.cartItems && !this.cartItems.length) {
           this.ref['cartModal'].hide();
         }
         this.showToast(response.data.message, 'success')
-      }).catch((e:any)=>{
+      }).catch((e: any) => {
         console.log(e);
         this.showError(e);
         this.ref['cartModal'].hide();
@@ -1097,20 +1129,20 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
-    this.$store.commit('SET_SELECTION_MODE',{
-      readonly:false,
-      collectionAddmoreMode:false,
-      eventProductMode:false,
-      eventCollectionMode:false
+    this.$store.commit('SET_SELECTION_MODE', {
+      readonly: false,
+      collectionAddmoreMode: false,
+      eventProductMode: false,
+      eventCollectionMode: false
     })
     this.gotoLogin()
   }
-  public gotoLogin(){
-    if (this.company.platform == 'self'){
+
+  public gotoLogin() {
+    if (this.company.platform == 'self') {
       this.$modal.show('loginModal')
-    }
-    else{
-      if(this.company.login_code.type == 'url') {
+    } else {
+      if (this.company.login_code.type == 'url') {
         window.location.href = this.company.login_code.action
       } else {
         eval(this.company.login_code.action)
@@ -1119,17 +1151,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private cancelEdit() {
-    this.$store.commit('CHANGE_EDIT_STATUS', {status : false, id: 0, designId: 0, styleId: 0, product_id:0})
+    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0})
     this.retrieveProducts();
   }
 
-  public async getLockers(share_url = false, show_add_to_locker_modal = false){
-    let self:Record<any, any> = this;
+  public async getLockers(share_url = false, show_add_to_locker_modal = false) {
+    let self: Record<any, any> = this;
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
-    if (show_add_to_locker_modal){
+    if (show_add_to_locker_modal) {
       const scene_ref = this.$store.getters.getCanvasImage.scene
-      if(scene_ref) {
+      if (scene_ref) {
         scene_ref.frontCanvas.discardActiveObject().renderAll()
         scene_ref.backCanvas.discardActiveObject().renderAll()
       }
@@ -1145,14 +1177,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     main_scene.backCanvas.discardActiveObject().renderAll();
     let locker_front_png = main_scene.frontCanvas.toDataURL("image/png").split(',')[1];
     let locker_back_png = null;
-    if(this.mainProductType == "front_back") {
-      locker_back_png =  main_scene.backCanvas.toDataURL("image/png").split(',')[1];
+    if (this.mainProductType == "front_back") {
+      locker_back_png = main_scene.backCanvas.toDataURL("image/png").split(',')[1];
     }
-    let distinct:Record<any, any> = []
+    let distinct: Record<any, any> = []
     let svgGroups = this.$store.getters.getSvgGroups
-    let unique:any = [];
-    for( let i = 0; i < svgGroups.length; i++ ){
-      if( !unique[svgGroups[i].color]){
+    let unique: any = [];
+    for (let i = 0; i < svgGroups.length; i++) {
+      if (!unique[svgGroups[i].color]) {
         distinct.push({value: svgGroups[i].color, name: svgGroups[i].name});
         unique[svgGroups[i].color] = 1;
       }
@@ -1173,7 +1205,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       svgcolors: distinct
     }
 
-    if (self.getProductEditInfoObject.editing){
+    if (self.getProductEditInfoObject.editing) {
       this.showLoader = true
       await http.post('updatelockerproduct', locker).then(async (successResponse) => {
         let response_data = successResponse.data;
@@ -1192,10 +1224,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       })
     }
   }
-  public undoAction(){
+
+  public undoAction() {
     this.$store.dispatch('undoAction')
   }
-  public redoAction(){
+
+  public redoAction() {
     this.$store.dispatch('redoAction');
   }
 
@@ -1207,9 +1241,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public showDesign() {
-    if(this.manageComponents.mobileScreen){
+    if (this.manageComponents.mobileScreen) {
       this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: false})
-      this.$store.dispatch('setManageComponents',  {index: 'ItemToCustomize', value: true})
+      this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: true})
       this.$store.dispatch('setManageComponents', {index: 'AdvanceCustomization', value: false})
       this.$store.dispatch('setManageComponents', {index: 'LogoArea', value: false})
       this.$store.dispatch('setManageComponents', {index: 'ChooseColor', value: false})
@@ -1224,12 +1258,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
     this.$store.dispatch('setManageComponents', {index: 'CustomizationTabs', value: true})
   }
+
   public additionalClass(additionalClassTrigger: string) {
-    if(additionalClassTrigger){
+    if (additionalClassTrigger) {
       this.extractedcolorclass = "additional-class"
     }
   }
-  public async logoutCustomer(){
+
+  public async logoutCustomer() {
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
       await this.$store.dispatch('logoutCustomer');
@@ -1238,8 +1274,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  public copyLink(){
-    let testingCodeToCopy = this.ref['share-design-link']  as Record<any, any>
+  public copyLink() {
+    let testingCodeToCopy = this.ref['share-design-link'] as Record<any, any>
     testingCodeToCopy.select()
     try {
       document.execCommand('copy');
@@ -1249,31 +1285,31 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  public async getLockerRoomProducts(locker_index:any){
-    this.$store.commit('SET_SELECTION_MODE',{
-      readonly:false,
-      collectionAddmoreMode:false,
-      eventProductMode:false,
-      eventCollectionMode:false
+  public async getLockerRoomProducts(locker_index: any) {
+    this.$store.commit('SET_SELECTION_MODE', {
+      readonly: false,
+      collectionAddmoreMode: false,
+      eventProductMode: false,
+      eventCollectionMode: false
     })
-    if(this.isCustomerAuthenticated){
+    if (this.isCustomerAuthenticated) {
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
-      if (res == true){
+      if (res == true) {
 
-        if(locker_index){
-          let payload = {index:locker_index, attribute: 'active_tab', value:true}
+        if (locker_index) {
+          let payload = {index: locker_index, attribute: 'active_tab', value: true}
           this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
-        }else{
+        } else {
           locker_index = this.$store.getters.getLockerTabsIndex;
-          if(locker_index){
-            let payload = {index:locker_index, attribute: 'active_tab', value:true}
+          if (locker_index) {
+            let payload = {index: locker_index, attribute: 'active_tab', value: true}
             this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
           }
         }
-       // console.log("modal opens from here")
+        // console.log("modal opens from here")
         this.showVModal('locker-modal')
 
-        if(this.ref.saveToLockerModal) {
+        if (this.ref.saveToLockerModal) {
           this.hideVModal('add-to-lockerroom')
           this.ref.saveToLockerModal.showLoader = false;
         }
@@ -1299,17 +1335,21 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.logoColorUsed = true
     this.$store.dispatch('setGroupColors', {})
     for (let i = 0; i < 4; i++) {
-      if(this.imageColors[i]) {
-        this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone })
+      if (this.imageColors[i]) {
+        this.$store.dispatch('setDefaultColor', {
+          index: i,
+          color: this.imageColors[i].hex,
+          pantone: this.imageColors[i].pantone
+        })
       } else {
-        this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '' })
+        this.$store.dispatch('setDefaultColor', {index: i, color: '', pantone: ''})
       }
     }
   }
 
   shuffleLogoColors() {
     this.isColorShuffled = false
-    if(this.imageColors.length > 1) {
+    if (this.imageColors.length > 1) {
       this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
       let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
         return imageColor.hex
@@ -1338,20 +1378,20 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  public rollbackPreviousColors (): void {
+  public rollbackPreviousColors(): void {
     this.previousImageColors.forEach((defaultColor: Record<any, any>, index: number) => {
-      this.$store.dispatch('setDefaultColor', { index: index, color: defaultColor.hex, pantone: defaultColor.pantone })
+      this.$store.dispatch('setDefaultColor', {index: index, color: defaultColor.hex, pantone: defaultColor.pantone})
     })
     this.$store.dispatch("SET_LOGO_COLORS", this.previousImageColors);
     this.previousImageColors = []
   }
 
   public changeTabs(index: number) {
-    if(index > 4){
+    if (index > 4) {
       index = 4
     }
     this.tabIndex = index
-    this.$store.dispatch('setTabMain',{value:index})
+    this.$store.dispatch('setTabMain', {value: index})
   }
 
   public async buyNow() {
@@ -1364,7 +1404,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.isActive = !this.isActive
   }
 
-  public async resetStore(){
+  public async resetStore() {
     const self: Record<any, any> = this;
 
     const ok = await this.ref['reset-changes'].showConfirm()
@@ -1385,15 +1425,15 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.updateOrderItemProducts = null;
       await this.$store.dispatch('resetStore')
       await self.$eventBus.$emit('resetTextsCanvas')
-      await this.$store.dispatch('setTabMain',{value: 0});
-      (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
+      await this.$store.dispatch('setTabMain', {value: 0});
+      (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
       await this.$store.dispatch('SET_LOGO_COLORS', [])
       await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
       await this.$store.dispatch("setProductsRosters")
       await this.retrieveProducts()
     }
 
-    if(this.mobileScreen){
+    if (this.mobileScreen) {
       this.showDesign()
       this.switchTabs(0, true)
     }
@@ -1404,8 +1444,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
   }
-  public async readNotification(notification:Record<any, any>){
-    if (notification.read_at === null || notification.read_at === ''){
+
+  public async readNotification(notification: Record<any, any>) {
+    if (notification.read_at === null || notification.read_at === '') {
       await this.$store.dispatch('readNotification', notification.id)
     }
   }
@@ -1422,9 +1463,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let query_params = await this.setQueryParams()
     await this.retrieveProducts(query_params);
 
-    if(this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress'){
+    if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress') {
       await this.showVModal('cart-modal')
-    }else if(!this.isCollectionView){
+    } else if (!this.isCollectionView) {
       window.location.href = this.company.company_domain + '/cart'
     }
   }
@@ -1436,7 +1477,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     query_params.forEach((query_param: string) => {
       let query_param_array = query_param.split("=");
-      if(url_obj.searchParams.has(query_param_array[0])) {
+      if (url_obj.searchParams.has(query_param_array[0])) {
         url_obj.searchParams.set(query_param_array[0], query_param_array[1])
       } else {
         url_obj.searchParams.append(query_param_array[0], query_param_array[1])
@@ -1446,24 +1487,24 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     //console.log('urls', url)
 
     http.get(url).then(async (response: Record<any, any>) => {
-      if(response.data.products.data.length > 0 ){
-        const validate_data  = await self.beforeSetDataValidateActiveProductData(response.data.products.data)
-        if(validate_data.validated) {
+      if (response.data.products.data.length > 0) {
+        const validate_data = await self.beforeSetDataValidateActiveProductData(response.data.products.data)
+        if (validate_data.validated) {
           await self.handleMainProducts(response);
-          if(self["showLoader"] || self["searchLoader"]) {
+          if (self["showLoader"] || self["searchLoader"]) {
             self.showLoader = false;
             await self.$store.dispatch('setSearchLoader', false)
           }
         } else {
           this.showError(validate_data.message)
-          if(self["showLoader"] || self["searchLoader"]) {
+          if (self["showLoader"] || self["searchLoader"]) {
             self.showLoader = false;
             await self.$store.dispatch('setSearchLoader', false)
           }
           await self.retrieveProducts()
           return false;
         }
-      }else{
+      } else {
         this.showError("No Product Found")
         self.showLoader = false
         await self.$store.dispatch('setSearchLoader', false)
@@ -1476,12 +1517,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   async loadOrderItemProduct(action: string) {
     let self = this;
     let updated_product = await getActiveProductData(this.products_fonts) as Record<any, any>;
-    if(updated_product == null) {
+    if (updated_product == null) {
       return false;
     }
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info
-    let order_product_active_index =  order_products_info_obj.order_products.active_index;
-    let order_product_updated_index =  (action == "next") ? order_product_active_index + 1 : order_product_active_index - 1;
+    let order_product_active_index = order_products_info_obj.order_products.active_index;
+    let order_product_updated_index = (action == "next") ? order_product_active_index + 1 : order_product_active_index - 1;
     let next_prev_product_id = order_products_info_obj.order_products.factory_products[order_product_updated_index].product_id
 
     updated_product["id"] = order_products_info_obj.order_products.factory_products[order_product_active_index].id;
@@ -1489,7 +1530,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     order_products_info_obj.order_products.factory_products[order_product_active_index] = updated_product
     order_products_info_obj.order_products.active_index = order_product_updated_index
     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-      editing: true, type: "order_product", filters: null, locker_product_info: null, cart_product_info: null, order_product_info: order_products_info_obj
+      editing: true,
+      type: "order_product",
+      filters: null,
+      locker_product_info: null,
+      cart_product_info: null,
+      order_product_info: order_products_info_obj
     })
     let query_params = [
       `customized=${true}`, `personalized=${true}`, `order_item_id=${this.$route.query.order_item_id}`,
@@ -1501,41 +1547,58 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async UpdateOrderProducts() {
     let self = this;
-    let updated_product:Record<any,any> = await getActiveProductData(this.products_fonts) as Record<any, any>;
-    if(updated_product == null) {
+    debugger;
+    let updated_product: Record<any, any> = await getActiveProductData(this.products_fonts) as Record<any, any>;
+    if (updated_product == null) {
       return false;
     }
-    if(updated_product){
-      if(Object.prototype.hasOwnProperty.call(updated_product,'production_url') && updated_product?.production_url){
-        let content:string = await fetchUrlContent(updated_product?.production_url);
-        let production_content = await parseSvgStringFile(content,updated_product as Record<any,any>);
+    console.log(updated_product);
+    debugger;
+    if (updated_product) {
+      if (Object.prototype.hasOwnProperty.call(updated_product, 'production_url') && updated_product?.production_url) {
+        let content: string = await fetchUrlContent(updated_product?.production_url);
+        console.log('start');
+        console.log(content);
+        let production_content = await parseSvgStringFile(content, updated_product as Record<any, any>);
         updated_product.svg_content = production_content;
+        console.log(updated_product)
+        console.log('end');
       }
-    }else{
+    } else {
       return false;
     }
+    debugger;
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info
-    let order_product_active_index =  order_products_info_obj.order_products.active_index;
+    let order_product_active_index = order_products_info_obj.order_products.active_index;
     updated_product["id"] = order_products_info_obj.order_products.factory_products[order_product_active_index].id;
     let order_item_id = order_products_info_obj.order_item_id;
     // updated_product["id"] = self.updateOrderItemProducts.factory_products[order_product_active_index].id;
     updated_product["status"] = "submitted_for_factory_review";
     order_products_info_obj.order_products.factory_products[order_product_active_index] = updated_product
     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-      editing: true, type: "order_product", filters: null, locker_product_info: null, cart_product_info: null, order_product_info: order_products_info_obj
+      editing: true,
+      type: "order_product",
+      filters: null,
+      locker_product_info: null,
+      cart_product_info: null,
+      order_product_info: order_products_info_obj
     })
-   // self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product;
+    debugger;
+    console.log(updated_product);
+    // self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product;
     let url = `order_item/${order_item_id}/update/products`;
     this.showLoader = true
-
-    http.post(url, {factory_products:  order_products_info_obj.order_products.factory_products}).then(async (res: any) => {
+    debugger;
+    http.post(url, {factory_products: order_products_info_obj.order_products.factory_products}).then(async (res: any) => {
+      debugger;
       await self.exitFromEditMode()
+      debugger;
       this.showLoader = false
       if (res.data.success == true) {
-        if(this.company.platform == 'wordpress') {
+        if (this.company.platform == 'wordpress') {
           window.location.href = `${this.company.company_domain}/my-account/orders`;
         } else {
-          self.$router.push({name: "OrderDetail", params: { order_id: order_item_id }});
+          self.$router.push({name: "OrderDetail", params: {order_id: order_item_id}});
         }
       }
     }).catch(err => {
@@ -1544,43 +1607,43 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     });
   }
 
-  private hideAll(){
+  private hideAll() {
     this.switchTabs(-1, true)
   }
 
-  public hideOtherTab(){
+  public hideOtherTab() {
     this.showOtherTab = false
   }
 
   private setMinMax = (idx: number) => {
     let element = document.querySelector('.customize_controls') as Record<any, any>;
 
-    if(!element){
-      let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
+    if (!element) {
+      let shadow_dom = (this.$root as Record<any, any>).$options.shadowRoot;
       element = shadow_dom.querySelector('.customize_controls') as Record<any, any>;
     }
 
-    if(element.clientHeight <= (window.screen.availHeight/2)){
+    if (element.clientHeight <= (window.screen.availHeight / 2)) {
       element.style.top = 15 + 'px';
       element.classList.remove('setMax')
-    }else{
+    } else {
       element.style.top = 'auto';
       element.classList.add('setMax')
     }
   }
 
-  private resizeTab(idx: number){
-    return (e:Record<any, any>) => {
+  private resizeTab(idx: number) {
+    return (e: Record<any, any>) => {
       let cursorPosition = e.changedTouches[0].clientY;
-      if(cursorPosition <= 15){
+      if (cursorPosition <= 15) {
         cursorPosition = 15
-      }else if(cursorPosition >= window.screen.availHeight - 190){
+      } else if (cursorPosition >= window.screen.availHeight - 190) {
         cursorPosition = window.screen.availHeight - 190
       }
       this.playersDataHeight = cursorPosition;
       let element = document.querySelector('.customize_controls') as Record<any, any>;
-      if(!element){
-        let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
+      if (!element) {
+        let shadow_dom = (this.$root as Record<any, any>).$options.shadowRoot;
         element = shadow_dom.querySelector('.customize_controls') as Record<any, any>;
       }
       element.style.top = cursorPosition + 'px';
@@ -1588,7 +1651,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private setPlayersDataHeight = (idx: number) => {
-    return (e:Record<any, any>) => {
+    return (e: Record<any, any>) => {
       let element = document.querySelectorAll('.customize_controls') as Record<any, any>;
     }
   }
@@ -1597,15 +1660,15 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getPopperID
   }
 
-  public showPopper(id:string){
+  public showPopper(id: string) {
     this.$store.commit('setPopper', id)
   }
 
-  public hidePopper(){
+  public hidePopper() {
     this.$store.commit('setPopper', '')
   }
 
-  get roomWithProducts():Record<any, any>{
+  get roomWithProducts(): Record<any, any> {
     return this.$store.getters.getLockerProducts
   }
 
@@ -1615,11 +1678,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async shareProduct(product: Record<any, any>, ind: number, i: number) {
     try {
-      if(product){
+      if (product) {
         let payload = {
           type: 'locker',
           id: product.id,
-          customer_id: this.customer.id ,
+          customer_id: this.customer.id,
           product_id: this.selectedProduct.product_id
         }
         let shared_url = "";
@@ -1639,20 +1702,58 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  private async shareDesign(){
-    if (this.editStatus || (this.lockerIndex >= 0 && this.lockerProductIndex !== undefined) && (this.undoItems.length > 0 || this.redoitems.length > 0)){
+  private async shareDesign() {
+    if (this.editStatus || (this.lockerIndex >= 0 && this.lockerProductIndex !== undefined) && (this.undoItems.length > 0 || this.redoitems.length > 0)) {
       await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
       this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
       this.hideVModal('locker-modal')
       // (this.ref['lockerModal'].$refs['lockerRoom'] as Record<any, any>).shareProduct(product, this.lockerProductIndex, this.lockerIndex)
 
-    }else{
+    } else {
       this.shareDesignLoader = true;
       await (this.$refs['saveToLockerModal'] as Record<any, any>).shareDesignUrl(this.product);
       this.shareDesignLoader = false;
 
     }
+  }
+
+  public async generatePdf() {
+    this.pdf_generation_loading = true;
+    this.showToast('Please wait your pdf is being generated', 'success');
+    let cart_product = await getActiveProductData(this.products_fonts);
+    let post_data = {
+      factory_product: [cart_product],
+      measurement_unit: this.settings.unit
+    };
+
+    http.post('generate-pdf', post_data).then(async (res: any) => {
+      this.showToast('Pdf Generated Successfully! Downloading...', 'success');
+      this.downloadPdfFile(res.data.pdf, res.data.name);
+      this.pdf_generation_loading = false
+    }).catch(err => {
+      this.showToast('Something went wrong', 'error');
+      this.pdf_generation_loading = false
+    });
+  }
+
+  public downloadPdfFile(base64, filename) {
+    // Create a new link
+    const anchor = document.createElement('a');
+    let url = 'data:application/pdf;base64,' + base64;
+    anchor.setAttribute('href', url);
+    anchor.setAttribute('download', filename);
+    anchor.setAttribute('style','display:none');
+    // anchor.style.display = 'none';
+    anchor.setAttribute('id', `${Math.random()}`);
+    // Append to the DOM
+    document.body.appendChild(anchor);
+    anchor.click();
+
+    // Remove element from DOM
+    setTimeout(() => {
+      document.body.removeChild(anchor);
+    },5000);
   }
 }
 </script>
