@@ -1386,6 +1386,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.hideLockerProductUpdateButton()
       this.updateOrderItemProducts = null;
       await this.$store.dispatch('resetStore')
+      this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
       await self.$eventBus.$emit('resetTextsCanvas')
       await self.$eventBus.$emit('resetLogosCanvas')
       await this.$store.dispatch('setTabMain',{value: 0});

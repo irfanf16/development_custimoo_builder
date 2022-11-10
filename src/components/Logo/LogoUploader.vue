@@ -246,7 +246,8 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
     }
     //check if logo setting at given index exists then get that else get logo default object
     let logo_setting_at_index = this.selectedProduct.logos_setting[this.customLogoIndex] ? this.selectedProduct.logos_setting[this.customLogoIndex] : {}
-    logo_setting_at_index = {...logo_setting_at_index, ...getLogoSettingsObject(), ...{logo_index: this.customLogoIndex}}
+    const default_values = {logo_index: this.customLogoIndex, product_id: this.customLogo.product_id}
+    logo_setting_at_index = {...logo_setting_at_index, ...getLogoSettingsObject(), ...default_values}
     /*
     * As we can not directly assign customLogo value because it is prop coming from parent component.
     * So here we loop through it's properties to update values

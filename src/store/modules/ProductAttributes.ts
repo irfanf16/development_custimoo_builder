@@ -13,7 +13,7 @@ import {
   logData,
   lastActiveProductDefaultObject,
   recentLogoDefaultObject,
-  getLogoSettingsObject
+  getLogoSettingsObject, logoColorInfoDefaultObject
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
