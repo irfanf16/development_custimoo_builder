@@ -273,9 +273,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   public async addToCart() {
     let self: Record<any, any> = this;
     try {
-
       // this.isLoading = true;
-      let cart_product: Record<any, any> = await getActiveProductData(this.products_fonts)
+      let cart_product = await getActiveProductData(this.products_fonts) as Record<any, any>
       this.$store.dispatch('setRevertRosterBOOL', true)
 
       let post_data: Record<any, any> = {
@@ -303,7 +302,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
         let ecom_form_data = new FormData()
 
-        let ecommerce_update_id = this.$route.query.update_item
+        let ecommerce_update_id = this.$route.query.update_item as string
         if (ecommerce_update_id) {
           ecom_form_data.append('action', 'custimoo_update_cart')
           ecom_form_data.append('update_item', ecommerce_update_id)
@@ -313,7 +312,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
         }
 
         ecom_form_data.append('product_id', cart_product.ecommerce_post_id)
-        ecom_form_data.append('quantity', this.total)
+        ecom_form_data.append('quantity', String(this.total))
         ecom_form_data.append('product_front_image', cart_product.front_image)
 
         await http.post(ecom_url, ecom_form_data).then((res: any) => {
@@ -342,7 +341,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             self.showToast(res.data.message, 'SUCCESS')
             self.$store.dispatch('addedToCart', true)
             if (platform === 'wordpress') {
-              let update_cart_id_data = new FormData()
+              let update_cart_id_data = new FormData() as Record<any, any>
               update_cart_id_data.append('santa_cart_id', api_res.new_created_id)
               update_cart_id_data.append('woocom_cart_id', ecommerce_cart_id)
               update_cart_id_data.append('action', 'add_custimoo_cart_id')
@@ -396,7 +395,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   public async retrieveProducts() {
     let self = this;
 
-    let url = `/list/products?customized=${this.getLastActiveProductData.customized}&personalized=${this.getLastActiveProductData.personalized}`;
+    let url = `/list/products?customized=${this.getLastActiveProductData.customized}&personalized=${this.getLastActiveProductData.personalized}&private=${this.getLastActiveProductData.private_product}`;
     if(this.getLastActiveProductData.search_products) {
       url +=` &title=${this.getLastActiveProductData.search_products}`
     }
@@ -529,14 +528,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     }
     let custom_text_objects = compact(this.customTextObjects);
     let custom_logo_objects = compact(this.customLogoObjects);
-    let custom_text_svgs = [];
+    let custom_text_svgs: Record<any, any> = [];
     for (const custom_text_object of custom_text_objects) {
       if (custom_text_object.constructor.name == "klass") {
         custom_text_svgs.push(custom_text_object.toSVG());
       }
     }
     order_detail.custom_text_svgs = custom_text_svgs
-    let custom_logo_svgs = [];
+    let custom_logo_svgs: Record<any, any> = [];
     for (const custom_logo_svg of custom_logo_objects) {
       if(custom_logo_svg.constructor.name == "klass") {
         custom_logo_svgs.push({

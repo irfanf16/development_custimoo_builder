@@ -1,7 +1,7 @@
 <template>
   <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
     <template v-if="selectedProduct.productstyles[styleIndex]">
-      <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id">
+      <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :class="{'selected_design': design.id == selectedDesignId}">
         <a @click="changeDesign(index); showPreview()" v-if="index < 12 || loadDesigns">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_thumbnail_url : ''}"
@@ -54,6 +54,9 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
   }
   get selectedProductIndex(): number{
     return this.$store.getters.getSelectedIndex
+  }
+  get selectedDesignId(): number{
+    return this.$store.getters.getSelectedDesignId
   }
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
@@ -162,35 +165,33 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
     margin-bottom: 10px;
     flex-basis: 25%;
     max-width: 25%;
-    min-height: 150px;
+    padding: 5px;
+    border-radius: 5px;
 
     a {
       display: block;
       position: relative;
       z-index: 1;
     }
+
     h3{
-        text-align: center;
-        padding: 0;
-        text-transform: uppercase;
-        overflow: hidden;
-        font-size: 0.65rem;
-        min-height: 30px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
+      text-align: center;
+      padding: 7px 0 0;
+      text-transform: uppercase;
+      overflow: hidden;
+      font-size: 0.65rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      word-break: break-all;
+      word-wrap: break-word;
+
         @media only screen and (min-width: 768px){
           font-size: 0.85rem;
-          min-height: 40px;
-          padding: 10px 0 0;
         }
         @media only screen and (min-width: 1024px){
           font-size: 0.6rem;
-          padding: 0;
-        }
-        @media only screen and (min-width: 1360px){
-          min-height: 50px;
         }
       }
 

@@ -294,16 +294,22 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   private async addToCart() {
     if (!this.rosterDetails.some(el => el.quantity == 0)) {
-      await this.addToCartMixin(this.products_fonts);
       this.hideVModal('rostermodal')
-
-      if(this.company.platform != 'wordpress'){
-        this.showVModal('cart-modal')
-      }
+      this.showToast("Adding to cart", "info")
+      await this.addToCartMixin(this.products_fonts as Record<any, any>[]);
     } // if quantity is not zero
     else {
       this.showToast("Quantity must be atleast 1", "error")
     } // toast message if quantity is zero
+  }
+
+  get addedToCart() {
+    return this.$store.getters.getAddedToCart
+  }
+
+  @Watch('addedToCart')
+  addedToCartChanged(newVal:boolean) {
+    this.$emit('addToCartAnimation')
   }
 
   get selectedProduct(): Record<any, any> {

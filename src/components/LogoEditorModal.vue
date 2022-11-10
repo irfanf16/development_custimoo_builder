@@ -1,5 +1,5 @@
 <template>
-  <modal name="logo-modal" ref="logo-modal" :width="screenWidth" :resizable="true" :scrollable="true" height="auto"
+  <modal name="logo-modal" ref="logo-modal" :width="screenWidth" :scrollable="true" height="auto"
     :reset="true" :shiftY="0" id="modal-center-savecolormodal" hide-footer centered size="xl" class="edit-logo-modal">
     <div class="w-100 modal-header d-block">
       <div>
@@ -45,10 +45,11 @@
                   :id="'colors-' + customLogoIndex" @click="toggleLogoColorModal()"
                   :style="{ background: selectedColor }">
                 </b-button>
-                <modal name="logo-color-modal" ref="logo-color-modal" :resizable="true" :scrollable="true" height="auto"
+                <modal name="logo-color-modal" ref="logo-color-modal" :minWidth="1200" :adaptive="true" :scrollable="true" height="auto"
                   :reset="true" :shiftY="0" id="modal-center-savecolormodal" hide-footer centered size="xl"
                   class="edit-logo-modal">
-                  <div class="w-100 modal-header d-block">
+                  <div class="w-100 modal-header d-block position-relative">
+                    <span class="modal-close fs-4 position-absolute cursor-pointer" @click="hideVModal('logo-color-modal')" style="right: 10px; top: 7px"><b-icon-x /></span>
                     <div>
                       <div class="fs-5 text-center text-secondary font-weight-bold">Logo Color</div>
                       <div class="text-center">
@@ -56,8 +57,10 @@
                       </div>
                     </div>
                   </div>
-                  <ColorTabs modalRef="logo-color-modal" :productColors="productColors" onlyColorsTabs="true"
-                    @setColorOfLogo="setColorOfLogo" />
+                  <div class="all_colors">
+                    <ColorTabs modalRef="logo-color-modal" :productColors="productColors" onlyColorsTabs="true"
+                      @setColorOfLogo="setColorOfLogo" />
+                  </div>
                 </modal>
               </div>
 

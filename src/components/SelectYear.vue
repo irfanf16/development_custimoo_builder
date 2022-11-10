@@ -65,7 +65,7 @@ export default class SelectYear extends Mixins(ErrorMessages) {
   }
 
   get getYears() {
-    let optionArray = [];
+    let optionArray: Record<any, any> = [];
     let cur_year = new Date().getFullYear()
     optionArray.push({
       value: null,

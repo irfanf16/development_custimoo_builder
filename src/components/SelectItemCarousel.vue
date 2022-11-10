@@ -3,7 +3,7 @@
     <div class="loader" v-if="searchLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: number_of_slides, adaptiveHeight: false, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
       <template v-for="(product, index) in products">
-        <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id" v-if="product.productstyles[0] && Object.prototype.hasOwnProperty.call(product.productstyles[0],'productdesigns')">
+        <a ref="products" v-on:click="productDesigns(index)" :class="{'selected_item': selectedItemIndex == index}" :key="product.product_id" v-if="product.productstyles[0] && Object.prototype.hasOwnProperty.call(product.productstyles[0],'productdesigns')">
           <template v-for="design in product.productstyles[0].productdesigns">
             <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
               <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="product.measurement_ratio"
@@ -45,7 +45,6 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
-  public renderComponent =  true;
   public multipleLogo = false;
   public has_more_products = false;
   public showLoader = false;
@@ -67,6 +66,10 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     return this.$store.getters.getProductEditInfoObject;
   }
 
+  get selectedItemIndex() {
+    return this.$store.getters.getSelectedIndex;
+  }
+
   public async productDesigns(index: number) {
     let self: Record<any, any> = this;
     let style_index = 0;
@@ -77,8 +80,8 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     this.$store.dispatch('setColorSectionVisibility')
     this.hideLockerProductUpdateButton()
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0,});
-    (this.$parent.$parent as Record<any, any>).adjustTotalTabs()
-    let design_index = null;
+    (this.$parent!.$parent as Record<any, any>).adjustTotalTabs()
+    let design_index = 0;
     let selected_product_design = this.selectedProduct.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>, product_design_index: number) => {
       if(product_design.design_show === 1) {
         design_index = product_design_index;
@@ -90,6 +93,8 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
         design_index: design_index, design_id: selected_product_design.id, product_index: index, product_id: this.selectedProduct.id, style_index: style_index,
         style_id:  this.selectedProduct.productstyles[style_index].id
       });
+
+      await this.$store.dispatch('setSelectedProductDesignID',selected_product_design.id);
     }
     if(self.getProductEditInfoObject.type == "locker_product" && self.getProductEditInfoObject.locker_product_info.product_id != this.selectedProduct.id) {
       await this.exitFromEditMode()
@@ -106,7 +111,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     // let main_products_info = await self.$store.getters.getMainProductsInfo;
     let next_page_no = self.$store.getters.getProductsNextPageNo;
     if(next_page_no) {
-      let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&page=${next_page_no}`;
+      let url = `/list/products?customized=${this.$store.getters.getCustomized}${this.$store.getters.getPrivateProduct? '&private=' + this.$store.getters.getPrivateProduct : '' }&personalized=${this.$store.getters.getPersonalized}&page=${next_page_no}`;
       if(self.getProductEditInfoObject.editing && ["locker_product", 'share_product'].includes(self.getProductEditInfoObject.type)) {
         url += `&active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}&offset=${self.$store.getters.getProducts.length}&active_product_type=locker_product`
       }

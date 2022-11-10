@@ -585,6 +585,38 @@ button {
                     font-size: 20px;
                 }
             }
+
+            .warning{
+                color: #FFC658;
+                position: absolute;
+                top: -7px;
+                font-size: 10px;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
+
+                &:before{
+                    content: "";
+                    display: block;
+                    height: 0.8em;
+                    width: 0.6em;
+                    position: absolute;
+                    z-index: 2;
+                    background: white;
+                    left: 0;
+                    top: 1px;
+                    bottom: 0;
+                    right: 0;
+                    border-radius: 100px;
+                    margin: auto;
+                }
+
+
+                svg{
+                    position: relative;
+                    z-index: 3;
+                }
+            }
         }
     }
 
@@ -1705,7 +1737,7 @@ button {
         }
 
         @media only screen and (min-width: 1600px) {
-            gap: 2.2%;
+            gap: 10px;
         }
 
         .color-box {
@@ -1715,6 +1747,7 @@ button {
             border-radius: 50%;
             border: 1px solid #EFF2F4;
             position: relative;
+            cursor: pointer;
 
             @media only screen and (min-width: 1024px) {
                 width: 32px;
@@ -2816,6 +2849,7 @@ button {
             @media (max-width: 1920px) {
                 height: 90px !important;
                 width: 90px !important;
+                max-width: 100%;
             }
 
             margin: 0 auto;
@@ -2932,6 +2966,29 @@ button {
     .color-type,
     .color-type~div {
         display: none !important;
+    }
+}
+
+.item-to-customize{
+    .slither-slider{
+        .slither-slider-slide{
+            gap: 0 !important;
+
+            .canvas-area-holder{
+                &>a{
+                    max-width: 100%;
+                }
+            }
+
+            &>a{
+                padding: 5px;
+                border-radius: 5px;
+
+                &.selected_item{
+                    background: rgba(24, 144, 118, 0.1);
+                }
+            }
+        }
     }
 }
 
@@ -3874,11 +3931,19 @@ $fontSize: 0.5;
     }
 }
 
-.available-designs-section .design-col a .canvas-container {
-    .canvas {
-        height: 100% !important;
-        width: 100% !important;
-        object-fit: contain;
+.available-designs-section .design-col {
+    &.selected_design{
+        background: rgba(24, 144, 118, 0.1);
+    }
+
+    a {
+        .canvas-container {
+            .canvas {
+                height: 100% !important;
+                width: 100% !important;
+                object-fit: contain;
+            }
+        }
     }
 }
 
@@ -5596,6 +5661,35 @@ $fontSize: 0.5;
 
 .text-underline {
     text-decoration: underline;
+}
+
+.all_colors {
+    ul.nav {
+        @extend .theme-scroll-h;
+
+        flex-wrap: nowrap;
+        overflow-x: auto;
+
+        li{
+            a.nav-link{
+                padding: 10px 7px;
+                transition: none !important;
+                white-space: nowrap;
+
+                &:hover{
+                    color: $theme-color;
+                    font-weight: bolder;
+                }
+            }
+
+            &.color-tab-active{
+                a.nav-link{
+                    color: $theme-color;
+                    font-weight: bolder;
+                }
+            }
+        }
+    }
 }
 
 .custom-popper.popper-vue {
