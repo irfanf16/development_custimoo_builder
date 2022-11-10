@@ -54,7 +54,7 @@
 
 import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import { getProductColors } from '@/helpers/Helpers'
+import {getProductColors, setDefaultColors} from '@/helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
@@ -132,6 +132,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     this.pulse_info.use_original_colors = false
     this.logoColorsInfo.colors = JSON.parse(JSON.stringify(this.logoColorsInfo.extracted_colors))
     this.logoColorsInfo.using_logo_colors = false
+    setDefaultColors()
   }
 
   public useLogoColors() {
@@ -148,7 +149,9 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
   public shuffleLogoColors() {
     this.pulse_info.shuffle = false
     const shuffled  = this.logoColorsInfo.colors.sort(() =>  0.5 - Math.random())
+    console.log('shuffled', shuffled)
     this.logoColorsInfo.colors = shuffled
+    setDefaultColors()
   }
 
   public selectLogoColor(logo_color_index: number) {

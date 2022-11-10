@@ -22,15 +22,6 @@ const Product:Module<any, any> = {
     product_locker_id:0,
     general_settings:{
       color_type: 'pantone-tcx'
-    },
-    logo_colors_info: {
-      /*
-      * while adding/removing property make  sure to add/remove property in helpers method logoColorInfoDefaultObject()
-      * */
-      using_logo_colors: false,
-      is_shuffled: false,
-      extracted_colors: [],
-      colors: []
     }
   },
   getters:{
@@ -72,11 +63,6 @@ const Product:Module<any, any> = {
     },
     getSetting: state => (setting_key: string) => {
       return state.general_settings[setting_key]
-    },
-    getLogoColorsInfo: state => (info_for: string|null = null) => {
-      if(info_for)
-        return state.logo_colors_info[info_for]
-      return state.logo_colors_info
     }
   },
   mutations:{
@@ -150,15 +136,7 @@ const Product:Module<any, any> = {
     },
     SET_SETTING(state:Record<any,any>, setting){
       state.general_settings = { ...state.general_settings, ...setting };
-    },
-    SET_LOGO_COLORS_INFO(state:Record<any,any>, payload: Record<any, any>) {
-      if('reset' in payload) {
-        state.logo_colors_info = logoColorInfoDefaultObject()
-      }
-      else {
-        state.logo_colors_info = {...state.logo_colors_info, ...payload.data}
-      }
-    },
+    }
   },
   actions: {
     async getModels({commit}, paylod:number){

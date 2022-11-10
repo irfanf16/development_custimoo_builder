@@ -55,7 +55,7 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
 import {getClosestColor, getColorEncoding} from '@/pantoneColor'
-import {getSelectedProductPantones} from "@/helpers/Helpers";
+import {getSelectedProductPantones, setDefaultColors} from "@/helpers/Helpers";
 
 @Component<LogoColorTabsNew>({
   components: {
@@ -129,10 +129,8 @@ export default class LogoColorTabsNew extends Vue {
   * methods starts
   * */
   public updateLogoActiveColor(selected_color: Record<any, any>, emitter=null) {
-    console.log('selected_color', selected_color, emitter)
     const selectProductPantonesList = getSelectedProductPantones()
     const color_value = emitter == 'color-picker' ? selected_color.hex : selected_color.value
-    console.log('color_value', color_value)
     let pantone_color = getClosestColor(color_value, selectProductPantonesList,this.getColorType);
     ({ hex: this.activeLogoColor.hex, name: this.activeLogoColor.name, pantone: this.activeLogoColor.pantone } = pantone_color)
     this.activeLogoColor.pantone = pantone_color.pantone
@@ -143,6 +141,7 @@ export default class LogoColorTabsNew extends Vue {
       this.activeLogoColor.hex = selected_color.value
       this.activeLogoColor.name = selected_color.name
     }
+    setDefaultColors()
   }
 
   /*

@@ -1722,6 +1722,25 @@ const getImageFromCanvas = (canvas:Canvas, options={}) => {
   }
 }
 
+const getDefaultColorsObject = () => {
+  return [
+    {title: 'Color One', color: null, pantone: null, name: null},
+    {title: 'Color Two', color: null, pantone: null, name: null},
+    {title: 'Color Three', color: null, pantone: null, name: null},
+    {title: 'Color Four', color: null, pantone: null, name: null}]
+}
+
+const setDefaultColors = () => {
+  const default_colors_object = getDefaultColorsObject()
+  const logo_colors = Store.getters.getLogoColorsInfo('colors')
+  logo_colors.forEach((logo_color, logoColorIndex) => {
+    default_colors_object[logoColorIndex].color = logo_color.hex
+    default_colors_object[logoColorIndex].pantone = logo_color.pantone
+    default_colors_object[logoColorIndex].name = logo_color.name
+  })
+  Store.commit('SET_DEFAULT_COLORS', default_colors_object)
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
@@ -1731,5 +1750,5 @@ export {
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, rosterDetailsInit, initCustomLogosNew,
-  getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getImageFromCanvas
+  getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getImageFromCanvas, getDefaultColorsObject, setDefaultColors
 };

@@ -13,7 +13,7 @@ import {
   logData,
   lastActiveProductDefaultObject,
   recentLogoDefaultObject,
-  getLogoSettingsObject, logoColorInfoDefaultObject
+  getLogoSettingsObject, logoColorInfoDefaultObject, getDefaultColorsObject, setDefaultColors
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
@@ -42,6 +42,7 @@ const ProductAttributes:Module<any, any> = {
     },
     customTexts: {},
     styleIndex: 0,
+    // changing defaultColors object will also need to change value in helper method getDefaultColorsObject
     defaultColors: [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}],
     groupColors: {},
     svgGroups: [],
@@ -114,6 +115,15 @@ const ProductAttributes:Module<any, any> = {
     products_next_page_no: null, //null value mean has no more pages,
     products_rosters:{},
     active_roster_index:0,
+    logo_colors_info: {
+      /*
+      * while adding/removing property make  sure to add/remove property in helpers method logoColorInfoDefaultObject()
+      * */
+      using_logo_colors: false,
+      is_shuffled: false,
+      extracted_colors: [],
+      colors: []
+    }
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -1036,6 +1046,20 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_ACTIVE_ROSTER_INDEX(state:Record<any,any>,index){
       state.active_roster_index = index;
+    },
+    SET_LOGO_COLORS_INFO(state:Record<any,any>, payload: Record<any, any>) {
+      const default_colors_object = getDefaultColorsObject()
+      if('reset' in payload) {
+        state.logo_colors_info = logoColorInfoDefaultObject()
+        state.defaultColors = default_colors_object
+      }
+      else {
+        state.logo_colors_info = {...state.logo_colors_info, ...payload.data}
+        setDefaultColors()
+      }
+    },
+    SET_DEFAULT_COLORS(state: Record<any, any>, payload: Record<any, any>) {
+      state.defaultColors = payload
     }
   },
   getters: {
@@ -1285,6 +1309,11 @@ const ProductAttributes:Module<any, any> = {
     },
     getActiveRosterIndex(state:Record<any,any>){
       return state.active_roster_index;
+    },
+    getLogoColorsInfo: state => (info_for: string|null = null) => {
+      if(info_for)
+        return state.logo_colors_info[info_for]
+      return state.logo_colors_info
     }
   },
   actions: {
