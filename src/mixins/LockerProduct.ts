@@ -15,20 +15,22 @@ export class LockerProducts extends Vue {
   public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="") {
     let self: Record<any, any> = this;
     self.search_products = ''
-    this.$store.commit('setActiveLockerProduct', ind)
+    let is_private:Boolean = room_product.is_private?true:false;
+    this.$store.commit('setActiveLockerProduct', ind);
+    this.$store.dispatch('setPrivateProduct',is_private);
     await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
-    let is_customized = this.$store.getters.getCustomized
-    let is_personalized = this.$store.getters.getPersonalized
+    let is_customized = is_private? false :this.$store.getters.getCustomized
+    let is_personalized = is_private? false :this.$store.getters.getPersonalized
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
     let locker_product_name = room_product.product_name
     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-      editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
+      editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: '', private_product: is_private },
       locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name},
       cart_product_info: null, order_product_info: null
     })
 
-    let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
+    let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
     if(share_url) {
       url += `?share_url=${share_url}`;
     }
@@ -99,19 +101,35 @@ export class LockerProducts extends Vue {
     let self: Record<any, any> = this;
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
-    let url = `list/products?active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1`;
+    let is_private:Boolean = room_product.is_private?true:false;
+    let url = `list/products?private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1&collection_type=true`;
 
-    await http.get(url).then(async (response: Record<any, any>) => {
-      let active_product_detail = response.data.editing_product_detail;
-      //todo need to confirm this logic. I think it's have no effect
-      if(active_product_detail.product_roster_detail) {
-        this.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
-      }
-      //todo ends her
-      await self.handleCollectionProducts( response, product_id , room_product_id , room_product.style_id , room_product.design_id );
-    }, (error:Record<any, any>) => {
-      console.error("Error while retrieving products",error)
+    return new Promise((resolve, reject) => {
+       const handle_product = new Promise((resolve, reject) => {
+        http.get(url).then(async (response: Record<any, any>) => {
+          let active_product_detail = response.data.editing_product_detail;
+          //todo need to confirm this logic. I think it's have no effect
+          if(active_product_detail.product_roster_detail) {
+            this.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
+          }
+          //todo ends her
+          const handle_collection_product =  new Promise(async (resolve, reject) => {
+            const handle_collection_product_promise =  await self.handleCollectionProducts( response, product_id , room_product_id , room_product.style_id , room_product.design_id );
+            resolve(handle_collection_product_promise);
+          });
+          handle_collection_product.then(() => {
+            resolve(true);
+          });
+        }, (error:Record<any, any>) => {
+          console.error("Error while retrieving products",error)
+        })
+      });
+       handle_product.then(() => {
+         resolve(true);
+       })
     })
+
+
   }
 }
 
@@ -131,6 +149,7 @@ export class handleMainProducts extends Vue {
       this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
     }
     await this.$store.dispatch('setStockCount',response.data.stock_count);
+    await this.$store.dispatch('setPrivateProductCount',response.data.private_product_count);
 
     const prms = new Promise((resolve) => {
       self.$eventBus.$emit('initProductsFonts', retrieved_products, resolve)
@@ -142,6 +161,7 @@ export class handleMainProducts extends Vue {
       }
       await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
       await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
+      await this.$store.dispatch('setPrivateProduct', response.data.private_product);
       let update_order_product = response_data.update_order_products_data;
       if(product_edit_info_object.type == 'order_product' && update_order_product) {
         let order_products = Object.assign({}, product_edit_info_object.order_product_info, {order_products: update_order_product})
@@ -220,7 +240,7 @@ export class handleMainProducts extends Vue {
             }
             let last_active_obj_updated_values = {category_index: category_index, category_id: category_id, design_index: design_index, design_id: design_id, product_id:  product_id,
               search_products: self.search_products, style_id: retrieved_products[0].productstyles[0].id,
-              customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized
+              customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized,private_product:this.$store.getters.getPrivateProduct
             }
             let set_last_active_product_data = lastActiveProductDefaultObject(last_active_obj_updated_values)
             self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
@@ -289,67 +309,74 @@ export class handleMainProducts extends Vue {
     })
   }
 
-  public async handleCollectionProducts(response: Record<any, any>, product_id: number , room_product_id: number , style_id:number , design_id: number){
+  public handleCollectionProducts(response: Record<any, any>, product_id: number , room_product_id: number , style_id:number , design_id: number){
     let self: Record<any, any> = this;
     let response_data = response.data;
     let response_products_obj = response_data.products;
     let retrieved_products = response_products_obj.data;
+    let active_product_detail = response.data.editing_product_detail;
 
-    const prms = new Promise((resolve) => {
-      self.$eventBus.$emit('initProductsFonts', retrieved_products, resolve)
-    })
 
-    prms.then(async () => {
-      await this.$store.dispatch('setStockCount',response.data.stock_count);
-      await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
-      await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
 
-      let product_index = 0;
-      let style_index = 0;
+    return new Promise((resolve, reject) => {
+      const prms = new Promise((resolve) => {
+        self.$eventBus.$emit('initProductsFonts', retrieved_products, resolve)
+      })
 
-      let editing_product_detail = response_data.editing_product_detail
-      /*
-      * The default value for edit_product_index is -1. -1 Means product is not being edited. product_edit_info_object.editing check is added as the edit_product_index
-      * will have value only when it's being edited.
-      * */
-      product_index = 0
-      if(product_index >= 0) {
-        style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
-          return product_style.id == style_id;
+      prms.then(async () => {
+        await this.$store.dispatch('setStockCount',response.data.stock_count);
+        await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
+        await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
+        await this.$store.dispatch('setPrivateProduct', response.data.private_product);
+
+        let product_index = 0;
+        let style_index = 0;
+
+        let editing_product_detail = response_data.editing_product_detail
+        /*
+        * The default value for edit_product_index is -1. -1 Means product is not being edited. product_edit_info_object.editing check is added as the edit_product_index
+        * will have value only when it's being edited.
+        * */
+        product_index = 0
+        if(product_index >= 0) {
+          style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
+            return product_style.id == style_id;
+          });
+        }
+        await this.$store.commit('SET_PRODUCTS', { products: retrieved_products });
+        await this.$store.dispatch('setSelectedIndex', { selectedIndex: product_index });
+        await setRetrievedProductsCustomTexts(retrieved_products)
+        this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+        await this.$store.dispatch("getModels", retrieved_products[product_index].id);
+        this.$root.$emit('sliderEvent', product_index);
+        //If we are editing locker product then set the locker product data and return
+
+        await self.setLockerProductData(editing_product_detail)
+        let selected_product = this.$store.getters.getSelectedProduct;
+        initCustomLogos(retrieved_products)
+        this.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
+        let customLogos = this.$store.getters.getCustomLogoObject
+        for (const product of retrieved_products) {
+          if (!customLogos[product.id]) {
+            await this.$store.dispatch('setCustomObj', product.id)
+          }
+        }
+        this.$store.dispatch('setColorSectionVisibility')
+        this.$store.dispatch("getModels", selected_product.product_id);
+        selected_product.productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
+          if (item.id == design_id) {
+            Vue.set(item, 'design_show', 1)
+            this.$store.dispatch('setSelectedProductDesignID', item.id)
+          } else {
+            Vue.set(item, 'design_show', 0)
+          }
         });
-      }
-      await this.$store.commit('SET_PRODUCTS', { products: retrieved_products });
-      await this.$store.dispatch('setSelectedIndex', { selectedIndex: product_index });
-      await setRetrievedProductsCustomTexts(retrieved_products)
-      this.$store.commit('CHANGE_STYLE_INDEX', style_index);
-      await this.$store.dispatch("getModels", retrieved_products[product_index].id);
-      this.$root.$emit('sliderEvent', product_index);
-      //If we are editing locker product then set the locker product data and return
 
-      await self.setLockerProductData(editing_product_detail)
-      let selected_product = this.$store.getters.getSelectedProduct;
-      initCustomLogos(retrieved_products)
-      this.$store.dispatch('setProductsRosters')
-      let customLogos = this.$store.getters.getCustomLogoObject
-      for (const product of retrieved_products) {
-        if (!customLogos[product.id]) {
-          await this.$store.dispatch('setCustomObj', product.id)
-        }
-      }
-      this.$store.dispatch('setColorSectionVisibility')
-      this.$store.dispatch("getModels", selected_product.product_id);
-      selected_product.productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
-        if (item.id == design_id) {
-          Vue.set(item, 'design_show', 1)
-          this.$store.dispatch('setSelectedProductDesignID', item.id)
-        } else {
-          Vue.set(item, 'design_show', 0)
-        }
-      });
-
-      self.show_roster = true;
-      await self.setProductSizes();
-      await self.show();
+        self.show_roster = true;
+        await self.setProductSizes();
+        await self.show();
+        resolve(true);
+      })
     })
   }
 
@@ -490,7 +517,7 @@ export class handleMainProducts extends Vue {
     let last_active_prod_data = self.$store.getters.getLastActiveProductData;
     last_active_prod_data.customized = this.$store.getters.getCustomized;
     last_active_prod_data.personalized = this.$store.getters.getPersonalized;
-    last_active_prod_data.personalized = this.$store.getters.getPersonalized;
+    last_active_prod_data.private_product = this.$store.getters.getPrivateProduct;
     last_active_prod_data.page_no = current_page;
     /*
     * As handleMainProduct is being used as mixin. So the search_products data attribute may not exists in some components that's why this check is added
@@ -723,6 +750,7 @@ export class handleMainProducts extends Vue {
       logo_colors = cart_item_product.colors
     }
     await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
+    this.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
   }
 
 }
@@ -767,6 +795,7 @@ export class ProductsQueryParamsMixin extends Vue {
           if(self.getProductEditInfoObject.type == "locker_product") {
             query_params = [
               `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
+              `private=${self.getProductEditInfoObject.filters.private_product?true:false}`,
               `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
               `active_product_child_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
               `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
@@ -775,6 +804,7 @@ export class ProductsQueryParamsMixin extends Vue {
           else if(self.getProductEditInfoObject.type == "cart_product") {
             query_params = [
               `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
+              `personalized=${self.getProductEditInfoObject.filters.private_product}`,
               `active_product_id=${self.getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`,
               `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
             ];
@@ -801,7 +831,8 @@ export class ProductsQueryParamsMixin extends Vue {
         }
         else {
           query_params = [
-            `customized=${self.getLastActiveProductData.customized}`, `personalized=${self.getLastActiveProductData.personalized}`
+            `customized=${self.getLastActiveProductData.customized}`, `personalized=${self.getLastActiveProductData.personalized}`,
+            `private=${self.getLastActiveProductData.private_product}`
           ];
           if(self.getLastActiveProductData.product_id) {
             query_params.push(`active_product_id=${self.getLastActiveProductData.product_id}`, 'paginate=false')
@@ -821,16 +852,12 @@ export class ProductsQueryParamsMixin extends Vue {
               self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: 0, category_id: category.id})
             }
           }
-          if(self.$route.query.product_share_link){
-            query_params = [
-              `customized=${false}`, `personalized=${false}`,`active_product_id=${self.$route.query.product_id}`, 'paginate=false','active_product_type=product_share_link'
-            ];
-          }
         }
       }
     }
     await this.$store.dispatch('setProductType', { prd_type: "customized", value: self.getLastActiveProductData.customized });
     await this.$store.dispatch('setProductType', { prd_type: "personalized", value: self.getLastActiveProductData.personalized });
+    await this.$store.dispatch('setPrivateProduct', self.getLastActiveProductData.personalized);
     return query_params
   }
 }
@@ -1084,7 +1111,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     let search_loader = this.$store.getters.getSearchLoader;
     let show_loader = this.$store.getters.getShowLoader;
 
-    let url = `/list/products?customized=${get_last_active_product_data.customized}&personalized=${get_last_active_product_data.personalized}`;
+    let url = `/list/products?customized=${get_last_active_product_data.customized}&personalized=${get_last_active_product_data.personalized}&private=${get_last_active_product_data.private_product}`;
     if(get_last_active_product_data.search_products) {
       url +=` &title=${get_last_active_product_data.search_products}`
     }

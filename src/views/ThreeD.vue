@@ -875,7 +875,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async retrieveProducts() {
     let self = this;
-    let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}`;
+    let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&private=${this.$store.getters.getPrivateProduct}`;
     http.get(url).then(async (response: Record<any, any>) => {
       await self.handleMainProducts(response);
       if(self["showLoader"]) {

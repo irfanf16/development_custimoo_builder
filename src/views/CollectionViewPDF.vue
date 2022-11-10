@@ -402,12 +402,11 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
     this.selectedItemIndex = idxs;
 
     if(self.isAuthenticated){
-      await self.fetchProductForCollectionView(room_product.product_locker_room.room_id,room_product.product_locker_room);
-
-      setTimeout(()=>{
+      const product_collection_view_promise =  self.fetchProductForCollectionView(room_product.product_locker_room.room_id,room_product.product_locker_room);
+      product_collection_view_promise.then(() => {
         self.ref['rosterDetailsModal'].fontsColorsManipulation();
         self.ref['rosterDetailsModal'].fontsList();
-      },10000)
+      });
       self.room_product_index = self.room_product_index + 1 ;
     }
     else{
