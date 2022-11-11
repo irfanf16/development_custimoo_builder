@@ -1534,13 +1534,32 @@ const fetchCustomer = async (jwtToken:string) => {
   }
 }
 const setVueVersion = async () => {
-  const vue_app_version = await localStorage.getItem('vue_app_version')
-  if(vue_app_version != process.env.VUE_APP_VERSION) {
-    await localStorage.setItem('vue_app_version', process.env.VUE_APP_VERSION)
-    await Store.dispatch('resetStore')
-    location.reload()
-    return
-  }
+  await http.get('get-reset-store')
+    .then(async (res) =>{
+
+      //const vue_app_version = await localStorage.getItem('vue_app_version')
+      if(res.data.company.reset_store == 1) {
+        const is_loggedIn = await localStorage.getItem('jwtToken');
+        if(is_loggedIn){
+          const customer = Store.getters.getCustomer;
+          console.log(customer);
+          await http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer.id}).catch(error => {
+            handleResponseException(error)
+            console.info("error while setting reset store", error)
+          });
+        }else if(is_loggedIn == null && await localStorage.getItem('is_restored') != 'yes') {
+          console.log('not logged in and not restored');
+          await localStorage.setItem('is_restored', 'yes')
+          await Store.dispatch('resetStore')
+          //location.reload()
+          return
+        }
+      }
+    })
+    .catch(error => {
+      handleResponseException(error)
+      console.info("error while getting company", error)
+    });
 }
 
 const getTeamLogo = () => {
