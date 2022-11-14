@@ -13,7 +13,7 @@
       <b-tab v-for="(logo_tab, ltIdx) in customLogos" :key="ltIdx" :active="tabIndex === ltIdx" @click="changeTab(ltIdx)">
         <template #title>
           <span>
-            <span v-if="!logo_tab.url" class="warning" :class="{'error': !vector_logos && logo_tab.url}">
+            <span class="warning" :class="{'error': !vector_logos && logo_tab.url}">
               <span v-b-tooltip.bottom="`Logo uploaded are not in vector format, please reupload to place order`" v-if="!vector_logos && logo_tab.url"><b-icon-exclamation-circle-fill /></span>
               <b-icon-exclamation-triangle-fill v-else />
             </span>
