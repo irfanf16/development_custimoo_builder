@@ -84,6 +84,7 @@ const ProductAttributes:Module<any, any> = {
       scene:null
     },
     using_logo_colors: false,
+    vector_logos: false,
     backgroundCheck: false,
     colorCheck: false,
     showColorsLogoEditor:false,
@@ -125,6 +126,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_NOTIFICATIONS(state:Record<any, any>, payload) {
       state.notifications  = payload
+    },
+    SET_VECTOR_LOGOS(state:Record<any, any>, payload) {
+      state.vector_logos  = payload
     },
     setIsShareDesign(state:Record<any, any>, payload) {
       state.isShareDesign  = payload
@@ -1051,6 +1055,9 @@ const ProductAttributes:Module<any, any> = {
     getNotifications: state => {
       return state.notifications
     },
+    getVectorLogos: state => {
+      return state.vector_logos
+    },
     getCanvasReady: state => {
       return state.canvas_ready
     },
@@ -1264,6 +1271,9 @@ const ProductAttributes:Module<any, any> = {
   actions: {
     setSearchLoader({commit}, payload){
       commit('SET_SEARCH_LOADER', payload)
+    },
+    setVectorLogos({commit}, payload){
+      commit('SET_VECTOR_LOGOS', payload)
     },
     setActiveTab({commit}, payload){
       commit('SET_ACTIVE_TAB', payload)
