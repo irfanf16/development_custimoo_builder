@@ -1534,25 +1534,31 @@ const fetchCustomer = async (jwtToken:string) => {
   }
 }
 const setVueVersion = async () => {
-  await http.get('get-reset-store')
+  const is_loggedIn = await localStorage.getItem('jwtToken');
+  let customer_id = 0;
+  if(is_loggedIn) {
+    const customer = Store.getters.getCustomer;
+    console.log(customer);
+    customer_id = customer.id;
+  }
+  await http.get('get-reset-store?customer_id='+customer_id)
     .then(async (res) =>{
-
       //const vue_app_version = await localStorage.getItem('vue_app_version')
-      if(res.data.company.reset_store == 1) {
-        const is_loggedIn = await localStorage.getItem('jwtToken');
-        if(is_loggedIn){
-          const customer = Store.getters.getCustomer;
-          console.log(customer);
-          await http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer.id}).catch(error => {
+      if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
+        if(is_loggedIn && res.data.isCustomerStoreReset <= 0){
+          console.log('logged in')
+          await http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).catch(error => {
             handleResponseException(error)
             console.info("error while setting reset store", error)
           });
         }else if(is_loggedIn == null && await localStorage.getItem('is_restored') != 'yes') {
           console.log('not logged in and not restored');
-          await localStorage.setItem('is_restored', 'yes')
-          await Store.dispatch('resetStore')
+          await localStorage.setItem('is_restored', 'yes');
+          await Store.dispatch('resetStore');
           //location.reload()
           return
+        }else{
+          console.log('none')
         }
       }
     })
