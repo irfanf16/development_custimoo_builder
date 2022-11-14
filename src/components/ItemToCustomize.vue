@@ -24,17 +24,31 @@
         <div class="collection-btn mt-1 px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0">
 <!--          <b-form-checkbox :checked="customized" @change="changeProductType('customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
 <!--          <b-form-checkbox :checked="personalized" @change="changeProductType('personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
-          <button type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                  @click="changeProductType(!$store.getters.getCustomized, 'customized')">
-            <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
-            Customized
-          </button>
+          <template v-if="StockCount > 0">
+            <button type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                    @click="changeProductType(!$store.getters.getCustomized, 'customized')">
+              <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
+              Customized
+            </button>
 
-          <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                  @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
-            <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
-            Stock
+            <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                    @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
+              <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
+              Stock
+            </button>
+          </template>
+          <button v-if="isCustomerAuthenticated && PrivateProductCount" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                  @click="changeProductType(!$store.getters.getPrivateProduct, 'private_product')">
+            <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
+            Private
           </button>
+          <template v-if="StockCount === 0 && isCustomerAuthenticated && PrivateProductCount > 0 && $store.getters.getPrivateProduct">
+            <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                    @click="changeProductType(true, 'customized')">
+              <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
+              Reset
+            </button>
+          </template>
         </div>
         <ItemsGrid :showItems="showItems" :products_fonts="products_fonts" />
       </div>
@@ -46,23 +60,38 @@
           <div class="px-1 d-flex align-items-center checkbox_buttons gap-2">
             <button style="white-space: nowrap" type="button" class="btn btn-secondary active">
               <span><b-icon icon="check-circle-fill"></b-icon></span>
-              {{ $store.getters.getCustomized ? "Customized" : "Stock" }}
+              {{ $store.getters.getPrivateProduct ? "Private" : ( $store.getters.getCustomized? "Customized":"Stock") }}
             </button>
           </div>
         </template>
        <template v-else>
-         <div class="px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0" >
-           <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                   @click="changeProductType(true, 'customized')">
-             <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
-             Customized
-           </button>
+         <div class="px-1 d-flex align-items-center checkbox_buttons gap-2"  >
+            <template v-if="StockCount > 0">
+              <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                      @click="changeProductType(true, 'customized')">
+                <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
+                Customized
+              </button>
 
-           <button style="white-space: nowrap" type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                   @click="changeProductType(true, 'personalized')">
-             <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
-             Stock
+              <button style="white-space: nowrap" type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                      @click="changeProductType(true, 'personalized')">
+                <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
+                Stock
+              </button>
+            </template>
+
+           <button v-if="isCustomerAuthenticated && PrivateProductCount > 0" style="white-space: nowrap" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                   @click="changeProductType(true, 'private_product')">
+             <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
+             Private
            </button>
+           <template v-if="StockCount === 0 && isCustomerAuthenticated && PrivateProductCount > 0 && $store.getters.getPrivateProduct">
+             <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                     @click="changeProductType(true, 'customized')">
+               <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
+               Reset
+             </button>
+           </template>
          </div>
 
          <div style="max-width: 230px; flex-shrink: 1; padding-left: 4px">
@@ -187,6 +216,10 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     return this.$store.getters.getSelectedProduct
   }
 
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
+
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex
   }
@@ -221,6 +254,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     let self:Record<string, any> = this;
     let customized = this.$store.getters.getCustomized
     let personalized = this.$store.getters.getPersonalized
+    let private_product = this.$store.getters.getPrivateProduct
     const itemCarousel = this.$refs['itemsCarousel'] as Record<any, any>
     let retrieve_products = false;
 
@@ -228,25 +262,39 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       if(prd_type == "customized"){
         customized = new_val
         personalized = false
+        private_product = false
       }
 
       if(prd_type == "personalized"){
         personalized = new_val
         customized = false
+        private_product = false
+      }
+
+      if(prd_type == "private_product"){
+        personalized = false
+        customized = false
+        private_product = new_val;
       }
     }
-
     if(prd_type == 'customized' && customized == false){
       retrieve_products = true
       check()
       await this.$store.dispatch('setCategories', {
-        query_params: `customized=${customized}&personalized=${personalized}`
+        query_params: `customized=${customized}&personalized=${personalized}&private=${private_product}`
       })
     } else if(prd_type == 'personalized' && personalized == false){
       retrieve_products = true
       check()
       await this.$store.dispatch('setCategories', {
-        query_params: `customized=${customized}&personalized=${personalized}`
+        query_params: `customized=${customized}&personalized=${personalized}&private=${private_product}`
+      })
+    }
+    else if(prd_type == 'private_product' && private_product == false){
+      retrieve_products = true
+      check()
+      await this.$store.dispatch('setCategories', {
+        query_params: `customized=${customized}&personalized=${personalized}&private=${private_product}`
       })
     }
     // if(new_val == false) {
@@ -271,6 +319,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       // eval(`${prd_type}=${new_val}`)
       await this.$store.dispatch('setProductType', {prd_type: 'customized', value: customized});
       await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: personalized});
+      await this.$store.dispatch('setPrivateProduct', private_product);
       // if(prd_type == "customized")
       //   await this.$store.dispatch('setProductType', {prd_type: 'customized', value: customized});
       //   await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: personalized});
@@ -305,12 +354,19 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     return this.$store.getters.getPersonalized
   }
 
+  get getPrivateProduct(): boolean {
+    return this.$store.getters.getPrivateProduct
+  }
+
   get getCustomized(): boolean {
     return this.$store.getters.getCustomized
   }
 
   get StockCount():number{
     return this.$store.getters.getStockCount
+  }
+  get PrivateProductCount():number{
+    return this.$store.getters.getPrivateProductCount
   }
 
   get getProductEditInfoObject() {

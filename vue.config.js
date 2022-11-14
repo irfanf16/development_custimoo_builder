@@ -19,7 +19,7 @@ module.exports = {
       .rule('vue')
       .use('vue-loader')
       .tap(options => {
-        // modify the options...
+        // modify the options... 
         return options
       })
   }

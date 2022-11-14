@@ -9,9 +9,8 @@ pipelines:
           - apt-get update
           - apt-get install -y zip
           - rm -rf node_modules
-          # - npm install --global node-gyp
-          # - npm install 
-          # - npm run build
+          - npm install 
+          - npm run build
           - zip -r application.zip .
           - pipe: atlassian/aws-code-deploy:0.5.3
             variables:

@@ -111,7 +111,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     // let main_products_info = await self.$store.getters.getMainProductsInfo;
     let next_page_no = self.$store.getters.getProductsNextPageNo;
     if(next_page_no) {
-      let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&page=${next_page_no}`;
+      let url = `/list/products?customized=${this.$store.getters.getCustomized}${this.$store.getters.getPrivateProduct? '&private=' + this.$store.getters.getPrivateProduct : '' }&personalized=${this.$store.getters.getPersonalized}&page=${next_page_no}`;
       if(self.getProductEditInfoObject.editing && ["locker_product", 'share_product'].includes(self.getProductEditInfoObject.type)) {
         url += `&active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}&offset=${self.$store.getters.getProducts.length}&active_product_type=locker_product`
       }

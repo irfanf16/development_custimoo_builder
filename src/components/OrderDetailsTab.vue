@@ -395,7 +395,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   public async retrieveProducts() {
     let self = this;
 
-    let url = `/list/products?customized=${this.getLastActiveProductData.customized}&personalized=${this.getLastActiveProductData.personalized}`;
+    let url = `/list/products?customized=${this.getLastActiveProductData.customized}&personalized=${this.getLastActiveProductData.personalized}&private=${this.getLastActiveProductData.private_product}`;
     if(this.getLastActiveProductData.search_products) {
       url +=` &title=${this.getLastActiveProductData.search_products}`
     }
