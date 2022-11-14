@@ -1799,6 +1799,8 @@ button {
 }
 
 .customization-tabs {
+    overflow-y: visible !important;
+
     .logo-placement-area{
         .color-holder{
             margin: 0;

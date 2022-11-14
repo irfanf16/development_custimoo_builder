@@ -7,10 +7,15 @@
             <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
-                <span class="icon-holder">
-                  <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
+                <span :class="{'no-vector-logos': !vector_logos}">
+                  <span v-if="!vector_logos" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order!`" class="logos-error">
+                    <b-icon-exclamation-circle-fill />
+                  </span>
+                  <span class="icon-holder">
+                    <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
+                  </span>
+                  Logo
                 </span>
-                Logo
               </a>
             </template>
             <div class="logo-placement-tabs" v-if="hideTab.logoHide">
