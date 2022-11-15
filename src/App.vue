@@ -19,7 +19,8 @@ window.io = require('socket.io-client');
 
 import { authenticateUser, getCompany, getPermissions } from '@/helpers/Helpers'
 import store from "@/store";
-import {i18n} from '@/i18n'
+import {i18n} from '@/i18n';
+import Gleap from 'gleap'
 
 // console.log(localStorage.getItem('access_tokens'))
 window.Echo = new Echo({
@@ -45,6 +46,24 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
     Navbar
   },
   async mounted() {
+    let elem = document.createElement('link');
+    elem.rel = ' stylesheet'
+    elem.type = 'text/css';
+    elem.href= 'https://cdn.custimoo.com/gulip/gulip.min.css';//Link of the css file
+    document.head.appendChild(elem);
+
+    if(process.env.NODE_ENV === 'production') {
+      window.addEventListener('keydown', (e) => {
+        if ((e.altKey === true || e.metaKey === true) && (e.key === 'u' ||  e.key === 'U')) {
+          Gleap.startFeedbackFlow("bugreporting")
+        }
+      });
+      window.addEventListener('touchstart', (e) => {
+        if(e.touches.length > 2) {
+          Gleap.startFeedbackFlow("bugreporting")
+        }
+      })
+    }
     await getCompany().then(function (){
       const current_locale = i18n.locale;
       i18n.setLocaleMessage(current_locale, store.getters.getCompany.translations[current_locale]);
