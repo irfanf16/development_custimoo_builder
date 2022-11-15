@@ -165,35 +165,41 @@
 
     <div class="d-flex justify-content-center mt-3" v-if="getProductEditInfoObject.editing == false || (getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product')">
 <!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
-      <template v-if="!isCustomerAuthenticated" >
-        <template v-if="company.platform !== 'self'">
-          <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
-                  :disabled="canvasImage.scene == null">
-            Add to Cart
-          </button>
+      <span v-if="!vector_logos" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order!`">
+        <b-button disabled class="mx-2 px-5" variant="secondary">
+          Add to Cart
+        </b-button>
+      </span>
+      <template v-else>
+        <template v-if="!isCustomerAuthenticated" >
+          <template v-if="company.platform !== 'self'">
+            <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
+                    :disabled="canvasImage.scene == null">
+              Add to Cart
+            </button>
+          </template>
         </template>
-      </template>
-      <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
-        <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-          <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
-            :disabled="canvasImage.scene == null">
-            Add to Cart
-          </button>
+        <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
+          <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+            <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
+              :disabled="canvasImage.scene == null">
+              Add to Cart
+            </button>
+          </template>
         </template>
-      </template>
-      <template v-else-if="!getCartLoading">
-        <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-          <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
-                  :disabled="canvasImage.scene == null">
-            Add to Cart
-          </button>
+        <template v-else-if="!getCartLoading">
+          <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+            <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
+                    :disabled="canvasImage.scene == null">
+              Add to Cart
+            </button>
 
+          </template>
         </template>
+        <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
+          <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+        </button>
       </template>
-      <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
-        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-      </button>
-
     </div>
   </div>
 </template>
@@ -318,6 +324,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   get allowNameAndNumbers() {
     return this.selectedProduct.allow_name_number
+  }
+
+  get vector_logos() {
+    return this.$store.getters.getVectorLogos
   }
 
   get rosterDetails(): [Record<any, any>] {

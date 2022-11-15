@@ -29,3 +29,6 @@ src/assets/css/custom.css.map
 env.development
 .env.development
 .env.staging
+.env.staging.wcOrderDetail
+.env.wcOrderDetail
+.env.woocom

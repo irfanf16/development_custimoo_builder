@@ -74,7 +74,7 @@
                         </Popper>
                       </template>
                     </template>
-                    <template>
+                    <template v-if="isCustomerAuthenticated">
                       <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate Pdf</b-button>
                       <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
                     </template>
@@ -267,7 +267,13 @@
                       <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                            <span v-if="!vector_logos" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order!`">
+                              <b-button disabled class="mx-2 px-5" variant="secondary">
+                                Add to Cart
+                              </b-button>
+                            </span>
+
+                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
                               {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
                             <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -622,6 +628,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   get usingColorLogos(): [Record<any, any>] {
     return this.$store.getters.getUsingColorLogos;
+  }
+  get vector_logos() {
+    return this.$store.getters.getVectorLogos;
   }
 
   get productLockerId(): number {

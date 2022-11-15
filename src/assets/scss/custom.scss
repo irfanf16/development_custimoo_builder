@@ -595,6 +595,10 @@ button {
                 right: 0;
                 margin: 0 auto;
 
+                &.error{
+                    color: #D53943;
+                }
+
                 &:before{
                     content: "";
                     display: block;
@@ -617,7 +621,18 @@ button {
                     z-index: 3;
                 }
             }
+
+            position: relative;
         }
+    }
+
+    .logos-error{
+        position: absolute;
+        top: -7px;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        color: #D53943;
     }
 
     .accordion {
@@ -935,14 +950,16 @@ button {
                         display: none;
                     }
 
-                    //.upload-box{
-                    //    width: 100%;
-                    //    height: 100%;
-                    //    margin: 0;
-                    //    padding: 0;
-                    //    border: none;
-                    //    font-size: 0;
-                    //}
+                    .upload-box{
+                        position: relative;
+
+                        .vector-logos-error{
+                            position: absolute;
+                            color: #D53943;
+                            left: -5px;
+                            top: -7px;
+                        }
+                    }
                 }
 
             }
@@ -1782,6 +1799,8 @@ button {
 }
 
 .customization-tabs {
+    overflow-y: visible !important;
+
     .logo-placement-area{
         .color-holder{
             margin: 0;
@@ -6002,7 +6021,7 @@ $fontSize: 0.5;
             overflow-x: auto;
             gap: 5px;
             padding-bottom: 0.7rem;
-            padding-top: 0.3rem;
+            padding-top: 0.4rem;
 
             @extend .theme-scroll-h;
 

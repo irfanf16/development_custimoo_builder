@@ -10,6 +10,7 @@
     </div>
     <div class="btn btn-secondary modal-handler" >
       <div class="upload-box position-relative" :class="{'pulse-animation': !(showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url)}" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
+        <span class="vector-logos-error" v-if="!vector_logos && customLogos[customLogoIndex].url" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order`"><b-icon-exclamation-circle-fill /></span>
         <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <img :src="storageUrl+customLogos[customLogoIndex].url+'?nocache=1'" width="100%"/>
@@ -192,6 +193,10 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
 
   get getColorType(): string {
     return this.$store.getters.getColorType;
+  }
+
+  get vector_logos() {
+    return this.$store.getters.getVectorLogos;
   }
 
   get logoUrl(): Record<any, any>[] {
