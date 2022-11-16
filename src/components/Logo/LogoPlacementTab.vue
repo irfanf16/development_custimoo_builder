@@ -14,7 +14,7 @@
       <b-tab v-for="(custom_logo, customLogoIndex) in customLogos" :active="custom_logo_tab_index == customLogoIndex"
              :key="`custom_logo_${customLogoIndex}`" @click="custom_logo_tab_index = customLogoIndex">
         <template #title>
-          <span>{{ customLogoIndex == 0 ? 'Team Logo' : 'logo ' + customLogoIndex }}</span>
+          <span :style="{background: custom_logo.url ? 'white' : '' }">{{ customLogoIndex == 0 ? 'Team Logo' : 'logo ' + customLogoIndex }}</span>
           <template v-if="customLogoIndex > 0">
             <span class="remove-logo" @click="removeLogoTab(customLogoIndex)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>

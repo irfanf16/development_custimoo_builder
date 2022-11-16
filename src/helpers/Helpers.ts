@@ -13,9 +13,9 @@ import {Canvas} from "fabric/fabric-impl";
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
     originalWidth: 57, originalHeight: 57, width: 57, height: 57, name_of_placement: "chest", side: "front", x_axis: 300,
-    y_axis: 300, is_locked: false, original_logo: null, transparent_logo: null, smart_transparent_logo: null,
+    y_axis: 300, is_locked: false, logo_name: null, original_logo: null, transparent_logo: null, smart_transparent_logo: null,
     original_logo_url: null, is_smart_transparent: null, url: null, haveControls: true, logo_colors: [], is_recent_logo: false,
-    logo_index: 0
+    logo_index: 0, is_vector: false
   }
   return {...default_obj, ...default_values}
 }
@@ -1637,11 +1637,13 @@ const getTeamLogo = () => {
     return {
       "id": team_logo.id,
       "url": team_logo.url,
-      "original_logo": team_logo.original_logo ,
-      "transparent_logo": team_logo.transparent_logo ,
-      "smart_transparent_logo": team_logo.smart_transparent_logo ,
-      "is_smart_transparent": team_logo.is_smart_transparent ,
-      "is_transparent": team_logo.is_transparent
+      "original_logo": team_logo.original_logo,
+      "original_logo_url": team_logo.original_logo_url,
+      "transparent_logo": team_logo.transparent_logo,
+      "smart_transparent_logo": team_logo.smart_transparent_logo,
+      "is_smart_transparent": team_logo.is_smart_transparent,
+      "is_transparent": team_logo.is_transparent,
+      "is_vector": team_logo.is_vector,
     }
   } else {
     return team_logo
@@ -1741,6 +1743,17 @@ const setDefaultColors = () => {
   Store.commit('SET_DEFAULT_COLORS', default_colors_object)
 }
 
+const getVectorExtensions = () => {
+  return ['svg', 'pdf', 'ai', 'eps', 'tiff']
+}
+
+const getExtensionFromString = (string: string) => {
+  let extension: string|null = null
+  if(string) {
+    extension =  string.substr(string.lastIndexOf('.') + 1).toLowerCase()
+  }
+  return extension
+}
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
@@ -1750,5 +1763,6 @@ export {
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, rosterDetailsInit, initCustomLogosNew,
-  getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getImageFromCanvas, getDefaultColorsObject, setDefaultColors
+  getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getImageFromCanvas, getDefaultColorsObject, setDefaultColors,
+  getVectorExtensions, getExtensionFromString
 };

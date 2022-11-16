@@ -132,8 +132,10 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
     this.customLogo.is_smart_transparent = false;
     this.customLogo.url = recent_logo.logo_url;
     this.customLogo.id = recent_logo.id;
+    this.customLogo.is_vector = recent_logo.is_vector;
     this.customLogo.is_recent_logo = true;
     this.customLogo.is_team_logo = false
+    console.log('this.customLogsssso', this.customLogo, recent_logo)
     if(this.customLogoIndex == 0) {
       this.customLogo.is_team_logo = true
       this.addRemoveTeamLogoOnAllProducts('add', this.customLogo)

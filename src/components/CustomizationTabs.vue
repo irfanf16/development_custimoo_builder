@@ -24,7 +24,7 @@
                 <span class="icon-holder">
                   <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
                 </span>
-                Logo
+                Logo {{notVectorLogosCount}}
               </a>
             </template>
             <div class="logo-placement-tabs">
@@ -129,6 +129,8 @@ import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 import RecentLogos from "@/components/RecentLogos.vue";
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
+import {filter} from "lodash"
+import {getVectorExtensions} from "@/helpers/Helpers";
 
 @Component<CustomizationTabs>({
   components: {
@@ -220,6 +222,18 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
 
   get productSizes(){
     return this.selectedProduct.sizes[0].json_data
+  }
+
+  get notVectorLogosCount(){
+    const custom_logos = this.$store.getters.getCustomLogos()
+    let non_vector_logos_count = 0
+    if(custom_logos && custom_logos.length > 0) {
+      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
+        return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+      })
+      non_vector_logos_count = non_vector_logos.length
+    }
+    return non_vector_logos_count
   }
 
 
