@@ -29,3 +29,5 @@ src/assets/css/custom.css.map
 env.development
 .env.development
 .env.staging
+self_customizer/
+wordpress_customizer_staging/
