@@ -962,6 +962,15 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     this.hideVModal('rostermodal');
     let self: Record<any, any> = this;
     try {
+      let company = self.$store.getters.getCompany;
+      let platform = company.platform;
+      if(platform === 'wordpress') {
+        const adminToken = localStorage.getItem('adminToken');
+          if(adminToken) {
+            return false;
+          }
+      }
+
       self.$store.dispatch('addedToCart', false)
       self.$store.dispatch('setCartLoading',true);
       let collection_view = self.$store.getters.getCollectionView;
@@ -973,7 +982,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       let url = "carts"
       let cart_edit_mode = false;
       let product_edit_info_object = self.$store.getters.getProductEditInfoObject
-      let company = self.$store.getters.getCompany;
+
       if(product_edit_info_object.editing && product_edit_info_object.type == "cart_product") {
         cart_edit_mode = true;
         (post_data as Record<any,any>).factory_product.id = product_edit_info_object.cart_product_info.cart_item_product.id
@@ -983,7 +992,6 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       let santacart = true;
       let company_domain = company.company_domain;
 
-      let platform = company.platform;
       let ecommerce_cart_id: string|null = null;
       let ecom_url = company_domain + '/wp-admin/admin-ajax.php';
 
