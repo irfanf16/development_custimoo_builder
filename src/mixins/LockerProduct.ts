@@ -276,6 +276,8 @@ export class handleMainProducts extends Vue {
         //if editing product detail not found then probably that locker product has been deleted or not found for some reason
         if(editing_product_detail) {
           await self.setLockerProductData(editing_product_detail)
+          self.$eventBus.$emit("customLogoResetAndAdd")
+          self.$eventBus.$emit("changeColors")
         } else {
           self.exitFromEditMode();
           let query_params = await self.setQueryParams()
@@ -286,16 +288,20 @@ export class handleMainProducts extends Vue {
 
       if(product_edit_info_object.type == "cart_product") {
         await self.setCartProductData(retrieved_products)
+        self.$eventBus.$emit("customLogoResetAndAdd")
+        self.$eventBus.$emit("changeColors")
         return false;
       }
       if(product_edit_info_object.type == "order_product") {
         await self.updateFactoryProduct(product_edit_info_object.order_product_info.order_products.factory_products[active_index]);
+        self.$eventBus.$emit("customLogoResetAndAdd")
+        self.$eventBus.$emit("changeColors")
         return false;
       }
 
       let selected_product = this.$store.getters.getSelectedProduct;
      // initCustomLogos(retrieved_products)
-      initCustomLogosNew(retrieved_products)
+      await initCustomLogosNew(retrieved_products)
       if(!set_last_active_data) {
         this.$store.dispatch("setProductsRosters");
       }

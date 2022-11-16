@@ -32,8 +32,13 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
     self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
     self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
     self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogos)
+    self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
     self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogosFromCanvas)
     self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
+    self.$eventBus.$on("changeDefaultColors", this.changeDefaultColors)
+    self.$eventBus.$on("changeGroupColors", this.changeGroupColors)
+    self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
+    self.$eventBus.$on("changeColors", this.changeColors)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -336,14 +341,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     return this.$store.getters.getIsSafari
   }
 
-  @Watch('defaultColors', {
-    deep: true
-  })
+  // @Watch('defaultColors', {
+  //   deep: true
+  // })
   defaultColorsChanged(newVal: [Record<any, any>]) {
     if (this.productType == 'customized' && this.svg_groups_ready) {
       let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       if (defaultColors.length) {
-        this.changeDefaultColors(defaultColors)
+        this.changeDefaultColors()
       } else {
         this.setInitialColors();
       }
@@ -356,12 +361,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     }
   }
 
-  @Watch('groupColors', {
-    deep: true, immediate: false
-  })
-  groupColorsChanged(newVal: Record<any, any>) {
+  // @Watch('groupColors', {
+  //   deep: true, immediate: false
+  // })
+  groupColorsChanged() {
     if (this.productType == 'customized' && this.svg_groups_ready) {
-      this.changeGroupColor(newVal)
+      this.changeGroupColor()
       if(this.productEditInfoObject && this.productEditInfoObject.editing == false) {
         this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "group_colors": this.groupColors})
       }
@@ -395,120 +400,137 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     object.setCoords()
   }
 
-  public async changeGroupColor(groupColors: Record<any, any>) {
-    let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-    let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
-    texture.forEach((item: Record<any, any>) => {
-      item.id = item.id.toLowerCase()
-      if (groupColors[item.id]) {
-        item.set('fill', groupColors[item.id].color)
-        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-          if (svgGroup.id == item.id) {
-            svgGroup.color = groupColors[item.id].color
-            svgGroup.pantone = groupColors[item.id].pantone
-            if (this.mainPreview) {
-              this.$store.dispatch('updateSvgGroups', {
-                index: index,
-                color: groupColors[item.id].color,
-                pantone: groupColors[item.id].pantone,
-                name: groupColors[item.id].name
-              })
-            }
+  public async changeColors() {
+    if(this.mounted) {
+      await this.changeDefaultColors()
+      await this.changeGroupColors()
+    }
+  }
 
-          }
-        })
-      } else if (!defaultColors.length) {
-        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-          if (svgGroup.id == item.id) {
-            if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
-              item.set('fill', this.initialSvgGroups[index].color)
-              if (!this.back) {
-                Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
-              }
-            }
-          }
-        })
-      }
-    })
-    this.frontCanvas.renderAll()
-    if (this.back) {
-      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
-      texture.forEach((item: Record<any, any>) => {
-        item.id = item.id.toLowerCase()
-        if (groupColors[item.id]) {
-          item.set('fill', groupColors[item.id].color);
-          if (this.mainPreview) {
+  public async changeGroupColors() {
+    if(this.productType == 'customized') {
+      if (Object.keys(this.groupColors).length) {
+        let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+        let groupColors = this.groupColors
+        let texture = this.frontTexture._objects ? this.frontTexture._objects : [this.frontTexture]
+        texture.forEach((item: Record<any, any>) => {
+          item.id = item.id.toLowerCase()
+          if (groupColors[item.id]) {
+            item.set('fill', groupColors[item.id].color)
             this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
               if (svgGroup.id == item.id) {
-                this.$store.dispatch('updateSvgGroups', {
-                  index: index,
-                  color: groupColors[item.id].color,
-                  pantone: groupColors[item.id].pantone,
-                  name: groupColors[item.id].name
-                })
+                svgGroup.color = groupColors[item.id].color
+                svgGroup.pantone = groupColors[item.id].pantone
+                if (this.mainPreview) {
+                  this.$store.dispatch('updateSvgGroups', {
+                    index: index,
+                    color: groupColors[item.id].color,
+                    pantone: groupColors[item.id].pantone,
+                    name: groupColors[item.id].name
+                  })
+                }
+
+              }
+            })
+          } else if (!defaultColors.length) {
+            this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+              if (svgGroup.id == item.id) {
+                if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
+                  item.set('fill', this.initialSvgGroups[index].color)
+                  if (!this.back) {
+                    Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+                  }
+                }
               }
             })
           }
-        } else if (!defaultColors.length) {
-          this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-            if (svgGroup.id == item.id) {
-              if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
-                item.set('fill', this.initialSvgGroups[index].color)
-                Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+        })
+        this.frontCanvas.renderAll()
+        if (this.back) {
+          texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
+          texture.forEach((item: Record<any, any>) => {
+            item.id = item.id.toLowerCase()
+            if (groupColors[item.id]) {
+              item.set('fill', groupColors[item.id].color);
+              if (this.mainPreview) {
+                this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+                  if (svgGroup.id == item.id) {
+                    this.$store.dispatch('updateSvgGroups', {
+                      index: index,
+                      color: groupColors[item.id].color,
+                      pantone: groupColors[item.id].pantone,
+                      name: groupColors[item.id].name
+                    })
+                  }
+                })
               }
+            } else if (!defaultColors.length) {
+              this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+                if (svgGroup.id == item.id) {
+                  if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
+                    item.set('fill', this.initialSvgGroups[index].color)
+                    Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+                  }
+                }
+              })
             }
           })
+          this.backCanvas.renderAll()
         }
-      })
-      this.backCanvas.renderAll()
+        this.unHideColorGrouping()
+      }
     }
-    this.unHideColorGrouping()
   }
 
-  public async changeDefaultColors(defaultColors: [Record<any, any>]): Promise<void> {
-    let appliedDefaultColors: string[] = []
-    let useColorIndex = 0
-    this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      appliedDefaultColors[svgGroup.id] = defaultColors[useColorIndex].color
-      if (this.mainPreview) {
-        this.$store.dispatch('updateSvgGroups',
-          {
-            index: index,
-            color: defaultColors[useColorIndex].color,
-            pantone: defaultColors[useColorIndex].pantone,
-            name: defaultColors[useColorIndex].name
+  public async changeDefaultColors(): Promise<void> {
+    if(this.productType == 'customized') {
+      let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+      if (defaultColors.length) {
+        let appliedDefaultColors: string[] = []
+        let useColorIndex = 0
+        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+          appliedDefaultColors[svgGroup.id] = defaultColors[useColorIndex].color
+          if (this.mainPreview) {
+            this.$store.dispatch('updateSvgGroups',
+              {
+                index: index,
+                color: defaultColors[useColorIndex].color,
+                pantone: defaultColors[useColorIndex].pantone,
+                name: defaultColors[useColorIndex].name
+              })
+          }
+          svgGroup.color = defaultColors[useColorIndex].color
+          svgGroup.pantone = defaultColors[useColorIndex].pantone
+          svgGroup.name = defaultColors[useColorIndex].name
+
+          useColorIndex++
+          if (useColorIndex >= defaultColors.length) {
+            useColorIndex = 0
+          }
+        })
+
+        let texture = this.frontTexture._objects ? this.frontTexture._objects : [this.frontTexture]
+        texture.forEach((item: Record<any, any>) => {
+          item.id = item.id.toLowerCase()
+          if (appliedDefaultColors[item.id]) {
+            item.set('fill', appliedDefaultColors[item.id]);
+          }
+        })
+        this.frontCanvas.renderAll()
+
+        if (this.back) {
+          texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
+          texture.forEach((item: Record<any, any>) => {
+            item.id = item.id.toLowerCase()
+            if (appliedDefaultColors[item.id]) {
+              item.set('fill', appliedDefaultColors[item.id]);
+            }
           })
-      }
-      svgGroup.color = defaultColors[useColorIndex].color
-      svgGroup.pantone = defaultColors[useColorIndex].pantone
-      svgGroup.name = defaultColors[useColorIndex].name
-
-      useColorIndex++
-      if (useColorIndex >= defaultColors.length) {
-        useColorIndex = 0
-      }
-    })
-
-    let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
-    texture.forEach((item: Record<any, any>) => {
-      item.id = item.id.toLowerCase()
-      if (appliedDefaultColors[item.id]) {
-        item.set('fill', appliedDefaultColors[item.id]);
-      }
-    })
-    this.frontCanvas.renderAll()
-
-    if (this.back) {
-      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
-      texture.forEach((item: Record<any, any>) => {
-        item.id = item.id.toLowerCase()
-        if (appliedDefaultColors[item.id]) {
-          item.set('fill', appliedDefaultColors[item.id]);
+          this.backCanvas.renderAll()
         }
-      })
-      this.backCanvas.renderAll()
+        this.unHideColorGrouping()
+      }
     }
-    this.unHideColorGrouping()
   }
 
   public setInitialColors(): void {
@@ -685,19 +707,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
       await this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
-    if (this.productType == 'customized' && this.defaultColors.length) {
-      let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-      if (defaultColors.length) {
-        await this.changeDefaultColors(defaultColors)
-      }
-    }
+    await this.changeDefaultColors()
 
-    if (Object.keys(this.groupColors).length) {
-      if (this.productType == 'customized') {
-        await this.changeGroupColor(this.groupColors)
-      }
-    }
-    this.svg_groups_ready = true
+    await this.changeGroupColors()
+
     this.showLoader = false
   }
 
@@ -1626,6 +1639,27 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         canvas.renderAll()
         this.addToOtherSide(img, logo.side)
       })
+    }
+  }
+
+  public resetAndAddLogos() {
+    if(this.mounted) {
+      this.resetLogosFromCanvas()
+      let logos: Record<any, any>[] = []
+      if (this.custom_logos && this.logoAllowed) {
+        let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
+        if (this.logosLimit) {
+          custom_logos = this.custom_logos.slice(0, this.logosLimit) as [Record<any, any>]
+        }
+        logos = logos.concat(custom_logos) as [Record<any, any>]
+      }
+      if (logos.length) {
+        logos.forEach((logo: Record<any, any>) => {
+          if (logo && logo.url) {
+            this.addLogos(logo)
+          }
+        })
+      }
     }
   }
 
