@@ -1648,6 +1648,7 @@ const getTeamLogo = () => {
       "is_smart_transparent": team_logo.is_smart_transparent,
       "is_transparent": team_logo.is_transparent,
       "is_vector": team_logo.is_vector,
+      "logo_name": team_logo.logo_name,
     }
   } else {
     return team_logo
