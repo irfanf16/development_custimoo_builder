@@ -267,7 +267,7 @@
                       <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
                               {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
                             <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -280,7 +280,7 @@
                     </template>
                     <template v-else>
                       <template v-if="company.platform !== 'self'">
-                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="is_admin_token && company.platform == 'wordpress'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                       </template>
                      </template>
                   </template>
@@ -585,6 +585,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     </svg>`,
   ]
   public is_shared_product = false;
+  public is_admin_token = localStorage.getItem('adminToken');
 
   private setRosterOpen(val: boolean) {
     this.isRosterOpened = val
