@@ -11,8 +11,6 @@ import {LockerProducts} from "@/mixins/LockerProduct";
 import router from '../router'
 import store from '../store'
 import Navbar from '@/components/Navbar.vue';
-import Gleap from 'gleap';
-Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
 Vue.filter("TitleCase", (value) => {
@@ -135,23 +133,15 @@ export default {
   },
   mounted: async function() {
     await getCompany();
-    let elem = document.createElement('link');
-    elem.rel = ' stylesheet'
-    elem.type = 'text/css';
-    elem.href= 'https://cdn.custimoo.com/gulip/gulip.min.css';//Link of the css file
-    document.head.appendChild(elem);
 
-    if(process.env.NODE_ENV === 'production') {
-      window.addEventListener('keydown', (e) => {
-        if ((e.altKey === true || e.metaKey === true) && (e.key === 'u' ||  e.key === 'U')) {
-          Gleap.startFeedbackFlow("bugreporting")
-        }
-      });
-      window.addEventListener('touchstart', (e) => {
-        if(e.touches.length > 2) {
-          Gleap.startFeedbackFlow("bugreporting")
-        }
-      })
+    // run time adding css for pringlessportsexcellence.com as it is not accept any direct css
+    let ele = window.parent.document.getElementById('e88d412d-dfc3-4628-910b-8c0d7237a371')?.querySelector('[data-ux="Container"]')
+    if(!ele) {
+      // run time adding css for totalteamsales.com as it is not accept any direct css
+      ele = window.parent.document.getElementById('8031c129-170b-4c6e-8387-bce977db3c36')?.querySelector('[data-ux="Container"]')
+    }
+    if(ele) {
+      ele.style.width = '100%'
     }
 
     if(this.$root.$options.shadowRoot) {
