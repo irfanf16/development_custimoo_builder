@@ -1415,7 +1415,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if (ok) {
       this.$store.commit('RESET_LAST_ACTIVE_DATA')
-      await this.$store.dispatch('setCategories', {
+      this.$store.dispatch('setCategories', {
         query_params: `customized=1&personalized=0&private=0`
       })
       await this.exitFromEditMode()
