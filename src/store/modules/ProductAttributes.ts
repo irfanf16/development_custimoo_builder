@@ -1063,6 +1063,15 @@ const ProductAttributes:Module<any, any> = {
         state.defaultColors = default_colors_object
       }
       else {
+        if('colors' in payload.data) {
+          /*
+          * sometimes hex property is missing so we add that property if it's not. Like in case of locker edit product
+          * defaultColors property does not have hex property
+          * */
+          payload.data.colors.forEach(color => {
+            color.hex = color.hex ? color.hex : color.color
+          })
+        }
         state.logo_colors_info = {...state.logo_colors_info, ...payload.data}
         setDefaultColors()
       }
