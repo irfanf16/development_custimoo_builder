@@ -17,6 +17,7 @@ export class LockerProducts extends Vue {
   public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="") {
     let self: Record<any, any> = this;
     self.search_products = ''
+    const response:Boolean = await self.editModeConfirmation();
     let is_private:Boolean = room_product.is_private?true:false;
     this.$store.commit('setActiveLockerProduct', ind);
     this.$store.dispatch('setPrivateProduct',is_private);
@@ -883,6 +884,140 @@ export class exitEditMode extends Vue {
   public async exitFromEditMode() {
     this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null
     })
+  }
+  public editModeConfirmation() {
+    let self: Record<any, any> = this;
+    console.log(this.$swal);
+    const swalWithDefaults = this.$swal.mixin({
+      title: 'Changes Detected',
+      text: "Do you want save the product before exiting!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+    });
+    console.log(self.$store.getters.getProductEditInfoObject.editing)
+    console.log(self.$store.getters.getProductEditInfoObject.type)
+    console.log(self.$store.getters.getHideSaveLockerButton)
+    return new Promise((resolve,reject) => {
+      if (self.$store.getters.getProductEditInfoObject.editing) {
+        switch (self.$store.getters.getProductEditInfoObject.type) {
+          case 'locker_product':
+            if (self.$store.getters.getHideSaveLockerButton === false) {
+              swalWithDefaults.fire().then((result) => {
+                if (result.isConfirmed) {
+                  this.$swal.fire(
+                    'Saving!',
+                    'Please wait your setting are being saved',
+                    'warning',
+                  )
+                  const prms = new Promise((resolve) => {
+                    self.$eventBus.$emit('saveToLockerProduct', resolve)
+                  })
+                  prms.then(() => {
+                    this.$swal.fire(
+                      'Saved!',
+                      'Changes Successfully saved',
+                      'success',
+                    )
+                    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                    resolve(true)
+                  });
+                } else if (
+                  /* Read more about handling dismissals below */
+                  result.dismiss === self.$swal.DismissReason.cancel
+                ) {
+                  this.$swal.fire(
+                    'Discarded',
+                    'Changes Discarded, Exiting from Editing State',
+                    'error'
+                  )
+                  self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                  resolve(false)
+                }
+              });
+            }
+            else{
+              resolve(false);
+            }
+            break;
+          case 'cart_product':
+            swalWithDefaults.fire().then((result) => {
+              if (result.isConfirmed) {
+                this.$swal.fire(
+                  'Saving!',
+                  'Please wait your setting are being saved',
+                  'warning',
+                )
+                const prms = new Promise((resolve) => {
+                  self.$eventBus.$emit('updateCart', resolve)
+                })
+                prms.then(() => {
+                  this.$swal.fire(
+                    'Saved!',
+                    'Changes Successfully saved',
+                    'success',
+                  )
+                  self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                  resolve(true)
+                });
+              } else if (
+                /* Read more about handling dismissals below */
+                result.dismiss === self.$swal.DismissReason.cancel
+              ) {
+                this.$swal.fire(
+                  'Discarded',
+                  'Changes Discarded, Exiting from Editing State',
+                  'error'
+                )
+                self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                resolve(false)
+              }
+            });
+            break;
+          case 'order_product':
+            swalWithDefaults.fire().then((result) => {
+              if (result.isConfirmed) {
+                this.$swal.fire(
+                  'Saving!',
+                  'Please wait your setting are being saved',
+                  'warning',
+                )
+                const prms = new Promise((resolve) => {
+                  self.$eventBus.$emit('updateOrder', resolve)
+                })
+                prms.then(() => {
+                  this.$swal.fire(
+                    'Saved!',
+                    'Changes Successfully saved',
+                    'success',
+                  )
+                  self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                  resolve(true)
+                });
+              } else if (
+                /* Read more about handling dismissals below */
+                result.dismiss === swalWithDefaults.DismissReason.cancel
+              ) {
+                this.$swal.fire(
+                  'Discarded',
+                  'Changes Discarded, Exiting from Editing State',
+                  'error'
+                )
+                self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                resolve(false)
+              }
+            });
+            break;
+          default:
+            resolve(false);
+            break;
+        }
+      }
+      else{
+        resolve(false);
+      }
+    });
   }
 }
 

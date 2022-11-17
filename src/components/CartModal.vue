@@ -173,7 +173,7 @@ import {
   lastActiveProductDefaultObject,
   processColorsCustom
 } from "@/helpers/Helpers";
-import { LockerProducts, handleMainProducts } from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
 import { findIndex } from "lodash";
 import ModalAction from "@/mixins/ModalAction";
 @Component<CartModal>({
@@ -221,7 +221,7 @@ import ModalAction from "@/mixins/ModalAction";
 
   }
 })
-export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction) {
+export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,exitEditMode) {
   @Prop({ default: 3, required: true }) mainTotalTabs!: number
 
   public viewLoader = false;
@@ -286,8 +286,8 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       this.showToast(`${this.$t('minimum_order_cart_message')}`, "error");
       return false;
     }
-
     let payload = {}
+    // const response = await this.editModeConfirmation();
     payload['customer_reference_no'] = this.customer_reference_no
     if (!this.customer_reference_no) {
       this.showToast('Please provide customer reference number.', 'error');
