@@ -652,7 +652,11 @@ export class handleMainProducts extends Vue {
         });
       })
     }
-    await this.$store.dispatch('overRideDefaultColors', JSON.parse(active_product_detail.defaultcolors));
+    let default_colors = JSON.parse(active_product_detail.defaultcolors)
+    await this.$store.dispatch('overRideDefaultColors', default_colors);
+    this.$store.commit('SET_LOGO_COLORS_INFO', {
+      data: {using_logo_colors: false,  is_shuffled: false,  colors: default_colors }
+    })
     await this.$store.dispatch('overRideGroupColors', JSON.parse(active_product_detail.groupcolors));
 
 
