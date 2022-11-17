@@ -34,3 +34,4 @@ env.development
 .env.woocom
 self_customizer/
 wordpress_customizer_staging/
+wordpress_customizer/
