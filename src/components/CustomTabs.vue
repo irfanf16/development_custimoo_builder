@@ -161,7 +161,6 @@ import ModalAction from "@/mixins/ModalAction";
     this.fontsList()
     let tabIndex = this.selectedProduct.is_logo_allowed ? 0 : 1
     this.switchTabs(tabIndex)
-    console.log('this', this)
   }
 })
 
@@ -515,7 +514,7 @@ export default class CustomTabs extends Mixins(cartModalData) {
     return this.$store.getters.getGroupColors
   }
   get getColorType(){
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
   // public showColor(index: number) {
   //   this.selectAccordionIndex = index

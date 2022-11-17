@@ -145,7 +145,7 @@ export default class ColorAccordion extends Vue {
     return this.$store.getters.getSelectedProduct
   }
   get getColorType(): string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   public selectType(index: number, showOther = false) {
@@ -170,6 +170,7 @@ export default class ColorAccordion extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
+    let self: Record<any, any> = this
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
     if (color.value){
       this.$store.dispatch('updateGroupColors',
@@ -179,6 +180,7 @@ export default class ColorAccordion extends Vue {
           pantone: color.pantone,
           name: color.name
         })
+      self.$eventBus.$emit("changeGroupColors")
     }
   }
 

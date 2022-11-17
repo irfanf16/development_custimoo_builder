@@ -333,27 +333,30 @@
           <div class="mobile-reset" v-if="mobileScreen && (undoItems.length > 0 || redoitems.length > 0)">
             <b-button @click="resetStore" variant="secondary" class="p-1"><b-icon-arrow-clockwise /></b-button>
           </div>
+
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
             <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll"
                              :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
-            <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">
-              <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>
-              <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
+<!--            mobile view code-->
+<!--            <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">-->
+<!--              <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>-->
+<!--              <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>-->
 
-              <div>
-                <LogoUploader @switchTabs="switchTabs" @ @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
-              </div>
-            </div>
-            <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">
-              <span class="fs-3 font-weight-bold d-inline-flex pb-1">Logo Uploader</span>
-              <span @click="switchTabs(0, true)" class="maximizer close">
-              <svg height="1em" width="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                   viewBox="0 0 16 16">
-                <polygon points="0,11.8 0,0 11.8,0 "/>
-                <polygon points="16,4.3 16,16 4.3,16 "/>
-              </svg>
-            </span>
-            </div>
+<!--              <div>-->
+<!--                <LogoUploader @switchTabs="switchTabs" @ @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">-->
+<!--              <span class="fs-3 font-weight-bold d-inline-flex pb-1">Logo Uploader</span>-->
+<!--              <span @click="switchTabs(0, true)" class="maximizer close">-->
+<!--              <svg height="1em" width="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"-->
+<!--                   viewBox="0 0 16 16">-->
+<!--                <polygon points="0,11.8 0,0 11.8,0 "/>-->
+<!--                <polygon points="16,4.3 16,16 4.3,16 "/>-->
+<!--              </svg>-->
+<!--            </span>-->
+<!--            </div>-->
+<!--            mobile view code end-->
           </b-col>
         </template>
       </b-row>
@@ -374,7 +377,7 @@ import ItemToCustomize from '@/components/ItemToCustomize.vue'
 import ChooseInterest from '@/components/ChooseInterest.vue'
 import CustomizationTabs from '@/components/CustomizationTabs.vue'
 import SaveColorModal from "@/components/SaveColorModal.vue"
-import UploadLogo from '@/components/UploadLogo.vue'
+// import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import ExtractedColors from '@/components/ExtractedColors.vue'
@@ -400,7 +403,8 @@ import {
   getRandom, resetLastActiveProductData, lastActiveProductDefaultObject
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
-import LogoUploader from "@/components/mobile/LogoUploader.vue";
+// import LogoUploader from "@/components/mobile/LogoUploader.vue";
+// import LogoUploader from "@/components/Logo/LogoUploader";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import { findIndex } from 'lodash'
@@ -416,7 +420,6 @@ Vue.filter('formatDate', function(value:string) {
 @Component<Home>({
   components: {
     Popper,
-    LogoUploader,
     CartModal,
     CustomTabs,
     ConfirmModal,
@@ -426,7 +429,7 @@ Vue.filter('formatDate', function(value:string) {
     ItemToCustomize,
     ChooseInterest,
     CustomizationTabs,
-    UploadLogo,
+    // UploadLogo,
     LockerRoomModal,
     AddLockerRoomModal,
     SaveColorModal,
@@ -454,8 +457,9 @@ Vue.filter('formatDate', function(value:string) {
 
     this.is_shared_product = this.$route.params.name ?  true : false
 
-    await this.$store.dispatch('fetchGeneralSettings','measurement_unit');
-    await this.$store.dispatch('setColorType','color_type');
+    await http.post(`/get-settings`, {setting_keys: ['measurement_unit', 'color_type']}).then((res) => {
+      this.$store.commit('SET_SETTING', res.data.result.settings)
+    });
     this.setRecentLogos()
 
     if (this.hideColorSection){
@@ -1421,22 +1425,18 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if (ok) {
       this.$store.commit('RESET_LAST_ACTIVE_DATA')
-      await this.$store.dispatch('setCategories', {
+      this.$store.dispatch('setCategories', {
         query_params: `customized=1&personalized=0&private=0`
       })
       await this.exitFromEditMode()
       this.hideLockerProductUpdateButton()
-      // if(this.editCart.cartId || this.editStatus || this.updateOrderItemProducts){
-      //   await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
-      //   await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
-      //   this.$store.commit('CHANGE_EDIT_STATUS',{status:false})
-      //
-      // }
       this.updateOrderItemProducts = null;
       await this.$store.dispatch('resetStore')
+      this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
       await self.$eventBus.$emit('resetTextsCanvas')
-      await this.$store.dispatch('setTabMain', {value: 0});
-      (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
+      await self.$eventBus.$emit('resetLogosCanvas')
+      await this.$store.dispatch('setTabMain',{value: 0});
+      (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
       await this.$store.dispatch('SET_LOGO_COLORS', [])
       await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
       await this.$store.dispatch("setProductsRosters")
@@ -1494,7 +1494,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     })
     url = url_obj.pathname + url_obj.search;
-    //console.log('urls', url)
 
     http.get(url).then(async (response: Record<any, any>) => {
       if (response.data.products.data.length > 0) {

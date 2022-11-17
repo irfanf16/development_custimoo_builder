@@ -212,7 +212,7 @@ export default class TextCustomization extends Vue {
   }
 
   get getColorType(){
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   get customTexts(): [Record<any, any>] {

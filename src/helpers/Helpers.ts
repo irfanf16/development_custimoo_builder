@@ -10,21 +10,14 @@ import {http} from "@/httpCommon";
 import {parseInt, findIndex} from "lodash";
 import {Canvas} from "fabric/fabric-impl";
 
-const getLogoSettingsObject = () => {
-  return {
-    id: null,
-    product_id: null,
-    product_style_id: null,
-    following_product_ids: null,
-    rotation: 0,
-    width: 57,
-    height: 57,
-    name_of_placement: "chest",
-    side: "front",
-    x_axis: 300,
-    y_axis: 300,
-    is_locked: false
+const getLogoSettingsObject = (default_values = {}) => {
+  const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
+    originalWidth: 57, originalHeight: 57, width: 57, height: 57, name_of_placement: "chest", side: "front", x_axis: 300,
+    y_axis: 300, is_locked: false, logo_name: null, original_logo: null, transparent_logo: null, smart_transparent_logo: null,
+    original_logo_url: null, is_smart_transparent: null, url: null, haveControls: true, logo_colors: [], is_recent_logo: false,
+    logo_index: 0, is_vector: false
   }
+  return {...default_obj, ...default_values}
 }
 
 const getRandom = (length = 5, type = 'number') => {
@@ -166,7 +159,7 @@ const fileToBase64 =  (file: any) => {
 
 }
 
-const processColorsCustom = (colors: []) => {
+const processColorsCustom = (colors: [], logos_count=4) => {
   const imageColors: any[] = []
   const uniqueColors: string[] = []
   colors.forEach((color: number[]) => {
@@ -178,39 +171,58 @@ const processColorsCustom = (colors: []) => {
   const deletedCount = uniqueColors.length - 4
   uniqueColors.splice(4, deletedCount)
   const selectProductPantonesList = getSelectedProductPantones()
-  const color_type = Store.getters.getColorType;
+  const color_type = Store.getters.getSetting('color_type');
   uniqueColors.forEach((color: string) => {
     const pantoneColor = getClosestColor(color, selectProductPantonesList,color_type);
-    //const pantoneColor = getClosestColor(color);
     imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
   })
+  while(imageColors.length < logos_count ) {
+    imageColors.push({hex: null, pantone: null, name: null})
+  }
   return imageColors;
 
 }
 
-const getSelectedProductPantones = (product_id: null|number = null) => {
-  const productPantones: Record<any, any>[] = []
-  let selectedProduct = Store.getters.getSelectedProduct;
-  if(product_id){
-    const search_product = getProductById(product_id);
-    if(search_product)
-      selectedProduct = search_product;
-  }
+// const getSelectedProductPantones = (product_id: null|number = null) => {
+//   const productPantones: Record<any, any>[] = []
+//   let selectedProduct = Store.getters.getSelectedProduct;
+//   if(product_id){
+//     const search_product = getProductById(product_id);
+//     if(search_product)
+//       selectedProduct = search_product;
+//   }
+//
+//     selectedProduct.colors.forEach((product_colors: any, key: number) => {
+//     if(key == 0){
+//       const colors = product_colors.json_data
+//       colors.forEach((color: any) => {
+//         //let pantone = color.name
+//         let pantone = ''
+//         if(color.pantone){
+//           pantone = color.pantone
+//         }
+//         productPantones.push({pantone : pantone, name: color.name, hex: color.value});
+//       })
+//     }
+//   })
+//   return productPantones;
+// }
 
-    selectedProduct.colors.forEach((product_colors: any, key: number) => {
-    if(key == 0){
-      const colors = product_colors.json_data
-      colors.forEach((color: any) => {
-        //let pantone = color.name
-        let pantone = ''
-        if(color.pantone){
-          pantone = color.pantone
-        }
-        productPantones.push({pantone : pantone, name: color.name, hex: color.value});
-      })
-    }
-  })
-  return productPantones;
+const getSelectedProductPantones = (product_id: null|number = null) => {
+  const product_pantones: Record<any, any>[] = []
+  const product = product_id ? Store.getters.getProduct(product_id) : Store.getters.getProduct()
+  if(product) {
+    product.colors.forEach((product_colors: any, key: number) => {
+      if(key == 0){
+        const colors = product_colors.json_data
+        colors.forEach((color: any) => {
+          const pantone = color.pantone ? color.pantone : ''
+          product_pantones.push({pantone : pantone, name: color.name, hex: color.value});
+        })
+      }
+    })
+  }
+  return product_pantones;
 }
 
 const getProductById = (product_id: number) => {
@@ -291,7 +303,7 @@ const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id =
 
   let image_colors:Record<any, any>[] = [];
   if(logo.logo_colors != null) {
-    image_colors = processColorsCustom(JSON.parse(logo.logo_colors))
+    image_colors = processColorsCustom(logo.logo_colors)
     let image_color_count = image_colors.length;
     while(image_color_count < 4 ) {
       image_colors.push({hex: null, pantone: null, name: null});
@@ -714,7 +726,7 @@ const initCustomLogos = async(retrieved_products: Record<any, any>) => {
           const logoSetting = product.logos_setting[0]
           let logo = {
             id: null,
-            product_id: null,
+            product_id: product.id,
             product_style_id: null,
             url: '',
             width: logoSetting.width,
@@ -733,6 +745,7 @@ const initCustomLogos = async(retrieved_products: Record<any, any>) => {
           Store.commit('customLogo', {index: 0, logo: logo, prd_id: product.id})
         } else { // if logo is allowed but there is no setting for logo in product the add default logo object to show team logo
           let logo = getLogoSettingsObject()
+          logo.product_id = product.id
           if(team_logo) {
             logo = {...logo, ...team_logo}
           }
@@ -743,6 +756,46 @@ const initCustomLogos = async(retrieved_products: Record<any, any>) => {
   })
 }
 
+const initCustomLogosNew = async (retrieved_products: Record<any, any>) => {
+  const team_logo = await getTeamLogo()
+  const custom_logos_by_products: Record<any, any> = {}
+  const existing_custom_logos = Store.getters.getCustomLogos('all')
+  retrieved_products.forEach((product: Record<any, any>) => {
+    if(product.is_logo_allowed) {
+      const product_existing_custom_logos = existing_custom_logos ? existing_custom_logos[product.id] : null
+      /*
+      * check if product custom logos already exists in persistent state then no need to load custom logos for that product
+      * and continue to next iteration
+      * */
+      if(product_existing_custom_logos && product_existing_custom_logos.length > 0) {
+        return false
+      }
+      let first_logo_setting = getLogoSettingsObject();
+      if(product.logos_setting.length) {
+        delete product.logos_setting.created_at
+        delete product.logos_setting.updated_at
+        first_logo_setting = { ...first_logo_setting, ...product.logos_setting[0], ...{id: null} }
+      }
+      if(team_logo) {
+        first_logo_setting = {...first_logo_setting, ...team_logo}
+      }
+      first_logo_setting.product_id = product.id
+      custom_logos_by_products[product.id] = [first_logo_setting]
+    }
+  })
+  if(Object.keys(custom_logos_by_products).length > 0) {
+    Store.commit('SET_PRODUCT_CUSTOM_LOGOS', { 'append': true, data: custom_logos_by_products})
+  }
+}
+
+const rosterDetailsInit = (retrieved_products: Record<any, any>) => {
+  retrieved_products.forEach((product: Record<any, any>) => {
+    if(!Store.getters.getAllRosterDetails[product.id]) {
+      const payload = getRosterDetailDefaultObject(product)
+      Store.dispatch('setRosterDetails', { pid : product.id, index: 0, roster: payload })
+    }
+  })
+}
 const getRosterDetailDefaultObject = (product = Store.getters.getSelectedProduct) => {
   if (product.sizes.length){
     const productSizes = product.sizes[0].json_data
@@ -931,9 +984,6 @@ const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
   }
   return response_obj;
 }
-
-//Functions related to SVG parsing start
-
 
 const INCH_TO_CENTIMETER = 2.54;
 
@@ -1401,7 +1451,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
 }
 
 const unitConversion = (value:number) => {
-  const setting = Store.getters.getSetting
+  const setting = Store.getters.getSetting('measurement_unit')
   switch( setting.conversion_operator ) {
     case 'multiply':
       return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
@@ -1576,6 +1626,43 @@ async function restore(){
   return
 }
 
+const getProductColors = (product_id = null, append_locker_colors = true ) => {
+  let product_colors: Record<any, any>[] = []
+  product_id = product_id ? product_id : Store.getters.getSelectedProductId
+  const product_obj = Store.getters.getProduct(product_id)
+  if(product_obj) {
+    product_obj.colors.forEach((colors: any, key: number) => {
+      const final_color = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
+      final_color.color_text = colors.json_data
+      product_colors = product_colors.concat(final_color)
+    })
+    if(append_locker_colors) {
+      product_colors = product_colors.concat(Store.getters.getLockerColors)
+    }
+  }
+  return product_colors
+}
+
+const logoColorInfoDefaultObject = () => {
+  return { using_logo_colors: false,  is_shuffled: false,  extracted_colors: [],  colors: [] }
+}
+
+const recentLogoDefaultObject = (default_values: Record<any, any> | Record<any, any>[] = {}): Record<any, any> | Record<any, any>[] => {
+  const default_object = {
+    id: null, browser_key: null, company_id: null, logo_colors: [], logo_name: null, logo_url: null, original_logo_url: null,
+    original_png: null, product_id: null, recent_delete: false, smart_transparent_logo_url: null,
+    transparent_logo_url: null
+  }
+  if(default_values.constructor.name == 'Object') {
+    return {...default_object, ...default_values}
+  }
+  else {
+    return default_values.map((default_values_object: Record<any, any>) => {
+      return {...default_object, ...default_values_object}
+    })
+  }
+}
+
 const getTeamLogo = () => {
   const custom_logos_by_products = Store.getters.getCustomLogoObject
   let team_logo:Record<any, any> = {}
@@ -1585,15 +1672,18 @@ const getTeamLogo = () => {
       break
     }
   }
-  if(team_logo) {
+  if(Object.keys(team_logo).length > 0) {
     return {
       "id": team_logo.id,
       "url": team_logo.url,
-      "original_logo": team_logo.original_logo ,
-      "transparent_logo": team_logo.transparent_logo ,
-      "smart_transparent_logo": team_logo.smart_transparent_logo ,
-      "is_smart_transparent": team_logo.is_smart_transparent ,
-      "is_transparent": team_logo.is_transparent
+      "original_logo": team_logo.original_logo,
+      "original_logo_url": team_logo.original_logo_url,
+      "transparent_logo": team_logo.transparent_logo,
+      "smart_transparent_logo": team_logo.smart_transparent_logo,
+      "is_smart_transparent": team_logo.is_smart_transparent,
+      "is_transparent": team_logo.is_transparent,
+      "is_vector": team_logo.is_vector,
+      "logo_name": team_logo.logo_name,
     }
   } else {
     return team_logo
@@ -1674,7 +1764,36 @@ const getImageFromCanvas = (canvas:Canvas, options={}) => {
   }
 }
 
-//Functions related to SVG parsing end
+const getDefaultColorsObject = () => {
+  return [
+    {title: 'Color One', color: null, pantone: null, name: null},
+    {title: 'Color Two', color: null, pantone: null, name: null},
+    {title: 'Color Three', color: null, pantone: null, name: null},
+    {title: 'Color Four', color: null, pantone: null, name: null}]
+}
+
+const setDefaultColors = () => {
+  const default_colors_object = getDefaultColorsObject()
+  const logo_colors = Store.getters.getLogoColorsInfo('colors')
+  logo_colors.forEach((logo_color, logoColorIndex) => {
+    default_colors_object[logoColorIndex].color = logo_color.hex
+    default_colors_object[logoColorIndex].pantone = logo_color.pantone
+    default_colors_object[logoColorIndex].name = logo_color.name
+  })
+  Store.commit('SET_DEFAULT_COLORS', default_colors_object)
+}
+
+const getVectorExtensions = () => {
+  return ['svg', 'pdf', 'ai', 'eps', 'tiff']
+}
+
+const getExtensionFromString = (string: string) => {
+  let extension: string|null = null
+  if(string) {
+    extension =  string.substr(string.lastIndexOf('.') + 1).toLowerCase()
+  }
+  return extension
+}
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
@@ -1683,5 +1802,7 @@ export {
   getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
-  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, getImageFromCanvas
+  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, rosterDetailsInit, initCustomLogosNew,
+  getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getImageFromCanvas, getDefaultColorsObject, setDefaultColors,
+  getVectorExtensions, getExtensionFromString
 };

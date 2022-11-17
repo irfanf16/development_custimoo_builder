@@ -1,9 +1,11 @@
 /* eslint-disable */
 import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
+
 import {
-  getActiveProductData, getRandom, handleResponseException, initCustomLogos, processColorsCustom,
-  setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject, getTeamLogo
+  getActiveProductData, getRandom, handleResponseException, processColorsCustom,
+  setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject,
+  initCustomLogosNew
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -275,6 +277,8 @@ export class handleMainProducts extends Vue {
         //if editing product detail not found then probably that locker product has been deleted or not found for some reason
         if(editing_product_detail) {
           await self.setLockerProductData(editing_product_detail)
+          self.$eventBus.$emit("customLogoResetAndAdd")
+          self.$eventBus.$emit("changeColors")
         } else {
           self.exitFromEditMode();
           let query_params = await self.setQueryParams()
@@ -285,15 +289,20 @@ export class handleMainProducts extends Vue {
 
       if(product_edit_info_object.type == "cart_product") {
         await self.setCartProductData(retrieved_products)
+        self.$eventBus.$emit("customLogoResetAndAdd")
+        self.$eventBus.$emit("changeColors")
         return false;
       }
       if(product_edit_info_object.type == "order_product") {
         await self.updateFactoryProduct(product_edit_info_object.order_product_info.order_products.factory_products[active_index]);
+        self.$eventBus.$emit("customLogoResetAndAdd")
+        self.$eventBus.$emit("changeColors")
         return false;
       }
 
       let selected_product = this.$store.getters.getSelectedProduct;
-      initCustomLogos(retrieved_products)
+     // initCustomLogos(retrieved_products)
+      await initCustomLogosNew(retrieved_products)
       if(!set_last_active_data) {
         this.$store.dispatch("setProductsRosters");
       }
@@ -353,7 +362,7 @@ export class handleMainProducts extends Vue {
 
         await self.setLockerProductData(editing_product_detail)
         let selected_product = this.$store.getters.getSelectedProduct;
-        initCustomLogos(retrieved_products)
+        initCustomLogosNew(retrieved_products)
         this.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
         let customLogos = this.$store.getters.getCustomLogoObject
         for (const product of retrieved_products) {

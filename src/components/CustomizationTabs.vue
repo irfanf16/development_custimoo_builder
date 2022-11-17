@@ -3,7 +3,7 @@
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
         <div class="myscroll" ref="myscroll">
-          <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
+<!--          <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
@@ -21,6 +21,19 @@
             <div class="logo-placement-tabs" v-if="hideTab.logoHide">
               <LogoPlacementTabs @setColorShuffled="(val) => $emit('setColorShuffled', val)" :isColorShuffled="isColorShuffled" v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
                                  :logosSetting="selectedProduct.logos_setting"/>
+            </div>
+          </b-tab>-->
+          <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
+            <template #title>
+              <a>
+                <span class="icon-holder">
+                  <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
+                </span>
+                Logo {{notVectorLogosCount}}
+              </a>
+            </template>
+            <div class="logo-placement-tabs">
+              <LogoPlacementTab />
             </div>
           </b-tab>
           <b-tab v-if="selectedProduct.product_type !== 'personalized'">
@@ -111,26 +124,30 @@
 <script lang="ts">
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
-import LogoPlacementTabs from './LogoPlacementTabs.vue'
+// import LogoPlacementTabs from './LogoPlacementTabs.vue'
+import LogoPlacementTab from '@/components/Logo/LogoPlacementTab.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
-import UploadLogo from '@/components/UploadLogo.vue'
+// import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 import RecentLogos from "@/components/RecentLogos.vue";
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
+import {filter} from "lodash"
+import {getVectorExtensions} from "@/helpers/Helpers";
 
 @Component<CustomizationTabs>({
   components: {
     RecentLogos,
     ColorAccordion,
-    LogoPlacementTabs,
+    // LogoPlacementTabs,
+    LogoPlacementTab,
     CustomizationText,
     CollarStyle,
     EditRosterAreaTab,
     ColorTabs,
-    UploadLogo,
+    // UploadLogo,
   },
   mounted() {
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});
@@ -210,6 +227,18 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
 
   get productSizes(){
     return this.selectedProduct.sizes[0].json_data
+  }
+
+  get notVectorLogosCount(){
+    const custom_logos = this.$store.getters.getCustomLogos()
+    let non_vector_logos_count = 0
+    if(custom_logos && custom_logos.length > 0) {
+      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
+        return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+      })
+      non_vector_logos_count = non_vector_logos.length
+    }
+    return non_vector_logos_count
   }
 
 

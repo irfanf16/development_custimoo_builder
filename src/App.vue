@@ -17,22 +17,24 @@ import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 window.io = require('socket.io-client');
 
-import { authenticateUser, getCompany, getPermissions } from '@/helpers/Helpers'
 import store from "@/store";
 import {i18n} from '@/i18n';
+import {authenticateUser, getCompany, getPermissions, processColorsCustom} from '@/helpers/Helpers'
 import Gleap from 'gleap'
 
 // console.log(localStorage.getItem('access_tokens'))
-window.Echo = new Echo({
-  broadcaster: "socket.io",
-  transports: ['websocket', 'polling', 'flashsocket'],
-  host: window.location.hostname + ':6001',
-  auth: {
-    headers: {
-      Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+if(process.env.VUE_APP_ENABLE_SOCKET == undefined) {
+  window.Echo = new Echo({
+    broadcaster: "socket.io",
+    transports: ['websocket', 'polling', 'flashsocket'],
+    host: window.location.hostname + ':6001',
+    auth: {
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+      },
     },
-  },
-});
+  });
+}
 
 //todo remove this code after a while as this is used to remove pwa cache
 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -80,6 +82,7 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
 
     const customer =  this.$store.getters.getCustomer;
 
+  if(process.env.VUE_APP_ENABLE_SOCKET == undefined) {
     window.Echo.channel(`notification.${this.enviorment}.${customer.id}`).listen('RoasterUpdatedEvent',  (e: Record<any,any>) => {
       this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
     })
@@ -96,6 +99,7 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
         this.showError('Pdf file could not be created')
       }
     })
+  }
   }
 })
 export default class App extends Mixins(LockerProducts,ErrorMessages) {

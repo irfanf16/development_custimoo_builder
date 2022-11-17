@@ -173,8 +173,13 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
     return this.$store.getters.getSelectedProduct
   }
 
-  get customLogos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos().filter((custom_logo:any) => (custom_logo && custom_logo.url != ""));
+  get customLogos(): Record<any, any>[] {
+    let custom_logos = this.$store.getters.getCustomLogos()
+    if(custom_logos) {
+      return this.$store.getters.getCustomLogos().filter((custom_logo:any) => (custom_logo && custom_logo.url != ""))
+    } else {
+      return []
+    }
   }
 
   get customTexts(): [Record<any, any>] {

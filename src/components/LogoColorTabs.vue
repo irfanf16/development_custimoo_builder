@@ -137,7 +137,7 @@ export default class LogoColorTabs extends Vue {
   }
 
   get getColorType(): string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   get svgGroups() {
@@ -217,6 +217,7 @@ export default class LogoColorTabs extends Vue {
     this.$emit('update:defSwatchColor',  color.value)
     this.pantoneColorVal = pantoneColor.pantone
     this.setSwatchColor({hex: color.value, name: color.name, pantone: pantoneColor.pantone})
+    console.log('colorsss', color, pantoneColor)
   }
 }
 </script>

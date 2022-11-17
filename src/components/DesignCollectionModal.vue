@@ -223,7 +223,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     return items
   }
   set collectionItems(val){
-    console.log('setter called')
     this.$store.commit('SET_COLLECTION_ITEMS',val)
   }
 
