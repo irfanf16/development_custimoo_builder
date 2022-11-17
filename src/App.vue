@@ -18,6 +18,8 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 window.io = require('socket.io-client');
 
 import {authenticateUser, getCompany, getPermissions, processColorsCustom} from '@/helpers/Helpers'
+import store from "@/store";
+import {i18n} from '@/i18n';
 import Gleap from 'gleap'
 
 // console.log(localStorage.getItem('access_tokens'))
@@ -64,7 +66,10 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
         }
       })
     }
-    await getCompany();
+    await getCompany().then(function (){
+      const current_locale = i18n.locale;
+      i18n.setLocaleMessage(current_locale, store.getters.getCompany.translations[current_locale]);
+    });
     // const token = this.$router.currentRoute.query.token as string
     const token = this.getParameterByName('token');
     if (token){

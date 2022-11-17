@@ -292,11 +292,9 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getSelectedModelIndex;
   }
 
-
   private async addToCart() {
     if (!this.rosterDetails.some(el => el.quantity == 0)) {
-      this.hideVModal('rostermodal')
-      this.showToast("Adding to cart", "info")
+      //this.showToast("Adding to cart", "info")
       await this.addToCartMixin(this.products_fonts as Record<any, any>[]);
     } // if quantity is not zero
     else {

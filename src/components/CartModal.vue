@@ -111,7 +111,39 @@
         </div>
 
         <div class="align-self-start">
-          <div class="fs-2 font-weight-bold ">Team Name / order reference</div>
+          <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
+            <thead class="bg-light">
+              <tr>
+                <th class="font-weight-bold">
+                  Product Name
+                </th>
+                <th class="font-weight-bold">
+                  MOQ
+                </th>
+                <th class="font-weight-bold">
+                  Total
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="(cart_item) in cartItems">
+                <tr :key="factory_product.id" v-for="(factory_product) in filterCartItemsForMOQSummary(cart_item.factory_products)">
+                  <td>
+                      <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.model_name }}</span>
+                  </td>
+                  <td>
+                      <span>{{ factory_product.minimum_order_quantity == null ? "N/A" : factory_product.minimum_order_quantity }}</span>
+                  </td>
+                  <td :class="{highlightMOQ: (factory_product.roster_product_count < factory_product.minimum_order_quantity)}">
+                    <template>
+                      <span>{{ factory_product.roster_product_count }}</span>
+                    </template>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+          <div class="fs-2 font-weight-bold mt-3">Team Name / order reference</div>
           <div class="mt-1">
             <b-form-input class="form-input" placeholder="Team Name / order reference" type="text" name="customer_reference_no"
               v-model="customer_reference_no" />
@@ -194,11 +226,34 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public customer_reference_no = ""
   public shipping_address: Record<any, any> | null = null
+  public can_finalize_order = true;
 
   get cartItems() {
-    return this.$store.getters.getCartItems
-  }
+    let cItems = this.$store.getters.getCartItems;
+    cItems.forEach((item:Record<any, any>) => {
+    let uniqueProductContainer:Record<any, any> = [];
+    item.factory_products.forEach((product:Record<any, any>) => {
+        let product_count = 0;
+        item.factory_products.forEach((nestProduct:Record<any, any>) => {
+          if(product.product_id == nestProduct.product_id){
+            product_count += parseInt(nestProduct.product_roster_detail[0].quantity);
+          }
+        });
+        if(uniqueProductContainer.includes(product.product_id)){
+          product.show_in_summary = false;
+        }else{
+          uniqueProductContainer.push(product.product_id);
+          product.show_in_summary = true;
+        }
+        product.roster_product_count = product_count;
+      });
+    });
 
+    return cItems;
+  }
+  get getProductSkus(){
+    return this.$store.getters.getProductsSkus;
+  }
   get company(){
     return this.$store.getters.getCompany;
   }
@@ -214,7 +269,21 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   get editingCartProductInfo() {
     return this.$store.getters.getProductEditInfoObject['cart_product_info']
   }
-  public async createOrder() {
+
+  public filterCartItemsForMOQSummary(cartItems:Record<any, any>){
+    this.can_finalize_order = true;
+    return cartItems.filter(item =>{
+      if(typeof item.roster_product_count !== 'undefined' && item.minimum_order_quantity != null && item.roster_product_count < item.minimum_order_quantity)
+        this.can_finalize_order = false;
+      return typeof item.show_in_summary !== 'undefined' && item.show_in_summary === true;
+    });
+  }
+
+  public createOrder() {
+    if(!this.can_finalize_order){
+      this.showToast(`${this.$t('minimum_order_cart_message')}`, "error");
+      return false;
+    }
     let payload = {}
     // const response = await this.editModeConfirmation();
     payload['customer_reference_no'] = this.customer_reference_no
@@ -341,6 +410,10 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 </script>
 
 <style lang="scss" scoped>
+.highlightMOQ{
+  background: #FF4500;
+  color: #ffffff;
+}
 .loader {
   &.relative {
     position: absolute;
