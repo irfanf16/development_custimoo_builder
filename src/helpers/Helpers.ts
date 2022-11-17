@@ -654,8 +654,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const selected_model_index = Store.getters.getSelectedModelIndex;
       scene_ref.frontCanvas.discardActiveObject().renderAll()
       scene_ref.backCanvas.discardActiveObject().renderAll()
-      const back_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
-      const front_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
+      // const back_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
+      // const front_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
+      const back_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
+      const front_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
       const post_data: Record<any, any> = {
         back_image: back_image,
         custom_logos: Store.getters.getCustomLogos(),
