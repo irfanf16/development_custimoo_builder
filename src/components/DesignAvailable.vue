@@ -2,7 +2,7 @@
   <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
     <template v-if="selectedProduct.productstyles[styleIndex]">
       <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :class="{'selected_design': design.id == selectedDesignId}">
-        <a @click="changeDesign(index); showPreview()" v-if="index < 12 || loadDesigns">
+        <a @click="changeDesign(index); showPreview()" v-if="index < itemsPerRow || loadDesigns">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_thumbnail_url : ''}"
                  :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
@@ -31,6 +31,7 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
     (this.$refs['designs'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
     (this.$refs['designs'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{this.loadIt($event)});
     (this.$refs['designs'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{this.loadIt($event)});
+    this.itemsPerRow = Math.round((this.$refs['designs'] as Record<any, any>).clientHeight / 130) * 4;
   },
   beforeDestroy() {
     (this.$refs['designs'] as Record<any, any>).removeEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
@@ -45,6 +46,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   @Prop() activeTab!: number;
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  public itemsPerRow = 16
 
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
@@ -71,7 +73,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
   public loadIt($event:Record<any, any>) {
     $event.stopPropagation()
 
-    let designHt = 10
+    let designHt = 1
     if(designHt <= $event.target.scrollTop){
       this.loadDesigns = true
     }else if(this.mobileScreen){
