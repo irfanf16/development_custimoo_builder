@@ -341,38 +341,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     return this.$store.getters.getIsSafari
   }
 
-  // @Watch('defaultColors', {
-  //   deep: true
-  // })
-  defaultColorsChanged(newVal: [Record<any, any>]) {
-    if (this.productType == 'customized' && this.svg_groups_ready) {
-      let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-      if (defaultColors.length) {
-        this.changeDefaultColors()
-      } else {
-        this.setInitialColors();
-      }
-
-      if (this.mainPreview) {
-        //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
-        this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
-      }
-      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "default_colors": this.defaultColors})
-    }
-  }
-
-  // @Watch('groupColors', {
-  //   deep: true, immediate: false
-  // })
-  groupColorsChanged() {
-    if (this.productType == 'customized' && this.svg_groups_ready) {
-      this.changeGroupColor()
-      if(this.productEditInfoObject && this.productEditInfoObject.editing == false) {
-        this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "group_colors": this.groupColors})
-      }
-    }
-  }
-
   public eventAction(item: Record<any, any>, object: Record<any, any>, otherSideObject: Record<any, any>) {
     object.center()
     object.set({

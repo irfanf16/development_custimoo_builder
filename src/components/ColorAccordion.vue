@@ -170,6 +170,7 @@ export default class ColorAccordion extends Vue {
   }
 
   public setColor(color: Record<any, any>) {
+    let self: Record<any, any> = this
     this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
     if (color.value){
       this.$store.dispatch('updateGroupColors',
@@ -179,6 +180,7 @@ export default class ColorAccordion extends Vue {
           pantone: color.pantone,
           name: color.name
         })
+      self.$eventBus.$emit("changeGroupColors")
     }
   }
 

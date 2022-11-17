@@ -117,10 +117,11 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
   * */
 
   public setSwatchColor(color: Record<any, any>) {
+    let self: Record<any, any> = this
     let payload = {color_info : color , index : this.active_logo_color_index}
-    // this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
     this.$store.dispatch('setDefaultColor', { index: this.active_logo_color_index, color: color.hex, pantone: color.pantone, name: color.name })
     this.$store.commit('SET_LOGO_COLOR', payload)
+    self.$eventBus.$emit('changeDefaultColors')
   }
 
 
@@ -129,17 +130,20 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
   }
 
   public useOriginalColors() {
+    let self: Record<any, any> = this
     this.pulse_info.use_original_colors = false
     this.logoColorsInfo.colors = JSON.parse(JSON.stringify(this.logoColorsInfo.extracted_colors))
     this.logoColorsInfo.using_logo_colors = false
     setDefaultColors()
+    self.$eventBus.$emit('useProductOriginalColors')
   }
 
   public useLogoColors() {
+    let self: Record<any, any> = this
     this.pulse_info.use_logo_colors = false
-    this.logoColorsInfo.colors = JSON.parse(JSON.stringify(this.logoColorsInfo.extracted_colors))
+   // this.logoColorsInfo.colors = JSON.parse(JSON.stringify(this.logoColorsInfo.extracted_colors))
     this.logoColorsInfo.using_logo_colors = true
-    this.$emit('logo-colors-updated', {})
+    self.$eventBus.$emit('changeDefaultColors')
   }
 
   public rollbackPreviousColors() {
@@ -147,11 +151,12 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
   }
 
   public shuffleLogoColors() {
+    let self: Record<any, any> = this
     this.pulse_info.shuffle = false
     const shuffled  = this.logoColorsInfo.colors.sort(() =>  0.5 - Math.random())
-    console.log('shuffled', shuffled)
     this.logoColorsInfo.colors = shuffled
     setDefaultColors()
+    self.$eventBus.$emit('changeDefaultColors')
   }
 
   public selectLogoColor(logo_color_index: number) {
