@@ -508,6 +508,15 @@ Vue.filter('formatDate', function(value:string) {
     if(this.$route.query.tabIdx){
       this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
     }
+    await this.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
+      await this.getLockers(false,false,resolve);
+    })
+    await this.$eventBus.$on('updateCart', async (resolve: any) => {
+      await this.addToCart(resolve);
+    })
+    await this.$eventBus.$on('updateOrder', async (resolve: any) => {
+      await this.UpdateOrderProducts(false,false,resolve);
+    })
   },
   async beforeRouteEnter(to, from, next) {
     next((vm:Record<any, any>) => {
@@ -520,7 +529,7 @@ Vue.filter('formatDate', function(value:string) {
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
-  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton) {
+  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton,exitEditMode) {
   public products_fonts: Record<any, any>[] = []
   public prevRoute: Record<any, any> = {};
   public logData = logData;
@@ -729,7 +738,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         customizer_tabs = shadow_dom.querySelectorAll('.sideNav li a')
 
         for (let i = 0; i < customizer_tabs.length; i++) {
-          console.log(customizer_tabs[i].classList)
           if (i === ind && ind >= 0) {
             customizer_tabs[i].classList.add('active')
           } else {
@@ -1064,10 +1072,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
 
-  private async addToCart() {
+  private async addToCart(resolve:any=null) {
     await this.addToCartMixin(this.products_fonts);
-    if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress') {
+    if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
       this.showVModal('cart-modal')
+    }
+    if(resolve){
+      resolve(true);
     }
   }
 
@@ -1159,7 +1170,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.retrieveProducts();
   }
 
-  public async getLockers(share_url = false, show_add_to_locker_modal = false) {
+  public async getLockers(share_url = false, show_add_to_locker_modal = false,resolve:any = null){
     let self: Record<any, any> = this;
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
@@ -1220,11 +1231,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         // this.exitFromEditMode();
         // let query_params = await self.setQueryParams()
         // self.retrieveProducts(query_params)
+        if(resolve){
+          resolve(true);
+        }
       }).catch(async errorResponse => {
         handleResponseException(errorResponse)
         self.exitFromEditMode();
         let query_params = await self.setQueryParams()
         self.retrieveProducts(query_params)
+        if(resolve){
+          resolve(false);
+        }
       })
     }
   }
@@ -1411,6 +1428,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public async resetStore() {
     const self: Record<any, any> = this;
 
+    const response = await this.editModeConfirmation();
+
     const ok = await this.ref['reset-changes'].showConfirm()
 
     if (ok) {
@@ -1459,13 +1478,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self: Record<any, any> = this;
     // await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
     // await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
-    await self.exitFromEditMode();
     let query_params = await this.setQueryParams()
     await this.retrieveProducts(query_params);
-
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress') {
       await this.showVModal('cart-modal')
-    } else if (!this.isCollectionView) {
+    } else if (this.company.platform === 'wordpress' && !this.isCollectionView) {
       window.location.href = this.company.company_domain + '/cart'
     }
   }
@@ -1544,29 +1561,21 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     await self.retrieveProducts(query_params);
   }
 
-  async UpdateOrderProducts() {
+  async UpdateOrderProducts(resolve:any= null) {
     let self = this;
-    debugger;
     let updated_product: Record<any, any> = await getActiveProductData(this.products_fonts) as Record<any, any>;
     if (updated_product == null) {
       return false;
     }
-    console.log(updated_product);
-    debugger;
     if (updated_product) {
       if (Object.prototype.hasOwnProperty.call(updated_product, 'production_url') && updated_product?.production_url) {
         let content: string = await fetchUrlContent(updated_product?.production_url);
-        console.log('start');
-        console.log(content);
         let production_content = await parseSvgStringFile(content, updated_product as Record<any, any>);
         updated_product.svg_content = production_content;
-        console.log(updated_product)
-        console.log('end');
       }
     } else {
       return false;
     }
-    debugger;
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info
     let order_product_active_index = order_products_info_obj.order_products.active_index;
     updated_product["id"] = order_products_info_obj.order_products.factory_products[order_product_active_index].id;
@@ -1582,16 +1591,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       cart_product_info: null,
       order_product_info: order_products_info_obj
     })
-    debugger;
-    console.log(updated_product);
     // self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product;
     let url = `order_item/${order_item_id}/update/products`;
     this.showLoader = true
-    debugger;
     http.post(url, {factory_products: order_products_info_obj.order_products.factory_products}).then(async (res: any) => {
-      debugger;
       await self.exitFromEditMode()
-      debugger;
       this.showLoader = false
       if (res.data.success == true) {
         if (this.company.platform == 'wordpress') {
@@ -1599,6 +1603,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         } else {
           self.$router.push({name: "OrderDetail", params: {order_id: order_item_id}});
         }
+      }
+      if(resolve){
+        resolve(true);
       }
     }).catch(err => {
       this.showErrorArr(err.response.data.errors)
@@ -1691,7 +1698,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           let res = await this.$store.dispatch('shareProduct', payload);
           shared_url += res.data.url;
           Vue.set(this.getLockerProducts[i].product[ind], 'shared_url', shared_url)
-          console.log(res)
         }
 
         this.showPopper('shareDesign');
