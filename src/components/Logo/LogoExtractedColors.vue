@@ -135,7 +135,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     this.logoColorsInfo.colors = JSON.parse(JSON.stringify(this.logoColorsInfo.extracted_colors))
     this.logoColorsInfo.using_logo_colors = false
     setDefaultColors()
-    self.$eventBus.$emit('changeDefaultColors')
+    self.$eventBus.$emit('useProductOriginalColors')
   }
 
   public useLogoColors() {
