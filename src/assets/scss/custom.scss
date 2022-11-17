@@ -595,6 +595,10 @@ button {
                 right: 0;
                 margin: 0 auto;
 
+                &.error{
+                    color: #D53943;
+                }
+
                 &:before{
                     content: "";
                     display: block;
@@ -617,6 +621,8 @@ button {
                     z-index: 3;
                 }
             }
+
+            position: relative;
         }
     }
 
@@ -943,6 +949,17 @@ button {
                     //    border: none;
                     //    font-size: 0;
                     //}
+
+                    .upload-box{
+                        position: relative;
+
+                        .vector-logos-error{
+                            position: absolute;
+                            color: #D53943;
+                            left: -5px;
+                            top: -7px;
+                        }
+                    }
                 }
 
             }
@@ -1782,6 +1799,17 @@ button {
 }
 
 .customization-tabs {
+    overflow-y: visible;
+
+    .logos-error{
+        position: absolute;
+        top: -7px;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        color: #D53943;
+    }
+
     .logo-placement-area{
         .color-holder{
             margin: 0;
