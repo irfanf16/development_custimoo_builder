@@ -41,7 +41,7 @@ Vue.use(SlitherSlider)
 })
 
 
-export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode, HideUpdateLockerButton) {
+export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode, HideUpdateLockerButton,exitEditMode) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
@@ -73,6 +73,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
   public async productDesigns(index: number) {
     let self: Record<any, any> = this;
     let style_index = 0;
+    const response = await this.editModeConfirmation();
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);

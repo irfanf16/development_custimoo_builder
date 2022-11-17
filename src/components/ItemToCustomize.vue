@@ -226,6 +226,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
   public async searchProducts(isClear:boolean) {
     let self = this;
+    const response = await this.editModeConfirmation();
     if(isClear)
     {
       self.search = "";
@@ -257,6 +258,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     let private_product = this.$store.getters.getPrivateProduct
     const itemCarousel = this.$refs['itemsCarousel'] as Record<any, any>
     let retrieve_products = false;
+    const response = await this.editModeConfirmation();
 
     let check = ()=>{
       if(prd_type == "customized"){
