@@ -60,6 +60,7 @@ import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
 import LogoColorTabsNew from "@/components/LogoColorTabsNew.vue";
+import Store from "@/store";
 
 @Component<LogoExtractedColors>({
   components: { LogoEditorModal, LogoDisclaimerModal, LogoEditor, LogoColorTabsNew },
@@ -134,7 +135,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     this.pulse_info.use_original_colors = false
     this.logoColorsInfo.colors = JSON.parse(JSON.stringify(this.logoColorsInfo.extracted_colors))
     this.logoColorsInfo.using_logo_colors = false
-    setDefaultColors()
+    Store.commit('SET_DEFAULT_COLORS', [])
     self.$eventBus.$emit('useProductOriginalColors')
   }
 
