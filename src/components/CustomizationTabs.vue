@@ -28,7 +28,7 @@
                   <span class="icon-holder">
                     <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
                   </span>
-                  Logo {{notVectorLogosCount}}
+                  Logo
                 </span>
               </a>
             </template>
@@ -234,7 +234,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     let non_vector_logos_count = 0
     if(custom_logos && custom_logos.length > 0) {
       const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
-        console.log('string', custom_logos)
         return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
       })
       non_vector_logos_count = non_vector_logos.length
