@@ -267,7 +267,12 @@
                       <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+                            <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+                              <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" disabled>
+                                Add to Cart
+                              </b-button>
+                            </span>
+                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart">
                               {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
                             <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -280,7 +285,10 @@
                     </template>
                     <template v-else>
                       <template v-if="company.platform !== 'self'">
-                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="is_admin_token && company.platform == 'wordpress'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                        <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
+                          <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                        </span>
+                        <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                       </template>
                      </template>
                   </template>
