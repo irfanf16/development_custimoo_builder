@@ -168,7 +168,7 @@
       <template v-if="!isCustomerAuthenticated" >
         <template v-if="company.platform !== 'self'">
           <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
-                  :disabled="canvasImage.scene == null">
+                  :disabled="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
             Add to Cart
           </button>
         </template>
@@ -176,7 +176,7 @@
       <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
         <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
           <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
-            :disabled="canvasImage.scene == null">
+            :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
             Add to Cart
           </button>
         </template>
@@ -184,7 +184,7 @@
       <template v-else-if="!getCartLoading">
         <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
           <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
-                  :disabled="canvasImage.scene == null">
+                  :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
             Add to Cart
           </button>
 
@@ -260,6 +260,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public roster_previous_state: Record<any, any>[] = []
   public show_roster_change_warning = false
   public show_undo_roster_btn = false
+  public is_admin_token = localStorage.getItem('adminToken')
 
   /*
   *  component data properties ends

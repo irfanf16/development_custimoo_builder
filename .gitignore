@@ -32,3 +32,5 @@ env.development
 .env.staging.wcOrderDetail
 .env.wcOrderDetail
 .env.woocom
+self_customizer/
+wordpress_customizer_staging/

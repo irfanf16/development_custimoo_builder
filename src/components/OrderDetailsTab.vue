@@ -41,7 +41,7 @@
             <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product'">
 <!--              <button class="btn btn-secondary fw-bold w-100" @click="generateSVG" >Generate SVG</button>-->
               <template v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-                <button v-if="!isLoading"  class="btn btn-secondary fw-bold w-100" @click="addToCartMixin(products_fonts)" :disabled="canvasImage.scene == null">
+                <button v-if="!isLoading" :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')"  class="btn btn-secondary fw-bold w-100" @click="addToCartMixin(products_fonts)">
 
                   <template v-if="getProductEditInfoObject.editing">
                     <template v-if="getProductEditInfoObject.type == 'cart_product'">
@@ -66,7 +66,7 @@
           </template>
           <template v-else>
             <template v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-              <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'"   class="btn btn-secondary fw-bold w-100">Add to Cart</button>
+              <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="is_admin_token && company.platform == 'wordpress'"   class="btn btn-secondary fw-bold w-100">Add to Cart</button>
             </template>
           </template>
 
@@ -149,6 +149,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   public logo_pattern_last_value_y = 0;
 
   public INCH_TO_CENTIMETER = 2.54;
+
+  public is_admin_token = localStorage.getItem('adminToken');
 
   get updateOrderItemProducts() {
     return this.$store.getters.getUpdateOrderItemProducts
