@@ -176,6 +176,7 @@ export default class LogoPlacementTab extends Vue {
     this.customLogos.forEach((custom_logo: Record<any, any>, customLogoIndex) => {
       custom_logo.logo_index = customLogoIndex
     })
+    self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 
   public handleLogoPlacementChange(updated_value: string, custom_logo: Record<any, any>) {

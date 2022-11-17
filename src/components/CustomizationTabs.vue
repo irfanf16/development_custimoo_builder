@@ -21,8 +21,8 @@
           <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
-                <span :class="{'no-vector-logos': notVectorLogosCount > 0}">
-                  <span v-if="notVectorLogosCount > 0" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order!`" class="logos-error">
+                <span :class="{'no-vector-logos': non_vector_logos_count > 0}">
+                  <span v-if="non_vector_logos_count > 0" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order!`" class="logos-error">
                     <b-icon-exclamation-circle-fill />
                   </span>
                   <span class="icon-holder">
@@ -135,7 +135,6 @@ import {default as $} from 'jquery';
 import RecentLogos from "@/components/RecentLogos.vue";
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import {filter} from "lodash"
-import {getVectorExtensions} from "@/helpers/Helpers";
 
 @Component<CustomizationTabs>({
   components: {
@@ -153,7 +152,7 @@ import {getVectorExtensions} from "@/helpers/Helpers";
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()});
-
+    this.$eventBus.$on('handleNonVectorCustomLogosCount', this.notVectorLogosCount)
     this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
     this.fontsColorsManipulation()
@@ -170,6 +169,7 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
   public set = false
   public previous_tab='';
   public ref = this.$refs as Record<any, any>
+  public non_vector_logos_count = 0
 
   public styling = {
     scrollbar: {
@@ -227,18 +227,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
 
   get productSizes(){
     return this.selectedProduct.sizes[0].json_data
-  }
-
-  get notVectorLogosCount(){
-    const custom_logos = this.$store.getters.koivna
-    let non_vector_logos_count = 0
-    if(custom_logos && custom_logos.length > 0) {
-      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
-        return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
-      })
-      non_vector_logos_count = non_vector_logos.length
-    }
-    return non_vector_logos_count
   }
 
 
@@ -425,6 +413,18 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     }
     this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: false, attribute: 'text', value: ''})
     this.$store.commit('REMOVE_CUSTOMIZATION_TEXT_ELEMENT', payload)
+  }
+
+  notVectorLogosCount(){
+    const custom_logos = this.$store.getters.koivna
+    let non_vector_logos_count = 0
+    if(custom_logos && custom_logos.length > 0) {
+      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
+        return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+      })
+      non_vector_logos_count = non_vector_logos.length
+    }
+    this.non_vector_logos_count =  non_vector_logos_count
   }
 
 }
