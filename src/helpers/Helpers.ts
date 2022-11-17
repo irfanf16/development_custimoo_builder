@@ -685,6 +685,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         logo_colors: Store.getters.getLogosColors,
         model_id: product_models[selected_model_index].id,
         model_name: product_models[selected_model_index].model_name,
+        minimum_order_quantity: product_models[selected_model_index].minimum_order_quantity,
+        minimum_order_quantity_type: product_models[selected_model_index].minimum_order_quantity_type,
         product_id: selected_product.product_id,
         ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
         sync_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].sync_id:'',
@@ -1583,14 +1585,47 @@ const fetchCustomer = async (jwtToken:string) => {
     }
   }
 }
+
 const setVueVersion = async () => {
-  const vue_app_version = await localStorage.getItem('vue_app_version')
-  if(vue_app_version != process.env.VUE_APP_VERSION) {
-    await localStorage.setItem('vue_app_version', process.env.VUE_APP_VERSION)
-    await Store.dispatch('resetStore')
-    location.reload()
-    return
+  const is_loggedIn = await localStorage.getItem('jwtToken');
+  const is_restored = await localStorage.getItem('is_restored');
+  let customer_id = 0;
+  if(is_loggedIn) {
+    const customer = Store.getters.getCustomer;
+    console.log(customer);
+    customer_id = customer.id;
   }
+  await http.get('get-reset-store?customer_id='+customer_id)
+    .then(async (res) =>{
+      if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
+        if(is_loggedIn && res.data.isCustomerStoreReset <= 0){
+          console.log('logged in');
+          await http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).catch(error => {
+            handleResponseException(error)
+            console.info("error while setting reset store", error)
+          });
+          if(is_restored != 'yes')
+            await restore();
+        }else if(is_loggedIn == null && is_restored != 'yes') {
+          console.log('not logged in and not restored');
+          await restore();
+        }else{
+          console.log('none')
+        }
+      }
+    })
+    .catch(error => {
+      handleResponseException(error)
+      console.info("error while getting company", error)
+    });
+}
+
+async function restore(){
+  await localStorage.setItem('is_restored', 'yes');
+  await Store.dispatch('resetStore');
+  console.log('restored');
+  //location.reload()
+  return
 }
 
 const getProductColors = (product_id = null, append_locker_colors = true ) => {

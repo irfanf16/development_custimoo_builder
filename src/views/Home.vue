@@ -34,7 +34,7 @@
                             Save
                           </b-button>
                           <b-button :key="'savetolocker'" variant="outline-secondary" @click="getLockers(false, true)">
-                           Save As
+                            Save As
                           </b-button>
                         </template>
                         <template v-else>
@@ -543,7 +543,8 @@ Vue.filter('formatDate', function(value:string) {
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
-  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton,exitEditMode) {
+  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton, exitEditMode) {
+  public langs = ['en','dk'];
   public products_fonts: Record<any, any>[] = []
   public prevRoute: Record<any, any> = {};
   public logData = logData;
