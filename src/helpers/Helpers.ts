@@ -666,8 +666,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const selected_model_index = Store.getters.getSelectedModelIndex;
       scene_ref.frontCanvas.discardActiveObject().renderAll()
       scene_ref.backCanvas.discardActiveObject().renderAll()
-      const back_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
-      const front_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
+      // const back_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
+      // const front_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
+      const back_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
+      const front_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
       const post_data: Record<any, any> = {
         back_image: back_image,
         custom_logos: Store.getters.getCustomLogos(),
@@ -1158,8 +1160,8 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     const group_front_image_tag = getGroupImageTag(factory_product,production_file_info,'front_image');
     $(svg_doc as SVGTextElement|Document).find("g").eq(0).prepend(group_front_image_tag)
     //Add Front and Back Images Side wise to svg End
-    const production_height = production_file_info.height.replace('px','')?parseFloat(production_file_info.height.replace('px','')):6000;
-    const production_width = production_file_info.width.replace('px','')?parseFloat(production_file_info.width.replace('px','')):8000;
+    const production_height = production_file_info.height? parseFloat(production_file_info.height.replace('px','')):6000;
+    const production_width = production_file_info.width? parseFloat(production_file_info.width.replace('px','')):8000;
     const view_box = (svg_doc as SVGTextElement|Document)?.querySelector('svg')?.getAttribute('viewBox');
 
     const view_box_dimensions = view_box?.split(" ");
