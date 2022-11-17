@@ -173,6 +173,12 @@
           </button>
         </template>
       </template>
+      <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-else-if="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
+        <b-button @click="addToCart" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+      </span>
+      <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
+        <b-button @click="addToCart" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+      </span>
       <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
         <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
           <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
@@ -200,7 +206,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import {find, findIndex, map} from 'lodash';
+import {filter, find, findIndex, map} from 'lodash';
 import ErrorMessages from '@/mixins/ErrorMessages';
 import {cartModalData, RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
@@ -292,6 +298,17 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getSelectedModelIndex;
   }
 
+  get notVectorLogosCount(){
+    const custom_logos = this.$store.getters.koivna
+    let non_vector_logos_count = 0
+    if(custom_logos && custom_logos.length > 0) {
+      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
+        return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+      })
+      non_vector_logos_count = non_vector_logos.length
+    }
+    return non_vector_logos_count
+  }
 
   private async addToCart() {
     if (!this.rosterDetails.some(el => el.quantity == 0)) {

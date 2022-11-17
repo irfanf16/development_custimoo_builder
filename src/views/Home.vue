@@ -272,6 +272,9 @@
                                 Add to Cart
                               </b-button>
                             </span>
+                            <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
+                              <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                            </span>
                             <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart">
                               {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
@@ -286,6 +289,9 @@
                     <template v-else>
                       <template v-if="company.platform !== 'self'">
                         <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
+                          <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                        </span>
+                        <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
                           <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                         </span>
                         <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
