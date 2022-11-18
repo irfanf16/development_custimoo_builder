@@ -14,7 +14,9 @@
       <b-tab v-for="(custom_logo, customLogoIndex) in customLogos" :active="custom_logo_tab_index == customLogoIndex"
              :key="`custom_logo_${customLogoIndex}`" @click="custom_logo_tab_index = customLogoIndex">
         <template #title>
-          <span :style="{background: custom_logo.url ? 'white' : '' }">{{ customLogoIndex == 0 ? 'Team Logo' : 'logo ' + customLogoIndex }}</span>
+          <span>{{ customLogoIndex == 0 ? 'Team Logo' : 'logo ' + customLogoIndex }}</span>
+          <span class="vector-logos-error warning error" v-if="!custom_logo.is_vector && customLogos[customLogoIndex].url" v-b-tooltip.right="`Logo uploaded are not in vector format, please reupload to place order`"><b-icon-exclamation-circle-fill /></span>
+          <span class="vector-logos-error warning" v-else-if="!customLogos[customLogoIndex].url" v-b-tooltip.right="`Logo is not found`"><b-icon-exclamation-triangle-fill /></span>
           <template v-if="customLogoIndex > 0">
             <span class="remove-logo" @click="removeLogoTab(customLogoIndex)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
@@ -174,6 +176,7 @@ export default class LogoPlacementTab extends Vue {
     this.customLogos.forEach((custom_logo: Record<any, any>, customLogoIndex) => {
       custom_logo.logo_index = customLogoIndex
     })
+    self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 
   public handleLogoPlacementChange(updated_value: string, custom_logo: Record<any, any>) {

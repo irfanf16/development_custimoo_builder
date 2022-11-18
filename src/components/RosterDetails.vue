@@ -164,48 +164,49 @@
     </div>
 
     <div class="d-flex justify-content-center mt-3" v-if="getProductEditInfoObject.editing == false || (getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product')">
-<!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
-      <span v-if="!vector_logos" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order!`">
-        <b-button disabled class="mx-2 px-5" variant="secondary">
-          Add to Cart
-        </b-button>
-      </span>
-      <template v-else>
-        <template v-if="!isCustomerAuthenticated" >
-          <template v-if="company.platform !== 'self'">
-            <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
-                    :disabled="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
-              Add to Cart
-            </button>
-          </template>
+      <!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
+      <template v-if="!isCustomerAuthenticated" >
+        <template v-if="company.platform !== 'self'">
+          <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
+                  :disabled="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
+            Add to Cart
+          </button>
         </template>
-        <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
-          <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-            <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
-                    :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
-              Add to Cart
-            </button>
-          </template>
-        </template>
-        <template v-else-if="!getCartLoading">
-          <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-            <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
-                    :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
-              Add to Cart
-            </button>
-          </template>
-        </template>
-        <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
-          <img width="20" height="20" src="../../src/assets/images/loading.gif" />
-        </button>
       </template>
+      <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-else-if="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
+        <b-button @click="addToCart" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+      </span>
+      <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
+        <b-button @click="addToCart" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+      </span>
+      <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
+        <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+          <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
+                  :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+            Add to Cart
+          </button>
+        </template>
+      </template>
+      <template v-else-if="!getCartLoading">
+        <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+          <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
+                  :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+            Add to Cart
+          </button>
+
+        </template>
+      </template>
+      <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
+        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+      </button>
+
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import {find, findIndex, map} from 'lodash';
+import {filter, find, findIndex, map} from 'lodash';
 import ErrorMessages from '@/mixins/ErrorMessages';
 import {cartModalData, RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
@@ -295,6 +296,18 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   get modelIndex(): Record<any,any>{
     return this.$store.getters.getSelectedModelIndex;
+  }
+
+  get notVectorLogosCount(){
+    const custom_logos = this.$store.getters.koivna
+    let non_vector_logos_count = 0
+    if(custom_logos && custom_logos.length > 0) {
+      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
+        return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+      })
+      non_vector_logos_count = non_vector_logos.length
+    }
+    return non_vector_logos_count
   }
 
   private async addToCart() {

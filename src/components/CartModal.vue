@@ -132,13 +132,10 @@
                       <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.model_name }}</span>
                   </td>
                   <td>
-                      <span>{{ factory_product.minimum_order_quantity }}</span>
+                      <span>{{ factory_product.minimum_order_quantity == null ? "N/A" : factory_product.minimum_order_quantity }}</span>
                   </td>
                   <td :class="{highlightMOQ: (factory_product.roster_product_count < factory_product.minimum_order_quantity)}">
-                    <template v-if="factory_product.roster_product_count >= factory_product.minimum_order_quantity">
-                      <span>{{ factory_product.roster_product_count }}</span>
-                    </template>
-                    <template v-else>
+                    <template>
                       <span>{{ factory_product.roster_product_count }}</span>
                     </template>
                   </td>
@@ -239,6 +236,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
         let product_count = 0;
         item.factory_products.forEach((nestProduct:Record<any, any>) => {
           if(product.product_id == nestProduct.product_id){
+            if(typeof nestProduct.product_roster_detail != 'undefined' && nestProduct.product_roster_detail != null && nestProduct.product_roster_detail[0] != null)
             product_count += parseInt(nestProduct.product_roster_detail[0].quantity);
           }
         });
@@ -276,11 +274,12 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public filterCartItemsForMOQSummary(cartItems:Record<any, any>){
     this.can_finalize_order = true;
     return cartItems.filter(item =>{
-      if(typeof item.roster_product_count !== 'undefined' && item.roster_product_count < item.minimum_order_quantity)
+      if(typeof item.roster_product_count !== 'undefined' && item.minimum_order_quantity != null && item.roster_product_count < item.minimum_order_quantity)
         this.can_finalize_order = false;
       return typeof item.show_in_summary !== 'undefined' && item.show_in_summary === true;
     });
   }
+
   public createOrder() {
     if(!this.can_finalize_order){
       this.showToast(`${this.$t('minimum_order_cart_message')}`, "error");

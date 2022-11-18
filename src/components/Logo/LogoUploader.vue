@@ -222,6 +222,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
         }
         this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject(logo_data)})
         self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
+        self.$eventBus.$emit('handleNonVectorCustomLogosCount')
       } else {
         this.showError(response_data.message);
         return false
@@ -255,6 +256,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
     for (const [logo_object_key, logo_object_value] of Object.entries(logo_setting_at_index)) {
       this.customLogo[logo_object_key] = logo_object_value
     }
+    self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 
   /*

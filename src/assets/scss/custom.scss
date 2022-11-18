@@ -609,7 +609,7 @@ button {
                     background: white;
                     left: 0;
                     top: 1px;
-                    bottom: 0;
+                    bottom: 1px;
                     right: 0;
                     border-radius: 100px;
                     margin: auto;
@@ -6039,7 +6039,7 @@ $fontSize: 0.5;
             overflow-x: auto;
             gap: 5px;
             padding-bottom: 0.7rem;
-            padding-top: 0.4rem;
+            padding-top: 0.5rem;
 
             @extend .theme-scroll-h;
 

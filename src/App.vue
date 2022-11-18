@@ -17,9 +17,9 @@ import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 window.io = require('socket.io-client');
 
+import {authenticateUser, getCompany, getPermissions, processColorsCustom} from '@/helpers/Helpers'
 import store from "@/store";
 import {i18n} from '@/i18n';
-import {authenticateUser, getCompany, getPermissions, processColorsCustom} from '@/helpers/Helpers'
 import Gleap from 'gleap'
 
 // console.log(localStorage.getItem('access_tokens'))

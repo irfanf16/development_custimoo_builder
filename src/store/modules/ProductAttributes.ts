@@ -1219,7 +1219,6 @@ const ProductAttributes:Module<any, any> = {
       return state.customLogos[product_id]
     },
     koivna: state => {
-      console.log('andar')
       return state.customLogos[state.selectedPrdId]
     },
     getCustomLogoObject: state => {

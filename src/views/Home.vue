@@ -75,7 +75,7 @@
                       </template>
                     </template>
                     <template v-if="isCustomerAuthenticated">
-                      <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate Pdf</b-button>
+                      <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
                       <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
                     </template>
                     <template v-if="getProductEditInfoObject.type == 'order_product'">
@@ -267,28 +267,36 @@
                       <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-                            <span v-if="!vector_logos" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order!`">
-                              <b-button disabled class="mx-2 px-5" variant="secondary">
+                            <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+                              <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" disabled>
                                 Add to Cart
                               </b-button>
                             </span>
-
-                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+                            <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
+                              <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                            </span>
+                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart">
                               {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
                             <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
                               <img width="20" height="20" src="../../src/assets/images/loading.gif" />
                             </b-button>
                           </template>
-                         </template>
+                        </template>
                       </template>
 
                     </template>
                     <template v-else>
                       <template v-if="company.platform !== 'self'">
-                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="is_admin_token && company.platform == 'wordpress'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                        <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
+                          <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                        </span>
+                        <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
+                          <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                        </span>
+                        <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                       </template>
-                     </template>
+                    </template>
                   </template>
 
                   <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
@@ -407,7 +415,7 @@ import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/Logo/LogoUploader";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
-import { findIndex } from 'lodash'
+import {filter, findIndex} from 'lodash'
 import opentype from 'opentype.js'
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 
@@ -535,7 +543,11 @@ Vue.filter('formatDate', function(value:string) {
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
+<<<<<<< HEAD
   ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton,exitEditMode) {
+=======
+  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton, exitEditMode) {
+>>>>>>> rewtire-custom-logos
   public langs = ['en','dk'];
   public products_fonts: Record<any, any>[] = []
   public prevRoute: Record<any, any> = {};
@@ -872,6 +884,18 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get mainProductType(): string {
     let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
     return selected_product.back_design ? "front_back" : "front";
+  }
+
+  get notVectorLogosCount(){
+    const custom_logos = this.$store.getters.koivna
+    let non_vector_logos_count = 0
+    if(custom_logos && custom_logos.length > 0) {
+      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
+        return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+      })
+      non_vector_logos_count = non_vector_logos.length
+    }
+    return non_vector_logos_count
   }
 
   public showCollectionModal = () => {

@@ -142,6 +142,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
       this.addRemoveTeamLogoOnAllProducts('add', this.customLogo)
     }
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
+    self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 
   /*
