@@ -9,6 +9,7 @@ import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
 import {parseInt, findIndex} from "lodash";
 import {Canvas} from "fabric/fabric-impl";
+import {eventBus} from "@/event/eventBus"
 
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
@@ -788,6 +789,7 @@ const initCustomLogosNew = async (retrieved_products: Record<any, any>) => {
   if(Object.keys(custom_logos_by_products).length > 0) {
     Store.commit('SET_PRODUCT_CUSTOM_LOGOS', { 'append': true, data: custom_logos_by_products})
   }
+  eventBus.$emit('handleNonVectorCustomLogosCount')
 }
 
 const rosterDetailsInit = (retrieved_products: Record<any, any>) => {
