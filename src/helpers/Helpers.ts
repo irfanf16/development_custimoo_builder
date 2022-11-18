@@ -1594,7 +1594,6 @@ const setVueVersion = async () => {
   let customer_id = 0;
   if(is_loggedIn) {
     const customer = Store.getters.getCustomer;
-    console.log(customer);
     customer_id = customer.id;
   }
   await http.get('get-reset-store?customer_id='+customer_id)
