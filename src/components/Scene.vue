@@ -1610,9 +1610,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     }
   }
 
-  public resetAndAddLogos() {
+  public async resetAndAddLogos() {
     if(this.mounted) {
-      this.resetLogosFromCanvas()
+      await this.resetLogosFromCanvas()
       let logos: Record<any, any>[] = []
       if (this.custom_logos && this.logoAllowed) {
         let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
