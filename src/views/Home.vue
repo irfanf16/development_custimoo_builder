@@ -543,11 +543,7 @@ Vue.filter('formatDate', function(value:string) {
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
-<<<<<<< HEAD
-  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton,exitEditMode) {
-=======
   ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton, exitEditMode) {
->>>>>>> rewtire-custom-logos
   public langs = ['en','dk'];
   public products_fonts: Record<any, any>[] = []
   public prevRoute: Record<any, any> = {};
