@@ -262,6 +262,7 @@
                     <b-button :key="'editRoster'" v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
                       Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
                     </b-button>
+
                     <template v-else-if="isCustomerAuthenticated">
 
                       <template>
@@ -297,12 +298,14 @@
                         <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                       </template>
                      </template>
+                    <button @click="showVModal('replace-logo')">asdasd</button>
                   </template>
 
                   <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
                 </div>
               </div>
             </div>
+            <ReplaceLogos />
             <div class="sideNav" v-if="mobileScreen">
               <ul>
                 <li v-if="selectedProduct.is_logo_allowed">
@@ -396,6 +399,7 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
 import Scene from "@/components/Scene.vue";
 import $ from 'jquery';
 import CustomTabs from "@/components/CustomTabs.vue";
+import ReplaceLogos from "@/components/ReplaceLogos.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData} from "@/mixins/LockerProduct";
 import moment from 'moment'
@@ -436,6 +440,7 @@ Vue.filter('formatDate', function(value:string) {
     CustomizationPreview,
     ItemToCustomize,
     ChooseInterest,
+    ReplaceLogos,
     CustomizationTabs,
     // UploadLogo,
     LockerRoomModal,
