@@ -274,7 +274,9 @@
                               </b-button>
                             </span>
                             <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
-                              <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                              <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+                                Replace Logos
+                              </b-button>
                             </span>
                             <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart">
                               {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
@@ -293,12 +295,13 @@
                           <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                         </span>
                         <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
-                          <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                          <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+                            Replace Logos
+                          </b-button>
                         </span>
                         <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                       </template>
                      </template>
-                    <button @click="showVModal('replace-logo')">Replace</button>
                   </template>
 
                   <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>

@@ -14,12 +14,16 @@
       </div>
       <div class="modal-content replace-logo">
         <div id="modal-center-lockerroom" class="modal-body">
+          <div class="text-left pb-3">
+            <div class="fs-3 font-weight-bolder">Unresolved Image Files </div>
+            <div class="text-muted fs-2">In order to proceed you must replace one or more Files that does not meet the minimum requirements for printing. You will not be able to place your order until you've done so.</div>
+          </div>
           <template v-for="(custom_logo, customLogoIndex) in customLogos">
             <div :key="`logo_${customLogoIndex}`" v-if="custom_logo.url">
               <div class="d-flex justify-content-between align-items-center border py-1 px-2 rounded-lg" :class="{'mt-2': customLogoIndex>0}">
                 <div class="d-flex align-items-center gap-1">
-                  <div :key="custom_logo.url">
-                    <img class="flex-shrink-0" style="height: 40px" :key="custom_logo.url+customLogoIndex" :src="storageUrl + custom_logo.url" :title="custom_logo.logo_name" />
+                  <div>
+                    <img class="flex-shrink-0" style="height: 40px" :key="custom_logo.url" :src="storageUrl + custom_logo.url" :title="custom_logo.logo_name" />
                   </div>
                   <span :key="custom_logo.url" style="text-overflow: ellipsis; overflow: hidden" class="d-block pr-2">{{ custom_logo.logo_name ? custom_logo.logo_name : 'N/A'  }}</span>
                 </div>
@@ -27,7 +31,8 @@
                 <b-button size="sm" @click="()=>showUploader = customLogoIndex">Replace</b-button>
               </div>
 
-              <div v-if="showUploader == customLogoIndex" class="tabs-logo-container">
+              <div v-if="showUploader == customLogoIndex" class="tabs-logo-container position-relative">
+                <a class="close" @click="showUploader = -1"><b-icon-x /></a>
                 <div class="logo-placement-area mb-3 mb-lg-4 pt-2">
                   <div class="logo-placement-holder mb-lg-3" :class="custom_logo.url ? 'hasLogo': 'noLogo'">
                     <div class="logo-holder">
@@ -73,3 +78,25 @@ export default class ReplaceLogos extends Mixins(ModalAction){
 
 }
 </script>
+
+<style lang="scss">
+.close {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: #D53943;
+  border-radius: 100px;
+  color: #fff;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  z-index: 1;
+  padding: 0;
+  opacity: 1;
+  z-index: 1000;
+}
+</style>

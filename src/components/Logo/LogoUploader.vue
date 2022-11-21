@@ -18,7 +18,17 @@
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <input  :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
+        <template v-if="replaceLogo">
+          <input  :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
+                  type="file"
+                  name="logos" ref="logoUploadInput"
+                  @change="handleInputChange"
+                  @click="handleInputOnClick"
+                  @drop="handleInputOnDrag($event)"
+                  class="fileLoader"
+                  accept="image/*,application/postscript,application/pdf">
+        </template>
+        <input v-else :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
                 type="file"
                 name="logos" ref="logoUploadInput"
                 @change="handleInputChange"
