@@ -6119,6 +6119,40 @@ $fontSize: 0.5;
     }
 }
 
+.replace-logo{
+    &.modal-content{
+        border: none;
+    }
+    .logo-edit-btn-updated{
+        display: none;
+    }
+
+    .upload-logo-opener{
+        position: static !important;
+        border: none !important;
+        padding: 0 !important;
+
+        .btn{
+            width: 100% !important;
+            max-width: none !important;
+
+            .upload-box{
+                width: 100%;
+                overflow: hidden !important;
+                cursor: pointer;
+
+                input{
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+
+    .logo-placement-area {
+        padding-bottom: 0 !important;
+    }
+}
+
 .cartAnim{
     position: absolute;
     opacity: 0;

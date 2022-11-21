@@ -4,7 +4,7 @@
     <div class="btn btn-secondary modal-handler" >
       <div class="upload-box position-relative" :class="{'pulse-animation': !customLogo.url}" :style="{overflow: customLogo.url ? 'visible' : 'hidden'}">
         <div class="loader relative" v-if="showLoader"><img src="../../../src/assets/images/loading.gif" /></div>
-        <div class="uploaded-logo-holder" v-if="customLogo.url">
+        <div class="uploaded-logo-holder" v-if="customLogo.url && !replaceLogo">
           <img :src="`${storageUrl}${customLogo.url}?nocache=1`" width="100%"/>
         </div>
         <div v-else>
@@ -13,12 +13,12 @@
           </div>
           <slot name="upload_text">Upload Logo</slot>
         </div>
-        <div class="remove-img" v-if="customLogo.url">
+        <div class="remove-img" v-if="customLogo.url && !replaceLogo">
           <a @click="removeLogo">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <input  :style="{display: customLogo.url ? 'none':  'block'}"
+        <input  :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
                 type="file"
                 name="logos" ref="logoUploadInput"
                 @change="handleInputChange"
@@ -61,6 +61,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
 
   @Prop({ required: true }) customLogoIndex!: number
   @Prop({ required: true }) customLogo!: Record<any, any>
+  @Prop({ required: true }) replaceLogo!: boolean
 
   /*
   * props ends here
