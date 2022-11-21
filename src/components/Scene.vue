@@ -1422,70 +1422,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     return obj;
   }
 
-  public objectMove(e: any, side: string) {
-    const logo_index = e.target.logo_index
-    const self = this;
-    if (e.action == 'drag') {
-      let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-      self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-      self.$store.dispatch('updateCustomLogoAttribute', {
-        index: logo_index,
-        attribute: 'x_axis',
-        value: e.target.left
-      })
-      self.$store.dispatch('updateCustomLogoAttribute', {
-        index: logo_index,
-        attribute: 'y_axis',
-        value: e.target.top
-      })
-    } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-      let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-      self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-      const width = e.target.width * e.target.scaleX;
-      const height = e.target.height * e.target.scaleY;
-      const converted_width = unitConversion((width * this.measurementRatio));
-      const converted_height = unitConversion((height * this.measurementRatio));
-      self.$store.dispatch('updateCustomLogoAttribute', {
-        index: logo_index,
-        attribute: 'scaleX',
-        value: e.target.scaleX
-      })
-      self.$store.dispatch('updateCustomLogoAttribute', {
-        index: logo_index,
-        attribute: 'originalWidth',
-        value:converted_width.value,
-      })
-      self.$store.dispatch('updateCustomLogoAttribute', {
-        index: logo_index,
-        attribute: 'scaleY',
-        value: e.target.scaleY
-      })
-      self.$store.dispatch('updateCustomLogoAttribute', {
-        index: logo_index,
-        attribute: 'originalHeight',
-        value:converted_height.value
-      })
-    } else if (e.action == 'rotate') {
-      let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-      self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-      self.$store.dispatch('updateCustomLogoAttribute', {
-        index: logo_index,
-        attribute: 'rotation',
-        value: e.target.angle
-      })
-    }
-    self.$store.dispatch('updateCustomLogoAttribute', {
-      index: logo_index,
-      attribute: 'action',
-      value: e.action
-    })
-    let dimText = this.dimTextFront
-    if (e.target.side == 'back' || e.target.side == 'Back') {
-      dimText = this.dimTextBack
-    }
-    this.showDimensions(e, dimText)
-  }
-
   public async addModel(modelUrl: string, side: string) {
     return new Promise((resolve, reject) => {
       fabric.Image.fromURL(modelUrl + '?nocache=2', async (img: any) => {
@@ -1705,8 +1641,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           if (this.mainPreview) {
             const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
             const converted_height = unitConversion(img.height * img.scaleY * this.measurementRatio)
-            await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
-              index: logo.logo_index,
+            this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
+              custom_logo_index: logo.logo_index,
               data: {
                 actualWidth: img.width,
                 actualHeight: img.height,
@@ -2096,6 +2032,21 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
       const converted_height = unitConversion(height)
       this.custom_logos[logo_index].originalWidth = converted_width.value;
       this.custom_logos[logo_index].originalHeight = converted_height.value;
+
+      this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
+        custom_logo_index: fabric_object.get("logo_index"),
+        data: {
+          x_axis: fabric_object.get("left"),
+          y_axis: fabric_object.get("top"),
+          rotation: fabric_object.get("angle"),
+          scaleX: fabric_object.get("scaleX"),
+          scaleY: fabric_object.get("scaleY"),
+          actualWidth: fabric_object.get('width'),
+          actualHeight: fabric_object.get('height'),
+          originalWidth: converted_width.value,
+          originalHeight: converted_height.value,
+        }
+      })
     }
     self.$eventBus.$emit("customLogoStoreUpdated", logo_index);
   }
