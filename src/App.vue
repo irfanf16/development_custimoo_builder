@@ -12,10 +12,10 @@ import Header from '@/components/Header.vue';
 import Navbar from '@/components/Navbar.vue';
 import {LockerProducts} from "@/mixins/LockerProduct";
 
-import Echo from "laravel-echo";
+// import Echo from "laravel-echo";
+// window.io = require('socket.io-client');
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
-window.io = require('socket.io-client');
 
 import {authenticateUser, getCompany, getPermissions, processColorsCustom} from '@/helpers/Helpers'
 import store from "@/store";
@@ -23,18 +23,18 @@ import {i18n} from '@/i18n';
 import Gleap from 'gleap'
 
 // console.log(localStorage.getItem('access_tokens'))
-if(process.env.VUE_APP_ENABLE_SOCKET == undefined) {
-  window.Echo = new Echo({
-    broadcaster: "socket.io",
-    transports: ['websocket', 'polling', 'flashsocket'],
-    host: window.location.hostname + ':6001',
-    auth: {
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('access_token'),
-      },
-    },
-  });
-}
+// if(process.env.VUE_APP_ENABLE_SOCKET == undefined) {
+//   window.Echo = new Echo({
+//     broadcaster: "socket.io",
+//     transports: ['websocket', 'polling', 'flashsocket'],
+//     host: window.location.hostname + ':6001',
+//     auth: {
+//       headers: {
+//         Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+//       },
+//     },
+//   });
+// }
 
 //todo remove this code after a while as this is used to remove pwa cache
 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -80,26 +80,26 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
       await this.$router.push({name: 'Home'})
     }
 
-    const customer =  this.$store.getters.getCustomer;
+    // const customer =  this.$store.getters.getCustomer;
 
-  if(process.env.VUE_APP_ENABLE_SOCKET == undefined) {
-    window.Echo.channel(`notification.${this.enviorment}.${customer.id}`).listen('RoasterUpdatedEvent',  (e: Record<any,any>) => {
-      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
-    })
-    window.Echo.channel(`order_activity_for_user_${this.enviorment}_${customer.id}`).listen('OrderActivityEvent',  (e: Record<any,any>) => {
-      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
-    })
-    window.Echo.channel(`Notify_to_user_${this.enviorment}_${customer.id}`).listen('NotifyUser',  (e: Record<any,any>) => {
-      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
-    })
-    window.Echo.channel(`orderfile.${customer.id}`).listen('OrderFileCreatedEvent',  (e: Record<any,any>) => {
-      if(e.design_file.length) {
-        this.downloadPdfFile(e.design_file)
-      } else {
-        this.showError('Pdf file could not be created')
-      }
-    })
-  }
+  // if(process.env.VUE_APP_ENABLE_SOCKET == undefined) {
+  //   window.Echo.channel(`notification.${this.enviorment}.${customer.id}`).listen('RoasterUpdatedEvent',  (e: Record<any,any>) => {
+  //     this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
+  //   })
+  //   window.Echo.channel(`order_activity_for_user_${this.enviorment}_${customer.id}`).listen('OrderActivityEvent',  (e: Record<any,any>) => {
+  //     this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
+  //   })
+  //   window.Echo.channel(`Notify_to_user_${this.enviorment}_${customer.id}`).listen('NotifyUser',  (e: Record<any,any>) => {
+  //     this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
+  //   })
+  //   window.Echo.channel(`orderfile.${customer.id}`).listen('OrderFileCreatedEvent',  (e: Record<any,any>) => {
+  //     if(e.design_file.length) {
+  //       this.downloadPdfFile(e.design_file)
+  //     } else {
+  //       this.showError('Pdf file could not be created')
+  //     }
+  //   })
+  // }
   }
 })
 export default class App extends Mixins(LockerProducts,ErrorMessages) {

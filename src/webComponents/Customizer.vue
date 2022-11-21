@@ -95,18 +95,18 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 Vue.use(VueSweetalert2);
 
-import Echo from "laravel-echo";
-window.io = require('socket.io-client');
-window.Echo = new Echo({
-  broadcaster: "socket.io",
-  transports: ['websocket', 'polling', 'flashsocket'],
-  host: window.location.hostname + ':6001',
-  auth: {
-    headers: {
-      Authorization: 'Bearer ' + localStorage.getItem('access_token'),
-    },
-  },
-});
+// import Echo from "laravel-echo";
+// window.io = require('socket.io-client');
+// window.Echo = new Echo({
+//   broadcaster: "socket.io",
+//   transports: ['websocket', 'polling', 'flashsocket'],
+//   host: window.location.hostname + ':6001',
+//   auth: {
+//     headers: {
+//       Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+//     },
+//   },
+// });
 
 import {getCompany, getPermissions} from "@/helpers/Helpers";
 import { authenticateUser } from '../helpers/Helpers'
@@ -166,10 +166,10 @@ export default {
       }, 500)
     }
 
-    const customer =  this.$store.getters.getCustomer;
-    window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
-      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
-    })
+    // const customer =  this.$store.getters.getCustomer;
+    // window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
+    //   this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
+    // })
   },
   methods:{
     getParameterByName(name, url = window.location.href) {
