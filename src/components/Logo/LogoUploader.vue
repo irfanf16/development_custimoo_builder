@@ -103,12 +103,13 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
   * */
 
   showLogoDisclaimer() {
+    let self: Record<any, any> = this;
     let show_disclaimer = this.logoDisclaimerInfo.accepted ? false : true;
     if(this.logoDisclaimerInfo.accepted == true) {
       show_disclaimer = this.logoDisclaimerInfo.show_again
     }
     if(show_disclaimer) {
-      this.$modal.show('logo-disclaimer-modal')
+      self.$modal.show('logo-disclaimer-modal')
     }
     return show_disclaimer
   }
@@ -164,16 +165,18 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
   }
 
   public handleDisclaimerModalHideEvent() {
-    this.$modal.hide('logo-disclaimer-modal')
+    let self: Record<any, any> = this;
+    self.$modal.hide('logo-disclaimer-modal')
     this.logo_file = null
   }
 
   public handleDisclaimerAction(show_disclaimer_again: boolean) {
+    let self: Record<any, any> = this;
     this.handlingDisclaimerAction = true
     this.logoDisclaimerInfo.accepted = true
     this.logoDisclaimerInfo.show_again = show_disclaimer_again
     localStorage.setItem('logoDisclaimerInfo', JSON.stringify(this.logoDisclaimerInfo));
-    this.$modal.hide('logo-disclaimer-modal')
+    self.$modal.hide('logo-disclaimer-modal')
     if(this.logo_file) {
       this.uploadLogo(this.logo_file)
     } else {
@@ -184,15 +187,16 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
   }
 
   public validateLogoFile(logo_file: File) {
+    let self: Record<any, any> = this;
     const extension = logo_file.name.toLowerCase().split('.').pop() as string;
     let is_allowed = this.logo_allowed_extensions.includes(extension)
     if(!is_allowed) {
-      this.showToast(`The file must be a file of type: ${this.logo_allowed_extensions.join(', ')}.`,'Error');
+      self.showToast(`The file must be a file of type: ${this.logo_allowed_extensions.join(', ')}.`,'Error');
     }
     return is_allowed;
   }
 
-  public uploadLogo(logo_file: File) {
+  public async uploadLogo(logo_file: File) {
     let self: Record<any, any> = this;
     let form_data = new FormData()
     form_data.append('file', logo_file)
@@ -210,7 +214,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
           this.$store.commit('SET_LOGO_COLORS_INFO', {
             data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
           })
-          await this.addRemoveTeamLogoOnAllProducts('add', logo_data)
+          await self.addRemoveTeamLogoOnAllProducts('add', logo_data)
         } else {
           this.customLogo.is_team_logo = false
           this.customLogo.transparent_logo = logo_data.transparent_logo_url;
@@ -224,7 +228,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
         self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
         self.$eventBus.$emit('handleNonVectorCustomLogosCount')
       } else {
-        this.showError(response_data.message);
+        self.showError(response_data.message);
         return false
       }
       const inputRef = this.$refs.logoUploadInput as Record<any, any>
@@ -235,15 +239,15 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
         const inputRef = this.$refs.logoUploadInput as Record<any, any>
         inputRef.value = null;
         this.showLoader = false;
-        this.showError(error);
+        self.showError(error);
       })
   }
 
-  public removeLogo() {
+  public async removeLogo() {
     const self: Record<any, any> = this;
-    self.$eventBus.$emit("customLogoRemoved", this.customLogoIndex)
+    await self.$eventBus.$emit("customLogoRemoved", this.customLogoIndex)
     if(this.customLogoIndex == 0) {
-      this.addRemoveTeamLogoOnAllProducts('remove')
+      await self.addRemoveTeamLogoOnAllProducts('remove')
     }
     //check if logo setting at given index exists then get that else get logo default object
     let logo_setting_at_index = this.selectedProduct.logos_setting[this.customLogoIndex] ? this.selectedProduct.logos_setting[this.customLogoIndex] : {}
