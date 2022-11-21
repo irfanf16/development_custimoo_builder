@@ -1,6 +1,6 @@
 <template>
   <div v-if="recentLogos.length > 0 && customLogo"  style="position:relative;">
-    <h4 class="mb-2" style="font-weight: 700">Recent Logos New</h4>
+    <h4 class="mb-2" style="font-weight: 700">Recent Logos</h4>
     <div class="grid grid-5 gap-2 py-2 px-3 rounded" style="background: rgb(205, 205, 205)">
       <div v-for="(recent_logo, recentLogoIndex) in recentLogos" :key="recentLogoIndex" style="position:relative;"
            :style="[customLogo.id == recent_logo.id ? {cursor: 'default', border: '1px solid green'} : {cursor: 'pointer'}]"
