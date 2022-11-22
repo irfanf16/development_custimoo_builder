@@ -36,7 +36,8 @@
                 <div class="logo-placement-area mb-3 mb-lg-4 pt-2">
                   <div class="logo-placement-holder mb-lg-3" :class="custom_logo.url ? 'hasLogo': 'noLogo'">
                     <div class="logo-holder">
-                      <LogoUploader :customLogoIndex="customLogoIndex" :customLogo="custom_logo" :key="custom_logo.url" :replaceLogo="true">
+                      <LogoUploader :customLogoIndex="customLogoIndex" :customLogo="custom_logo" :key="custom_logo.url"
+                                    :replaceLogo="true" @logo-uploaded="showUploader = -1">
                         <span slot="upload_text">Click to upload logo or drag a file here</span>
                       </LogoUploader>
                     </div>
