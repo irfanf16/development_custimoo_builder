@@ -363,7 +363,7 @@ export class handleMainProducts extends Vue {
 
         await self.setLockerProductData(editing_product_detail)
         let selected_product = this.$store.getters.getSelectedProduct;
-        initCustomLogosNew(retrieved_products)
+        await initCustomLogosNew(retrieved_products)
         this.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
         let customLogos = this.$store.getters.getCustomLogoObject
         for (const product of retrieved_products) {
