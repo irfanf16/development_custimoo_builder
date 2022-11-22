@@ -236,8 +236,11 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
         let product_count = 0;
         item.factory_products.forEach((nestProduct:Record<any, any>) => {
           if(product.product_id == nestProduct.product_id){
-            if(typeof nestProduct.product_roster_detail != 'undefined' && nestProduct.product_roster_detail != null && nestProduct.product_roster_detail[0] != null)
-            product_count += parseInt(nestProduct.product_roster_detail[0].quantity);
+            if(typeof nestProduct.product_roster_detail != 'undefined' && nestProduct.product_roster_detail != null){
+              nestProduct.product_roster_detail.forEach((roster:Record<any, any>) => {
+                product_count += parseInt(roster.quantity);
+              });
+            }
           }
         });
         if(uniqueProductContainer.includes(product.product_id)){
