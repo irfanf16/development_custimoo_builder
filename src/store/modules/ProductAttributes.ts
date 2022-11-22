@@ -1077,7 +1077,6 @@ const ProductAttributes:Module<any, any> = {
           })
         }
         state.logo_colors_info = {...state.logo_colors_info, ...payload.data}
-        setDefaultColors()
       }
     },
     SET_DEFAULT_COLORS(state: Record<any, any>, payload: Record<any, any>) {
