@@ -26,7 +26,7 @@
                   @click="handleInputOnClick"
                   @drop="handleInputOnDrag($event)"
                   class="fileLoader"
-                  accept="image/*,application/postscript,application/pdf">
+                  accept="application/postscript,application/pdf,application/eps,image/eps,image/tiff">
         </template>
         <input v-else :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
                 type="file"
