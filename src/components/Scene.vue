@@ -234,6 +234,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
   private backTexture !: any
+  private texture_default_position = {front: {top: 0, left: 0}, back: {top: 0, left: 0}}
   private clip_path !: any
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private logoObjects: any[] = []
@@ -706,7 +707,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
       }
 
-      promises.push(this.addClipPath(ImageData.textureUrl) as never)
 
       const self: Record<any, any> = this
 
@@ -724,6 +724,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (this.productType == 'customized') {
           canvas.add(model)
           canvas.viewportCenterObject(model)
+        }
+        if(side == 'front' && this.mainPreview) {
+          this.addClipPath()
         }
         if (side == 'back') {
           canvas.add(self.dimTextBack)
@@ -1499,24 +1502,32 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     })
   }
 
-  public addClipPath(url = this.storageUrl + '1/safe_zone/safezone.svg', side = 'front') {
+  public addClipPath(url = '1/safe_zone/safezone.svg', side = 'front') {
     return new Promise((resolve, reject) => {
-      fabric.loadSVGFromURL(url, (objects: any, options: any) => {
+      fabric.loadSVGFromURL(this.storageUrl + url, (objects: any, options: any) => {
         options.crossOrigin = 'Anonymous'
         const img = fabric.util.groupSVGElements(objects) as fabric.Group
-        if(img.width! > img.height!) {
-          img.scaleToWidth(this.canvasWidth - 10)
-        } else {
-          img.scaleToHeight(this.canvasHeight - 10)
-        }
+        // if(img.width! > img.height!) {
+        //   img.scaleToWidth(this.canvasWidth - 10)
+        // } else {
+        //   img.scaleToHeight(this.canvasHeight - 10)
+        // }
 
+        let bounding = img.getBoundingRect()
+
+        let width = bounding.width * this.frontTexture.scaleX
+        let height = bounding.height * this.frontTexture.scaleY
         img.set({
-          hasControls: true,
-          selectable: true,
-          evented: true,
-          lockMovementX: false,
-          lockMovementY: false,
-          absolutePositioned: false
+          left: width / 1.6,
+          top: height / 1.6,
+          scaleX: this.frontTexture.scaleX,
+          scaleY: this.frontTexture.scaleY,
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          lockMovementX: true,
+          lockMovementY: true,
+          absolutePositioned: true
         })
 
         img.center().setCoords();
@@ -1529,18 +1540,19 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           this.clip_path = img
         }
 
-        let clip_1 = new fabric.Circle({
-          radius: 50,
-          top: 300,
-          left: 300,
-        });
-        let clip_2 = new fabric.Rect({ left: 220, top: 150, width: 70, height: 50 });
+        // let clip_1 = new fabric.Circle({
+        //   radius: 50,
+        //   top: 300,
+        //   left: 300,
+        // });
+        // let clip_2 = new fabric.Rect({ left: 220, top: 150, width: 70, height: 50 });
+        //
+        // let g = new fabric.Group([clip_1, clip_2]);
+        // g.inverted = true
+        // g.absolutePositioned = true
+        //
+        // this.clip_path = g
 
-        let g = new fabric.Group([clip_1, clip_2]);
-        g.inverted = true
-        g.absolutePositioned = true
-
-        this.clip_path = g
 
         this.frontCanvas.add(img)
 
@@ -1614,7 +1626,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if(this.custom_logo_objects[logo.logo_index as number]) {
         this.deleteExistingLogoFromCanvas(logo.logo_index)
       }
-      if ((logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.custom_logo_objects[logo.logo_index as number]) {
+      if (logo.url && (logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.custom_logo_objects[logo.logo_index as number]) {
         if (logo.customLogo) {
           this.custom_logo_objects[logo.logo_index as number] = true
         }
