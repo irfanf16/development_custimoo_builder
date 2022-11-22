@@ -14,7 +14,7 @@
           <slot name="upload_text">Upload Logo</slot>
         </div>
         <div class="remove-img" v-if="customLogo.url && !replaceLogo">
-          <a @click="removeLogo">
+          <a @click="removeLogo(customLogoIndex)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
@@ -103,6 +103,10 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
 
   get recentLogos() {
     return this.$store.getters.getRecentLogos
+  }
+
+  get custom_logos(): [Record<any, any>] {
+    return this.$store.getters.getCustomLogos(this.selectedProduct.id)
   }
 
   /*
@@ -250,26 +254,6 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
         this.showLoader = false;
         self.showError(error);
       })
-  }
-
-  public async removeLogo() {
-    const self: Record<any, any> = this;
-    await self.$eventBus.$emit("customLogoRemoved", this.customLogoIndex)
-    if(this.customLogoIndex == 0) {
-      await self.addRemoveTeamLogoOnAllProducts('remove')
-    }
-    //check if logo setting at given index exists then get that else get logo default object
-    let logo_setting_at_index = this.selectedProduct.logos_setting[this.customLogoIndex] ? this.selectedProduct.logos_setting[this.customLogoIndex] : {}
-    const default_values = {logo_index: this.customLogoIndex, product_id: this.customLogo.product_id}
-    logo_setting_at_index = {...logo_setting_at_index, ...getLogoSettingsObject(), ...default_values}
-    /*
-    * As we can not directly assign customLogo value because it is prop coming from parent component.
-    * So here we loop through it's properties to update values
-    * */
-    for (const [logo_object_key, logo_object_value] of Object.entries(logo_setting_at_index)) {
-      this.customLogo[logo_object_key] = logo_object_value
-    }
-    self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 
   /*
