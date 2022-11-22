@@ -1529,18 +1529,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           this.clip_path = img
         }
 
-        // let clip_1 = new fabric.Circle({
-        //   radius: 50,
-        //   top: 300,
-        //   left: 300,
-        // });
-        // let clip_2 = new fabric.Rect({ left: 300, top: 100, width: 100, height: 100 });
-        //
-        // let g = new fabric.Group([clip_1, clip_2]);
-        // g.inverted = true
-        // g.absolutePositioned = true
-        //
-        // this.clip_path = g
+        let clip_1 = new fabric.Circle({
+          radius: 50,
+          top: 300,
+          left: 300,
+        });
+        let clip_2 = new fabric.Rect({ left: 220, top: 150, width: 70, height: 50 });
+
+        let g = new fabric.Group([clip_1, clip_2]);
+        g.inverted = true
+        g.absolutePositioned = true
+
+        this.clip_path = g
 
         this.frontCanvas.add(img)
 
@@ -1607,7 +1607,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public addLogos(logo: Record<any, any>, from_load = false) {
-    if(logo.logo_index == 0 && logo.product_id != this.product_id) {
+    if(logo.logo_index == 0) {
       logo = this.custom_logos[logo.logo_index]
     }
     if(logo.product_id == this.product_id && (this.mounted || from_load)) {
