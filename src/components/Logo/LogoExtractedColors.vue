@@ -142,7 +142,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
   public useLogoColors() {
     let self: Record<any, any> = this
     this.pulse_info.use_logo_colors = false
-   // this.logoColorsInfo.colors = JSON.parse(JSON.stringify(this.logoColorsInfo.extracted_colors))
+    setDefaultColors()
     this.logoColorsInfo.using_logo_colors = true
     self.$eventBus.$emit('changeDefaultColors')
   }
