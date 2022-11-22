@@ -4,7 +4,7 @@
     <div class="btn btn-secondary modal-handler" >
       <div class="upload-box position-relative" :class="{'pulse-animation': !customLogo.url}" :style="{overflow: customLogo.url ? 'visible' : 'hidden'}">
         <div class="loader relative" v-if="showLoader"><img src="../../../src/assets/images/loading.gif" /></div>
-        <div class="uploaded-logo-holder" v-if="customLogo.url">
+        <div class="uploaded-logo-holder" v-if="customLogo.url && !replaceLogo">
           <img :src="`${storageUrl}${customLogo.url}?nocache=1`" width="100%"/>
         </div>
         <div v-else>
@@ -13,12 +13,22 @@
           </div>
           <slot name="upload_text">Upload Logo</slot>
         </div>
-        <div class="remove-img" v-if="customLogo.url">
-          <a @click="removeLogo">
+        <div class="remove-img" v-if="customLogo.url && !replaceLogo">
+          <a @click="removeLogo(customLogoIndex)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <input  :style="{display: customLogo.url ? 'none':  'block'}"
+        <template v-if="replaceLogo">
+          <input  :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
+                  type="file"
+                  name="logos" ref="logoUploadInput"
+                  @change="handleInputChange"
+                  @click="handleInputOnClick"
+                  @drop="handleInputOnDrag($event)"
+                  class="fileLoader"
+                  accept="application/postscript,application/pdf,application/eps,image/eps,image/tiff">
+        </template>
+        <input v-else :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
                 type="file"
                 name="logos" ref="logoUploadInput"
                 @change="handleInputChange"
@@ -61,6 +71,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
 
   @Prop({ required: true }) customLogoIndex!: number
   @Prop({ required: true }) customLogo!: Record<any, any>
+  @Prop({ required: false }) replaceLogo!: boolean
 
   /*
   * props ends here
@@ -92,6 +103,10 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
 
   get recentLogos() {
     return this.$store.getters.getRecentLogos
+  }
+
+  get custom_logos(): [Record<any, any>] {
+    return this.$store.getters.getCustomLogos(this.selectedProduct.id)
   }
 
   /*
@@ -213,7 +228,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
           this.$store.commit('SET_LOGO_COLORS_INFO', {
             data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
           })
-          await self.addRemoveTeamLogoOnAllProducts('add', logo_data)
+          await this.addRemoveTeamLogoOnAllProducts('add', logo_data)
         } else {
           this.customLogo.transparent_logo = logo_data.transparent_logo_url;
           this.customLogo.smart_transparent_logo = logo_data.smart_transparent_logo_url;
@@ -225,6 +240,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
         this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject(logo_data)})
         self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
         self.$eventBus.$emit('handleNonVectorCustomLogosCount')
+        this.$emit('logo-uploaded', this.customLogo)
       } else {
         self.showError(response_data.message);
         return false
@@ -239,26 +255,6 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
         this.showLoader = false;
         self.showError(error);
       })
-  }
-
-  public async removeLogo() {
-    const self: Record<any, any> = this;
-    await self.$eventBus.$emit("customLogoRemoved", this.customLogoIndex)
-    if(this.customLogoIndex == 0) {
-      await self.addRemoveTeamLogoOnAllProducts('remove')
-    }
-    //check if logo setting at given index exists then get that else get logo default object
-    let logo_setting_at_index = this.selectedProduct.logos_setting[this.customLogoIndex] ? this.selectedProduct.logos_setting[this.customLogoIndex] : {}
-    const default_values = {logo_index: this.customLogoIndex, product_id: this.customLogo.product_id}
-    logo_setting_at_index = {...logo_setting_at_index, ...getLogoSettingsObject(), ...default_values}
-    /*
-    * As we can not directly assign customLogo value because it is prop coming from parent component.
-    * So here we loop through it's properties to update values
-    * */
-    for (const [logo_object_key, logo_object_value] of Object.entries(logo_setting_at_index)) {
-      this.customLogo[logo_object_key] = logo_object_value
-    }
-    self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 
   /*
