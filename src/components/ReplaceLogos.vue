@@ -40,10 +40,6 @@
                         <span slot="upload_text">Click to upload logo or drag a file here</span>
                       </LogoUploader>
                     </div>
-<!--                    <div class="logo-placemet-content" v-if="custom_logo.url">-->
-<!--                      <h4>Logo Placement</h4>-->
-<!--                      <b-form-select :value="custom_logo.side" :options="['front', 'back']" @change="handleLogoPlacementChange($event, custom_logo)"></b-form-select>-->
-<!--                    </div>-->
                   </div>
                 </div>
               </div>
