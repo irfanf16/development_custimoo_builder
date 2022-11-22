@@ -24,6 +24,7 @@ import rgbHex from 'rgb-hex'
 import { getRandom, getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
 import {find} from "lodash";
 import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
+import CustomLogosMixin from '@/mixins/CustomLogosMixin'
 
 @Component<Scene>({
   async mounted() {
@@ -33,7 +34,7 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
     self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
     self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogos)
     self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
-    self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogosFromCanvas)
+    self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
     self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
     self.$eventBus.$on("changeDefaultColors", this.changeDefaultColors)
     self.$eventBus.$on("changeGroupColors", this.changeGroupColors)
@@ -133,22 +134,7 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
           handleFabricCustomTextRemoved(target)
         }
         else {
-          let logo = setLogoSettings(target.logoIndex);
-          logo.logoIndex = target.logoIndex;
-          logo.removeLogo = true
-          let payload = {
-            custom_logo: logo
-          }
-
-          let before_update = self.updateLogoObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomLogoObject)))
-          self.$store.commit('UPDATE_UNDO', {data: before_update, action: 'customLogos'})
-
-          self.$store.commit('customLogos', payload)
-          self.$store.commit('SET_LOGO_COLORS', []);
-          self.$store.commit('SET_INITIAL_LOGO_COLORS', []);
-          if(logo.logoIndex == 0) {
-            self.$store.commit('REMOVE_TEAM_LOGO')
-          }
+          self.removeLogo(target.logo_index)
         }
         canvas.remove(target);
         canvas.requestRenderAll();
@@ -215,7 +201,7 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
   }
 })
 
-export default class Scene extends Mixins(HideUpdateLockerButton) {
+export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMixin) {
   @Prop({ required: true }) readonly front!: Record<string, unknown>;
   @Prop({ required: false }) readonly back!: Record<string, unknown>;
   @Prop({ required: false }) readonly backTextureUrl!: string;
@@ -248,6 +234,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
   private backTexture !: any
+  private clip_path !: any
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private logoObjects: any[] = []
   private custom_logo_objects: any[] = []
@@ -718,6 +705,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
       if (this.backTextureUrl && side == 'front') {
         promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
       }
+
+      promises.push(this.addClipPath(ImageData.textureUrl) as never)
 
       const self: Record<any, any> = this
 
@@ -1510,6 +1499,56 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     })
   }
 
+  public addClipPath(url = this.storageUrl + '1/safe_zone/safezone.svg', side = 'front') {
+    return new Promise((resolve, reject) => {
+      fabric.loadSVGFromURL(url, (objects: any, options: any) => {
+        options.crossOrigin = 'Anonymous'
+        const img = fabric.util.groupSVGElements(objects) as fabric.Group
+        if(img.width! > img.height!) {
+          img.scaleToWidth(this.canvasWidth - 10)
+        } else {
+          img.scaleToHeight(this.canvasHeight - 10)
+        }
+
+        img.set({
+          hasControls: true,
+          selectable: true,
+          evented: true,
+          lockMovementX: false,
+          lockMovementY: false,
+          absolutePositioned: false
+        })
+
+        img.center().setCoords();
+
+        img.inverted = true
+
+        if (side == 'back') {
+          this.clip_path = img
+        } else {
+          this.clip_path = img
+        }
+
+        // let clip_1 = new fabric.Circle({
+        //   radius: 50,
+        //   top: 300,
+        //   left: 300,
+        // });
+        // let clip_2 = new fabric.Rect({ left: 300, top: 100, width: 100, height: 100 });
+        //
+        // let g = new fabric.Group([clip_1, clip_2]);
+        // g.inverted = true
+        // g.absolutePositioned = true
+        //
+        // this.clip_path = g
+
+        this.frontCanvas.add(img)
+
+        resolve('done')
+      })
+    })
+  }
+
   public addSvgLogos(logo: Record<any, any>) {
     if (logo.side == 'front' || (logo.side == 'back' && this.back)) {
       let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari? getRandom(3) : '11')
@@ -1573,7 +1612,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     }
     if(logo.product_id == this.product_id && (this.mounted || from_load)) {
       if(this.custom_logo_objects[logo.logo_index as number]) {
-        this.deleteExistingLogosFromCanvas(logo.logo_index)
+        this.deleteExistingLogoFromCanvas(logo.logo_index)
       }
       if ((logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.custom_logo_objects[logo.logo_index as number]) {
         if (logo.customLogo) {
@@ -1599,6 +1638,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
             cornerSize: 30,
             type: "logo",
           })
+
+          img.clipPath = this.clip_path
 
           if (logo.scaleX && logo.scaleY) {
             img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX
@@ -1698,7 +1739,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     }
   }
 
-  public async deleteExistingLogosFromCanvas(custom_logo_index:  number) {
+  public async deleteExistingLogoFromCanvas(custom_logo_index:  number) {
     if(custom_logo_index == 0 || this.custom_logos[custom_logo_index] && this.custom_logos[custom_logo_index].product_id == this.product_id) {
       const custom_logo = this.custom_logo_objects[custom_logo_index]
       if (custom_logo) {

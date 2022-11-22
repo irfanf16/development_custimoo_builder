@@ -789,6 +789,14 @@ const initCustomLogosNew = async (retrieved_products: Record<any, any>) => {
   if(Object.keys(custom_logos_by_products).length > 0) {
     Store.commit('SET_PRODUCT_CUSTOM_LOGOS', { 'append': true, data: custom_logos_by_products})
   }
+  const selected_product_custom_logos = Store.getters.getCustomLogos()
+  if(selected_product_custom_logos) {
+    /*
+    * As selected product custom logos are being passed by reference. So any change in the custom logos of selected product
+    * will automatically be reflected in last active product data custom_logos
+    * */
+    Store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { custom_logos: selected_product_custom_logos})
+  }
   eventBus.$emit('handleNonVectorCustomLogosCount')
 }
 
