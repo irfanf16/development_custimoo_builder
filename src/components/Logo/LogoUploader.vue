@@ -71,7 +71,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
 
   @Prop({ required: true }) customLogoIndex!: number
   @Prop({ required: true }) customLogo!: Record<any, any>
-  @Prop({ required: true }) replaceLogo!: boolean
+  @Prop({ required: false }) replaceLogo!: boolean
 
   /*
   * props ends here
