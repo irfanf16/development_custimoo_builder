@@ -15,7 +15,7 @@
              :key="`custom_logo_${customLogoIndex}`" @click="custom_logo_tab_index = customLogoIndex">
         <template #title>
           <span>{{ customLogoIndex == 0 ? 'Team Logo' : 'logo ' + customLogoIndex }}</span>
-          <span class="vector-logos-error warning error" v-if="!custom_logo.is_vector && customLogos[customLogoIndex].url" v-b-tooltip.right="`Logo uploaded are not in vector format, please reupload to place order`"><b-icon-exclamation-circle-fill /></span>
+          <span class="vector-logos-error warning error" v-if="vectorImageConstraint? !custom_logo.is_vector && customLogos[customLogoIndex].url:false" v-b-tooltip.right="`Logo uploaded are not in vector format, please reupload to place order`"><b-icon-exclamation-circle-fill /></span>
           <span class="vector-logos-error warning" v-else-if="!customLogos[customLogoIndex].url" v-b-tooltip.right="`Logo is not found`"><b-icon-exclamation-triangle-fill /></span>
           <template v-if="customLogoIndex > 0">
             <span class="remove-logo" @click="removeLogoTab(customLogoIndex)">
@@ -159,6 +159,10 @@ export default class LogoPlacementTab extends Vue {
     this.$store.dispatch('setLogoTab', index)
   }
 
+  get vectorImageConstraint():boolean{
+    return this.$store.getters.getSetting('vector_image_constraint')
+  }
+
   public addLogoTab() {
     const new_logo_index = this.customLogos.length
     //check if logo setting at given index exists then get that else get logo default object
@@ -176,6 +180,7 @@ export default class LogoPlacementTab extends Vue {
     this.customLogos.forEach((custom_logo: Record<any, any>, customLogoIndex) => {
       custom_logo.logo_index = customLogoIndex
     })
+    this.custom_logo_tab_index = logo_index - 1
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 

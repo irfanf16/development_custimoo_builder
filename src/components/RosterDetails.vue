@@ -176,7 +176,7 @@
       <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-else-if="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
         <b-button @click="addToCart" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
       </span>
-      <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
+      <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
         <b-button @click="addToCart" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
       </span>
       <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
@@ -296,6 +296,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   get modelIndex(): Record<any,any>{
     return this.$store.getters.getSelectedModelIndex;
+  }
+
+  get vectorImageConstraint():boolean{
+    return this.$store.getters.getSetting('vector_image_constraint')
   }
 
   get notVectorLogosCount(){
