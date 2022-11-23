@@ -21,7 +21,8 @@ const Product:Module<any, any> = {
     update_order_item_products: null,
     product_locker_id:0,
     general_settings:{
-      color_type: 'pantone-tcx'
+      color_type: 'pantone-tcx',
+      vector_image_constraint:true,
     }
   },
   getters:{
