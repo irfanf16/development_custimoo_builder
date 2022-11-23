@@ -101,7 +101,7 @@
                       <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
                       <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                       <a style="margin-left:6px" :href="company.login_code.logout_action"  v-if="isCustomerAuthenticated && company.platform == 'cdnExceptLogin' && company.login_code.logout_type == 'url'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></a>
-
+                      <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'wordpress'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     </li>
                     <li><a>
                       <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']" title="Reset to default"/>
@@ -1271,6 +1271,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       await this.$store.dispatch('logoutCustomer');
       this.$store.commit('ADD_LOCKER_ROOM_COLORS', [])
       await this.$store.commit('SET_RECENT_LOGOS')
+
+      if(this.company.platform == 'wordpress'){
+     // @ts-ignore
+        if(custimoo_wp_logout_url){
+          // @ts-ignore
+          window.location.href =  custimoo_wp_logout_url // Global variable defined in wordpress
+        }
+      }
     }
   }
 
