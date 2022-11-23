@@ -235,7 +235,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private frontTexture !: any
   private backTexture !: any
   private texture_default_position = {front: {top: 0, left: 0}, back: {top: 0, left: 0}}
-  private clip_path !: any
+  private clip_path_front !: any
+  private clip_path_back !: any
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private logoObjects: any[] = []
   private custom_logo_objects: any[] = []
@@ -748,7 +749,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             })
           }
 
-          this.addClipPath().then(() => {
+          this.addClipPath(ImageData.safe_zone_url, side).then(() => {
             let logos: Record<any, any>[] = []
             if (this.custom_logos && this.logoAllowed) {
               let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
@@ -1503,17 +1504,21 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     })
   }
 
-  public addClipPath(url = '1/safe_zone/safezone.svg', side = 'front') {
+  public addClipPath(url: string, side: string) {
     return new Promise((resolve, reject) => {
-      fabric.loadSVGFromURL(this.storageUrl + url, (objects: any, options: any) => {
+      fabric.loadSVGFromURL( url, (objects: any, options: any) => {
         options.crossOrigin = 'Anonymous'
         const img = fabric.util.groupSVGElements(objects) as fabric.Group
 
         this.frontCanvas.viewportCenterObject(img)
 
+        let texture = this.frontTexture
+        if(side == 'back') {
+          texture = this.backTexture
+        }
         img.set({
-          scaleX: this.frontTexture.scaleX,
-          scaleY: this.frontTexture.scaleY,
+          scaleX: texture.scaleX,
+          scaleY: texture.scaleY,
           hasControls: false,
           selectable: false,
           evented: false,
@@ -1527,24 +1532,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         img.inverted = true
 
         if (side == 'back') {
-          this.clip_path = img
+          this.clip_path_back = img
         } else {
-          this.clip_path = img
+          this.clip_path_front = img
         }
-
-        // let clip_1 = new fabric.Circle({
-        //   radius: 50,
-        //   top: 300,
-        //   left: 300,
-        // });
-        // let clip_2 = new fabric.Rect({ left: 220, top: 150, width: 70, height: 50 });
-        //
-        // let g = new fabric.Group([clip_1, clip_2]);
-        // g.inverted = true
-        // g.absolutePositioned = true
-        //
-        // this.clip_path = g
-
 
         resolve('done')
       })
@@ -1641,7 +1632,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             type: "logo",
           })
 
-          img.clipPath = this.clip_path
+          if(logo.side == 'back') {
+            img.clipPath = this.clip_path_back
+          } else {
+            img.clipPath = this.clip_path_front
+          }
 
           if (logo.scaleX && logo.scaleY) {
             img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX

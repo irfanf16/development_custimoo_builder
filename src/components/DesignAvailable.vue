@@ -4,7 +4,8 @@
       <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :class="{'selected_design': design.id == selectedDesignId}">
         <a @click="changeDesign(index); showPreview()" v-if="index < itemsPerRow || loadDesigns">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
-                 :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_thumbnail_url : ''}"
+                 :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                 modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_thumbnail_url : ''}"
                  :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
                  :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
                  :logos="selectedProduct.productstyles[styleIndex].logo"
