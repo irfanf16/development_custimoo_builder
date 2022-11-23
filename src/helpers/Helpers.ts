@@ -1674,8 +1674,11 @@ const recentLogoDefaultObject = (default_values: Record<any, any> | Record<any, 
   }
 }
 
-const getTeamLogo = () => {
+const getTeamLogo = (product_id: number|null = null) => {
   const custom_logos_by_products = Store.getters.getCustomLogoObject
+  if(product_id) {
+    return custom_logos_by_products[product_id][0]
+  }
   let team_logo:Record<any, any> = {}
   for(const product_id in custom_logos_by_products) {
     if(custom_logos_by_products[product_id][0] && custom_logos_by_products[product_id][0].original_logo) {
