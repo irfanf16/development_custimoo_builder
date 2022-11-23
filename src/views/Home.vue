@@ -275,9 +275,9 @@
                                 Add to Cart
                               </b-button>
                             </span>
-                            <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
+                            <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
                               <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
-                                Replace Logos
+                                Finalize Design
                               </b-button>
                             </span>
                             <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart">
@@ -296,9 +296,9 @@
                         <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
                           <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                         </span>
-                        <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
+                        <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
                           <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
-                            Replace Logos
+                            Finalize Design
                           </b-button>
                         </span>
                         <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
@@ -427,6 +427,7 @@ import 'popper-vue/dist/popper-vue.css'
 import {filter, findIndex} from 'lodash'
 import opentype from 'opentype.js'
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
+import Store from "@/store";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -887,6 +888,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get mainProductType(): string {
     let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
     return selected_product.back_design ? "front_back" : "front";
+  }
+  get vectorImageConstraint():boolean{
+    return this.$store.getters.getSetting('vector_image_constraint')
   }
 
   get notVectorLogosCount(){
