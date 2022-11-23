@@ -6,7 +6,8 @@
         <template v-for="design in product.productstyles[0].productdesigns">
           <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
             <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
-                   :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : ''}"
+                   :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                   modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : ''}"
                    :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
                    :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
                    :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
@@ -19,24 +20,6 @@
     </swiper-slide>
     <div class="swiper-pagination" slot="pagination"></div>
   </swiper>
-
-<!--  <slither-slider @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: products.length > 3? 4: products.length, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">-->
-<!--    <template v-for="(product, index) in products">-->
-<!--      <a ref="products" v-on:click="productDesigns(index)" :key="product.product_id">-->
-<!--        <template v-for="design in product.productstyles[0].productdesigns">-->
-<!--          <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">-->
-<!--            <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="design.measurement_ratio"-->
-<!--                   :front="{textureUrl: storageUrl+design.front_design.file_url, modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_url : ''}"-->
-<!--                   :backTextureUrl="design.back_design? design.back_design.file_url: ''"-->
-<!--                   :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"-->
-<!--                   :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"-->
-<!--                   :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type"/>-->
-<!--          </div>-->
-<!--        </template>-->
-<!--        <h3 class="text-center">{{ product.display_name }}</h3>-->
-<!--      </a>-->
-<!--    </template>-->
-<!--  </slither-slider>-->
 </div>
 </template>
 
