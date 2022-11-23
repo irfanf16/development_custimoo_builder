@@ -99,9 +99,7 @@
                     <li class="d-flex flex-wrap align-items-center">
                       <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                       <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                      <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
-                      <a style="margin-left:6px" :href="company.login_code.logout_action"  v-if="isCustomerAuthenticated && company.platform == 'cdnExceptLogin' && company.login_code.logout_type == 'url'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></a>
-                      <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'wordpress'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
+                      <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     </li>
                     <li><a>
                       <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']" title="Reset to default"/>
@@ -207,7 +205,7 @@
                       <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
                       <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
                       <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
-                      <b-dropdown-item v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
+                      <b-dropdown-item v-if="isCustomerAuthenticated"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                     </b-dropdown>
                   </div>
                 </div>
@@ -1271,12 +1269,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       await this.$store.dispatch('logoutCustomer');
       this.$store.commit('ADD_LOCKER_ROOM_COLORS', [])
       await this.$store.commit('SET_RECENT_LOGOS')
-
-      if(this.company.platform == 'wordpress'){
-     // @ts-ignore
-        if(custimoo_wp_logout_url){
-          // @ts-ignore
-          window.location.href =  custimoo_wp_logout_url // Global variable defined in wordpress
+      if(this.company.platform != 'self') {
+        if (this.company.login_code.logout_type == 'url') {
+          window.location.href = this.company.login_code.logout_action
+        } else {
+          eval(this.company.login_code.logout_action)
         }
       }
     }
