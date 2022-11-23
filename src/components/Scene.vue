@@ -1506,39 +1506,43 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   public addClipPath(url: string, side: string) {
     return new Promise((resolve, reject) => {
-      fabric.loadSVGFromURL( url, (objects: any, options: any) => {
-        options.crossOrigin = 'Anonymous'
-        const img = fabric.util.groupSVGElements(objects) as fabric.Group
+      if(url) {
+        fabric.loadSVGFromURL(url, (objects: any, options: any) => {
+          options.crossOrigin = 'Anonymous'
+          const img = fabric.util.groupSVGElements(objects) as fabric.Group
 
-        this.frontCanvas.viewportCenterObject(img)
+          this.frontCanvas.viewportCenterObject(img)
 
-        let texture = this.frontTexture
-        if(side == 'back') {
-          texture = this.backTexture
-        }
-        img.set({
-          scaleX: texture.scaleX,
-          scaleY: texture.scaleY,
-          hasControls: false,
-          selectable: false,
-          evented: false,
-          lockMovementX: true,
-          lockMovementY: true,
-          absolutePositioned: true
+          let texture = this.frontTexture
+          if (side == 'back') {
+            texture = this.backTexture
+          }
+          img.set({
+            scaleX: texture.scaleX,
+            scaleY: texture.scaleY,
+            hasControls: false,
+            selectable: false,
+            evented: false,
+            lockMovementX: true,
+            lockMovementY: true,
+            absolutePositioned: true
+          })
+
+          img.center().setCoords();
+
+          img.inverted = true
+
+          if (side == 'back') {
+            this.clip_path_back = img
+          } else {
+            this.clip_path_front = img
+          }
+
+          resolve('done')
         })
-
-        img.center().setCoords();
-
-        img.inverted = true
-
-        if (side == 'back') {
-          this.clip_path_back = img
-        } else {
-          this.clip_path_front = img
-        }
-
+      } else {
         resolve('done')
-      })
+      }
     })
   }
 
