@@ -316,6 +316,9 @@ export class handleMainProducts extends Vue {
       }
       this.$store.dispatch('setColorSectionVisibility')
       this.$store.dispatch("getModels", selected_product.product_id);
+      await http.post(`/get-factory-settings`, {factory_id:selected_product.factory_id, keys: ['vector_image_constraint']}).then((res) => {
+        this.$store.commit('SET_SETTING', res.data.result.settings)
+      });
     })
   }
 
@@ -385,6 +388,9 @@ export class handleMainProducts extends Vue {
         self.show_roster = true;
         await self.setProductSizes();
         await self.show();
+        await http.post(`/get-factory-settings`, {factory_id:selected_product.factory_id, keys: ['vector_image_constraint']}).then((res) => {
+          this.$store.commit('SET_SETTING', res.data.result.settings)
+        });
         resolve(true);
       })
     })
