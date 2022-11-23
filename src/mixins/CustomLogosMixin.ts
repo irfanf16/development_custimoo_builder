@@ -29,7 +29,7 @@ export default class CustomLogosMixin extends Vue{
     //check if logo setting at given index exists then get that else get logo default object
     let logo_setting_at_index = self.selectedProduct.logos_setting[logo_index] ? self.selectedProduct.logos_setting[logo_index] : {}
     const default_values = {logo_index: logo_index, product_id: self.selectedProduct.id}
-    logo_setting_at_index = {...logo_setting_at_index, ...getLogoSettingsObject(), ...default_values}
+    logo_setting_at_index = {...getLogoSettingsObject(), ...logo_setting_at_index, ...default_values}
 
     self.custom_logos[logo_index] = logo_setting_at_index
 
