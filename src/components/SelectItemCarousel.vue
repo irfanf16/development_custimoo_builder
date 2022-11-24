@@ -101,9 +101,8 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     if(self.getProductEditInfoObject.type == "locker_product" && self.getProductEditInfoObject.locker_product_info.product_id != this.selectedProduct.id) {
       await this.exitFromEditMode()
     }
-    await http.post(`/get-factory-settings`, {factory_id:this.selectedProduct.factory_id, keys: ['vector_image_constraint']}).then((res) => {
-      this.$store.commit('SET_SETTING', res.data.result.settings)
-    });
+    const factory_setting = this.$store.getters.getFactorySettings(this.selectedProduct.factory_id);
+    this.$store.commit('SET_SETTING', factory_setting)
   }
 
   public setSliderIndex(slide_no = 0) {
