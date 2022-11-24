@@ -105,10 +105,6 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
     return this.$store.getters.getRecentLogos
   }
 
-  get custom_logos(): [Record<any, any>] {
-    return this.$store.getters.getCustomLogos(this.selectedProduct.id)
-  }
-
   /*
   * computed props ends
   * */
@@ -230,12 +226,13 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
           })
           await this.addRemoveTeamLogoOnAllProducts('add', logo_data)
         } else {
-          this.customLogo.transparent_logo = logo_data.transparent_logo_url;
-          this.customLogo.smart_transparent_logo = logo_data.smart_transparent_logo_url;
-          this.customLogo.original_logo_url = logo_data.original_logo_url;
-          this.customLogo.is_smart_transparent = false;
-          this.customLogo.url = logo_data.logo_url;
-          this.customLogo.id = logo_data.id;
+          const custom_logos_updated_props = { transparent_logo : logo_data.transparent_logo_url,
+            smart_transparent_logo : logo_data.smart_transparent_logo_url, original_logo_url : logo_data.original_logo_url,
+            is_smart_transparent : false, url : logo_data.logo_url, id : logo_data.id,
+          }
+          await this.$store.commit('SET_CUSTOM_LOGOS', {
+            logo_index: this.customLogoIndex, custom_logos: {...this.customLogo, ...custom_logos_updated_props}
+          })
         }
         this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject(logo_data)})
         self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)

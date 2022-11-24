@@ -126,16 +126,15 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
         data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
       })
     }
-    this.customLogo.transparent_logo = recent_logo.transparent_logo_url;
-    this.customLogo.smart_transparent_logo = recent_logo.smart_transparent_logo_url;
-    this.customLogo.original_logo_url = recent_logo.original_logo_url;
-    this.customLogo.original_logo = recent_logo.original_logo;
-    this.customLogo.is_smart_transparent = false;
-    this.customLogo.url = recent_logo.logo_url;
-    this.customLogo.id = recent_logo.id;
-    this.customLogo.is_vector = recent_logo.is_vector;
-    this.customLogo.is_recent_logo = true;
-    this.customLogo.logo_name = recent_logo.logo_name
+    const custom_logos_updated_props = {
+      transparent_logo: recent_logo.transparent_logo_url, smart_transparent_logo: recent_logo.smart_transparent_logo_url,
+      original_logo_url: recent_logo.original_logo_url, original_logo: recent_logo.original_logo, is_smart_transparent: false,
+      url: recent_logo.logo_url, id: recent_logo.id, is_vector: recent_logo.is_vector, is_recent_logo: true,
+      logo_name: recent_logo.logo_nam
+    }
+    await this.$store.commit('SET_CUSTOM_LOGOS', {
+      logo_index: this.customLogoIndex, custom_logos: {...this.customLogo, ...custom_logos_updated_props}
+    })
     if(this.customLogoIndex == 0) {
       await this.addRemoveTeamLogoOnAllProducts('add', this.customLogo)
     }
