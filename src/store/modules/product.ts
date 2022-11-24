@@ -23,7 +23,8 @@ const Product:Module<any, any> = {
     general_settings:{
       color_type: 'pantone-tcx',
       vector_image_constraint:true,
-    }
+    },
+    factory_settings:[]
   },
   getters:{
     getProductModels(state:Record<any, any>){
@@ -64,6 +65,16 @@ const Product:Module<any, any> = {
     },
     getSetting: state => (setting_key: string) => {
       return state.general_settings[setting_key]
+    },
+    getFactorySettings: state => (factory_id:string) => {
+      const factory_settings= state.factory_settings.filter(factory_setting => {
+        return factory_setting.sourceable_id === factory_id
+      });
+      const factory_settings_obj: Record<any,any> = {};
+      factory_settings.forEach((factory_setting:Record<any,any>) => {
+        factory_settings_obj[factory_setting.key_name] = factory_setting.value;
+      });
+      return factory_settings_obj;
     }
   },
   mutations:{
@@ -137,6 +148,9 @@ const Product:Module<any, any> = {
     },
     SET_SETTING(state:Record<any,any>, setting){
       state.general_settings = { ...state.general_settings, ...setting };
+    },
+    SET_FACTORY_SETTING(state:Record<any, any>, factory_setting){
+      state.factory_settings =  factory_setting
     }
   },
   actions: {

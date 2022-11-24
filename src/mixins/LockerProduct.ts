@@ -316,9 +316,8 @@ export class handleMainProducts extends Vue {
       }
       this.$store.dispatch('setColorSectionVisibility')
       this.$store.dispatch("getModels", selected_product.product_id);
-      await http.post(`/get-factory-settings`, {factory_id:selected_product.factory_id, keys: ['vector_image_constraint']}).then((res) => {
-        this.$store.commit('SET_SETTING', res.data.result.settings)
-      });
+      const factory_setting = this.$store.getters.getFactorySettings(selected_product.factory_id);
+      this.$store.commit('SET_SETTING', factory_setting)
     })
   }
 

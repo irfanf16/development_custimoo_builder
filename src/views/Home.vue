@@ -476,8 +476,9 @@ Vue.filter('formatDate', function(value:string) {
 
     this.is_shared_product = this.$route.params.name ?  true : false
 
-    await http.post(`/get-settings`, {setting_keys: ['measurement_unit', 'color_type']}).then((res) => {
+    await http.get(`/get-settings`).then((res) => {
       this.$store.commit('SET_SETTING', res.data.result.settings)
+      this.$store.commit('SET_FACTORY_SETTING', res.data.result.factory_settings)
     });
     this.setRecentLogos()
 
