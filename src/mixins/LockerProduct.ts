@@ -666,8 +666,7 @@ export class handleMainProducts extends Vue {
       data: {using_logo_colors: false,  is_shuffled: false,  colors: default_colors }
     })
     await this.$store.dispatch('overRideGroupColors', JSON.parse(active_product_detail.groupcolors));
-
-
+    this.setProductTeamLogoColors(active_product_detail.custom_logos)
     selected_product.productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
       if (item.id == active_product_detail.design_id) {
         Vue.set(item, 'design_show', 1)
@@ -678,32 +677,59 @@ export class handleMainProducts extends Vue {
     });
 
     //set logo colors
-    let logo_colors:Record<any, any> = []
-    if(!active_product_detail.colors && active_product_detail.custom_logos) {
-      //fetch from server
-      let logos = JSON.parse(active_product_detail.custom_logos)
-      if(logos.length > 0) {
-        let color_str:any = await this.fetchLogoColors(logos[0].id);
-        let image_colors:Record<any, any> = processColorsCustom(JSON.parse(color_str))
-        let image_color_count = image_colors.length;
-        while(image_color_count < 4 ) {
-          image_colors.push({hex: null, pantone: null, name: null});
-          ++image_color_count;
-        }
-        logo_colors = image_colors
-      }
-    }
-    else {
-      logo_colors = JSON.parse(active_product_detail.colors)
-    }
+    // let logo_colors:Record<any, any> = []
+    // if(!active_product_detail.colors && active_product_detail.custom_logos) {
+    //   //fetch from server
+    //   let logos = JSON.parse(active_product_detail.custom_logos)
+    //   if(logos.length > 0) {
+    //     let color_str:any = await this.fetchLogoColors(logos[0].id);
+    //     let image_colors:Record<any, any> = processColorsCustom(JSON.parse(color_str))
+    //     let image_color_count = image_colors.length;
+    //     while(image_color_count < 4 ) {
+    //       image_colors.push({hex: null, pantone: null, name: null});
+    //       ++image_color_count;
+    //     }
+    //     logo_colors = image_colors
+    //   }
+    // }
+    // else {
+    //   logo_colors = JSON.parse(active_product_detail.colors)
+    // }
 
     this.$store.commit('RESET_UNDO');
     this.$store.commit('RESET_REDO');
-    await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
+    // await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
     if(!collection_view){
       this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
       this.$emit('hideLockerRoomModal')
     }
+  }
+
+  public setProductTeamLogoColors(custom_logos) {
+    const custom_logos_type = custom_logos.constructor.name
+    custom_logos = custom_logos_type == 'String' ? JSON.parse(custom_logos) : custom_logos
+    if(custom_logos.length > 0) {
+      let logo_colors = this.getLogoColors(custom_logos[0].logo_colors)
+      this.$store.commit('SET_LOGO_COLORS_INFO', {
+        data: { using_logo_colors: false,  is_shuffled: false,  colors: logo_colors,  extracted_colors: logo_colors }
+      })
+    }
+  }
+
+  public getLogoColors(logo_colors) {
+    let is_processed_colors = true
+    if(logo_colors.length > 0 && logo_colors[0]) {
+      /*
+      * As processed colors have object with keys hex, name, pantone. If it's not processed then it have [[255, 255, 255], ....]
+      * if it's already processed mean have hex, name and pantone then no need to process it. So if it have object
+      *  then it's processed otherwise not processed
+      * */
+      is_processed_colors = logo_colors[0].constructor.name == 'Object'
+    }
+    if(!is_processed_colors) {
+      logo_colors = processColorsCustom(logo_colors)
+    }
+    return logo_colors
   }
 
   public async setCartProductData(retrieved_products: Record<any, any>[]) {
