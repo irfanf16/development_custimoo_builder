@@ -22,7 +22,7 @@ export default class CustomLogosMixin extends Vue{
 
   public async removeLogo(logo_index) {
     const self: Record<any, any> = this;
-    await self.$eventBus.$emit("customLogoRemoved", logo_index)
+    await self.$eventBus.$emit("customLogoRemoved", logo_index, true)
     if(logo_index == 0) {
       await self.addRemoveTeamLogoOnAllProducts('remove')
     }
