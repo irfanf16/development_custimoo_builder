@@ -1543,8 +1543,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           } else {
             this.clip_path_front = img
           }
-
-          this.frontCanvas.add(img)
+          
 
           resolve('done')
         })
