@@ -53,6 +53,9 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         fontFamily: 'Ubuntu'
       })
     }
+    if(this.mainPreview) {
+      console.log(this.front)
+    }
     let frontPromise = this.loadScene(this.front, 'front')
     frontPromise.then(() => {
       if (this.back) {
@@ -734,6 +737,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
         canvas.renderAll()
 
+        if(side == 'front') {
+          this.addClipPath(ImageData.safe_zone_url, side)
+        }
         if (!this.back || (this.back && side == 'back')) {
           if (ImageData.file_extension == 'svg' && this.productType == 'customized') {
             this.getSvgGroups()
@@ -1537,6 +1543,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           } else {
             this.clip_path_front = img
           }
+
+          this.frontCanvas.add(img)
 
           resolve('done')
         })
