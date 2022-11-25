@@ -235,15 +235,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private frontTexture !: any
   private backTexture !: any
   private texture_default_position = {front: {top: 0, left: 0}, back: {top: 0, left: 0}}
-  private clip_path_front !: any
-  private clip_path_back !: any
+  private clip_path_front !: fabric.Group
+  private clip_path_back !: fabric.Group
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private logoObjects: any[] = []
   private custom_logo_objects: any[] = []
   private customTextObjects: any[] = []
   private mounted = false
-  private frontModel: any
-  private backModel: any
+  private frontModel: fabric.Image
+  private backModel: fabric.Image
   private showSmall = { front: false, back: this.manageComponents.mobileScreen }
   private svgGroups: any[] = []
   private initialSvgGroups: any[] = []
@@ -833,6 +833,34 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         this.viewportTransform = canvas.viewportTransform;
       });
 
+      if(this.mainPreview) {
+        let default_view_port = canvas.viewportTransform as number[]
+
+        canvas.on('mouse:wheel', (opt) => {
+          let delta = opt.e.deltaY;
+          let pointer = canvas.getPointer(opt.e);
+
+          let zoom = canvas.getZoom();
+          zoom *= 0.999 ** delta;
+          if (zoom > 20) zoom = 20;
+          if (zoom < 1) {
+            zoom = 1;
+            this.frontCanvas.viewportTransform = default_view_port as number[];
+            this.backCanvas.viewportTransform = default_view_port as number[];
+          }
+          this.frontCanvas.zoomToPoint({
+            x: pointer.x,
+            y: pointer.y
+          }, zoom);
+          this.backCanvas.zoomToPoint({
+            x: pointer.x,
+            y: pointer.y
+          }, zoom);
+          opt.e.preventDefault();
+          opt.e.stopPropagation()
+        })
+      }
+
       let vertical_line = new fabric.Line([self.canvasWidth / 2, 0, self.canvasWidth / 2, self.canvasHeight], {
         stroke: '#6EF3CC',
         strokeWidth: 4,
@@ -1196,7 +1224,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     this.showDimensions(e, dimText)
   }
 
-  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string, max_call = 600): Record<any, any> {
+  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Group, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string, max_call = 600): Record<any, any> {
     let pointXCompare = pointX + (width * scaleX / 4)
     if(moveTo == 'left') {
       pointXCompare = pointX - (width * scaleX / 4)
@@ -1964,9 +1992,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   this.frontCanvas.renderAll()
                   if(this.back) {
                     this.backCanvas.renderAll()
-                    setTimeout(() => {
-                      this.backCanvas.renderAll()
-                    }, 2000)
                   }
                   this.addToOtherSide(fabric_text, custom_text_item.placement, true)
                 })
