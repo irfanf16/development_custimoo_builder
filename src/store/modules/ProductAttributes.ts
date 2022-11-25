@@ -306,7 +306,7 @@ const ProductAttributes:Module<any, any> = {
       const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
       const logo_index = payload.logo_index
       if(logo_index >= 0) {
-        Vue.set(state.customLogos[product_id], logo_index, {...state.customLogos[product_id], ...payload.custom_logos})
+        Vue.set(state.customLogos[product_id], logo_index, payload.custom_logos)
       }
       else {
         Vue.set(state.customLogos, product_id, payload.custom_logos)
@@ -1216,6 +1216,9 @@ const ProductAttributes:Module<any, any> = {
       if(logo_index >= 0)
         return state.customLogos[product_id][logo_index]
       return state.customLogos[product_id]
+    },
+    selectedProductCustomLogos: state => {
+      return state.customLogos[state.selectedPrdId]
     },
     koivna: state => {
       return state.customLogos[state.selectedPrdId]

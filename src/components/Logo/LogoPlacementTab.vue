@@ -167,7 +167,7 @@ export default class LogoPlacementTab extends Vue {
     const new_logo_index = this.customLogos.length
     //check if logo setting at given index exists then get that else get logo default object
     let logo_setting_at_index = this.selectedProduct.logos_setting[new_logo_index] ? this.selectedProduct.logos_setting[new_logo_index] : {}
-    logo_setting_at_index = {...logo_setting_at_index, ...getLogoSettingsObject({product_id: this.selectedProduct.id})}
+    logo_setting_at_index = {...getLogoSettingsObject({product_id: this.selectedProduct.id}), ...logo_setting_at_index}
     logo_setting_at_index.logo_index = new_logo_index
     this.customLogos.push(logo_setting_at_index)
     this.custom_logo_tab_index = new_logo_index

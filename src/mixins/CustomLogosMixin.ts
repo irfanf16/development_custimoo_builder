@@ -7,12 +7,16 @@ export default class CustomLogosMixin extends Vue{
     const custom_logos = this.$store.getters.getCustomLogos('all')
     if(action == 'add') {
       const team_logo_obj = { "id": team_logo.id, "url": team_logo.url, "original_logo": team_logo.original_logo_url,
-        "original_logo_url": team_logo.original_logo_url, "transparent_logo": team_logo.transparent_logo, "smart_transparent_logo": team_logo.smart_transparent_logo,
-        "is_smart_transparent": team_logo.is_smart_transparent, is_vector: team_logo.is_vector, logo_name: team_logo.logo_name
+        "original_logo_url": team_logo.original_logo_url, "transparent_logo": team_logo.transparent_logo,
+        "smart_transparent_logo": team_logo.smart_transparent_logo, "is_smart_transparent": team_logo.is_smart_transparent,
+        is_vector: team_logo.is_vector, logo_name: team_logo.logo_name
       }
       for(const product_id in custom_logos) {
-        if(custom_logos[product_id][0]) {
-          custom_logos[product_id][0] = {...custom_logos[product_id][0], ...team_logo_obj}
+        const product_team_logo = custom_logos[product_id][0]
+        if(product_team_logo) {
+          this.$store.commit('SET_CUSTOM_LOGOS', {
+            product_id: product_id, logo_index: 0, custom_logos: {...product_team_logo, ...team_logo_obj}
+          })
         }
       }
     } else {
@@ -22,17 +26,16 @@ export default class CustomLogosMixin extends Vue{
 
   public async removeLogo(logo_index) {
     const self: Record<any, any> = this;
-    await self.$eventBus.$emit("customLogoRemoved", logo_index)
     if(logo_index == 0) {
-      await self.addRemoveTeamLogoOnAllProducts('remove')
+      await this.addRemoveTeamLogoOnAllProducts('remove')
+    } else {
+      //check if logo setting at given index exists then get that else get logo default object
+      let logo_setting_at_index = self.selectedProduct.logos_setting[logo_index] ? self.selectedProduct.logos_setting[logo_index] : {}
+      const default_values = {logo_index: logo_index, product_id: self.selectedProduct.id}
+      logo_setting_at_index = {...getLogoSettingsObject(), ...logo_setting_at_index, ...default_values}
+      this.$store.commit('SET_CUSTOM_LOGOS', {logo_index: logo_index, custom_logos: logo_setting_at_index})
     }
-    //check if logo setting at given index exists then get that else get logo default object
-    let logo_setting_at_index = self.selectedProduct.logos_setting[logo_index] ? self.selectedProduct.logos_setting[logo_index] : {}
-    const default_values = {logo_index: logo_index, product_id: self.selectedProduct.id}
-    logo_setting_at_index = {...getLogoSettingsObject(), ...logo_setting_at_index, ...default_values}
-
-    self.custom_logos[logo_index] = logo_setting_at_index
-
+    await self.$eventBus.$emit("customLogoRemoved", logo_index, true)
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 }

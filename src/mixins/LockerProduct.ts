@@ -316,9 +316,8 @@ export class handleMainProducts extends Vue {
       }
       this.$store.dispatch('setColorSectionVisibility')
       this.$store.dispatch("getModels", selected_product.product_id);
-      await http.post(`/get-factory-settings`, {factory_id:selected_product.factory_id, keys: ['vector_image_constraint']}).then((res) => {
-        this.$store.commit('SET_SETTING', res.data.result.settings)
-      });
+      const factory_setting = this.$store.getters.getFactorySettings(selected_product.factory_id);
+      this.$store.commit('SET_SETTING', factory_setting)
     })
   }
 
@@ -776,26 +775,29 @@ export class handleMainProducts extends Vue {
         Vue.set(item, 'design_show', 0)
       }
     });
+    this.$store.commit('SET_LOGO_COLORS_INFO', {
+      data: { using_logo_colors: false,  is_shuffled: false,  colors: cart_item_product.logo_colors,  extracted_colors: cart_item_product.logo_colors }
+    })
     //set logo colors
-    let logo_colors:Record<any, any> = []
-    if (!cart_item_product.colors && cart_item_product.custom_logos) {
-      //fetch from server
-      let logos = cart_item_product.custom_logos
-      if (logos.length > 0) {
-        let color_str: any = await this.fetchLogoColors(logos[0].id);
-        let image_colors = processColorsCustom(JSON.parse(color_str))
-        let image_color_count = image_colors.length;
-        while (image_color_count < 4) {
-          image_colors.push({ hex: null, pantone: null, name: null });
-          ++image_color_count;
-        }
-        logo_colors = image_colors
-      }
-    }
-    else {
-      logo_colors = cart_item_product.colors
-    }
-    await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
+    // let logo_colors:Record<any, any> = []
+    // if (!cart_item_product.colors && cart_item_product.custom_logos) {
+    //   //fetch from server
+    //   let logos = cart_item_product.custom_logos
+    //   if (logos.length > 0) {
+    //     let color_str: any = await this.fetchLogoColors(logos[0].id);
+    //     let image_colors = processColorsCustom(JSON.parse(color_str))
+    //     let image_color_count = image_colors.length;
+    //     while (image_color_count < 4) {
+    //       image_colors.push({ hex: null, pantone: null, name: null });
+    //       ++image_color_count;
+    //     }
+    //     logo_colors = image_colors
+    //   }
+    // }
+    // else {
+    //   logo_colors = cart_item_product.colors
+    // }
+    // await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
     this.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
   }
 
