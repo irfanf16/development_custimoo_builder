@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/kitbuilder-autodeployment/public_html/
+    destination: /home/santa-builder/public_html/
 hooks:
     BeforeInstall:  
     - location: /permissions.sh
