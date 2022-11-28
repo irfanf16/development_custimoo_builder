@@ -891,7 +891,7 @@ const ProductAttributes:Module<any, any> = {
     SET_ACTIVE_TAB(state:Record<any, any>, payload){
       state.activeTab = payload
     },
-    SET_SUFFLE(state:Record<any, any>, payload) {
+    SET_SHUFFLE(state:Record<any, any>, payload) {
       state.showShuffle = payload
     },
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
