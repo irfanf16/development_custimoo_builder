@@ -428,7 +428,7 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    console.log('auto deployment testing')
+    console.log('auto deployment testing', window.location.href)
     let self: Record<any, any> = this;
     await this.adjustTotalTabs();
     const last_active_product_default_obj = lastActiveProductDefaultObject()
