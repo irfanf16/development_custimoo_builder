@@ -3,8 +3,8 @@ const path = require("path");
 module.exports = {
   configureWebpack: {
     output: {
-      filename: 'js/[name].js',
-      chunkFilename: 'js/[name].js',
+      filename: 'js/[name].[chunkhash].js',
+      chunkFilename: 'js/[name].[chunkhash].js',
     },
     resolve: {
       extensions: ['*', '.js', '.vue', '.json'],
