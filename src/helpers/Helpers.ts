@@ -1654,6 +1654,11 @@ const getUrlParameterByName = (name, url = '') => {
   console.log('inside getUrlParameterByName', {
     url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
   })
+  setTimeout(() => {
+    console.log('settimeout inside getUrlParameterByName', {
+      url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
+    }, 10000)
+  })
   name = name.replace(/[[\]]/g, '\\$&');
   const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
   const results = regex.exec(url);
