@@ -65,6 +65,7 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
     await getCompany();
     // const token = this.$router.currentRoute.query.token as string
     const token = this.getParameterByName('token');
+    console.log('token from build', token, window.location.href)
     if (token){
       localStorage.setItem('jwtToken', token)
       localStorage.setItem('adminToken', token)
