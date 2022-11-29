@@ -9,17 +9,21 @@ pipelines:
           - apt-get update
           - apt-get install -y zip
           - npm cache clean --force
+          - npm cache verify
           #- npm uninstall node-sass
           #- npm i sass --save-dev
           - npm run sass-compile
           #- npm install
           - npm run build
           - npm cache clean --force
+          - npm cache verify
           # - npm run build:staging
           - npm run build:wc:customizer:self
           - npm cache clean --force
+          - npm cache verify
           - npm run build:wc:customizer:wordpress
           - npm cache clean --force
+          - npm cache verify
           - npm run build:wc:orderdetail
           - zip -r application.zip .
           - pipe: atlassian/aws-code-deploy:0.5.3
