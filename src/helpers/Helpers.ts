@@ -1641,6 +1641,24 @@ const getImageFromCanvas = (canvas:Canvas, options={}) => {
   }
 }
 
+const getUrlParameterByName = (name, url = '') => {
+  if(!url) {
+    const iframes_count = window.frames.length
+    if(iframes_count > 0) {
+      url = window.frames[0].parent.window.location.href
+    } else {
+      url = window.location.href
+    }
+  }
+  name = name.replace(/[[\]]/g, '\\$&');
+  const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+  const results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  console.log('getUrlParameterByName', url, decodeURIComponent(results[2].replace(/\+/g, ' ')))
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
 //Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -1650,5 +1668,5 @@ export {
   getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
-  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, getImageFromCanvas
+  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, getImageFromCanvas, getUrlParameterByName
 };

@@ -1,3 +1,4 @@
+<script src="../mixins/LockerProduct.ts"></script>
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
     <Navbar />
@@ -110,8 +111,7 @@ window.Echo = new Echo({
   },
 });
 
-import {getCompany, getPermissions} from "@/helpers/Helpers"
-import { authenticateUser } from '../helpers/Helpers'
+import {getCompany, authenticateUser, getUrlParameterByName} from "@/helpers/Helpers"
 export default {
   store, router,
   name: "Customizer",
@@ -163,7 +163,7 @@ export default {
     }
 
     // const token = this.$router.currentRoute.query.token
-    const token = this.getParameterByName('token')
+    const token = getUrlParameterByName('token')
     console.log('token', token, window.location.href)
     if (token){
       localStorage.setItem('jwtToken', token)
