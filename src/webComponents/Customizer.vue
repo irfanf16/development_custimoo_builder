@@ -149,7 +149,7 @@ export default {
 
     // const token = this.$router.currentRoute.query.token
     const token = getUrlParameterByName('token')
-    console.log('from customizer', token, window.location.href)
+    console.log('from customizers', token, window.location.href)
     if (token){
       localStorage.setItem('jwtToken', token)
       localStorage.setItem('adminToken', token)
