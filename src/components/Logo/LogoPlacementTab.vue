@@ -68,6 +68,9 @@ import { getLogoSettingsObject } from "@/helpers/Helpers"
     LogoExtractedColors
   },
   async mounted() {
+    this.$eventBus.$on('set-logo-tab-index', (logo_tab_index: number) => {
+      this.custom_logo_tab_index = logo_tab_index >=0 ? logo_tab_index : 0
+    })
     this.$root.$on('changeLogoTabIndex', (index:number) => {
       // here you need to use the arrow function
       this.tabIndex = index;

@@ -17,6 +17,7 @@ import {
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
+import {eventBus} from "@/event/eventBus";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
@@ -784,6 +785,7 @@ const ProductAttributes:Module<any, any> = {
       state.customLogoObjects = [];
       state.customLogos = {};
       await initCustomLogosNew(state.products)
+      eventBus.$emit('set-logo-tab-index')
     },
     RESET_ALL_COLORS: (state: Record<any, any>) => {
       state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]
@@ -893,7 +895,7 @@ const ProductAttributes:Module<any, any> = {
     SET_ACTIVE_TAB(state:Record<any, any>, payload){
       state.activeTab = payload
     },
-    SET_SUFFLE(state:Record<any, any>, payload) {
+    SET_SHUFFLE(state:Record<any, any>, payload) {
       state.showShuffle = payload
     },
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){

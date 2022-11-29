@@ -89,8 +89,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
     })
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     this.$store.dispatch('setActiveTab', -1)
-    this.$store.commit('SET_SUFFLE', false)
-    console.log(self.styleIndex, ' style index design index ', index)
+    this.$store.commit('SET_SHUFFLE', false)
     this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {
         Vue.set(design, 'design_show', 1)
