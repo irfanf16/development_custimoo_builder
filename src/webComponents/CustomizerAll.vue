@@ -1,3 +1,4 @@
+<script src="../mixins/LockerProduct.ts"></script>
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
     <Navbar />
@@ -110,8 +111,7 @@ Vue.use(VueSweetalert2);
 //   },
 // });
 
-import {getCompany, getPermissions} from "@/helpers/Helpers"
-import { authenticateUser } from '../helpers/Helpers'
+import {getCompany, authenticateUser, getUrlParameterByName} from "@/helpers/Helpers"
 export default {
   store, router,
   name: "Customizer",
@@ -163,7 +163,8 @@ export default {
     }
 
     // const token = this.$router.currentRoute.query.token
-    const token = this.getParameterByName('token')
+    const token = getUrlParameterByName('token')
+    console.log('token', token, window.location.href)
     if (token){
       localStorage.setItem('jwtToken', token)
       localStorage.setItem('adminToken', token)
@@ -192,6 +193,7 @@ export default {
         results = regex.exec(url);
       if (!results) return null;
       if (!results[2]) return '';
+      console.log('decode url', results[2])
       return decodeURIComponent(results[2].replace(/\+/g, ' '));
     }
   }
