@@ -3,8 +3,8 @@ const path = require("path");
 module.exports = {
   configureWebpack: {
     output: {
-      filename: 'js/[name].[hash].js',
-      chunkFilename: 'js/[name].[hash].js',
+      filename: 'js/[name].[chunkhash].js',
+      chunkFilename: 'js/[name].[chunkhash].js',
     },
     resolve: {
       extensions: ['*', '.js', '.vue', '.json'],
@@ -19,7 +19,7 @@ module.exports = {
       .rule('vue')
       .use('vue-loader')
       .tap(options => {
-        // modify the options... 
+        // modify the options...
         return options
       })
   }
