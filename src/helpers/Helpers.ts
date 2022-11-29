@@ -1650,7 +1650,9 @@ const getUrlParameterByName = (name, url = '') => {
       url = window.location.href
     }
   }
-  console.log('inside getUrlParameterByName', url,  window.frames.length)
+  console.log('inside getUrlParameterByName', {
+    url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
+  })
   name = name.replace(/[[\]]/g, '\\$&');
   const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
   const results = regex.exec(url);
