@@ -19,6 +19,7 @@ window.io = require('socket.io-client');
 
 import { authenticateUser, getCompany, getPermissions } from '@/helpers/Helpers'
 import Gleap from 'gleap'
+Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
 
 // console.log(localStorage.getItem('access_tokens'))
 window.Echo = new Echo({
