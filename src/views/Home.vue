@@ -264,7 +264,6 @@
                     </b-button>
 
                     <template v-else-if="isCustomerAuthenticated">
-
                       <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
@@ -273,9 +272,9 @@
                                 Add to Cart
                               </b-button>
                             </span>
-                            <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
+                            <span v-else-if="notVectorLogosCount > 0 && isRosterOpened">
                               <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
-                                Replace Logos
+                                Finalize Design
                               </b-button>
                             </span>
                             <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart">
@@ -287,28 +286,27 @@
                           </template>
                          </template>
                       </template>
-
                     </template>
-                    <template v-else>
-                      <template v-if="company.platform !== 'self'">
-                        <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
-                          <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
-                        </span>
-                        <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="notVectorLogosCount > 0">
-                          <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
-                            Replace Logos
-                          </b-button>
-                        </span>
-                        <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
-                      </template>
-                     </template>
+
+                    <span v-else-if="notVectorLogosCount > 0 && isRosterOpened">
+                      <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+                        Finalize Design
+                      </b-button>
+                    </span>
+
+                    <template v-if="company.platform !== 'self'">
+                      <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
+                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                      </span>
+                      <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                    </template>
                   </template>
 
                   <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
                 </div>
               </div>
             </div>
-            <ReplaceLogos />
+            <ReplaceLogos @hidePopper="hidePopper" :popperID="popperID" :product="product" @shareDesign="shareDesign" :shareDesignLoader="shareDesignLoader" @copyLink="copyLink(lockerProductIndex)"/>
             <div class="sideNav" v-if="mobileScreen">
               <ul>
                 <li v-if="selectedProduct.is_logo_allowed">
