@@ -108,8 +108,7 @@ Vue.use(VueSweetalert2);
 //   },
 // });
 
-import {getCompany, getPermissions} from "@/helpers/Helpers";
-import { authenticateUser } from '../helpers/Helpers'
+import {getCompany, authenticateUser, getUrlParameterByName} from "@/helpers/Helpers";
 
 export default {
   store, router,
@@ -149,7 +148,8 @@ export default {
     }
 
     // const token = this.$router.currentRoute.query.token
-    const token = this.getParameterByName('token')
+    const token = getUrlParameterByName('token')
+    console.log('from customizers', token, window.location.href)
     if (token){
       localStorage.setItem('jwtToken', token)
       localStorage.setItem('adminToken', token)
@@ -172,9 +172,17 @@ export default {
     // })
   },
   methods:{
-    getParameterByName(name, url = window.location.href) {
-        name = name.replace(/[[\]]/g, '\\$&');
-        let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+    getParameterByName(name, url = null) {
+      if(!url) {
+        const iframes_count = window.frames.length
+        if(iframes_count > 0) {
+          url = window.frames[0].window.location.href
+        } else {
+          url = window.location.href
+        }
+      }
+      name = name.replace(/[[\]]/g, '\\$&');
+      let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
         results = regex.exec(url);
         if (!results) return null;
         if (!results[2]) return '';

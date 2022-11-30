@@ -132,6 +132,8 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
       url: recent_logo.logo_url, id: recent_logo.id, is_vector: recent_logo.is_vector, is_recent_logo: true,
       logo_name: recent_logo.logo_nam
     }
+    delete this.customLogo.scaleX
+    delete this.customLogo.scaleY
     await this.$store.commit('SET_CUSTOM_LOGOS', {
       logo_index: this.customLogoIndex, custom_logos: {...this.customLogo, ...custom_logos_updated_props}
     })
