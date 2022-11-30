@@ -561,14 +561,14 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 
                       const boundingBox = path.getBoundingBox()
                       boundingBox.y1 = Math.abs(boundingBox.y1)
-                      const width = boundingBox.x2 - boundingBox.x1
-                      const height = boundingBox.y1 + boundingBox.y2
+                      const width = boundingBox.x2 - boundingBox.x1 + parseInt(custom_text_item.outline_width)
+                      const height = boundingBox.y1 + boundingBox.y2 + parseInt(custom_text_item.outline_width)
                       const svg_string = path.toSVG()
                       const parser = new DOMParser();
                       const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
                       // dom_svg.style.translate = '0px ' + height + 'px'
                       text_item_object.svg_height = height
-                      let transform_height = height;
+                      let transform_height = height - parseInt(custom_text_item.outline_width) / 2; // As Transform needs half of the stroke width to show top and bottom equally of stroke
                       if (custom_text.type == 'name') {
 
                         let minus_height = false;
@@ -588,7 +588,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                           transform_height -= 15;
                       }
                       // console.log('transform_height',transform_height ,' ', height, ' ', text_for_test_char)
-                      dom_svg.setAttribute('transform', 'translate(-1 ' + transform_height + ')')
+                      dom_svg.setAttribute('transform', 'translate(0 ' + transform_height + ')')
+                      dom_svg.setAttribute('paint-order', 'stroke')
 
                       const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
                         '<svg stroke-location="outside" style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
@@ -1818,6 +1819,14 @@ const getUrlParameterByName = (name, url = '') => {
       url = window.location.href
     }
   }
+  console.log('inside getUrlParameterByName', {
+    url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
+  })
+  setTimeout(() => {
+    console.log('settimeout inside getUrlParameterByName', {
+      url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
+    }, 10000)
+  })
   name = name.replace(/[[\]]/g, '\\$&');
   const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
   const results = regex.exec(url);
