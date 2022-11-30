@@ -16,11 +16,11 @@ import {LockerProducts} from "@/mixins/LockerProduct";
 // window.io = require('socket.io-client');
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
-
-import {authenticateUser, getCompany, getPermissions, processColorsCustom} from '@/helpers/Helpers'
 import store from "@/store";
 import {i18n} from '@/i18n';
 import Gleap from 'gleap'
+import { authenticateUser, getCompany, getPermissions } from '@/helpers/Helpers'
+import CommonImportMixin from '@/mixins/CommonImportMixin'
 
 // console.log(localStorage.getItem('access_tokens'))
 // if(process.env.VUE_APP_ENABLE_SOCKET == undefined) {
@@ -47,25 +47,8 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
     Header,
     Navbar
   },
+  mixins: [CommonImportMixin],
   async mounted() {
-    let elem = document.createElement('link');
-    elem.rel = ' stylesheet'
-    elem.type = 'text/css';
-    elem.href= 'https://cdn.custimoo.com/gulip/gulip.min.css';//Link of the css file
-    document.head.appendChild(elem);
-
-    if(process.env.NODE_ENV === 'production') {
-      window.addEventListener('keydown', (e) => {
-        if ((e.altKey === true || e.metaKey === true) && (e.key === 'u' ||  e.key === 'U')) {
-          Gleap.startFeedbackFlow("bugreporting")
-        }
-      });
-      window.addEventListener('touchstart', (e) => {
-        if(e.touches.length > 2) {
-          Gleap.startFeedbackFlow("bugreporting")
-        }
-      })
-    }
     await getCompany().then(function (){
       const current_locale = i18n.locale;
       i18n.setLocaleMessage(current_locale, store.getters.getCompany.translations[current_locale]);
