@@ -14,6 +14,8 @@ export default class CustomLogosMixin extends Vue{
       for(const product_id in custom_logos) {
         const product_team_logo = custom_logos[product_id][0]
         if(product_team_logo) {
+          delete product_team_logo.scaleX
+          delete product_team_logo.scaleY
           this.$store.commit('SET_CUSTOM_LOGOS', {
             product_id: product_id, logo_index: 0, custom_logos: {...product_team_logo, ...team_logo_obj}
           })
