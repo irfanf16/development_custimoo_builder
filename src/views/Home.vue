@@ -99,9 +99,7 @@
                     <li class="d-flex flex-wrap align-items-center">
                       <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                       <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                      <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
-                      <a style="margin-left:6px" :href="company.login_code.logout_action"  v-if="isCustomerAuthenticated && company.platform == 'cdnExceptLogin' && company.login_code.logout_type == 'url'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></a>
-
+                      <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     </li>
                     <li><a>
                       <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']" title="Reset to default"/>
@@ -207,7 +205,7 @@
                       <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
                       <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
                       <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
-                      <b-dropdown-item v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
+                      <b-dropdown-item v-if="isCustomerAuthenticated"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                     </b-dropdown>
                   </div>
                 </div>
@@ -222,14 +220,17 @@
                       <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
                         <div v-if="design.design_show == 1" class="image-holder" ref="scene-holder" :key="'front'+design.id">
                           <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
-                                 :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                                 :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
+                                 :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                 modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
+                                 :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
+                                 modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
                                  :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
 
                           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
-                                 :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
+                                 :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                 modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
                                  :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
@@ -272,7 +273,8 @@
                                 Add to Cart
                               </b-button>
                             </span>
-                            <span v-else-if="notVectorLogosCount > 0 && isRosterOpened">
+
+                            <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
                               <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
                                 Finalize Design
                               </b-button>
@@ -294,12 +296,19 @@
                       </b-button>
                     </span>
 
-                    <template v-if="company.platform !== 'self'">
-                      <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
-                        <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
-                      </span>
-                      <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
-                    </template>
+                    <template v-else>
+                      <template v-if="company.platform !== 'self'">
+                        <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
+                          <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                        </span>
+                        <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                      </template>
+                      <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+                          <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+                            Finalize Design
+                          </b-button>
+                        </span>
+                     </template>
                   </template>
 
                   <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
@@ -423,6 +432,7 @@ import 'popper-vue/dist/popper-vue.css'
 import {filter, findIndex} from 'lodash'
 import opentype from 'opentype.js'
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
+import Store from "@/store";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -453,6 +463,7 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
+    console.log('auto deployment testing', window.location.href)
     let self: Record<any, any> = this;
     await this.adjustTotalTabs();
     const last_active_product_default_obj = lastActiveProductDefaultObject()
@@ -471,8 +482,9 @@ Vue.filter('formatDate', function(value:string) {
 
     this.is_shared_product = this.$route.params.name ?  true : false
 
-    await http.post(`/get-settings`, {setting_keys: ['measurement_unit', 'color_type']}).then((res) => {
+    await http.get(`/get-settings`).then((res) => {
       this.$store.commit('SET_SETTING', res.data.result.settings)
+      this.$store.commit('SET_FACTORY_SETTING', res.data.result.factory_settings)
     });
     this.setRecentLogos()
 
@@ -883,6 +895,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get mainProductType(): string {
     let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
     return selected_product.back_design ? "front_back" : "front";
+  }
+  get vectorImageConstraint():boolean{
+    return this.$store.getters.getSetting('vector_image_constraint')
   }
 
   get notVectorLogosCount(){
@@ -1325,6 +1340,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       await this.$store.dispatch('logoutCustomer');
       this.$store.commit('ADD_LOCKER_ROOM_COLORS', [])
       await this.$store.commit('SET_RECENT_LOGOS')
+      if(this.company.platform != 'self') {
+        if (this.company.login_code.logout_type == 'url') {
+          window.location.href = this.company.login_code.logout_action
+        } else {
+          eval(this.company.login_code.logout_action)
+        }
+      }
     }
   }
 

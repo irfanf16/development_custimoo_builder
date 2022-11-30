@@ -17,6 +17,7 @@ import {
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
+import {eventBus} from "@/event/eventBus";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
@@ -302,7 +303,7 @@ const ProductAttributes:Module<any, any> = {
       const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
       const logo_index = payload.logo_index
       if(logo_index >= 0) {
-        Vue.set(state.customLogos[product_id], logo_index, {...state.customLogos[product_id], ...payload.custom_logos})
+        Vue.set(state.customLogos[product_id], logo_index, payload.custom_logos)
       }
       else {
         Vue.set(state.customLogos, product_id, payload.custom_logos)
@@ -780,6 +781,7 @@ const ProductAttributes:Module<any, any> = {
       state.customLogoObjects = [];
       state.customLogos = {};
       await initCustomLogosNew(state.products)
+      eventBus.$emit('set-logo-tab-index')
     },
     RESET_ALL_COLORS: (state: Record<any, any>) => {
       state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]
@@ -889,7 +891,7 @@ const ProductAttributes:Module<any, any> = {
     SET_ACTIVE_TAB(state:Record<any, any>, payload){
       state.activeTab = payload
     },
-    SET_SUFFLE(state:Record<any, any>, payload) {
+    SET_SHUFFLE(state:Record<any, any>, payload) {
       state.showShuffle = payload
     },
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
@@ -1209,6 +1211,9 @@ const ProductAttributes:Module<any, any> = {
       if(logo_index >= 0)
         return state.customLogos[product_id][logo_index]
       return state.customLogos[product_id]
+    },
+    selectedProductCustomLogos: state => {
+      return state.customLogos[state.selectedPrdId]
     },
     koivna: state => {
       return state.customLogos[state.selectedPrdId]

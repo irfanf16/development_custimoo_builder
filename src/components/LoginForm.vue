@@ -88,6 +88,31 @@
             ></b-form-input>
           </b-form-group>
 
+          <b-form-group class="text-left"
+                        label="Team / Company Name"
+                        label-for="input-3"
+          >
+            <b-form-input
+              v-model="form.company_name"
+              type="email"
+              placeholder="Enter Team / Company Name"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <b-form-group label-for="country" class="text-left">
+            <label class="required"><strong>Country</strong></label>
+            <v-select
+              autocomplete="off"
+              id="country"
+              :options="countries"
+              name="country"
+              v-model="form.country"
+              placeholder="Select Country"
+              v-validate="{required: true}">
+            </v-select>
+          </b-form-group>
+
+
           <b-form-group id="input-group-4" class="text-left" label="Password" label-for="input-4">
             <b-form-input
               v-model="form.password"
@@ -157,12 +182,26 @@
   import {Vue, Component, Mixins } from 'vue-property-decorator'
   import ErrorMessages from "@/mixins/ErrorMessages";
   import {getPermissions} from "@/helpers/Helpers";
+  import {http} from "@/httpCommon";
 
-  @Component<LoginForm>({})
+  @Component<LoginForm>({
+    mounted(){
+      http.get(`/addresses/countries`).then((response: any) => {
+        const countries = response.data.result;
+        countries.forEach((country) => {
+            this.countries.push({ id: country.id , label: country.name});
+        });
+      })
+        .catch((e: any) => {
+          this.showError(e.response.data.message)
+        });
+    }
+  })
   export default class LoginForm extends Mixins(ErrorMessages) {
 
     public ref = this.$refs as Record<any, any>
     private screenWidth = (window.screen.availWidth - 100)
+    public countries:Record<any,any> = [];
     public email  = ''
     public password  = ''
     public form = {
@@ -170,7 +209,8 @@
       last_name: '',
       email: '',
       password: '',
-      password_confirmation: ''
+      password_confirmation: '',
+      company_name: '',
     }
     public isActive = false
     public additionClass() {
@@ -236,4 +276,42 @@
 
   }
 </script>
+<style>
+  .vs__search::placeholder {
+    color: #495057;
+    opacity: 1;
+  }
+  #vs2__combobox{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: flex;
+    padding: 0 0 4px;
+    background: none;
+    border:none;
+    /* border: 1px solid rgba(60,60,60,.26); */
+    border-radius: 4px;
+    white-space: normal;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+  }
+  .v-select.vs--single.vs--searchable{
+    display: block;
+    width: 100%;
+    height: calc(1.5em + 0.75rem + 2px);
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+</style>
 

@@ -7,7 +7,13 @@ Vue.use(Vue2TouchEvents);
 
 import VModal from 'vue-js-modal'
 import 'vue-js-modal/dist/styles.css'
+import vSelect from "vue-select";
+import 'vue-select/dist/vue-select.css';
+
+
 Vue.use(VModal, {})
+
+Vue.component("v-select", vSelect);
 
 // Vue.directive('tooltip', VTooltip)
 // Vue.directive('close-popover', VClosePopover)

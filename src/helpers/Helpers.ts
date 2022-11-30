@@ -561,14 +561,14 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 
                       const boundingBox = path.getBoundingBox()
                       boundingBox.y1 = Math.abs(boundingBox.y1)
-                      const width = boundingBox.x2 - boundingBox.x1
-                      const height = boundingBox.y1 + boundingBox.y2
+                      const width = boundingBox.x2 - boundingBox.x1 + parseInt(custom_text_item.outline_width)
+                      const height = boundingBox.y1 + boundingBox.y2 + parseInt(custom_text_item.outline_width)
                       const svg_string = path.toSVG()
                       const parser = new DOMParser();
                       const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
                       // dom_svg.style.translate = '0px ' + height + 'px'
                       text_item_object.svg_height = height
-                      let transform_height = height;
+                      let transform_height = height - parseInt(custom_text_item.outline_width) / 2; // As Transform needs half of the stroke width to show top and bottom equally of stroke
                       if (custom_text.type == 'name') {
 
                         let minus_height = false;
@@ -588,7 +588,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                           transform_height -= 15;
                       }
                       // console.log('transform_height',transform_height ,' ', height, ' ', text_for_test_char)
-                      dom_svg.setAttribute('transform', 'translate(-1 ' + transform_height + ')')
+                      dom_svg.setAttribute('transform', 'translate(0 ' + transform_height + ')')
+                      dom_svg.setAttribute('paint-order', 'stroke')
 
                       const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
                         '<svg stroke-location="outside" style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
@@ -1674,8 +1675,11 @@ const recentLogoDefaultObject = (default_values: Record<any, any> | Record<any, 
   }
 }
 
-const getTeamLogo = () => {
+const getTeamLogo = (product_id: number|null = null) => {
   const custom_logos_by_products = Store.getters.getCustomLogoObject
+  if(product_id) {
+    return custom_logos_by_products[product_id][0]
+  }
   let team_logo:Record<any, any> = {}
   for(const product_id in custom_logos_by_products) {
     if(custom_logos_by_products[product_id][0] && custom_logos_by_products[product_id][0].original_logo) {
@@ -1805,6 +1809,34 @@ const getExtensionFromString = (string: string) => {
   }
   return extension
 }
+
+const getUrlParameterByName = (name, url = '') => {
+  if(!url) {
+    const iframes_count = window.frames.length
+    if(iframes_count > 0) {
+      url = window.frames[0].parent.window.location.href
+    } else {
+      url = window.location.href
+    }
+  }
+  console.log('inside getUrlParameterByName', {
+    url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
+  })
+  setTimeout(() => {
+    console.log('settimeout inside getUrlParameterByName', {
+      url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
+    }, 10000)
+  })
+  name = name.replace(/[[\]]/g, '\\$&');
+  const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+  const results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  console.log('getUrlParameterByName', url, decodeURIComponent(results[2].replace(/\+/g, ' ')))
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+//Functions related to SVG parsing end
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
@@ -1813,7 +1845,7 @@ export {
   getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
-  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, rosterDetailsInit, initCustomLogosNew,
-  getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getImageFromCanvas, getDefaultColorsObject, setDefaultColors,
-  getVectorExtensions, getExtensionFromString
+  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, getImageFromCanvas, getUrlParameterByName,
+  rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getDefaultColorsObject,
+  setDefaultColors, getVectorExtensions, getExtensionFromString
 };

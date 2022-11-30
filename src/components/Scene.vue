@@ -53,6 +53,9 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         fontFamily: 'Ubuntu'
       })
     }
+    if(this.mainPreview) {
+      console.log(this.front)
+    }
     let frontPromise = this.loadScene(this.front, 'front')
     frontPromise.then(() => {
       if (this.back) {
@@ -234,7 +237,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
   private backTexture !: any
-  private clip_path !: any
+  private texture_default_position = {front: {top: 0, left: 0}, back: {top: 0, left: 0}}
+  private clip_path_front !: any
+  private clip_path_back !: any
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private logoObjects: any[] = []
   private custom_logo_objects: any[] = []
@@ -706,7 +711,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
       }
 
-      promises.push(this.addClipPath(ImageData.textureUrl) as never)
 
       const self: Record<any, any> = this
 
@@ -725,6 +729,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           canvas.add(model)
           canvas.viewportCenterObject(model)
         }
+
         if (side == 'back') {
           canvas.add(self.dimTextBack)
         } else {
@@ -732,6 +737,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
         canvas.renderAll()
 
+        if(side == 'front') {
+          this.addClipPath(ImageData.safe_zone_url, side)
+        }
         if (!this.back || (this.back && side == 'back')) {
           if (ImageData.file_extension == 'svg' && this.productType == 'customized') {
             this.getSvgGroups()
@@ -746,43 +754,46 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               }
             })
           }
-          let logos: Record<any, any>[] = []
-          if (this.custom_logos && this.logoAllowed) {
-            let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
-            if (this.logosLimit) {
-              custom_logos = this.custom_logos.slice(0, this.logosLimit) as [Record<any, any>]
+
+          this.addClipPath(ImageData.safe_zone_url, side).then(() => {
+            let logos: Record<any, any>[] = []
+            if (this.custom_logos && this.logoAllowed) {
+              let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
+              if (this.logosLimit) {
+                custom_logos = this.custom_logos.slice(0, this.logosLimit) as [Record<any, any>]
+              }
+              logos = logos.concat(custom_logos) as [Record<any, any>]
             }
-            logos = logos.concat(custom_logos) as [Record<any, any>]
-          }
-          if (logos.length) {
-            logos.forEach((logo: Record<any, any>) => {
-              if (logo && logo.url) {
-                this.addLogos(logo, true)
-              }
-            })
-          }
+            if (logos.length) {
+              logos.forEach((logo: Record<any, any>) => {
+                if (logo && logo.url) {
+                  this.addLogos(logo, true)
+                }
+              })
+            }
 
-          if(this.productCustomTexts) {
-            this.productCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
-              if(custom_text.value) {
-                const text = { value: custom_text, custom_text_index: index }
-                this.addTextsNew(text, true)
-              }
-            })
-          }
+            if(this.productCustomTexts) {
+              this.productCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
+                if(custom_text.value) {
+                  const text = { value: custom_text, custom_text_index: index }
+                  this.addTextsNew(text, true)
+                }
+              })
+            }
 
-          if (this.mainPreview) {
-            this.setProductionSVG()
-            this.$store.commit('STORE_CANVAS_IMAGE', {
-              front: this.$refs.front,
-              back: this.$refs.back,
-              scene: this
-            })
-            setTimeout(() => {
-              this.$store.commit('SET_CANVAS_READY', true);
-            }, 500)
-          }
-          this.mounted = true
+            if (this.mainPreview) {
+              this.setProductionSVG()
+              this.$store.commit('STORE_CANVAS_IMAGE', {
+                front: this.$refs.front,
+                back: this.$refs.back,
+                scene: this
+              })
+              setTimeout(() => {
+                this.$store.commit('SET_CANVAS_READY', true);
+              }, 500)
+            }
+            this.mounted = true
+          })
         }
         resolve('done')
       })
@@ -1499,53 +1510,46 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     })
   }
 
-  public addClipPath(url = this.storageUrl + '1/safe_zone/safezone.svg', side = 'front') {
+  public addClipPath(url: string, side: string) {
     return new Promise((resolve, reject) => {
-      fabric.loadSVGFromURL(url, (objects: any, options: any) => {
-        options.crossOrigin = 'Anonymous'
-        const img = fabric.util.groupSVGElements(objects) as fabric.Group
-        if(img.width! > img.height!) {
-          img.scaleToWidth(this.canvasWidth - 10)
-        } else {
-          img.scaleToHeight(this.canvasHeight - 10)
-        }
+      if(url) {
+        fabric.loadSVGFromURL(url, (objects: any, options: any) => {
+          options.crossOrigin = 'Anonymous'
+          const img = fabric.util.groupSVGElements(objects) as fabric.Group
 
-        img.set({
-          hasControls: true,
-          selectable: true,
-          evented: true,
-          lockMovementX: false,
-          lockMovementY: false,
-          absolutePositioned: false
+          this.frontCanvas.viewportCenterObject(img)
+
+          let texture = this.frontTexture
+          if (side == 'back') {
+            texture = this.backTexture
+          }
+          img.set({
+            scaleX: texture.scaleX,
+            scaleY: texture.scaleY,
+            hasControls: false,
+            selectable: false,
+            evented: false,
+            lockMovementX: true,
+            lockMovementY: true,
+            absolutePositioned: true
+          })
+
+          img.center().setCoords();
+
+          img.inverted = true
+
+          if (side == 'back') {
+            this.clip_path_back = img
+          } else {
+            this.clip_path_front = img
+          }
+          
+
+          resolve('done')
         })
-
-        img.center().setCoords();
-
-        img.inverted = true
-
-        if (side == 'back') {
-          this.clip_path = img
-        } else {
-          this.clip_path = img
-        }
-
-        let clip_1 = new fabric.Circle({
-          radius: 50,
-          top: 300,
-          left: 300,
-        });
-        let clip_2 = new fabric.Rect({ left: 220, top: 150, width: 70, height: 50 });
-
-        let g = new fabric.Group([clip_1, clip_2]);
-        g.inverted = true
-        g.absolutePositioned = true
-
-        this.clip_path = g
-
-        this.frontCanvas.add(img)
-
+      } else {
         resolve('done')
-      })
+      }
     })
   }
 
@@ -1614,7 +1618,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if(this.custom_logo_objects[logo.logo_index as number]) {
         this.deleteExistingLogoFromCanvas(logo.logo_index)
       }
-      if ((logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.custom_logo_objects[logo.logo_index as number]) {
+      if (logo.url && (logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.custom_logo_objects[logo.logo_index as number]) {
         if (logo.customLogo) {
           this.custom_logo_objects[logo.logo_index as number] = true
         }
@@ -1639,7 +1643,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             type: "logo",
           })
 
-          img.clipPath = this.clip_path
+          if(logo.side == 'back') {
+            img.clipPath = this.clip_path_back
+          } else {
+            img.clipPath = this.clip_path_front
+          }
 
           if (logo.scaleX && logo.scaleY) {
             img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX
@@ -1739,7 +1747,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public async deleteExistingLogoFromCanvas(custom_logo_index:  number) {
+  public async deleteExistingLogoFromCanvas(custom_logo_index: number, keep_index = false) {
+    console.log(keep_index, ' keep_index')
     if(custom_logo_index == 0 || this.custom_logos[custom_logo_index] && this.custom_logos[custom_logo_index].product_id == this.product_id) {
       const custom_logo = this.custom_logo_objects[custom_logo_index]
       if (custom_logo) {
@@ -1753,11 +1762,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if (this.back) {
             this.backCanvas.remove(other_side_logo)
           }
-          this.other_side_logos.splice(custom_logo_index, 1)
+          if(keep_index) {
+            this.other_side_logos[custom_logo_index] = null
+          } else {
+            this.other_side_logos.splice(custom_logo_index, 1)
+          }
         }
       }
-
-      this.custom_logo_objects.splice(custom_logo_index, 1)
+      if(keep_index) {
+        this.custom_logo_objects[custom_logo_index] = null
+      } else {
+        this.custom_logo_objects.splice(custom_logo_index, 1)
+      }
     }
   }
 
