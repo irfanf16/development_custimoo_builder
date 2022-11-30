@@ -18,6 +18,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 window.io = require('socket.io-client');
 
 import { authenticateUser, getCompany, getPermissions } from '@/helpers/Helpers'
+import CommonImportMixin from '@/mixins/CommonImportMixin'
 
 // console.log(localStorage.getItem('access_tokens'))
 window.Echo = new Echo({
@@ -42,6 +43,7 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
     Header,
     Navbar
   },
+  mixins: [CommonImportMixin],
   async mounted() {
     await getCompany();
     // const token = this.$router.currentRoute.query.token as string

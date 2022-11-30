@@ -109,11 +109,12 @@ window.Echo = new Echo({
 });
 
 import {getCompany, authenticateUser, getUrlParameterByName} from "@/helpers/Helpers";
+import CommonImportMixin from '../mixins/CommonImportMixin'
 
 export default {
   store, router,
   name: "Customizer",
-  mixins: [LockerProducts],
+  mixins: [LockerProducts, CommonImportMixin],
   computed: {
     isCustomerAuthenticated: function() {
       return this.$store.getters.isCustomerAuthenticated

@@ -95,8 +95,6 @@ Vue.prototype.$logData = logData;
 
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
-import Gleap from 'gleap'
-Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
 
 Vue.use(VueSweetalert2);
 
@@ -104,24 +102,4 @@ new Vue({
   router,
   store,
   render: h => h(App),
-  mounted () {
-    const elem = document.createElement('link');
-    elem.rel = ' stylesheet'
-    elem.type = 'text/css';
-    elem.href= 'https://cdn.custimoo.com/gulip/gulip.min.css';//Link of the css file
-    document.head.appendChild(elem);
-
-    if(process.env.NODE_ENV === 'production') {
-      window.addEventListener('keydown', (e) => {
-        if ((e.altKey === true || e.metaKey === true) && (e.key === 'u' ||  e.key === 'U')) {
-          Gleap.startFeedbackFlow("bugreporting")
-        }
-      });
-      window.addEventListener('touchstart', (e) => {
-        if(e.touches.length > 2) {
-          Gleap.startFeedbackFlow("bugreporting")
-        }
-      })
-    }
-  }
 }).$mount('#santa')
