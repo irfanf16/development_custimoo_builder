@@ -17,8 +17,6 @@ import {LockerProducts} from "@/mixins/LockerProduct";
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import store from "@/store";
-import {i18n} from '@/i18n';
-import Gleap from 'gleap'
 import { authenticateUser, getCompany, getPermissions } from '@/helpers/Helpers'
 import CommonImportMixin from '@/mixins/CommonImportMixin'
 
@@ -49,10 +47,6 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
   },
   mixins: [CommonImportMixin],
   async mounted() {
-    await getCompany().then(function (){
-      const current_locale = i18n.locale;
-      i18n.setLocaleMessage(current_locale, store.getters.getCompany.translations[current_locale]);
-    });
     // const token = this.$router.currentRoute.query.token as string
     const token = this.getParameterByName('token');
     console.log('token from build', token, window.location.href)
