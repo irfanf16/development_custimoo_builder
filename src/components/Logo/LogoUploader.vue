@@ -230,6 +230,8 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
             smart_transparent_logo : logo_data.smart_transparent_logo_url, original_logo_url : logo_data.original_logo_url,
             is_smart_transparent : false, url : logo_data.logo_url, id : logo_data.id,
           }
+          delete this.customLogo.scaleX
+          delete this.customLogo.scaleY
           await this.$store.commit('SET_CUSTOM_LOGOS', {
             logo_index: this.customLogoIndex, custom_logos: {...this.customLogo, ...custom_logos_updated_props}
           })
