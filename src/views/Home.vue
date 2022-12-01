@@ -237,7 +237,7 @@
                         </div>
                       </template>
                     </template>
-                    <div>{{mainTotalTabs}}</div>
+                    
                     <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                   </div>
                 </div>
