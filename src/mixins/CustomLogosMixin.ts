@@ -37,7 +37,7 @@ export default class CustomLogosMixin extends Vue{
       logo_setting_at_index = {...getLogoSettingsObject(), ...logo_setting_at_index, ...default_values}
       this.$store.commit('SET_CUSTOM_LOGOS', {logo_index: logo_index, custom_logos: logo_setting_at_index})
     }
-    await self.$eventBus.$emit("customLogoRemoved", logo_index, true)
+    await self.$eventBus.$emit("customLogoRemoved", logo_index)
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 }

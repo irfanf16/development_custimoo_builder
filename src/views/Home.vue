@@ -416,7 +416,7 @@ import {
   handleResponseException,
   parseSvgStringFile,
   fetchUrlContent,
-  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject
+  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject,fetchCategories
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -501,48 +501,52 @@ Vue.filter('formatDate', function(value:string) {
     if(sync_id) {
       await resetLastActiveProductData()
     }
-    await this.$store.dispatch('setCategories', {
-      query_params: `customized=${last_active_product_obj.customized}&personalized=${last_active_product_obj.personalized}&private=${last_active_product_obj.private_product}`
-    })
-    let query_params = await this.setQueryParams()
-    await this.retrieveProducts(query_params)
-    this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
-    this.jwtToken = localStorage.getItem('jwtToken') as string
-    // await this.$store.dispatch('setJwtToken')
-    if(!localStorage.getItem('browserToken')){
-      await this.$store.dispatch('setBrowserToken')
-    }
-
-    if (this.isCustomerAuthenticated){
-      await this.$store.dispatch('getNotifications')
-      await  getPermissions()
-      let show_cart = await this.$store.getters.getShowCart
-      if(show_cart){
-        this.showVModal('cart-modal');
+    // await this.$store.dispatch('setCategories', {
+    //   query_params: `customized=${last_active_product_obj.customized}&personalized=${last_active_product_obj.personalized}&private=${last_active_product_obj.private_product}`
+    // })
+    const categories_promise = fetchCategories();
+    categories_promise.then(async (response) => {
+      let query_params = await this.setQueryParams()
+      await this.retrieveProducts(query_params)
+      this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
+      this.jwtToken = localStorage.getItem('jwtToken') as string
+      // await this.$store.dispatch('setJwtToken')
+      if(!localStorage.getItem('browserToken')){
+        await this.$store.dispatch('setBrowserToken')
       }
-      this.prevRoute = null
-    }else{
 
-      if(this.prevRoute && this.prevRoute.name == 'OrderDetail'){
-        setTimeout( () => {
-         this.gotoLogin();
-        },5000)
-       }
+      if (this.isCustomerAuthenticated){
+        await this.$store.dispatch('getNotifications')
+        await  getPermissions()
+        let show_cart = await this.$store.getters.getShowCart
+        if(show_cart){
+          this.showVModal('cart-modal');
+        }
+        this.prevRoute = null
+      }else{
 
-    }
+        if(this.prevRoute && this.prevRoute.name == 'OrderDetail'){
+          setTimeout( () => {
+            this.gotoLogin();
+          },5000)
+        }
 
-    if(this.$route.query.tabIdx){
-      this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
-    }
-    await this.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
-      await this.getLockers(false,false,resolve);
-    })
-    await this.$eventBus.$on('updateCart', async (resolve: any) => {
-      await this.addToCart(resolve);
-    })
-    await this.$eventBus.$on('updateOrder', async (resolve: any) => {
-      await this.UpdateOrderProducts(false,false,resolve);
-    })
+      }
+
+      if(this.$route.query.tabIdx){
+        this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
+      }
+    });
+
+      await this.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
+        await this.getLockers(false,false,resolve);
+      })
+      await this.$eventBus.$on('updateCart', async (resolve: any) => {
+        await this.addToCart(resolve);
+      })
+      await this.$eventBus.$on('updateOrder', async (resolve: any) => {
+        await this.UpdateOrderProducts(false,false,resolve);
+      });
   },
   async beforeRouteEnter(to, from, next) {
     next((vm:Record<any, any>) => {
@@ -1210,9 +1214,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  private cancelEdit() {
+  private async  cancelEdit() {
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0})
-    this.retrieveProducts();
+    const categories_promise = fetchCategories();
+    categories_promise.then(() => {
+      this.retrieveProducts();
+    });
   }
 
   public async getLockers(share_url = false, show_add_to_locker_modal = false,resolve:any = null){
@@ -1282,11 +1289,15 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }).catch(async errorResponse => {
         handleResponseException(errorResponse)
         self.exitFromEditMode();
-        let query_params = await self.setQueryParams()
-        self.retrieveProducts(query_params)
-        if(resolve){
-          resolve(false);
-        }
+        const categories_promise = fetchCategories();
+        categories_promise.then(async (response)=> {
+          let query_params = await self.setQueryParams()
+          self.retrieveProducts(query_params)
+          if(resolve){
+            resolve(false);
+          }
+        })
+
       })
     }
   }
@@ -1486,31 +1497,33 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if (ok) {
       this.$store.commit('RESET_LAST_ACTIVE_DATA')
-      this.$store.dispatch('setCategories', {
-        query_params: `customized=1&personalized=0&private=0`
+      const categories_promise = fetchCategories();
+      categories_promise.then(async (response) => {
+        if(response){
+          await this.exitFromEditMode()
+          this.hideLockerProductUpdateButton()
+          this.updateOrderItemProducts = null;
+          await self.$eventBus.$emit('useProductOriginalColors')
+          await this.$store.dispatch('resetStore')
+          this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
+          await self.$eventBus.$emit('resetTextsCanvas')
+          await self.$eventBus.$emit('resetLogosCanvas')
+          await this.$store.dispatch('setTabMain',{value: 0});
+          (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
+          await this.$store.dispatch('SET_LOGO_COLORS', [])
+          await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+          await this.$store.dispatch("setProductsRosters")
+          await this.retrieveProducts()
+          if (this.mobileScreen) {
+            this.showDesign()
+            this.switchTabs(0, true)
+          }
+
+          this.isRosterOpened = false
+        }
       })
-      await this.exitFromEditMode()
-      this.hideLockerProductUpdateButton()
-      this.updateOrderItemProducts = null;
-      await self.$eventBus.$emit('useProductOriginalColors')
-      await this.$store.dispatch('resetStore')
-      this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
-      await self.$eventBus.$emit('resetTextsCanvas')
-      await self.$eventBus.$emit('resetLogosCanvas')
-      await this.$store.dispatch('setTabMain',{value: 0});
-      (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
-      await this.$store.dispatch('SET_LOGO_COLORS', [])
-      await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
-      await this.$store.dispatch("setProductsRosters")
-      await this.retrieveProducts()
-    }
 
-    if (this.mobileScreen) {
-      this.showDesign()
-      this.switchTabs(0, true)
     }
-
-    this.isRosterOpened = false
   }
 
   get hideColorSection() {
@@ -1531,20 +1544,25 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self: Record<any, any> = this;
     // await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
     // await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
-    let query_params = await this.setQueryParams()
-    await this.retrieveProducts(query_params);
-    if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress') {
-      await this.showVModal('cart-modal')
-    } else if (this.company.platform === 'wordpress' && !this.isCollectionView) {
-      window.location.href = this.company.company_domain + '/cart'
-    }
+    const categories_promise = fetchCategories();
+    categories_promise.then(async (response) => {
+      if(response){
+        let query_params = await this.setQueryParams()
+        await this.retrieveProducts(query_params);
+        if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress') {
+          await this.showVModal('cart-modal')
+        } else if (this.company.platform === 'wordpress' && !this.isCollectionView) {
+          window.location.href = this.company.company_domain + '/cart'
+        }
+      }
+    })
+
   }
 
   public async retrieveProducts(query_params: string[] = []) {
     let self = this;
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&private=${this.$store.getters.getPrivateProduct}`;
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
-
     query_params.forEach((query_param: string) => {
       let query_param_array = query_param.split("=");
       if (url_obj.searchParams.has(query_param_array[0])) {
@@ -1554,7 +1572,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     })
     url = url_obj.pathname + url_obj.search;
-
+    console.log('New Url')
+    console.log(url);
     http.get(url).then(async (response: Record<any, any>) => {
       if (response.data.products.data.length > 0) {
         const validate_data = await self.beforeSetDataValidateActiveProductData(response.data.products.data)
@@ -1611,7 +1630,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       `activity_id=${this.$route.query.activity_id}`, 'active_product_type=order_product', `update_order_product_id=${next_prev_product_id}`
     ];
     self.showLoader = true;
-    await self.retrieveProducts(query_params);
+    const categories_promise = fetchCategories();
+    categories_promise.then(async (response) => {
+      if(response){
+        await self.retrieveProducts(query_params);
+      }
+    });
   }
 
   async UpdateOrderProducts(resolve:any= null) {

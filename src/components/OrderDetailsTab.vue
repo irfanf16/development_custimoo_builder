@@ -94,6 +94,7 @@ import ProductionScene from '@/components/ProductionScene.vue'
 import {
   getActiveProductData,
   handleResponseException,
+  fetchCategories,
   unitConversion
 } from '@/helpers/Helpers'
 import LoginForm from '@/components/LoginForm.vue'
@@ -359,8 +360,13 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             } else {
               if (cart_edit_mode) {
                 await self.exitFromEditMode()
-                let query_params = await self.setQueryParams
-                self.retrieveProducts(query_params)
+                const categories_promise = fetchCategories();
+                categories_promise.then(async (response) => {
+                  if(response){
+                    let query_params = await self.setQueryParams
+                    self.retrieveProducts(query_params)
+                  }
+                });
               }
             }
             self.isLoading = false
@@ -370,8 +376,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             }
             if (cart_edit_mode) {
               await self.exitFromEditMode()
-              let query_params = await self.setQueryParams
-              self.retrieveProducts(query_params)
+              const categories_promise = fetchCategories();
+              categories_promise.then(async (response) => {
+                if(response){
+                  let query_params = await self.setQueryParams
+                  self.retrieveProducts(query_params)
+                }
+              })
+
             }
           }
           self.showToast(res.data.message, res.data.success ? 'SUCCESS' : 'ERROR')
@@ -382,8 +394,13 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
           handleResponseException(errorResponse)
           if (cart_edit_mode) {
             await self.exitFromEditMode()
-            let query_params = await self.setQueryParams
-            self.retrieveProducts(query_params)
+            const categories_promise = fetchCategories();
+            categories_promise.then(async (response) => {
+              if(response){
+                let query_params = await self.setQueryParams
+                self.retrieveProducts(query_params)
+              }
+            })
           }
         })
       }

@@ -699,7 +699,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         // front_design:front_design,
         product_roster_detail: Store.getters.getProductRosters(),
         style_id: product_style.id,
-        is_private: selected_product.is_private?true:false,
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
       }
@@ -1758,7 +1757,8 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
     category_index: category_index,
     category_id: category_id,
     customized: Store.getters.getCustomized,
-    personalized: Store.getters.getPersonalized
+    personalized: Store.getters.getPersonalized,
+    private_product: Store.getters.getPrivateProduct,
   }
 }
 
@@ -1837,6 +1837,70 @@ const getUrlParameterByName = (name, url = '') => {
 }
 
 //Functions related to SVG parsing end
+const fetchCategories = async (product_filter: null | string = null, product_id = null) => {
+  return new Promise((resolve,reject) => {
+    let categories_promise;
+    if(!product_filter){
+      const getProductEditInfoObject = Store.getters.getProductEditInfoObject;
+      const last_active_product_obj = Store.getters.getLastActiveProductData;
+      if(getProductEditInfoObject.editing && !product_id){
+        switch(getProductEditInfoObject.type)
+        {
+          case "locker_product":
+            categories_promise = Store.dispatch('setCategories',{
+              query_params:`product_id=${getProductEditInfoObject.locker_product_info.product_id}`
+            });
+
+            break;
+          case "cart_product":
+            categories_promise = Store.dispatch('setCategories',{
+              query_params:`product_id=${getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`
+            });
+            break;
+          case "order_product":
+            categories_promise = Store.dispatch('setCategories',{
+              query_params:`product_id=${getProductEditInfoObject.order_product_info.order_products.factory_products[0].product_id}`
+            });
+        }
+      }else{
+        if(product_id){
+          categories_promise = Store.dispatch('setCategories',{
+            query_params:`product_id=${product_id}`
+          });
+        }
+        else if(last_active_product_obj.product_id){
+          categories_promise = Store.dispatch('setCategories',{
+            query_params:`product_id=${last_active_product_obj.product_id}`
+          });
+        }
+        else{
+          categories_promise = Store.dispatch('setCategories',{
+            query_params: `customized=true`
+          });
+        }
+      }
+    }
+    else{
+      let params = `customized=true`;
+      if(product_filter === 'customized'){
+        params = `customized=true`;
+      }
+      else if(product_filter === 'personalized'){
+        params = `personalized=true`;
+      }
+      else if(product_filter === 'private_product'){
+        params = `private=true`;
+      }
+      categories_promise = Store.dispatch('setCategories',{
+        query_params: params
+      });
+    }
+    categories_promise.then((response) => {
+      resolve(true);
+    })
+  })
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
@@ -1845,7 +1909,8 @@ export {
   getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
-  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, getImageFromCanvas, getUrlParameterByName,
-  rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getDefaultColorsObject,
-  setDefaultColors, getVectorExtensions, getExtensionFromString
+  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameterByName,
+  rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
+  getDefaultColorsObject, setDefaultColors, getVectorExtensions, getExtensionFromString,fetchCategories
+
 };
