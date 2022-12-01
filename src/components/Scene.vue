@@ -1748,7 +1748,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public async deleteExistingLogoFromCanvas(custom_logo_index: number) {
-    console.log(keep_index, ' keep_index')
     if(custom_logo_index == 0 || this.custom_logos[custom_logo_index] && this.custom_logos[custom_logo_index].product_id == this.product_id) {
       const custom_logo = this.custom_logo_objects[custom_logo_index]
       if (custom_logo) {
@@ -1762,11 +1761,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if (this.back) {
             this.backCanvas.remove(other_side_logo)
           }
-          if(keep_index) {
-            this.other_side_logos[custom_logo_index] = null
-          } else {
-            this.other_side_logos.splice(custom_logo_index, 1)
-          }
+          this.other_side_logos[custom_logo_index] = null
         }
       }
       this.custom_logo_objects[custom_logo_index] = null
