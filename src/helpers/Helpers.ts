@@ -1798,8 +1798,22 @@ const setDefaultColors = () => {
   Store.commit('SET_DEFAULT_COLORS', default_colors_object)
 }
 
-const getVectorExtensions = () => {
-  return ['svg', 'pdf', 'ai', 'eps', 'tiff']
+const getExtensionsFor = (type = '') => {
+  const type_extensions = {
+    raster: ['jpg','gif','png','jpeg'],
+    vector: ['svg', 'pdf', 'ai', 'eps', 'tiff']
+  }
+  if(type) {
+    return type_extensions[type]
+  } else {
+    return [...type_extensions['raster'], ...type_extensions['vector']]
+  }
+}
+
+const validateLogoType = (type: string, file_name:string) => {
+  const type_extensions = getExtensionsFor(type)
+  const file_extension = getExtensionFromString(file_name)
+  return type_extensions.includes(file_extension)
 }
 
 const getExtensionFromString = (string: string) => {
@@ -1901,6 +1915,15 @@ const fetchCategories = async (product_filter: null | string = null, product_id 
   })
 }
 
+const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
+  return {
+    id: updated_logo.id, url: updated_logo.url, original_logo: updated_logo.original_logo_url, original_logo_url: updated_logo.original_logo_url,
+    transparent_logo: updated_logo.transparent_logo, smart_transparent_logo: updated_logo.smart_transparent_logo,
+    is_smart_transparent: updated_logo.is_smart_transparent, is_vector: updated_logo.is_vector,
+    logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success
+  }
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
@@ -1911,6 +1934,6 @@ export {
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameterByName,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
-  getDefaultColorsObject, setDefaultColors, getVectorExtensions, getExtensionFromString,fetchCategories
+  getDefaultColorsObject, setDefaultColors, getExtensionFromString,fetchCategories, getExtensionsFor, validateLogoType, getLogoUpdatedProps
 
 };
