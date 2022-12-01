@@ -191,6 +191,7 @@ export class handleMainProducts extends Mixins(FetchCategories) {
       * will have value only when it's being edited.
       * */
       let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
+      console.log('is_editing', is_editing)
       if(is_editing) {
         ({product_index, style_index, design_id, active_index} = await this.handleEditMode(retrieved_products));
       }
@@ -836,6 +837,8 @@ export class ProductsQueryParamsMixin extends Vue {
         query_params = [
           `shared_url=${shared_url}`, "active_product_type=share_product", 'paginate=false'
         ];
+        resetLastActiveProductData()
+        exitFromEditMode()
       }
       else {
         //if route have update_order_product query parameter then it means the order edit product changed so we need to exit from existing edit mode and re set order edit mode
