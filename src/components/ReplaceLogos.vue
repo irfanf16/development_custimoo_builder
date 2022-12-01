@@ -50,42 +50,6 @@
             </div>
           </template>
         </div>
-
-        <div class="pb-3">
-          <template v-if="company.platform !== 'self'">
-            <b-button aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
-              Add to Cart
-            </b-button>
-          </template>
-          <template v-else>
-            <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" :disabled="shareDesignLoader" style="min-width: 100px" @click.stop="$emit('shareDesign')">
-              <template v-if="!shareDesignLoader">Share design</template>
-              <img v-else width="20" height="20" src="../../src/assets/images/loading.gif" />
-            </b-button>
-            <Popper
-              style="font-size: 12px;"
-              v-if="product"
-              :is-open="popperID == 'shareDesign'"
-              :anchor-el="$refs['shareDesign']"
-              :on-close="$emit('hidePopper')"
-            >
-              <aside id="popper-content" class="tooltip b-tooltip bs-tooltip share-tooltip">
-                <div class="share-holder">
-                  <h3>Copy link and Share</h3>
-                  <div class="share-form">
-                    <b-form inline>
-                      <b-form-input ref="share-design-link" id="share-design-link"
-                                    :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
-
-                      ></b-form-input>
-                      <button @click="$emit('copyLink')" class="btn" type="button">Copy Link</button>
-                    </b-form>
-                  </div>
-                </div>
-              </aside>
-            </Popper>
-          </template>
-        </div>
       </div>
     </modal>
 </template>

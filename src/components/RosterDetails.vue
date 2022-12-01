@@ -131,7 +131,7 @@
                 <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
                   {{ productSize.text }}</b-form-select-option>
               </b-form-select>
-              <div class="tooltip guide">Press enter to view the options</div>
+              <div v-if="false" class="tooltip guide">Press enter to view the options</div>
             </div>
           </div>
           <div class="align-right">
@@ -703,44 +703,44 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 }
 
 .shirt-size{
-  .tooltip.guide{
-    display: none;
-    background: #333;
-    color: white;
-    padding: 7px 10px;
-    border-radius: 7px;
-    white-space: nowrap;
-    margin-top: 10px;
-    animation: fadeInUp 0.2s ease;
+  //.tooltip.guide{
+  //  display: none;
+  //  background: #333;
+  //  color: white;
+  //  padding: 7px 10px;
+  //  border-radius: 7px;
+  //  white-space: nowrap;
+  //  margin-top: 10px;
+  //  animation: fadeInUp 0.2s ease;
+  //
+  //  &:before{
+  //    display: block;
+  //    position: absolute;
+  //    content: "";
+  //    height: 0;
+  //    width: 0;
+  //    border-color: transparent transparent #333;
+  //    border-style: solid;
+  //    border-width: 7px;
+  //    top: -14px;
+  //    left: 30%;
+  //  }
+  //}
 
-    &:before{
-      display: block;
-      position: absolute;
-      content: "";
-      height: 0;
-      width: 0;
-      border-color: transparent transparent #333;
-      border-style: solid;
-      border-width: 7px;
-      top: -14px;
-      left: 30%;
-    }
-  }
-
-  select {
-    &:focus{
-      &+.tooltip.guide{
-        display: block;
-        opacity: 1;
-      }
-    }
-
-    &:hover{
-      &+.tooltip.guide{
-        display: none;
-        opacity: 0;
-      }
-    }
-  }
+  //select {
+  //  &:focus{
+  //    &+.tooltip.guide{
+  //      display: block;
+  //      opacity: 1;
+  //    }
+  //  }
+  //
+  //  &:hover{
+  //    &+.tooltip.guide{
+  //      display: none;
+  //      opacity: 0;
+  //    }
+  //  }
+  //}
 }
 </style>
