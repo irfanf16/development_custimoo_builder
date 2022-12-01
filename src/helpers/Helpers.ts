@@ -1787,8 +1787,22 @@ const setDefaultColors = () => {
   Store.commit('SET_DEFAULT_COLORS', default_colors_object)
 }
 
-const getVectorExtensions = () => {
-  return ['svg', 'pdf', 'ai', 'eps', 'tiff']
+const getExtensionsFor = (type = '') => {
+  const type_extensions = {
+    raster: ['jpg','gif','png','jpeg'],
+    vector: ['svg', 'pdf', 'ai', 'eps', 'tiff']
+  }
+  if(type) {
+    return type_extensions[type]
+  } else {
+    return [...type_extensions['raster'], ...type_extensions['vector']]
+  }
+}
+
+const validateLogoType = (type: string, file_name:string) => {
+  const type_extensions = getExtensionsFor(type)
+  const file_extension = getExtensionFromString(file_name)
+  return type_extensions.includes(file_extension)
 }
 
 const getExtensionFromString = (string: string) => {
@@ -1825,31 +1839,38 @@ const getUrlParameterByName = (name, url = '') => {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
-const showError = (err) =>{
-  if(typeof err === 'string') {
-  VsToast.show({
-    title: err,
-    variant: 'error',
-    timeout: 5000,
-    position: "bottom-left"
-  });
-}
-else {
-  const errors = err.response.data.errors;
-  const errArr: string[] = [];
-  Object.keys(errors).map((field) => {
-    errArr.push(errors[field][0]);
-  });
-  errArr.forEach(element => {
+const showError = (err) => {
+  if (typeof err === 'string') {
     VsToast.show({
-      title: element,
+      title: err,
       variant: 'error',
-      duration: 5000,
-      position: 'bottom-left'
+      timeout: 5000,
+      position: "bottom-left"
     });
-  })
+  } else {
+    const errors = err.response.data.errors;
+    const errArr: string[] = [];
+    Object.keys(errors).map((field) => {
+      errArr.push(errors[field][0]);
+    });
+    errArr.forEach(element => {
+      VsToast.show({
+        title: element,
+        variant: 'error',
+        duration: 5000,
+        position: 'bottom-left'
+      });
+    })
+  }
 }
 
+const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
+  return {
+    id: updated_logo.id, url: updated_logo.url, original_logo: updated_logo.original_logo_url, original_logo_url: updated_logo.original_logo_url,
+    transparent_logo: updated_logo.transparent_logo, smart_transparent_logo: updated_logo.smart_transparent_logo,
+    is_smart_transparent: updated_logo.is_smart_transparent, is_vector: updated_logo.is_vector,
+    logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success
+  }
 }
 
 export {
@@ -1862,6 +1883,6 @@ export {
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameterByName,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
-  getDefaultColorsObject, setDefaultColors, getVectorExtensions, getExtensionFromString, exitFromEditMode
+  getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps
 
 };
