@@ -10,6 +10,7 @@ import {http} from "@/httpCommon";
 import {parseInt, findIndex} from "lodash";
 import {Canvas} from "fabric/fabric-impl";
 import {eventBus} from "@/event/eventBus"
+import VueRouter from 'vue-router'
 
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
@@ -1555,6 +1556,10 @@ const resetLastActiveProductData = async () => {
   Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_product_default_object)
 }
 
+const exitFromEditMode = () => {
+  Store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null })
+}
+
 const persistToken =  (to:Record<any,any>, from:Record<any,any>) => {
   let jwtToken = localStorage.getItem('jwtToken')
   if(to.query && to.query.token && jwtToken){
@@ -1598,43 +1603,27 @@ const fetchCustomer = async (jwtToken:string) => {
 
 const setVueVersion = async () => {
   const is_loggedIn = await localStorage.getItem('jwtToken');
-  const is_restored = await localStorage.getItem('is_restored');
   let customer_id = 0;
   if(is_loggedIn) {
     const customer = Store.getters.getCustomer;
     customer_id = customer.id;
   }
-  await http.get('get-reset-store?customer_id='+customer_id)
-    .then(async (res) =>{
-      if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
-        if(is_loggedIn && res.data.isCustomerStoreReset <= 0){
-          console.log('logged in');
-          await http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).catch(error => {
-            handleResponseException(error)
-            console.info("error while setting reset store", error)
-          });
-          if(is_restored != 'yes')
-            await restore();
-        }else if(is_loggedIn == null && is_restored != 'yes') {
-          console.log('not logged in and not restored');
-          await restore();
-        }else{
-          console.log('none')
-        }
+  await http.get('get-reset-store?customer_id='+customer_id).then((res) => {
+    if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
+      if(is_loggedIn && res.data.isCustomerStoreReset == 0){
+        http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).then(() => {
+          restore();
+        })
       }
-    })
-    .catch(error => {
-      handleResponseException(error)
-      console.info("error while getting company", error)
-    });
+    }
+  })
 }
 
 async function restore(){
-  await localStorage.setItem('is_restored', 'yes');
   await Store.dispatch('resetStore');
-  console.log('restored');
-  //location.reload()
-  return
+  setTimeout(() => {
+    location.reload()
+  }, 2500)
 }
 
 const getProductColors = (product_id = null, append_locker_colors = true ) => {
@@ -1850,69 +1839,29 @@ const getUrlParameterByName = (name, url = '') => {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
-//Functions related to SVG parsing end
-const fetchCategories = async (product_filter: null | string = null, product_id = null) => {
-  return new Promise((resolve,reject) => {
-    let categories_promise;
-    if(!product_filter){
-      const getProductEditInfoObject = Store.getters.getProductEditInfoObject;
-      const last_active_product_obj = Store.getters.getLastActiveProductData;
-      if(getProductEditInfoObject.editing && !product_id){
-        switch(getProductEditInfoObject.type)
-        {
-          case "locker_product":
-            categories_promise = Store.dispatch('setCategories',{
-              query_params:`product_id=${getProductEditInfoObject.locker_product_info.product_id}`
-            });
-
-            break;
-          case "cart_product":
-            categories_promise = Store.dispatch('setCategories',{
-              query_params:`product_id=${getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`
-            });
-            break;
-          case "order_product":
-            categories_promise = Store.dispatch('setCategories',{
-              query_params:`product_id=${getProductEditInfoObject.order_product_info.order_products.factory_products[0].product_id}`
-            });
-        }
-      }else{
-        if(product_id){
-          categories_promise = Store.dispatch('setCategories',{
-            query_params:`product_id=${product_id}`
-          });
-        }
-        else if(last_active_product_obj.product_id){
-          categories_promise = Store.dispatch('setCategories',{
-            query_params:`product_id=${last_active_product_obj.product_id}`
-          });
-        }
-        else{
-          categories_promise = Store.dispatch('setCategories',{
-            query_params: `customized=true`
-          });
-        }
-      }
-    }
-    else{
-      let params = `customized=true`;
-      if(product_filter === 'customized'){
-        params = `customized=true`;
-      }
-      else if(product_filter === 'personalized'){
-        params = `personalized=true`;
-      }
-      else if(product_filter === 'private_product'){
-        params = `private=true`;
-      }
-      categories_promise = Store.dispatch('setCategories',{
-        query_params: params
+const showError = (err) => {
+  if (typeof err === 'string') {
+    VsToast.show({
+      title: err,
+      variant: 'error',
+      timeout: 5000,
+      position: "bottom-left"
+    });
+  } else {
+    const errors = err.response.data.errors;
+    const errArr: string[] = [];
+    Object.keys(errors).map((field) => {
+      errArr.push(errors[field][0]);
+    });
+    errArr.forEach(element => {
+      VsToast.show({
+        title: element,
+        variant: 'error',
+        duration: 5000,
+        position: 'bottom-left'
       });
-    }
-    categories_promise.then((response) => {
-      resolve(true);
     })
-  })
+  }
 }
 
 const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
@@ -1934,6 +1883,6 @@ export {
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameterByName,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
-  getDefaultColorsObject, setDefaultColors, getExtensionFromString,fetchCategories, getExtensionsFor, validateLogoType, getLogoUpdatedProps
+  getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps
 
 };

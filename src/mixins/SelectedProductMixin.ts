@@ -1,4 +1,7 @@
 import {Component, Vue, Watch} from "vue-property-decorator";
+import VueRouter from 'vue-router'
+import Store from '@/store'
+import { exitFromEditMode, resetLastActiveProductData } from '@/helpers/Helpers'
 
 @Component
 export class ProductColors extends Vue {
@@ -79,5 +82,86 @@ export class HideUpdateLockerButton extends Vue {
       //     this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
       // }
     }
+  }
+}
+
+@Component
+export class FetchCategories extends Vue {
+  public async fetchCategories(product_filter: null | string = null, product_id = null) {
+    const self: Record<any, any> = this
+    return new Promise((resolve,reject) => {
+      let categories_promise;
+      if(!product_filter){
+        const getProductEditInfoObject = this.$store.getters.getProductEditInfoObject;
+        const last_active_product_obj = this.$store.getters.getLastActiveProductData;
+
+        if (self.$route.params.name) {
+          let shared_url = self.$route.path
+          if (shared_url.charAt(0) === '/'){
+            shared_url = shared_url.substring(1)
+          }
+          categories_promise = this.$store.dispatch('setCategories',{
+            query_params:`share_url=${shared_url}`
+          });
+        } else if(getProductEditInfoObject.editing && !product_id){
+          switch(getProductEditInfoObject.type)
+          {
+            case "locker_product":
+              categories_promise = this.$store.dispatch('setCategories',{
+                query_params:`product_id=${getProductEditInfoObject.locker_product_info.product_id}`
+              });
+
+              break;
+            case "cart_product":
+              categories_promise = this.$store.dispatch('setCategories',{
+                query_params:`product_id=${getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`
+              });
+              break;
+            case "order_product":
+              categories_promise = this.$store.dispatch('setCategories',{
+                query_params:`product_id=${getProductEditInfoObject.order_product_info.order_products.factory_products[0].product_id}`
+              });
+          }
+        } else{
+          if(product_id){
+            categories_promise = this.$store.dispatch('setCategories',{
+              query_params:`product_id=${product_id}`
+            });
+          } else if(last_active_product_obj.product_id){
+            categories_promise = this.$store.dispatch('setCategories',{
+              query_params:`product_id=${last_active_product_obj.product_id}`
+            });
+          }
+          else{
+            categories_promise = this.$store.dispatch('setCategories',{
+              query_params: `customized=true`
+            });
+          }
+        }
+      }
+      else{
+        let params = `customized=true`;
+        if(product_filter === 'customized'){
+          params = `customized=true`;
+        }
+        else if(product_filter === 'personalized'){
+          params = `personalized=true`;
+        }
+        else if(product_filter === 'private_product'){
+          params = `private=true`;
+        }
+        categories_promise = this.$store.dispatch('setCategories',{
+          query_params: params
+        });
+      }
+      categories_promise.then((no_product_found) => {
+        if(no_product_found) {
+          exitFromEditMode();
+          resetLastActiveProductData();
+          self.showError('Product data not found, loading all products')
+        }
+        resolve(true);
+      })
+    })
   }
 }

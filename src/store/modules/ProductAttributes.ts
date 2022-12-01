@@ -1404,7 +1404,7 @@ const ProductAttributes:Module<any, any> = {
             await commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
             await commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
             await commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
-            resolve(true);
+            resolve(response.data.no_product_found);
           }
         }).catch((e: any) => {
           console.error('error while getting categories',e)

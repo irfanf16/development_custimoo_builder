@@ -5,14 +5,15 @@ import {findIndex} from 'lodash';
 import {
   getActiveProductData, getRandom, handleResponseException, processColorsCustom,
   setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject,
-  initCustomLogosNew,fetchCategories
+  initCustomLogosNew, exitFromEditMode
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
+import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
 @Component
-export class LockerProducts extends Vue {
+export class LockerProducts extends Mixins(FetchCategories) {
 
   public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="") {
     let self: Record<any, any> = this;
@@ -22,7 +23,7 @@ export class LockerProducts extends Vue {
     // await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
-    const categories_promise = fetchCategories(null, product_id);
+    const categories_promise = this.fetchCategories(null, product_id);
     categories_promise.then((response) => {
       if(response){
         let is_private:Boolean =  this.$store.getters.getPrivateProduct
@@ -109,7 +110,7 @@ export class LockerProducts extends Vue {
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
 
-    const categories_promise = fetchCategories(null,  room_product.product_id);
+    const categories_promise = this.fetchCategories(null,  room_product.product_id);
     categories_promise.then((response) => {
       let is_private:Boolean = this.$store.getters.getPrivateProduct;
       let url = `list/products?private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1&collection_type=true`;
@@ -142,7 +143,7 @@ export class LockerProducts extends Vue {
 }
 
 @Component
-export class handleMainProducts extends Vue {
+export class handleMainProducts extends Mixins(FetchCategories) {
 
   public async handleMainProducts(response: Record<any, any>){
     let self: Record<any, any> = this;
@@ -190,6 +191,7 @@ export class handleMainProducts extends Vue {
       * will have value only when it's being edited.
       * */
       let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
+      console.log('is_editing', is_editing)
       if(is_editing) {
         ({product_index, style_index, design_id, active_index} = await this.handleEditMode(retrieved_products));
       }
@@ -287,7 +289,7 @@ export class handleMainProducts extends Vue {
           self.$eventBus.$emit("changeColors")
         } else {
           self.exitFromEditMode();
-          const categories_promise = fetchCategories();
+          const categories_promise = this.fetchCategories();
           categories_promise.then(  async(response) => {
             if(response){
               let query_params = await self.setQueryParams()
@@ -835,6 +837,8 @@ export class ProductsQueryParamsMixin extends Vue {
         query_params = [
           `shared_url=${shared_url}`, "active_product_type=share_product", 'paginate=false'
         ];
+        resetLastActiveProductData()
+        exitFromEditMode()
       }
       else {
         //if route have update_order_product query parameter then it means the order edit product changed so we need to exit from existing edit mode and re set order edit mode
@@ -926,8 +930,7 @@ export class exitEditMode extends Vue {
     return this.$store.getters.getProductEditInfoObject;
   }
   public async exitFromEditMode() {
-    this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null
-    })
+    exitFromEditMode()
   }
   public editModeConfirmation() {
     let self: Record<any, any> = this;
@@ -1258,7 +1261,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             else {
               if(cart_edit_mode) {
                 await self.exitFromEditMode()
-                const categories_promise = fetchCategories();
+                const categories_promise = this.fetchCategories();
                 categories_promise.then(async (response) => {
                   if(response){
                     let query_params = await self.setQueryParams
@@ -1276,7 +1279,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             }
             if(cart_edit_mode) {
               await self.exitFromEditMode()
-              const categories_promise = fetchCategories();
+              const categories_promise = this.fetchCategories();
               categories_promise.then(async (response) => {
                 if(response){
                   let query_params = await self.setQueryParams
@@ -1298,7 +1301,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           handleResponseException(errorResponse)
           if(cart_edit_mode) {
             await self.exitFromEditMode()
-            const categories_promise = fetchCategories();
+            const categories_promise = this.fetchCategories();
             categories_promise.then(async (response) => {
               let query_params = await self.setQueryParams
               self.retrieveProducts(query_params);

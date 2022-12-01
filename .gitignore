@@ -35,3 +35,4 @@ env.development
 self_customizer/
 wordpress_customizer_staging/
 wordpress_customizer/
+order_detail_customizer/

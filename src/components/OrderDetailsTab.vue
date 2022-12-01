@@ -94,13 +94,13 @@ import ProductionScene from '@/components/ProductionScene.vue'
 import {
   getActiveProductData,
   handleResponseException,
-  fetchCategories,
   unitConversion
 } from '@/helpers/Helpers'
 import LoginForm from '@/components/LoginForm.vue'
 import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData} from "@/mixins/LockerProduct";
 
 import {compact} from 'lodash';
+import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
 type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
@@ -120,7 +120,7 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
   }
 })
 
-export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData) {
+export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData, FetchCategories) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
@@ -360,7 +360,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             } else {
               if (cart_edit_mode) {
                 await self.exitFromEditMode()
-                const categories_promise = fetchCategories();
+                const categories_promise = this.fetchCategories();
                 categories_promise.then(async (response) => {
                   if(response){
                     let query_params = await self.setQueryParams
@@ -376,7 +376,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             }
             if (cart_edit_mode) {
               await self.exitFromEditMode()
-              const categories_promise = fetchCategories();
+              const categories_promise = this.fetchCategories();
               categories_promise.then(async (response) => {
                 if(response){
                   let query_params = await self.setQueryParams
@@ -394,7 +394,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
           handleResponseException(errorResponse)
           if (cart_edit_mode) {
             await self.exitFromEditMode()
-            const categories_promise = fetchCategories();
+            const categories_promise = this.fetchCategories();
             categories_promise.then(async (response) => {
               if(response){
                 let query_params = await self.setQueryParams
