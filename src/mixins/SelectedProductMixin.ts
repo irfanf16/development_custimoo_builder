@@ -94,7 +94,16 @@ export class FetchCategories extends Vue {
       if(!product_filter){
         const getProductEditInfoObject = this.$store.getters.getProductEditInfoObject;
         const last_active_product_obj = this.$store.getters.getLastActiveProductData;
-        if(getProductEditInfoObject.editing && !product_id){
+
+        if (self.$route.params.name) {
+          let shared_url = self.$route.path
+          if (shared_url.charAt(0) === '/'){
+            shared_url = shared_url.substring(1)
+          }
+          categories_promise = this.$store.dispatch('setCategories',{
+            query_params:`share_url=${shared_url}`
+          });
+        } else if(getProductEditInfoObject.editing && !product_id){
           switch(getProductEditInfoObject.type)
           {
             case "locker_product":
@@ -113,21 +122,12 @@ export class FetchCategories extends Vue {
                 query_params:`product_id=${getProductEditInfoObject.order_product_info.order_products.factory_products[0].product_id}`
               });
           }
-        }else{
+        } else{
           if(product_id){
             categories_promise = this.$store.dispatch('setCategories',{
               query_params:`product_id=${product_id}`
             });
-          } else if (self.$route.params.name) {
-            let shared_url = self.$route.path
-            if (shared_url.charAt(0) === '/'){
-              shared_url = shared_url.substring(1)
-            }
-            categories_promise = this.$store.dispatch('setCategories',{
-              query_params:`share_url=${shared_url}`
-            });
-          }
-          else if(last_active_product_obj.product_id){
+          } else if(last_active_product_obj.product_id){
             categories_promise = this.$store.dispatch('setCategories',{
               query_params:`product_id=${last_active_product_obj.product_id}`
             });
