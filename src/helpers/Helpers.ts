@@ -1555,6 +1555,10 @@ const resetLastActiveProductData = async () => {
   Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_product_default_object)
 }
 
+const exitFromEditMode = () => {
+  Store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null })
+}
+
 const persistToken =  (to:Record<any,any>, from:Record<any,any>) => {
   let jwtToken = localStorage.getItem('jwtToken')
   if(to.query && to.query.token && jwtToken){
@@ -1879,10 +1883,41 @@ const fetchCategories = async (product_filter: null | string = null, product_id 
         query_params: params
       });
     }
-    categories_promise.then((response) => {
+    categories_promise.then((no_product_found) => {
+      if(no_product_found) {
+        exitFromEditMode();
+        resetLastActiveProductData();
+        showError('Product data not found, loading all products')
+      }
       resolve(true);
     })
   })
+}
+const showError = (err) =>{
+  if(typeof err === 'string') {
+  VsToast.show({
+    title: err,
+    variant: 'error',
+    timeout: 5000,
+    position: "bottom-left"
+  });
+}
+else {
+  const errors = err.response.data.errors;
+  const errArr: string[] = [];
+  Object.keys(errors).map((field) => {
+    errArr.push(errors[field][0]);
+  });
+  errArr.forEach(element => {
+    VsToast.show({
+      title: element,
+      variant: 'error',
+      duration: 5000,
+      position: 'bottom-left'
+    });
+  })
+}
+
 }
 
 export {
@@ -1895,6 +1930,6 @@ export {
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameterByName,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
-  getDefaultColorsObject, setDefaultColors, getVectorExtensions, getExtensionFromString,fetchCategories
+  getDefaultColorsObject, setDefaultColors, getVectorExtensions, getExtensionFromString,fetchCategories, exitFromEditMode
 
 };

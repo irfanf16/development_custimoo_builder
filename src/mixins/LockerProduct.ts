@@ -5,7 +5,7 @@ import {findIndex} from 'lodash';
 import {
   getActiveProductData, getRandom, handleResponseException, processColorsCustom,
   setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject,
-  initCustomLogosNew,fetchCategories
+  initCustomLogosNew, fetchCategories, exitFromEditMode
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -926,8 +926,7 @@ export class exitEditMode extends Vue {
     return this.$store.getters.getProductEditInfoObject;
   }
   public async exitFromEditMode() {
-    this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null
-    })
+    exitFromEditMode()
   }
   public editModeConfirmation() {
     let self: Record<any, any> = this;
