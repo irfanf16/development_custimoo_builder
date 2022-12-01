@@ -10,6 +10,7 @@ import {http} from "@/httpCommon";
 import {parseInt, findIndex} from "lodash";
 import {Canvas} from "fabric/fabric-impl";
 import {eventBus} from "@/event/eventBus"
+import VueRouter from 'vue-router'
 
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
@@ -1824,75 +1825,6 @@ const getUrlParameterByName = (name, url = '') => {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
-//Functions related to SVG parsing end
-const fetchCategories = async (product_filter: null | string = null, product_id = null) => {
-  return new Promise((resolve,reject) => {
-    let categories_promise;
-    if(!product_filter){
-      const getProductEditInfoObject = Store.getters.getProductEditInfoObject;
-      const last_active_product_obj = Store.getters.getLastActiveProductData;
-      if(getProductEditInfoObject.editing && !product_id){
-        switch(getProductEditInfoObject.type)
-        {
-          case "locker_product":
-            categories_promise = Store.dispatch('setCategories',{
-              query_params:`product_id=${getProductEditInfoObject.locker_product_info.product_id}`
-            });
-
-            break;
-          case "cart_product":
-            categories_promise = Store.dispatch('setCategories',{
-              query_params:`product_id=${getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`
-            });
-            break;
-          case "order_product":
-            categories_promise = Store.dispatch('setCategories',{
-              query_params:`product_id=${getProductEditInfoObject.order_product_info.order_products.factory_products[0].product_id}`
-            });
-        }
-      }else{
-        if(product_id){
-          categories_promise = Store.dispatch('setCategories',{
-            query_params:`product_id=${product_id}`
-          });
-        }
-        else if(last_active_product_obj.product_id){
-          categories_promise = Store.dispatch('setCategories',{
-            query_params:`product_id=${last_active_product_obj.product_id}`
-          });
-        }
-        else{
-          categories_promise = Store.dispatch('setCategories',{
-            query_params: `customized=true`
-          });
-        }
-      }
-    }
-    else{
-      let params = `customized=true`;
-      if(product_filter === 'customized'){
-        params = `customized=true`;
-      }
-      else if(product_filter === 'personalized'){
-        params = `personalized=true`;
-      }
-      else if(product_filter === 'private_product'){
-        params = `private=true`;
-      }
-      categories_promise = Store.dispatch('setCategories',{
-        query_params: params
-      });
-    }
-    categories_promise.then((no_product_found) => {
-      if(no_product_found) {
-        exitFromEditMode();
-        resetLastActiveProductData();
-        showError('Product data not found, loading all products')
-      }
-      resolve(true);
-    })
-  })
-}
 const showError = (err) =>{
   if(typeof err === 'string') {
   VsToast.show({
@@ -1930,6 +1862,6 @@ export {
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameterByName,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
-  getDefaultColorsObject, setDefaultColors, getVectorExtensions, getExtensionFromString,fetchCategories, exitFromEditMode
+  getDefaultColorsObject, setDefaultColors, getVectorExtensions, getExtensionFromString, exitFromEditMode
 
 };

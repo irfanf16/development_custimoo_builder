@@ -164,7 +164,6 @@ import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
-  fetchCategories,
   getActiveProductData,
   getReminderOptions,
   getSelectedProductData,
@@ -174,6 +173,7 @@ import {
 import {LockerProducts, handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
 import { findIndex } from "lodash";
 import ModalAction from "@/mixins/ModalAction";
+import { FetchCategories } from '@/mixins/SelectedProductMixin'
 @Component<CartModal>({
   components: {},
   filters: {
@@ -219,7 +219,7 @@ import ModalAction from "@/mixins/ModalAction";
 
   }
 })
-export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,exitEditMode) {
+export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, FetchCategories) {
   @Prop({ default: 3, required: true }) mainTotalTabs!: number
 
   public viewLoader = false;
@@ -343,7 +343,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let self = this;
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index]
-    const categories_promise = fetchCategories(null, cart_item_product.product_id);
+    const categories_promise = this.fetchCategories(null, cart_item_product.product_id);
     categories_promise.then( async (response) => {
       let is_private = this.$store.getters.getPrivateProduct;
       let is_customized = this.$store.getters.getCustomized;

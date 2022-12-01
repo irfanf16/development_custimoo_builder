@@ -422,7 +422,7 @@ import {
   handleResponseException,
   parseSvgStringFile,
   fetchUrlContent,
-  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject,fetchCategories
+  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -431,7 +431,7 @@ import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import {filter, findIndex} from 'lodash'
 import opentype from 'opentype.js'
-import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
+import { FetchCategories, HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 import Store from "@/store";
 
 Vue.filter('formatDate', function(value:string) {
@@ -509,7 +509,7 @@ Vue.filter('formatDate', function(value:string) {
     // await this.$store.dispatch('setCategories', {
     //   query_params: `customized=${last_active_product_obj.customized}&personalized=${last_active_product_obj.personalized}&private=${last_active_product_obj.private_product}`
     // })
-    const categories_promise = fetchCategories();
+    const categories_promise = this.fetchCategories();
     categories_promise.then(async (response) => {
       let query_params = await this.setQueryParams()
       await this.retrieveProducts(query_params)
@@ -564,7 +564,7 @@ Vue.filter('formatDate', function(value:string) {
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
-  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton, exitEditMode) {
+  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton, exitEditMode, FetchCategories) {
   public langs = ['en','dk'];
   public products_fonts: Record<any, any>[] = []
   public prevRoute: Record<any, any> = {};
@@ -1206,7 +1206,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   private async  cancelEdit() {
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0})
-    const categories_promise = fetchCategories();
+    const categories_promise = this.fetchCategories();
     categories_promise.then(() => {
       this.retrieveProducts();
     });
@@ -1279,7 +1279,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }).catch(async errorResponse => {
         handleResponseException(errorResponse)
         self.exitFromEditMode();
-        const categories_promise = fetchCategories();
+        const categories_promise = this.fetchCategories();
         categories_promise.then(async (response)=> {
           let query_params = await self.setQueryParams()
           self.retrieveProducts(query_params)
@@ -1487,7 +1487,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if (ok) {
       this.$store.commit('RESET_LAST_ACTIVE_DATA')
-      const categories_promise = fetchCategories();
+      const categories_promise = this.fetchCategories();
       categories_promise.then(async (response) => {
         if(response){
           await this.exitFromEditMode()
@@ -1534,7 +1534,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self: Record<any, any> = this;
     // await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
     // await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
-    const categories_promise = fetchCategories();
+    const categories_promise = this.fetchCategories();
     categories_promise.then(async (response) => {
       if(response){
         let query_params = await this.setQueryParams()
@@ -1620,7 +1620,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       `activity_id=${this.$route.query.activity_id}`, 'active_product_type=order_product', `update_order_product_id=${next_prev_product_id}`
     ];
     self.showLoader = true;
-    const categories_promise = fetchCategories();
+    const categories_promise = this.fetchCategories();
     categories_promise.then(async (response) => {
       if(response){
         await self.retrieveProducts(query_params);

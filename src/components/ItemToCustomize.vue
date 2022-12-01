@@ -146,8 +146,9 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
   import DesignAvailable from '../components/DesignAvailable.vue'
   import ItemsGrid from "@/components/ItemsGrid.vue";
   import { dragscroll } from 'vue-dragscroll'
-  import { resetLastActiveProductData, fetchCategories } from '@/helpers/Helpers'
+  import { resetLastActiveProductData } from '@/helpers/Helpers'
   import {ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
+import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
 @Component<ItemToCustomize>({
   components: {
@@ -174,7 +175,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 })
 
 
-export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode) {
+export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode, FetchCategories) {
   // @Prop({required: true}) categories!: any;
   @Prop({required: true}) uploaderOpened!: any;
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
@@ -247,7 +248,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
      // const itemCarousel = self.$refs['itemsCarousel'] as Record<any, any>
      //  await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
       // this.$emit('update:search_products', self.search_products)
-      const categories_promise =  fetchCategories();
+      const categories_promise =  this.fetchCategories();
       categories_promise.then(() => {
         let query_params = [`title=${self.search_products}`]
         this.$emit('retrieveProducts', query_params)
@@ -291,16 +292,16 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     if(prd_type == 'customized' && customized == false){
       retrieve_products = true
       check()
-      categories_promise =  fetchCategories('customized');
+      categories_promise =  this.fetchCategories('customized');
     } else if(prd_type == 'personalized' && personalized == false){
       retrieve_products = true
       check()
-      categories_promise = fetchCategories('personalized');
+      categories_promise = this.fetchCategories('personalized');
     }
     else {
       retrieve_products = true
       check()
-      categories_promise = fetchCategories('private_product');
+      categories_promise = this.fetchCategories('private_product');
     }
     categories_promise.then( async(response) => {
       if(response){
