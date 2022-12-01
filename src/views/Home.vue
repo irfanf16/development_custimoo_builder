@@ -8,7 +8,7 @@
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
                                @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
-                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
+                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" @adjustTotalTabs="adjustTotalTabs"
                                :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
             <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
                         @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" :products_fonts="products_fonts" />
@@ -237,7 +237,7 @@
                         </div>
                       </template>
                     </template>
-
+                    <div>{{mainTotalTabs}}</div>
                     <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                   </div>
                 </div>
@@ -265,7 +265,6 @@
                     </b-button>
 
                     <template v-else-if="isCustomerAuthenticated">
-
                       <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
@@ -274,6 +273,7 @@
                                 Add to Cart
                               </b-button>
                             </span>
+
                             <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
                               <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
                                 Finalize Design
@@ -288,20 +288,26 @@
                           </template>
                          </template>
                       </template>
-
                     </template>
+
+                    <span v-else-if="notVectorLogosCount > 0 && isRosterOpened">
+                      <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+                        Finalize Design
+                      </b-button>
+                    </span>
+
                     <template v-else>
                       <template v-if="company.platform !== 'self'">
                         <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
                           <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                         </span>
-                        <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+                        <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                      </template>
+                      <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
                           <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
                             Finalize Design
                           </b-button>
                         </span>
-                        <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
-                      </template>
                      </template>
                   </template>
 
@@ -309,7 +315,7 @@
                 </div>
               </div>
             </div>
-            <ReplaceLogos />
+            <ReplaceLogos @hidePopper="hidePopper" :popperID="popperID" :product="product" @shareDesign="shareDesign" :shareDesignLoader="shareDesignLoader" @copyLink="copyLink(lockerProductIndex)"/>
             <div class="sideNav" v-if="mobileScreen">
               <ul>
                 <li v-if="selectedProduct.is_logo_allowed">
@@ -459,7 +465,6 @@ Vue.filter('formatDate', function(value:string) {
   async mounted() {
     console.log('auto deployment testing', window.location.href)
     let self: Record<any, any> = this;
-    await this.adjustTotalTabs();
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
     /*
@@ -681,20 +686,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.showOtherTab = value
   }
 
-  private adjustTotalTabs() {
-    this.mainTotalTabs = 3
-
-    if (!this.selectedProduct.is_logo_allowed) {
-      this.mainTotalTabs = (this.mainTotalTabs - 1)
-    }
-
-    if (!this.selectedProduct.allow_name_number) {
-      this.mainTotalTabs = (this.mainTotalTabs - 1)
-    }
-
-    if (this.selectedProduct.product_type === 'personalized') {
-      this.mainTotalTabs = (this.mainTotalTabs - 1)
-    }
+  public adjustTotalTabs(totalTabs:number) {
+    this.mainTotalTabs = totalTabs
   }
 
   private swapSide(textIndex: number) {

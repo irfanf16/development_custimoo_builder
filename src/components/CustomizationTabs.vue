@@ -1,7 +1,7 @@
 <template>
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
-      <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
+      <b-tabs ref="customization-tabs" v-model="tabIndex" :key="selectedProduct.allow_name_number">
         <div class="myscroll" ref="myscroll">
 <!--          <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
@@ -157,6 +157,7 @@ import {filter} from "lodash"
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
+    this.$emit('adjustTotalTabs', ((this.$refs['customization-tabs'] as Record<any, any>).getTabs().length-2))
   },
 })
 export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
@@ -421,10 +422,12 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
 
   notVectorLogosCount(){
     const custom_logos = this.$store.getters.koivna
+    console.log('custom_logos', custom_logos)
     let non_vector_logos_count = 0
     if(custom_logos && custom_logos.length > 0) {
       const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
-        return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+        // return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+        return custom_logo.is_vector == false
       })
       non_vector_logos_count = non_vector_logos.length
     }
