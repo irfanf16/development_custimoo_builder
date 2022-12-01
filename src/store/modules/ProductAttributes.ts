@@ -21,6 +21,8 @@ import {eventBus} from "@/event/eventBus";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
+    personalized_count: 0 ,
+    customized_count:0,
     private_product_count:0,
     searchLoader: false,
     showLoader:true,
@@ -203,6 +205,12 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_STOCK_COUNT(state:Record<any,any>, payload:number){
       state.stock_count = payload;
+    },
+    SET_PERSONALIZED_COUNT(state:Record<any,any>, payload:number){
+      state.personalized_count = payload;
+    },
+    SET_CUSTOMIZED_COUNT(state:Record<any,any>, payload:number){
+      state.customized_count = payload;
     },
     SET_PRIVATE_PRODUCT_COUNT(state:Record<any,any>, payload:number){
       state.private_product_count = payload;
@@ -1317,6 +1325,12 @@ const ProductAttributes:Module<any, any> = {
     getPrivateProductCount(state:Record<any,any>){
       return state.private_product_count;
     },
+    getPersonalizedCount(state:Record<any,any>){
+      return state.personalized_count;
+    },
+    getCustomizedCount(state:Record<any,any>){
+      return state.customized_count;
+    },
     getHideSaveLockerButton(state:Record<any,any>){
       return state.hideSaveLockerButton;
     },
@@ -1380,13 +1394,23 @@ const ProductAttributes:Module<any, any> = {
       if(payload && 'query_params' in payload) {
         url += `?${payload.query_params}`
       }
-      const response = await http.get(url).catch((e: any) => {
-        console.error('error while getting categories',e)
-      });
-      if(response) {
-        await commit('categories', response.data)
-      }
-
+      return new Promise((resolve, reject) => {
+        http.get(url).then( async (response: Record<any,any>) => {
+          if(response) {
+            await commit('categories', response.data.data)
+            await commit('SET_PRIVATE_PRODUCT', response.data.private_product);
+            await commit('SET_PRODUCT_TYPE',{prd_type: 'customized', value: response.data.customized})
+            await commit('SET_PRODUCT_TYPE',{prd_type: 'personalized', value: response.data.personalized})
+            await commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
+            await commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
+            await commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
+            resolve(true);
+          }
+        }).catch((e: any) => {
+          console.error('error while getting categories',e)
+          reject(false);
+        });
+      })
     },
     setCustomLogos({commit}, payload){
       commit('customLogos', payload)
@@ -1453,6 +1477,12 @@ const ProductAttributes:Module<any, any> = {
     },
     setStockCount({commit},payload){
       commit('SET_STOCK_COUNT',payload);
+    },
+    setCustomizedCount({commit},payload){
+      commit('SET_CUSTOMIZED_COUNT',payload);
+    },
+    setPersonalizedCount({commit},payload){
+      commit('SET_PERSONALIZED_COUNT',payload);
     },
     setPrivateProductCount({commit},payload){
       commit('SET_PRIVATE_PRODUCT_COUNT',payload);

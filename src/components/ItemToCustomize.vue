@@ -21,34 +21,37 @@
         </div>
 
 <!--        <div class="collection-btn mt-1 px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0">-->
-        <div class="collection-btn mt-1 px-1 d-flex align-items-center checkbox_buttons gap-2" v-if="StockCount > 0">
+        <div class="collection-btn mt-1 px-1 d-flex align-items-center checkbox_buttons gap-2">
 <!--          <b-form-checkbox :checked="customized" @change="changeProductType('customized')"  class="mr-3" name="check-button" button key="Customized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Customized</b-form-checkbox>-->
 <!--          <b-form-checkbox :checked="personalized" @change="changeProductType('personalized')" name="check-button" button key="Personalized"><span class="checked"><b-icon icon="check-circle-fill"></b-icon></span> Stock</b-form-checkbox>-->
-          <template v-if="StockCount > 0">
+          <template v-if="CustomizedCount > 0">
             <button type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
                     @click="changeProductType(!$store.getters.getCustomized, 'customized')">
               <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
               Customized
             </button>
-
+          </template>
+          <template v-if="PersonalizedCount > 0">
             <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
                     @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
               <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
               Stock
             </button>
           </template>
-          <button v-if="isCustomerAuthenticated && PrivateProductCount" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                  @click="changeProductType(!$store.getters.getPrivateProduct, 'private_product')">
-            <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
-            Private
-          </button>
-          <template v-if="StockCount === 0 && isCustomerAuthenticated && PrivateProductCount > 0 && $store.getters.getPrivateProduct">
-            <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                    @click="changeProductType(true, 'customized')">
-              <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
-              Reset
+          <template v-if="PrivateProductCount > 0">
+            <button v-if="isCustomerAuthenticated && PrivateProductCount" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                    @click="changeProductType(!$store.getters.getPrivateProduct, 'private_product')">
+              <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
+              Private
             </button>
           </template>
+<!--          <template v-if="PersonalizedCount === 0  && && isCustomerAuthenticated && PrivateProductCount > 0 && $store.getters.getPrivateProduct">-->
+<!--            <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"-->
+<!--                    @click="changeProductType(true, 'customized')">-->
+<!--              <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>-->
+<!--              Reset-->
+<!--            </button>-->
+<!--          </template>-->
         </div>
         <ItemsGrid :showItems="showItems" :products_fonts="products_fonts" />
       </div>
@@ -66,32 +69,33 @@
         </template>
        <template v-else>
          <div class="px-1 d-flex align-items-center checkbox_buttons gap-2"  >
-            <template v-if="StockCount > 0">
+            <template v-if="CustomizedCount > 0">
               <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
                       @click="changeProductType(true, 'customized')">
                 <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
                 Customized
               </button>
-
-              <button style="white-space: nowrap" type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                      @click="changeProductType(true, 'personalized')">
-                <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
-                Stock
-              </button>
             </template>
+           <template v-if="PersonalizedCount > 0">
+             <button style="white-space: nowrap" type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
+                     @click="changeProductType(true, 'personalized')">
+               <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
+               Stock
+             </button>
+           </template>
 
            <button v-if="isCustomerAuthenticated && PrivateProductCount > 0" style="white-space: nowrap" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
                    @click="changeProductType(true, 'private_product')">
              <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
              Private
            </button>
-           <template v-if="StockCount === 0 && isCustomerAuthenticated && PrivateProductCount > 0 && $store.getters.getPrivateProduct">
-             <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                     @click="changeProductType(true, 'customized')">
-               <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
-               Reset
-             </button>
-           </template>
+<!--           <template v-if="StockCount === 0 && isCustomerAuthenticated && PrivateProductCount > 0 && $store.getters.getPrivateProduct">-->
+<!--             <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"-->
+<!--                     @click="changeProductType(true, 'customized')">-->
+<!--               <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>-->
+<!--               Reset-->
+<!--             </button>-->
+<!--           </template>-->
          </div>
 
          <div style="max-width: 230px; flex-shrink: 1; padding-left: 4px">
@@ -142,7 +146,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
   import DesignAvailable from '../components/DesignAvailable.vue'
   import ItemsGrid from "@/components/ItemsGrid.vue";
   import { dragscroll } from 'vue-dragscroll'
-  import { resetLastActiveProductData } from '@/helpers/Helpers'
+  import { resetLastActiveProductData, fetchCategories } from '@/helpers/Helpers'
   import {ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
 
 @Component<ItemToCustomize>({
@@ -243,8 +247,12 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
      // const itemCarousel = self.$refs['itemsCarousel'] as Record<any, any>
      //  await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
       // this.$emit('update:search_products', self.search_products)
-      let query_params = [`title=${self.search_products}`]
-      this.$emit('retrieveProducts', query_params)
+      const categories_promise =  fetchCategories();
+      categories_promise.then(() => {
+        let query_params = [`title=${self.search_products}`]
+        this.$emit('retrieveProducts', query_params)
+      });
+
      // itemCarousel.setSliderIndex();
     }, 700);
   }
@@ -279,63 +287,30 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         private_product = new_val;
       }
     }
+    let categories_promise;
     if(prd_type == 'customized' && customized == false){
       retrieve_products = true
       check()
-      await this.$store.dispatch('setCategories', {
-        query_params: `customized=${customized}&personalized=${personalized}&private=${private_product}`
-      })
+      categories_promise =  fetchCategories('customized');
     } else if(prd_type == 'personalized' && personalized == false){
       retrieve_products = true
       check()
-      await this.$store.dispatch('setCategories', {
-        query_params: `customized=${customized}&personalized=${personalized}&private=${private_product}`
-      })
+      categories_promise = fetchCategories('personalized');
     }
-    else if(prd_type == 'private_product' && private_product == false){
+    else {
       retrieve_products = true
       check()
-      await this.$store.dispatch('setCategories', {
-        query_params: `customized=${customized}&personalized=${personalized}&private=${private_product}`
-      })
+      categories_promise = fetchCategories('private_product');
     }
-    // if(new_val == false) {
-    //   if(prd_type == "customized" && personalized) {
-    //     retrieve_products = true;
-    //   }
-    //   if(prd_type == "personalized" && customized) {
-    //     retrieve_products = true;
-    //   }
-    // } else {
-    //   if(prd_type == "customized" && !customized) {
-    //     retrieve_products = true;
-    //   }
-    //   if(prd_type == "personalized" && !personalized) {
-    //     retrieve_products = true;
-    //   }
-    // }
-
-    // self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null, active_product_id: null});
-    if(retrieve_products) {
-      await resetLastActiveProductData()
-      // eval(`${prd_type}=${new_val}`)
-      await this.$store.dispatch('setProductType', {prd_type: 'customized', value: customized});
-      await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: personalized});
-      await this.$store.dispatch('setPrivateProduct', private_product);
-      // if(prd_type == "customized")
-      //   await this.$store.dispatch('setProductType', {prd_type: 'customized', value: customized});
-      //   await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: personalized});
-      // if(prd_type == "personalized")
-      //   await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
-      //   await this.$store.dispatch('setProductType', {prd_type: prd_type, value: new_val});
-      //exit from edit mode
-      await this.exitFromEditMode()
-
-      //self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
-      //let query_params = await this.setQueryParams()
-      await this.$emit('retrieveProducts')
-      await itemCarousel.setSliderIndex();
-    }
+    categories_promise.then( async(response) => {
+      if(response){
+        if(retrieve_products) {
+          await resetLastActiveProductData()
+          await this.exitFromEditMode()
+          await this.$emit('retrieveProducts')
+        }
+      }
+    });
   }
 
   public async handleCategoryUpdate(category_index:number){
@@ -364,8 +339,11 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     return this.$store.getters.getCustomized
   }
 
-  get StockCount():number{
-    return this.$store.getters.getStockCount
+  get CustomizedCount():number{
+    return this.$store.getters.getCustomizedCount
+  }
+  get PersonalizedCount():number{
+    return this.$store.getters.getPersonalizedCount
   }
   get PrivateProductCount():number{
     return this.$store.getters.getPrivateProductCount
