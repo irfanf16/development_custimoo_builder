@@ -48,7 +48,9 @@
 import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon"
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {getLogoSettingsObject, processColorsCustom, recentLogoDefaultObject} from '@/helpers/Helpers'
+import {
+  getExtensionsFor, getLogoUpdatedProps, processColorsCustom, recentLogoDefaultObject
+} from '@/helpers/Helpers'
 import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
@@ -200,9 +202,13 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
   public validateLogoFile(logo_file: File) {
     let self: Record<any, any> = this;
     const extension = logo_file.name.toLowerCase().split('.').pop() as string;
-    let is_allowed = this.logo_allowed_extensions.includes(extension)
+    let logo_allowed_extensions = getExtensionsFor()
+    if(this.replaceLogo) {
+      logo_allowed_extensions = getExtensionsFor('vector')
+    }
+    let is_allowed = logo_allowed_extensions.includes(extension)
     if(!is_allowed) {
-      self.showToast(`The file must be a file of type: ${this.logo_allowed_extensions.join(', ')}.`,'Error');
+      self.showToast(`The file must be a file of type: ${logo_allowed_extensions.join(', ')}.`,'Error');
     }
     return is_allowed;
   }
@@ -219,6 +225,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
       let response_data = resp.data
       if(response_data.success) {
         let logo_data = response_data.result.customer_logo
+        logo_data.is_replace_success =  this.replaceLogo ? true : false
         if(this.customLogoIndex == 0) {
           let logo_colors = processColorsCustom(logo_data.logo_colors)
           this.$store.commit('SET_LOGO_COLORS_INFO', {
@@ -226,10 +233,11 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
           })
           await this.addRemoveTeamLogoOnAllProducts('add', logo_data)
         } else {
-          const custom_logos_updated_props = { transparent_logo : logo_data.transparent_logo_url,
-            smart_transparent_logo : logo_data.smart_transparent_logo_url, original_logo_url : logo_data.original_logo_url,
-            is_smart_transparent : false, url : logo_data.logo_url, id : logo_data.id,
-          }
+          // const custom_logos_updated_props = { transparent_logo : logo_data.transparent_logo_url,
+          //   smart_transparent_logo : logo_data.smart_transparent_logo_url, original_logo_url : logo_data.original_logo_url,
+          //   is_smart_transparent : false, url : logo_data.logo_url, id : logo_data.id, is_replace_success: logo_data.is_replace_success
+          // }
+          const custom_logos_updated_props = getLogoUpdatedProps(logo_data)
           delete this.customLogo.scaleX
           delete this.customLogo.scaleY
           await this.$store.commit('SET_CUSTOM_LOGOS', {

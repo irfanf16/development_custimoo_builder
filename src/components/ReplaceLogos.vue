@@ -19,7 +19,7 @@
             <div class="text-muted fs-2">In order to proceed you must replace one or more Files that does not meet the minimum requirements for printing. You will not be able to place your order until you've done so.</div>
           </div>
           <template v-for="(custom_logo, customLogoIndex) in replaceable_logos">
-            <div :key="`logo_${customLogoIndex}`" v-if="custom_logo.url && !custom_logo.is_vector">
+            <div :key="`logo_${customLogoIndex}`">
               <div class="d-flex justify-content-between align-items-center border py-1 px-2 rounded-lg" :class="{'mt-2': customLogoIndex>0}">
                 <div class="d-flex align-items-center gap-1">
                   <div class="d-flex align-items-center gap-1 fs-4 text-success">
@@ -123,12 +123,14 @@ export default class ReplaceLogos extends Mixins(ModalAction){
   }
 
   get replaceable_logos() {
-    const non_vector_logos =  this.customLogos.filter((custom_logo: Record<any, any>) => {
-      return custom_logo.url && custom_logo.is_vector == false
-    })
-    return non_vector_logos.map((non_vector_logo: Record<any, any>) => {
-      return {...non_vector_logo, is_replace_success: false}
-    })
+    if(this.customLogos) {
+      return this.customLogos.filter((custom_logo: Record<any, any>) => {
+        return custom_logo.is_replace_success == true ? true : custom_logo.url && custom_logo.is_vector == false
+      })
+    } else {
+      return []
+    }
+
   }
 
 }

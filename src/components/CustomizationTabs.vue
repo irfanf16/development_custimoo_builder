@@ -3,21 +3,6 @@
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
       <b-tabs ref="customization-tabs" v-model="tabIndex" :key="selectedProduct.allow_name_number">
         <div class="myscroll" ref="myscroll">
-<!--          <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
-            <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
-            <template #title>
-              <a @click="setHideTab('logoHide', true)" >
-                <span class="icon-holder">
-                  <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
-                </span>
-                Logo
-              </a>
-            </template>
-            <div class="logo-placement-tabs" v-if="hideTab.logoHide">
-              <LogoPlacementTabs @setColorShuffled="(val) => $emit('setColorShuffled', val)" :isColorShuffled="isColorShuffled" v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
-                                 :logosSetting="selectedProduct.logos_setting"/>
-            </div>
-          </b-tab>-->
           <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
