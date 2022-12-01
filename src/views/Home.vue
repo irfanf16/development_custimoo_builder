@@ -8,7 +8,7 @@
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
                                @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
-                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
+                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" @adjustTotalTabs="adjustTotalTabs"
                                :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
             <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
                         @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" :products_fonts="products_fonts" />
@@ -237,7 +237,7 @@
                         </div>
                       </template>
                     </template>
-
+                    <div>{{mainTotalTabs}}</div>
                     <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                   </div>
                 </div>
@@ -465,7 +465,6 @@ Vue.filter('formatDate', function(value:string) {
   async mounted() {
     console.log('auto deployment testing', window.location.href)
     let self: Record<any, any> = this;
-    await this.adjustTotalTabs();
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
     /*
@@ -683,20 +682,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.showOtherTab = value
   }
 
-  private adjustTotalTabs() {
-    this.mainTotalTabs = 3
-
-    if (!this.selectedProduct.is_logo_allowed) {
-      this.mainTotalTabs = (this.mainTotalTabs - 1)
-    }
-
-    if (!this.selectedProduct.allow_name_number) {
-      this.mainTotalTabs = (this.mainTotalTabs - 1)
-    }
-
-    if (this.selectedProduct.product_type === 'personalized') {
-      this.mainTotalTabs = (this.mainTotalTabs - 1)
-    }
+  public adjustTotalTabs(totalTabs:number) {
+    this.mainTotalTabs = totalTabs
   }
 
   private swapSide(textIndex: number) {
