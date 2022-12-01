@@ -1616,7 +1616,9 @@ const setVueVersion = async () => {
 
 async function restore(){
   await Store.dispatch('resetStore');
-  location.reload()
+  setTimeout(() => {
+    location.reload()
+  }, 2500)
 }
 
 const getProductColors = (product_id = null, append_locker_colors = true ) => {
