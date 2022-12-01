@@ -5,7 +5,7 @@ import {findIndex} from 'lodash';
 import {
   getActiveProductData, getRandom, handleResponseException, processColorsCustom,
   setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject,
-  initCustomLogosNew
+  initCustomLogosNew,fetchCategories
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -18,42 +18,48 @@ export class LockerProducts extends Vue {
     let self: Record<any, any> = this;
     self.search_products = ''
     const response:Boolean = await self.editModeConfirmation();
-    let is_private:Boolean = room_product.is_private?true:false;
     this.$store.commit('setActiveLockerProduct', ind);
-    this.$store.dispatch('setPrivateProduct',is_private);
-    await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
-    let is_customized = is_private? false :this.$store.getters.getCustomized
-    let is_personalized = is_private? false :this.$store.getters.getPersonalized
+    // await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
-    let locker_product_name = room_product.product_name
-    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-      editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: '', private_product: is_private },
-      locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name},
-      cart_product_info: null, order_product_info: null
-    })
+    console.log('Product Id');
+    console.log(product_id);
+    const categories_promise = fetchCategories(null, product_id);
+    categories_promise.then((response) => {
+      if(response){
+        let is_private:Boolean =  this.$store.getters.getPrivateProduct
+        let is_customized = this.$store.getters.getCustomized
+        let is_personalized = this.$store.getters.getPersonalized
+        let locker_product_name = room_product.product_name
+        self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
+          editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: '', private_product: is_private },
+          locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name},
+          cart_product_info: null, order_product_info: null
+        })
 
-    let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
-    if(share_url) {
-      url += `?share_url=${share_url}`;
-    }
-
-      http.get(url).then(async (response: Record<any, any>) => {
-        let active_product_detail = response.data.editing_product_detail;
-        //todo need to confirm this logic. I think it's have no effect
-        if(active_product_detail.product_roster_detail) {
-          self.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
-        } else {
-          this.$store.dispatch("setProductsRosters");
+        let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
+        if(share_url) {
+          url += `?share_url=${share_url}`;
         }
-        this.$root.$emit('rostershared', '')
-        //todo ends her
 
-        await self.handleMainProducts(response, active_product_detail);
-        this.$emit('hideLockerRoomModal')
-      }, (error:Record<any, any>) => {
-        console.error("Error while retrieving products",error)
-      })
+        http.get(url).then(async (response: Record<any, any>) => {
+          let active_product_detail = response.data.editing_product_detail;
+          //todo need to confirm this logic. I think it's have no effect
+          if(active_product_detail.product_roster_detail) {
+            self.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
+          } else {
+            this.$store.dispatch("setProductsRosters");
+          }
+          this.$root.$emit('rostershared', '')
+          //todo ends her
+
+          await self.handleMainProducts(response, active_product_detail);
+          this.$emit('hideLockerRoomModal')
+        }, (error:Record<any, any>) => {
+          console.error("Error while retrieving products",error)
+        })
+      }
+    });
   }
 
   get getLockerProducts() {
@@ -104,35 +110,36 @@ export class LockerProducts extends Vue {
     let self: Record<any, any> = this;
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
-    let is_private:Boolean = room_product.is_private?true:false;
-    let url = `list/products?private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1&collection_type=true`;
 
-    return new Promise((resolve, reject) => {
-       const handle_product = new Promise((resolve, reject) => {
-        http.get(url).then(async (response: Record<any, any>) => {
-          let active_product_detail = response.data.editing_product_detail;
-          //todo need to confirm this logic. I think it's have no effect
-          if(active_product_detail.product_roster_detail) {
-            this.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
-          }
-          //todo ends her
-          const handle_collection_product =  new Promise(async (resolve, reject) => {
-            const handle_collection_product_promise =  await self.handleCollectionProducts( response, product_id , room_product_id , room_product.style_id , room_product.design_id );
-            resolve(handle_collection_product_promise);
-          });
-          handle_collection_product.then(() => {
-            resolve(true);
-          });
-        }, (error:Record<any, any>) => {
-          console.error("Error while retrieving products",error)
+    const categories_promise = fetchCategories(null,  room_product.product_id);
+    categories_promise.then((response) => {
+      let is_private:Boolean = this.$store.getters.getPrivateProduct;
+      let url = `list/products?private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1&collection_type=true`;
+      return new Promise((resolve, reject) => {
+        const handle_product = new Promise((resolve, reject) => {
+          http.get(url).then(async (response: Record<any, any>) => {
+            let active_product_detail = response.data.editing_product_detail;
+            //todo need to confirm this logic. I think it's have no effect
+            if(active_product_detail.product_roster_detail) {
+              this.$store.dispatch('setProductsRosters', {product_id: active_product_detail.product_id, roster_data: active_product_detail.product_roster_detail })
+            }
+            //todo ends her
+            const handle_collection_product =  new Promise(async (resolve, reject) => {
+              const handle_collection_product_promise =  await self.handleCollectionProducts( response, product_id , room_product_id , room_product.style_id , room_product.design_id );
+              resolve(handle_collection_product_promise);
+            });
+            handle_collection_product.then(() => {
+              resolve(true);
+            });
+          }, (error:Record<any, any>) => {
+            console.error("Error while retrieving products",error)
+          })
+        });
+        handle_product.then(() => {
+          resolve(true);
         })
-      });
-       handle_product.then(() => {
-         resolve(true);
-       })
-    })
-
-
+      })
+    });
   }
 }
 
@@ -151,8 +158,8 @@ export class handleMainProducts extends Vue {
     } else {
       this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
     }
-    await this.$store.dispatch('setStockCount',response.data.stock_count);
-    await this.$store.dispatch('setPrivateProductCount',response.data.private_product_count);
+    // await this.$store.dispatch('setStockCount',response.data.stock_count);
+    // await this.$store.dispatch('setPrivateProductCount',response.data.private_product_count);
 
     const prms = new Promise((resolve) => {
       self.$eventBus.$emit('initProductsFonts', retrieved_products, resolve)
@@ -162,9 +169,9 @@ export class handleMainProducts extends Vue {
         await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: true});
         return false;
       }
-      await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
-      await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
-      await this.$store.dispatch('setPrivateProduct', response.data.private_product);
+      // await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
+      // await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
+      // await this.$store.dispatch('setPrivateProduct', response.data.private_product);
       let update_order_product = response_data.update_order_products_data;
       if(product_edit_info_object.type == 'order_product' && update_order_product) {
         let order_products = Object.assign({}, product_edit_info_object.order_product_info, {order_products: update_order_product})
@@ -282,8 +289,13 @@ export class handleMainProducts extends Vue {
           self.$eventBus.$emit("changeColors")
         } else {
           self.exitFromEditMode();
-          let query_params = await self.setQueryParams()
-          self.retrieveProducts(query_params)
+          const categories_promise = fetchCategories();
+          categories_promise.then(  async(response) => {
+            if(response){
+              let query_params = await self.setQueryParams()
+              self.retrieveProducts(query_params)
+            }
+          })
         }
         return false;
       }
@@ -903,9 +915,9 @@ export class ProductsQueryParamsMixin extends Vue {
         }
       }
     }
-    await this.$store.dispatch('setProductType', { prd_type: "customized", value: self.getLastActiveProductData.customized });
-    await this.$store.dispatch('setProductType', { prd_type: "personalized", value: self.getLastActiveProductData.personalized });
-    await this.$store.dispatch('setPrivateProduct', self.getLastActiveProductData.personalized);
+    // await this.$store.dispatch('setProductType', { prd_type: "customized", value: self.getLastActiveProductData.customized });
+    // await this.$store.dispatch('setProductType', { prd_type: "personalized", value: self.getLastActiveProductData.personalized });
+    // await this.$store.dispatch('setPrivateProduct', self.getLastActiveProductData.personalized);
     return query_params
   }
 }
@@ -1252,8 +1264,14 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             else {
               if(cart_edit_mode) {
                 await self.exitFromEditMode()
-                let query_params = await self.setQueryParams
-                self.retrieveProducts(query_params);
+                const categories_promise = fetchCategories();
+                categories_promise.then(async (response) => {
+                  if(response){
+                    let query_params = await self.setQueryParams
+                    self.retrieveProducts(query_params);
+                  }
+                })
+
               }
             }
             self.$store.dispatch('setCartLoading',true);
@@ -1264,8 +1282,13 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             }
             if(cart_edit_mode) {
               await self.exitFromEditMode()
-              let query_params = await self.setQueryParams
-              self.retrieveProducts(query_params);
+              const categories_promise = fetchCategories();
+              categories_promise.then(async (response) => {
+                if(response){
+                  let query_params = await self.setQueryParams
+                  self.retrieveProducts(query_params);
+                };
+              })
             }
           }
           self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
@@ -1281,9 +1304,12 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           handleResponseException(errorResponse)
           if(cart_edit_mode) {
             await self.exitFromEditMode()
-            let query_params = await self.setQueryParams
-            self.retrieveProducts(query_params);
-            self.hideVModal('rostermodal');
+            const categories_promise = fetchCategories();
+            categories_promise.then(async (response) => {
+              let query_params = await self.setQueryParams
+              self.retrieveProducts(query_params);
+              self.hideVModal('rostermodal');
+            });
           }
         })
       }

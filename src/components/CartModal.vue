@@ -164,6 +164,7 @@ import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
+  fetchCategories,
   getActiveProductData,
   getReminderOptions,
   getSelectedProductData,
@@ -340,63 +341,45 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
   public async editCartItem(cart_item_index: number, factory_product_index: number, edit=true) {
     let self = this;
-    await this.setLastActiveProductData()
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index]
-    let cart_product_type = cart_item_product.product_type
-    let is_customized = false;
-    let is_personalized = false;
-    let is_private = cart_item_product.is_private?true:false;
-    cart_product_type = is_private? "private":cart_product_type;
+    console.log('Cart Item');
+    console.log(cart_item_product);
+    const categories_promise = fetchCategories(null, cart_item_product.product_id);
+    categories_promise.then( async (response) => {
+      let is_private = this.$store.getters.getPrivateProduct;
+      let is_customized = this.$store.getters.getCustomized;
+      let is_personalized = this.$store.getters.getPersonalized;
 
-    //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
-    switch(cart_product_type) {
-      case "private":
-        is_private = true;
-        is_customized = false;
-        is_personalized = false;
-        break;
-      case "customized":
-        is_private = false;
-        is_customized = true;
-        is_personalized = false;
-        break;
-      case "personalized":
-        is_private = false;
-        is_customized = false;
-        is_personalized = true;
-    }
+      //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
 
-    await this.$store.dispatch('setProductType', { prd_type: "customized", value: is_customized });
-    await this.$store.dispatch('setProductType', { prd_type: "personalized", value: is_private });
-    await this.$store.dispatch('setPrivateProduct', is_private);
+      self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
+        editing: true,  type: "cart_product", filters: {customized: is_customized, personalized: is_personalized, search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
+          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product
+        },
+        order_product_info: null
+      })
+      self.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
 
-    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-      editing: true,  type: "cart_product", filters: {customized: is_customized, personalized: is_personalized, search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
-        cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product
-      },
-      order_product_info: null
+      //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
+      this.$root.$emit('rostershared', '')
+      let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product`;
+      self.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
+      await http.get(url).then(async (response: Record<any, any>) => {
+        await (this as Record<any, any>).handleMainProducts(response);
+
+      })
+      // if(!is_private){
+      //   await this.$store.dispatch('setProductType', { prd_type: cart_item_product.product_type, value: true });
+      // }else{
+      //   this.$store.dispatch('setPrivateProduct', is_private);
+      // }
+      this.hideVModal('cart-modal')
+      if (!edit) {
+        await this.$store.dispatch('setTabMain', {value: (this.mainTotalTabs + 1)})
+        this.showVModal('rostermodal');
+      }
     })
-    self.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
-
-    //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
-    this.$root.$emit('rostershared', '')
-    let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product`;
-    self.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
-    await http.get(url).then(async (response: Record<any, any>) => {
-      await (this as Record<any, any>).handleMainProducts(response);
-
-    })
-    if(!is_private){
-      await this.$store.dispatch('setProductType', { prd_type: cart_item_product.product_type, value: true });
-    }else{
-      this.$store.dispatch('setPrivateProduct', is_private);
-    }
-    this.hideVModal('cart-modal')
-    if (!edit) {
-      await this.$store.dispatch('setTabMain', {value: (this.mainTotalTabs + 1)})
-      this.showVModal('rostermodal');
-    }
   }
 
   public async setLastActiveProductData() {
