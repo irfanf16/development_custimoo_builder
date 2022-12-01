@@ -1558,17 +1558,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async retrieveProducts(query_params: string[] = []) {
     let self = this;
-    console.log('customized retrieve products');
-    console.log(this.$store.getters.getCustomized);
-    console.log('personalized retrieve products');
-    console.log(this.$store.getters.getPersonalized);
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&private=${this.$store.getters.getPrivateProduct}`;
-    console.log('test url')
-    console.log(url);
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
-    console.log('query params')
-    console.log(query_params);
-
     query_params.forEach((query_param: string) => {
       let query_param_array = query_param.split("=");
       if (url_obj.searchParams.has(query_param_array[0])) {

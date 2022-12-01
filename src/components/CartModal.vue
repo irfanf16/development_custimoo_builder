@@ -343,8 +343,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let self = this;
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index]
-    console.log('Cart Item');
-    console.log(cart_item_product);
     const categories_promise = fetchCategories(null, cart_item_product.product_id);
     categories_promise.then( async (response) => {
       let is_private = this.$store.getters.getPrivateProduct;

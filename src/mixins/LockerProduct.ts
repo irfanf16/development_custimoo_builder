@@ -22,8 +22,6 @@ export class LockerProducts extends Vue {
     // await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
-    console.log('Product Id');
-    console.log(product_id);
     const categories_promise = fetchCategories(null, product_id);
     categories_promise.then((response) => {
       if(response){
@@ -933,7 +931,6 @@ export class exitEditMode extends Vue {
   }
   public editModeConfirmation() {
     let self: Record<any, any> = this;
-    console.log(this.$swal);
     const swalWithDefaults = this.$swal.mixin({
       title: 'Changes Detected',
       text: "Do you want save the product before exiting!",
@@ -942,9 +939,6 @@ export class exitEditMode extends Vue {
       confirmButtonText: 'Yes',
       cancelButtonText: 'No',
     });
-    console.log(self.$store.getters.getProductEditInfoObject.editing)
-    console.log(self.$store.getters.getProductEditInfoObject.type)
-    console.log(self.$store.getters.getHideSaveLockerButton)
     return new Promise((resolve,reject) => {
       if (self.$store.getters.getProductEditInfoObject.editing) {
         switch (self.$store.getters.getProductEditInfoObject.type) {

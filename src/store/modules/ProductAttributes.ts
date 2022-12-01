@@ -1401,8 +1401,6 @@ const ProductAttributes:Module<any, any> = {
             await commit('SET_PRIVATE_PRODUCT', response.data.private_product);
             await commit('SET_PRODUCT_TYPE',{prd_type: 'customized', value: response.data.customized})
             await commit('SET_PRODUCT_TYPE',{prd_type: 'personalized', value: response.data.personalized})
-            console.log('customization');
-            console.log(response.data);
             await commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
             await commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
             await commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
