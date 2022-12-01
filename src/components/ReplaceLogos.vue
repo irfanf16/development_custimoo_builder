@@ -18,11 +18,14 @@
             <div class="fs-3 font-weight-bolder">Unresolved Image Files </div>
             <div class="text-muted fs-2">In order to proceed you must replace one or more Files that does not meet the minimum requirements for printing. You will not be able to place your order until you've done so.</div>
           </div>
-          <template v-for="(custom_logo, customLogoIndex) in customLogos">
+          <template v-for="(custom_logo, customLogoIndex) in replaceable_logos">
             <div :key="`logo_${customLogoIndex}`" v-if="custom_logo.url && !custom_logo.is_vector">
               <div class="d-flex justify-content-between align-items-center border py-1 px-2 rounded-lg" :class="{'mt-2': customLogoIndex>0}">
                 <div class="d-flex align-items-center gap-1">
-                  <div>
+                  <div class="d-flex align-items-center gap-1 fs-4 text-success">
+                    <span v-if="custom_logo.is_vector">
+                      <b-icon-check-circle-fill />
+                    </span>
                     <img class="flex-shrink-0" style="height: 40px" :key="custom_logo.url" :src="storageUrl + custom_logo.url" :title="custom_logo.logo_name" />
                   </div>
                   <span :key="custom_logo.url" style="text-overflow: ellipsis; overflow: hidden" class="d-block pr-2">{{ custom_logo.logo_name ? custom_logo.logo_name : 'N/A'  }}</span>
@@ -117,6 +120,15 @@ export default class ReplaceLogos extends Mixins(ModalAction){
   }
   get company(): Record<any, any> {
     return this.$store.getters.getCompany
+  }
+
+  get replaceable_logos() {
+    const non_vector_logos =  this.customLogos.filter((custom_logo: Record<any, any>) => {
+      return custom_logo.url && custom_logo.is_vector == false
+    })
+    return non_vector_logos.map((non_vector_logo: Record<any, any>) => {
+      return {...non_vector_logo, is_replace_success: false}
+    })
   }
 
 }

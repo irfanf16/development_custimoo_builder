@@ -15,7 +15,7 @@ const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
     originalWidth: 57, originalHeight: 57, width: 57, height: 57, name_of_placement: "chest", side: "front", x_axis: 300,
     y_axis: 300, is_locked: false, logo_name: null, original_logo: null, transparent_logo: null, smart_transparent_logo: null,
-    original_logo_url: null, is_smart_transparent: null, url: null, haveControls: true, logo_colors: [], is_recent_logo: false,
+    original_logo_url: null, is_smart_transparent: null, url: null, haveControls: true, logo_colors: [], is_replace_success: false,
     logo_index: 0, is_vector: false
   }
   return {...default_obj, ...default_values}
