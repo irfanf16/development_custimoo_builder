@@ -1598,43 +1598,25 @@ const fetchCustomer = async (jwtToken:string) => {
 
 const setVueVersion = async () => {
   const is_loggedIn = await localStorage.getItem('jwtToken');
-  const is_restored = await localStorage.getItem('is_restored');
   let customer_id = 0;
   if(is_loggedIn) {
     const customer = Store.getters.getCustomer;
     customer_id = customer.id;
   }
-  await http.get('get-reset-store?customer_id='+customer_id)
-    .then(async (res) =>{
-      if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
-        if(is_loggedIn && res.data.isCustomerStoreReset <= 0){
-          console.log('logged in');
-          await http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).catch(error => {
-            handleResponseException(error)
-            console.info("error while setting reset store", error)
-          });
-          if(is_restored != 'yes')
-            await restore();
-        }else if(is_loggedIn == null && is_restored != 'yes') {
-          console.log('not logged in and not restored');
-          await restore();
-        }else{
-          console.log('none')
-        }
+  await http.get('get-reset-store?customer_id='+customer_id).then((res) => {
+    if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
+      if(is_loggedIn && res.data.isCustomerStoreReset == 0){
+        http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).then(() => {
+          restore();
+        })
       }
-    })
-    .catch(error => {
-      handleResponseException(error)
-      console.info("error while getting company", error)
-    });
+    }
+  })
 }
 
 async function restore(){
-  await localStorage.setItem('is_restored', 'yes');
   await Store.dispatch('resetStore');
-  console.log('restored');
-  //location.reload()
-  return
+  location.reload()
 }
 
 const getProductColors = (product_id = null, append_locker_colors = true ) => {
