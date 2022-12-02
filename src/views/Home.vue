@@ -878,7 +878,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       non_vector_logos_count = non_vector_logos.length
       if(non_vector_logos.length == 0){
         setTimeout(()=>{
-          this.hideVModal('replace-logo')
+          this.hideVModal('replace-logo');
+          this.hideVModal('rostermodal');
         }, 3000)
       }
     }

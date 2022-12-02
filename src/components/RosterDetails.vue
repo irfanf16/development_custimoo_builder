@@ -173,17 +173,17 @@
           </button>
         </template>
         <span v-else-if="notVectorLogosCount > 0">
-        <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
-          Finalize Design
-        </b-button>
-      </span>
+          <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+            Finalize Design
+          </b-button>
+        </span>
       </template>
       <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-else-if="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
         <b-button @click="addToCart" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
       </span>
 
       <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
-        <b-button @click="showVModal('replace-logo')" aria-label="Finalizer Order" class="mx-2 px-5" variant="secondary">Finalizer Order</b-button>
+        <b-button @click="showVModal('replace-logo')" aria-label="Finalize Order" class="mx-2 px-5" variant="secondary">Finalize Design</b-button>
       </span>
       <template v-else-if="!getCartLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
         <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
