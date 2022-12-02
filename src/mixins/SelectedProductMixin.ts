@@ -98,7 +98,7 @@ export class FetchCategories extends Vue {
         const shared_url = getUrlParameter()
         if (shared_url?.includes('share')) {
           categories_promise = this.$store.dispatch('setCategories',{
-            query_params:`share_url=${encodeURI(shared_url)}`
+            query_params:`share_url=${encodeURIComponent(shared_url)}`
           });
         } else if(getProductEditInfoObject.editing && !product_id){
           switch(getProductEditInfoObject.type)
