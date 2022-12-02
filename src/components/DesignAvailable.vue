@@ -33,6 +33,9 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
     (this.$refs['designs'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{this.loadIt($event)});
     (this.$refs['designs'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{this.loadIt($event)});
     this.itemsPerRow = Math.round((this.$refs['designs'] as Record<any, any>).clientHeight / 130) * 4;
+    setTimeout(()=>{
+      this.loadDesigns = true
+    }, 1000)
   },
   beforeDestroy() {
     (this.$refs['designs'] as Record<any, any>).removeEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
