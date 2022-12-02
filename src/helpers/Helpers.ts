@@ -1817,7 +1817,8 @@ const getUrlParameter = (name = '') => {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
-  const hash_url = window.parent.window.location.hash
+  let hash_url = window.parent.window.location.hash
+  hash_url =  hash_url.replace(' ', '+')
   return hash_url.replace('#/', '')
 }
 
