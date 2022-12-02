@@ -402,7 +402,7 @@ import {
   handleResponseException,
   parseSvgStringFile,
   fetchUrlContent,
-  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject
+  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject, getUrlParameter
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -458,7 +458,10 @@ Vue.filter('formatDate', function(value:string) {
       await this.initProductsFonts(products, resolve)
     })
 
-    this.is_shared_product = this.$route.params.name ?  true : false
+    const shared_url = getUrlParameter()
+    if (shared_url?.includes('share')) {
+      this.is_shared_product = true
+    }
 
     await http.get(`/get-settings`).then((res) => {
       this.$store.commit('SET_SETTING', res.data.result.settings)
