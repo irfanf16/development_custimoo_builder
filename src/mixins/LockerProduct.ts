@@ -5,7 +5,7 @@ import {findIndex} from 'lodash';
 import {
   getActiveProductData, getRandom, handleResponseException, processColorsCustom,
   setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject,
-  initCustomLogosNew, exitFromEditMode
+  initCustomLogosNew, exitFromEditMode, getUrlParameter
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -786,11 +786,8 @@ export class ProductsQueryParamsMixin extends Vue {
       }
     }
     else {
-      if (self.$route.params.name) {
-        let shared_url = self.$route.path
-        if (shared_url.charAt(0) === '/'){
-          shared_url = shared_url.substring(1)
-        }
+      const shared_url = getUrlParameter()
+      if (shared_url?.includes('share')) {
         query_params = [
           `shared_url=${shared_url}`, "active_product_type=share_product", 'paginate=false'
         ];

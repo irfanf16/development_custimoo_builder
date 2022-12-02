@@ -29,7 +29,10 @@ const Main:Module<any, any> = {
       state.manageComponents[payload.index] = payload.value
     },
     setPopper(state: Record<any, any>, payload: string) {
-      state.popperID = payload
+      if(state.popperID != payload)
+      {
+        state.popperID = payload
+      }
     },
     SET_HIDE_TAB(state: Record<any, any>, payload: Record<any, any>) {
       state.hideTab = {

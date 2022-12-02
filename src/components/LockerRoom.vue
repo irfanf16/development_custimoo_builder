@@ -630,7 +630,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {
       if(product){
-          let payload = {
+        let payload = {
             type: 'locker',
             id: product.id,
             customer_id: this.customer ? this.customer.id : '',
@@ -645,7 +645,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
             Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url', shared_url)
           }
 
-          this.showPopper('share'+lockerIndex+''+ind);
+        this.showPopper('share'+lockerIndex+''+ind);
       }
     } catch (error) {
       console.log(error)
