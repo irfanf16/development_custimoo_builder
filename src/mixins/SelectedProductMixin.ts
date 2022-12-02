@@ -1,7 +1,7 @@
 import {Component, Vue, Watch} from "vue-property-decorator";
 import VueRouter from 'vue-router'
 import Store from '@/store'
-import { exitFromEditMode, resetLastActiveProductData } from '@/helpers/Helpers'
+import { exitFromEditMode, getUrlParameter, resetLastActiveProductData } from '@/helpers/Helpers'
 
 @Component
 export class ProductColors extends Vue {
@@ -95,11 +95,8 @@ export class FetchCategories extends Vue {
         const getProductEditInfoObject = this.$store.getters.getProductEditInfoObject;
         const last_active_product_obj = this.$store.getters.getLastActiveProductData;
 
-        if (self.$route.params.name) {
-          let shared_url = self.$route.path
-          if (shared_url.charAt(0) === '/'){
-            shared_url = shared_url.substring(1)
-          }
+        const shared_url = getUrlParameter()
+        if (shared_url?.includes('share')) {
           categories_promise = this.$store.dispatch('setCategories',{
             query_params:`share_url=${shared_url}`
           });
@@ -158,7 +155,7 @@ export class FetchCategories extends Vue {
         if(no_product_found) {
           exitFromEditMode();
           resetLastActiveProductData();
-          self.showError('Product data not found, loading all products')
+          self.showError('Product is no more available, loading all products')
         }
         resolve(true);
       })
