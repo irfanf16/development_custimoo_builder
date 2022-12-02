@@ -237,7 +237,7 @@
                         </div>
                       </template>
                     </template>
-                    
+
                     <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                   </div>
                 </div>
@@ -464,6 +464,7 @@ Vue.filter('formatDate', function(value:string) {
 
   async mounted() {
     console.log('auto deployment testing', window.location.href)
+    console.log('auto deployment testing', this.$route)
     let self: Record<any, any> = this;
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
