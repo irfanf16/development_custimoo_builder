@@ -472,7 +472,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       if(roster_details){
         for(let roster_index = 0; roster_index < roster_details.length; roster_index++) {
           const roster_detail = roster_details[roster_index]
-          // console.log('roster_detail', roster_detail)
           const text_object = {
             size: roster_detail.size,
             quantity: roster_detail.quantity,
@@ -588,7 +587,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                         if (minus_height)
                           transform_height -= 15;
                       }
-                      // console.log('transform_height',transform_height ,' ', height, ' ', text_for_test_char)
                       dom_svg.setAttribute('transform', 'translate(0 ' + transform_height + ')')
                       dom_svg.setAttribute('paint-order', 'stroke')
 
@@ -1150,10 +1148,6 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     svg_string += `${svg_common_payload.svg_string}`;
 
     svg_string += `\n</g>\n</svg>`;
-
-    // console.log( getSVGNumbers(numbers_array));
-
-    // const factory_product:Record<any,any> = await parseFactoryProduct(factory_product_content);
 
     const svg_doc = await getDocFromString(svg_string);
     const production_file_info:Record<any, any> = {
@@ -1813,30 +1807,18 @@ const getExtensionFromString = (string: string) => {
   return extension
 }
 
-const getUrlParameterByName = (name, url = '') => {
-  if(!url) {
-    const iframes_count = window.frames.length
-    if(iframes_count > 0) {
-      url = window.frames[0].parent.window.location.href
-    } else {
-      url = window.location.href
-    }
+const getUrlParameter = (name = '') => {
+  if(name) {
+    const url = window.parent.window.location.href
+    name = name.replace(/[[\]]/g, '\\$&');
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    const results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
-  console.log('inside getUrlParameterByName', {
-    url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
-  })
-  setTimeout(() => {
-    console.log('settimeout inside getUrlParameterByName', {
-      url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
-    }, 10000)
-  })
-  name = name.replace(/[[\]]/g, '\\$&');
-  const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
-  const results = regex.exec(url);
-  if (!results) return null;
-  if (!results[2]) return '';
-  console.log('getUrlParameterByName', url, decodeURIComponent(results[2].replace(/\+/g, ' ')))
-  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  const hash_url = window.parent.window.location.hash
+  return hash_url.replace('#/', '')
 }
 
 const showError = (err) => {
@@ -1881,7 +1863,7 @@ export {
   getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
-  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameterByName,
+  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps
 

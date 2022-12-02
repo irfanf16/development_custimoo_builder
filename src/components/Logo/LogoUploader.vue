@@ -150,7 +150,6 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
         this.uploadLogo(logo_file)
       } else {
         target.value = '';
-        console.log('files', target.files)
       }
     }
   }

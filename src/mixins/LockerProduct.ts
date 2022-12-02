@@ -5,7 +5,7 @@ import {findIndex} from 'lodash';
 import {
   getActiveProductData, getRandom, handleResponseException, processColorsCustom,
   setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject,
-  initCustomLogosNew, exitFromEditMode
+  initCustomLogosNew, exitFromEditMode, getUrlParameter
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -100,7 +100,6 @@ export class LockerProducts extends Mixins(FetchCategories) {
         colors =  res.data.colors
       }).catch((e) => {
         console.log('Unable to fetch logo colors',e.response.data.message)
-        //this.showError('Unable to fetch logo colors')
       })
     return colors
   }
@@ -191,7 +190,6 @@ export class handleMainProducts extends Mixins(FetchCategories) {
       * will have value only when it's being edited.
       * */
       let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
-      console.log('is_editing', is_editing)
       if(is_editing) {
         ({product_index, style_index, design_id, active_index} = await this.handleEditMode(retrieved_products));
       }
@@ -687,29 +685,8 @@ export class handleMainProducts extends Mixins(FetchCategories) {
       }
     });
 
-    //set logo colors
-    // let logo_colors:Record<any, any> = []
-    // if(!active_product_detail.colors && active_product_detail.custom_logos) {
-    //   //fetch from server
-    //   let logos = JSON.parse(active_product_detail.custom_logos)
-    //   if(logos.length > 0) {
-    //     let color_str:any = await this.fetchLogoColors(logos[0].id);
-    //     let image_colors:Record<any, any> = processColorsCustom(JSON.parse(color_str))
-    //     let image_color_count = image_colors.length;
-    //     while(image_color_count < 4 ) {
-    //       image_colors.push({hex: null, pantone: null, name: null});
-    //       ++image_color_count;
-    //     }
-    //     logo_colors = image_colors
-    //   }
-    // }
-    // else {
-    //   logo_colors = JSON.parse(active_product_detail.colors)
-    // }
-
     this.$store.commit('RESET_UNDO');
     this.$store.commit('RESET_REDO');
-    // await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
     if(!collection_view){
       this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
       this.$emit('hideLockerRoomModal')
@@ -790,26 +767,6 @@ export class handleMainProducts extends Mixins(FetchCategories) {
     this.$store.commit('SET_LOGO_COLORS_INFO', {
       data: { using_logo_colors: false,  is_shuffled: false,  colors: cart_item_product.logo_colors,  extracted_colors: cart_item_product.logo_colors }
     })
-    //set logo colors
-    // let logo_colors:Record<any, any> = []
-    // if (!cart_item_product.colors && cart_item_product.custom_logos) {
-    //   //fetch from server
-    //   let logos = cart_item_product.custom_logos
-    //   if (logos.length > 0) {
-    //     let color_str: any = await this.fetchLogoColors(logos[0].id);
-    //     let image_colors = processColorsCustom(JSON.parse(color_str))
-    //     let image_color_count = image_colors.length;
-    //     while (image_color_count < 4) {
-    //       image_colors.push({ hex: null, pantone: null, name: null });
-    //       ++image_color_count;
-    //     }
-    //     logo_colors = image_colors
-    //   }
-    // }
-    // else {
-    //   logo_colors = cart_item_product.colors
-    // }
-    // await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
     this.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
   }
 
@@ -829,11 +786,8 @@ export class ProductsQueryParamsMixin extends Vue {
       }
     }
     else {
-      if (self.$route.params.name) {
-        let shared_url = self.$route.path
-        if (shared_url.charAt(0) === '/'){
-          shared_url = shared_url.substring(1)
-        }
+      const shared_url = getUrlParameter()
+      if (shared_url?.includes('share')) {
         query_params = [
           `shared_url=${shared_url}`, "active_product_type=share_product", 'paginate=false'
         ];
@@ -917,9 +871,6 @@ export class ProductsQueryParamsMixin extends Vue {
         }
       }
     }
-    // await this.$store.dispatch('setProductType', { prd_type: "customized", value: self.getLastActiveProductData.customized });
-    // await this.$store.dispatch('setProductType', { prd_type: "personalized", value: self.getLastActiveProductData.personalized });
-    // await this.$store.dispatch('setPrivateProduct', self.getLastActiveProductData.personalized);
     return query_params
   }
 }
@@ -1264,7 +1215,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 const categories_promise = this.fetchCategories();
                 categories_promise.then(async (response) => {
                   if(response){
-                    let query_params = await self.setQueryParams
+                    let query_params = await self.setQueryParams()
                     self.retrieveProducts(query_params);
                   }
                 })
@@ -1282,7 +1233,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               const categories_promise = this.fetchCategories();
               categories_promise.then(async (response) => {
                 if(response){
-                  let query_params = await self.setQueryParams
+                  let query_params = await self.setQueryParams()
                   self.retrieveProducts(query_params);
                 };
               })
@@ -1294,8 +1245,6 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           if(collection_view){
             self.$root.$emit('getNextProduct');
           }
-          // self.hideVModal('rostermodal');
-          // self.$root.$emit('showCartModal');
         }).catch(async errorResponse => {
           self.$store.dispatch('setCartLoading',false);
           handleResponseException(errorResponse)
@@ -1303,7 +1252,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             await self.exitFromEditMode()
             const categories_promise = this.fetchCategories();
             categories_promise.then(async (response) => {
-              let query_params = await self.setQueryParams
+              let query_params = await self.setQueryParams()
               self.retrieveProducts(query_params);
               self.hideVModal('rostermodal');
             });

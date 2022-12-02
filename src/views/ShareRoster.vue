@@ -223,7 +223,6 @@ export default class ShareRoster extends Mixins(ErrorMessages) {
           }
           let objStatus = false;
           for (let i in rows[row]) {
-            console.log(rows[row])
             if (rows[row][2] && this.productName == rows[row][2]) {
               objStatus = true
               if (i == '3') {

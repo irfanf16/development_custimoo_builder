@@ -34,7 +34,6 @@ export default class HorizontalScroll extends Vue {
 
   private hideAnim = () => {
     this.animPlayed = true
-    console.log('this', this.animPlayed)
   }
 }
 </script>

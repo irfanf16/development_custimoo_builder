@@ -43,7 +43,6 @@ export default class Orders extends Mixins() {
         this.customer_orders = response_data.result.data;
         this.makePagination(response_data.result)
       }
-      console.log("shsha", successResponse)
 
     }).catch((errorResponse) => {
       console.log("error", errorResponse)

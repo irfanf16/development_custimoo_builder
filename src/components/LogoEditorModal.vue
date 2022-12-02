@@ -264,15 +264,12 @@ export default class LogoEditorModal extends Mixins(ErrorMessages, ModalAction) 
   }
   public toggleColorTabs() {
     this.colorTabClick = !this.colorTabClick
-    console.log("open", this.colorTabClick)
   }
   public closeColorTabs() {
     this.colorTabClick = false
-    console.log("close", this.colorTabClick)
   }
 
   public toggleLogoColorModal() {
-    console.log("dksdksl")
     this.showVModal("logo-color-modal")
   }
 

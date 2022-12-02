@@ -73,13 +73,6 @@ import {getSelectedProductPantones} from "@/helpers/Helpers";
     }
   },
   mounted(){
-    // this.$refs['ColorAccordion'] && (this.$refs['ColorAccordion'] as Record<any, any>).forEach((item:any, index:number)=>{
-    //   console.log('item', item);
-    //   item.addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});
-    //   item.addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});
-    //   item.addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()});
-    // });
-
     setTimeout(() => {
     this.selectType(this.selectTypeIndex)
     }, 300)

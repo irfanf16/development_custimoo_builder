@@ -85,6 +85,8 @@ export default class ReplaceLogos extends Mixins(ModalAction){
     return this.$store.getters.getCompany
   }
 
+  priv
+
   get replaceable_logos() {
     if(this.customLogos) {
       return this.customLogos.filter((custom_logo: Record<any, any>) => {
