@@ -195,8 +195,15 @@ export class handleMainProducts extends Mixins(FetchCategories) {
       }
       else {
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;
-        if(editing_product_detail ) {
+        if(editing_product_detail ) { // share product case comes here
+          console.log(self.$route.query, 'self.$route.query bbbbb')
           product_index = response_data.active_product_index;
+          design_id = editing_product_detail.design_id
+          if(product_index >= 0) {
+            style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
+              return product_style.id == editing_product_detail.style_id;
+            });
+          }
         }
         else {
           if(last_active_prod_data.product_id) {
