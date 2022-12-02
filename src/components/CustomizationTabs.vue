@@ -407,7 +407,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
 
   notVectorLogosCount(){
     const custom_logos = this.$store.getters.koivna
-    console.log('custom_logos', custom_logos)
     let non_vector_logos_count = 0
     if(custom_logos && custom_logos.length > 0) {
       const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {

@@ -166,7 +166,6 @@ export default {
 
     // const token = this.$router.currentRoute.query.token
     const token = getUrlParameterByName('token')
-    console.log('customizerAll', token, window.location.href)
     if (token){
       localStorage.setItem('jwtToken', token)
       localStorage.setItem('adminToken', token)
@@ -195,7 +194,6 @@ export default {
         results = regex.exec(url);
       if (!results) return null;
       if (!results[2]) return '';
-      console.log('decode url', results[2])
       return decodeURIComponent(results[2].replace(/\+/g, ' '));
     }
   }

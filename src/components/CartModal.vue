@@ -32,7 +32,7 @@
           <template v-for="(cart_item, cart_item_index) in cartItems">
             <tr :key="factory_product.id" v-for="(factory_product, factory_product_index) in cart_item.factory_products">
               <td>
-                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
+                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
                   <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
                 </template>
                 <template v-else="">
@@ -49,7 +49,7 @@
                 </div>
               </td>
               <td>
-                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
+                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
                   <span title="Editing This Product" style="cursor:pointer;">
                     {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
                   </span>
@@ -62,7 +62,7 @@
 
               </td>
               <td class="cursor-pointer">
-                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
+                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
                   Editing
                 </template>
                 <template v-else="">

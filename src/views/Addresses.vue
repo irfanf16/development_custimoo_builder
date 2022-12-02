@@ -103,7 +103,6 @@ export default class Addresses extends Mixins(ErrorMessages) {
   getAddressDetails(): void {
     this.showLoader = true;
     http.get(`/addresses`).then((response: any) => {
-      //console.log(response);
       this.addresses = response.data.result
       this.showLoader = false
     })
@@ -128,14 +127,12 @@ export default class Addresses extends Mixins(ErrorMessages) {
 
   async deleteAddress(address: Record<any, any>) {
     const response = await this.ref['delete-address'].showConfirm();
-    //console.log(address);
     if (response) {
       const url = `addresses/${address.id}`
       http.delete(url).then(async (response: Record<any, any>) => {
         this.getAddressDetails();
         this.showToast(response.data.message, 'success')
       }).catch((e: any) => {
-        //console.log(e);
         this.showError(e);
         this.ref['cartModal'].hide();
       });

@@ -369,12 +369,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     // Use traditional 'for loops' for IE 11
     for(const mutation of mutationsList) {
       if (mutation.addedNodes.length) {
-        console.log('A child node has been added or removed.', mutation);
-        console.log('Nodes added', mutation.addedNodes.length);
-
         mutation.target.classList.add('dropping')
       }else if(mutation.removedNodes.length){
-        console.log('Nodes removed', mutation.removedNodes.length);
         mutation.target.classList.remove('dropping')
       }
       else if (mutation.type === 'attributes') {
@@ -670,7 +666,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
           let res = await http.post('collection/link', collections)
           shared_url += res.data.url;
           Vue.set(this.getCollections[index], 'shared_url', shared_url)
-          console.log("url", this.getCollections[index].shared_url)
         }
         this.showPopper('share-collection'+index)
       }

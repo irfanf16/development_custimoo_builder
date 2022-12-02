@@ -175,7 +175,6 @@
           http.post(`/addresses`,this.form).then((response: any) => {
 
             if(response.data.success){
-             // console.log(response.data.result)
               this.$store.commit('ADD_SHIPPING_ADDRESS', response.data.result)
               this.isLoading = false;
               this.$modal.hide('AddAdressModal');
@@ -198,7 +197,6 @@
 
       }catch (error){
         this.isLoading = false
-        //console.log(error)
         this.showError(error)
       }
     }
@@ -217,7 +215,6 @@
 
     public getCountries() {
       http.get(`/addresses/countries`).then((response: any) => {
-        //console.log(response);
         this.countries = response.data.result
       })
         .catch((e: any) => {

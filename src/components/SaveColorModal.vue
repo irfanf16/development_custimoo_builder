@@ -98,7 +98,6 @@ import {Component, Vue, Watch} from 'vue-property-decorator'
       }
       public changeRoom(id:number){
         this.room_id = id;
-        console.log(this.room_id)
       }
       public async saveFolder(){
         if (this.room_id == 0){

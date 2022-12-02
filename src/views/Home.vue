@@ -237,7 +237,7 @@
                         </div>
                       </template>
                     </template>
-                    
+
                     <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                   </div>
                 </div>
@@ -246,7 +246,7 @@
                   <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'">
                     <template v-if="isCustomerAuthenticated">
                       <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                        <b-button v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                        <b-button v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart(null)" :disabled="canvasImage.scene == null">
                           Update Cart
                         </b-button>
                         <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -254,7 +254,7 @@
                         </b-button>
                       </template>
                     </template>
-                    <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel">Cancel</b-button>
+                    <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel" v-if="!cartLoading">Cancel</b-button>
                   </template>
 
                   <b-button :key="'Next'" @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-else-if="(hideColorSection && (tabIndex <= (mainTotalTabs-1))) || (!hideColorSection && (tabIndex <= mainTotalTabs))">Next</b-button>
@@ -279,7 +279,7 @@
                                 Finalize Design
                               </b-button>
                             </span>
-                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart">
+                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart(null)">
                               {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
                             <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -358,26 +358,6 @@
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
             <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll"
                              :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
-<!--            mobile view code-->
-<!--            <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">-->
-<!--              <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>-->
-<!--              <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>-->
-
-<!--              <div>-->
-<!--                <LogoUploader @switchTabs="switchTabs" @ @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--            <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">-->
-<!--              <span class="fs-3 font-weight-bold d-inline-flex pb-1">Logo Uploader</span>-->
-<!--              <span @click="switchTabs(0, true)" class="maximizer close">-->
-<!--              <svg height="1em" width="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"-->
-<!--                   viewBox="0 0 16 16">-->
-<!--                <polygon points="0,11.8 0,0 11.8,0 "/>-->
-<!--                <polygon points="16,4.3 16,16 4.3,16 "/>-->
-<!--              </svg>-->
-<!--            </span>-->
-<!--            </div>-->
-<!--            mobile view code end-->
           </b-col>
         </template>
       </b-row>
@@ -463,7 +443,6 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    console.log('auto deployment testing', window.location.href)
     let self: Record<any, any> = this;
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
@@ -747,8 +726,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.hideOtherTab()
       self.$store.dispatch('setActiveTab', ind);
     } else {
-      // console.log(ind, isHome)
-
       this.hideOtherTab()
       if ($(".sideNav li a").length) {
         customizer_tabs = $(".sideNav li a")
@@ -1104,7 +1081,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.buyNow()
     } else if (this.actionBeforeLogin == 'addToCart') {
       this.isRosterOpened = true;
-      this.addToCart()
+      this.addToCart(null)
     } else if (this.actionBeforeLogin == 'shareDesign') {
       this.shareDesign()
     }
@@ -1380,7 +1357,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
           }
         }
-        // console.log("modal opens from here")
         this.showVModal('locker-modal')
 
         if (this.ref.saveToLockerModal) {
@@ -1562,8 +1538,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     })
     url = url_obj.pathname + url_obj.search;
-    console.log('New Url')
-    console.log(url);
     http.get(url).then(async (response: Record<any, any>) => {
       if (response.data.products.data.length > 0) {
         const validate_data = await self.beforeSetDataValidateActiveProductData(response.data.products.data)
