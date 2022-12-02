@@ -6,8 +6,7 @@
            :reset="true"
            :shiftY="0"
            @before-open="showUploader = -1"
-           name="replace-logo" ref="replace-logo" id="modal-center-lockerroom" size="xl" :hide-footer="true"
-           @close="$store.commit('Change_Locker_Active_Tab', 0)">
+           name="replace-logo" ref="replace-logo" id="modal-center-lockerroom" size="xl" :hide-footer="true">
       <div class="modal-header d-flex justify-content-between">
         <span class="fs-5 font-weight-bold">Replace Logos</span>
         <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('replace-logo')"><BIconX /></span>

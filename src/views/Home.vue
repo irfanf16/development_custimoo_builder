@@ -237,7 +237,7 @@
                         </div>
                       </template>
                     </template>
-                    
+
                     <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                   </div>
                 </div>
@@ -274,7 +274,7 @@
                               </b-button>
                             </span>
 
-                            <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+                            <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
                               <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
                                 Finalize Design
                               </b-button>
@@ -303,7 +303,7 @@
                         </span>
                         <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                       </template>
-                      <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+                      <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
                           <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
                             Finalize Design
                           </b-button>
@@ -899,6 +899,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
       })
       non_vector_logos_count = non_vector_logos.length
+      if(non_vector_logos.length == 0){
+        setTimeout(()=>{
+          this.hideVModal('replace-logo')
+        }, 3000)
+      }
     }
     return non_vector_logos_count
   }

@@ -182,8 +182,8 @@
         <b-button @click="addToCart" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
       </span>
 
-      <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
-        <b-button @click="addToCart" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+      <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+        <b-button @click="showVModal('replace-logo')" aria-label="Finalizer Order" class="mx-2 px-5" variant="secondary">Finalizer Order</b-button>
       </span>
       <template v-else-if="!getCartLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
         <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
