@@ -212,7 +212,7 @@ export default class TextCustomization extends Vue {
   }
 
   get getColorType(){
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   get customTexts(): [Record<any, any>] {
@@ -226,7 +226,6 @@ export default class TextCustomization extends Vue {
       finalColor.color_text = colors.json_data
       this.productColors = this.productColors.concat(finalColor)
     })
-    console.log('this.lockerColors', this.lockerColors)
     this.productColors = this.productColors.concat(this.lockerColors)
 
     if(this.logoColors.length){
@@ -307,7 +306,6 @@ export default class TextCustomization extends Vue {
       this.productColors = this.productColors.concat(teamLogoColors)
 
     }
-    // console.log('this.productColors',this.productColors)
   }
 
   public setColor(color: Record<any, any>) {
@@ -315,7 +313,6 @@ export default class TextCustomization extends Vue {
     const selectProductPantonesList = getSelectedProductPantones()
     let pantone = getClosestColor(color.value, selectProductPantonesList, this.getColorType);
     let color_pantone = color.name;
-    // console.log(pantone.pantone);
     if(pantone && pantone.pantone && pantone.pantone != 'undefined'){
       color_pantone = pantone.pantone;
     }

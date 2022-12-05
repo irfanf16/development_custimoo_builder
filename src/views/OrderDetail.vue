@@ -551,7 +551,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       }).catch((errorResponse) => {
       this.showLoader = false;
       console.log(errorResponse);
-      //handleResponseException(errorResponse)
     });
   }
   public resetActivityData(){
@@ -658,7 +657,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   goToMessage(parent_message_id: number) {
-    console.log("goto message",document.getElementById(`comment-${parent_message_id}-box`))
     document.getElementById(`comment-${parent_message_id}-box`)?.scrollIntoView({
       behavior: 'smooth'
     });

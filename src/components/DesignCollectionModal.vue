@@ -223,7 +223,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     return items
   }
   set collectionItems(val){
-    console.log('setter called')
     this.$store.commit('SET_COLLECTION_ITEMS',val)
   }
 
@@ -340,7 +339,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
       res = await this.$store.dispatch('createNewCollection', formData);
       if(res.status){
         await this.$store.dispatch('getCollections')
-        console.log("responssse", res)
       }
     } else {
       //content = await this.generateCollectionPdf();
@@ -349,7 +347,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
       res = await this.$store.dispatch('updateNewCollection', formData);
       if(res.status){
         await this.$store.dispatch('getCollections')
-        console.log("responssse", res)
       }
     }
     this.showLoader = false;

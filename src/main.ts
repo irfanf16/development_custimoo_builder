@@ -1,12 +1,19 @@
 import Vue from 'vue'
 import router from './router'
 import store from './store'
+import {i18n} from '@/i18n'
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
 
 import VModal from 'vue-js-modal'
 import 'vue-js-modal/dist/styles.css'
+import vSelect from "vue-select";
+import 'vue-select/dist/vue-select.css';
+
+
 Vue.use(VModal, {})
+
+Vue.component("v-select", vSelect);
 
 // Vue.directive('tooltip', VTooltip)
 // Vue.directive('close-popover', VClosePopover)
@@ -97,9 +104,9 @@ import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
 Vue.use(VueSweetalert2);
-
 new Vue({
   router,
   store,
+  i18n,
   render: h => h(App),
 }).$mount('#santa')

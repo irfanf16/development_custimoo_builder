@@ -12,25 +12,25 @@ import Header from '@/components/Header.vue';
 import Navbar from '@/components/Navbar.vue';
 import {LockerProducts} from "@/mixins/LockerProduct";
 
-import Echo from "laravel-echo";
+// import Echo from "laravel-echo";
+// window.io = require('socket.io-client');
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
-window.io = require('socket.io-client');
-
-import { authenticateUser, getCompany, getPermissions } from '@/helpers/Helpers'
 import CommonImportMixin from '@/mixins/CommonImportMixin'
 
 // console.log(localStorage.getItem('access_tokens'))
-window.Echo = new Echo({
-  broadcaster: "socket.io",
-  transports: ['websocket', 'polling', 'flashsocket'],
-  host: window.location.hostname + ':6001',
-  auth: {
-    headers: {
-      Authorization: 'Bearer ' + localStorage.getItem('access_token'),
-    },
-  },
-});
+// if(process.env.VUE_APP_ENABLE_SOCKET == undefined) {
+//   window.Echo = new Echo({
+//     broadcaster: "socket.io",
+//     transports: ['websocket', 'polling', 'flashsocket'],
+//     host: window.location.hostname + ':6001',
+//     auth: {
+//       headers: {
+//         Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+//       },
+//     },
+//   });
+// }
 
 //todo remove this code after a while as this is used to remove pwa cache
 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -45,36 +45,27 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
   },
   mixins: [CommonImportMixin],
   async mounted() {
-    await getCompany();
-    // const token = this.$router.currentRoute.query.token as string
-    const token = this.getParameterByName('token');
-    console.log('token from build', token, window.location.href)
-    if (token){
-      localStorage.setItem('jwtToken', token)
-      localStorage.setItem('adminToken', token)
-      await authenticateUser(token)
-      await this.$store.dispatch('resetStore')
-      await this.$router.push({name: 'Home'})
-    }
 
-    const customer =  this.$store.getters.getCustomer;
+    // const customer =  this.$store.getters.getCustomer;
 
-    window.Echo.channel(`notification.${this.enviorment}.${customer.id}`).listen('RoasterUpdatedEvent',  (e: Record<any,any>) => {
-      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
-    })
-    window.Echo.channel(`order_activity_for_user_${this.enviorment}_${customer.id}`).listen('OrderActivityEvent',  (e: Record<any,any>) => {
-      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
-    })
-    window.Echo.channel(`Notify_to_user_${this.enviorment}_${customer.id}`).listen('NotifyUser',  (e: Record<any,any>) => {
-      this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
-    })
-    window.Echo.channel(`orderfile.${customer.id}`).listen('OrderFileCreatedEvent',  (e: Record<any,any>) => {
-      if(e.design_file.length) {
-        this.downloadPdfFile(e.design_file)
-      } else {
-        this.showError('Pdf file could not be created')
-      }
-    })
+  // if(process.env.VUE_APP_ENABLE_SOCKET == undefined) {
+  //   window.Echo.channel(`notification.${this.enviorment}.${customer.id}`).listen('RoasterUpdatedEvent',  (e: Record<any,any>) => {
+  //     this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
+  //   })
+  //   window.Echo.channel(`order_activity_for_user_${this.enviorment}_${customer.id}`).listen('OrderActivityEvent',  (e: Record<any,any>) => {
+  //     this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
+  //   })
+  //   window.Echo.channel(`Notify_to_user_${this.enviorment}_${customer.id}`).listen('NotifyUser',  (e: Record<any,any>) => {
+  //     this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
+  //   })
+  //   window.Echo.channel(`orderfile.${customer.id}`).listen('OrderFileCreatedEvent',  (e: Record<any,any>) => {
+  //     if(e.design_file.length) {
+  //       this.downloadPdfFile(e.design_file)
+  //     } else {
+  //       this.showError('Pdf file could not be created')
+  //     }
+  //   })
+  // }
   }
 })
 export default class App extends Mixins(LockerProducts,ErrorMessages) {
@@ -100,15 +91,6 @@ export default class App extends Mixins(LockerProducts,ErrorMessages) {
       link.click();
       this.showToast('Pdf file created','success')
     })
-  }
-
-  public getParameterByName(name:string, url = window.location.href) {
-    name = name.replace(/[[\]]/g, '\\$&');
-    let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-      results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 
 }

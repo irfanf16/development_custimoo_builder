@@ -7,7 +7,8 @@
           <template v-for="design in product.productstyles[0].productdesigns">
             <div v-if="design.is_default == 1" class="image-holder" :key="'front'+design.id">
               <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="product.measurement_ratio"
-                     :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : ''}"
+                     :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                     modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : ''}"
                      :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
                      :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
                      :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id" :product_index="index" :products_fonts="products_fonts"/>
@@ -41,7 +42,7 @@ Vue.use(SlitherSlider)
 })
 
 
-export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode, HideUpdateLockerButton) {
+export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode, HideUpdateLockerButton,exitEditMode) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
@@ -73,6 +74,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
   public async productDesigns(index: number) {
     let self: Record<any, any> = this;
     let style_index = 0;
+    const response = await this.editModeConfirmation();
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: index})
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);
@@ -99,6 +101,8 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     if(self.getProductEditInfoObject.type == "locker_product" && self.getProductEditInfoObject.locker_product_info.product_id != this.selectedProduct.id) {
       await this.exitFromEditMode()
     }
+    const factory_setting = this.$store.getters.getFactorySettings(this.selectedProduct.factory_id);
+    this.$store.commit('SET_SETTING', factory_setting)
   }
 
   public setSliderIndex(slide_no = 0) {

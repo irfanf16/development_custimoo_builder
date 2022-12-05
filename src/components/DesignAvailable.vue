@@ -4,7 +4,8 @@
       <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :class="{'selected_design': design.id == selectedDesignId}">
         <a @click="changeDesign(index); showPreview()" v-if="index < itemsPerRow || loadDesigns">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
-                 :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_thumbnail_url : ''}"
+                 :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                 modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_thumbnail_url : ''}"
                  :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
                  :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
                  :logos="selectedProduct.productstyles[styleIndex].logo"
@@ -32,6 +33,9 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
     (this.$refs['designs'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{this.loadIt($event)});
     (this.$refs['designs'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{this.loadIt($event)});
     this.itemsPerRow = Math.round((this.$refs['designs'] as Record<any, any>).clientHeight / 130) * 4;
+    setTimeout(()=>{
+      this.loadDesigns = true
+    }, 1000)
   },
   beforeDestroy() {
     (this.$refs['designs'] as Record<any, any>).removeEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
@@ -88,8 +92,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
     })
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     this.$store.dispatch('setActiveTab', -1)
-    this.$store.commit('SET_SUFFLE', false)
-    console.log(self.styleIndex, ' style index design index ', index)
+    this.$store.commit('SET_SHUFFLE', false)
     this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {
         Vue.set(design, 'design_show', 1)

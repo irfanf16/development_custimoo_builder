@@ -131,7 +131,7 @@
                 <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
                   {{ productSize.text }}</b-form-select-option>
               </b-form-select>
-              <div class="tooltip guide">Press enter to view the options</div>
+              <div v-if="false" class="tooltip guide">Press enter to view the options</div>
             </div>
           </div>
           <div class="align-right">
@@ -172,8 +172,20 @@
             Add to Cart
           </button>
         </template>
+        <span v-else-if="notVectorLogosCount > 0">
+          <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+            Finalize Design
+          </b-button>
+        </span>
       </template>
-      <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
+      <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-else-if="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
+        <b-button @click="addToCart" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+      </span>
+
+      <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+        <b-button @click="showVModal('replace-logo')" aria-label="Finalize Order" class="mx-2 px-5" variant="secondary">Finalize Design</b-button>
+      </span>
+      <template v-else-if="!getCartLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
         <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
           <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
             :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
@@ -200,7 +212,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import {find, findIndex, map} from 'lodash';
+import {filter, find, findIndex, map} from 'lodash';
 import ErrorMessages from '@/mixins/ErrorMessages';
 import {cartModalData, RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
@@ -292,11 +304,25 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getSelectedModelIndex;
   }
 
+  get vectorImageConstraint():boolean{
+    return this.$store.getters.getSetting('vector_image_constraint')
+  }
+
+  get notVectorLogosCount(){
+    const custom_logos = this.$store.getters.koivna
+    let non_vector_logos_count = 0
+    if(custom_logos && custom_logos.length > 0) {
+      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
+        return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+      })
+      non_vector_logos_count = non_vector_logos.length
+    }
+    return non_vector_logos_count
+  }
 
   private async addToCart() {
     if (!this.rosterDetails.some(el => el.quantity == 0)) {
-      this.hideVModal('rostermodal')
-      this.showToast("Adding to cart", "info")
+      //this.showToast("Adding to cart", "info")
       await this.addToCartMixin(this.products_fonts as Record<any, any>[]);
     } // if quantity is not zero
     else {
@@ -677,44 +703,44 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 }
 
 .shirt-size{
-  .tooltip.guide{
-    display: none;
-    background: #333;
-    color: white;
-    padding: 7px 10px;
-    border-radius: 7px;
-    white-space: nowrap;
-    margin-top: 10px;
-    animation: fadeInUp 0.2s ease;
+  //.tooltip.guide{
+  //  display: none;
+  //  background: #333;
+  //  color: white;
+  //  padding: 7px 10px;
+  //  border-radius: 7px;
+  //  white-space: nowrap;
+  //  margin-top: 10px;
+  //  animation: fadeInUp 0.2s ease;
+  //
+  //  &:before{
+  //    display: block;
+  //    position: absolute;
+  //    content: "";
+  //    height: 0;
+  //    width: 0;
+  //    border-color: transparent transparent #333;
+  //    border-style: solid;
+  //    border-width: 7px;
+  //    top: -14px;
+  //    left: 30%;
+  //  }
+  //}
 
-    &:before{
-      display: block;
-      position: absolute;
-      content: "";
-      height: 0;
-      width: 0;
-      border-color: transparent transparent #333;
-      border-style: solid;
-      border-width: 7px;
-      top: -14px;
-      left: 30%;
-    }
-  }
-
-  select {
-    &:focus{
-      &+.tooltip.guide{
-        display: block;
-        opacity: 1;
-      }
-    }
-
-    &:hover{
-      &+.tooltip.guide{
-        display: none;
-        opacity: 0;
-      }
-    }
-  }
+  //select {
+  //  &:focus{
+  //    &+.tooltip.guide{
+  //      display: block;
+  //      opacity: 1;
+  //    }
+  //  }
+  //
+  //  &:hover{
+  //    &+.tooltip.guide{
+  //      display: none;
+  //      opacity: 0;
+  //    }
+  //  }
+  //}
 }
 </style>

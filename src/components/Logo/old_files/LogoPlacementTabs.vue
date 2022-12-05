@@ -107,7 +107,7 @@ import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
 import LogoColorTabs from "@/components/LogoColorTabs.vue"
 import RecentLogos from "@/components/RecentLogos.vue";
-import { setLogoSettings, getCustomLogos,} from "../helpers/Helpers"
+import { setLogoSettings, getCustomLogos,} from "@/helpers/Helpers"
 
 
 @Component<LogoPlacementTabs>({
@@ -266,6 +266,8 @@ export default class LogoPlacementTabs extends Vue {
   }
 
   public removeLogoTab(index: number){
+    const self: Record<any, any> = this;
+    self.$eventBus.$emit("customLogoRemoved", index)
     let payload = {
       index: index
     }

@@ -1,11 +1,33 @@
 import { Component, Vue } from 'vue-property-decorator'
 import Gleap from 'gleap'
+import { authenticateUser, getCompany, getUrlParameter } from '@/helpers/Helpers'
+import { i18n } from '@/i18n'
+import store from '@/store'
 Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
 
 @Component
 export default class CommonImportMixin extends Vue{
-  mounted () {
-    console.log('run CommonImportMixin.ts file')
+  async mounted () {
+    await getCompany();
+
+    const token = getUrlParameter('token')
+    if (token){
+      localStorage.setItem('jwtToken', token)
+      localStorage.setItem('adminToken', token)
+      await authenticateUser(token)
+      await this.$store.dispatch('resetStore')
+      // @ts-ignore
+      await window.parent.vueRouter.push({name: 'Home'})
+    } else{
+      const storageInterval = setInterval(()=>{
+        const jwtToken = localStorage.getItem('jwtToken');
+        if(jwtToken && jwtToken !=''){
+          authenticateUser(jwtToken)
+          clearInterval(storageInterval);
+        }
+      }, 500)
+    }
+
     const elem = document.createElement('link');
     elem.rel = ' stylesheet'
     elem.type = 'text/css';
@@ -24,5 +46,9 @@ export default class CommonImportMixin extends Vue{
         }
       })
     }
+    await getCompany().then(function (){
+      const current_locale = i18n.locale;
+      i18n.setLocaleMessage(current_locale, store.getters.getCompany.translations[current_locale]);
+    });
   }
 }

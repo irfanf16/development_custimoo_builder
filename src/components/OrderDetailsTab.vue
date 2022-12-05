@@ -100,6 +100,7 @@ import LoginForm from '@/components/LoginForm.vue'
 import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData} from "@/mixins/LockerProduct";
 
 import {compact} from 'lodash';
+import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
 type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
@@ -119,7 +120,7 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
   }
 })
 
-export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData) {
+export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData, FetchCategories) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
@@ -363,8 +364,13 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             } else {
               if (cart_edit_mode) {
                 await self.exitFromEditMode()
-                let query_params = await self.setQueryParams
-                self.retrieveProducts(query_params)
+                const categories_promise = this.fetchCategories();
+                categories_promise.then(async (response) => {
+                  if(response){
+                    let query_params = await self.setQueryParams
+                    self.retrieveProducts(query_params)
+                  }
+                });
               }
             }
             self.isLoading = false
@@ -374,8 +380,14 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             }
             if (cart_edit_mode) {
               await self.exitFromEditMode()
-              let query_params = await self.setQueryParams
-              self.retrieveProducts(query_params)
+              const categories_promise = this.fetchCategories();
+              categories_promise.then(async (response) => {
+                if(response){
+                  let query_params = await self.setQueryParams
+                  self.retrieveProducts(query_params)
+                }
+              })
+
             }
           }
           self.showToast(res.data.message, res.data.success ? 'SUCCESS' : 'ERROR')
@@ -386,8 +398,13 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
           handleResponseException(errorResponse)
           if (cart_edit_mode) {
             await self.exitFromEditMode()
-            let query_params = await self.setQueryParams
-            self.retrieveProducts(query_params)
+            const categories_promise = this.fetchCategories();
+            categories_promise.then(async (response) => {
+              if(response){
+                let query_params = await self.setQueryParams
+                self.retrieveProducts(query_params)
+              }
+            })
           }
         })
       }

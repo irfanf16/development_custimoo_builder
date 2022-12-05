@@ -100,7 +100,6 @@ import { findIndex } from 'lodash'
   mounted() {
     this.fontsColorsManipulation()
     this.fontsList()
-    console.log(this.productSizes)
   }
 })
 export default class RosterTableMobile extends Vue {

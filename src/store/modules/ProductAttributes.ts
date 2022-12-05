@@ -5,20 +5,24 @@ import {
   rosterDefaultItem,
   setRetrievedProductsCustomTexts,
   getRosterDetailDefaultObject,
-  initCustomLogos,
+  initCustomLogosNew,
   setCustomLogo,
   getLogoSettings,
   setLogoSettings,
   getProductLogoSetting,
   logData,
   lastActiveProductDefaultObject,
-  getLogoSettingsObject
+  recentLogoDefaultObject,
+  getLogoSettingsObject, logoColorInfoDefaultObject, getDefaultColorsObject, setDefaultColors
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
+import {eventBus} from "@/event/eventBus";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
+    personalized_count: 0 ,
+    customized_count:0,
     private_product_count:0,
     searchLoader: false,
     showLoader:true,
@@ -42,6 +46,7 @@ const ProductAttributes:Module<any, any> = {
     },
     customTexts: {},
     styleIndex: 0,
+    // changing defaultColors object will also need to change value in helper method getDefaultColorsObject
     defaultColors: [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}],
     groupColors: {},
     svgGroups: [],
@@ -115,6 +120,15 @@ const ProductAttributes:Module<any, any> = {
     products_next_page_no: null, //null value mean has no more pages,
     products_rosters:{},
     active_roster_index:0,
+    logo_colors_info: {
+      /*
+      * while adding/removing property make  sure to add/remove property in helpers method logoColorInfoDefaultObject()
+      * */
+      using_logo_colors: false,
+      is_shuffled: false,
+      extracted_colors: [],
+      colors: []
+    }
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -191,6 +205,12 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_STOCK_COUNT(state:Record<any,any>, payload:number){
       state.stock_count = payload;
+    },
+    SET_PERSONALIZED_COUNT(state:Record<any,any>, payload:number){
+      state.personalized_count = payload;
+    },
+    SET_CUSTOMIZED_COUNT(state:Record<any,any>, payload:number){
+      state.customized_count = payload;
     },
     SET_PRIVATE_PRODUCT_COUNT(state:Record<any,any>, payload:number){
       state.private_product_count = payload;
@@ -270,22 +290,53 @@ const ProductAttributes:Module<any, any> = {
          }
        }
     },
-    SET_CUSTOM_LOGOS(state: Record<any, any>,payload = []) {
-      if('product_id' in payload) {
-        Vue.set(state.customLogos, payload.product_id, payload.custom_logos)
-      } else {
-        Vue.set(state.customLogos, state.selectedPrdId, payload)
+    SET_PRODUCT_CUSTOM_LOGOS(state: Record<any, any>, payload: Record<any, any> ) {
+      if('append' in payload) {
+        state.customLogos = {...state.customLogos, ...payload.data}
+      }
+      else {
+        const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
+        const custom_logo_index = payload.logo_index
+        let product_custom_logos = state.customLogos[product_id]
+        if(custom_logo_index >= 0) {
+          let product_custom_logo = product_custom_logos[custom_logo_index]
+          product_custom_logo = {...product_custom_logo, ...payload.data}
+        }
+        else {
+          product_custom_logos = payload.data
+        }
       }
     },
-    SET_RECENT_LOGOS(state: Record<any, any>,payload = []) {
-      if(payload.length > 0) {
-        state.recentLogos = []
-        state.recentLogos = payload
+    SET_CUSTOM_LOGOS(state: Record<any, any>,payload = []) {
+      const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
+      const logo_index = payload.logo_index
+      if(logo_index >= 0) {
+        Vue.set(state.customLogos[product_id], logo_index, payload.custom_logos)
+      }
+      else {
+        Vue.set(state.customLogos, product_id, payload.custom_logos)
+      }
+    },
+    SET_RECENT_LOGOS(state: Record<any, any>, payload: Record<any, any>) {
+      if(payload) {
+        // payload action can have = {prepend, append, assign}
+        const action = payload.action ? payload.action : 'prepend'
+        payload.data = payload.data.constructor.name == 'Object' ? [ payload.data ] : payload.data
+        switch (action) {
+          case 'prepend':
+            state.recentLogos = [ ...payload.data, ...state.recentLogos ]
+            break;
+          case 'append':
+            state.recentLogos = [ ...state.recentLogos, ...payload.data ]
+            break;
+          default:
+            state.recentLogos = payload.data
+        }
       }
       else {
         http.get('logos/recent').then((res) => {
           state.recentLogos = []
-          state.recentLogos = res.data.data
+          state.recentLogos = recentLogoDefaultObject(res.data.data)
         }).catch((e) => {
           console.log('e',e)
         })
@@ -472,11 +523,10 @@ const ProductAttributes:Module<any, any> = {
     REMOVE_TEAM_LOGO(state: Record<any, any>) {
       state.products.forEach((product: Record<any, any>) => {
         if(state.customLogos[product.id]) {
-          const logo_default_setting = product.logos_setting[0] ? JSON.parse(JSON.stringify(product.logos_setting[0])) : getLogoSettingsObject()
-          logo_default_setting.id = null
-          logo_default_setting.logoIndex = 0
-          logo_default_setting.customLogo = 1
-          logo_default_setting.haveControls = 1
+          let logo_default_setting: Record<any, any> = getLogoSettingsObject()
+          if(product.logos_setting[0]) {
+            logo_default_setting = {...logo_default_setting, ...product.logos_setting[0]}
+          }
           Vue.set(state.customLogos[product.id], 0, logo_default_setting)
         }
       })
@@ -738,7 +788,8 @@ const ProductAttributes:Module<any, any> = {
       state.logoTabIndex = 0;
       state.customLogoObjects = [];
       state.customLogos = {};
-      await initCustomLogos(state.products)
+      await initCustomLogosNew(state.products)
+      eventBus.$emit('set-logo-tab-index')
     },
     RESET_ALL_COLORS: (state: Record<any, any>) => {
       state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]
@@ -848,7 +899,7 @@ const ProductAttributes:Module<any, any> = {
     SET_ACTIVE_TAB(state:Record<any, any>, payload){
       state.activeTab = payload
     },
-    SET_SUFFLE(state:Record<any, any>, payload) {
+    SET_SHUFFLE(state:Record<any, any>, payload) {
       state.showShuffle = payload
     },
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
@@ -1014,6 +1065,28 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_ACTIVE_ROSTER_INDEX(state:Record<any,any>,index){
       state.active_roster_index = index;
+    },
+    SET_LOGO_COLORS_INFO(state:Record<any,any>, payload: Record<any, any>) {
+      const default_colors_object = getDefaultColorsObject()
+      if('reset' in payload) {
+        state.logo_colors_info = logoColorInfoDefaultObject()
+        state.defaultColors = default_colors_object
+      }
+      else {
+        if('colors' in payload.data) {
+          /*
+          * sometimes hex property is missing so we add that property if it's not. Like in case of locker edit product
+          * defaultColors property does not have hex property
+          * */
+          payload.data.colors.forEach(color => {
+            color.hex = color.hex ? color.hex : color.color
+          })
+        }
+        state.logo_colors_info = {...state.logo_colors_info, ...payload.data}
+      }
+    },
+    SET_DEFAULT_COLORS(state: Record<any, any>, payload: Record<any, any>) {
+      state.defaultColors = payload
     }
   },
   getters: {
@@ -1082,6 +1155,7 @@ const ProductAttributes:Module<any, any> = {
       return state.showColorsLogoEditor
     },
     getLockerTabsIndex: state => {
+
       return state.lockerTabsIndex
     },
     getColorsFromRecent: state => {
@@ -1114,6 +1188,9 @@ const ProductAttributes:Module<any, any> = {
     getHideColorSection: state => {
       return state.hideColorSection
     },
+    getProduct: (state) => (product_id:number = state.selectedPrdId) => {
+      return state.products.find((product: Record<any, any>) => product.id == product_id)
+    },
     getProducts: (state: any) => state.products,
     getSelectedIndex: (state: any) => state.selectedIndex,
     getSelectedProduct: (state => {
@@ -1130,12 +1207,24 @@ const ProductAttributes:Module<any, any> = {
     getSelectedCategories: state => {
       return state.selectedCategories
     },
-
-    getCustomLogos: state => (prd_id = state.selectedPrdId) => {
-      if(!state.customLogos[prd_id]) {
-        return []
-      }
-      return state.customLogos[prd_id]
+    /*
+    * product_id could be number or string. If product_id = 'all' it will return all products logos and return type will be object.
+    * If it's number then it will return custom logos against product id and return type will be array
+    * @return [Object | array]
+    * */
+    getCustomLogos: state => (product_id = state.selectedPrdId, logo_index = -1) => {
+      product_id = product_id == null ? state.selectedPrdId : product_id
+      if(product_id == 'all')
+        return state.customLogos
+      if(logo_index >= 0)
+        return state.customLogos[product_id][logo_index]
+      return state.customLogos[product_id]
+    },
+    selectedProductCustomLogos: state => {
+      return state.customLogos[state.selectedPrdId]
+    },
+    koivna: state => {
+      return state.customLogos[state.selectedPrdId]
     },
     getCustomLogoObject: state => {
     return state.customLogos
@@ -1236,6 +1325,12 @@ const ProductAttributes:Module<any, any> = {
     getPrivateProductCount(state:Record<any,any>){
       return state.private_product_count;
     },
+    getPersonalizedCount(state:Record<any,any>){
+      return state.personalized_count;
+    },
+    getCustomizedCount(state:Record<any,any>){
+      return state.customized_count;
+    },
     getHideSaveLockerButton(state:Record<any,any>){
       return state.hideSaveLockerButton;
     },
@@ -1259,6 +1354,11 @@ const ProductAttributes:Module<any, any> = {
     },
     getActiveRosterIndex(state:Record<any,any>){
       return state.active_roster_index;
+    },
+    getLogoColorsInfo: state => (info_for: string|null = null) => {
+      if(info_for)
+        return state.logo_colors_info[info_for]
+      return state.logo_colors_info
     }
   },
   actions: {
@@ -1294,13 +1394,23 @@ const ProductAttributes:Module<any, any> = {
       if(payload && 'query_params' in payload) {
         url += `?${payload.query_params}`
       }
-      const response = await http.get(url).catch((e: any) => {
-        console.error('error while getting categories',e)
-      });
-      if(response) {
-        await commit('categories', response.data)
-      }
-
+      return new Promise((resolve, reject) => {
+        http.get(url).then( async (response: Record<any,any>) => {
+          if(response) {
+            await commit('categories', response.data.data)
+            await commit('SET_PRIVATE_PRODUCT', response.data.private_product);
+            await commit('SET_PRODUCT_TYPE',{prd_type: 'customized', value: response.data.customized})
+            await commit('SET_PRODUCT_TYPE',{prd_type: 'personalized', value: response.data.personalized})
+            await commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
+            await commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
+            await commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
+            resolve(response.data.no_product_found);
+          }
+        }).catch((e: any) => {
+          console.error('error while getting categories',e)
+          reject(false);
+        });
+      })
     },
     setCustomLogos({commit}, payload){
       commit('customLogos', payload)
@@ -1367,6 +1477,12 @@ const ProductAttributes:Module<any, any> = {
     },
     setStockCount({commit},payload){
       commit('SET_STOCK_COUNT',payload);
+    },
+    setCustomizedCount({commit},payload){
+      commit('SET_CUSTOMIZED_COUNT',payload);
+    },
+    setPersonalizedCount({commit},payload){
+      commit('SET_PERSONALIZED_COUNT',payload);
     },
     setPrivateProductCount({commit},payload){
       commit('SET_PRIVATE_PRODUCT_COUNT',payload);

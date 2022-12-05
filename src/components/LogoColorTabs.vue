@@ -66,7 +66,6 @@ import {getSelectedProductPantones} from "@/helpers/Helpers";
       this.selectType(this.selectTypeIndex)
 
      if(this.$refs.colorPicker){
-       console.log('found')
        let container = document.querySelector('.color-container') as Record<any, any>
        Vue.set(this.$refs.colorPicker, 'hueHeight', (container.clientWidth - 60))
      }else{
@@ -137,7 +136,7 @@ export default class LogoColorTabs extends Vue {
   }
 
   get getColorType(): string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   get svgGroups() {
@@ -200,7 +199,6 @@ export default class LogoColorTabs extends Vue {
     let pantone_code = this.extractExactCode($event)
     let pantone_color = pantone_code ? this.extractExactCode(pantone_code) : color
     let pantoneColor = pantone_color && getColorEncoding(pantone_color,this.getColorType);
-    // console.log('pantone_color', pantoneColor)
     if (pantoneColor) {
       this.setSwatchColor({hex: pantoneColor.hex.toUpperCase(), name: pantoneColor.name, pantone: pantoneColor.pantone })
       this.$emit('update:defSwatchColor',  pantoneColor.hex)

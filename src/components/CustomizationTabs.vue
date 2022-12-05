@@ -1,21 +1,24 @@
 <template>
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
-      <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
+      <b-tabs ref="customization-tabs" v-model="tabIndex" :key="selectedProduct.allow_name_number">
         <div class="myscroll" ref="myscroll">
           <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
-            <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
-                <span class="icon-holder">
-                  <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
+                <span :class="{'no-vector-logos': vectorImageConstraint?non_vector_logos_count > 0 : false }">
+                  <span v-if="vectorImageConstraint?non_vector_logos_count > 0:false" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order!`" class="logos-error">
+                    <b-icon-exclamation-circle-fill />
+                  </span>
+                  <span class="icon-holder">
+                    <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
+                  </span>
+                  Logo
                 </span>
-                Logo
               </a>
             </template>
-            <div class="logo-placement-tabs" v-if="hideTab.logoHide">
-              <LogoPlacementTabs @setColorShuffled="(val) => $emit('setColorShuffled', val)" :isColorShuffled="isColorShuffled" v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
-                                 :logosSetting="selectedProduct.logos_setting"/>
+            <div class="logo-placement-tabs">
+              <LogoPlacementTab />
             </div>
           </b-tab>
           <b-tab v-if="selectedProduct.product_type !== 'personalized'">
@@ -106,36 +109,40 @@
 <script lang="ts">
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
-import LogoPlacementTabs from './LogoPlacementTabs.vue'
+// import LogoPlacementTabs from './LogoPlacementTabs.vue'
+import LogoPlacementTab from '@/components/Logo/LogoPlacementTab.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
-import UploadLogo from '@/components/UploadLogo.vue'
+// import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import {default as $} from 'jquery';
 import RecentLogos from "@/components/RecentLogos.vue";
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
+import {filter} from "lodash"
 
 @Component<CustomizationTabs>({
   components: {
     RecentLogos,
     ColorAccordion,
-    LogoPlacementTabs,
+    // LogoPlacementTabs,
+    LogoPlacementTab,
     CustomizationText,
     CollarStyle,
     EditRosterAreaTab,
     ColorTabs,
-    UploadLogo,
+    // UploadLogo,
   },
   mounted() {
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()});
-
+    this.$eventBus.$on('handleNonVectorCustomLogosCount',this.notVectorLogosCount)
     this.$store.dispatch('setCustomLogos')
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
+    this.$emit('adjustTotalTabs', ((this.$refs['customization-tabs'] as Record<any, any>).getTabs().length-2))
   },
 })
 export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
@@ -148,6 +155,7 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
   public set = false
   public previous_tab='';
   public ref = this.$refs as Record<any, any>
+  public non_vector_logos_count = 0
 
   public styling = {
     scrollbar: {
@@ -205,6 +213,10 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
 
   get productSizes(){
     return this.selectedProduct.sizes[0].json_data
+  }
+
+  get vectorImageConstraint():boolean{
+    return this.$store.getters.getSetting('vector_image_constraint')
   }
 
 
@@ -391,6 +403,19 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     }
     this.$store.dispatch('updateCustomTextAttribute', {index: index, on_all: false, attribute: 'text', value: ''})
     this.$store.commit('REMOVE_CUSTOMIZATION_TEXT_ELEMENT', payload)
+  }
+
+  notVectorLogosCount(){
+    const custom_logos = this.$store.getters.koivna
+    let non_vector_logos_count = 0
+    if(custom_logos && custom_logos.length > 0) {
+      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
+        // return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+        return custom_logo.is_vector == false
+      })
+      non_vector_logos_count = non_vector_logos.length
+    }
+    this.non_vector_logos_count =  non_vector_logos_count
   }
 
 }

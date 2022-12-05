@@ -595,6 +595,10 @@ button {
                 right: 0;
                 margin: 0 auto;
 
+                &.error{
+                    color: #D53943;
+                }
+
                 &:before{
                     content: "";
                     display: block;
@@ -605,7 +609,7 @@ button {
                     background: white;
                     left: 0;
                     top: 1px;
-                    bottom: 0;
+                    bottom: 1px;
                     right: 0;
                     border-radius: 100px;
                     margin: auto;
@@ -617,6 +621,8 @@ button {
                     z-index: 3;
                 }
             }
+
+            position: relative;
         }
     }
 
@@ -943,6 +949,17 @@ button {
                     //    border: none;
                     //    font-size: 0;
                     //}
+
+                    .upload-box{
+                        position: relative;
+
+                        .vector-logos-error{
+                            position: absolute;
+                            color: #D53943;
+                            left: -5px;
+                            top: -7px;
+                        }
+                    }
                 }
 
             }
@@ -1782,6 +1799,17 @@ button {
 }
 
 .customization-tabs {
+    overflow-y: visible;
+
+    .logos-error{
+        position: absolute;
+        top: -7px;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        color: #D53943;
+    }
+
     .logo-placement-area{
         .color-holder{
             margin: 0;
@@ -3385,7 +3413,7 @@ button {
             left: 0;
             right: 0;
             margin: 0 !important;
-            text-align: center;
+            //text-align: center;
             max-width: 100%;
         }
     }
@@ -6002,7 +6030,7 @@ $fontSize: 0.5;
             overflow-x: auto;
             gap: 5px;
             padding-bottom: 0.7rem;
-            padding-top: 0.3rem;
+            padding-top: 0.5rem;
 
             @extend .theme-scroll-h;
 
@@ -6088,6 +6116,40 @@ $fontSize: 0.5;
                 display: none;
             }
         }
+    }
+}
+
+.replace-logo{
+    &.modal-content{
+        border: none;
+    }
+    .logo-edit-btn-updated{
+        display: none;
+    }
+
+    .upload-logo-opener{
+        position: static !important;
+        border: none !important;
+        padding: 0 !important;
+
+        .btn{
+            width: 100% !important;
+            max-width: none !important;
+
+            .upload-box{
+                width: 100%;
+                overflow: hidden !important;
+                cursor: pointer;
+
+                input{
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+
+    .logo-placement-area {
+        padding-bottom: 0 !important;
     }
 }
 

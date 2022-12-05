@@ -93,7 +93,7 @@ import {
   getSelectedProductPantones,
   getUploadedLogoObject, processColorsCustom,
   setLogoSettings
-} from '../helpers/Helpers'
+} from '@/helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import ModalAction from "@/mixins/ModalAction";
 
@@ -191,7 +191,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   }
 
   get getColorType(): string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   get logoUrl(): Record<any, any>[] {
@@ -320,7 +320,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     uniqueColors.forEach((color: string) => {
 
       let pantoneColor = getClosestColor(color, selectProductPantonesList,this.getColorType)
-      //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
     let add_extra_colors = 4 - uniqueColors.length;

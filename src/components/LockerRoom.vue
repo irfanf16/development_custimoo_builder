@@ -369,12 +369,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     // Use traditional 'for loops' for IE 11
     for(const mutation of mutationsList) {
       if (mutation.addedNodes.length) {
-        console.log('A child node has been added or removed.', mutation);
-        console.log('Nodes added', mutation.addedNodes.length);
-
         mutation.target.classList.add('dropping')
       }else if(mutation.removedNodes.length){
-        console.log('Nodes removed', mutation.removedNodes.length);
         mutation.target.classList.remove('dropping')
       }
       else if (mutation.type === 'attributes') {
@@ -634,7 +630,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {
       if(product){
-          let payload = {
+        let payload = {
             type: 'locker',
             id: product.id,
             customer_id: this.customer ? this.customer.id : '',
@@ -649,7 +645,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
             Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url', shared_url)
           }
 
-          this.showPopper('share'+lockerIndex+''+ind);
+        this.showPopper('share'+lockerIndex+''+ind);
       }
     } catch (error) {
       console.log(error)
@@ -670,7 +666,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
           let res = await http.post('collection/link', collections)
           shared_url += res.data.url;
           Vue.set(this.getCollections[index], 'shared_url', shared_url)
-          console.log("url", this.getCollections[index].shared_url)
         }
         this.showPopper('share-collection'+index)
       }

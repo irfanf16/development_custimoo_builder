@@ -24,13 +24,22 @@ import rgbHex from 'rgb-hex'
 import { getRandom, getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
 import {find} from "lodash";
 import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
+import CustomLogosMixin from '@/mixins/CustomLogosMixin'
 
 @Component<Scene>({
   async mounted() {
     let self: Record<any, any> = this;
     self.$eventBus.$on("customTextUpdated", this.addTextsNew)
-    self.$eventBus.$on("customTextRemoved", self.deleteExistingTextsFromCanvas)
-    self.$eventBus.$on("resetTextsCanvas", self.resetTextsFromCanvas)
+    self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
+    self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
+    self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogos)
+    self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
+    self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
+    self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
+    self.$eventBus.$on("changeDefaultColors", this.changeDefaultColors)
+    self.$eventBus.$on("changeGroupColors", this.changeGroupColors)
+    self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
+    self.$eventBus.$on("changeColors", this.changeColors)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -43,6 +52,9 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
         visible: false,
         fontFamily: 'Ubuntu'
       })
+    }
+    if(this.mainPreview) {
+      console.log(this.front)
     }
     let frontPromise = this.loadScene(this.front, 'front')
     frontPromise.then(() => {
@@ -125,22 +137,7 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
           handleFabricCustomTextRemoved(target)
         }
         else {
-          let logo = setLogoSettings(target.logoIndex);
-          logo.logoIndex = target.logoIndex;
-          logo.removeLogo = true
-          let payload = {
-            custom_logo: logo
-          }
-
-          let before_update = self.updateLogoObject(JSON.parse(JSON.stringify(self.$store.getters.getCustomLogoObject)))
-          self.$store.commit('UPDATE_UNDO', {data: before_update, action: 'customLogos'})
-
-          self.$store.commit('customLogos', payload)
-          self.$store.commit('SET_LOGO_COLORS', []);
-          self.$store.commit('SET_INITIAL_LOGO_COLORS', []);
-          if(logo.logoIndex == 0) {
-            self.$store.commit('REMOVE_TEAM_LOGO')
-          }
+          self.removeLogo(target.logo_index)
         }
         canvas.remove(target);
         canvas.requestRenderAll();
@@ -194,10 +191,20 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
         }
       })
     }
+    if(!this.mainPreview && this.selectedProductId == this.product_id) {
+      self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
+        const logo = this.custom_logos[logo_index]
+        if(logo && this.custom_logo_objects[logo_index]) {
+          const logoObject = this.custom_logo_objects[logo_index]
+          const otherSideObject = this.other_side_logos[logo_index]
+          this.eventAction(logo, logoObject, otherSideObject)
+        }
+      })
+    }
   }
 })
 
-export default class Scene extends Mixins(HideUpdateLockerButton) {
+export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMixin) {
   @Prop({ required: true }) readonly front!: Record<string, unknown>;
   @Prop({ required: false }) readonly back!: Record<string, unknown>;
   @Prop({ required: false }) readonly backTextureUrl!: string;
@@ -230,9 +237,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   private backCanvas !: fabric.Canvas
   private frontTexture !: any
   private backTexture !: any
+  private texture_default_position = {front: {top: 0, left: 0}, back: {top: 0, left: 0}}
+  private clip_path_front !: any
+  private clip_path_back !: any
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private logoObjects: any[] = []
-  private customLogoObjects: any[] = []
+  private custom_logo_objects: any[] = []
   private customTextObjects: any[] = []
   private mounted = false
   private frontModel: any
@@ -254,7 +264,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   public dimTextBack!: fabric.Text
   public showLoader = true
   public svg_groups_ready = false
-  public otherSideLogos: any[] = []
+  public other_side_logos: any[] = []
   public otherSideTexts: any[] = []
   public logoIndex = 0
   public textIndex = 0
@@ -275,10 +285,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
   }
 
   get getColorType() : string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
-  get customLogos(): [Record<any, any>] {
+  get custom_logos(): [Record<any, any>] {
     let product_id = this.product_id ? this.product_id : this.selectedProductId
     return this.$store.getters.getCustomLogos(product_id)
   }
@@ -323,140 +333,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     return this.$store.getters.getIsSafari
   }
 
-  @Watch('customLogos', {
-    deep: true
-  })
-  customLogosChanged(newVal: [Record<any, any>]) {
-    if (this.mounted && this.logoAllowed) {
-      const self = this
-      if (this.customLogoObjects.length != this.customLogos.filter((logo: Record<any, any>) => logo && logo.url).length) {
-        this.customLogoObjects.forEach((item: Record<any, any>, index: number) => {
-          if (item && (!this.customLogos[item.logoIndex] || this.customLogos[item.logoIndex].url == '' || this.customLogos[item.logoIndex].url == null)) {
-            this.frontCanvas.remove(this.customLogoObjects[item.logoIndex])
-            if (this.backCanvas) {
-              this.backCanvas.remove(this.customLogoObjects[item.logoIndex])
-            }
-            this.customLogoObjects[item.logoIndex] = null
-            if (this.otherSideLogos[item.logoIndex]) {
-              this.frontCanvas.remove(this.otherSideLogos[item.logoIndex])
-              if (this.backCanvas) {
-                this.backCanvas.remove(this.otherSideLogos[item.logoIndex])
-              }
-              this.otherSideLogos[item.logoIndex] = null
-            }
-          }
-        })
-      }
-      newVal.forEach((logo: Record<any, any>, index: number) => {
-        let logoUrl = logo ? encodeURI((this.storageUrl + logo.url).trim()) : ''
-        if (logo && ((this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && logo.side != this.customLogoObjects[logo.logoIndex].side) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && !logo.url) || (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element && this.customLogoObjects[logo.logoIndex]._element.src.split("?")[0] != logoUrl))) {
-          self.frontCanvas.remove(this.customLogoObjects[logo.logoIndex])
-          if (self.backCanvas) {
-            self.backCanvas.remove(this.customLogoObjects[logo.logoIndex])
-          }
-          this.customLogoObjects[logo.logoIndex] = null
-          if (this.mainPreview) {
-            this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", { index: logo.logoIndex, data: null, scene: this });
-          }
-          if (this.otherSideLogos[index]) {
-            this.frontCanvas.remove(this.otherSideLogos[index])
-            if (this.backCanvas) {
-              this.backCanvas.remove(this.otherSideLogos[index])
-            }
-            this.otherSideLogos[index] = null
-          }
-        } else {
-          if (!logo && this.customLogoObjects[index]) {
-            this.frontCanvas.remove(this.customLogoObjects[index])
-            if (this.backCanvas) {
-              this.backCanvas.remove(this.customLogoObjects[index])
-            }
-            this.customLogoObjects[index] = null
-            if (this.mainPreview) {
-              this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", { index: index, data: null, scene: this });
-            }
-            if (this.otherSideLogos[index]) {
-              this.frontCanvas.remove(this.otherSideLogos[index])
-              if (this.backCanvas) {
-                this.backCanvas.remove(this.otherSideLogos[index])
-              }
-              this.otherSideLogos[index] = null
-            }
-          }
-        }
-      })
-
-      newVal.forEach((logo: Record<any, any>, index: number) => {
-        if (logo) {
-          if ((logo.side == 'back' && self.backCanvas) || logo.side == 'front') {
-            let addLogo = true
-            if (this.customLogoObjects[logo.logoIndex] && this.customLogoObjects[logo.logoIndex]._element) {
-              const logoObject = this.customLogoObjects[logo.logoIndex]
-              const otherSideObject = this.otherSideLogos[logo.logoIndex]
-
-              if (logo.haveControls) {
-                this.eventAction(logo, logoObject, otherSideObject)
-              }
-              addLogo = false
-            }
-
-            if (addLogo && logo.url) {
-              let backLogosCount = 0
-              if (!this.backCanvas) {
-                backLogosCount = this.customLogos.filter((item: Record<any, any>) => {
-                  return item && item.side == 'back'
-                }).length
-              }
-
-              if (this.logosLimit && this.customLogoObjects.filter((item: Record<any, any>) => item).length < this.logosLimit - backLogosCount) {
-                this.addLogos(logo, index)
-              } else if (!this.logosLimit) {
-                this.addLogos(logo, index)
-              }
-            }
-          }
-        }
-      })
-      if (this.mainPreview) {
-        //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
-        this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
-      }
-      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "custom_logos": this.customLogos})
-    }
-  }
-
-  @Watch('defaultColors', {
-    deep: true
-  })
-  defaultColorsChanged(newVal: [Record<any, any>]) {
-    if (this.productType == 'customized' && this.svg_groups_ready) {
-      let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-      if (defaultColors.length) {
-        this.changeDefaultColors(defaultColors)
-      } else {
-        this.setInitialColors();
-      }
-
-      if (this.mainPreview) {
-        //todo Here the main logic is whenever there is change in scene component then we update the ref of scene in store.
-        this.$store.commit('STORE_CANVAS_IMAGE', { front: this.$refs.front, back: this.$refs.back, scene: this })
-      }
-      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "default_colors": this.defaultColors})
-    }
-  }
-
-  @Watch('groupColors', {
-    deep: true, immediate: false
-  })
-  groupColorsChanged(newVal: Record<any, any>) {
-    if (this.productType == 'customized' && this.svg_groups_ready) {
-      this.changeGroupColor(newVal)
-      if(this.productEditInfoObject && this.productEditInfoObject.editing == false) {
-        this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { "group_colors": this.groupColors})
-      }
-    }
-  }
-
   public eventAction(item: Record<any, any>, object: Record<any, any>, otherSideObject: Record<any, any>) {
     object.center()
     object.set({
@@ -484,120 +360,137 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     object.setCoords()
   }
 
-  public async changeGroupColor(groupColors: Record<any, any>) {
-    let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-    let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
-    texture.forEach((item: Record<any, any>) => {
-      item.id = item.id.toLowerCase()
-      if (groupColors[item.id]) {
-        item.set('fill', groupColors[item.id].color)
-        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-          if (svgGroup.id == item.id) {
-            svgGroup.color = groupColors[item.id].color
-            svgGroup.pantone = groupColors[item.id].pantone
-            if (this.mainPreview) {
-              this.$store.dispatch('updateSvgGroups', {
-                index: index,
-                color: groupColors[item.id].color,
-                pantone: groupColors[item.id].pantone,
-                name: groupColors[item.id].name
-              })
-            }
+  public async changeColors() {
+    if(this.mounted) {
+      await this.changeDefaultColors()
+      await this.changeGroupColors()
+    }
+  }
 
-          }
-        })
-      } else if (!defaultColors.length) {
-        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-          if (svgGroup.id == item.id) {
-            if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
-              item.set('fill', this.initialSvgGroups[index].color)
-              if (!this.back) {
-                Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
-              }
-            }
-          }
-        })
-      }
-    })
-    this.frontCanvas.renderAll()
-    if (this.back) {
-      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
-      texture.forEach((item: Record<any, any>) => {
-        item.id = item.id.toLowerCase()
-        if (groupColors[item.id]) {
-          item.set('fill', groupColors[item.id].color);
-          if (this.mainPreview) {
+  public async changeGroupColors() {
+    if(this.productType == 'customized') {
+      if (Object.keys(this.groupColors).length) {
+        let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+        let groupColors = this.groupColors
+        let texture = this.frontTexture._objects ? this.frontTexture._objects : [this.frontTexture]
+        texture.forEach((item: Record<any, any>) => {
+          item.id = item.id.toLowerCase()
+          if (groupColors[item.id]) {
+            item.set('fill', groupColors[item.id].color)
             this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
               if (svgGroup.id == item.id) {
-                this.$store.dispatch('updateSvgGroups', {
-                  index: index,
-                  color: groupColors[item.id].color,
-                  pantone: groupColors[item.id].pantone,
-                  name: groupColors[item.id].name
-                })
+                svgGroup.color = groupColors[item.id].color
+                svgGroup.pantone = groupColors[item.id].pantone
+                if (this.mainPreview) {
+                  this.$store.dispatch('updateSvgGroups', {
+                    index: index,
+                    color: groupColors[item.id].color,
+                    pantone: groupColors[item.id].pantone,
+                    name: groupColors[item.id].name
+                  })
+                }
+
+              }
+            })
+          } else if (!defaultColors.length) {
+            this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+              if (svgGroup.id == item.id) {
+                if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
+                  item.set('fill', this.initialSvgGroups[index].color)
+                  if (!this.back) {
+                    Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+                  }
+                }
               }
             })
           }
-        } else if (!defaultColors.length) {
-          this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-            if (svgGroup.id == item.id) {
-              if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
-                item.set('fill', this.initialSvgGroups[index].color)
-                Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+        })
+        this.frontCanvas.renderAll()
+        if (this.back) {
+          texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
+          texture.forEach((item: Record<any, any>) => {
+            item.id = item.id.toLowerCase()
+            if (groupColors[item.id]) {
+              item.set('fill', groupColors[item.id].color);
+              if (this.mainPreview) {
+                this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+                  if (svgGroup.id == item.id) {
+                    this.$store.dispatch('updateSvgGroups', {
+                      index: index,
+                      color: groupColors[item.id].color,
+                      pantone: groupColors[item.id].pantone,
+                      name: groupColors[item.id].name
+                    })
+                  }
+                })
               }
+            } else if (!defaultColors.length) {
+              this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+                if (svgGroup.id == item.id) {
+                  if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
+                    item.set('fill', this.initialSvgGroups[index].color)
+                    Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+                  }
+                }
+              })
             }
           })
+          this.backCanvas.renderAll()
         }
-      })
-      this.backCanvas.renderAll()
+        this.unHideColorGrouping()
+      }
     }
-    this.unHideColorGrouping()
   }
 
-  public async changeDefaultColors(defaultColors: [Record<any, any>]): Promise<void> {
-    let appliedDefaultColors: string[] = []
-    let useColorIndex = 0
-    this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      appliedDefaultColors[svgGroup.id] = defaultColors[useColorIndex].color
-      if (this.mainPreview) {
-        this.$store.dispatch('updateSvgGroups',
-          {
-            index: index,
-            color: defaultColors[useColorIndex].color,
-            pantone: defaultColors[useColorIndex].pantone,
-            name: defaultColors[useColorIndex].name
+  public async changeDefaultColors(): Promise<void> {
+    if(this.productType == 'customized') {
+      let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+      if (defaultColors.length) {
+        let appliedDefaultColors: string[] = []
+        let useColorIndex = 0
+        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+          appliedDefaultColors[svgGroup.id] = defaultColors[useColorIndex].color
+          if (this.mainPreview) {
+            this.$store.dispatch('updateSvgGroups',
+              {
+                index: index,
+                color: defaultColors[useColorIndex].color,
+                pantone: defaultColors[useColorIndex].pantone,
+                name: defaultColors[useColorIndex].name
+              })
+          }
+          svgGroup.color = defaultColors[useColorIndex].color
+          svgGroup.pantone = defaultColors[useColorIndex].pantone
+          svgGroup.name = defaultColors[useColorIndex].name
+
+          useColorIndex++
+          if (useColorIndex >= defaultColors.length) {
+            useColorIndex = 0
+          }
+        })
+
+        let texture = this.frontTexture._objects ? this.frontTexture._objects : [this.frontTexture]
+        texture.forEach((item: Record<any, any>) => {
+          item.id = item.id.toLowerCase()
+          if (appliedDefaultColors[item.id]) {
+            item.set('fill', appliedDefaultColors[item.id]);
+          }
+        })
+        this.frontCanvas.renderAll()
+
+        if (this.back) {
+          texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
+          texture.forEach((item: Record<any, any>) => {
+            item.id = item.id.toLowerCase()
+            if (appliedDefaultColors[item.id]) {
+              item.set('fill', appliedDefaultColors[item.id]);
+            }
           })
-      }
-      svgGroup.color = defaultColors[useColorIndex].color
-      svgGroup.pantone = defaultColors[useColorIndex].pantone
-      svgGroup.name = defaultColors[useColorIndex].name
-
-      useColorIndex++
-      if (useColorIndex >= defaultColors.length) {
-        useColorIndex = 0
-      }
-    })
-
-    let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
-    texture.forEach((item: Record<any, any>) => {
-      item.id = item.id.toLowerCase()
-      if (appliedDefaultColors[item.id]) {
-        item.set('fill', appliedDefaultColors[item.id]);
-      }
-    })
-    this.frontCanvas.renderAll()
-
-    if (this.back) {
-      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
-      texture.forEach((item: Record<any, any>) => {
-        item.id = item.id.toLowerCase()
-        if (appliedDefaultColors[item.id]) {
-          item.set('fill', appliedDefaultColors[item.id]);
+          this.backCanvas.renderAll()
         }
-      })
-      this.backCanvas.renderAll()
+        this.unHideColorGrouping()
+      }
     }
-    this.unHideColorGrouping()
   }
 
   public setInitialColors(): void {
@@ -774,19 +667,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
       await this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
-    if (this.productType == 'customized' && this.defaultColors.length) {
-      let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-      if (defaultColors.length) {
-        await this.changeDefaultColors(defaultColors)
-      }
-    }
+    await this.changeDefaultColors()
 
-    if (Object.keys(this.groupColors).length) {
-      if (this.productType == 'customized') {
-        await this.changeGroupColor(this.groupColors)
-      }
-    }
-    this.svg_groups_ready = true
+    await this.changeGroupColors()
+
     this.showLoader = false
   }
 
@@ -827,6 +711,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
       }
 
+
       const self: Record<any, any> = this
 
       Promise.all(promises).then((values) => {
@@ -844,6 +729,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           canvas.add(model)
           canvas.viewportCenterObject(model)
         }
+
         if (side == 'back') {
           canvas.add(self.dimTextBack)
         } else {
@@ -851,6 +737,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         }
         canvas.renderAll()
 
+        if(side == 'front') {
+          this.addClipPath(ImageData.safe_zone_url, side)
+        }
         if (!this.back || (this.back && side == 'back')) {
           if (ImageData.file_extension == 'svg' && this.productType == 'customized') {
             this.getSvgGroups()
@@ -865,43 +754,46 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
               }
             })
           }
-          let logos: Record<any, any>[] = []
-          if (this.customLogos && this.logoAllowed) {
-            let customLogos = JSON.parse(JSON.stringify(this.customLogos))
-            if (this.logosLimit) {
-              customLogos = this.customLogos.slice(0, this.logosLimit) as [Record<any, any>]
+
+          this.addClipPath(ImageData.safe_zone_url, side).then(() => {
+            let logos: Record<any, any>[] = []
+            if (this.custom_logos && this.logoAllowed) {
+              let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
+              if (this.logosLimit) {
+                custom_logos = this.custom_logos.slice(0, this.logosLimit) as [Record<any, any>]
+              }
+              logos = logos.concat(custom_logos) as [Record<any, any>]
             }
-            logos = logos.concat(customLogos) as [Record<any, any>]
-          }
-          if (logos.length) {
-            logos.forEach((logo: Record<any, any>, index: number) => {
-              if (logo && logo.url) {
-                this.addLogos(logo, index)
-              }
-            })
-          }
+            if (logos.length) {
+              logos.forEach((logo: Record<any, any>) => {
+                if (logo && logo.url) {
+                  this.addLogos(logo, true)
+                }
+              })
+            }
 
-          if(this.productCustomTexts) {
-            this.productCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
-              if(custom_text.value) {
-                const text = { value: custom_text, custom_text_index: index }
-                this.addTextsNew(text, true)
-              }
-            })
-          }
+            if(this.productCustomTexts) {
+              this.productCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
+                if(custom_text.value) {
+                  const text = { value: custom_text, custom_text_index: index }
+                  this.addTextsNew(text, true)
+                }
+              })
+            }
 
-          if (this.mainPreview) {
-            this.setProductionSVG()
-            this.$store.commit('STORE_CANVAS_IMAGE', {
-              front: this.$refs.front,
-              back: this.$refs.back,
-              scene: this
-            })
-            setTimeout(() => {
-              this.$store.commit('SET_CANVAS_READY', true);
-            }, 500)
-          }
-          this.mounted = true
+            if (this.mainPreview) {
+              this.setProductionSVG()
+              this.$store.commit('STORE_CANVAS_IMAGE', {
+                front: this.$refs.front,
+                back: this.$refs.back,
+                scene: this
+              })
+              setTimeout(() => {
+                this.$store.commit('SET_CANVAS_READY', true);
+              }, 500)
+            }
+            this.mounted = true
+          })
         }
         resolve('done')
       })
@@ -910,7 +802,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         if(fabric_object.get("type") == "text") {
           this.handleCustomTextModifiedEvent(e.target)
         } else {
-          this.objectMove(e, side)
+          this.handleCustomLogoModifiedEvent(e.target)
         }
         let objects = canvas.getObjects('line');
         for (let i in objects) {
@@ -1342,11 +1234,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         canvas = this.backCanvas
       }
 
-      let addIndex
+      let add_index
       if (target.type == 'text') {
-        addIndex = target.custom_text_index + '' + target.custom_text_item_index
+        add_index = target.custom_text_index + '' + target.custom_text_item_index
       } else if(target.type == 'logo') {
-        addIndex = target.logoIndex
+        add_index = target.logo_index
       }
 
       const modelBoundingRect = texture.getBoundingRect()
@@ -1401,7 +1293,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         checkPointY = target.top - (target.height * target.scaleY / 2)
       }
 
-      let otherSideObjects = this.otherSideLogos
+      let otherSideObjects = this.other_side_logos
       if (target.custom_text_index) {
         otherSideObjects = this.otherSideTexts
       }
@@ -1432,30 +1324,30 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
         }
 
         if(clone_again) {
-          if (otherSideObjects[addIndex]) {
+          if (otherSideObjects[add_index]) {
             if (side == 'back') {
-              this.frontCanvas.remove(otherSideObjects[addIndex])
+              this.frontCanvas.remove(otherSideObjects[add_index])
             } else {
               if (this.back) {
-                this.backCanvas.remove(otherSideObjects[addIndex])
+                this.backCanvas.remove(otherSideObjects[add_index])
               }
             }
-            delete otherSideObjects[addIndex]
+            delete otherSideObjects[add_index]
           }
         }
-        if (otherSideObjects[addIndex]) {
-          otherSideObjects[addIndex].left = addLeft
-          otherSideObjects[addIndex].top = addTop
+        if (otherSideObjects[add_index]) {
+          otherSideObjects[add_index].left = addLeft
+          otherSideObjects[add_index].top = addTop
           if(actualNearTo == 'top') {
-            otherSideObjects[addIndex].flipX = true
-            otherSideObjects[addIndex].flipY = true
+            otherSideObjects[add_index].flipX = true
+            otherSideObjects[add_index].flipY = true
           } else {
-            otherSideObjects[addIndex].flipX = false
-            otherSideObjects[addIndex].flipY = false
+            otherSideObjects[add_index].flipX = false
+            otherSideObjects[add_index].flipY = false
           }
-          otherSideObjects[addIndex].scaleX = target.scaleX
-          otherSideObjects[addIndex].scaleY = target.scaleY
-          otherSideObjects[addIndex].angle = -target.angle
+          otherSideObjects[add_index].scaleX = target.scaleX
+          otherSideObjects[add_index].scaleY = target.scaleY
+          otherSideObjects[add_index].angle = -target.angle
 
           if (side == 'back') {
             this.frontCanvas.renderAll()
@@ -1476,8 +1368,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
-          if(addIndex != undefined) {
-            otherSideObjects[addIndex] = objectAdd
+          if(add_index != undefined) {
+            otherSideObjects[add_index] = objectAdd
           }
           if (side == 'back') {
             this.frontCanvas.add(objectAdd)
@@ -1494,15 +1386,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
           }
         }
       } else {
-        if (otherSideObjects[addIndex]) {
+        if (otherSideObjects[add_index]) {
           if (side == 'back') {
-            this.frontCanvas.remove(otherSideObjects[addIndex])
+            this.frontCanvas.remove(otherSideObjects[add_index])
           } else {
             if (this.back) {
-              this.backCanvas.remove(otherSideObjects[addIndex])
+              this.backCanvas.remove(otherSideObjects[add_index])
             }
           }
-          delete otherSideObjects[addIndex]
+          delete otherSideObjects[add_index]
         }
       }
     }
@@ -1528,76 +1420,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
       })
     });
     return obj;
-  }
-
-  public objectMove(e: any, side: string) {
-    const self = this;
-    this.customLogos.forEach((logo, index) => {
-      if (logo) {
-        let logoUrl = encodeURI((this.storageUrl + logo.url).trim())
-        if (logoUrl == e.target._element.src.split("?")[0] && logo.logoIndex == e.target.logoIndex) {
-          if (e.action == 'drag') {
-            let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'x_axis',
-              value: e.target.left
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'y_axis',
-              value: e.target.top
-            })
-          } else if (e.action == 'scale' || e.action == 'scaleX' || e.action == 'scaleY') {
-            let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-            const width = e.target.width * e.target.scaleX;
-            const height = e.target.height * e.target.scaleY;
-            const converted_width = unitConversion((width * this.measurementRatio));
-            const converted_height = unitConversion((height * this.measurementRatio));
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'scaleX',
-              value: e.target.scaleX
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'originalWidth',
-              value:converted_width.value,
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'scaleY',
-              value: e.target.scaleY
-            })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'originalHeight',
-              value:converted_height.value
-            })
-          } else if (e.action == 'rotate') {
-            let before_update = this.updateLogoObject(JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), { 'action': e.action })
-            self.$store.commit('UPDATE_UNDO', { data: before_update, action: 'customLogos' })
-            self.$store.dispatch('updateCustomLogoAttribute', {
-              index: index,
-              attribute: 'rotation',
-              value: e.target.angle
-            })
-          }
-          self.$store.dispatch('updateCustomLogoAttribute', {
-            index: index,
-            attribute: 'action',
-            value: e.action
-          })
-          let dimText = this.dimTextFront
-          if (e.target.side == 'back' || e.target.side == 'Back') {
-            dimText = this.dimTextBack
-          }
-          this.showDimensions(e, dimText)
-        }
-      }
-    })
   }
 
   public async addModel(modelUrl: string, side: string) {
@@ -1688,6 +1510,49 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     })
   }
 
+  public addClipPath(url: string, side: string) {
+    return new Promise((resolve, reject) => {
+      if(url) {
+        fabric.loadSVGFromURL(url, (objects: any, options: any) => {
+          options.crossOrigin = 'Anonymous'
+          const img = fabric.util.groupSVGElements(objects) as fabric.Group
+
+          this.frontCanvas.viewportCenterObject(img)
+
+          let texture = this.frontTexture
+          if (side == 'back') {
+            texture = this.backTexture
+          }
+          img.set({
+            scaleX: texture.scaleX,
+            scaleY: texture.scaleY,
+            hasControls: false,
+            selectable: false,
+            evented: false,
+            lockMovementX: true,
+            lockMovementY: true,
+            absolutePositioned: true
+          })
+
+          img.center().setCoords();
+
+          img.inverted = true
+
+          if (side == 'back') {
+            this.clip_path_back = img
+          } else {
+            this.clip_path_front = img
+          }
+
+
+          resolve('done')
+        })
+      } else {
+        resolve('done')
+      }
+    })
+  }
+
   public addSvgLogos(logo: Record<any, any>) {
     if (logo.side == 'front' || (logo.side == 'back' && this.back)) {
       let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari? getRandom(3) : '11')
@@ -1724,87 +1589,109 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     }
   }
 
-  public addLogos(logo: Record<any, any>, logoIndex: null | number = null) {
-    if ('logoIndex' in logo) {
-      logoIndex = logo.logoIndex
-    } else {
-      this.$store.dispatch('updateCustomLogoWithoutTrigger', {
-        index: logoIndex,
-        data: {
-          logoIndex: logoIndex,
+  public async resetAndAddLogos() {
+    if(this.mounted) {
+      await this.resetLogosFromCanvas()
+      let logos: Record<any, any>[] = []
+      if (this.custom_logos && this.logoAllowed) {
+        let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
+        if (this.logosLimit) {
+          custom_logos = this.custom_logos.slice(0, this.logosLimit) as [Record<any, any>]
         }
-      })
-    }
-
-    if ((logo.side == 'front' || (logo.side == 'back' && this.back)) && (this.multipleLogo || (!this.multipleLogo && logoIndex as number == 0)) && !this.customLogoObjects[logoIndex as number]) {
-      if (logo.customLogo) {
-        this.customLogoObjects[logoIndex as number] = true
+        logos = logos.concat(custom_logos) as [Record<any, any>]
       }
-      logo.haveControls = Boolean(logo.haveControls)
-      let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari? getRandom(3) : '11')
-      fabric.Image.fromURL(logoUrl, async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
-        img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
-        img.set({
-          left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
-          top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
-          angle: logo.rotation< 0? 360 - logo.rotation : logo.rotation  as number,
-          centeredScaling: true,
-          selectable: this.canvasSelection,
-          //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
-          hasControls: logo.haveControls,
-          hasBorders: false,
-          evented: logo.haveControls,
-          globalCompositeOperation: 'source-atop',
-          lockScalingFlip: true,
-          padding: 15,
-          cornerSize: 30,
-          type: "logo",
+      if (logos.length) {
+        logos.forEach((logo: Record<any, any>) => {
+          if (logo && logo.url) {
+            this.addLogos(logo)
+          }
         })
+      }
+    }
+  }
 
-        if (logo.scaleX && logo.scaleY) {
-          img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX
-          img.scaleY = this.canvasHeight / this.mainCanvasHeight * logo.scaleY
-        }
-
-        let model = this.frontModel
-        let canvas = this.frontCanvas
-        let dimText = this.dimTextFront
-        if (logo.side == 'back') {
-          canvas = this.backCanvas
-          model = this.backModel
-          dimText = this.dimTextBack
-        }
-
-        img.setControlsVisibility({
-          tl: false,
-          bl: false,
-          tr: true,
-          br: true,
-          ml: false,
-          mb: false,
-          mr: false,
-          mt: false,
-          mtr: false
-        })
-
-        Object.assign(img, {
-          logoIndex: logoIndex,
-          side: logo.side
-        })
-        canvas.add(img)
-        if (this.productType == 'customized') {
-          model.bringToFront()
-        }
-        canvas.renderAll()
-
-        this.addToOtherSide(img, logo.side)
-
+  public addLogos(logo: Record<any, any>, from_load = false) {
+    if(logo.logo_index == 0) {
+      logo = this.custom_logos[logo.logo_index]
+    }
+    if(logo.product_id == this.product_id && (this.mounted || from_load)) {
+      if(this.custom_logo_objects[logo.logo_index as number]) {
+        this.deleteExistingLogoFromCanvas(logo.logo_index)
+      }
+      if (logo.url && (logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.custom_logo_objects[logo.logo_index as number]) {
         if (logo.customLogo) {
+          this.custom_logo_objects[logo.logo_index as number] = true
+        }
+        logo.haveControls = Boolean(logo.haveControls)
+        let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari ? getRandom(3) : '11')
+        fabric.Image.fromURL(logoUrl, async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
+          img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
+          img.set({
+            left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
+            top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
+            angle: logo.rotation < 0 ? 360 - logo.rotation : logo.rotation as number,
+            centeredScaling: true,
+            selectable: this.canvasSelection,
+            //selectable: !this.canvasSelection ? this.canvasSelection : logo.haveControls,
+            hasControls: logo.haveControls,
+            hasBorders: false,
+            evented: true,
+            globalCompositeOperation: 'source-atop',
+            lockScalingFlip: true,
+            padding: 15,
+            cornerSize: 30,
+            type: "logo",
+          })
+
+          if(logo.side == 'back') {
+            img.clipPath = this.clip_path_back
+          } else {
+            img.clipPath = this.clip_path_front
+          }
+
+          if (logo.scaleX && logo.scaleY) {
+            img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX
+            img.scaleY = this.canvasHeight / this.mainCanvasHeight * logo.scaleY
+          }
+
+          let model = this.frontModel
+          let canvas = this.frontCanvas
+          let dimText = this.dimTextFront
+          if (logo.side == 'back') {
+            canvas = this.backCanvas
+            model = this.backModel
+            dimText = this.dimTextBack
+          }
+
+          img.setControlsVisibility({
+            tl: false,
+            bl: false,
+            tr: true,
+            br: true,
+            ml: false,
+            mb: false,
+            mr: false,
+            mt: false,
+            mtr: false
+          })
+
+          Object.assign(img, {
+            logo_index: logo.logo_index,
+            side: logo.side
+          })
+          canvas.add(img)
+          if (this.productType == 'customized') {
+            model.bringToFront()
+          }
+          canvas.renderAll()
+
+          this.addToOtherSide(img, logo.side)
+
           if (this.mainPreview) {
             const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
             const converted_height = unitConversion(img.height * img.scaleY * this.measurementRatio)
-            await this.$store.dispatch('updateCustomLogoWithoutTrigger', {
-              index: logoIndex,
+            this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
+              custom_logo_index: logo.logo_index,
               data: {
                 actualWidth: img.width,
                 actualHeight: img.height,
@@ -1815,28 +1702,69 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
               }
             })
           }
-          this.customLogoObjects[logoIndex as number] = img
+          this.custom_logo_objects[logo.logo_index as number] = img
           if (this.mainPreview) {
             await this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {
-              index: logoIndex,
+              index: logo.logo_index,
               data: img,
               scene: this
             });
           }
-        } else {
-          this.logoObjects.push(img)
-        }
 
-        img.on('selected', (e: Record<any, any>) => {
-          this.$root.$emit('changeLogoTabIndex', logoIndex);
-          this.showDimensions(e, dimText)
-        })
-        canvas.on('selection:cleared', () => {
-          dimText.set({
-            visible: false
+          img.on('selected', (e: Record<any, any>) => {
+            this.$root.$emit('changeLogoTabIndex', logo.logo_index);
+            this.showDimensions(e, dimText)
           })
-        })
-      }, { crossOrigin: 'Anonymous' })
+          canvas.on('selection:cleared', () => {
+            dimText.set({
+              visible: false
+            })
+          })
+        }, { crossOrigin: 'Anonymous' })
+      }
+    }
+  }
+
+  public async resetLogosFromCanvas() {
+    if(this.custom_logo_objects) {
+      for (let objectIndex = 0; objectIndex < this.custom_logo_objects.length; objectIndex++) {
+        const custom_logo = this.custom_logo_objects[objectIndex]
+        if(custom_logo) {
+          this.frontCanvas.remove(custom_logo)
+          if(this.back) {
+            this.backCanvas.remove(custom_logo)
+          }
+          const otherSideLogo = this.other_side_logos[objectIndex]
+          if(otherSideLogo) {
+            this.frontCanvas.remove(otherSideLogo)
+            if(this.back) {
+              this.backCanvas.remove(otherSideLogo)
+            }
+          }
+        }
+      }
+      this.custom_logo_objects = []
+    }
+  }
+
+  public async deleteExistingLogoFromCanvas(custom_logo_index: number) {
+    if(custom_logo_index == 0 || this.custom_logos[custom_logo_index] && this.custom_logos[custom_logo_index].product_id == this.product_id) {
+      const custom_logo = this.custom_logo_objects[custom_logo_index]
+      if (custom_logo) {
+        this.frontCanvas.remove(custom_logo)
+        if (this.back) {
+          this.backCanvas.remove(custom_logo)
+        }
+        const other_side_logo = this.other_side_logos[custom_logo_index]
+        if (other_side_logo) {
+          this.frontCanvas.remove(other_side_logo)
+          if (this.back) {
+            this.backCanvas.remove(other_side_logo)
+          }
+          this.other_side_logos[custom_logo_index] = null
+        }
+      }
+      this.custom_logo_objects[custom_logo_index] = null
     }
   }
 
@@ -2135,6 +2063,40 @@ export default class Scene extends Mixins(HideUpdateLockerButton) {
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height.value;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
+  }
+
+  public handleCustomLogoModifiedEvent(fabric_object: Record<any, any>) {
+    let self: Record<any, any> = this;
+    const logo_index =  fabric_object.get("logo_index");
+    if(this.custom_logos[logo_index]) {
+      this.custom_logos[logo_index].x_axis = fabric_object.get("left");
+      this.custom_logos[logo_index].y_axis = fabric_object.get("top");
+      this.custom_logos[logo_index].rotation = fabric_object.get("angle");
+      this.custom_logos[logo_index].scaleX = fabric_object.get("scaleX");
+      this.custom_logos[logo_index].scaleY = fabric_object.get("scaleY");
+      const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
+      const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
+      const converted_width = unitConversion(width)
+      const converted_height = unitConversion(height)
+      this.custom_logos[logo_index].originalWidth = converted_width.value;
+      this.custom_logos[logo_index].originalHeight = converted_height.value;
+
+      this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
+        custom_logo_index: fabric_object.get("logo_index"),
+        data: {
+          x_axis: fabric_object.get("left"),
+          y_axis: fabric_object.get("top"),
+          rotation: fabric_object.get("angle"),
+          scaleX: fabric_object.get("scaleX"),
+          scaleY: fabric_object.get("scaleY"),
+          actualWidth: fabric_object.get('width'),
+          actualHeight: fabric_object.get('height'),
+          originalWidth: converted_width.value,
+          originalHeight: converted_height.value,
+        }
+      })
+    }
+    self.$eventBus.$emit("customLogoStoreUpdated", logo_index);
   }
 
   public setShowSmall(side: string): void {
