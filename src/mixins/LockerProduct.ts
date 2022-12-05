@@ -109,11 +109,11 @@ export class LockerProducts extends Mixins(FetchCategories) {
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
 
-    const categories_promise = this.fetchCategories(null,  room_product.product_id);
-    categories_promise.then((response) => {
+    return new Promise((resolve, reject) => {
+      const categories_promise = this.fetchCategories(null,  room_product.product_id);
+      categories_promise.then((response) => {
       let is_private:Boolean = this.$store.getters.getPrivateProduct;
       let url = `list/products?private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1&collection_type=true`;
-      return new Promise((resolve, reject) => {
         const handle_product = new Promise((resolve, reject) => {
           http.get(url).then(async (response: Record<any, any>) => {
             let active_product_detail = response.data.editing_product_detail;
@@ -397,9 +397,6 @@ export class handleMainProducts extends Mixins(FetchCategories) {
         self.show_roster = true;
         await self.setProductSizes();
         await self.show();
-        await http.post(`/get-factory-settings`, {factory_id:selected_product.factory_id, keys: ['vector_image_constraint']}).then((res) => {
-          this.$store.commit('SET_SETTING', res.data.result.settings)
-        });
         resolve(true);
       })
     })
