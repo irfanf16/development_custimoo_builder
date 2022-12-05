@@ -16,7 +16,8 @@ export default class CommonImportMixin extends Vue{
       localStorage.setItem('adminToken', token)
       await authenticateUser(token)
       await this.$store.dispatch('resetStore')
-      await this.$router.push({name: 'Home'})
+      // @ts-ignore
+      await window.parent.vueRouter.push({name: 'Home'})
     } else{
       const storageInterval = setInterval(()=>{
         const jwtToken = localStorage.getItem('jwtToken');
