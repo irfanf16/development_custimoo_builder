@@ -202,8 +202,14 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
         });
 
         if(cart_items[cart_item_index]){
+
           let factory_item_index = cart_items[cart_item_index].factory_products.findIndex((factory_item)=>{
-            return factory_item.ecommerce_cart_id == ecommerce_update_id
+            if(this.company.platform === 'wordpress'){
+              return factory_item.ecommerce_cart_id == ecommerce_update_id
+            }else if(this.company.platform === 'shopify'){
+              return factory_item.id == ecommerce_update_id
+            }
+
           } );
 
           if(cart_items[cart_item_index].factory_products[factory_item_index]){

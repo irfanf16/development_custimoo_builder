@@ -1165,8 +1165,6 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           ecom_form_data.append('product_name', (cart_product as Record<any, any>).product_name);
         }
 
-
-
         ecom_form_data.append('product_id', (cart_product as Record<any, any>).ecommerce_post_id);
         ecom_form_data.append('quantity', total_quantity.toString());
         ecom_form_data.append('product_front_image', (cart_product as Record<any, any>).front_image);
