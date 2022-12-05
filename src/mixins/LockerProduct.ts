@@ -970,13 +970,25 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       let company_domain = company.company_domain;
 
       let ecommerce_cart_id: string|null = null;
-      let ecom_url = company_domain + '/wp-admin/admin-ajax.php';
+
+      let ecom_url  = '';
+      let total_quantity = 0;
+
+
+      if (platform === 'wordpress' || platform === 'shopify') {
+        if ((cart_product as Record<any, any>).sync_id === '' || (cart_product as Record<any, any>).ecommerce_post_id === '') {
+          self.showToast('This product cannot be added into the cart','Error');
+          return false
+        }
+        let roster_detail = await this.$store.getters.getProductRosters()
+        for(let i=0; i < roster_detail.length;  i++){
+          let roster = roster_detail[i];
+          total_quantity += parseInt(roster.quantity);
+        }
+      }
 
       if(platform === 'wordpress'){
-        if((cart_product as Record<any, any>).sync_id === "" || (cart_product as Record<any, any>).ecommerce_post_id === ""){
-          return false;
-        }
-
+        ecom_url = company_domain + '/wp-admin/admin-ajax.php';
         let ecom_form_data = new FormData();
 
         let ecommerce_update_id = self.$route.query.update_item;
@@ -988,13 +1000,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           ecom_form_data.append('product_name', (cart_product as Record<any, any>).product_name);
         }
 
-        let roster_detail = await this.$store.getters.getProductRosters()
 
-        let total_quantity = 0;
-        for(let i=0; i < roster_detail.length;  i++){
-          let roster = roster_detail[i];
-          total_quantity += parseInt(roster.quantity);
-        }
 
         ecom_form_data.append('product_id', (cart_product as Record<any, any>).ecommerce_post_id);
         ecom_form_data.append('quantity', total_quantity.toString());
@@ -1015,6 +1021,8 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
         (post_data as Record<any,any>).factory_product.ecommerce_cart_id = ecommerce_cart_id;
       }
+
+
       if(santacart){
         self.$store.dispatch('setCartLoading',true);
         http.post(url, post_data).then(async (res: any) => {
@@ -1036,12 +1044,47 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 await self.exitFromEditMode()
               }
               http.post(ecom_url, update_cart_id_data).then((res: any) => {
+                self.$store.dispatch('setCartLoading',false);
                 if(!collection_view) {
                   window.location.href = company_domain + '/cart'
                 }
               }).catch(err => {
+                self.$store.dispatch('setCartLoading',false);
                 self.showErrorArr(err.response.data.errors)
               });
+
+            }
+            else if(platform === 'shopify'){
+              let shopify_cart_data:Record<any, any> = {};
+
+              let ecommerce_update_id = self.$route.query.update_item;
+              if(ecommerce_update_id){
+                ecom_url = company_domain + '/cart/change.js'
+                shopify_cart_data['line'] = self.$route.query.line;
+              }else{
+                ecom_url = company_domain + '/cart/add.js'
+                shopify_cart_data['id'] = (cart_product as Record<any, any>).ecommerce_variant_id;
+               }
+
+              shopify_cart_data['quantity'] = total_quantity;
+              shopify_cart_data['properties'] = {
+                'custimoo_front_image': api_res.front_image_url,
+                'custimoo_back_image': api_res.back_image_url,
+                'custimoo_cart_url': `${company_domain}/pages/customizer/#/?sync_id=${(cart_product as Record<any, any>).sync_id}&update_item=${api_res.cart_item_key}&update_cart=${api_res.new_created_id}`,
+                'custimoo_product_name': (cart_product as Record<any, any>).product_name
+              };
+
+              // console.log(shopify_cart_data);
+              self.$store.dispatch('setCartLoading',true);
+              http.post(ecom_url, shopify_cart_data).then((res: any) => {
+                console.log('shopify_response',res);
+                self.$store.dispatch('setCartLoading',false);
+              }).catch(err => {
+                console.log('shopify error',err);
+                santacart = false
+                self.showToast(err, 'ERROR');
+                self.$store.dispatch('setCartLoading',false);
+              })
 
             }
             else {
@@ -1050,10 +1093,12 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 let query_params = await self.setQueryParams
                 self.retrieveProducts(query_params);
               }
+              self.$store.dispatch('setCartLoading',false);
             }
-            self.$store.dispatch('setCartLoading',true);
+
           }
-          else {
+          else
+          {
             if(res.data.status_code === 422){
               self.showErrorValidation(res.data.errors);
             }
@@ -1062,9 +1107,10 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               let query_params = await self.setQueryParams
               self.retrieveProducts(query_params);
             }
+
+            self.$store.dispatch('setCartLoading',false);
           }
           self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
-          self.$store.dispatch('setCartLoading',false);
 
           if(collection_view){
             self.$root.$emit('getNextProduct');

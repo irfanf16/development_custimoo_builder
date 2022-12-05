@@ -676,6 +676,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         model_name: product_models[selected_model_index].model_name,
         product_id: selected_product.product_id,
         ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
+        ecommerce_variant_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_variant_id:'',
         sync_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].sync_id:'',
         product_type: selected_product.product_type,
         product_name: product_name,
