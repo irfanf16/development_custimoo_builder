@@ -309,10 +309,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return this.$store.getters.getProductEditInfoObject
   }
 
-  get mainSvgGroups(): [Record<any, any>] {
-    return this.$store.getters.getSvgGroups
-  }
-
   get selectedProductId(): number {
     return this.$store.getters.getSelectedProductId
   }
@@ -1696,9 +1692,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 actualWidth: img.width,
                 actualHeight: img.height,
                 originalWidth: converted_width.value,
-                originalHeight: converted_height.value,
-                scaleX: img.scaleX,
-                scaleY: img.scaleY,
+                originalHeight: converted_height.value
               }
             })
           }
