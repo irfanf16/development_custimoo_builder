@@ -1821,6 +1821,13 @@ const getUrlParameter = (name = '') => {
   return hash_url.replace('#/', '')
 }
 
+const routerPush = (router, route_name) => {
+  const router_url = router.resolve({name: route_name})
+  if(router_url) {
+    window.parent.window.location.hash = router_url.href;
+  }
+}
+
 const showError = (err) => {
   if (typeof err === 'string') {
     VsToast.show({
@@ -1865,6 +1872,6 @@ export {
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
-  getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps
-
+  getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
+  routerPush
 };

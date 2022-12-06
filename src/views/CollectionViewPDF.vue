@@ -162,7 +162,10 @@ import opentype from 'opentype.js'
     this.getCollection()
     this.$store.dispatch('setCartIconShow', true);
     this.$store.dispatch('setCollectionView', true);
-    await this.$store.dispatch('fetchGeneralSettings','measurement_unit');
+    await http.get(`/get-settings`).then((res) => {
+      this.$store.commit('SET_SETTING', res.data.result.settings)
+      this.$store.commit('SET_FACTORY_SETTING', res.data.result.factory_settings)
+    });
     this.$nextTick(() => {
       if (!this.rosterDetails.length) {
         this.rosterDetailsInit()
@@ -377,7 +380,8 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   getCollection(): void {
     this.showLoader = true
     const collection_file_name = this.$route.params.collection_file_name;
-    http.get(`/collection/${collection_file_name}/view`).then(async (response: any) => {
+    console.log('collection_file_name', collection_file_name)
+    http.get(`/collection/view?collection_file_name=${encodeURIComponent(collection_file_name)}`).then(async (response: any) => {
         this.collection = response.data.result.collection
         this.showLoader = false
         this.room_products = await this.getRoomProducts() as Record<any, any>;

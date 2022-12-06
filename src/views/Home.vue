@@ -1562,13 +1562,26 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             self.showLoader = false;
             await self.$store.dispatch('setSearchLoader', false)
           }
-          await self.retrieveProducts()
+          this.exitFromEditMode();
+          resetLastActiveProductData();
+          const categories_promise = this.fetchCategories('customized');
+          categories_promise.then(async (response) => {
+            await self.retrieveProducts()
+            await self.$store.dispatch('setSearchLoader', false)
+          });
           return false;
         }
       } else {
         this.showError("No Product Found")
         self.showLoader = false
-        await self.$store.dispatch('setSearchLoader', false)
+        this.exitFromEditMode();
+        resetLastActiveProductData();
+        const categories_promise = this.fetchCategories('customized');
+        categories_promise.then(async (response) => {
+          await self.retrieveProducts()
+          await self.$store.dispatch('setSearchLoader', false)
+        });
+
       }
     }, (error) => {
       console.error("Error while getting order detail", error?.response?.data?.message)

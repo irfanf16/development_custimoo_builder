@@ -296,14 +296,16 @@ const ProductAttributes:Module<any, any> = {
       }
       else {
         const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
-        const custom_logo_index = payload.logo_index
-        let product_custom_logos = state.customLogos[product_id]
+        const custom_logo_index = payload.custom_logo_index
+        const product_custom_logos = state.customLogos[product_id]
         if(custom_logo_index >= 0) {
-          let product_custom_logo = product_custom_logos[custom_logo_index]
-          product_custom_logo = {...product_custom_logo, ...payload.data}
+          const product_custom_logo = product_custom_logos[custom_logo_index]
+          state.customLogos[product_id][custom_logo_index] = {...product_custom_logo, ...payload.data}
         }
         else {
-          product_custom_logos = payload.data
+          const custom_logos: Record<any,any> = state.customLogos[product_id];
+          state.customLogos[product_id] = {...custom_logos, ...payload.data}
+
         }
       }
     },
@@ -311,9 +313,11 @@ const ProductAttributes:Module<any, any> = {
       const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
       const logo_index = payload.logo_index
       if(logo_index >= 0) {
+        console.log('Set custom logos with Index', payload);
         Vue.set(state.customLogos[product_id], logo_index, payload.custom_logos)
       }
       else {
+        console.log('Set custom logos without Index', payload);
         Vue.set(state.customLogos, product_id, payload.custom_logos)
       }
     },
