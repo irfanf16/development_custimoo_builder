@@ -4,6 +4,7 @@ import { authenticateUser, getCompany, getUrlParameter, routerPush } from '@/hel
 import { i18n } from '@/i18n'
 import store from '@/store'
 Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 @Component
 export default class CommonImportMixin extends Vue{
