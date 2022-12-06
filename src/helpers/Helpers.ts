@@ -1849,9 +1849,9 @@ const showError = (err) => {
 const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
   return {
     id: updated_logo.id, url: updated_logo.url, original_logo: updated_logo.original_logo_url, original_logo_url: updated_logo.original_logo_url,
-    transparent_logo: updated_logo.transparent_logo, smart_transparent_logo: updated_logo.smart_transparent_logo,
-    is_smart_transparent: updated_logo.is_smart_transparent, is_vector: updated_logo.is_vector,
-    logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success
+    transparent_logo: updated_logo.transparent_logo_url, smart_transparent_logo: updated_logo.smart_transparent_logo_url,
+    is_smart_transparent: updated_logo.is_smart_transparent ? true : false, is_vector: updated_logo.is_vector ? true : false,
+    logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success ? true : false
   }
 }
 

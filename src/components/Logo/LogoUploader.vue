@@ -232,10 +232,6 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
           })
           await this.addRemoveTeamLogoOnAllProducts('add', logo_data)
         } else {
-          // const custom_logos_updated_props = { transparent_logo : logo_data.transparent_logo_url,
-          //   smart_transparent_logo : logo_data.smart_transparent_logo_url, original_logo_url : logo_data.original_logo_url,
-          //   is_smart_transparent : false, url : logo_data.logo_url, id : logo_data.id, is_replace_success: logo_data.is_replace_success
-          // }
           const custom_logos_updated_props = getLogoUpdatedProps(logo_data)
           delete this.customLogo.scaleX
           delete this.customLogo.scaleY

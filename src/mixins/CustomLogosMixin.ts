@@ -7,6 +7,7 @@ export default class CustomLogosMixin extends Vue{
     const custom_logos = this.$store.getters.getCustomLogos('all')
     if(action == 'add') {
       const team_logo_obj = getLogoUpdatedProps(team_logo)
+      console.log('team_logo_obj', team_logo, team_logo_obj)
       for(const product_id in custom_logos) {
         const product_team_logo = custom_logos[product_id][0]
         if(product_team_logo) {
