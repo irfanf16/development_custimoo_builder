@@ -501,19 +501,21 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
     let appliedDefaultColors: string[] = []
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      appliedDefaultColors[svgGroup.id] = defaultSvgGroups[svgGroup.id].color
-      if (this.mainPreview) {
-        this.$store.dispatch('updateSvgGroups',
-          {
-            index: index,
-            color: defaultSvgGroups[svgGroup.id].color,
-            pantone: defaultSvgGroups[svgGroup.id].pantone,
-            name: defaultSvgGroups[svgGroup.id].name
-          })
+      if(Object.keys(defaultSvgGroups).length && defaultSvgGroups[svgGroup.id]) {
+        appliedDefaultColors[svgGroup.id] = defaultSvgGroups[svgGroup.id].color
+        if (this.mainPreview) {
+          this.$store.dispatch('updateSvgGroups',
+            {
+              index: index,
+              color: defaultSvgGroups[svgGroup.id].color,
+              pantone: defaultSvgGroups[svgGroup.id].pantone,
+              name: defaultSvgGroups[svgGroup.id].name
+            })
+        }
+        svgGroup.color = defaultSvgGroups[svgGroup.id].color
+        svgGroup.pantone = defaultSvgGroups[svgGroup.id].pantone
+        svgGroup.name = defaultSvgGroups[svgGroup.id].name
       }
-      svgGroup.color = defaultSvgGroups[svgGroup.id].color
-      svgGroup.pantone = defaultSvgGroups[svgGroup.id].pantone
-      svgGroup.name = defaultSvgGroups[svgGroup.id].name
     })
 
     let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
@@ -1685,8 +1687,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
           canvas.renderAll()
 
-          this.addToOtherSide(img, logo.side)
-
           if (this.mainPreview) {
             const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
             const converted_height = unitConversion(img.height * img.scaleY * this.measurementRatio)
@@ -1720,6 +1720,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               visible: false
             })
           })
+
+          this.addToOtherSide(img, logo.side)
         }, { crossOrigin: 'Anonymous' })
       }
     }
@@ -1873,7 +1875,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (self.product_custom_text_objects[custom_text_index]) {
           await this.deleteExistingTextsFromCanvas(custom_text_index, false)
         }
-        if (custom_text.value) {
+        if (Object.keys(custom_text).length && custom_text.value) {
           custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
             let fabric_text: fabric.Text | fabric.Group | Record<any, any>
             if (this.mainPreview) {
