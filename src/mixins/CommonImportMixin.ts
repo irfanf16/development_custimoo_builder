@@ -1,6 +1,6 @@
 import { Component, Vue } from 'vue-property-decorator'
 import Gleap from 'gleap'
-import { authenticateUser, getCompany, getUrlParameter } from '@/helpers/Helpers'
+import { authenticateUser, getCompany, getUrlParameter, routerPush } from '@/helpers/Helpers'
 import { i18n } from '@/i18n'
 import store from '@/store'
 Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
@@ -16,8 +16,7 @@ export default class CommonImportMixin extends Vue{
       localStorage.setItem('adminToken', token)
       await authenticateUser(token)
       await this.$store.dispatch('resetStore')
-      // @ts-ignore
-      await window.parent.vueRouter.push({name: 'Home'})
+      routerPush(this.$router, 'Home')
     } else{
       const storageInterval = setInterval(()=>{
         const jwtToken = localStorage.getItem('jwtToken');

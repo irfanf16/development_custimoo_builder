@@ -59,7 +59,4 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 
-// @ts-ignore
-window.parent.vueRouter = router
-
 export default router
