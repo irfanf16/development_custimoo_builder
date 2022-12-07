@@ -1230,20 +1230,21 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                }
 
               shopify_cart_data['quantity'] = total_quantity;
+              let delete_cart_item_url = `${process.env.VUE_APP_API_BASE_URL}/api/carts/cart-items/${api_res.new_created_id}/factory_product/${api_res.cart_item_key}`;
               shopify_cart_data['properties'] = {
                 'custimoo_front_image': api_res.front_image_url,
                 'custimoo_back_image': api_res.back_image_url,
                 'custimoo_cart_url': `${company_domain}/pages/customizer/#/?sync_id=${(cart_product as Record<any, any>).sync_id}&update_item=${api_res.cart_item_key}&update_cart=${api_res.new_created_id}`,
-                'custimoo_product_name': (cart_product as Record<any, any>).product_name
+                'custimoo_delete_cart_url': delete_cart_item_url,
+                'custimoo_product_name': (cart_product as Record<any, any>).product_name,
               };
 
               // console.log(shopify_cart_data);
               self.$store.dispatch('setCartLoading',true);
               http.post(ecom_url, shopify_cart_data).then((res: any) => {
-                console.log('shopify_response',res);
-                self.$store.dispatch('setCartLoading',false);
+               self.$store.dispatch('setCartLoading',false);
               }).catch(err => {
-                console.log('shopify error',err);
+                http.delete(delete_cart_item_url);
                 santacart = false
                 self.showToast(err, 'ERROR');
                 self.$store.dispatch('setCartLoading',false);
