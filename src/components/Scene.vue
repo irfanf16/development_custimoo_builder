@@ -309,10 +309,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return this.$store.getters.getProductEditInfoObject
   }
 
-  get mainSvgGroups(): [Record<any, any>] {
-    return this.$store.getters.getSvgGroups
-  }
-
   get selectedProductId(): number {
     return this.$store.getters.getSelectedProductId
   }
@@ -384,6 +380,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 if (this.mainPreview) {
                   this.$store.dispatch('updateSvgGroups', {
                     index: index,
+                    id:item.id,
                     color: groupColors[item.id].color,
                     pantone: groupColors[item.id].pantone,
                     name: groupColors[item.id].name
@@ -417,6 +414,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   if (svgGroup.id == item.id) {
                     this.$store.dispatch('updateSvgGroups', {
                       index: index,
+                      id:item.id,
                       color: groupColors[item.id].color,
                       pantone: groupColors[item.id].pantone,
                       name: groupColors[item.id].name
@@ -454,6 +452,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             this.$store.dispatch('updateSvgGroups',
               {
                 index: index,
+                id:svgGroup.id,
                 color: defaultColors[useColorIndex].color,
                 pantone: defaultColors[useColorIndex].pantone,
                 name: defaultColors[useColorIndex].name
@@ -501,19 +500,22 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
     let appliedDefaultColors: string[] = []
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      appliedDefaultColors[svgGroup.id] = defaultSvgGroups[svgGroup.id].color
-      if (this.mainPreview) {
-        this.$store.dispatch('updateSvgGroups',
-          {
-            index: index,
-            color: defaultSvgGroups[svgGroup.id].color,
-            pantone: defaultSvgGroups[svgGroup.id].pantone,
-            name: defaultSvgGroups[svgGroup.id].name
-          })
+      if(Object.keys(defaultSvgGroups).length && defaultSvgGroups[svgGroup.id]) {
+        appliedDefaultColors[svgGroup.id] = defaultSvgGroups[svgGroup.id].color
+        if (this.mainPreview) {
+          this.$store.dispatch('updateSvgGroups',
+            {
+              index: index,
+              id:svgGroup.id,
+              color: defaultSvgGroups[svgGroup.id].color,
+              pantone: defaultSvgGroups[svgGroup.id].pantone,
+              name: defaultSvgGroups[svgGroup.id].name
+            })
+        }
+        svgGroup.color = defaultSvgGroups[svgGroup.id].color
+        svgGroup.pantone = defaultSvgGroups[svgGroup.id].pantone
+        svgGroup.name = defaultSvgGroups[svgGroup.id].name
       }
-      svgGroup.color = defaultSvgGroups[svgGroup.id].color
-      svgGroup.pantone = defaultSvgGroups[svgGroup.id].pantone
-      svgGroup.name = defaultSvgGroups[svgGroup.id].name
     })
 
     let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
@@ -585,9 +587,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               this.backCanvas.renderAll()
             }
             let svgIndex = 0
+            let svgGroupId = null;
             this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
               if (svgGroup.id == key.toLowerCase()) {
                 svgIndex = index
+                svgGroupId = svgGroup.id
                 svgGroup.color = changeColor.value
                 svgGroup.name = changeColor.name
                 svgGroup.pantone = changeColor.pantone
@@ -596,6 +600,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             if (this.mainPreview) {
               this.$store.dispatch('updateSvgGroups', {
                 index: svgIndex,
+                id:svgGroupId,
                 color: changeColor.value,
                 name: changeColor.name,
                 pantone: changeColor.pantone
@@ -1685,8 +1690,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
           canvas.renderAll()
 
-          this.addToOtherSide(img, logo.side)
-
           if (this.mainPreview) {
             const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
             const converted_height = unitConversion(img.height * img.scaleY * this.measurementRatio)
@@ -1696,9 +1699,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 actualWidth: img.width,
                 actualHeight: img.height,
                 originalWidth: converted_width.value,
-                originalHeight: converted_height.value,
-                scaleX: img.scaleX,
-                scaleY: img.scaleY,
+                originalHeight: converted_height.value
               }
             })
           }
@@ -1720,6 +1721,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               visible: false
             })
           })
+
+          this.addToOtherSide(img, logo.side)
         }, { crossOrigin: 'Anonymous' })
       }
     }
@@ -1873,7 +1876,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (self.product_custom_text_objects[custom_text_index]) {
           await this.deleteExistingTextsFromCanvas(custom_text_index, false)
         }
-        if (custom_text.value) {
+        if (Object.keys(custom_text).length && custom_text.value) {
           custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
             let fabric_text: fabric.Text | fabric.Group | Record<any, any>
             if (this.mainPreview) {

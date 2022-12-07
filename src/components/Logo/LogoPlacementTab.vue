@@ -33,7 +33,7 @@
               </div>
               <div class="logo-placemet-content" v-if="custom_logo.url">
                 <h4>Logo Placement</h4>
-                <b-form-select :value="custom_logo.side" :options="['front', 'back']" @change="handleLogoPlacementChange($event, custom_logo)"></b-form-select>
+                <b-form-select :value="custom_logo.side" :options="['front', 'back']" @change="handleLogoPlacementChange($event, customLogoIndex)"></b-form-select>
               </div>
             </div>
           </div>
@@ -187,10 +187,10 @@ export default class LogoPlacementTab extends Vue {
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 
-  public handleLogoPlacementChange(updated_value: string, custom_logo: Record<any, any>) {
-    custom_logo.side = updated_value
+  public handleLogoPlacementChange(updated_value: string, custom_logo_index: number) {
     let self: Record<any, any> = this;
-    self.$eventBus.$emit('handleCustomLogoUpdatedEvent', custom_logo)
+    this.customLogos[custom_logo_index].side = updated_value
+    self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogos[custom_logo_index])
   }
 
   public getColors() {
