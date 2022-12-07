@@ -79,7 +79,7 @@ import {getSelectedProductPantones} from "@/helpers/Helpers";
   }
 })
 export default class ColorAccordion extends Vue {
-  @Prop({required: true}) productColors!: any
+  @Prop({required: true}) productColors!: Record<any, any>[]
   @Prop({required: true}) tabIndex!: any
 
   public color= '#59c7f9'
