@@ -219,7 +219,6 @@ export class handleMainProducts extends Mixins(FetchCategories) {
               product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos
             })
             this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
-            await this.$store.dispatch('setProductsRosters')
           }
           else {
             let {sync_id, customizer_preview, update_cart} = self.$route.query
@@ -314,9 +313,8 @@ export class handleMainProducts extends Mixins(FetchCategories) {
       let selected_product = this.$store.getters.getSelectedProduct;
      // initCustomLogos(retrieved_products)
       await initCustomLogosNew(retrieved_products)
-      if(!set_last_active_data) {
-        this.$store.dispatch("setProductsRosters");
-      }
+      this.$store.dispatch("setProductsRosters");
+
       this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {products_rosters: this.$store.getters.getProductRosters('all')})
       let customLogos = this.$store.getters.getCustomLogoObject
       for (const product of retrieved_products) {
