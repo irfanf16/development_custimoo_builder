@@ -101,13 +101,13 @@
                             </div>
 
                             <b-tabs>
-                              <b-tab v-for="(product_color, productColorIndex) in product_colors" :key="`product_color_${productColorIndex}_${product_color.type}_type`">
+                              <b-tab v-for="(product_color, productColorIndex) in productColors" :key="`product_color_${productColorIndex}_${product_color.type}_type`">
                                 <template #title>
                                   {{product_color.name | capitalize}}
                                 </template>
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">
-                                    <div class="color-box" v-for="(color, colorIndex) in product_color.colors" :style="{background: color.value}"
+                                    <div class="color-box" v-for="(color, colorIndex) in product_color.color_text" :style="{background: color.value}"
                                         :key="`product_color_${productColorIndex}_${product_color.type}_type_color_${colorIndex}`" :title="color.name"
                                           @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)"></div>
                                   </div>
@@ -207,7 +207,7 @@
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
-import {HideUpdateLockerButton, ProductColors, ProductFonts} from "@/mixins/SelectedProductMixin";
+import {HideUpdateLockerButton, ProductFonts} from "@/mixins/SelectedProductMixin";
 import {find, filter} from "lodash";
 import colorPicker from '@caohenghu/vue-colorpicker';
 import {getSelectedProductPantones} from "@/helpers/Helpers";
@@ -224,7 +224,6 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
     let self: Record<any, any> = this;
 
     await this.productFonts()
-    self.product_colors = await this.productColors('file_colors');
   },
   filters: {
     capitalize: (value: string) => {
@@ -235,11 +234,11 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
   }
 })
 
-export default class CustomizationText extends Mixins(ProductColors, ProductFonts, HideUpdateLockerButton) {
+export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLockerButton) {
   @Prop({required: true}) customTextIndex!: number
+  @Prop({required: true}) productColors!: Record<any, any>[]
   /* component data properties goes here */
   public product_fonts: Record<any, any>[] = []
-  public product_colors: Record<any, any>[] = []
   public default_font_obj = ''
   public pantoneMessage = ''
   public customTextColorIndex: Record<any, any>[] = []
