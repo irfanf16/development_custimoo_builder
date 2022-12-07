@@ -132,7 +132,7 @@
                 <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
                   <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                   <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
-                  <b-button variant="outline-secondary" :class="{'pulse-animation': isColorShuffled}" v-if="usingColorLogos && imageColors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
+                  <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo('is_shuffled')}" v-if="logoColorsInfo('using_logo_colors') && logoColorsInfo('colors').length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
                 </div>
                 <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
                 <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
@@ -402,7 +402,7 @@ import {
   handleResponseException,
   parseSvgStringFile,
   fetchUrlContent,
-  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject, getUrlParameter
+  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject, getUrlParameter, setDefaultColors
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -443,6 +443,7 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
+    // await console.log('getLogoColorsInfo', this.getLogoColorsInfo('colors'));
     let self: Record<any, any> = this;
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
@@ -616,6 +617,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   ]
   public is_shared_product = false;
   public is_admin_token = localStorage.getItem('adminToken');
+  public pulse_info: Record<any, any> = {
+    use_original_colors: true, shuffle: true, use_logo_colors: true
+  }
 
   private setRosterOpen(val: boolean) {
     this.isRosterOpened = val
@@ -633,6 +637,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.frontPreview = imgFront
       this.backPreview = imgBack
     }
+  }
+
+  get logoColorsInfo() {
+    return this.$store.getters.getLogoColorsInfo;
   }
 
   get getProductEditInfoObject() {
@@ -654,6 +662,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   get usingColorLogos(): [Record<any, any>] {
     return this.$store.getters.getUsingColorLogos;
+  }
+
+  get usingLogoColors() {
+    return this.logoColorsInfo.using_logo_colors
   }
 
   get productLockerId(): number {
@@ -1407,34 +1419,42 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   shuffleLogoColors() {
-    this.isColorShuffled = false
-    if (this.imageColors.length > 1) {
-      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
-      let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
-        return imageColor.hex
-      })
+    let self: Record<any, any> = this
+    this.pulse_info.shuffle = false
+    console.log('logoColorsInfo', this.logoColorsInfo)
+    const shuffled  = this.logoColorsInfo('colors').sort(() =>  0.5 - Math.random())
+    this.logoColorsInfo.colors = shuffled
+    setDefaultColors()
+    self.$eventBus.$emit('changeDefaultColors')
 
-      let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
-        if (currentIndex !== 1) return previousValue;
-
-        array.sort(() => Math.random() - 0.5)
-        return array;
-      }
-
-      while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
-        imageColors.reduce(shuffle)
-      }
-
-      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
-      imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-        this.$store.dispatch('setDefaultColor', {
-          index: index,
-          color: imageColor.hex,
-          pantone: imageColor.pantone,
-          name: imageColor.name
-        })
-      })
-    }
+    // this.isColorShuffled = false
+    // if (this.imageColors.length > 1) {
+    //   this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
+    //   let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
+    //     return imageColor.hex
+    //   })
+    //
+    //   let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
+    //     if (currentIndex !== 1) return previousValue;
+    //
+    //     array.sort(() => Math.random() - 0.5)
+    //     return array;
+    //   }
+    //
+    //   while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
+    //     imageColors.reduce(shuffle)
+    //   }
+    //
+    //   this.$store.dispatch("SET_LOGO_COLORS", imageColors);
+    //   imageColors.forEach((imageColor: Record<any, any>, index: number) => {
+    //     this.$store.dispatch('setDefaultColor', {
+    //       index: index,
+    //       color: imageColor.hex,
+    //       pantone: imageColor.pantone,
+    //       name: imageColor.name
+    //     })
+    //   })
+    // }
   }
 
   public rollbackPreviousColors(): void {
