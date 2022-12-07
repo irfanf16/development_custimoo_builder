@@ -641,10 +641,14 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
-        const index = color.index
+        // const index = color.index
+        const index = state.svgGroups.findIndex((svgGroup) => { return svgGroup.id === color.id  });
         delete color.index
-        color = {...state.svgGroups[index], ...color}
-        Vue.set(state.svgGroups, index, color)
+        if(index >= 0){
+          color = {...state.svgGroups[index], ...color}
+          Vue.set(state.svgGroups, index, color)
+        }
+
       }
     },
     updateAllRoster(state: Record<any, any>, rosterDetail: [Record<any, any>]){
