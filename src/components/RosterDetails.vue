@@ -273,6 +273,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public show_roster_change_warning = false
   public show_undo_roster_btn = false
   public is_admin_token = localStorage.getItem('adminToken')
+  public handle_text_change_timer!: number
 
   /*
   *  component data properties ends
@@ -581,7 +582,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     self.$store.dispatch('setProductsRosters', {product_id: product_id, roster_index: roster_index, roster_data: roster_data})
     //The custom text first item of type name and numbers are synced with the first row (name and number) of the roster.
     if(['name', 'number'].includes(type)) {
-      await self.syncRosterWithCustomText(type, updated_val)
+      clearTimeout (this.handle_text_change_timer);
+      this.handle_text_change_timer = setTimeout(() => {
+        self.syncRosterWithCustomText(type, updated_val)
+      }, 300)
     }
   }
 

@@ -1377,12 +1377,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             otherSideObjects[add_index] = objectAdd
           }
           if (side == 'back') {
+            objectAdd.clipPath = this.clip_path_front
             this.frontCanvas.add(objectAdd)
             if (this.productType == 'customized') {
               this.frontModel.bringToFront()
             }
           } else {
             if (this.back) {
+              objectAdd.clipPath = this.clip_path_back
               this.backCanvas.add(objectAdd)
               if (this.productType == 'customized') {
                 this.backModel.bringToFront()
@@ -1918,6 +1920,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                     text_index: custom_text_index,
                     manually_added: custom_text.manually_added
                   })
+                  if(custom_text_item.placement == 'Back' && self.backCanvas) {
+                    fabric_text.clipPath = this.clip_path_back
+                  } else {
+                    fabric_text.clipPath = this.clip_path_front
+                  }
 
                   if (custom_text_item.scaleX && custom_text_item.scaleY) {
                     fabric_text.scaleX = custom_text_item.scaleX
@@ -2012,6 +2019,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
               }
               self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
+
+              if(custom_text_item.placement == 'Back' && self.backCanvas) {
+                fabric_text.clipPath = this.clip_path_back
+              } else {
+                fabric_text.clipPath = this.clip_path_front
+              }
 
               if (custom_text_item.placement == 'Front') {
                 self.frontCanvas.add(fabric_text)
