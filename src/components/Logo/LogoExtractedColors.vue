@@ -37,7 +37,7 @@
           Use Logo Colors
         </b-button>
         <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" v-if="logoColorsInfo.using_logo_colors"
-                  :class="{'pulse-animation': pulse_info.shuffle}"
+                  :class="{'pulse-animation': !logoColorsInfo.is_shuffled}"
                   variant="secondary">Shuffle
         </b-button>
         <b-button class="use-btn flex-shrink-1" :class="{'invisible': !(logoColorsInfo.colors.length && logoColorsInfo.using_logo_colors)}"
@@ -135,6 +135,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     this.pulse_info.use_original_colors = false
     this.logoColorsInfo.colors = JSON.parse(JSON.stringify(this.logoColorsInfo.extracted_colors))
     this.logoColorsInfo.using_logo_colors = false
+    this.logoColorsInfo.is_shuffled = false
     Store.commit('SET_DEFAULT_COLORS', [])
     self.$eventBus.$emit('useProductOriginalColors')
   }
@@ -156,6 +157,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     this.pulse_info.shuffle = false
     const shuffled  = this.logoColorsInfo.colors.sort(() =>  0.5 - Math.random())
     this.logoColorsInfo.colors = shuffled
+    this.logoColorsInfo.is_shuffled = true
     setDefaultColors()
     self.$eventBus.$emit('changeDefaultColors')
   }

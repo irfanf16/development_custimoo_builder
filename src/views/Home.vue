@@ -132,7 +132,7 @@
                 <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
                   <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                   <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
-                  <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo('is_shuffled')}" v-if="logoColorsInfo('using_logo_colors') && logoColorsInfo('colors').length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
+                  <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo.is_shuffled}" v-if="logoColorsInfo.using_logo_colors && logoColorsInfo.colors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
                 </div>
                 <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
                 <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
@@ -640,7 +640,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   get logoColorsInfo() {
-    return this.$store.getters.getLogoColorsInfo;
+    return this.$store.getters.getLogoColorsInfo();
   }
 
   get getProductEditInfoObject() {
@@ -658,14 +658,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   private get lockerIndex() {
     return this.$store.getters.getLockerTabsIndex
-  }
-
-  get usingColorLogos(): [Record<any, any>] {
-    return this.$store.getters.getUsingColorLogos;
-  }
-
-  get usingLogoColors() {
-    return this.logoColorsInfo.using_logo_colors
   }
 
   get productLockerId(): number {
@@ -1421,9 +1413,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   shuffleLogoColors() {
     let self: Record<any, any> = this
     this.pulse_info.shuffle = false
-    console.log('logoColorsInfo', this.logoColorsInfo)
-    const shuffled  = this.logoColorsInfo('colors').sort(() =>  0.5 - Math.random())
+    const shuffled  = this.logoColorsInfo.colors.sort(() =>  0.5 - Math.random())
     this.logoColorsInfo.colors = shuffled
+    this.logoColorsInfo.is_shuffled = true
     setDefaultColors()
     self.$eventBus.$emit('changeDefaultColors')
 
