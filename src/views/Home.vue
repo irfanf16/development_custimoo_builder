@@ -74,10 +74,10 @@
                         </Popper>
                       </template>
                     </template>
-                    <template v-if="isCustomerAuthenticated">
-                      <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
-                      <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
-                    </template>
+
+                    <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
+                    <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
+
                     <template v-if="getProductEditInfoObject.type == 'order_product'">
                       <b-button @click="loadOrderItemProduct('previous')" variant="outline-secondary"
                                 v-if="getProductEditInfoObject.order_product_info.order_products.active_index != 0">Previous</b-button>
