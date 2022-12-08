@@ -136,15 +136,14 @@
                                         <div class="mt-3">
                                           Pantone (xxx c):
                                         </div>
-                                        <div class="p-2">
+                                        <div class="p-2" v-if="getColorType !== 'product_color'">
                                           <div v-if="selectColorTypeIndex==0">
                                             <b-form-input
                                               @focusin="($event)=>$event.target.select()"
                                               :value="product_custom_text_item.color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.color_pantone"
                                               class="mb-2 mr-sm-2 mb-sm-0"
-                                              placeholder="XX-XXXX"
+                                              :placeholder="place_holder"
                                               @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Fill Color')"
-                                              :disabled="getColorType === 'cmyk'"
                                             ></b-form-input>
                                           </div>
 
@@ -153,9 +152,8 @@
                                               @focusin="($event)=>$event.target.select()"
                                               :value="product_custom_text_item.outline_color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.outline_color_pantone"
                                               class="mb-2 mr-sm-2 mb-sm-0"
-                                              placeholder="XX-XXXX"
+                                              :placeholder="place_holder"
                                               @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Outline Color')"
-                                              :disabled="getColorType === 'cmyk'"
                                             ></b-form-input>
                                           </div>
                                           <div v-if="pantoneMessage" class="pantone-message p-2 text-danger">
@@ -266,7 +264,7 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
   }
 
   get getColorType(): string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   get product_custom_texts(): Record<any, any>[] {
@@ -275,6 +273,17 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
 
   get all_products_custom_texts() {
     return this.$store.getters.productCustomTexts()
+  }
+
+  get place_holder() {
+    if(this.getColorType === 'cmyk') {
+      return 'x,x,x,x';
+    } else if(this.getColorType === 'pantone-coated') {
+      return 'xxx c';
+    } else if(this.getColorType === 'pantone-tcx') {
+      return 'xx-xxxx';
+    }
+    return '';
   }
 
   /*
@@ -303,8 +312,8 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
 
   public changePantoneColor($event: string, customTextIndex: number, productCustomTextItemIndex: number, select_color_type: string) {
     let fill_type = select_color_type=='Fill Color' ? 0 : 1;
-    let color_code = this.extractExactCode($event)?this.extractExactCode($event):(fill_type==0 ? this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].color : this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].outline_color);
-    let pantoneColor = getColorEncoding(color_code,this.getColorType);
+    let color_code = this.extractExactCode($event)? this.extractExactCode($event) : (fill_type==0 ? this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].color : this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].outline_color);
+    let pantoneColor = getColorEncoding(color_code, this.getColorType);
     const color_picker = this.$refs[`text-color-picker${customTextIndex}${productCustomTextItemIndex}`] as Record<any, any>;
     if (pantoneColor) {
       let color = {value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.name}
