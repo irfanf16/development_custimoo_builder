@@ -103,7 +103,7 @@
                             <b-tabs>
                               <b-tab v-for="(product_color, productColorIndex) in productColors" :key="`product_color_${productColorIndex}_${product_color.type}_type`">
                                 <template #title>
-                                  {{product_color.name | capitalize}}
+                                  {{product_color.name | capitalize | removeExt}}
                                 </template>
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">
@@ -119,9 +119,11 @@
                                 </template>
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">
-                                    <div class="color-box" v-for="(color, colorIndex) in logoColors" :style="{background: color.hex}"
-                                        :key="`text_color_${colorIndex}${color.pantone}`" :title="color.name"
-                                          @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, {name: color.name, value: color.hex, position: '1'}, select_color_type)"></div>
+                                    <template v-for="(color, colorIndex) in logoColorsInfo">
+                                      <div class="color-box" :style="{background: color.hex}" v-if="color.hex"
+                                           :key="`text_color_${colorIndex}${color.name}`" :title="color.name"
+                                           @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, {name: color.name, value: color.hex, position: '1'}, select_color_type)"></div>
+                                    </template>
                                   </div>
                                 </div>
                               </b-tab>
@@ -228,6 +230,11 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
       if (!value) return ''
       value = value.toString()
       return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+    },
+    removeExt: (value: string) => {
+      if (!value) return ''
+      value = value.toString()
+      return value.replace(/\.[^/.]+$/, "")
     }
   }
 })
@@ -255,8 +262,8 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
   get selectedProductId(): Record<any, any> {
     return this.$store.getters.getSelectedProductId
   }
-  get logoColors(): [] {
-    return this.$store.getters.getLogosColors
+  get logoColorsInfo() {
+    return this.$store.getters.getLogoColorsInfo('extracted_colors')
   }
 
   get lockerColors() {

@@ -1,14 +1,14 @@
 <template>
   <div class="logo-placement-area extracted-color-area"
        v-if="logoColorsInfo.colors.length > 0 && selectedProduct.product_type == 'customized'">
-    <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
+    <h4 class="mb-0 mb-lg-4">Color Extracted from Logo</h4>
     <div class="mb-lg-3 w-100">
       <div class="color-holder">
-        <div class="color-container">
+        <div class="color-container pt-2">
           <div class="color-box" v-for="(logo_color, logoColorIndex) in logoColorsInfo.colors"
                @click="selectLogoColor(logoColorIndex)" :title="logo_color.name"
                :class="{'active-swatch' : logoColorIndex == active_logo_color_index, 'noColor': !logo_color.hex}"
-               :style="{background: logo_color.hex ? logo_color.hex : '#fff', cursor: 'pointer'}" :key="logoColorIndex">
+               :style="{background: logo_color.hex ? logo_color.hex : '#fff', cursor: 'pointer'}" :key="logoColorIndex + logo_color.name">
             <template v-if="logo_color.hex">
               <span class="removeColor" @click="deleteLogoColor(logoColorIndex)">
                 <BIconX />
