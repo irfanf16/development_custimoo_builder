@@ -75,8 +75,11 @@
                       </template>
                     </template>
 
-                    <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
-                    <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
+                    <template v-if="isCustomerAuthenticated">
+                      <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
+                      <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
+                    </template>
+                    <b-button v-else @click="setActionBeforeLogin('generatePdf')"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
 
                     <template v-if="getProductEditInfoObject.type == 'order_product'">
                       <b-button @click="loadOrderItemProduct('previous')" variant="outline-secondary"
@@ -104,7 +107,7 @@
                     <li><a>
                       <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']" title="Reset to default"/>
                     </a></li>
-                    <li v-if="isCustomerAuthenticated">
+                    <li v-if="isCustomerAuthenticated && false">
                       <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
                       <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
                         <template v-for="(notification, ind) in notifications" >
@@ -1097,6 +1100,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.addToCart(null)
     } else if (this.actionBeforeLogin == 'shareDesign') {
       this.shareDesign()
+    } else if (this.actionBeforeLogin == 'generatePdf') {
+      this.generatePdf()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
@@ -1418,35 +1423,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.logoColorsInfo.is_shuffled = true
     setDefaultColors()
     self.$eventBus.$emit('changeDefaultColors')
-
-    // this.isColorShuffled = false
-    // if (this.imageColors.length > 1) {
-    //   this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
-    //   let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
-    //     return imageColor.hex
-    //   })
-    //
-    //   let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
-    //     if (currentIndex !== 1) return previousValue;
-    //
-    //     array.sort(() => Math.random() - 0.5)
-    //     return array;
-    //   }
-    //
-    //   while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
-    //     imageColors.reduce(shuffle)
-    //   }
-    //
-    //   this.$store.dispatch("SET_LOGO_COLORS", imageColors);
-    //   imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-    //     this.$store.dispatch('setDefaultColor', {
-    //       index: index,
-    //       color: imageColor.hex,
-    //       pantone: imageColor.pantone,
-    //       name: imageColor.name
-    //     })
-    //   })
-    // }
   }
 
   public rollbackPreviousColors(): void {
@@ -1500,7 +1476,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           await this.$store.dispatch('SET_LOGO_COLORS', [])
           await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
           await this.$store.dispatch("setProductsRosters")
-          await this.retrieveProducts()
+          let query_params = await this.setQueryParams()
+          await this.retrieveProducts(query_params)
           if (this.mobileScreen) {
             this.showDesign()
             this.switchTabs(0, true)

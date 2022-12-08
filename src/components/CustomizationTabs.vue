@@ -53,7 +53,7 @@
               </a>
             </template>
             <div class="d-none d-lg-block">
-                <CustomizationText :customTextIndex="customTextIndex" />
+                <CustomizationText :customTextIndex="customTextIndex" :productColors="productColors" :key="selectedProduct.id" />
             </div>
 <!--            <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">-->
 <!--              <b-tabs>-->
