@@ -1197,7 +1197,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               }
               http.post(ecom_url, update_cart_id_data).then((res: any) => {
                 if(!collection_view) {
-                  window.location.href = company_domain + '/cart'
+                  window.location.replace(company_domain + '/cart');
                 }
               }).catch(err => {
                 self.showErrorArr(err.response.data.errors)
