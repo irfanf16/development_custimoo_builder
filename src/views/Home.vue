@@ -446,7 +446,6 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    // await console.log('getLogoColorsInfo', this.getLogoColorsInfo('colors'));
     let self: Record<any, any> = this;
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
@@ -675,7 +674,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.showOtherTab = value
   }
 
-  public adjustTotalTabs(totalTabs:number) {
+  public adjustTotalTabs(totalTabs: number) {
+    console.log('totalTabs', totalTabs)
     this.mainTotalTabs = totalTabs
   }
 

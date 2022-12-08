@@ -313,11 +313,9 @@ const ProductAttributes:Module<any, any> = {
       const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
       const logo_index = payload.logo_index
       if(logo_index >= 0) {
-        console.log('Set custom logos with Index', payload);
         Vue.set(state.customLogos[product_id], logo_index, payload.custom_logos)
       }
       else {
-        console.log('Set custom logos without Index', payload);
         Vue.set(state.customLogos, product_id, payload.custom_logos)
       }
     },

@@ -746,6 +746,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           this.addClipPath(ImageData.safe_zone_url, side)
         }
         if (!this.back || (this.back && side == 'back')) {
+          if(this.mainPreview) {
+            self.$eventBus.$emit('setTotalTabs')
+          }
           if (ImageData.file_extension == 'svg' && this.productType == 'customized') {
             this.getSvgGroups()
           } else {
@@ -1405,28 +1408,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
       }
     }
-  }
-
-  public updateLogoObject(obj: Record<any, any>, update_obj: Record<any, any>) {
-
-    Object.keys(obj).map(function (key, index) {
-      obj[key].forEach((logo: Record<any, any>, logo_index: number) => {
-        let logo_obj = obj[key][logo_index]
-        obj[key][logo_index] = { ...logo_obj, ...update_obj }
-      })
-    });
-    return obj;
-  }
-
-  public updateTextObject(obj: Record<any, any>, update_obj: Record<any, any>) {
-
-    Object.keys(obj).map(function (key, index) {
-      obj[key].forEach((logo: Record<any, any>, logo_index: number) => {
-        let logo_obj = obj[key][logo_index]
-        obj[key][logo_index] = { ...logo_obj, ...update_obj }
-      })
-    });
-    return obj;
   }
 
   public async addModel(modelUrl: string, side: string) {
