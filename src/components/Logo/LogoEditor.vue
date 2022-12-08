@@ -28,7 +28,7 @@
       </span>
       </div>
 
-      <div class="loader" v-if="showLoader"><img :src="'@/assets/images/loading.gif'" /></div>
+      <div class="loader" v-if="showLoader"><img :src="require('@/assets/images/loading.gif')" /></div>
       <div class="p-5">
         <div class="d-flex flex-column flex-md-row w-100 gap-3">
           <div style="flex-basis: 50%; padding-top: 27px" class="checkboxes_container">
@@ -280,7 +280,6 @@ export default class LogoEditor extends Mixins(ErrorMessages, ModalAction, Custo
     http.post('/customer/update/logo', data)
       .then(async resp => {
         const logo_data = resp.data.file
-        console.log('logo_data', logo_data)
         if(this.customLogoIndex == 0) {
           let logo_colors = processColorsCustom(resp.data.colors)
           this.$store.commit('SET_LOGO_COLORS_INFO', {
@@ -296,13 +295,12 @@ export default class LogoEditor extends Mixins(ErrorMessages, ModalAction, Custo
           })
         }
         this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject(logo_data)})
-        console.log('logsss', this.customLogo)
         self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
         self.$eventBus.$emit('handleNonVectorCustomLogosCount')
         this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
         this.showToast('Logo Applied', 'SUCCESS')
         this.showLoader = false
-        this.hideVModal('logo-modal')
+        this.hideVModal('logo-editor-modal')
       }).catch((e) => {
       this.showLoader = false
       this.showError('Something went wrong')
