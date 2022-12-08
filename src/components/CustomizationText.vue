@@ -142,7 +142,7 @@
                                           <div v-if="selectColorTypeIndex==0">
                                             <b-form-input
                                               @focusin="($event)=>$event.target.select()"
-                                              :value="product_custom_text_item.color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.color_pantone"
+                                              :value="product_custom_text_item.color_pantone"
                                               class="mb-2 mr-sm-2 mb-sm-0"
                                               :placeholder="place_holder"
                                               @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Fill Color')"
@@ -152,7 +152,7 @@
                                           <div v-else>
                                             <b-form-input
                                               @focusin="($event)=>$event.target.select()"
-                                              :value="product_custom_text_item.outline_color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.outline_color_pantone"
+                                              :value="product_custom_text_item.outline_color_pantone"
                                               class="mb-2 mr-sm-2 mb-sm-0"
                                               :placeholder="place_holder"
                                               @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Outline Color')"
