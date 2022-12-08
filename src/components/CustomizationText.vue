@@ -323,7 +323,7 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     let pantoneColor = getColorEncoding(color_code, this.getColorType);
     const color_picker = this.$refs[`text-color-picker${customTextIndex}${productCustomTextItemIndex}`] as Record<any, any>;
     if (pantoneColor) {
-      let color = {value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.name}
+      let color = {value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.pantone}
       this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type);
       console.log(color_picker[fill_type].$forceUpdate());
       this.pantoneMessage = ''
