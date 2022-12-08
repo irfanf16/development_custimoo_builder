@@ -351,9 +351,14 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
       //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
 
+      let ecommerce_cart_id = (self.$route.query.update_item)?self.$route.query.update_item:null;
+      if(ecommerce_cart_id){
+        this.$router.push({ name: 'Home' });
+      }
+
       self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
         editing: true,  type: "cart_product", filters: {customized: is_customized, personalized: is_personalized, search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
-          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product
+          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product, ecommerce_cart_id
         },
         order_product_info: null
       })

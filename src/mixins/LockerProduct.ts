@@ -1139,7 +1139,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
         let ecom_form_data = new FormData();
 
-        let ecommerce_update_id = self.$route.query.update_item;
+        let ecommerce_update_id = (product_edit_info_object.cart_product_info)?product_edit_info_object.cart_product_info.ecommerce_cart_id:null;
         if(ecommerce_update_id){
           ecom_form_data.append('action', 'custimoo_update_cart');
           ecom_form_data.append('update_item', ecommerce_update_id);
