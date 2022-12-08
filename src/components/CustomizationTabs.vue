@@ -6,8 +6,8 @@
           <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
-                <span :class="{'no-vector-logos': vectorImageConstraint?non_vector_logos_count > 0 : false }">
-                  <span v-if="vectorImageConstraint?non_vector_logos_count > 0:false" v-b-tooltip="`Logo uploaded are not in vector format`" class="logos-error">
+                <span :class="{'no-vector-logos': vectorImageConstraint? non_vector_logos_count > 0 : false }">
+                  <span v-if="vectorImageConstraint? non_vector_logos_count > 0 : false" v-b-tooltip="`Logo uploaded are not in vector format`" class="logos-error">
                     <b-icon-exclamation-circle-fill />
                   </span>
                   <span class="icon-holder">
