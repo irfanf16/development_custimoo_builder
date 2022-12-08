@@ -1500,7 +1500,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           await this.$store.dispatch('SET_LOGO_COLORS', [])
           await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
           await this.$store.dispatch("setProductsRosters")
-          await this.retrieveProducts()
+          let query_params = await this.setQueryParams()
+          await this.retrieveProducts(query_params)
           if (this.mobileScreen) {
             this.showDesign()
             this.switchTabs(0, true)
