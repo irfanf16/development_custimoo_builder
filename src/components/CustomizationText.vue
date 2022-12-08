@@ -265,7 +265,7 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     return this.$store.getters.getSelectedProductId
   }
   get logoColorsInfo() {
-    return this.$store.getters.getLogoColorsInfo('colors')
+    return this.$store.getters.getLogoColorsInfo('extracted_colors')
   }
 
   get lockerColors() {
