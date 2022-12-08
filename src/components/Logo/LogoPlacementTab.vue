@@ -16,7 +16,7 @@
         <template #title>
           <span>{{ customLogoIndex == 0 ? 'Team Logo' : 'logo ' + customLogoIndex }}</span>
           <span class="vector-logos-error warning error" v-if="vectorImageConstraint? !custom_logo.is_vector && custom_logo.url : false" v-b-tooltip.right="`Logo uploaded are not in vector format.`"><b-icon-exclamation-circle-fill /></span>
-          <span class="vector-logos-error warning" v-else-if="!customLogos[customLogoIndex].url" v-b-tooltip.right="`Logo is not found`"><b-icon-exclamation-triangle-fill /></span>
+          <span class="vector-logos-error warning" v-else-if="!custom_logo.url" v-b-tooltip.right="`Logo is not found`"><b-icon-exclamation-triangle-fill /></span>
           <template v-if="customLogoIndex > 0">
             <span class="remove-logo" @click="removeLogoTab(customLogoIndex)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>

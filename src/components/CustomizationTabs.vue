@@ -142,7 +142,8 @@ import {filter} from "lodash"
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
-    this.$emit('adjustTotalTabs', ((this.$refs['customization-tabs'] as Record<any, any>).getTabs().length-2))
+    const self: Record<any, any> = this;
+    self.$eventBus.$on("setTotalTabs", this.setTotalTabs)
   },
 })
 export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
@@ -276,6 +277,10 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
 
   logoColorsChanged(newval:any, old:any) {
     this.productColorsManipulation()
+  }
+
+  public setTotalTabs() {
+    this.$emit('adjustTotalTabs', ((this.$refs['customization-tabs'] as Record<any, any>).getTabs().length-2))
   }
 
   public openAddToLocker () {

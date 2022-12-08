@@ -36,7 +36,6 @@ Vue.use(SlitherSlider)
     Scene
   },
   created() {
-    (this.$parent.$parent as Record<any, any>).adjustTotalTabs()
    this.listenSliderEvent()
   }
 })
@@ -81,8 +80,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     this.$store.dispatch("getModels", this.products[index].product_id);
     this.$store.dispatch('setColorSectionVisibility')
     this.hideLockerProductUpdateButton()
-    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0,});
-    (this.$parent!.$parent as Record<any, any>).adjustTotalTabs()
+    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0});
     let design_index = 0;
     let selected_product_design = this.selectedProduct.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>, product_design_index: number) => {
       if(product_design.design_show === 1) {
