@@ -108,6 +108,7 @@ export default class App extends Mixins(LockerProducts,ErrorMessages) {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  background: #fff;
 }
 
 [v-cloak] {display: none}
