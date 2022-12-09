@@ -280,7 +280,7 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
   }
 
   public setTotalTabs() {
-    this.$emit('adjustTotalTabs', ((this.$refs['customization-tabs'] as Record<any, any>).getTabs().length-2))
+    this.$emit('adjustTotalTabs', (this.$refs['customization-tabs'] as Record<any, any>)?.getTabs().length-2)
   }
 
   public openAddToLocker () {
