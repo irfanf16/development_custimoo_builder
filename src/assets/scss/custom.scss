@@ -5912,6 +5912,10 @@ $fontSize: 0.5;
             line-height: 1;
         }
     }
+
+    &+.page-wrapper{
+        background: #fff;
+    }
 }
 
 .tooltip {
