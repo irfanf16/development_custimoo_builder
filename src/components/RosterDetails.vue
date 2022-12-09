@@ -562,6 +562,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
       }
       this.$store.commit('UPDATE_ROSTER', updated_roster)
     })
+    this.syncRosterWithCustomText('name', this.rosterDetails[this.active_roster_index].text)
   }
 
   public async handleRosterUpdate(updated_val:string, type: string, roster_index: number) {
@@ -602,7 +603,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
         emitter: "input", custom_text_index: custom_name_number_index, value: custom_text_synced_with_roster
       });
     }
-
   }
 
   public handleLockerUpdate(updated_val: Record<any, any>[]) {

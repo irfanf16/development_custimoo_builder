@@ -53,9 +53,6 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         fontFamily: 'Ubuntu'
       })
     }
-    if(this.mainPreview) {
-      console.log(this.front)
-    }
     let frontPromise = this.loadScene(this.front, 'front')
     frontPromise.then(() => {
       if (this.back) {
@@ -193,7 +190,7 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
     }
     if(!this.mainPreview && this.selectedProductId == this.product_id) {
       self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
-        const logo = this.custom_logos[logo_index]
+        const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
         if(logo && this.custom_logo_objects[logo_index]) {
           const logoObject = this.custom_logo_objects[logo_index]
           const otherSideObject = this.other_side_logos[logo_index]
@@ -746,6 +743,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           this.addClipPath(ImageData.safe_zone_url, side)
         }
         if (!this.back || (this.back && side == 'back')) {
+          if(this.mainPreview) {
+            self.$eventBus.$emit('setTotalTabs')
+          }
           if (ImageData.file_extension == 'svg' && this.productType == 'customized') {
             this.getSvgGroups()
           } else {
@@ -1407,28 +1407,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public updateLogoObject(obj: Record<any, any>, update_obj: Record<any, any>) {
-
-    Object.keys(obj).map(function (key, index) {
-      obj[key].forEach((logo: Record<any, any>, logo_index: number) => {
-        let logo_obj = obj[key][logo_index]
-        obj[key][logo_index] = { ...logo_obj, ...update_obj }
-      })
-    });
-    return obj;
-  }
-
-  public updateTextObject(obj: Record<any, any>, update_obj: Record<any, any>) {
-
-    Object.keys(obj).map(function (key, index) {
-      obj[key].forEach((logo: Record<any, any>, logo_index: number) => {
-        let logo_obj = obj[key][logo_index]
-        obj[key][logo_index] = { ...logo_obj, ...update_obj }
-      })
-    });
-    return obj;
-  }
-
   public async addModel(modelUrl: string, side: string) {
     return new Promise((resolve, reject) => {
       fabric.Image.fromURL(modelUrl + '?nocache=2', async (img: any) => {
@@ -2081,23 +2059,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
   }
 
-  public handleCustomLogoModifiedEvent(fabric_object: Record<any, any>) {
+  public async handleCustomLogoModifiedEvent(fabric_object: Record<any, any>) {
     let self: Record<any, any> = this;
     const logo_index =  fabric_object.get("logo_index");
     if(this.custom_logos[logo_index]) {
-      this.custom_logos[logo_index].x_axis = fabric_object.get("left");
-      this.custom_logos[logo_index].y_axis = fabric_object.get("top");
-      this.custom_logos[logo_index].rotation = fabric_object.get("angle");
-      this.custom_logos[logo_index].scaleX = fabric_object.get("scaleX");
-      this.custom_logos[logo_index].scaleY = fabric_object.get("scaleY");
       const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
       const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
       const converted_width = unitConversion(width)
       const converted_height = unitConversion(height)
-      this.custom_logos[logo_index].originalWidth = converted_width.value;
-      this.custom_logos[logo_index].originalHeight = converted_height.value;
 
-      this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
+      await this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
         custom_logo_index: fabric_object.get("logo_index"),
         data: {
           x_axis: fabric_object.get("left"),
