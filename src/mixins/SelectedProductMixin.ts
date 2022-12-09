@@ -137,7 +137,7 @@ export class FetchCategories extends Vue {
         }
       }
       else{
-        let params = `customized=true`;
+        let params;
         if(product_filter === 'customized'){
           params = `customized=true`;
         }
@@ -146,6 +146,8 @@ export class FetchCategories extends Vue {
         }
         else if(product_filter === 'private_product'){
           params = `private=true`;
+        } else {
+          params = product_filter
         }
         categories_promise = this.$store.dispatch('setCategories',{
           query_params: params

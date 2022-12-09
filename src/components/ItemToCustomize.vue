@@ -235,7 +235,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
      // const itemCarousel = self.$refs['itemsCarousel'] as Record<any, any>
      //  await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
       // this.$emit('update:search_products', self.search_products)
-      const categories_promise =  this.fetchCategories();
+      const categories_promise =  this.fetchCategories(`title=${self.search_products}`);
       categories_promise.then(() => {
         let query_params = [`title=${self.search_products}`]
         this.$emit('retrieveProducts', query_params)
