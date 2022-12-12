@@ -303,6 +303,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
   public async handleCategoryUpdate(category_index:number){
     let self: Record<any, any> = this;
+    const response = await this.editModeConfirmation();
     let selected_category = self.categories[category_index]
     if(this.getLastActiveProductData.category_id !== selected_category.id){
       await this.$store.commit('SET_SELECTED_CATEGORIES', selected_category.id)
