@@ -359,8 +359,9 @@
           </div>
 
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-            <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll"
-                             :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
+            <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen"
+                             @hideAll="hideAll" :categories="categories" @retrieveProducts="retrieveProducts" @setRosterOpen="setRosterOpen"
+                             v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
           </b-col>
         </template>
       </b-row>

@@ -79,6 +79,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);
     this.$store.dispatch("getModels", this.products[index].product_id);
     this.$store.dispatch('setColorSectionVisibility')
+    this.$emit('setRosterOpen', false);
     this.hideLockerProductUpdateButton()
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0});
     let design_index = 0;

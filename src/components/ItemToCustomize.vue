@@ -109,7 +109,7 @@
         </div>
       </div>
 
-      <SelectItemCarousel ref="itemsCarousel" :products_fonts="products_fonts" />
+      <SelectItemCarousel @setRosterOpen="setRosterOpen" ref="itemsCarousel" :products_fonts="products_fonts" />
 
     </template>
 
@@ -214,6 +214,10 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex
+  }
+
+  public setRosterOpen(val: boolean){
+    this.$emit('setRosterOpen', val)
   }
 
   public async searchProducts(isClear:boolean) {
