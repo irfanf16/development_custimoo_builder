@@ -888,42 +888,43 @@ export class exitEditMode extends Vue {
       confirmButtonText: 'Yes',
       cancelButtonText: 'No',
     });
+    const santaConfirmModal = self.$santaModal.show({
+        icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+    });
     return new Promise((resolve,reject) => {
       if (self.$store.getters.getProductEditInfoObject.editing) {
         switch (self.$store.getters.getProductEditInfoObject.type) {
           case 'locker_product':
             if (self.$store.getters.getHideSaveLockerButton === false) {
-              swalWithDefaults.fire().then((result) => {
-                if (result.isConfirmed) {
-                  this.$swal.fire(
-                    'Saving!',
-                    'Please wait your setting are being saved',
-                    'warning',
-                  )
-                  const prms = new Promise((resolve) => {
-                    self.$eventBus.$emit('saveToLockerProduct', resolve)
-                  })
-                  prms.then(() => {
-                    this.$swal.fire(
-                      'Saved!',
-                      'Changes Successfully saved',
-                      'success',
-                    )
-                    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
-                    resolve(true)
-                  });
-                } else if (
-                  /* Read more about handling dismissals below */
-                  result.dismiss === self.$swal.DismissReason.cancel
-                ) {
-                  this.$swal.fire(
-                    'Discarded',
-                    'Changes Discarded, Exiting from Editing State',
-                    'error'
-                  )
-                  self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
-                  resolve(false)
-                }
+              self.$santaModal.show({
+                icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+              }).then((confirmation) => {
+                console.log('Faisal')
+                  if(confirmation){
+                    self.$santaModal.show({
+                      icon: 'success', title: 'Saving', text: 'Please wait your setting are being saved', confirm_text: 'OK',
+                    }).then((result)=> {
+                      const prms = new Promise((resolve) => {
+                        self.$eventBus.$emit('saveToLockerProduct', resolve)
+                      })
+                      prms.then(() => {
+                        self.$santaModal.show({
+                          icon: 'success', title: 'Saved', text: 'Changes Successfully saved', confirm_text: 'OK',
+                        }).then((result)=>{
+                          self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                          resolve(true)
+                        });
+                      });
+                    })
+                  }
+                  else{
+                    self.$santaModal.show({
+                      icon: 'error', title: 'Discarded', text: 'Changes Discarded, Exiting from Editing State', confirm_text: 'OK',
+                    }).then((result) => {
+                      self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                      resolve(false)
+                    })
+                  }
               });
             }
             else{
