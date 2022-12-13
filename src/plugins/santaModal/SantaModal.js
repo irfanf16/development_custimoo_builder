@@ -20,10 +20,8 @@ SantaModal.install = (Vue) => {
       } else {
         modal_data = {...modal_data, ...santa_modal_data}
       }
-      console.log(self);
-      console.log(self.$root.$options);
       if(self.$root.$options.shadowRoot){
-        self.$root.$options.shadowRoot.body.appendChild(instance.$el);
+        self.$root.$options.shadowRoot.appendChild(instance.$el);
       }
       else{
         document.body.appendChild(instance.$el);
