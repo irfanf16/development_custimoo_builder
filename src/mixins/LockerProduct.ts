@@ -809,7 +809,9 @@ export class ProductsQueryParamsMixin extends Vue {
               `private=${self.getProductEditInfoObject.filters.private_product?true:false}`,
               `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
               `active_product_child_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
-              `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
+              `active_product_type=${self.getProductEditInfoObject.type}`,
+              `category_id=${self.getProductEditInfoObject.category_id}`,
+              'paginate=false'
             ];
           }
           else if(self.getProductEditInfoObject.type == "cart_product") {
@@ -871,7 +873,7 @@ export class ProductsQueryParamsMixin extends Vue {
 }
 
 @Component
-export class exitEditMode extends Vue {
+export class exitEditMode extends Mixins(ErrorMessages) {
   get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject;
   }
@@ -880,50 +882,34 @@ export class exitEditMode extends Vue {
   }
   public editModeConfirmation() {
     let self: Record<any, any> = this;
-    const swalWithDefaults = this.$swal.mixin({
-      title: 'Changes Detected',
-      text: "Do you want save the product before exiting!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No',
-    });
+    // const santaConfirmModal = self.$santaModal.show({
+    //     icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+    // });
     return new Promise((resolve,reject) => {
       if (self.$store.getters.getProductEditInfoObject.editing) {
         switch (self.$store.getters.getProductEditInfoObject.type) {
           case 'locker_product':
             if (self.$store.getters.getHideSaveLockerButton === false) {
-              swalWithDefaults.fire().then((result) => {
-                if (result.isConfirmed) {
-                  this.$swal.fire(
-                    'Saving!',
-                    'Please wait your setting are being saved',
-                    'warning',
-                  )
-                  const prms = new Promise((resolve) => {
-                    self.$eventBus.$emit('saveToLockerProduct', resolve)
-                  })
-                  prms.then(() => {
-                    this.$swal.fire(
-                      'Saved!',
-                      'Changes Successfully saved',
-                      'success',
-                    )
+              self.$santaModal.show({
+                icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+              }).then((confirmation) => {
+                  if(confirmation){
+                    self.$santaModal.hide();
+                    self.showToast('Your settings are being saved please wait...', 'info');
+                    const prms = new Promise((resolve) => {
+                      self.$eventBus.$emit('saveToLockerProduct', resolve)
+                    })
+                    prms.then(() => {
+                      self.showToast('Your settings saved successfully', 'success');
+                      self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                      resolve(true);
+                    });
+                  }
+                  else{
+                    self.showToast('Changes Discarded, Exiting from Editing State', 'error');
                     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
-                    resolve(true)
-                  });
-                } else if (
-                  /* Read more about handling dismissals below */
-                  result.dismiss === self.$swal.DismissReason.cancel
-                ) {
-                  this.$swal.fire(
-                    'Discarded',
-                    'Changes Discarded, Exiting from Editing State',
-                    'error'
-                  )
-                  self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
-                  resolve(false)
-                }
+                    resolve(false)
+                  }
               });
             }
             else{
@@ -931,80 +917,58 @@ export class exitEditMode extends Vue {
             }
             break;
           case 'cart_product':
-            swalWithDefaults.fire().then((result) => {
-              if (result.isConfirmed) {
-                this.$swal.fire(
-                  'Saving!',
-                  'Please wait your setting are being saved',
-                  'warning',
-                )
+            self.$santaModal.show({
+              icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+            }).then((confirmation) => {
+              if(confirmation){
+                self.$santaModal.hide();
+                self.showToast('Your settings are being saved please wait...', 'info');
                 const prms = new Promise((resolve) => {
                   self.$eventBus.$emit('updateCart', resolve)
                 })
                 prms.then(() => {
-                  this.$swal.fire(
-                    'Saved!',
-                    'Changes Successfully saved',
-                    'success',
-                  )
+                  self.showToast('Your settings saved successfully', 'success');
                   self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
                   resolve(true)
                 });
-              } else if (
-                /* Read more about handling dismissals below */
-                result.dismiss === self.$swal.DismissReason.cancel
-              ) {
-                this.$swal.fire(
-                  'Discarded',
-                  'Changes Discarded, Exiting from Editing State',
-                  'error'
-                )
+              }
+              else{
+                self.showToast('Changes Discarded, Exiting from Editing State', 'error');
                 self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
                 resolve(false)
               }
             });
             break;
           case 'order_product':
-            swalWithDefaults.fire().then((result) => {
-              if (result.isConfirmed) {
-                this.$swal.fire(
-                  'Saving!',
-                  'Please wait your setting are being saved',
-                  'warning',
-                )
+            self.$santaModal.show({
+              icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+            }).then((confirmation) => {
+              if(confirmation){
+                self.$santaModal.hide();
+                self.showToast('Your settings are being saved please wait...', 'info');
                 const prms = new Promise((resolve) => {
                   self.$eventBus.$emit('updateOrder', resolve)
                 })
                 prms.then(() => {
-                  this.$swal.fire(
-                    'Saved!',
-                    'Changes Successfully saved',
-                    'success',
-                  )
+                  self.showToast('Your settings saved successfully', 'success');
                   self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
                   resolve(true)
                 });
-              } else if (
-                /* Read more about handling dismissals below */
-                result.dismiss === swalWithDefaults.DismissReason.cancel
-              ) {
-                this.$swal.fire(
-                  'Discarded',
-                  'Changes Discarded, Exiting from Editing State',
-                  'error'
-                )
+              }
+              else{
+                self.showToast('Changes Discarded, Exiting from Editing State', 'error');
                 self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
                 resolve(false)
               }
             });
             break;
           default:
-            resolve(false);
+            resolve(null);
             break;
         }
       }
       else{
-        resolve(false);
+        resolve(null);
       }
     });
   }
@@ -1060,7 +1024,7 @@ export class RosterDetailsGlobal extends Mixins(){
 }
 
 @Component
-export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitEditMode,ModalAction) {
+export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitEditMode,ModalAction,ProductsQueryParamsMixin) {
   get total(): number {
     let sum = 0;
     let roster_details = this.$store.getters.getRosterDetails()
@@ -1093,17 +1057,24 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     return true;
   }
 
-  public async addToCartMixin(product_fonts: Record<any, any>[]) {
-    if(!this.checkMinimumOrderQtyBYDesign())
+  public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null) {
+    if(!this.checkMinimumOrderQtyBYDesign()) {
+      if(resolve){
+        resolve(false);
+      }
       return;
+    }
     this.hideVModal('rostermodal');
     let self: Record<any, any> = this;
-    try {
+
       let company = self.$store.getters.getCompany;
       let platform = company.platform;
       if(platform === 'wordpress') {
         const adminToken = localStorage.getItem('adminToken');
           if(adminToken) {
+            if(resolve){
+              resolve(false);
+            }
             return false;
           }
       }
@@ -1134,6 +1105,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
       if(platform === 'wordpress'){
         if((cart_product as Record<any, any>).sync_id === "" || (cart_product as Record<any, any>).ecommerce_post_id === ""){
+          if(resolve){
+            resolve(false);
+          }
           return false;
         }
 
@@ -1177,7 +1151,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       }
       if(santacart){
         self.$store.dispatch('setCartLoading',true);
-        http.post(url, post_data).then(async (res: any) => {
+        await http.post(url, post_data).then(async (res: any) => {
           if (res.data.success == true){
             let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
             let api_res:Record<any, any> = res.data.result
@@ -1236,7 +1210,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           }
           self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
           self.$store.dispatch('setCartLoading',false);
-
+          if(resolve){
+            resolve(true);
+          }
           if(collection_view){
             self.$root.$emit('getNextProduct');
           }
@@ -1251,14 +1227,13 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               self.retrieveProducts(query_params);
               self.hideVModal('rostermodal');
             });
+            if(resolve){
+              resolve(false);
+            }
           }
         })
       }
-    }
-    catch (e) {
-      console.error('error in add to cart',e)
-      self.$store.dispatch('setCartLoading',false);
-    }
+
   }
 
   public async retrieveProducts() {

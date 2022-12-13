@@ -220,8 +220,8 @@
                 <div class="twoD-view">
                   <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
                     <template v-if="selectedProduct.productstyles[styleIndex]" >
-                      <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
-                        <div v-if="design.design_show == 1" class="image-holder" ref="scene-holder" :key="'front'+design.id">
+                      <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
+                        <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
                           <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
                                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
                                  modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
@@ -676,7 +676,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public adjustTotalTabs(totalTabs: number) {
-    console.log('totalTabs', totalTabs)
     this.mainTotalTabs = totalTabs
   }
 
@@ -1108,12 +1107,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async addToCart(resolve:any=null) {
-    await this.addToCartMixin(this.products_fonts);
+    await this.addToCartMixin(this.products_fonts,resolve);
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
       this.showVModal('cart-modal')
-    }
-    if(resolve){
-      resolve(true);
     }
   }
 
@@ -1455,40 +1451,47 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public async resetStore() {
     const self: Record<any, any> = this;
 
-    const response = await this.editModeConfirmation();
+    const editConfirmation = this.editModeConfirmation();
+    editConfirmation.then(async (response) => {
+      const ok = await this.ref['reset-changes'].showConfirm()
+      if (ok) {
+        this.$store.commit('RESET_LAST_ACTIVE_DATA')
+        const categories_promise = this.fetchCategories();
+        categories_promise.then(async (response) => {
+          if (response) {
+            await this.exitFromEditMode()
+            this.hideLockerProductUpdateButton()
+            this.updateOrderItemProducts = null;
+            await self.$eventBus.$emit('useProductOriginalColors')
+            await this.$store.dispatch('resetStore')
+            this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
+            await self.$eventBus.$emit('resetTextsCanvas')
+            await self.$eventBus.$emit('resetLogosCanvas')
+            await this.$store.dispatch('setTabMain', {value: 0});
+            (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
+            await this.$store.dispatch('SET_LOGO_COLORS', [])
+            await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+            await this.$store.dispatch("setProductsRosters")
+            let query_params = await this.setQueryParams()
+            await this.retrieveProducts(query_params)
+            if (this.mobileScreen) {
+              this.showDesign()
+              this.switchTabs(0, true)
+            }
 
-    const ok = await this.ref['reset-changes'].showConfirm()
-
-    if (ok) {
-      this.$store.commit('RESET_LAST_ACTIVE_DATA')
-      const categories_promise = this.fetchCategories();
-      categories_promise.then(async (response) => {
-        if(response){
-          await this.exitFromEditMode()
-          this.hideLockerProductUpdateButton()
-          this.updateOrderItemProducts = null;
-          await self.$eventBus.$emit('useProductOriginalColors')
-          await this.$store.dispatch('resetStore')
-          this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
-          await self.$eventBus.$emit('resetTextsCanvas')
-          await self.$eventBus.$emit('resetLogosCanvas')
-          await this.$store.dispatch('setTabMain',{value: 0});
-          (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
-          await this.$store.dispatch('SET_LOGO_COLORS', [])
-          await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
-          await this.$store.dispatch("setProductsRosters")
-          let query_params = await this.setQueryParams()
-          await this.retrieveProducts(query_params)
-          if (this.mobileScreen) {
-            this.showDesign()
-            this.switchTabs(0, true)
+            this.isRosterOpened = false
           }
-
-          this.isRosterOpened = false
+        })
+      } else {
+        if (response === true || response === false) {
+          const categories_promise = this.fetchCategories();
+          categories_promise.then(async (response) => {
+            let query_params = await this.setQueryParams()
+            await this.retrieveProducts(query_params)
+          });
         }
-      })
-
-    }
+      }
+    })
   }
 
   get hideColorSection() {
