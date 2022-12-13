@@ -138,7 +138,7 @@
                   <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo.is_shuffled}" v-if="logoColorsInfo.using_logo_colors && logoColorsInfo.colors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
                 </div>
                 <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
-                <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
+                <LockerRoomModal  :mainTotalTabs="mainTotalTabs" @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
                 <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
                 <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
                 <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />

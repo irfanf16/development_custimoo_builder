@@ -16,6 +16,7 @@
           <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideVModal('locker-modal')"
                       @showCollectionModal="showCollectionModal"
                       @editCollectionModal="editCollectionModal"
+                      :mainTotalTabs="mainTotalTabs"
                       />
         </div>
       </div>
@@ -31,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue, Mixins} from 'vue-property-decorator'
+import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
 import LockerRoom from '@/components/LockerRoom.vue'
 import DesignCollection from '@/components/DesignCollection.vue'
 import ModalAction from '@/mixins/ModalAction'
@@ -43,6 +44,7 @@ import ModalAction from '@/mixins/ModalAction'
   }
 })
 export default class LockerRoomModal extends Mixins(ModalAction){
+  @Prop({required: true}) mainTotalTabs:number
   public ref = this.$refs as Record<any, any>
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
