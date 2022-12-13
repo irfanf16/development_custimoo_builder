@@ -220,8 +220,8 @@
                 <div class="twoD-view">
                   <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
                     <template v-if="selectedProduct.productstyles[styleIndex]" >
-                      <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
-                        <div v-if="design.design_show == 1" class="image-holder" ref="scene-holder" :key="'front'+design.id">
+                      <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
+                        <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
                           <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
                                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
                                  modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"

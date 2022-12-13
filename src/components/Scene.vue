@@ -176,28 +176,29 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         updated_custom_text.value = "";
         self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: updated_custom_text})
       }
-    })
 
-    if(!this.mainPreview && this.selectedProductId == this.product_id) {
-      self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
-        const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
-        if(text && this.product_custom_text_objects[indexes.custom_text_index] && this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
-          const textObject = this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
-          const otherSideObject = this.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
-          this.eventAction(text, textObject, otherSideObject)
-        }
-      })
-    }
-    if(!this.mainPreview && this.selectedProductId == this.product_id) {
-      self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
-        const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
-        if(logo && this.custom_logo_objects[logo_index]) {
-          const logoObject = this.custom_logo_objects[logo_index]
-          const otherSideObject = this.other_side_logos[logo_index]
-          this.eventAction(logo, logoObject, otherSideObject)
-        }
-      })
-    }
+      if(!this.mainPreview && this.selectedProductId == this.product_id) {
+        self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
+          const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
+          if(text && this.product_custom_text_objects[indexes.custom_text_index] && this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
+            const textObject = this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
+            const otherSideObject = this.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
+            this.eventAction(text, textObject, otherSideObject)
+          }
+        })
+      }
+
+      if(!this.mainPreview && this.selectedProductId == this.product_id) {
+        self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
+          const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
+          if(logo && this.custom_logo_objects[logo_index]) {
+            const logoObject = this.custom_logo_objects[logo_index]
+            const otherSideObject = this.other_side_logos[logo_index]
+            this.eventAction(logo, logoObject, otherSideObject)
+          }
+        })
+      }
+    })
   }
 })
 
