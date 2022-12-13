@@ -303,10 +303,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return this.$store.getters.getGroupColors
   }
 
-  get productEditInfoObject(): Record<any, any> {
-    return this.$store.getters.getProductEditInfoObject
-  }
-
   get selectedProductId(): number {
     return this.$store.getters.getSelectedProductId
   }

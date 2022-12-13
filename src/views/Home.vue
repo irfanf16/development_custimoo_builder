@@ -676,7 +676,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public adjustTotalTabs(totalTabs: number) {
-    console.log('totalTabs', totalTabs)
     this.mainTotalTabs = totalTabs
   }
 
