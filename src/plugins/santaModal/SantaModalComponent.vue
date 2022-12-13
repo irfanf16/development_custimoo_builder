@@ -31,7 +31,7 @@
 import {Component, Vue, Prop} from 'vue-property-decorator';
 import VModal from 'vue-js-modal'
 import 'vue-js-modal/dist/styles.css'
-import {getSantaModalConfig} from "@/plugins/santaModal/helpers";
+import {getSantaModalConfig} from "@/helpers/Helpers";
 Vue.use(VModal, {})
 
 

@@ -809,7 +809,9 @@ export class ProductsQueryParamsMixin extends Vue {
               `private=${self.getProductEditInfoObject.filters.private_product?true:false}`,
               `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
               `active_product_child_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
-              `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
+              `active_product_type=${self.getProductEditInfoObject.type}`,
+              `category_id=${self.getProductEditInfoObject.category_id}`,
+              'paginate=false'
             ];
           }
           else if(self.getProductEditInfoObject.type == "cart_product") {

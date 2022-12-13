@@ -1,12 +1,13 @@
 import SantaModalComponent from "@/plugins/santaModal/SantaModalComponent.vue";
-import {getSantaModalConfig} from "@/plugins/santaModal/helpers";
+import {getDomDocument, getSantaModalConfig} from "@/helpers/Helpers";
 
 const SantaModal = {};
 
 SantaModal.install = (Vue) => {
   const santaModalConstructor = Vue.extend(SantaModalComponent);
   const instance = new santaModalConstructor();
-  instance.$mount(document.createElement("div"));
+  const dom_document = getDomDocument(instance)
+  instance.$mount(dom_document.createElement("div"));
   Vue.prototype.$santaModal = {
     /*
     * @param santa_modal_data = {string|Object}
@@ -19,7 +20,7 @@ SantaModal.install = (Vue) => {
       } else {
         modal_data = {...modal_data, ...santa_modal_data}
       }
-      document.body.appendChild(instance.$el);
+      dom_document.body.appendChild(instance.$el);
       return instance.show(modal_data)
     },
     hide: () => {
