@@ -961,12 +961,12 @@ export class exitEditMode extends Mixins(ErrorMessages) {
             });
             break;
           default:
-            resolve(false);
+            resolve(null);
             break;
         }
       }
       else{
-        resolve(false);
+        resolve(null);
       }
     });
   }
@@ -1055,17 +1055,24 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     return true;
   }
 
-  public async addToCartMixin(product_fonts: Record<any, any>[]) {
-    if(!this.checkMinimumOrderQtyBYDesign())
+  public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null) {
+    if(!this.checkMinimumOrderQtyBYDesign()) {
+      if(resolve){
+        resolve(false);
+      }
       return;
+    }
     this.hideVModal('rostermodal');
     let self: Record<any, any> = this;
-    try {
+
       let company = self.$store.getters.getCompany;
       let platform = company.platform;
       if(platform === 'wordpress') {
         const adminToken = localStorage.getItem('adminToken');
           if(adminToken) {
+            if(resolve){
+              resolve(false);
+            }
             return false;
           }
       }
@@ -1096,6 +1103,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
       if(platform === 'wordpress'){
         if((cart_product as Record<any, any>).sync_id === "" || (cart_product as Record<any, any>).ecommerce_post_id === ""){
+          if(resolve){
+            resolve(false);
+          }
           return false;
         }
 
@@ -1139,7 +1149,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       }
       if(santacart){
         self.$store.dispatch('setCartLoading',true);
-        http.post(url, post_data).then(async (res: any) => {
+        await http.post(url, post_data).then(async (res: any) => {
           if (res.data.success == true){
             let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
             let api_res:Record<any, any> = res.data.result
@@ -1198,7 +1208,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           }
           self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
           self.$store.dispatch('setCartLoading',false);
-
+          if(resolve){
+            resolve(true);
+          }
           if(collection_view){
             self.$root.$emit('getNextProduct');
           }
@@ -1213,14 +1225,13 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               self.retrieveProducts(query_params);
               self.hideVModal('rostermodal');
             });
+            if(resolve){
+              resolve(false);
+            }
           }
         })
       }
-    }
-    catch (e) {
-      console.error('error in add to cart',e)
-      self.$store.dispatch('setCartLoading',false);
-    }
+
   }
 
   public async retrieveProducts() {
