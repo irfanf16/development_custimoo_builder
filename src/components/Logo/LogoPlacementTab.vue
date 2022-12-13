@@ -15,8 +15,8 @@
              :key="`custom_logo_${customLogoIndex}`" @click="custom_logo_tab_index = customLogoIndex">
         <template #title>
           <span>{{ customLogoIndex == 0 ? 'Team Logo' : 'logo ' + customLogoIndex }}</span>
-          <span class="vector-logos-error warning error" v-if="vectorImageConstraint? !custom_logo.is_vector && customLogos[customLogoIndex].url:false" v-b-tooltip.right="`Logo uploaded are not in vector format, please reupload to place order`"><b-icon-exclamation-circle-fill /></span>
-          <span class="vector-logos-error warning" v-else-if="!customLogos[customLogoIndex].url" v-b-tooltip.right="`Logo is not found`"><b-icon-exclamation-triangle-fill /></span>
+          <span class="vector-logos-error warning error" v-if="vectorImageConstraint? !custom_logo.is_vector && custom_logo.url : false" v-b-tooltip.right="`Logo uploaded are not in vector format.`"><b-icon-exclamation-circle-fill /></span>
+          <span class="vector-logos-error warning" v-else-if="!custom_logo.url" v-b-tooltip.right="`Logo is not found`"><b-icon-exclamation-triangle-fill /></span>
           <template v-if="customLogoIndex > 0">
             <span class="remove-logo" @click="removeLogoTab(customLogoIndex)">
               <font-awesome-icon :icon="['fas', 'trash-alt']"/>
@@ -33,7 +33,7 @@
               </div>
               <div class="logo-placemet-content" v-if="custom_logo.url">
                 <h4>Logo Placement</h4>
-                <b-form-select :value="custom_logo.side" :options="['front', 'back']" @change="handleLogoPlacementChange($event, custom_logo)"></b-form-select>
+                <b-form-select :value="custom_logo.side" :options="['front', 'back']" @change="handleLogoPlacementChange($event, customLogoIndex)"></b-form-select>
               </div>
             </div>
           </div>
@@ -187,10 +187,10 @@ export default class LogoPlacementTab extends Vue {
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 
-  public handleLogoPlacementChange(updated_value: string, custom_logo: Record<any, any>) {
-    custom_logo.side = updated_value
+  public handleLogoPlacementChange(updated_value: string, custom_logo_index: number) {
     let self: Record<any, any> = this;
-    self.$eventBus.$emit('handleCustomLogoUpdatedEvent', custom_logo)
+    this.customLogos[custom_logo_index].side = updated_value
+    self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogos[custom_logo_index])
   }
 
   public getColors() {

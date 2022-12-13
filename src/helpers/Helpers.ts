@@ -589,9 +589,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       }
                       dom_svg.setAttribute('transform', 'translate(0 ' + transform_height + ')')
                       dom_svg.setAttribute('paint-order', 'stroke')
+                      dom_svg.setAttribute('stroke-location', 'outside')
 
                       const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
-                        '<svg stroke-location="outside" style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+                        '<svg stroke-location="outside" paint-order="outside" style="width:100%; height: auto;" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
                         'viewBox="0 0 ' + width + ' ' + height + '"> \n' + dom_svg.outerHTML + '\n</svg>'
 
 
@@ -1822,6 +1823,13 @@ const getUrlParameter = (name = '') => {
   return hash_url.replace('#/', '')
 }
 
+const routerPush = (router, route_name) => {
+  const router_url = router.resolve({name: route_name})
+  if(router_url) {
+    window.parent.window.location.hash = router_url.href;
+  }
+}
+
 const showError = (err) => {
   if (typeof err === 'string') {
     VsToast.show({
@@ -1850,9 +1858,9 @@ const showError = (err) => {
 const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
   return {
     id: updated_logo.id, url: updated_logo.url, original_logo: updated_logo.original_logo_url, original_logo_url: updated_logo.original_logo_url,
-    transparent_logo: updated_logo.transparent_logo, smart_transparent_logo: updated_logo.smart_transparent_logo,
-    is_smart_transparent: updated_logo.is_smart_transparent, is_vector: updated_logo.is_vector,
-    logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success
+    transparent_logo: updated_logo.transparent_logo_url, smart_transparent_logo: updated_logo.smart_transparent_logo_url,
+    is_smart_transparent: updated_logo.is_smart_transparent ? true : false, is_vector: updated_logo.is_vector ? true : false,
+    logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success ? true : false
   }
 }
 
@@ -1866,6 +1874,6 @@ export {
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
-  getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps
-
+  getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
+  routerPush
 };

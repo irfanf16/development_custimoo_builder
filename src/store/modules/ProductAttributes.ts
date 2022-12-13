@@ -296,14 +296,16 @@ const ProductAttributes:Module<any, any> = {
       }
       else {
         const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
-        const custom_logo_index = payload.logo_index
-        let product_custom_logos = state.customLogos[product_id]
+        const custom_logo_index = payload.custom_logo_index
+        const product_custom_logos = state.customLogos[product_id]
         if(custom_logo_index >= 0) {
-          let product_custom_logo = product_custom_logos[custom_logo_index]
-          product_custom_logo = {...product_custom_logo, ...payload.data}
+          const product_custom_logo = product_custom_logos[custom_logo_index]
+          state.customLogos[product_id][custom_logo_index] = {...product_custom_logo, ...payload.data}
         }
         else {
-          product_custom_logos = payload.data
+          const custom_logos: Record<any,any> = state.customLogos[product_id];
+          state.customLogos[product_id] = {...custom_logos, ...payload.data}
+
         }
       }
     },
@@ -637,10 +639,14 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
-        const index = color.index
+        // const index = color.index
+        const index = state.svgGroups.findIndex((svgGroup) => { return svgGroup.id === color.id  });
         delete color.index
-        color = {...state.svgGroups[index], ...color}
-        Vue.set(state.svgGroups, index, color)
+        if(index >= 0){
+          color = {...state.svgGroups[index], ...color}
+          Vue.set(state.svgGroups, index, color)
+        }
+
       }
     },
     updateAllRoster(state: Record<any, any>, rosterDetail: [Record<any, any>]){

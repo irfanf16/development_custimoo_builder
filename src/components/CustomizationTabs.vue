@@ -6,8 +6,8 @@
           <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
-                <span :class="{'no-vector-logos': vectorImageConstraint?non_vector_logos_count > 0 : false }">
-                  <span v-if="vectorImageConstraint?non_vector_logos_count > 0:false" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order!`" class="logos-error">
+                <span :class="{'no-vector-logos': vectorImageConstraint? non_vector_logos_count > 0 : false }">
+                  <span v-if="vectorImageConstraint? non_vector_logos_count > 0 : false" v-b-tooltip="`Logo uploaded are not in vector format`" class="logos-error">
                     <b-icon-exclamation-circle-fill />
                   </span>
                   <span class="icon-holder">
@@ -53,7 +53,7 @@
               </a>
             </template>
             <div class="d-none d-lg-block">
-                <CustomizationText :customTextIndex="customTextIndex" />
+                <CustomizationText :customTextIndex="customTextIndex" :productColors="productColors" :key="selectedProduct.id" />
             </div>
 <!--            <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">-->
 <!--              <b-tabs>-->
@@ -142,7 +142,8 @@ import {filter} from "lodash"
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
-    this.$emit('adjustTotalTabs', ((this.$refs['customization-tabs'] as Record<any, any>).getTabs().length-2))
+    const self: Record<any, any> = this;
+    self.$eventBus.$on("setTotalTabs", this.setTotalTabs)
   },
 })
 export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
@@ -276,6 +277,10 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
 
   logoColorsChanged(newval:any, old:any) {
     this.productColorsManipulation()
+  }
+
+  public setTotalTabs() {
+    this.$emit('adjustTotalTabs', (this.$refs['customization-tabs'] as Record<any, any>)?.getTabs().length-2)
   }
 
   public openAddToLocker () {

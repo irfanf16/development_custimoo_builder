@@ -1,14 +1,14 @@
 <template>
   <div class="logo-placement-area extracted-color-area"
        v-if="logoColorsInfo.colors.length > 0 && selectedProduct.product_type == 'customized'">
-    <h4 class="mb-3 mb-lg-4">Color Extracted from Logo</h4>
+    <h4 class="mb-0 mb-lg-4">Color Extracted from Logo</h4>
     <div class="mb-lg-3 w-100">
       <div class="color-holder">
-        <div class="color-container">
+        <div class="color-container pt-2">
           <div class="color-box" v-for="(logo_color, logoColorIndex) in logoColorsInfo.colors"
                @click="selectLogoColor(logoColorIndex)" :title="logo_color.name"
                :class="{'active-swatch' : logoColorIndex == active_logo_color_index, 'noColor': !logo_color.hex}"
-               :style="{background: logo_color.hex ? logo_color.hex : '#fff', cursor: 'pointer'}" :key="logoColorIndex">
+               :style="{background: logo_color.hex ? logo_color.hex : '#fff', cursor: 'pointer'}" :key="logoColorIndex + logo_color.name">
             <template v-if="logo_color.hex">
               <span class="removeColor" @click="deleteLogoColor(logoColorIndex)">
                 <BIconX />
@@ -37,7 +37,7 @@
           Use Logo Colors
         </b-button>
         <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors()" v-if="logoColorsInfo.using_logo_colors"
-                  :class="{'pulse-animation': pulse_info.shuffle}"
+                  :class="{'pulse-animation': !logoColorsInfo.is_shuffled}"
                   variant="secondary">Shuffle
         </b-button>
         <b-button class="use-btn flex-shrink-1" :class="{'invisible': !(logoColorsInfo.colors.length && logoColorsInfo.using_logo_colors)}"
@@ -135,6 +135,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     this.pulse_info.use_original_colors = false
     this.logoColorsInfo.colors = JSON.parse(JSON.stringify(this.logoColorsInfo.extracted_colors))
     this.logoColorsInfo.using_logo_colors = false
+    this.logoColorsInfo.is_shuffled = false
     Store.commit('SET_DEFAULT_COLORS', [])
     self.$eventBus.$emit('useProductOriginalColors')
   }
@@ -156,6 +157,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     this.pulse_info.shuffle = false
     const shuffled  = this.logoColorsInfo.colors.sort(() =>  0.5 - Math.random())
     this.logoColorsInfo.colors = shuffled
+    this.logoColorsInfo.is_shuffled = true
     setDefaultColors()
     self.$eventBus.$emit('changeDefaultColors')
   }

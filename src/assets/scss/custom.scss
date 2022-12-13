@@ -4691,7 +4691,14 @@ $fontSize: 0.5;
         }
     }
 
+}
 
+.vm--modal{
+    max-width: 95% !important;
+    right: auto !important;
+    left: auto !important;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .customize_controls {
@@ -5911,6 +5918,10 @@ $fontSize: 0.5;
             padding: 0;
             line-height: 1;
         }
+    }
+
+    &+.page-wrapper{
+        background: #fff;
     }
 }
 

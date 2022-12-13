@@ -20,7 +20,7 @@
           <div class="color-holder" style="padding-top: 5px;" ref="ColorAccordion">
             <div class="color-container">
               <div v-if="showOther && selectedProduct.is_custom_color_allowed" class="custom-color-picker">
-                <b-form class="pantone-color-field" v-on:submit.prevent>
+                <b-form v-if="getColorType !== 'product_color'" class="pantone-color-field" v-on:submit.prevent>
                   <label for="inline-form-input-pantone-color" v-if="getColorType === 'cmyk'">CMYK (x,x,x,x)</label>
                   <label for="inline-form-input-pantone-color" v-else-if="getColorType === 'pantone-coated'">Pantone: (xxx c)</label>
                   <label class="mb-2" for="inline-form-input-pantone-color" v-else>Pantone: (TCX xx-xxxx)</label>
@@ -28,7 +28,7 @@
                     @focusin="($event)=>$event.target.select()"
                     v-model="svgGroups[selectAccordionIndex].pantone"
                     class="mb-2 mr-sm-2 mb-sm-0"
-                    placeholder="XX-XXXX"
+                    :placeholder="place_holder"
                     @input="changePantoneColor"
                     :disabled="getColorType === 'cmyk'"
                   ></b-form-input>
@@ -79,7 +79,7 @@ import {getSelectedProductPantones} from "@/helpers/Helpers";
   }
 })
 export default class ColorAccordion extends Vue {
-  @Prop({required: true}) productColors!: any
+  @Prop({required: true}) productColors!: Record<any, any>[]
   @Prop({required: true}) tabIndex!: any
 
   public color= '#59c7f9'
@@ -123,6 +123,17 @@ export default class ColorAccordion extends Vue {
     }else{
       this.selectType(this.selectTypeIndex-1, false)
     }
+  }
+
+  get place_holder() {
+    if(this.getColorType === 'cmyk') {
+      return 'x,x,x,x';
+    } else if(this.getColorType === 'pantone-coated') {
+      return 'xxx c';
+    } else if(this.getColorType === 'pantone-tcx') {
+      return 'xx-xxxx';
+    }
+    return '';
   }
 
   get svgGroups() {
@@ -185,7 +196,7 @@ export default class ColorAccordion extends Vue {
 
   public changePantoneColor() {
     let color_code = this.extractExactCode(this.svgGroups[this.selectAccordionIndex].pantone)?this.extractExactCode(this.svgGroups[this.selectAccordionIndex].pantone):this.svgGroups[this.selectAccordionIndex].pantone;
-    let pantoneColor = getColorEncoding(color_code,this.getColorType);
+    let pantoneColor = getColorEncoding(color_code, this.getColorType);
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.name})
       this.pantoneMessage = ''

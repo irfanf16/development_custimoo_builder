@@ -109,11 +109,11 @@ export class LockerProducts extends Mixins(FetchCategories) {
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
 
-    const categories_promise = this.fetchCategories(null,  room_product.product_id);
-    categories_promise.then((response) => {
+    return new Promise((resolve, reject) => {
+      const categories_promise = this.fetchCategories(null,  room_product.product_id);
+      categories_promise.then((response) => {
       let is_private:Boolean = this.$store.getters.getPrivateProduct;
       let url = `list/products?private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1&collection_type=true`;
-      return new Promise((resolve, reject) => {
         const handle_product = new Promise((resolve, reject) => {
           http.get(url).then(async (response: Record<any, any>) => {
             let active_product_detail = response.data.editing_product_detail;
@@ -219,7 +219,6 @@ export class handleMainProducts extends Mixins(FetchCategories) {
               product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos
             })
             this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
-            await this.$store.dispatch('setProductsRosters')
           }
           else {
             let {sync_id, customizer_preview, update_cart} = self.$route.query
@@ -314,9 +313,8 @@ export class handleMainProducts extends Mixins(FetchCategories) {
       let selected_product = this.$store.getters.getSelectedProduct;
      // initCustomLogos(retrieved_products)
       await initCustomLogosNew(retrieved_products)
-      if(!set_last_active_data) {
-        this.$store.dispatch("setProductsRosters");
-      }
+      this.$store.dispatch("setProductsRosters");
+
       this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {products_rosters: this.$store.getters.getProductRosters('all')})
       let customLogos = this.$store.getters.getCustomLogoObject
       for (const product of retrieved_products) {
@@ -397,9 +395,6 @@ export class handleMainProducts extends Mixins(FetchCategories) {
         self.show_roster = true;
         await self.setProductSizes();
         await self.show();
-        await http.post(`/get-factory-settings`, {factory_id:selected_product.factory_id, keys: ['vector_image_constraint']}).then((res) => {
-          this.$store.commit('SET_SETTING', res.data.result.settings)
-        });
         resolve(true);
       })
     })
@@ -1156,7 +1151,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         ecom_url = company_domain + '/wp-admin/admin-ajax.php';
         let ecom_form_data = new FormData();
 
-        let ecommerce_update_id = self.$route.query.update_item;
+        let ecommerce_update_id = (product_edit_info_object.cart_product_info)?product_edit_info_object.cart_product_info.ecommerce_cart_id:null;
         if(ecommerce_update_id){
           ecom_form_data.append('action', 'custimoo_update_cart');
           ecom_form_data.append('update_item', ecommerce_update_id);
@@ -1209,7 +1204,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               http.post(ecom_url, update_cart_id_data).then((res: any) => {
                 self.$store.dispatch('setCartLoading',false);
                 if(!collection_view) {
-                  window.location.href = company_domain + '/cart'
+                  window.location.replace(company_domain + '/cart');
                 }
               }).catch(err => {
                 self.$store.dispatch('setCartLoading',false);

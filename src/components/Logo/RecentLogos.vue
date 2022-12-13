@@ -138,7 +138,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
       logo_index: this.customLogoIndex, custom_logos: {...this.customLogo, ...custom_logos_updated_props}
     })
     if(this.customLogoIndex == 0) {
-      await this.addRemoveTeamLogoOnAllProducts('add', this.customLogo)
+      await this.addRemoveTeamLogoOnAllProducts('add', recent_logo)
     }
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
