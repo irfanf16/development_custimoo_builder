@@ -309,13 +309,11 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     let self: Record<any, any> = this;
     const response = await this.editModeConfirmation();
     let selected_category = self.categories[category_index]
-    if(this.getLastActiveProductData.category_id !== selected_category.id){
-      await this.$store.commit('SET_SELECTED_CATEGORIES', selected_category.id)
       await resetLastActiveProductData()
       self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: category_index, category_id: selected_category.id});
-      let query_params = [`category_id=${selected_category.id}`]
-      this.$emit('retrieveProducts', query_params)
-    }
+      await this.$store.commit('SET_SELECTED_CATEGORY', {category_id:selected_category.id, category_index: category_index })
+        let query_params = [`category_id=${selected_category.id}`]
+        this.$emit('retrieveProducts', query_params)
   }
 
   /* getters/computed props starts */
@@ -353,12 +351,13 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   get getLastActiveProductData() {
     return this.$store.getters.getLastActiveProductData;
   }
+  get getSelectedCategory(){
+    return this.$store.getters.getSelectedCategory;
+  }
 
   get selectedCategory() {
     let self = this;
-    let category_index = self.getLastActiveProductData.category_index
-    let category_id = self.getLastActiveProductData.category_id
-    return { index: category_index, id: category_id }
+    return { index: this.getSelectedCategory.category_index, id: this.getSelectedCategory.category_id }
   }
 
   get categories(): Record<any, any>[] {
