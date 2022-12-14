@@ -853,14 +853,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if (zoom > 20) zoom = 20;
           if (zoom < 1) {
             zoom = 1;
-            this.frontCanvas.viewportTransform = default_view_port as number[];
-            this.backCanvas.viewportTransform = default_view_port as number[];
+            canvas.viewportTransform = default_view_port as number[];
           }
-          this.frontCanvas.zoomToPoint({
-            x: pointer.x,
-            y: pointer.y
-          }, zoom);
-          this.backCanvas.zoomToPoint({
+          canvas.zoomToPoint({
             x: pointer.x,
             y: pointer.y
           }, zoom);
@@ -883,12 +878,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       let relativeCanvasHeight = self.canvasHeight / 2 - 20
 
       canvas.on('object:moving', (e: Record<any, any>) => {
-        self.objectScaling(e, side)
+        this.objectScaling(e, side)
         let customObj: Record<any, any> = this.getCustomObjectsLength(canvas)
-        if (customObj.logoLength + customObj.textLength == 1)
+        if (customObj.logoLength + customObj.textLength >= 1) {
           this.addGuideLine(e, canvas, vertical_line, horizontal_line, relativeCanvasWidth, relativeCanvasHeight)
-
-        self.addGuideForMultipleObjects(canvas, e.target)
+          this.addGuideForMultipleObjects(canvas, e.target)
+        }
       })
 
       canvas.on('object:scaling', (e: Record<any, any>) => {
